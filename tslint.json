@@ -4,6 +4,12 @@
   },
   "extends": "tslint:latest",
   "rules": {
+    "ban": [true,
+      ["describe", "only"],
+      ["it", "only"],
+      ["Object", "assign"]
+    ],
+
     "callable-types": true,
     "interface-name": false,
     "interface-over-type-literal": true,
@@ -22,6 +28,7 @@
     "no-empty-interface": true,
     "no-string-throw": true,
     "no-switch-case-fall-through": true,
+    "no-unsafe-any": true,
     "prefer-const": true,
     "switch-default": false,
     "variable-name": [true,

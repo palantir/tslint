@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasOwnProperty } from "../utils";
 
 export interface IBlockRequirementDescriptor {
     visibilities?: Visibility[];
@@ -145,13 +146,13 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * \`string\` to enable for that type
             * \`object\` keying types to when their documentation is required:
-                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES} may specify:
-                    * \`"${DESCRIPTOR_PRIVACIES}":
+                * \`"${ARGUMENT_METHODS}"\` and \`"${ARGUMENT_PROPERTIES}"\` may specify:
+                    * \`"${DESCRIPTOR_PRIVACIES}"\`:
                         * \`"${ALL}"\`
                         * \`"${PRIVACY_PRIVATE}"\`
                         * \`"${PRIVACY_PROTECTED}"\`
                         * \`"${PRIVACY_PUBLIC}"\`
-                    * \`"${DESCRIPTOR_LOCATIONS}:
+                    * \`"${DESCRIPTOR_LOCATIONS}"\`:
                         * \`"${ALL}"\`
                         * \`"${LOCATION_INSTANCE}"\`
                         * \`"${LOCATION_STATIC}"\`
@@ -197,18 +198,22 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, "${ARGUMENT_ENUMS}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}"]`,
-            `[true, {
-                "${ARGUMENT_ENUMS}": true,
-                "${ARGUMENT_FUNCTIONS}": {
-                    "${DESCRIPTOR_VISIBILITIES}": ["${VISIBILITY_EXPORTED}"]
+            true,
+            [true, ARGUMENT_ENUMS, ARGUMENT_FUNCTIONS, ARGUMENT_METHODS],
+            [
+                true,
+                {
+                    [ARGUMENT_ENUMS]: true,
+                    [ARGUMENT_FUNCTIONS]: {
+                        [DESCRIPTOR_VISIBILITIES]: [VISIBILITY_EXPORTED],
+                    },
+                    [ARGUMENT_METHODS]: {
+                        [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
+                        [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
+                    },
                 },
-                "${ARGUMENT_METHODS}": {
-                    "${DESCRIPTOR_LOCATIONS}": ["${LOCATION_INSTANCE}"]
-                    "${DESCRIPTOR_PRIVACIES}": ["${PRIVACY_PUBLIC}", "${PRIVACY_PROTECTED}"]
-                }
-            }]`],
+            ],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -250,7 +255,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
 
         for (const type in descriptor) {
-            if (descriptor.hasOwnProperty(type)) {
+            if (hasOwnProperty(descriptor, type)) {
                 requirements.set(
                     type as DocType,
                     (type === "methods" || type === "properties")

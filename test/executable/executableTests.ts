@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
@@ -111,6 +112,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
             });
+        });
+
+        it("exits with code 0 if custom rules directory is passed and file contains lint warnings", (done) => {
+            execCli(["-c", "./test/config/tslint-extends-package-warning.json", "-r", "./test/files/custom-rules", "src/test.ts"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                },
+            );
         });
 
         it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", (done) => {
@@ -251,7 +261,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("exits with code 1 if --project is not passed", (done) => {
             execCli(["--type-check"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
+                assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
             });
         });
@@ -315,7 +325,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 });
 
-type ExecFileCallback = (error: any, stdout: string, stderr: string) => void;
+type ExecFileCallback = (error: Error & { code: number }, stdout: string, stderr: string) => void;
 
 function execCli(args: string[], cb: ExecFileCallback): cp.ChildProcess;
 function execCli(args: string[], options: cp.ExecFileOptions, cb: ExecFileCallback): cp.ChildProcess;
@@ -336,7 +346,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
         if (cb === undefined) {
             throw new Error("cb not defined");
         }
-        cb(error, stdout.trim(), stderr.trim());
+        cb(error as Error & { code: number }, stdout.trim(), stderr.trim());
     });
 }
 

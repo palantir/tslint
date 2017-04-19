@@ -31,7 +31,7 @@ export class Rule extends BanRule.Rule {
             type: "array",
             items: { type: "string" },
         },
-        optionExamples: [`[true, "log", "error"]`],
+        optionExamples: [[true, "log", "error"]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -40,7 +40,7 @@ export class Rule extends BanRule.Rule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const consoleBanWalker = new BanRule.BanFunctionWalker(sourceFile, this.getOptions());
-        for (const option of options.ruleArguments) {
+        for (const option of options.ruleArguments as string[]) {
             consoleBanWalker.addBannedFunction(["console", option]);
         }
         return this.applyWithWalker(consoleBanWalker);

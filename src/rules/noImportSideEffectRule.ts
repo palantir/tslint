@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +25,7 @@ const OPTION_IGNORE_MODULE = "ignore-module";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Avoid import statements with side-effect.",
-        optionExamples: ["true", `[true, { "${OPTION_IGNORE_MODULE}": "(\\.html|\\.css)$" }]`],
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
         options: {
             items: {
                 properties: {
@@ -50,29 +51,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import with explicit side-effect";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoImportSideEffectWalker(sourceFile, this.getOptions()));
+        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string };
+        const ignorePattern = patternConfig && new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+        return this.applyWithFunction(sourceFile, walk, ignorePattern);
     }
 }
 
-class NoImportSideEffectWalker extends Lint.SkippableTokenAwareRuleWalker {
-    private scanner: ts.Scanner;
-    private ignorePattern: RegExp | null;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        const patternConfig = this.getOptions().pop();
-        this.ignorePattern = patternConfig ? new RegExp(patternConfig[OPTION_IGNORE_MODULE]) : null;
-        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const importClause = node.importClause;
-        if (importClause === undefined) {
-            const specifier = node.moduleSpecifier.getText();
-            if (this.ignorePattern === null || !this.ignorePattern.test(specifier.substring(1, specifier.length - 1))) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
+function walk(ctx: Lint.WalkContext<RegExp | undefined>): void {
+    const { options: ignorePattern, sourceFile } = ctx;
+    for (const statement of sourceFile.statements) {
+        if (!utils.isImportDeclaration(statement)) {
+            continue;
         }
-        super.visitImportDeclaration(node);
+
+        const { importClause, moduleSpecifier } = statement;
+        if (importClause || !utils.isStringLiteral(moduleSpecifier)) {
+            continue;
+        }
+
+        if (!ignorePattern || !ignorePattern.test(moduleSpecifier.text)) {
+            ctx.addFailureAtNode(statement, Rule.FAILURE_STRING);
+        }
     }
 }
