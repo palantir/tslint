@@ -1,1 +1,2 @@
-let foo = <Image resizeMode='contain' />
+let foo = <span class='foo' id="bar" />
+                               ~~~~~ [" should be ']
