@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     for (const ref of ctx.sourceFile.referencedFiles) {
         ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING);
     }

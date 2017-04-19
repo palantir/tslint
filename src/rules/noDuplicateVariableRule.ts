@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     let scope = new Set<string>();
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isFunctionScopeBoundary(node)) {

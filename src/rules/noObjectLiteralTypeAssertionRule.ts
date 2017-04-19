@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAssertionLike(node) && isObjectLiteral(node.expression)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);

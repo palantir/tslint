@@ -73,7 +73,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boolean, checkConstructor: boolean) {
+function walk(ctx: Lint.WalkContext, noPublic: boolean, checkAccessor: boolean, checkConstructor: boolean) {
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         if (isClassLikeDeclaration(node)) {
             for (const child of node.members) {

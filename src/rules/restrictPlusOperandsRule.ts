@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, program: ts.Program) {
+function walk(ctx: Lint.WalkContext, program: ts.Program) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
             const tc = program.getTypeChecker();

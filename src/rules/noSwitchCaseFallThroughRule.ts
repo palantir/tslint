@@ -66,7 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker<void> {
+export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (node.kind === ts.SyntaxKind.SwitchStatement) {

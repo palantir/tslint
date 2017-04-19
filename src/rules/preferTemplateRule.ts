@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
+function walk(ctx: Lint.WalkContext, allowSingleConcat: boolean): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const failure = getError(node, allowSingleConcat);
         if (failure) {

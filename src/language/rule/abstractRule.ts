@@ -48,7 +48,7 @@ export abstract class AbstractRule implements IRule {
         return this.ruleSeverity !== "off";
     }
 
-    protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
+    protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext) => void): RuleFailure[];
     protected applyWithFunction<T, U extends T>(
         sourceFile: ts.SourceFile,
         walkFn: (ctx: WalkContext<T>) => void,

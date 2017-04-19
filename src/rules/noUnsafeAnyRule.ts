@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     if (ctx.sourceFile.isDeclarationFile) {
         // Not possible in a declaration file.
         return;

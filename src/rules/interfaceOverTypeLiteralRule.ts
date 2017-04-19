@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAliasDeclaration(node) && node.type.kind === ts.SyntaxKind.TypeLiteral) {
             ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING);

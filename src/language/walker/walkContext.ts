@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import { Fix, RuleFailure } from "../rule/rule";
 
-export class WalkContext<T> {
+export class WalkContext<T = void> {
     public readonly failures: RuleFailure[] = [];
 
     constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {}

@@ -47,7 +47,7 @@ interface IncrementorState {
     onlyArrayReadAccess: boolean;
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     const scopes: IncrementorState[] = [];
 

@@ -96,7 +96,7 @@ function parseOptions(options: any[]): Options {
     return { checkParameters, ignorePattern };
 }
 
-function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
+function walk(ctx: Lint.WalkContext, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
     const { sourceFile } = ctx;
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
@@ -148,7 +148,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - If all of the import specifiers in an import are unused, add a combined failure for them all.
  * - Unused imports are fixable.
  */
-function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+function addImportSpecifierFailures(ctx: Lint.WalkContext, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);
