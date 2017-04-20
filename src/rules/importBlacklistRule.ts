@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import {
+    isCallExpression, isExternalModuleReference, isIdentifier, isImportDeclaration, isImportEqualsDeclaration, isTextualLiteral,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -49,43 +51,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ImportBlacklistWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new ImportBlacklistWalker(sourceFile, this.ruleName, this.ruleArguments));
     }
 }
 
-class ImportBlacklistWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        if (node.expression.kind === ts.SyntaxKind.Identifier &&
-            (node.expression as ts.Identifier).text === "require" &&
-            node.arguments !== undefined &&
-            node.arguments.length === 1) {
+class ImportBlacklistWalker extends Lint.AbstractWalker<string[]> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isCallExpression(node)) {
+                if (isIdentifier(node.expression) && node.expression.text === "require" &&
+                    node.arguments.length === 1) {
+                    this.checkForBannedImport(node.arguments[0]);
+                }
+            } else if (isImportEqualsDeclaration(node)) {
+                if (isExternalModuleReference(node.moduleReference) && node.moduleReference.expression !== undefined) {
+                    this.checkForBannedImport(node.moduleReference.expression);
+                }
+            } else if (isImportDeclaration(node)) {
+                this.checkForBannedImport(node.moduleSpecifier);
+            }
+            return ts.forEachChild(node, cb);
+        };
 
-            this.checkForBannedImport(node.arguments[0]);
-        }
-        super.visitCallExpression(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        if (utils.isExternalModuleReference(node.moduleReference) &&
-            node.moduleReference.expression !== undefined) {
-            // If it's an import require and not an import alias
-            this.checkForBannedImport(node.moduleReference.expression);
-        }
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        this.checkForBannedImport(node.moduleSpecifier);
-        super.visitImportDeclaration(node);
+        return ts.forEachChild(sourceFile, cb);
     }
 
     private checkForBannedImport(expression: ts.Expression) {
-        if (utils.isTextualLiteral(expression) && this.hasOption(expression.text)) {
-            this.addFailureFromStartToEnd(
-                expression.getStart(this.getSourceFile()) + 1,
-                expression.getEnd() - 1,
-                Rule.FAILURE_STRING,
-            );
+        if (isTextualLiteral(expression) && this.options.indexOf(expression.text) !== -1) {
+            this.addFailure(expression.getStart(this.sourceFile) + 1, expression.end - 1, Rule.FAILURE_STRING);
         }
     }
 }
