@@ -57,23 +57,25 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class ImportBlacklistWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
-            if (isCallExpression(node)) {
-                if (isIdentifier(node.expression) && node.expression.text === "require" &&
-                    node.arguments.length === 1) {
-                    this.checkForBannedImport(node.arguments[0]);
-                }
-            } else if (isImportEqualsDeclaration(node)) {
-                if (isExternalModuleReference(node.moduleReference) && node.moduleReference.expression !== undefined) {
-                    this.checkForBannedImport(node.moduleReference.expression);
-                }
-            } else if (isImportDeclaration(node)) {
-                this.checkForBannedImport(node.moduleSpecifier);
+        const findRequire = (node: ts.Node): void => {
+            if (isCallExpression(node) && node.arguments.length === 1 &&
+                isIdentifier(node.expression) && node.expression.text === "require") {
+                this.checkForBannedImport(node.arguments[0]);
             }
-            return ts.forEachChild(node, cb);
+            return ts.forEachChild(node, findRequire);
         };
 
-        return ts.forEachChild(sourceFile, cb);
+        for (const statement of sourceFile.statements) {
+            if (isImportDeclaration(statement)) {
+                this.checkForBannedImport(statement.moduleSpecifier);
+            } else if (isImportEqualsDeclaration(statement)) {
+                if (isExternalModuleReference(statement.moduleReference) && statement.moduleReference.expression !== undefined) {
+                    this.checkForBannedImport(statement.moduleReference.expression);
+                }
+            } else {
+                ts.forEachChild(statement, findRequire);
+            }
+        }
     }
 
     private checkForBannedImport(expression: ts.Expression) {
