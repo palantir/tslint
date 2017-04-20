@@ -64,7 +64,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
 
         const alignColumn = ts.getLineAndCharacterOfPosition(ctx.sourceFile, pos + 1).character;
-        let lineStart = pos + firstLine.length + 4;
+        let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
         for (let i = 1; i < endIndex; ++i) {
             const line = lines[i];
