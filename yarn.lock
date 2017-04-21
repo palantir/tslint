@@ -85,6 +85,16 @@
   version "0.0.29"
   resolved "https://registry.yarnpkg.com/@types/optimist/-/optimist-0.0.29.tgz#a8873580b3a84b69ac1e687323b15fbbeb90479a"
 
+"@types/react-dom@^15.5.0":
+  version "15.5.0"
+  resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-15.5.0.tgz#7f4fb9613d4051141773242f7b6b5f1a46b34bd9"
+  dependencies:
+    "@types/react" "*"
+
+"@types/react@*", "@types/react@^15.0.22":
+  version "15.0.22"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-15.0.22.tgz#50803cde8d89f60a9b034f2dd0d619bc5f0273b5"
+
 "@types/resolve@0.0.4":
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-0.0.4.tgz#9b586d65a947dea88c4bc24da0b905fe9520a0d5"
@@ -1533,14 +1543,14 @@ range-parser@0.0.4:
   version "0.0.4"
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-0.0.4.tgz#c0427ffef51c10acba0782a46c9602e744ff620b"
 
-react-addons-css-transition-group@^15.3.0:
+react-addons-css-transition-group@^15.3.0, react-addons-css-transition-group@^15.5.2:
   version "15.5.2"
   resolved "https://registry.yarnpkg.com/react-addons-css-transition-group/-/react-addons-css-transition-group-15.5.2.tgz#ea7e0a9f0e1c27ca426da4efd3559915bd42ead2"
   dependencies:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-react-dom@^15.3.0:
+react-dom@^15.3.0, react-dom@^15.5.4:
   version "15.5.4"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.5.4.tgz#ba0c28786fd52ed7e4f2135fe0288d462aef93da"
   dependencies:
@@ -1549,7 +1559,7 @@ react-dom@^15.3.0:
     object-assign "^4.1.0"
     prop-types "~15.5.7"
 
-react@^15.3.0:
+react@^15.3.0, react@^15.5.4:
   version "15.5.4"
   resolved "https://registry.yarnpkg.com/react/-/react-15.5.4.tgz#fa83eb01506ab237cdc1c8c3b1cea8de012bf047"
   dependencies:

@@ -1,0 +1,15 @@
+{
+    "extends": "../config/tsconfig.base.json",
+    "compilerOptions": {
+        "jsx": "react",
+        "lib": [
+            "dom",
+            "es6"
+        ],
+        "outDir": "./build"
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
+
