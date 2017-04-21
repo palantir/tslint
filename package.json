@@ -50,6 +50,7 @@
     "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev"
   },
   "devDependencies": {
+    "@blueprintjs/docs": "^1.0.0",
     "@types/babel-code-frame": "^6.20.0",
     "@types/chai": "^3.5.0",
     "@types/colors": "^0.6.33",
@@ -64,6 +65,7 @@
     "@types/resolve": "0.0.4",
     "@types/semver": "^5.3.30",
     "chai": "^3.5.0",
+    "documentalist": "^0.0.7",
     "github": "^8.1.1",
     "js-yaml": "^3.7.0",
     "json-stringify-pretty-compact": "^1.0.3",
