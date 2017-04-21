@@ -58,13 +58,13 @@ function walk(ctx: Lint.WalkContext<void>) {
         const lines = fullText.slice(pos + 3, end - 2).split("\n");
         const firstLine = lines[0];
         if (lines.length === 1) {
-            if (!firstLine.startsWith(" ") || !firstLine.endsWith(" ")) {
+            if (firstLine[0] !== " " || !firstLine.endsWith(" ")) {
                 ctx.addFailure(pos, end, Rule.FORMAT_FAILURE_STRING);
             }
             return;
         }
 
-        const alignColumn = ts.getLineAndCharacterOfPosition(ctx.sourceFile, pos + 1).character;
+        const alignColumn = getAlignColumn(ctx.sourceFile, pos + 1);
         let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
         for (let i = 1; i < endIndex; ++i) {
@@ -89,4 +89,12 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
 
     });
+}
+
+function getAlignColumn(sourceFile: ts.SourceFile, pos: number) {
+    const result = ts.getLineAndCharacterOfPosition(sourceFile, pos);
+    // handle files starting with BOM
+    return result.line === 0 && sourceFile.text[0] === "\uFEFF"
+        ? result.character - 1
+        : result.character;
 }
