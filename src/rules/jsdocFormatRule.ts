@@ -51,7 +51,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia || fullText[pos + 2] !== "*" || fullText[pos + 3] === "*") {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
+            fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
             return;
         }
         const lines = fullText.slice(pos + 3, end - 2).split(/\n/);
