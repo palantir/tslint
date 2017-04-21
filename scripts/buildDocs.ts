@@ -15,179 +15,57 @@
  */
 
 /*
- * This TS script reads the metadata from each TSLint built-in rule
- * and serializes it in a format appropriate for the docs website.
+ * This script compiles documentation embedded in the TSLint source code
+ * as well as adjacent markdown files into a static documentation web site.
  *
- * This script expects there to be a tslint-gh-pages directory
- * parallel to the main tslint directory. The tslint-gh-pages should
- * have the gh-pages branch of the TSLint repo checked out.
- * One easy way to do this is with the following Git command:
+ * This script expects there to be a `tslint-gh-pages` directory
+ * next to the to the directory where this repo lives.
+ * The `tslint-gh-pages` directory should have the gh-pages branch
+ * of the TSLint repo checked out. One easy way to do this is with
+ * `git worktree`:
  *
  * ```
  * git worktree add -b gh-pages ../tslint-gh-pages origin/gh-pages
  * ```
  *
- * See http://palantir.github.io/tslint/develop/docs/ for more info
- *
+ * See http://palantir.github.io/tslint/develop/docs/ for more info.
  */
 
-import * as fs from "fs";
-import * as glob from "glob";
+import { Documentalist, ICompiler, IFile, IPlugin, MarkdownPlugin } from "documentalist";
+import { writeFileSync } from "fs";
 import stringify = require("json-stringify-pretty-compact");
-import * as yaml from "js-yaml";
-import * as path from "path";
 
-import {IFormatterMetadata} from "../lib/language/formatter/formatter";
-import {IRuleMetadata} from "../lib/language/rule/rule";
+import { IFormatterMetadata, IRuleMetadata } from "../lib";
 
-type Metadata = IRuleMetadata | IFormatterMetadata;
+main();
 
-interface Documented {
-    metadata: Metadata;
-};
-
-interface IDocumentation {
-    /**
-     * File name for the json data file listing.
-     */
-    dataFileName: string;
-
-    /**
-     * Exported item name from each file.
-     */
-    exportName: string;
-
-    /**
-     * Pattern matching files to be documented.
-     */
-    globPattern: string;
-
-    /**
-     * Key of the item's name within the metadata object.
-     */
-    nameMetadataKey: string;
-
-    /**
-     * Function to generate individual documentation pages.
-     */
-    pageGenerator: (metadata: any) => string;
-
-    /**
-     * Documentation subdirectory to output to.
-     */
-    subDirectory: string;
-}
-
-const DOCS_DIR = "../docs";
-
-process.chdir("./scripts");
-
-/**
- * Documentation definition for rule modules.
- */
-const ruleDocumentation: IDocumentation = {
-    dataFileName: "rules.json",
-    exportName: "Rule",
-    globPattern: "../lib/rules/*Rule.js",
-    nameMetadataKey: "ruleName",
-    pageGenerator: generateRuleFile,
-    subDirectory: path.join(DOCS_DIR, "rules"),
-};
-
-/**
- * Documentation definition for formatter modules.
- */
-const formatterDocumentation: IDocumentation = {
-    dataFileName: "formatters.json",
-    exportName: "Formatter",
-    globPattern: "../lib/formatters/*Formatter.js",
-    nameMetadataKey: "formatterName",
-    pageGenerator: generateFormatterFile,
-    subDirectory: path.join(DOCS_DIR, "formatters"),
-};
-
-/**
- * Builds complete documentation.
- */
-function buildDocumentation(documentation: IDocumentation) {
-    // Create each module's documentation file.
-    const paths = glob.sync(documentation.globPattern);
-    const metadataJson = paths.map((path: string) => {
-        return buildSingleModuleDocumentation(documentation, path);
-    });
-
-    // Create a data file with details of every module.
-    buildDocumentationDataFile(documentation, metadataJson);
-}
-
-/**
- * Produces documentation for a single file/module.
- */
-function buildSingleModuleDocumentation(documentation: IDocumentation, modulePath: string): Metadata {
-    // Load the module.
-    // tslint:disable-next-line:no-var-requires
-    const module = require(modulePath);
-    const DocumentedItem = module[documentation.exportName] as Documented;
-    if (DocumentedItem != null && DocumentedItem.metadata != null) {
-        // Build the module's page.
-        const { metadata } = DocumentedItem;
-        const fileData = documentation.pageGenerator(metadata);
-
-        // Ensure a directory exists and write the module's file.
-        const moduleName = (metadata as any)[documentation.nameMetadataKey];
-        const fileDirectory = path.join(documentation.subDirectory, moduleName);
-        if (!fs.existsSync(documentation.subDirectory)) {
-            fs.mkdirSync(documentation.subDirectory);
+function main() {
+    const lintRulePlugin = createMetadataPlugin((metadata: IRuleMetadata) => {
+        if (metadata.optionExamples != null) {
+            metadata = { ...metadata };
+            metadata.optionExamples = metadata.optionExamples.map((example: any) => {
+                return typeof example === "string" ? example : stringify(example);
+            });
         }
-        if (!fs.existsSync(fileDirectory)) {
-            fs.mkdirSync(fileDirectory);
-        }
-        fs.writeFileSync(path.join(fileDirectory, "index.html"), fileData);
-
         return metadata;
-    }
+    });
+    const lintFormatterPlugin = createMetadataPlugin<IFormatterMetadata>();
+    const dm = new Documentalist({ markdown: { gfm: true }})
+        .use("md", new MarkdownPlugin())
+        .use("Rule.ts", lintRulePlugin)
+        .use("Formatter.ts", lintFormatterPlugin);
+
+    dm.documentGlobs("src/**/*")
+        .then((docs) => JSON.stringify(docs, null, 2))
+        .then((content) => writeFileSync("docs/generated/data.json", content));
 }
 
-function buildDocumentationDataFile(documentation: IDocumentation, metadataJson: any[]) {
-    const dataJson = JSON.stringify(metadataJson, undefined, 2);
-    fs.writeFileSync(path.join(DOCS_DIR, "_data", documentation.dataFileName), dataJson);
-}
-
-/**
- * Generates Jekyll data from any item's metadata.
- */
-function generateJekyllData(metadata: any, layout: string, type: string, name: string): any {
+function createMetadataPlugin<T>(sanitize = (m: T) => m): IPlugin<T[]> {
     return {
-        ...metadata,
-        layout,
-        title: `${type}: ${name}`,
+        compile: (files: IFile[], _compiler: ICompiler) => {
+            return files.map(({ path }) => require(path))
+                .filter((module) => module != null && module.metadata != null)
+                .map(({ metadata }: { metadata: T }) => sanitize(metadata));
+        },
     };
 }
-
-/**
- * Based off a rule's metadata, generates a Jekyll "HTML" file
- * that only consists of a YAML front matter block.
- */
-function generateRuleFile(metadata: IRuleMetadata): string {
-    if (metadata.optionExamples) {
-        metadata = { ...metadata };
-        metadata.optionExamples = (metadata.optionExamples as any[]).map((example) =>
-            typeof example === "string" ? example : stringify(example));
-    }
-
-    const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
-    yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
-    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
-}
-
-/**
- * Based off a formatter's metadata, generates a Jekyll "HTML" file
- * that only consists of a YAML front matter block.
- */
-function generateFormatterFile(metadata: IFormatterMetadata): string {
-    const yamlData = generateJekyllData(metadata, "formatter", "TSLint formatter", metadata.formatterName);
-    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
-}
-
-buildDocumentation(ruleDocumentation);
-buildDocumentation(formatterDocumentation);
