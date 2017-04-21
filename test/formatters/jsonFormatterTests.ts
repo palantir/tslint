@@ -57,7 +57,7 @@ describe("JSON Formatter", () => {
                 character: 1,
             },
             ruleName: "first-name",
-            ruleSeverity: "ERROR",
+            ruleSeverity: "error",
         },
         {
             name: TEST_FILE,
@@ -73,7 +73,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "last-name",
-            ruleSeverity: "ERROR",
+            ruleSeverity: "error",
         },
         {
             name: TEST_FILE,
@@ -94,7 +94,7 @@ describe("JSON Formatter", () => {
                 character: 0,
             },
             ruleName: "full-name",
-            ruleSeverity: "ERROR",
+            ruleSeverity: "error",
         }];
         /* tslint:enable:object-literal-sort-keys */
 
