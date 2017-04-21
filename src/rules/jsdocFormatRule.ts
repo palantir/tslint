@@ -55,7 +55,7 @@ function walk(ctx: Lint.WalkContext<void>) {
             fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
             return;
         }
-        const lines = fullText.slice(pos + 3, end - 2).split(/\n/);
+        const lines = fullText.slice(pos + 3, end - 2).split("\n");
         const firstLine = lines[0];
         if (lines.length === 1) {
             if (!firstLine.startsWith(" ") || !firstLine.endsWith(" ")) {
@@ -68,16 +68,16 @@ function walk(ctx: Lint.WalkContext<void>) {
         let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
         for (let i = 1; i < endIndex; ++i) {
-            const line = lines[i];
+            const line = lines[i].endsWith("\r") ? lines[i].slice(0, -1) : lines[i];
             // regex is: start of string, followed by any amount of whitespace, followed by *,
             // followed by either a space or the end of the string
-            if (!/^\s*\*(?: |\r?$)/.test(line)) {
-                ctx.addFailureAt(lineStart, lineLength(line), Rule.FORMAT_FAILURE_STRING);
+            if (!/^\s*\*(?: |$)/.test(line)) {
+                ctx.addFailureAt(lineStart, line.length, Rule.FORMAT_FAILURE_STRING);
             }
             if (line.indexOf("*") !== alignColumn) {
-                ctx.addFailureAt(lineStart, lineLength(line), Rule.ALIGNMENT_FAILURE_STRING);
+                ctx.addFailureAt(lineStart, line.length, Rule.ALIGNMENT_FAILURE_STRING);
             }
-            lineStart += line.length + 1; // + 1 for the splitted-out newline
+            lineStart += lines[i].length + 1; // + 1 for the splitted-out newline
         }
         const lastLine = lines[endIndex];
         // last line should only consist of whitespace
@@ -89,8 +89,4 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
 
     });
-}
-
-function lineLength(line: string) {
-    return line.endsWith("\r") ? line.length - 1 : line.length;
 }
