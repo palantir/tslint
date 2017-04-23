@@ -15,10 +15,7 @@
  * limitations under the License.
  */
 
-import {
-    isAssertionExpression, isAssignmentKind, isBinaryExpression, isConditionalExpression, isDoStatement, isForStatement, isIfStatement,
-    isNonNullExpression, isParenthesizedExpression, isPrefixUnaryExpression, isWhileStatement,
-} from "tsutils";
+import { isAssignmentKind, isNodeKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -28,7 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-conditional-assignment",
         description: "Disallows any type of assignment in conditionals.",
-        descriptionDetails: "This applies to `do-while`, `for`, `if`, and `while` statements.",
+        descriptionDetails: "This applies to `do-while`, `for`, `if`, and `while` statements and conditional (ternary) expressions.",
         rationale: Lint.Utils.dedent `
             Assignments in conditionals are often typos:
             for example \`if (var1 = var2)\` instead of \`if (var1 == var2)\`.
@@ -44,41 +41,74 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Assignments in conditional expressions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoConditionalAssignmentWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoConditionalAssignmentWalker extends Lint.AbstractWalker<void> {
-    public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
-            if (isIfStatement(node) || isDoStatement(node) || isWhileStatement(node)) {
-                this.checkCondition(node.expression);
-            } else if (isConditionalExpression(node) || isForStatement(node) && node.condition !== undefined) {
-                this.checkCondition(node.condition!);
+function walk(ctx: Lint.WalkContext<void>) {
+    let checking = 0;
+    return ts.forEachChild(ctx.sourceFile, cb);
+
+    function cb(node: ts.Node): void {
+        const kind = node.kind;
+        if (!isNodeKind(kind)) {
+            return; // return early for tokens
+        }
+        switch (kind) {
+            case ts.SyntaxKind.ConditionalExpression:
+                return check((node as ts.ConditionalExpression).condition),
+                       cb((node as ts.ConditionalExpression).whenTrue),
+                       cb((node as ts.ConditionalExpression).whenFalse);
+            case ts.SyntaxKind.IfStatement:
+                return check((node as ts.IfStatement).expression),
+                       cb((node as ts.IfStatement).thenStatement),
+                       maybeCallback(cb, (node as ts.IfStatement).elseStatement);
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+                return check((node as ts.DoStatement | ts.WhileStatement).expression),
+                       cb((node as ts.IterationStatement).statement);
+            case ts.SyntaxKind.ForStatement:
+                return maybeCallback(cb, (node as ts.ForStatement).initializer),
+                       maybeCallback(check, (node as ts.ForStatement).condition),
+                       maybeCallback(cb, (node as ts.ForStatement).incrementor),
+                       cb((node as ts.ForStatement).statement);
+        }
+        if (checking !== 0) {
+            switch (kind) {
+                case ts.SyntaxKind.BinaryExpression:
+                    if (isAssignmentKind((node as ts.BinaryExpression).operatorToken.kind)) {
+                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+                    }
+                    return cb((node as ts.BinaryExpression).left), cb((node as ts.BinaryExpression).right);
+                case ts.SyntaxKind.ParenthesizedExpression:
+                case ts.SyntaxKind.NonNullExpression:
+                case ts.SyntaxKind.AsExpression:
+                case ts.SyntaxKind.TypeAssertionExpression:
+                    return cb((node as ts.AssertionExpression | ts.NonNullExpression | ts.ParenthesizedExpression).expression);
+                case ts.SyntaxKind.PrefixUnaryExpression:
+                    return cb((node as ts.PrefixUnaryExpression).operand);
+                default:
+                    return noCheck(node);
             }
-            return ts.forEachChild(node, cb);
-        };
-        return ts.forEachChild(sourceFile, cb);
+        }
+        return ts.forEachChild(node, cb);
     }
 
-    private checkCondition(node: ts.Expression) {
-        // return early for prevalent conditions
-        if (node.kind === ts.SyntaxKind.Identifier || node.kind === ts.SyntaxKind.CallExpression) {
-            return;
-        }
-        if (isBinaryExpression(node)) {
-            if (isAssignmentKind(node.operatorToken.kind)) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-            this.checkCondition(node.left);
-            this.checkCondition(node.right);
-        } else if (isParenthesizedExpression(node) || isNonNullExpression(node) || isAssertionExpression(node)) {
-            this.checkCondition(node.expression);
-        } else if (isConditionalExpression(node)) {
-            this.checkCondition(node.whenTrue);
-            this.checkCondition(node.whenFalse);
-        } else if (isPrefixUnaryExpression(node)) {
-            this.checkCondition(node.operand);
-        }
+    function check(node: ts.Node): void {
+        ++checking;
+        cb(node);
+        --checking;
+    }
+    function noCheck(node: ts.Node): void {
+        const old = checking;
+        checking = 0;
+        ts.forEachChild(node, cb);
+        checking = old;
+    }
+}
+
+function maybeCallback(cb: (node: ts.Node) => void, node?: ts.Node) {
+    if (node !== undefined) {
+        return cb(node);
     }
 }

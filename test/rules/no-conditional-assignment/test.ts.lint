@@ -16,11 +16,11 @@ for (var x = 8; x == 8; x = 12) { }
 for (;;) { }
 
 while (--i) {}
-while ((a = b) ++) {} // don't bother, it's a compile error anyway
+while ((a = b)++) {} // don't bother, it's a compile error anyway
 
-while ((a || a = b).foo) {}
+while ((a || (a = b)).foo) {}
 while (a[b = c]) {}
-while ((function() {a = b})()) {}
+while ((() => a = b)()) {}
 while (fn(a = b)) {}
 a ? b = a : a = b;
 
@@ -58,9 +58,9 @@ while ((a = 5) && ((b == 4) || (c = 3))) {}
 while (+(a = b) || -(b = c)) {}
          ~~~~~ [0]
                      ~~~~~ [0]
-while ((a = (b = c)!)) {}
-        ~~~~~~~~~~~~ [0]
-             ~~~~~ [0]
+while (foo() || (a = (b = c)!)) {}
+                 ~~~~~~~~~~~~ [0]
+                      ~~~~~ [0]
 while (a == (b = fn()) as any) {}
              ~~~~~~~~ [0]
 while (a ? b : c) {}
@@ -71,5 +71,8 @@ while (!((a = b) ? c : d)) {}
           ~~~~~ [0]
 (a = b) ? c : d;
  ~~~~~ [0]
+(foo ? a = b : b = a) ? c : d;
+       ~~~~~ [0]
+               ~~~~~ [0]
 
 [0]: Assignments in conditional expressions are forbidden
