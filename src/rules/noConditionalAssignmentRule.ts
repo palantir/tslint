@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+import {
+    isAssertionExpression, isAssignmentKind, isBinaryExpression, isConditionalExpression, isDoStatement, isForStatement, isIfStatement,
+    isNonNullExpression, isParenthesizedExpression, isPrefixUnaryExpression, isWhileStatement,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,61 +44,41 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Assignments in conditional expressions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new NoConditionalAssignmentWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(walker);
+        return this.applyWithWalker(new NoConditionalAssignmentWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class NoConditionalAssignmentWalker extends Lint.RuleWalker {
-    private isInConditional = false;
-
-    protected visitIfStatement(node: ts.IfStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitIfStatement(node);
+class NoConditionalAssignmentWalker extends Lint.AbstractWalker<void> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isIfStatement(node) || isDoStatement(node) || isWhileStatement(node)) {
+                this.checkCondition(node.expression);
+            } else if (isConditionalExpression(node) || isForStatement(node) && node.condition !== undefined) {
+                this.checkCondition(node.condition!);
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    protected visitWhileStatement(node: ts.WhileStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitWhileStatement(node);
-    }
-
-    protected visitDoStatement(node: ts.DoStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitDoStatement(node);
-    }
-
-    protected visitForStatement(node: ts.ForStatement) {
-        if (node.condition != null) {
-            this.validateConditionalExpression(node.condition);
+    private checkCondition(node: ts.Expression) {
+        // return early for prevalent conditions
+        if (node.kind === ts.SyntaxKind.Identifier || node.kind === ts.SyntaxKind.CallExpression) {
+            return;
         }
-        super.visitForStatement(node);
-    }
-
-    protected visitBinaryExpression(expression: ts.BinaryExpression) {
-        if (this.isInConditional) {
-            this.checkForAssignment(expression);
-        }
-        super.visitBinaryExpression(expression);
-    }
-
-    private validateConditionalExpression(expression: ts.Expression) {
-        this.isInConditional = true;
-        if (expression.kind === ts.SyntaxKind.BinaryExpression) {
-            // check for simple assignment in a conditional, like `if (a = 1) {`
-            this.checkForAssignment(expression as ts.BinaryExpression);
-        }
-        // walk the children of the conditional expression for nested assignments, like `if ((a = 1) && (b == 1)) {`
-        this.walkChildren(expression);
-        this.isInConditional = false;
-    }
-
-    private checkForAssignment(expression: ts.BinaryExpression) {
-        if (isAssignmentToken(expression.operatorToken)) {
-            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
+        if (isBinaryExpression(node)) {
+            if (isAssignmentKind(node.operatorToken.kind)) {
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
+            this.checkCondition(node.left);
+            this.checkCondition(node.right);
+        } else if (isParenthesizedExpression(node) || isNonNullExpression(node) || isAssertionExpression(node)) {
+            this.checkCondition(node.expression);
+        } else if (isConditionalExpression(node)) {
+            this.checkCondition(node.whenTrue);
+            this.checkCondition(node.whenFalse);
+        } else if (isPrefixUnaryExpression(node)) {
+            this.checkCondition(node.operand);
         }
     }
-}
-
-function isAssignmentToken(token: ts.Node) {
-    return token.kind >= ts.SyntaxKind.FirstAssignment && token.kind <= ts.SyntaxKind.LastAssignment;
 }
