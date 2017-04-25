@@ -47,6 +47,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
     private lastSortedKeyStack: string[] = [];
     private multilineFlagStack: boolean[] = [];
     private sortedStateStack: boolean[] = [];
+    private propertyNodes: Array<ts.NodeArray<ts.ObjectLiteralElementLike>> = [];
 
     public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
         // char code 0; every string should be >= to this
@@ -54,7 +55,9 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
         // sorted state is always initially true
         this.sortedStateStack.push(true);
         this.multilineFlagStack.push(this.isMultilineListNode(node));
+        this.propertyNodes.push(node.properties);
         super.visitObjectLiteralExpression(node);
+        this.propertyNodes.pop();
         this.multilineFlagStack.pop();
         this.lastSortedKeyStack.pop();
         this.sortedStateStack.pop();
@@ -74,7 +77,7 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
                 const key = keyNode.text;
                 if (key < lastSortedKey) {
                     const failureString = Rule.FAILURE_STRING_FACTORY(key);
-                    this.addFailureAtNode(keyNode, failureString);
+                    this.addFailureAtNode(keyNode, failureString, this.generateFix(this.propertyNodes[this.propertyNodes.length - 1]));
                     this.sortedStateStack[this.sortedStateStack.length - 1] = false;
                 } else {
                     this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1] = key;
@@ -88,6 +91,44 @@ class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
         const startLineOfNode = this.getLineAndCharacterOfPosition(node.getStart()).line;
         const endLineOfNode = this.getLineAndCharacterOfPosition(node.getEnd()).line;
         return endLineOfNode !== startLineOfNode;
+    }
+
+    private generateFix(properties: ts.NodeArray<ts.ObjectLiteralElementLike>): Lint.Fix {
+        const trailingComma = properties.hasTrailingComma;
+        const cmp = (
+            a: ts.ObjectLiteralElementLike,
+            b: ts.ObjectLiteralElementLike,
+        ): number => {
+            if (a.name == null || b.name == null) {
+                return 0;
+            }
+            if (!isIdentifierOrStringLiteral(a.name) || !isIdentifierOrStringLiteral(b.name)) {
+                return 0;
+            }
+
+            const aText = a.name.text;
+            const bText = b.name.text;
+
+            if (aText < bText) {
+                return -1;
+            }
+            return 1;
+        };
+
+        const sortedProperties = properties.slice(0).sort(cmp);
+
+        const newText = sortedProperties.map((v, i) => {
+            const fullText = v.getFullText();
+            if (i > 0) {
+                return "," + fullText;
+            }
+            return fullText;
+        }).join("") + (trailingComma ? "," : "");
+
+        const start = properties.pos;
+        const width = properties.end - start;
+
+        return new Lint.Replacement(start, width, newText);
     }
 }
 
