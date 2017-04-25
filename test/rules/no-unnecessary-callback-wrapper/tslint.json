@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-unnecessary-callback-wrapper": true
-  },
-  "jsRules": {
-    "no-unnecessary-callback-wrapper": true
   }
 }

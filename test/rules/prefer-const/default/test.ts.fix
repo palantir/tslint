@@ -194,3 +194,4 @@ declare let ambient = 0;
 declare namespace ambient {
     let foo = 0;
 }
+

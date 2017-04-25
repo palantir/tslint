@@ -97,7 +97,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                 case ts.SyntaxKind.DoStatement:
                 case ts.SyntaxKind.ExportAssignment:
-                    this.checkSemicolonAt(node);
+                    this.checkSemicolonAt(node as ts.Statement);
                     break;
                 case ts.SyntaxKind.TypeAliasDeclaration:
                 case ts.SyntaxKind.ImportDeclaration:
@@ -208,7 +208,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos, 1));
     }
 
-    private checkSemicolonAt(node: ts.Node) {
+    private checkSemicolonAt(node: ts.Statement) {
         const hasSemicolon = this.sourceFile.text[node.end - 1] === ";";
 
         if (this.options.always && !hasSemicolon) {
@@ -222,8 +222,19 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.RegularExpressionLiteral:
                     break;
                 default:
-                    this.reportUnnecessary(node.end - 1);
+                    if (!this.isFollowedByStatement(node)) {
+                        this.reportUnnecessary(node.end - 1);
+                    }
             }
         }
+    }
+
+    private isFollowedByStatement(node: ts.Statement): boolean {
+        const nextStatement = utils.getNextStatement(node);
+        if (nextStatement === undefined) {
+            return false;
+        }
+        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
+            === ts.getLineAndCharacterOfPosition(this.sourceFile, nextStatement.getStart(this.sourceFile)).line;
     }
 }

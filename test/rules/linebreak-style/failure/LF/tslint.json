@@ -1,8 +1,5 @@
 {
   "rules": {
     "linebreak-style": [true, "CRLF"]
-  },
-  "jsRules": {
-    "linebreak-style": [true, "CRLF"]
   }
 }

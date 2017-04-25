@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-unnecessary-initializer": [true]
-  },
-  "jsRules": {
-    "no-unnecessary-initializer": [true]
   }
 }

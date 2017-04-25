@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-console": [true, "dir", "error", "log", "warn"]
-  },
-  "jsRules": {
-    "no-console": [true, "dir", "error", "log", "warn"]
   }
 }
