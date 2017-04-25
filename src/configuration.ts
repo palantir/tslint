@@ -147,6 +147,8 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * '/path/to/config' will be treated as an absolute path
  * './path/to/config' will be treated as a relative path
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
+ * @param configFilePath The configuration to load
+ * @param originalFilePath The entry point configuration file
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
 export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
@@ -159,7 +161,12 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
                 .toString()
                 .replace(/^\uFEFF/, ""));
-            rawConfigFile = parseJson(fileContent, configFilePath, originalFilePath) as RawConfigFile;
+            try {
+                rawConfigFile = JSON.parse(fileContent);
+            } catch (error) {
+                // include the configuration file being parsed in the error since it may differ from the directly referenced config
+                throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
+            }
         } else {
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath]; // tslint:disable-line no-unsafe-any (Fixed in 5.2)
@@ -176,16 +183,6 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         }).concat([configFile]);
 
         return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
-    }
-}
-
-function parseJson(fileContent: string, configFilePath: string, originalFilePath?: string) {
-    try {
-        return JSON.parse(fileContent);
-    } catch (error) {
-        throw configFilePath === originalFilePath
-            ? error
-            : new Error(`${error.message} in ${configFilePath}`);
     }
 }
 
