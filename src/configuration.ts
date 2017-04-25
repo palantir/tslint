@@ -162,8 +162,9 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
                 .toString()
                 .replace(/^\uFEFF/, ""));
             try {
-                rawConfigFile = JSON.parse(fileContent);
-            } catch (error) {
+                rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
+            } catch (e) {
+                const error = e as Error;
                 // include the configuration file being parsed in the error since it may differ from the directly referenced config
                 throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
             }
