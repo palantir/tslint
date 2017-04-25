@@ -147,9 +147,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * '/path/to/config' will be treated as an absolute path
  * './path/to/config' will be treated as a relative path
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
+ * @param configFilePath The configuration to load
+ * @param originalFilePath The entry point configuration file
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string): IConfigurationFile {
+export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
     } else {
@@ -159,7 +161,13 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
             const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
                 .toString()
                 .replace(/^\uFEFF/, ""));
-            rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
+            try {
+                rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
+            } catch (e) {
+                const error = e as Error;
+                // include the configuration file being parsed in the error since it may differ from the directly referenced config
+                throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
+            }
         } else {
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath]; // tslint:disable-line no-unsafe-any (Fixed in 5.2)
@@ -170,9 +178,9 @@ export function loadConfigurationFromPath(configFilePath?: string): IConfigurati
 
         // load configurations, in order, using their identifiers or relative paths
         // apply the current configuration last by placing it last in this array
-        const configs = configFile.extends.map((name) => {
+        const configs: IConfigurationFile[] = configFile.extends.map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath);
+            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
         }).concat([configFile]);
 
         return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
