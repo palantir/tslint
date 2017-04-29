@@ -91,7 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function parseOptions(args: any[]): Options {
+function parseOptions(args: Array<string | string[] | FunctionBan | MethodBan>): Options {
     const functions: FunctionBan[] = [];
     const methods: MethodBan[] = [];
     for (const arg of args) {
@@ -103,8 +103,8 @@ function parseOptions(args: any[]): Options {
             } else {
                 methods.push({object: arg[0], name: arg[1], message: arg[2]});
             }
-        } else if (arg.object !== undefined) {
-            methods.push(arg);
+        } else if ("object" in arg) {
+            methods.push(arg as MethodBan);
         } else {
             functions.push(arg);
         }
