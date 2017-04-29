@@ -28,10 +28,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Require or disallow a space before function parenthesis",
         hasFix: true,
         optionExamples: [
-            `true`,
-            `[true, "always"]`,
-            `[true, "never"]`,
-            `[true, {"anonymous": "always", "named": "never", "asyncArrow": "always"}]`,
+            true,
+            [true, "always"],
+            [true, "never"],
+            [true, {anonymous: "always", named: "never", asyncArrow: "always"}],
         ],
         options: {
             properties: {
@@ -67,12 +67,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 type OptionName = "anonymous" | "asyncArrow" | "constructor" | "method" | "named";
 
+type Option = "always" | "never";
+
 interface CachedOptions {
-    anonymous?: string;
-    asyncArrow?: string;
-    constructor?: string;
-    method?: string;
-    named?: string;
+    anonymous?: Option;
+    asyncArrow?: Option;
+    constructor?: Option;
+    method?: Option;
+    named?: Option;
 }
 
 class FunctionWalker extends Lint.RuleWalker {
@@ -125,8 +127,7 @@ class FunctionWalker extends Lint.RuleWalker {
     }
 
     private cacheOptions(): void {
-        const allOptions = this.getOptions();
-        const options = allOptions[0];
+        const options = (this.getOptions() as any[])[0] as Option | { [K in OptionName]: Option } | undefined;
         const optionNames: OptionName[] = ["anonymous", "asyncArrow", "constructor", "method", "named"];
 
         optionNames.forEach((optionName) => {
@@ -146,11 +147,11 @@ class FunctionWalker extends Lint.RuleWalker {
         });
     }
 
-    private getOption(optionName: OptionName): string | undefined {
+    private getOption(optionName: OptionName): Option | undefined {
         return this.cachedOptions[optionName];
     }
 
-    private evaluateRuleAt(openParen?: ts.Node, option?: string): void {
+    private evaluateRuleAt(openParen?: ts.Node, option?: Option): void {
         if (openParen === undefined || option === undefined) {
             return;
         }

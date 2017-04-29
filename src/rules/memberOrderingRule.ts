@@ -151,33 +151,31 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            '[true, { "order": "fields-first" }]',
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        "static-field",
-                        "instance-field",
-                        "constructor",
-                        "public-instance-method",
-                        "protected-instance-method",
-                        "private-instance-method"
-                    ]
-                }]`,
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        {
-                            "name": "static non-private",
-                            "kinds": [
-                                "public-static-field",
-                                "protected-static-field",
-                                "public-static-method",
-                                "protected-static-method"
-                            ]
-                        },
-                        "constructor"
-                    ]
-                }]`,
+            [true, { order: "fields-first" }],
+            [true, {
+                order: [
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method",
+                ],
+            }],
+            [true, {
+                order: [
+                    {
+                        name: "static non-private",
+                        kinds: [
+                            "public-static-field",
+                            "protected-static-field",
+                            "public-static-method",
+                            "protected-static-method",
+                        ],
+                    },
+                    "constructor",
+                ],
+            }],
         ],
         type: "typescript",
         typescriptOnly: false,
@@ -201,7 +199,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.opts = parseOptions(this.getOptions());
+        this.opts = parseOptions(this.getOptions() as any[]);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
@@ -310,11 +308,11 @@ function caseInsensitiveLess(a: string, b: string) {
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"];
+    return (MemberKind as any)[access + "Constructor"] as MemberKind;
 }
 
 function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
-    return (MemberKind as any)[access + membership + kind];
+    return (MemberKind as any)[access + membership + kind] as MemberKind;
 }
 
 const allAccess: Access[] = ["public", "protected", "private"];
@@ -392,7 +390,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0];
+    const firstOption = allOptions[0] as Options | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]

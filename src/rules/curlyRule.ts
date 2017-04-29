@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
         },
-        optionExamples: ["true", '[true, "ignore-same-line"]'],
+        optionExamples: [true, [true, "ignore-same-line"]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -74,7 +74,7 @@ class CurlyWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const args = this.getOptions();
+        const args = this.getOptions() as any[];
 
         this.optionIgnoreSameLine = args.indexOf(OPTION_IGNORE_SAME_LINE) > -1;
     }

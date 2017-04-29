@@ -6,9 +6,7 @@
 TSLint
 ======
 
-An extensible linter for the [TypeScript language](https://github.com/Microsoft/TypeScript).
-
-TSLint is a static analysis tool that checks TypeScript code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
+TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
 TSLint supports:
 
@@ -47,6 +45,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [codelyzer](https://github.com/mgechev/codelyzer) - A set of tslint rules for static code analysis of Angular TypeScript projects
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 - [tslint-immutable](https://github.com/jonaskello/tslint-immutable) - TSLint rules to disable mutation in TypeScript
+- [tslint-consistent-codestyle](https://github.com/ajafff/tslint-consistent-codestyle) - TSLint rules to enforce consistent code style in TypeScript
 
 Development
 -----------

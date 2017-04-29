@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Warns on use of `${` in non-template strings.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

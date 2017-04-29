@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             > Different implementations produce different results when a radix is not specified, usually defaulting the value to 10.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

@@ -4,7 +4,7 @@ layout: page
 permalink: /usage/type-checking/
 ---
 
-#### Type Checking
+#### Semantic lint rules
 
 Some TSLint rules go further than linting code syntax. Semantic rules use the compiler's program APIs to inspect static types and validate code patterns.
 

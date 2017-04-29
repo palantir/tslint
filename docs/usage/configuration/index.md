@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Configuration
+title: Configuring TSLint
 permalink: /usage/configuration/
 ---
 
@@ -20,7 +20,7 @@ named "tslint-config" as a configuration file. Specific files inside node module
 specified, eg. `"tslint-config/path/to/submodule"`. Relative paths to JSON files or JS modules
 are also supported, e.g. `"./tslint-config"`.
 * `rulesDirectory?: string | string[]`:
-A path or array of paths to a directories of [custom rules][2]. These may be relative or absolute paths.
+A path to a directory or an array of paths to directories of [custom rules][2]. These values are handled using node module resolution semantics, if an `index.js` is placed in your rules directory. We fallback to use relative or absolute paths, if the module can't be resolved. If you want to avoid module resolution you can directly use a relative or absolute path (e.g. with `./`).
 * `rules?: { [name: string]: RuleSetting }`: A map of rule names to their configuration settings.
   - These rules are applied to `.ts` and `.tsx` files.
   - Each rule is associated with an object containing:
@@ -68,7 +68,7 @@ An example `tslint.json` file might look like this:
 }
 ```
 
-### Rule Severity
+### Rule severity
 
 The severity level of each rule can can be configured to `default`, `error`, `warning`/`warn`, or `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` top-level option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
@@ -81,10 +81,20 @@ __`tslint:recommended`__ is a stable, somewhat opinionated set of rules which we
 __`tslint:latest`__ extends `tslint:recommended` and is continuously updated to include configuration for the latest rules in every TSLint release. Using this config may introduce breaking changes across minor releases as new rules are enabled which cause lint failures in your code. When TSLint reaches a major version bump, `tslint:recommended` will be updated to be identical to `tslint:latest`.
 
 __`tslint:all`__ turns on all rules to their strictest settings. This will use type checking, so it must be combined with the `--project` option.
-(Exceptions are [`"ban"`](https://palantir.github.io/tslint/rules/ban/), [`"import-blacklist"`](https://palantir.github.io/tslint/rules/import-blacklist/), and [`"file-header"`](https://palantir.github.io/tslint/rules/file-header/), which have no sensible defaults, and deprecated rules.)
+(Exceptions include rules such as [`"ban"`][rule-ban], [`"import-blacklist"`][rule-import-blacklist], and [`"file-header"`][rule-file-header], which have no sensible defaults, and deprecated rules.)
 
+### Custom rules
+
+If TSLint's core rules don't have all the lint checks you're looking for,
+you may [write your own custom rules][2] or use custom rules that others have developed.
+
+Some commonly used custom rule packages in the TSLint community are listed in the
+[README](https://github.com/palantir/tslint/blob/master/README.md).
 
 [0]: {{site.baseurl | append: "/usage/cli"}}
 [1]: {{site.baseurl | append: "/usage/third-party-tools"}}
-[2]: {{site.baseurl | append: "/usage/custom-rules"}}
+[2]: {{site.baseurl | append: "/develop/custom-rules"}}
 [3]: {{site.baseurl | append: "/rules"}}
+[rule-ban]: {{site.baseurl | append: "/rules/ban"}}
+[rule-import-blacklist]: {{site.baseurl | append: "/rules/import-blacklist"}}
+[rule-file-header]: {{site.baseurl | append: "/rules/file-header"}}

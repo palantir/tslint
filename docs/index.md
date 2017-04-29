@@ -4,7 +4,7 @@ layout: default
 subtitle: An extensible linter for the TypeScript language.
 ---
 
-TSLint is a static analysis tool that checks your [TypeScript][0] code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
+TSLint is an extensible static analysis tool that checks [TypeScript][0] code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
 ## Quick start
 

@@ -11,8 +11,8 @@
          "url": "/library/"
       },
       {
-         "title": "tslint.json",
-         "url": "/tslint-json/"
+         "title": "Configuration",
+         "url": "/configuration/"
       },
       {
          "title": "Rule Flags",
@@ -21,10 +21,6 @@
       {
           "title": "Type Checking",
           "url": "/type-checking/"
-      },
-      {
-         "title": "Custom Rules",
-         "url": "/custom-rules/"
       },
       {
          "title": "Third-Party Tools",

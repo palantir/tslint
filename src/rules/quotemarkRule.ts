@@ -57,9 +57,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 5,
         },
         optionExamples: [
-            `[true, "${OPTION_SINGLE}", "${OPTION_AVOID_ESCAPE}"]`,
-            `[true, "${OPTION_SINGLE}", "${OPTION_JSX_DOUBLE}"]`,
-            ],
+            [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE],
+            [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -81,7 +81,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             avoidEscape: args.indexOf(OPTION_AVOID_ESCAPE) !== -1,
             jsxQuoteMark: args.indexOf(OPTION_JSX_SINGLE) !== -1
                           ? "'"
-                          : args.indexOf(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
+                          : args.indexOf(OPTION_JSX_DOUBLE) !== -1 ? '"' : quoteMark,
         });
     }
 }

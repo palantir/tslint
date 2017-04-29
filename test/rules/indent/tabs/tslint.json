@@ -1,8 +1,5 @@
 {
   "rules": {
     "indent": [true, "tabs"]
-  },
-  "jsRules": {
-    "indent": [true, "tabs"]
   }
 }

@@ -56,9 +56,10 @@ export class Rule extends Lint.Rules.TypedRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ["[true]", '[true, {"ignore-pattern": "^_"}]'],
+        optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
         type: "functionality",
         typescriptOnly: true,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -82,9 +83,13 @@ function parseOptions(options: any[]): Options {
 
     let ignorePattern: RegExp | undefined;
     for (const o of options) {
-        if (typeof o === "object" && o[OPTION_IGNORE_PATTERN] != null) {
-            ignorePattern = new RegExp(o[OPTION_IGNORE_PATTERN]);
-            break;
+        if (typeof o === "object") {
+            // tslint:disable-next-line no-unsafe-any
+            const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
+            if (ignore != null) {
+                ignorePattern = new RegExp(ignore);
+                break;
+            }
         }
     }
 

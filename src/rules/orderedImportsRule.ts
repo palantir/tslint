@@ -72,8 +72,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            "true",
-            '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
+            true,
+            [true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}],
         ],
         type: "style",
         typescriptOnly: false,
@@ -161,7 +161,8 @@ class OrderedImportsWalker extends Lint.RuleWalker {
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const optionSet = this.getOptions()[0] || {};
+        interface Options { "import-sources-order": string; "named-imports-order": string; }
+        const optionSet = (this.getOptions() as [Options])[0] || {};
         this.importSourcesOrderTransform =
             TRANSFORMS[optionSet["import-sources-order"] || "case-insensitive"];
         this.namedImportsOrderTransform =

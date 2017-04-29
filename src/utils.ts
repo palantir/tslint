@@ -39,12 +39,24 @@ export function objectify(arg: any): any {
     }
 }
 
+export function hasOwnProperty(arg: {}, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(arg, key) as boolean;
+}
+
 /**
  * Replace hyphens in a rule name by upper-casing the letter after them.
  * E.g. "foo-bar" -> "fooBar"
  */
 export function camelize(stringWithHyphens: string): string {
-    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
+    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => (nextLetter as string).toUpperCase());
+}
+
+export function isUpperCase(str: string): boolean {
+    return str === str.toUpperCase();
+}
+
+export function isLowerCase(str: string): boolean {
+    return str === str.toLowerCase();
 }
 
 /**
@@ -80,7 +92,7 @@ export function stripComments(content: string): string {
      * Fourth matches line comments
      */
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
-    const result = content.replace(regexp, (match, _m1, _m2, m3, m4) => {
+    const result = content.replace(regexp, (match: string, _m1: string, _m2: string, m3: string, m4: string) => {
         // Only one of m1, m2, m3, m4 matches
         if (m3) {
             // A block comment. Replace with nothing
