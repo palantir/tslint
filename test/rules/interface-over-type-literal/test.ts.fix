@@ -1,0 +1,10 @@
+interface T { x: number; }
+
+type U = string;
+type V = { x: number; } | { y: string; };
+export interface W<T> {
+    x: T,
+}
+type Record<T, U> = {
+ 	[K in T]: U; 
+}
