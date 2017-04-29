@@ -19,14 +19,14 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export interface FunctionBan {
+interface FunctionBan {
     name: string;
     message?: string;
 }
-export interface MethodBan extends FunctionBan {
+interface MethodBan extends FunctionBan {
     object: string;
 }
-export interface Options {
+interface Options {
     functions: FunctionBan[];
     methods: MethodBan[];
 }
@@ -112,7 +112,7 @@ function parseOptions(args: Array<string | string[] | FunctionBan | MethodBan>):
     return { functions, methods };
 }
 
-export class BanFunctionWalker extends Lint.AbstractWalker<Options> {
+class BanFunctionWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isCallExpression(node)) {
