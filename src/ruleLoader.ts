@@ -71,7 +71,7 @@ export function loadRules(ruleOptionsList: IOptions[],
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (notAllowedInJsRules.length > 0) {
         const warning = dedent`
@@ -80,10 +80,10 @@ export function loadRules(ruleOptionsList: IOptions[],
             Make sure to exclude them from "jsRules" section of your tslint.json.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (rules.length === 0) {
-        console.warn("No valid rules have been specified");
+        showWarningOnce("No valid rules have been specified");
     }
     return rules;
 }
