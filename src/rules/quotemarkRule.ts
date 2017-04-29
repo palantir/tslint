@@ -80,7 +80,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             avoidEscape: args.indexOf(OPTION_AVOID_ESCAPE) !== -1,
             jsxQuoteMark: args.indexOf(OPTION_JSX_SINGLE) !== -1
                           ? "'"
-                          : args.indexOf(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
+                          : args.indexOf(OPTION_JSX_DOUBLE) !== -1 ? '"' : quoteMark,
             quoteMark,
         });
     }

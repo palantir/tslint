@@ -141,7 +141,7 @@ function substituteMessage(templates: Map<string, string>, message: string): str
  * If `name` is not found in `templates`, `message` is returned unchanged.
  */
 function formatMessage(templates: Map<string, string>, message: string): string {
-    const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
+    const formatMatch = /^([-\w]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
         const template = templates.get(formatMatch[1]);
         if (template !== undefined) {
