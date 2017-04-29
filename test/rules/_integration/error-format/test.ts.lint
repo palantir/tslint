@@ -19,9 +19,9 @@ let indirection3;
 var formatInSubstitution;
     ~~~~~~~~~~~~~~~~~~~~ [preformatted]
 let worksWithEscape;
-    ~~~~~~~~~~~~~~~ [full_substitution % ('Identifier \'worksWithEscape\' is never reassigned; use \'const\' instead of \'let\'.')]
+    ~~~~~~~~~~~~~~~ [full-substitution % ('Identifier \'worksWithEscape\' is never reassigned; use \'const\' instead of \'let\'.')]
 var worksWithDoubleQuotes;
-    ~~~~~~~~~~~~~~~~~~~~~ [full_substitution % ("Identifier 'worksWithDoubleQuotes' is never reassigned; use 'const' instead of 'var'.")]
+    ~~~~~~~~~~~~~~~~~~~~~ [full-substitution % ("Identifier 'worksWithDoubleQuotes' is never reassigned; use 'const' instead of 'var'.")]
 let doesntTrimSpaces;
     ~~~~~~~~~~~~~~~~ [base3 % ("Identifier 'doesntTrimSpaces' is never reassigned; ", " 'let'")]
 
@@ -33,5 +33,5 @@ let doesntTrimSpaces;
 [var]: base2 % ('var')
 [partial_format]: base % ('indirection3')
 [preformatted]: base % ('formatInSubstitution', 'var')
-[full_substitution]: %s
+[full-substitution]: %s
 [base3]: %suse 'const' instead of%s.
