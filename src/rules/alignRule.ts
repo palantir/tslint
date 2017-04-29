@@ -82,7 +82,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
-                this.checkAlignment(node.statements.filter(s => !isEmptyStatement(s)), OPTION_STATEMENTS);
+                this.checkAlignment(node.statements.filter((s) => !isEmptyStatement(s)), OPTION_STATEMENTS);
             } else {
                 switch (node.kind) {
                     case ts.SyntaxKind.NewExpression:
