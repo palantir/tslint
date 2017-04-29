@@ -82,7 +82,10 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],
+    ],    
+    "no-console": {
+      "options": ["log"]
+    },
     "no-switch-case-fall-through": true,
     "switch-default": false,
     "variable-name": [true,
