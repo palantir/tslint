@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getNextToken, isBlockLike } from "tsutils";
+import { getNextToken, isBlockLike, isEmptyStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -82,7 +82,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
-                this.checkAlignment(node.statements, OPTION_STATEMENTS);
+                this.checkAlignment(node.statements.filter(s => !isEmptyStatement(s)), OPTION_STATEMENTS);
             } else {
                 switch (node.kind) {
                     case ts.SyntaxKind.NewExpression:
