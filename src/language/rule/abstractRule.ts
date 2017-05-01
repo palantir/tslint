@@ -49,16 +49,8 @@ export abstract class AbstractRule implements IRule {
     }
 
     protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
-    protected applyWithFunction<T, U extends T>(
-        sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<T>) => void,
-        options: U,
-    ): RuleFailure[];
-    protected applyWithFunction<T, U extends T>(
-        sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<T | void>) => void,
-        options?: U,
-    ): RuleFailure[] {
+    protected applyWithFunction<T>(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<T>) => void, options: {} & T): RuleFailure[];
+    protected applyWithFunction<T>(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<T | void>) => void, options?: T): RuleFailure[] {
         const ctx = new WalkContext(sourceFile, this.ruleName, options);
         walkFn(ctx);
         return this.filterFailures(ctx.failures);
