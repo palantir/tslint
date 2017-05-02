@@ -45,7 +45,7 @@ export function createTempFile(extension: string) {
     if (tmpfile == null) {
         throw new Error("Couldn't create temp file");
     }
-    return tmpfile;
+    return path.relative(process.cwd(), tmpfile);
 }
 
 // converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)

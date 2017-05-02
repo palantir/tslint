@@ -33,6 +33,7 @@ interface Argv {
     init?: boolean;
     o?: string;
     out?: string;
+    outputAbsolutePaths?: boolean;
     p?: string;
     project?: string;
     r?: string;
@@ -92,6 +93,10 @@ const processed = optimist
             alias: "out",
             describe: "output file",
             type: "string",
+        },
+        "outputAbsolutePaths": {
+            describe: "whether or not outputted file paths are absolute",
+            type: "boolean",
         },
         "p": {
             alias: "project",
@@ -237,6 +242,7 @@ const options: IRunnerOptions = {
     formattersDirectory: argv.s,
     init: argv.init,
     out: argv.out,
+    outputAbsolutePaths: argv.outputAbsolutePaths,
     project: argv.p,
     rulesDirectory: argv.r,
     test: argv.test,
