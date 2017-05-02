@@ -65,6 +65,7 @@ class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
                     this.addImport(statement.moduleReference.expression);
                 }
             } else if (isModuleDeclaration(statement) && statement.body !== undefined && this.sourceFile.isDeclarationFile) {
+                // There can't be any imports in a module augmentation or namespace
                 this.findImportsInModule(statement.body);
             }
         }
