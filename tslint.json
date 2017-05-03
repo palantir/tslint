@@ -48,7 +48,6 @@
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
-    "no-object-literal-type-assertion": false,
     "no-require-imports": false,
     "no-unbound-method": false,
     "no-unnecessary-callback-wrapper": false,
@@ -82,7 +81,7 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],    
+    ],
     "no-console": {
       "options": ["log"]
     },
