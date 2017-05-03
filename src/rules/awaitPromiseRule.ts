@@ -24,9 +24,17 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "await-promise",
         description: "Warns for an awaited value that is not a Promise.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            A list of 'string' names of any additional classes that should also be handled as Promises.
+        `,
+        options: {
+            type: "list",
+            listType: {
+                type: "array",
+                items: {type: "string"},
+            },
+        },
+        optionExamples: [true, [true, "Thenable"]],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -36,12 +44,13 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "'await' of non-Promise.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
         const tc = program.getTypeChecker();
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, tc));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, tc, promiseTypes));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set<string>) {
     return ts.forEachChild(ctx.sourceFile, cb);
 
     function cb(node: ts.Node): void {
@@ -66,7 +75,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
 
     function isPromiseType(type: ts.Type): boolean {
         const { target } = type as ts.TypeReference;
-        return target !== undefined && target.symbol !== undefined && target.symbol.name === "Promise";
+        return target !== undefined && target.symbol !== undefined && promiseTypes.has(target.symbol.name);
     }
 }
 
