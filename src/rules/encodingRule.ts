@@ -19,6 +19,7 @@ import * as fs from "fs";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { detectBufferEncoding, Encoding } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -62,59 +63,10 @@ function showEncoding(encoding: Encoding): string {
     }
 }
 
-export type Encoding = "utf8" | "utf8-bom" | "utf16le" | "utf16be";
 function detectEncoding(fileName: string): Encoding {
     const fd = fs.openSync(fileName, "r");
     const maxBytesRead = 3; // Only need 3 bytes to detect the encoding.
     const buffer = new Buffer(maxBytesRead);
     const bytesRead = fs.readSync(fd, buffer, /*offset*/ 0, /*length*/ maxBytesRead, /*position*/ 0);
     return detectBufferEncoding(buffer, bytesRead);
-}
-
-export function readBufferWithDetectedEncoding(buffer: Buffer): string {
-    switch (detectBufferEncoding(buffer)) {
-        case "utf8":
-            return buffer.toString();
-        case "utf8-bom":
-            return buffer.toString("utf-8", 2);
-        case "utf16le":
-            return buffer.toString("utf16le", 2);
-        case "utf16be":
-            // Round down to nearest multiple of 2.
-            const len = buffer.length & ~1; // tslint:disable-line no-bitwise
-            // Flip all byte pairs, then read as little-endian.
-            for (let i = 0; i < len; i += 2) {
-                const temp = buffer[i];
-                buffer[i] = buffer[i + 1];
-                buffer[i + 1] = temp;
-            }
-            return buffer.toString("utf16le", 2);
-    }
-}
-
-function detectBufferEncoding(buffer: Buffer, length = buffer.length): Encoding {
-    if (length < 2) {
-        return "utf8";
-    }
-
-    switch (buffer[0]) {
-        case 0xef:
-            if (buffer[1] === 0xbb && length >= 3 && buffer[2] === 0xbf) {
-                return "utf8-bom";
-            }
-            break;
-
-        case 0xfe:
-            if (buffer[1] === 0xff) {
-                return "utf16be";
-            }
-            break;
-
-        case 0xff:
-            if (buffer[1] === 0xfe) {
-                return "utf16le";
-            }
-    }
-
-    return "utf8";
 }
