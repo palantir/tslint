@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isAwaitExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -34,38 +35,39 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "'await' of non-Promise.";
 
-    public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const tc = program.getTypeChecker();
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, tc));
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.AwaitExpression &&
-            !couldBePromise(this.getTypeChecker().getTypeAtLocation((node as ts.AwaitExpression).expression))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+    return ts.forEachChild(ctx.sourceFile, cb);
+
+    function cb(node: ts.Node): void {
+        if (isAwaitExpression(node) && !couldBePromise(tc.getTypeAtLocation(node.expression))) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    }
+
+    function couldBePromise(type: ts.Type): boolean {
+        if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any) || isPromiseType(type)) {
+            return true;
         }
 
-        super.visitNode(node);
-    }
-}
+        if (isUnionType(type)) {
+            return type.types.some(isPromiseType);
+        }
 
-function couldBePromise(type: ts.Type): boolean {
-    if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any) || isPromiseType(type)) {
-        return true;
-    }
-
-    if (isUnionType(type)) {
-        return type.types.some(isPromiseType);
+        const bases = type.getBaseTypes();
+        return bases !== undefined && bases.some(couldBePromise);
     }
 
-    const bases = type.getBaseTypes();
-    return bases !== undefined && bases.some(couldBePromise);
-}
-
-function isPromiseType(type: ts.Type): boolean {
-    const { target } = type as ts.TypeReference;
-    return target !== undefined && target.symbol !== undefined && target.symbol.name === "Promise";
+    function isPromiseType(type: ts.Type): boolean {
+        const { target } = type as ts.TypeReference;
+        return target !== undefined && target.symbol !== undefined && target.symbol.name === "Promise";
+    }
 }
 
 function isUnionType(type: ts.Type): type is ts.UnionType {
