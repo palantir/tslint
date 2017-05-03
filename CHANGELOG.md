@@ -1,6 +1,64 @@
 Change Log
 ===
 
+v5.2.0
+---
+
+- [rule-change] [`no-console`](https://palantir.github.io/tslint/rules/no-console/) bans all console methods when no methods are specified (#2610)
+- [new-rule] [`no-object-literal-type-assertion`](https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/) (#2580)
+- [new-rule] [`no-irregular-whitespace`](https://palantir.github.io/tslint/rules/no-irregular-whitespace/) (#2487)
+- [new-rule] [`prefer-switch`](https://palantir.github.io/tslint/rules/prefer-switch/) (#2331)
+- [new-rule] [`number-literal-format`](https://palantir.github.io/tslint/rules/number-literal-format/) (#2526)
+- [new-rule] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) (#2395)
+- [new-rule] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) (#2519)
+- [new-fixer] [`interface-over-type-literal`](https://palantir.github.io/tslint/rules/interface-over-type-literal/) (#2617)
+- [new-fixer] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/) (#2552)
+- [new-fixer] [`no-string-literal`](https://palantir.github.io/tslint/rules/no-string-literal/) (#2495)
+- [new-fixer] [`no-internal-module`](https://palantir.github.io/tslint/rules/no-internal-module/) (#2517)
+- [new-rule-option] [`align`](https://palantir.github.io/tslint/rules/align/) rule added `members` option, which checks alignment of methods and properties of classes, objects, interfaces, type literals and object destructuring (#2387)
+- [new-rule-option] [`align`](https://palantir.github.io/tslint/rules/align/) rule added `elements` option, which checks alignment of elements in array literals, array destructuring and tuple types (#2387)
+- [new-rule-option] [`trailing-comma`](https://palantir.github.io/tslint/rules/trailing-comma/) adds more granular options to specify trailing commas for arrays, objects, functions, type literals, imports, and exports (#2538)
+- [api] Deprecate `ScopeAwareRuleWalker` and `BlockScopeAwareRuleWalker`. (#2561)
+- [develop] added support for [error templates in rule tests](https://palantir.github.io/tslint/develop/testing-rules/) (#2481)
+- [bugfix] Fixes "Severity for rule not found" error (#2516)
+- [bugfix] [`no-unused-expression`](https://palantir.github.io/tslint/rules/no-unused-expression/): allow `void(0)` in addition to `void 0` and `void` in expression and statement position (#2645)
+- [bugfix] [`align`](https://palantir.github.io/tslint/rules/align/): fix false positive for files with BOM (#2642)
+- [bugfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/): Handle contextual types with ambiguous signatures; allow `any`; and handle async functions. (#2576)
+- [bugfix] [`semicolon`](https://palantir.github.io/tslint/rules/semicolon/): don't mark semicolon as unnecessary when the next statement is on the same line (#2591)
+- [bugfix] [`no-internal-module`](https://palantir.github.io/tslint/rules/no-internal-module/): no more false positives for global augmentation (#2517)
+- [bugfix] [`no-unnecessary-qualifier`](https://palantir.github.io/tslint/rules/no-unnecessary-qualifier/): no longer breaks when walking a function that references `arguments` (#2555)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/) no longer shows warnings on ambient declarations (#2391)
+- [bugfix] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/): suggest correct fix for interfaces with type arguments (#2552)
+- [bugfix] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/): fix regression with jsx attributes (#2605)
+- [bugfix] [`adjacent-overload-signatures`](https://palantir.github.io/tslint/rules/adjacent-overload-signatures/) handles functions ending in semicolon (#2412)
+- [bugfix] [`object-literal-key-quotes`](https://palantir.github.io/tslint/rules/object-literal-key-quotes/): correctly stringify numbers when fixing (#2515)
+- [bugfix] [`object-literal-key-quotes`](https://palantir.github.io/tslint/rules/object-literal-key-quotes/): does no longer require quotes for property names containing digits (#2515)
+- [enhancement] Failures in extended config files now indicate which file (#2588)
+- [enhancement] [`align`](https://palantir.github.io/tslint/rules/align/): Don't report 'statements are not aligned' for empty statements (#2653)
+- [enhancement] [`class-name`](https://palantir.github.io/tslint/rules/class-name/) now also checks class expressions (#2553)
+- [enhancement] `optionExamples`: Allow to use an options array directly instead of a string representation. (#2527)
+- [enhancement] `rulesDirectory` can now be resolved with Nodes resolve logic, if the directory contains an `index.js` (#2163) (#2358)
+- [enhancement] [`no-unused-expression`](https://palantir.github.io/tslint/rules/no-unused-expression/): narrow error location for comma separated expressions and conditional expressions (#2645)
+- [enhancement] [`no-string-literal`](https://palantir.github.io/tslint/rules/no-string-literal/) now handles escaped strings (#2495)
+- [enhancement] [`no-unnecessary-callback-wrapper`](https://palantir.github.io/tslint/rules/no-unnecessary-callback-wrapper/): Allow `x => x(x)` (#2524)
+- [enhancement] [`no-var-keyword`](https://palantir.github.io/tslint/rules/no-var-keyword/): Allow global var declarations (#2513)
+
+Thanks to our contributors!
+- Andy Hanson
+- Alex Eagle
+- Donald Pipowitch
+- Klaus Meinhardt
+- Gord P
+- Andy
+- Quentin
+- Mitchell Wills
+- Vito
+- CSchulz
+- Josh Goldberg
+- Brian Olore
+- Manuel Lopez
+- James Clark
+
 v5.1.0
 ---
 
@@ -60,7 +118,7 @@ v5.0.0
     + public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
     +     return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
     ```
-    
+
     - N.B. If you are refactoring your custom rules, consider [these performance tips for writing custom rules](https://palantir.github.io/tslint/develop/custom-rules/performance.html).
 
 - Removed `createFix`. Replacements should be passed directly into addFailure. (#2403)
