@@ -306,6 +306,9 @@ class SemicolonNeverWalker extends SemicolonWalker {
     }
 
     protected checkPropertyDeclaration(node: ts.PropertyDeclaration) {
+        if (node.initializer === undefined) {
+            return this.checkSemicolonOrLineBreak(node);
+        }
         return this.checkUnnecessary(node);
     }
 

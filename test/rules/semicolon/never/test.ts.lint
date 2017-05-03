@@ -224,6 +224,9 @@ function bar(foo) { if (foo) {return true;} return false;}
                                                         ~ [0]
 
 class Foo {
+    public [foo];
+                ~ [0]
+    ['moo']
     public bar = foo;
     ['foo']
     public baz = () => true;

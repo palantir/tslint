@@ -179,6 +179,8 @@ function bar(foo) { if (foo) return true; return false }
 function bar(foo) { if (foo) {return true} return false}
 
 class Foo {
+    public [foo]
+    ['moo']
     public bar = foo;
     ['foo']
     public baz = () => true;
