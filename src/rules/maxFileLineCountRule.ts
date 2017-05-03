@@ -37,10 +37,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (lineCount: number, lineLimit: number) => {
-        let msg = `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `;
-        msg += `Consider breaking this file up into smaller parts`;
-        return msg;
+    public static FAILURE_STRING_FACTORY(lineCount: number, lineLimit: number) {
+        return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `
+             + `Consider breaking this file up into smaller parts`;
     }
 
     public isEnabled(): boolean {

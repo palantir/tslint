@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING_FACTORY(name: string) {
         return `The key '${name}' is not sorted alphabetically`;
     }
 

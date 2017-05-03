@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (identifier: string, blockScoped: boolean) => {
+    public static FAILURE_STRING_FACTORY(identifier: string, blockScoped: boolean) {
         return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${blockScoped ? "let" : "var"}'.`;
     }
 

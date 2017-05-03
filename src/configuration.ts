@@ -220,7 +220,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
 
-    const combineProperties = <T>(targetProperty: T | undefined, nextProperty: T | undefined): T => {
+    function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
@@ -237,9 +237,9 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
 
         }
-    };
+    }
 
-    const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
+    function combineMaps(target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) {
         const combined = new Map<string, Partial<IOptions>>();
         target.forEach((options, ruleName) => {
             combined.set(ruleName, options);
@@ -253,7 +253,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
         });
         return combined;
-    };
+    }
 
     const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
     const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
