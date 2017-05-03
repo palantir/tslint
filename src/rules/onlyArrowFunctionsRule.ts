@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -43,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}", "${OPTION_ALLOW_NAMED_FUNCTIONS}"]`],
+        optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -52,39 +53,43 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "non-arrow functions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new OnlyArrowFunctionsWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-class OnlyArrowFunctionsWalker extends Lint.RuleWalker {
-    private allowDeclarations: boolean;
-    private allowNamedFunctions: boolean;
+interface Options {
+    allowDeclarations: boolean;
+    allowNamedFunctions: boolean;
+}
+function parseOptions(ruleArguments: string[]): Options {
+    return {
+        allowDeclarations: hasOption(OPTION_ALLOW_DECLARATIONS),
+        allowNamedFunctions: hasOption(OPTION_ALLOW_NAMED_FUNCTIONS),
+    };
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.allowDeclarations = this.hasOption(OPTION_ALLOW_DECLARATIONS);
-        this.allowNamedFunctions = this.hasOption(OPTION_ALLOW_NAMED_FUNCTIONS);
+    function hasOption(name: string): boolean {
+        return ruleArguments.indexOf(name) !== -1;
     }
+}
 
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        if (!this.allowDeclarations && !this.allowNamedFunctions) {
-            this.failUnlessExempt(node);
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { allowDeclarations, allowNamedFunctions } } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.FunctionDeclaration:
+                if (allowDeclarations) {
+                    break;
+                }
+                // falls through
+            case ts.SyntaxKind.FunctionExpression: {
+                const f = node as ts.FunctionLikeDeclaration;
+                if (!(allowNamedFunctions && f.name) && !functionIsExempt(f)) {
+                    ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
+                }
+            }
         }
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        if (node.name === undefined || !this.allowNamedFunctions) {
-            this.failUnlessExempt(node);
-        }
-        super.visitFunctionExpression(node);
-    }
-
-    private failUnlessExempt(node: ts.FunctionLikeDeclaration) {
-        if (!functionIsExempt(node)) {
-            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
-        }
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
 
 /** Generator functions and functions using `this` are allowed. */
@@ -99,17 +104,5 @@ function hasThisParameter(node: ts.FunctionLikeDeclaration) {
 }
 
 function usesThisInBody(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.ThisKeyword || !hasNewThis(node) && ts.forEachChild(node, usesThisInBody);
-}
-
-function hasNewThis(node: ts.Node) {
-    switch (node.kind) {
-        case ts.SyntaxKind.FunctionDeclaration:
-        case ts.SyntaxKind.FunctionExpression:
-        case ts.SyntaxKind.ClassDeclaration:
-        case ts.SyntaxKind.ClassExpression:
-            return true;
-        default:
-            return false;
-    }
+    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody);
 }

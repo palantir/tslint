@@ -72,8 +72,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            "true",
-            '[true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}]',
+            true,
+            [true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}],
         ],
         type: "style",
         typescriptOnly: false,
@@ -154,14 +154,15 @@ const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
 class OrderedImportsWalker extends Lint.RuleWalker {
     private currentImportsBlock: ImportsBlock = new ImportsBlock();
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
-    private lastFix: Lint.Fix | null;
+    private lastFix: Lint.Replacement[] | null;
     private importSourcesOrderTransform: (x: string) => string;
     private namedImportsOrderTransform: (x: string) => string;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        const optionSet = this.getOptions()[0] || {};
+        interface Options { "import-sources-order": string; "named-imports-order": string; }
+        const optionSet = (this.getOptions() as [Options])[0] || {};
         this.importSourcesOrderTransform =
             TRANSFORMS[optionSet["import-sources-order"] || "case-insensitive"];
         this.namedImportsOrderTransform =
@@ -177,7 +178,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
 
         if (previousSource && compare(source, previousSource) === -1) {
-            this.lastFix = this.createFix();
+            this.lastFix = [];
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
 
@@ -202,7 +203,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
                 this.currentImportsBlock.replaceNamedImports(start, length, sortedDeclarations[i]);
             }
 
-            this.lastFix = this.createFix();
+            this.lastFix = [];
             this.addFailureFromStartToEnd(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
         }
 
@@ -224,7 +225,7 @@ class OrderedImportsWalker extends Lint.RuleWalker {
             if (this.lastFix != null) {
                 const replacement = this.currentImportsBlock.getReplacement();
                 if (replacement != null) {
-                    this.lastFix.replacements.push(replacement);
+                    this.lastFix.push(replacement);
                 }
                 this.lastFix = null;
             }

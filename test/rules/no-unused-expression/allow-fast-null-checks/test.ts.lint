@@ -106,9 +106,9 @@ fun1() + 4;
 4 + fun2(j);
 ~~~~~~~~~~~~ [0]
 (j === 0 ? fun1() : 5);
-~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                    ~ [0]
 (j === 0 ? i : fun2(j));
-~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+           ~ [0]
 a => fun2(a);
 ~~~~~~~~~~~~~ [0]
 () => {return fun1();};
@@ -133,5 +133,11 @@ function interactionHandler(e) {
     e && !e.preventDefault();
     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
+
+a && b;
+~~~~~~~ [0]
+a() && b;
+~~~~~~~~~ [0]
+a() && b();
 
 [0]: unused expression, expected an assignment or function call

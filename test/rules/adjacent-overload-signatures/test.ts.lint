@@ -140,12 +140,10 @@ class Foo {
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [All 'constructor' signatures should be adjacent]
 }
 
-// A semi-colon on its own is a statement with no name
+// A semicolon on its own is a SemicolonClassElement, but still consider them adjacent.
 class Bar {
-  private constructor() {}
-  ;
-  public bar() {}
-  ;
+    get test() { return 0; };
+    set test(v: number) {};
 }
 
 interface I {

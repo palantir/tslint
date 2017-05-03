@@ -23,11 +23,12 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
-import {Fix} from "./language/rule/rule";
+import {Replacement} from "./language/rule/rule";
 import * as Linter from "./linter";
 import {readBufferWithDetectedEncoding} from "./rules/encodingRule";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
+import {mapDefined} from "./utils";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -179,8 +180,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes = failures.filter((f) => f.hasFix()).map((f) => f.getFix()) as Fix[];
-                newFileText = Fix.applyAll(fileTextWithoutMarkup, fixes);
+                const fixes = mapDefined(failures, (f) => f.getFix());
+                newFileText = Replacement.applyFixes(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {
             fixedFileText = "";

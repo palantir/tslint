@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Avoiding them all together can help avoid tooling bugs and conflicts.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
     };

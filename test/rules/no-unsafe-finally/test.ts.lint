@@ -2,7 +2,7 @@ function() {
     try {
     } finally {
         return;
-        ~~~~~~~    [no-return-in-finally]
+        ~~~~~~~    [return]
     }
 }
 
@@ -11,7 +11,7 @@ function() {
     } catch {
     } finally {
         return 1;
-        ~~~~~~~~~    [no-return-in-finally]
+        ~~~~~~~~~    [return]
     }
 }
 
@@ -21,7 +21,7 @@ function() {
     } finally {
         {
             return 1;
-            ~~~~~~~~~    [no-return-in-finally]
+            ~~~~~~~~~    [return]
         }
     }
 }
@@ -33,7 +33,7 @@ function() {
         for (let i = 0; i < 5; ++i) {
             if (i % 2 === 0) {
                 return 1;
-                ~~~~~~~~~    [no-return-in-finally]
+                ~~~~~~~~~    [return]
             }
         }
     }
@@ -47,7 +47,7 @@ function() {
         while (i < 5) {
             if (i % 2 === 0) {
                 return i;
-                ~~~~~~~~~    [no-return-in-finally]
+                ~~~~~~~~~    [return]
             }
 
             ++i;
@@ -63,7 +63,7 @@ function() {
         do {
             if (i % 2 === 0) {
                 return i;
-                ~~~~~~~~~    [no-return-in-finally]
+                ~~~~~~~~~    [return]
             }
 
             ++i;
@@ -79,7 +79,7 @@ function() {
             } catch {
             } finally {
                 return 2;
-                ~~~~~~~~~    [no-return-in-finally]
+                ~~~~~~~~~    [return]
             }
         }
     } catch {
@@ -87,7 +87,7 @@ function() {
         for (const i of [1, 2, 3, 4, 5]) {
             if (i % 2 === 0) {
                 return 1;
-                ~~~~~~~~~    [no-return-in-finally]
+                ~~~~~~~~~    [return]
             }
         }
     }
@@ -98,7 +98,7 @@ function foo() {
         try {
         } finally {
             return 1;
-            ~~~~~~~~~    [no-return-in-finally]
+            ~~~~~~~~~    [return]
         }
     } catch {
     }
@@ -108,7 +108,7 @@ function foo() {
     try {
     } finally {
         throw "error";
-        ~~~~~~~~~~~~~~    [no-throw-in-finally]
+        ~~~~~~~~~~~~~~    [throw]
     }
 }
 
@@ -117,7 +117,7 @@ function foo() {
         try {
         } finally {
             continue;
-            ~~~~~~~~~    [no-continue-in-finally]
+            ~~~~~~~~~    [continue]
         }
     }
 }
@@ -127,7 +127,7 @@ function foo() {
         try {
         } finally {
             break;
-            ~~~~~~    [no-break-in-finally]
+            ~~~~~~    [break]
         }
     }
 }
@@ -137,7 +137,7 @@ function foo() {
         try {
         } finally {
             continue;
-            ~~~~~~~~~    [no-continue-in-finally]
+            ~~~~~~~~~    [continue]
         }
     }
 }
@@ -147,7 +147,7 @@ function foo() {
         try {
         } finally {
             continue;
-            ~~~~~~~~~    [no-continue-in-finally]
+            ~~~~~~~~~    [continue]
         }
     } while (i > 0);
 }
@@ -157,7 +157,7 @@ function foo() {
         try {
         } finally {
             continue;
-            ~~~~~~~~~    [no-continue-in-finally]
+            ~~~~~~~~~    [continue]
         }
     }
 }
@@ -167,7 +167,7 @@ function foo() {
         try {
         } finally {
             break;
-            ~~~~~~    [no-break-in-finally]
+            ~~~~~~    [break]
         }
     } while (i > 0);
 }
@@ -177,7 +177,7 @@ function foo() {
         try {
         } finally {
             break;
-            ~~~~~~    [no-break-in-finally]
+            ~~~~~~    [break]
         }
     }
 }
@@ -189,14 +189,14 @@ function foo() {
                 return;
             } finally {
                 break;
-                ~~~~~~    [no-break-in-finally]
+                ~~~~~~    [break]
             }
             break;
         default:
             try {
             } finally {
                 break;
-                ~~~~~~    [no-break-in-finally]
+                ~~~~~~    [break]
             }
             break;
     }
@@ -207,7 +207,7 @@ function foo() {
     try {
     } finally {
         break label;
-        ~~~~~~~~~~~~    [no-break-in-finally]
+        ~~~~~~~~~~~~    [break]
     }
 }
 
@@ -217,7 +217,7 @@ function foo() {
         try {
         } finally {
             break label;
-            ~~~~~~~~~~~~    [no-break-in-finally]
+            ~~~~~~~~~~~~    [break]
         }
     }
 }
@@ -230,7 +230,7 @@ function foo() {
             inner:
             for (let j = 0; j < 2; ++j) {
                 break outer;
-                ~~~~~~~~~~~~    [no-break-in-finally]
+                ~~~~~~~~~~~~    [break]
             }
         }
     }
@@ -242,7 +242,7 @@ function foo() {
         try {
         } finally {
             continue label;
-            ~~~~~~~~~~~~~~~    [no-continue-in-finally]
+            ~~~~~~~~~~~~~~~    [continue]
         }
     }
 }
@@ -255,7 +255,7 @@ function foo() {
             inner:
             for (let j = 0; j < 2; ++j) {
                 continue outer;
-                ~~~~~~~~~~~~~~~    [no-continue-in-finally]
+                ~~~~~~~~~~~~~~~    [continue]
             }
         }
     }
@@ -355,7 +355,22 @@ function() {
     }
 }
 
-[no-return-in-finally]: return statements in finally blocks are forbidden.
-[no-throw-in-finally]: throw statements in finally blocks are forbidden.
-[no-break-in-finally]: break statements in finally blocks are forbidden.
-[no-continue-in-finally]: continue statements in finally blocks are forbidden.
+function() {
+    try {
+    } finally {
+        function f() {
+            return;
+        }
+    }
+}
+
+try {
+} finally {
+    break;
+    ~~~~~~ [break]
+}
+
+[return]: 'return' statements in finally blocks are forbidden.
+[throw]: 'throw' statements in finally blocks are forbidden.
+[break]: 'break' statements in finally blocks are forbidden.
+[continue]: 'continue' statements in finally blocks are forbidden.

@@ -36,51 +36,33 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
         },
-        optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
+        optionExamples: [[true, OPTION_LINEBREAK_STYLE_LF], [true, OPTION_LINEBREAK_STYLE_CRLF]],
         type: "maintainability",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRINGS = {
-        CRLF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_CRLF}'`,
-        LF: `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`,
-    };
+    public static FAILURE_CRLF = `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_CRLF}'`;
+    public static FAILURE_LF = `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const failures: Lint.RuleFailure[] = [];
-        const scanner = ts.createScanner(
-            sourceFile.languageVersion,
-            false,
-            sourceFile.languageVariant,
-            sourceFile.getFullText(),
-        );
-
-        const ruleArguments = this.getOptions().ruleArguments;
-        const linebreakStyle = ruleArguments.length > 0 ? ruleArguments[0] : OPTION_LINEBREAK_STYLE_LF;
-        const expectLF = linebreakStyle === OPTION_LINEBREAK_STYLE_CRLF;
-        const expectedEOL = expectLF ? "\r\n" : "\n";
-        const failureString = expectLF ? Rule.FAILURE_STRINGS.CRLF : Rule.FAILURE_STRINGS.LF;
-
-        for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
-            if (token === ts.SyntaxKind.NewLineTrivia) {
-                const text = scanner.getTokenText();
-                if (text !== expectedEOL) {
-                    failures.push(this.createFailure(sourceFile, scanner, failureString));
-                }
-            }
-        }
-
-        return failures;
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments.indexOf(OPTION_LINEBREAK_STYLE_CRLF) !== -1);
     }
+}
 
-    public createFailure(sourceFile: ts.SourceFile, scanner: ts.Scanner, failure: string): Lint.RuleFailure {
-        // get the start of the current line
-        const start = sourceFile.getPositionOfLineAndCharacter(sourceFile.getLineAndCharacterOfPosition(scanner.getStartPos()).line, 0);
-        // since line endings are not visible, we simply end at the beginning of
-        // the line ending, which happens to be the start of the token.
-        const end = scanner.getStartPos();
-
-        return new Lint.RuleFailure(sourceFile, start, end, failure, this.getOptions().ruleName);
+function walk(ctx: Lint.WalkContext<boolean>) {
+    const expectedCr = ctx.options;
+    const sourceText = ctx.sourceFile.text;
+    const lineStarts = ctx.sourceFile.getLineStarts();
+    for (let i = 1; i < lineStarts.length; ++i) {
+        const lineEnd = lineStarts[i] - 1;
+        if (sourceText[lineEnd - 1] === "\r") {
+            if (!expectedCr) {
+                ctx.addFailure(lineStarts[i - 1], lineEnd - 1, Rule.FAILURE_LF, Lint.Replacement.deleteText(lineEnd - 1, 1));
+            }
+        } else if (expectedCr) {
+            ctx.addFailure(lineStarts[i - 1], lineEnd, Rule.FAILURE_CRLF, Lint.Replacement.appendText(lineEnd, "\r"));
+        }
     }
 }

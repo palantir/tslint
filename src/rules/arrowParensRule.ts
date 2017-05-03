@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [BAN_SINGLE_ARG_PARENS],
         },
-        optionExamples: [`true`, `[true, "${BAN_SINGLE_ARG_PARENS}"]`],
+        optionExamples: [true, [true, BAN_SINGLE_ARG_PARENS]],
         type: "style",
         typescriptOnly: false,
     };
@@ -65,17 +65,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     const parameter = node.parameters[0];
                     const start = parameter.getStart(ctx.sourceFile);
                     const end = parameter.end;
-                    ctx.addFailure(start, end, Rule.FAILURE_STRING_MISSING, ctx.createFix(
+                    ctx.addFailure(start, end, Rule.FAILURE_STRING_MISSING, [
                         Lint.Replacement.appendText(start, "("),
                         Lint.Replacement.appendText(end, ")"),
-                    ));
+                    ]);
                 }
             } else if (ctx.options.banSingleArgParens) {
                 const closeParen = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!;
-                ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, ctx.createFix(
+                ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, [
                     Lint.Replacement.deleteText(openParen.end - 1, 1),
                     Lint.Replacement.deleteText(closeParen.end - 1, 1),
-                ));
+                ]);
             }
         }
         return ts.forEachChild(node, cb);

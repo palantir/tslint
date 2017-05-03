@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isTypeAssertion } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -31,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             across your codebase.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
     };
@@ -40,20 +41,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoAngleBracketTypeAssertionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoAngleBracketTypeAssertionWalker extends Lint.RuleWalker {
-    public visitTypeAssertionExpression(node: ts.TypeAssertion) {
-        const { expression, type } = node;
-        const fix = this.createFix(
-            // add 'as' syntax at end
-            this.createReplacement(node.getEnd(), 0, ` as ${type.getText()}`),
-            // delete the angle bracket assertion
-            this.createReplacement(node.getStart(), expression.getStart() - node.getStart(), ""),
-        );
-        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
-        super.visitTypeAssertionExpression(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isTypeAssertion(node)) {
+            const start = node.getStart(ctx.sourceFile);
+            ctx.addFailure(start, node.end, Rule.FAILURE_STRING, [
+                Lint.Replacement.appendText(node.end, ` as ${ node.type.getText(ctx.sourceFile) }`),
+                Lint.Replacement.deleteFromTo(start, node.expression.getStart(ctx.sourceFile)),
+            ]);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

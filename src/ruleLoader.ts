@@ -20,13 +20,12 @@ import * as path from "path";
 
 import { getRelativePath } from "./configuration";
 import { showWarningOnce } from "./error";
-import { AbstractRule } from "./language/rule/abstractRule";
-import { IDisabledInterval, IOptions, IRule } from "./language/rule/rule";
+import { IDisabledInterval, IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, typeof AbstractRule | null>(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
 export interface IEnableDisablePosition {
     isEnabled: boolean;
@@ -45,8 +44,8 @@ export function loadRules(ruleOptionsList: IOptions[],
         const ruleName = ruleOptions.ruleName;
         const enableDisableRules = enableDisableRuleMap.get(ruleName);
         if (ruleOptions.ruleSeverity !== "off" || enableDisableRuleMap) {
-            const Rule: (typeof AbstractRule) | null = findRule(ruleName, rulesDirectories);
-            if (Rule == null) {
+            const Rule = findRule(ruleName, rulesDirectories);
+            if (Rule === "not-found") {
                 notFoundRules.push(ruleName);
             } else {
                 if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
@@ -54,7 +53,7 @@ export function loadRules(ruleOptionsList: IOptions[],
                 } else {
                     const ruleSpecificList = enableDisableRules || [];
                     ruleOptions.disabledIntervals = buildDisabledIntervalsFromSwitches(ruleSpecificList);
-                    rules.push(new (Rule as any)(ruleOptions));
+                    rules.push(new Rule(ruleOptions));
 
                     if (Rule.metadata && Rule.metadata.deprecationMessage) {
                         showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
@@ -72,7 +71,7 @@ export function loadRules(ruleOptionsList: IOptions[],
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (notAllowedInJsRules.length > 0) {
         const warning = dedent`
@@ -81,26 +80,26 @@ export function loadRules(ruleOptionsList: IOptions[],
             Make sure to exclude them from "jsRules" section of your tslint.json.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (rules.length === 0) {
-        console.warn("No valid rules have been specified");
+        showWarningOnce("No valid rules have been specified");
     }
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]) {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | "not-found" {
     const camelizedName = transformName(name);
-    let Rule: typeof AbstractRule | null;
+    let Rule: RuleConstructor | "not-found";
 
     // first check for core rules
     Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
 
-    if (Rule == null) {
+    if (Rule === "not-found") {
         // then check for rules within the first level of rulesDirectory
         for (const dir of arrayify(rulesDirectories)) {
             Rule = loadCachedRule(dir, camelizedName, true);
-            if (Rule != null) {
+            if (Rule !== "not-found") {
                 break;
             }
         }
@@ -109,7 +108,7 @@ export function findRule(name: string, rulesDirectories?: string | string[]) {
     return Rule;
 }
 
-function transformName(name: string) {
+function transformName(name: string): string {
     // camelize strips out leading and trailing underscores and dashes, so make sure they aren't passed to camelize
     // the regex matches the groups (leading underscores and dashes)(other characters)(trailing underscores and dashes)
     const nameMatch = name.match(/^([-_]*)(.*?)([-_]*)$/);
@@ -123,18 +122,18 @@ function transformName(name: string) {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string) {
+function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath);
-        if (ruleModule && ruleModule.Rule) {
+        const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
+        if (ruleModule !== undefined) {
             return ruleModule.Rule;
         }
     }
-    return undefined;
+    return "not-found";
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false) {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | "not-found" {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
@@ -153,8 +152,8 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
         }
     }
 
-    let Rule: typeof AbstractRule | null = null;
-    if (absolutePath != null) {
+    let Rule: RuleConstructor | "not-found" = "not-found";
+    if (absolutePath !== undefined) {
         Rule = loadRule(absolutePath, ruleName);
     }
     cachedRules.set(fullPath, Rule);
