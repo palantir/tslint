@@ -104,8 +104,10 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
 
             switch (node.type.kind) {
                 case ts.SyntaxKind.BooleanKeyword:
-                    if (node.initializer.kind === ts.SyntaxKind.TrueKeyword || node.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-                        failure = "boolean";
+                    switch (node.initializer.kind) {
+                        case ts.SyntaxKind.TrueKeyword:
+                        case ts.SyntaxKind.FalseKeyword:
+                            failure = "boolean";
                     }
                     break;
                 case ts.SyntaxKind.NumberKeyword:

@@ -113,8 +113,10 @@ function getExcludedRanges(sourceFile: ts.SourceFile, options: Options): ts.Text
         if (kind >= ts.SyntaxKind.FirstTemplateToken && kind <= ts.SyntaxKind.LastTemplateToken) {
             intervals.push(range);
         } else if (options.ignoreComments) {
-            if (kind === ts.SyntaxKind.SingleLineCommentTrivia || kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-                intervals.push(range);
+            switch (kind) {
+                case ts.SyntaxKind.SingleLineCommentTrivia:
+                case ts.SyntaxKind.MultiLineCommentTrivia:
+                    intervals.push(range);
             }
         } else if (options.ignoreJsDoc) {
             if (isJsDoc(text, kind, range)) {

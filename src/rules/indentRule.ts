@@ -110,29 +110,33 @@ class IndentWalker extends Lint.RuleWalker {
 
                 // scan until we reach end of line, skipping over template strings
                 while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
-                        // template string without expressions - skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
-                        // find end of template string containing expressions...
-                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                            scanType = scanner.scan();
-                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
-                                scanType = scanner.reScanTemplateToken();
+                    switch (scanType) {
+                        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+                            // template string without expressions - skip past it
+                            endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                            break;
+                        case ts.SyntaxKind.TemplateHead:
+                            // find end of template string containing expressions...
+                            while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                                scanType = scanner.scan();
+                                if (scanType === ts.SyntaxKind.CloseBraceToken) {
+                                    scanType = scanner.reScanTemplateToken();
+                                }
                             }
-                        }
-                        // ... and skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                            // ... and skip past it
+                            endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                            break;
                     }
                     scanType = scanner.scan();
                 }
             }
 
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-                // ignore lines that have comments before the first token
-                continue;
+            switch (currentScannedType) {
+                case ts.SyntaxKind.SingleLineCommentTrivia:
+                case ts.SyntaxKind.MultiLineCommentTrivia:
+                case ts.SyntaxKind.NewLineTrivia:
+                    // ignore lines that have comments before the first token
+                    continue;
             }
 
             if (fullLeadingWhitespace.match(this.regExp)) {
