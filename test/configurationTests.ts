@@ -297,8 +297,8 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
 
             const expectedConfig = getEmptyConfig();
             expectedConfig.rules.set("always-fail", { ruleSeverity: "off" });

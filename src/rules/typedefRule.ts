@@ -112,16 +112,16 @@ class TypedefWalker extends Lint.RuleWalker {
         for (const property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.PropertyAssignment:
-                    this.visitPropertyAssignment(property as ts.PropertyAssignment);
+                    this.visitPropertyAssignment(property);
                     break;
                 case ts.SyntaxKind.MethodDeclaration:
-                    this.visitMethodDeclaration(property as ts.MethodDeclaration);
+                    this.visitMethodDeclaration(property);
                     break;
                 case ts.SyntaxKind.GetAccessor:
-                    this.visitGetAccessor(property as ts.AccessorDeclaration);
+                    this.visitGetAccessor(property);
                     break;
                 case ts.SyntaxKind.SetAccessor:
-                    this.visitSetAccessor(property as ts.AccessorDeclaration);
+                    this.visitSetAccessor(property);
                     break;
                 default:
                     break;

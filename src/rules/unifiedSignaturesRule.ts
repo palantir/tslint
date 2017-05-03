@@ -65,7 +65,7 @@ class Walker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const { body } = node;
         if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
-            this.checkStatements((body as ts.ModuleBlock).statements);
+            this.checkStatements(body.statements);
         }
         super.visitModuleDeclaration(node);
     }

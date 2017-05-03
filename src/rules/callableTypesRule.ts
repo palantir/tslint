@@ -72,7 +72,7 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
     if (node.heritageClauses.length !== 1) {
         return false;
     }
-    const expr = node.heritageClauses[0].types![0].expression;
+    const expr = node.heritageClauses[0].types[0].expression;
     return isIdentifier(expr) && expr.text === "Function";
 }
 

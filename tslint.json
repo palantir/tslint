@@ -52,7 +52,6 @@
     "no-require-imports": false,
     "no-unbound-method": false,
     "no-unnecessary-callback-wrapper": false,
-    "no-unnecessary-type-assertion": false,
     "no-unnecessary-qualifier": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
@@ -82,7 +81,7 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],    
+    ],
     "no-console": {
       "options": ["log"]
     },

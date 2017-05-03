@@ -372,7 +372,7 @@ function showLocation(n: Location): string {
         case ts.SyntaxKind.DoStatement:
             return "'do-while' condition";
         case ts.SyntaxKind.BinaryExpression:
-            return `operand for the '${binaryBooleanExpressionKind(n as ts.BinaryExpression)}' operator`;
+            return `operand for the '${binaryBooleanExpressionKind(n)}' operator`;
     }
 }
 
