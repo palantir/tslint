@@ -110,22 +110,19 @@ class IndentWalker extends Lint.RuleWalker {
 
                 // scan until we reach end of line, skipping over template strings
                 while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                    switch (scanType) {
-                        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-                            // template string without expressions - skip past it
-                            endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                            break;
-                        case ts.SyntaxKind.TemplateHead:
-                            // find end of template string containing expressions...
-                            while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                                scanType = scanner.scan();
-                                if (scanType === ts.SyntaxKind.CloseBraceToken) {
-                                    scanType = scanner.reScanTemplateToken();
-                                }
+                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+                        // template string without expressions - skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
+                        // find end of template string containing expressions...
+                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                            scanType = scanner.scan();
+                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
+                                scanType = scanner.reScanTemplateToken();
                             }
-                            // ... and skip past it
-                            endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                            break;
+                        }
+                        // ... and skip past it
+                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
                     }
                     scanType = scanner.scan();
                 }
