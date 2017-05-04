@@ -40,7 +40,6 @@
     // TODO: Enable these
     "completed-docs": false,
     "cyclomatic-complexity": false,
-    "deprecation": false,
     "no-any": false,
     "no-boolean-literal-compare": false,
     "no-inferrable-types": false,
@@ -82,7 +81,7 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],    
+    ],
     "no-console": {
       "options": ["log"]
     },

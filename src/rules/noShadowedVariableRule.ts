@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable deprecation
+// (https://github.com/palantir/tslint/pull/2598)
+
 import * as ts from "typescript";
 
 import * as Lint from "../index";
