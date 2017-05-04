@@ -339,44 +339,58 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
 
 /** Exclude leading positions that would lead to scanning for trivia inside JsxText */
 function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
-    if (tokenKind === ts.SyntaxKind.JsxText) {
-        return false; // there is no trivia before JsxText
+    switch (tokenKind) {
+        case ts.SyntaxKind.JsxText:
+            return false; // there is no trivia before JsxText
+
+        case ts.SyntaxKind.OpenBraceToken:
+            // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+        case ts.SyntaxKind.LessThanToken:
+            switch (parent.kind) {
+                case ts.SyntaxKind.JsxClosingElement:
+                    return false; // would be inside the element body
+                case ts.SyntaxKind.JsxOpeningElement:
+                case ts.SyntaxKind.JsxSelfClosingElement:
+                    // there can only be leading trivia if we are at the end of the top level element
+                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                default:
+                    return true;
+            }
+
+        default:
+            return true;
     }
-    if (tokenKind === ts.SyntaxKind.OpenBraceToken) {
-        // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
-    }
-    if (tokenKind === ts.SyntaxKind.LessThanToken) {
-        if (parent.kind === ts.SyntaxKind.JsxClosingElement) {
-            return false; // would be inside the element body
-        }
-        if (parent.kind === ts.SyntaxKind.JsxOpeningElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
-            // there can only be leading trivia if we are at the end of the top level element
-            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
-        }
-    }
-    return true;
 }
 
 /** Exclude trailing positions that would lead to scanning for trivia inside JsxText */
 function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
-    if (tokenKind === ts.SyntaxKind.JsxText) {
-        return false; // there is no trivia after JsxText
+    switch (tokenKind) {
+        case ts.SyntaxKind.JsxText:
+            // there is no trivia after JsxText
+            return false;
+
+        case ts.SyntaxKind.CloseBraceToken:
+            // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+        case ts.SyntaxKind.GreaterThanToken:
+            switch (parent.kind) {
+                case ts.SyntaxKind.JsxOpeningElement:
+                    return false; // would be inside the element
+                case ts.SyntaxKind.JsxClosingElement:
+                case ts.SyntaxKind.JsxSelfClosingElement:
+                    // there can only be trailing trivia if we are at the end of the top level element
+                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+                default:
+                    return true;
+            }
+
+        default:
+            return true;
     }
-    if (tokenKind === ts.SyntaxKind.CloseBraceToken) {
-        // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
-    }
-    if (tokenKind === ts.SyntaxKind.GreaterThanToken) {
-        if (parent.kind === ts.SyntaxKind.JsxOpeningElement) {
-            return false; // would be inside the element
-        }
-        if (parent.kind === ts.SyntaxKind.JsxClosingElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
-            // there can only be trailing trivia if we are at the end of the top level element
-            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
-        }
-    }
-    return true;
 }
 
 /**

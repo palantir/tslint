@@ -201,33 +201,41 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     }
 
     private handleExpression(node: ts.Expression): void {
-        if (node.kind === ts.SyntaxKind.Identifier) {
-            this.scope.reassigned.add((node as ts.Identifier).text);
-        } else if (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
-            return this.handleExpression((node as ts.ParenthesizedExpression).expression);
-        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
-            for (const element of (node as ts.ArrayLiteralExpression).elements) {
-                if (element.kind === ts.SyntaxKind.SpreadElement) {
-                    this.handleExpression((element as ts.SpreadElement).expression);
-                } else {
-                    this.handleExpression(element);
-                }
-            }
-        } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            for (const property of (node as ts.ObjectLiteralExpression).properties) {
-                if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
-                    this.scope.reassigned.add(property.name.text);
-                } else if (property.kind === ts.SyntaxKind.SpreadAssignment) {
-                    if (property.name !== undefined) {
-                        this.scope.reassigned.add((property.name as ts.Identifier).text);
+        switch (node.kind) {
+            case ts.SyntaxKind.Identifier:
+                this.scope.reassigned.add((node as ts.Identifier).text);
+                break;
+            case ts.SyntaxKind.ParenthesizedExpression:
+                this.handleExpression((node as ts.ParenthesizedExpression).expression);
+                break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                for (const element of (node as ts.ArrayLiteralExpression).elements) {
+                    if (element.kind === ts.SyntaxKind.SpreadElement) {
+                        this.handleExpression((element as ts.SpreadElement).expression);
                     } else {
-                        // handle `...(variable)`
-                        this.handleExpression(property.expression!);
+                        this.handleExpression(element);
                     }
-                } else {
-                    this.handleExpression((property as ts.PropertyAssignment).initializer);
                 }
-            }
+                break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                for (const property of (node as ts.ObjectLiteralExpression).properties) {
+                    switch (property.kind) {
+                        case ts.SyntaxKind.ShorthandPropertyAssignment:
+                            this.scope.reassigned.add(property.name.text);
+                            break;
+                        case ts.SyntaxKind.SpreadAssignment:
+                            if (property.name !== undefined) {
+                                this.scope.reassigned.add((property.name as ts.Identifier).text);
+                            } else {
+                                // handle `...(variable)`
+                                this.handleExpression(property.expression!);
+                            }
+                            break;
+                        default:
+                            this.handleExpression((property as ts.PropertyAssignment).initializer);
+                    }
+                }
+                break;
         }
     }
 

@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             An optional object with the property '${OPTION_MIN_CASES}'.
             This is the number cases needed before a switch statement is recommended.
-            Defaults to 2.`,
+            Defaults to 3.`,
         options: {
             type: "object",
             properties: {
@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use a switch statement instead of using multiple '===' checks.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let minCases = 2;
+        let minCases = 3;
         if (this.ruleArguments.length) {
             const obj = this.ruleArguments[0] as { "min-cases": number };
             minCases = obj[OPTION_MIN_CASES];
