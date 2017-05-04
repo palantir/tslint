@@ -1,10 +1,12 @@
 ---
 layout: page
-title: Rule Flags
+title: TSLint rule flags
 permalink: /usage/rule-flags/
 ---
 
-You can enable/disable TSLint or a subset of rules within a file with the following comment rule flags:
+### Comment flags in source code
+
+In addition to [global configuration][0], you may also enable/disable linting or a subset of lint rules within a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
 * `/* tslint:enable */` - Enable all rules for the rest of the file
@@ -42,3 +44,5 @@ const point = {
 
 console.log(validRange(range));
 ```
+
+[0]: {{site.baseurl | append: "/configuration"}}

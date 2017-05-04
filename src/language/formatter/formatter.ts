@@ -46,6 +46,10 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
+export interface FormatterConstructor {
+    new(): IFormatter;
+}
+
 export interface IFormatter {
     /**
      * Formats linter results

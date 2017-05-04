@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isImportDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -28,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Does nothing for anonymous default exports.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -39,31 +40,24 @@ export class Rule extends Lint.Rules.TypedRule {
         return `Expected import '${importName}' to match the default export '${exportName}'.`;
     }
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        for (const statement of node.statements) {
-            if (statement.kind !== ts.SyntaxKind.ImportDeclaration) {
-                continue;
-            }
-
-            const { importClause } = statement as ts.ImportDeclaration;
-            if (importClause && importClause.name) {
-                this.checkDefaultImport(importClause.name);
-            }
+function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+    for (const statement of ctx.sourceFile.statements) {
+        if (!isImportDeclaration(statement) ||
+            statement.importClause === undefined || statement.importClause.name === undefined) {
+            continue;
         }
-    }
-
-    private checkDefaultImport(defaultImport: ts.Identifier) {
-        const { declarations } = this.getTypeChecker().getAliasedSymbol(
-            this.getTypeChecker().getSymbolAtLocation(defaultImport));
-        const name = declarations && declarations[0] && declarations[0].name;
-        if (name && name.kind === ts.SyntaxKind.Identifier && defaultImport.text !== name.text) {
-            this.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
+        const defaultImport = statement.importClause.name;
+        const {declarations} = tc.getAliasedSymbol(tc.getSymbolAtLocation(defaultImport));
+        if (declarations !== undefined && declarations.length !== 0) {
+            const [{name}] = declarations;
+            if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && name.text !== defaultImport.text) {
+                ctx.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
+            }
         }
     }
 }

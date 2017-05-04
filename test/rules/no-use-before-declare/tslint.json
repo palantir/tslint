@@ -1,8 +1,8 @@
 {
-  "rules": {
-    "no-use-before-declare": true
+  "linterOptions": {
+    "typeCheck": true
   },
-  "jsRules": {
+  "rules": {
     "no-use-before-declare": true
   }
 }

@@ -147,7 +147,7 @@ export class Runner {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
-            program = Linter.createProgram(this.options.project, path.dirname(this.options.project));
+            program = Linter.createProgram(this.options.project);
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }
@@ -193,8 +193,8 @@ export class Runner {
         try {
             this.processFiles(onComplete, files, program);
         } catch (error) {
-            if (error.name === FatalError.NAME) {
-                console.error(error.message);
+            if ((error as FatalError).name === FatalError.NAME) {
+                console.error((error as FatalError).message);
                 return onComplete(1);
             }
             // rethrow unhandled error

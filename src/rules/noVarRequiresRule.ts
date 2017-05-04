@@ -24,13 +24,13 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-var-requires",
-        description: "Disallows the use of require statements except in import statements.",
+        description: "Disallows the use of 'require()' except in import statements.",
         descriptionDetails: Lint.Utils.dedent`
             In other words, the use of forms such as \`var module = require("module")\` are banned.
             Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -38,8 +38,8 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
     public static FAILURE_STRING = "Prefer to use an 'import' statement instead of 'require()'.";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, languageService: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, languageService.getProgram().getTypeChecker()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

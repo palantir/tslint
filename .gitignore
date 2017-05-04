@@ -8,6 +8,7 @@
 /lib/
 /test/executable/tslint.json
 node_modules/
+!test/rules/**/node_modules
 tscommand*.txt
 npm-debug.log
 # created by grunt-ts for faster compiling
@@ -19,3 +20,6 @@ typings/.basedir.ts
 
 docs/_data/rules.json
 docs/rules/*/index.html
+
+/coverage/
+/.nyc_output

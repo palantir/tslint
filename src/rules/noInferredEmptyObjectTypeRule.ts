@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Disallow type inference of {} (empty object type) at function and constructor call sites",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -36,8 +36,8 @@ export class Rule extends Lint.Rules.TypedRule {
     public static EMPTY_INTERFACE_INSTANCE = "Explicit type parameter needs to be provided to the constructor";
     public static EMPTY_INTERFACE_FUNCTION = "Explicit type parameter needs to be provided to the function call";
 
-    public applyWithProgram(srcFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(srcFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(sourceFile, this.getOptions(), program));
     }
 }
 
@@ -52,9 +52,9 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     public visitNewExpression(node: ts.NewExpression): void {
         const nodeTypeArgs = node.typeArguments;
         let isObjectReference: (o: ts.TypeReference) => boolean;
-        if ((ts as any).TypeFlags.Reference != null) {
+        if ((ts.TypeFlags as any).Reference != null) {
             // typescript 2.0.x specific code
-            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts as any).TypeFlags.Reference);
+            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts.TypeFlags as any).Reference as ts.TypeFlags);
         } else {
             isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, ts.TypeFlags.Object);
         }
@@ -84,13 +84,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        let isAnonymous: boolean;
-        if (ts.ObjectFlags == null) {
-            // typescript 2.0.x specific code
-            isAnonymous = isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
-        } else {
-            isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
-        }
+        const isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
         let hasProblematicCallSignatures = false;
         const hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
         const hasNumberIndexType = objType.getNumberIndexType() !== undefined;

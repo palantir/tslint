@@ -39,12 +39,24 @@ export function objectify(arg: any): any {
     }
 }
 
+export function hasOwnProperty(arg: {}, key: string): boolean {
+    return Object.prototype.hasOwnProperty.call(arg, key) as boolean;
+}
+
 /**
  * Replace hyphens in a rule name by upper-casing the letter after them.
  * E.g. "foo-bar" -> "fooBar"
  */
 export function camelize(stringWithHyphens: string): string {
-    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => nextLetter.toUpperCase());
+    return stringWithHyphens.replace(/-(.)/g, (_, nextLetter) => (nextLetter as string).toUpperCase());
+}
+
+export function isUpperCase(str: string): boolean {
+    return str === str.toUpperCase();
+}
+
+export function isLowerCase(str: string): boolean {
+    return str === str.toLowerCase();
 }
 
 /**
@@ -80,7 +92,7 @@ export function stripComments(content: string): string {
      * Fourth matches line comments
      */
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
-    const result = content.replace(regexp, (match, _m1, _m2, m3, m4) => {
+    const result = content.replace(regexp, (match: string, _m1: string, _m2: string, m3: string, m4: string) => {
         // Only one of m1, m2, m3, m4 matches
         if (m3) {
             // A block comment. Replace with nothing
@@ -113,4 +125,25 @@ export type Equal<T> = (a: T, b: T) => boolean;
 
 export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
     return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
+}
+
+/** Returns an array that is the concatenation of all output arrays. */
+export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
+    const out = [];
+    for (const input of inputs) {
+        out.push(...getOutputs(input));
+    }
+    return out;
+}
+
+/** Returns an array of all outputs that are not `undefined`. */
+export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
+    const out = [];
+    for (const input of inputs) {
+        const output = getOutput(input);
+        if (output !== undefined) {
+            out.push(output);
+        }
+    }
+    return out;
 }

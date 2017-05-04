@@ -34,8 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { createLanguageService, wrapProgram } from "./language/languageServiceHost";
-import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
+import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -44,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.5.1";
+    public static VERSION = "5.1.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -53,7 +52,6 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private languageService: ts.LanguageService;
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -93,10 +91,6 @@ class Linter {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
-
-        if (program) {
-            this.languageService = wrapProgram(program);
-        }
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
@@ -110,16 +104,8 @@ class Linter {
         if (this.options.fix) {
             for (const rule of enabledRules) {
                 const ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => !!f) as Fix[];
-                source = fs.readFileSync(fileName, { encoding: "utf-8" });
-                if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleFailures);
-                    source = Fix.applyAll(source, fixes);
-                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
-
-                    // reload AST if file is modified
-                    sourceFile = this.getSourceFile(fileName, source);
-                }
+                source = this.applyFixes(fileName, source, ruleFailures);
+                sourceFile = this.getSourceFile(fileName, source);
                 fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
@@ -135,19 +121,20 @@ class Linter {
                 }
             }
         }
-        this.failures = this.failures.concat(fileFailures);
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map((rule) => {
             return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
         }));
-        for (const failure of this.failures) {
+        for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
             if (severity === undefined) {
-                throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
+                throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
             }
             failure.setRuleSeverity(severity);
         }
+
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
@@ -175,13 +162,45 @@ class Linter {
         };
     }
 
+    // Applies fixes to the files where the failures are reported.
+    // Returns the content of the source file which AST needs to be reloaded.
+    protected applyFixes(sourceFilePath: string, sourceContent: string, ruleFailures: RuleFailure[]) {
+      const fixesPerFile: {[file: string]: Fix[]} = ruleFailures
+          .reduce((accum: {[file: string]: Fix[]}, c) => {
+              const currentFileName = c.getFileName();
+              const fix = c.getFix();
+              if (fix) {
+                  accum[currentFileName] = accum[currentFileName] || [];
+                  accum[currentFileName].push(fix);
+              }
+              return accum;
+          }, {});
+
+      const hasFixes = Object.keys(fixesPerFile).length > 0;
+      let result = sourceContent;
+
+      if (hasFixes) {
+          this.fixes = this.fixes.concat(ruleFailures);
+          Object.keys(fixesPerFile).forEach((currentFileName: string) => {
+              const fixesForFile = fixesPerFile[currentFileName];
+              let source = fs.readFileSync(currentFileName, { encoding: "utf-8" });
+              source = Replacement.applyFixes(source, fixesForFile);
+              fs.writeFileSync(currentFileName, source, { encoding: "utf-8" });
+              if (sourceFilePath === currentFileName) {
+                  result = source;
+              }
+          });
+      }
+      return result;
+    }
+
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {
         let ruleFailures: RuleFailure[] = [];
         try {
             if (this.program && isTypedRule(rule)) {
-                ruleFailures = rule.applyWithProgram(sourceFile, this.languageService);
+                ruleFailures = rule.applyWithProgram(sourceFile, this.program);
             } else {
-                ruleFailures = rule.apply(sourceFile, this.languageService);
+                ruleFailures = rule.apply(sourceFile);
             }
         } catch (error) {
             if (isError(error)) {
@@ -214,25 +233,22 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        let sourceFile: ts.SourceFile;
         if (this.program) {
-            sourceFile = this.program.getSourceFile(fileName);
+            const sourceFile = this.program.getSourceFile(fileName);
+            if (sourceFile === undefined) {
+                const INVALID_SOURCE_ERROR = dedent`
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                `;
+                throw new Error(INVALID_SOURCE_ERROR);
+            }
             // check if the program has been type checked
-            if (sourceFile && !("resolvedModules" in sourceFile)) {
+            if (!("resolvedModules" in sourceFile)) {
                 throw new Error("Program must be type checked before linting");
             }
+            return sourceFile;
         } else {
-            sourceFile = utils.getSourceFile(fileName, source);
-            this.languageService = createLanguageService(fileName, source);
+            return utils.getSourceFile(fileName, source);
         }
-
-        if (sourceFile === undefined) {
-            const INVALID_SOURCE_ERROR = dedent`
-                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
-            `;
-            throw new Error(INVALID_SOURCE_ERROR);
-        }
-        return sourceFile;
     }
 
     private containsRule(rules: RuleFailure[], rule: RuleFailure) {

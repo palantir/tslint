@@ -10,17 +10,5 @@
       "check-type",
       "check-typecast"
     ]
-  },
-  "jsRules": {
-    "whitespace": [true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-module",
-      "check-preblock",
-      "check-separator",
-      "check-type",
-      "check-typecast"
-    ]
   }
 }

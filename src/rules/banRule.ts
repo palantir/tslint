@@ -36,8 +36,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                 maxLength: 3,
             },
         },
-        optionExamples: [`[true, ["someGlobalMethod"], ["someObject", "someFunction"],
-                          ["someObject", "otherFunction", "Optional explanation"]]`],
+        optionExamples: [
+            [
+                true,
+                ["someGlobalMethod"],
+                ["someObject", "someFunction"],
+                ["someObject", "otherFunction", "Optional explanation"],
+            ],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -50,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
-        const functionsToBan = options.ruleArguments;
+        const functionsToBan = options.ruleArguments as string[][];
         if (functionsToBan !== undefined) {
             functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
         }

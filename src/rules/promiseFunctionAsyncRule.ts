@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -40,8 +40,8 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "functions that return promises must be async";
 
-    public applyWithProgram(sourceFile: ts.SourceFile, langSvc: ts.LanguageService): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions(), langSvc.getProgram()));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions(), program));
     }
 }
 
