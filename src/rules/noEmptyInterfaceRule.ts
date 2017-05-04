@@ -46,7 +46,6 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (isInterfaceDeclaration(node) &&
             node.members.length === 0 &&
             (node.heritageClauses === undefined ||
-             node.heritageClauses[0].types === undefined ||
              // allow interfaces that extend 2 or more interfaces
              node.heritageClauses[0].types.length < 2)) {
             return ctx.addFailureAtNode(node.name, node.heritageClauses ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
