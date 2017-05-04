@@ -8,13 +8,14 @@
     "newline-before-return": false,
     "no-parameter-properties": false,
     "no-unused-variable": false,
-
     // TODO: Enable stricter options for these
-    "align": [
-        true,
-        "parameters",
-        "statements"
-    ],
+    "align": {
+        "options": [
+            "parameters",
+            "statements",
+            "members"
+        ]
+    },
     "arrow-return-shorthand": true,
     "comment-format": [
         true,
