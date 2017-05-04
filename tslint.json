@@ -68,8 +68,7 @@
 
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"],
-      ["Object", "assign"]
+      ["it", "only"]
     ],
 
     "interface-name": false,
