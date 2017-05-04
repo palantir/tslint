@@ -56,11 +56,7 @@ class Linter {
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
-    public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
-        if (projectDirectory === undefined) {
-            projectDirectory = path.dirname(configFile);
-        }
-
+    public static createProgram(configFile: string, projectDirectory: string = path.dirname(configFile)): ts.Program {
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
         const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
