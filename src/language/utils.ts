@@ -42,7 +42,12 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  * which indicates this is a "let" or "const".
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
-    return isBlockScopedVariableDeclarationList(node.kind === ts.SyntaxKind.VariableDeclaration ? node.parent! : node.declarationList);
+    if (node.kind === ts.SyntaxKind.VariableDeclaration) {
+        const parent = node.parent!;
+        return parent.kind === ts.SyntaxKind.CatchClause || isBlockScopedVariableDeclarationList(parent);
+    } else {
+        return isBlockScopedVariableDeclarationList(node.declarationList);
+    }
 }
 
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {

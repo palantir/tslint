@@ -20,12 +20,12 @@ import * as path from "path";
 
 import { getRelativePath } from "./configuration";
 import { showWarningOnce } from "./error";
-import { IOptions, IRule, RuleStatic } from "./language/rule/rule";
+import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
-const cachedRules = new Map<string, RuleStatic | null>(); // null indicates that the rule was not found
+const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
 export function loadRules(ruleOptionsList: IOptions[],
                           rulesDirectories?: string | string[],
@@ -66,7 +66,7 @@ export function loadRules(ruleOptionsList: IOptions[],
             If TSLint was recently upgraded, you may have old rules configured which need to be cleaned up.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (notAllowedInJsRules.length > 0) {
         const warning = dedent`
@@ -75,22 +75,24 @@ export function loadRules(ruleOptionsList: IOptions[],
             Make sure to exclude them from "jsRules" section of your tslint.json.
         `;
 
-        console.warn(warning);
+        showWarningOnce(warning);
     }
     if (rules.length === 0) {
-        console.warn("No valid rules have been specified");
+        showWarningOnce("No valid rules have been specified");
     }
     return rules;
 }
 
-export function findRule(name: string, rulesDirectories?: string | string[]): RuleStatic | undefined {
+export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
     const camelizedName = transformName(name);
     // first check for core rules
-    return loadCachedRule(CORE_RULES_DIRECTORY, camelizedName) ||
+    const Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
+    return Rule !== undefined ? Rule :
+        // then check for rules within the first level of rulesDirectory
         find(arrayify(rulesDirectories), (dir) => loadCachedRule(dir, camelizedName, true));
 }
 
-function transformName(name: string) {
+function transformName(name: string): string {
     // camelize strips out leading and trailing underscores and dashes, so make sure they aren't passed to camelize
     // the regex matches the groups (leading underscores and dashes)(other characters)(trailing underscores and dashes)
     const nameMatch = name.match(/^([-_]*)(.*?)([-_]*)$/);
@@ -104,23 +106,23 @@ function transformName(name: string) {
  * @param directory - An absolute path to a directory of rules
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
-function loadRule(directory: string, ruleName: string): RuleStatic | null {
+function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
     const fullPath = path.join(directory, ruleName);
     if (fs.existsSync(fullPath + ".js")) {
-        const ruleModule = require(fullPath);
-        if (ruleModule && ruleModule.Rule) {
+        const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
+        if (ruleModule !== undefined) {
             return ruleModule.Rule;
         }
     }
-    return null;
+    return "not-found";
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleStatic | undefined {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | undefined {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);
     if (cachedRule !== undefined) {
-        return cachedRule === null ? undefined : cachedRule;
+        return cachedRule === "not-found" ? undefined : cachedRule;
     }
 
     // get absolute path
@@ -132,7 +134,8 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
         }
     }
 
-    const Rule = absolutePath === undefined ? null : loadRule(absolutePath, ruleName);
+    const Rule = absolutePath === undefined ? "not-found" : loadRule(absolutePath, ruleName);
+
     cachedRules.set(fullPath, Rule);
-    return Rule === null ? undefined : Rule;
+    return Rule === "not-found" ? undefined : Rule;
 }

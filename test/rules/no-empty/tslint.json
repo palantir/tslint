@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-empty": true
-  },
-  "jsRules": {
-    "no-empty": true
   }
 }

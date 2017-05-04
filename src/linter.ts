@@ -116,7 +116,7 @@ class Linter {
         for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
             if (severity === undefined) {
-                throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
+                throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
             }
             failure.setRuleSeverity(severity);
         }

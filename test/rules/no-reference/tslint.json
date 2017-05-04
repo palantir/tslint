@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-reference": true
-  },
-  "jsRules": {
-    "no-reference": true
   }
 }

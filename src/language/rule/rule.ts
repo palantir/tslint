@@ -24,6 +24,11 @@ export interface RuleStatic {
     new(options: IOptions): IRule;
 }
 
+export interface RuleConstructor {
+    metadata: IRuleMetadata;
+    new(options: IOptions): IRule;
+}
+
 export interface IRuleMetadata {
     /**
      * The kebab-case name of the rule.
@@ -113,7 +118,7 @@ export interface ITypedRule extends IRule {
 export interface IRuleFailureJson {
     endPosition: IRuleFailurePositionJson;
     failure: string;
-    fix?: Fix;
+    fix?: FixJson;
     name: string;
     ruleSeverity: string;
     ruleName: string;
@@ -130,6 +135,11 @@ export function isTypedRule(rule: IRule): rule is ITypedRule {
     return "applyWithProgram" in rule;
 }
 
+export interface ReplacementJson {
+    innerStart: number;
+    innerLength: number;
+    innerText: string;
+}
 export class Replacement {
     public static applyFixes(content: string, fixes: Fix[]): string {
         return this.applyAll(content, flatMap(fixes, arrayify));
@@ -161,27 +171,24 @@ export class Replacement {
         return new Replacement(start, 0, text);
     }
 
-    constructor(private innerStart: number, private innerLength: number, private innerText: string) {
-    }
-
-    get start() {
-        return this.innerStart;
-    }
-
-    get length() {
-        return this.innerLength;
-    }
+    constructor(readonly start: number, readonly length: number, readonly text: string) {}
 
     get end() {
-        return this.innerStart + this.innerLength;
-    }
-
-    get text() {
-        return this.innerText;
+        return this.start + this.length;
     }
 
     public apply(content: string) {
         return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+    }
+
+    public toJson(): ReplacementJson {
+        // tslint:disable object-literal-sort-keys
+        return {
+            innerStart: this.start,
+            innerLength: this.length,
+            innerText: this.text,
+        };
+        // tslint:enable object-literal-sort-keys
     }
 }
 
@@ -216,6 +223,7 @@ export class RuleFailurePosition {
 }
 
 export type Fix = Replacement | Replacement[];
+export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
     private fileName: string;
@@ -282,7 +290,7 @@ export class RuleFailure {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
-            fix: this.fix,
+            fix: this.fix === undefined ? undefined : Array.isArray(this.fix) ? this.fix.map((r) => r.toJson()) : this.fix.toJson(),
             name: this.fileName,
             ruleName: this.ruleName,
             ruleSeverity: this.ruleSeverity.toUpperCase(),

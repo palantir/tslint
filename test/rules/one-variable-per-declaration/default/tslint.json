@@ -1,8 +1,5 @@
 {
   "rules": {
     "one-variable-per-declaration": true
-  },
-  "jsRules": {
-    "one-variable-per-declaration": true
   }
 }

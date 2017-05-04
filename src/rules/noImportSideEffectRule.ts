@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import with explicit side-effect";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1];
+        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string };
         const ignorePattern = patternConfig && new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
         return this.applyWithFunction(sourceFile, walk, ignorePattern);
     }

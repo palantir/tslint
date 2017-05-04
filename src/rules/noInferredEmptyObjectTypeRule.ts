@@ -52,9 +52,9 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     public visitNewExpression(node: ts.NewExpression): void {
         const nodeTypeArgs = node.typeArguments;
         let isObjectReference: (o: ts.TypeReference) => boolean;
-        if ((ts as any).TypeFlags.Reference != null) {
+        if ((ts.TypeFlags as any).Reference != null) {
             // typescript 2.0.x specific code
-            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts as any).TypeFlags.Reference);
+            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts.TypeFlags as any).Reference as ts.TypeFlags);
         } else {
             isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, ts.TypeFlags.Object);
         }
@@ -82,13 +82,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        let isAnonymous: boolean;
-        if (ts.ObjectFlags == null) {
-            // typescript 2.0.x specific code
-            isAnonymous = isTypeFlagSet(objType, (ts as any).TypeFlags.Anonymous);
-        } else {
-            isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
-        }
+        const isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
         let hasProblematicCallSignatures = false;
         const hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
         const hasNumberIndexType = objType.getNumberIndexType() !== undefined;

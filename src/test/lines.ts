@@ -31,7 +31,7 @@ const multilineErrorRegex = /^\s*(~+|~nil)$/;
 // "    ~~~~~~~~~   [some error message]"
 const endErrorRegex = /^\s*(~+|~nil)\s*\[(.+)\]\s*$/;
 // "[shortcut]: full messages goes here!!  "
-const messageSubstitutionRegex = /^\[([\w\-\_]+?)]: \s*(.+?)\s*$/;
+const messageSubstitutionRegex = /^\[([-\w]+?)]: \s*(.+?)\s*$/;
 
 export const ZERO_LENGTH_ERROR = "~nil";
 
