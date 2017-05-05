@@ -122,7 +122,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
     } else {
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
-        if (configFilePath !== undefined && fs.existsSync(configFilePath)) {
+        if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
 
