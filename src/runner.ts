@@ -202,7 +202,6 @@ export class Runner {
             .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
             .reduce((a: string[], b: string[]) => a.concat(b), [])
             .map((file: string) => {
-                // tslint:disable
                 if (this.options.outputAbsolutePaths) {
                     return path.resolve(file);
                 }
