@@ -64,7 +64,7 @@ class Linter {
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory));
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
