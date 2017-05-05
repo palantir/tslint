@@ -170,7 +170,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             }
         } else {
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
-            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath]; // tslint:disable-line no-unsafe-any (Fixed in 5.2)
+            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
 
         const configFileDir = path.dirname(resolvedConfigFilePath);

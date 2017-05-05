@@ -128,11 +128,12 @@ class IndentWalker extends Lint.RuleWalker {
                 }
             }
 
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-                // ignore lines that have comments before the first token
-                continue;
+            switch (currentScannedType) {
+                case ts.SyntaxKind.SingleLineCommentTrivia:
+                case ts.SyntaxKind.MultiLineCommentTrivia:
+                case ts.SyntaxKind.NewLineTrivia:
+                    // ignore lines that have comments before the first token
+                    continue;
             }
 
             if (fullLeadingWhitespace.match(this.regExp)) {
