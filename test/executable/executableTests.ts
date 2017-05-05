@@ -156,7 +156,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     fs.unlinkSync(tempFile);
                     assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
                     assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
+                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${path.relative(process.cwd(), denormalizedFileName)}`);
                     done();
                 });
         });
