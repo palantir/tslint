@@ -217,3 +217,38 @@ for (let i = 0; i < 3; i++) {
     let i = 34;
         ~       [Shadowed variable: 'i']
 }
+
+class C<C> {
+        ~ [C]
+    C<C>(C: C): C {
+      ~ [C]
+         ~ [C]
+        type C = C;
+             ~ [C]
+        namespace C {
+                  ~ [C]
+            interface C<C> {}
+                      ~ [C]
+                        ~ [C]
+        }
+    }
+}
+
+
+// Allow mergeable declarations.
+interface I {}
+interface I {}
+
+// Do not allow non-mergeable declarations.
+function f() {
+    const f = 0;
+          ~ [f]
+}
+
+// Exempt 'this'
+function f(this): void {
+    function inner(this): void {}
+}
+
+[C]: Shadowed variable: 'C'
+[f]: Shadowed variable: 'f'

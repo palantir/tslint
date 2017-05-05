@@ -209,7 +209,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     } catch (err) {
         try {
             return require.resolve(filePath);
-        } catch (err) {
+        } catch (anotherErr) {
             throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");
