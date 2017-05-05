@@ -28,7 +28,9 @@ const customRulesOptions: IRunnerOptions = {
 describe("Runner Tests", () => {
     it("outputs absolute path with --outputAbsolutePaths", () => {
         const output = runLint({ ...customRulesOptions, outputAbsolutePaths: true });
-        assert.include(output, "ERROR: /");
+
+        // match either a path starting with `/` or something like `C:\`
+        assert.isTrue(/ERROR: (\/|\w+:\\)/.test(output));
     });
 
     it("outputs relative path without --outputAbsolutePaths", () => {
