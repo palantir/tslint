@@ -4,6 +4,9 @@
   },
   "extends": "tslint:all",
   "rules": {
+    // TODO: remove this when tslint 5.3 released
+    "prefer-switch": [true, { "min-cases": 3 }],
+
     // Don't want these
     "newline-before-return": false,
     "no-parameter-properties": false,
