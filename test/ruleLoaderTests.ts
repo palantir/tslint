@@ -31,11 +31,11 @@ const testRulesDir = "test/rules";
 describe("Rule Loader", () => {
     it("loads core rules", () => {
         const validConfiguration: IOptions[] = [
-            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error" },
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
         const rules = loadRules(validConfiguration, builtRulesDir);
@@ -44,7 +44,7 @@ describe("Rule Loader", () => {
 
     it("ignores off rules", () => {
         const validConfiguration: IOptions[] = [
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off" },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
         ];
         const rules = loadRules(validConfiguration, builtRulesDir);
         assert.equal(rules.length, 0);
@@ -52,9 +52,9 @@ describe("Rule Loader", () => {
 
     it("ignores invalid rules", () => {
         const invalidConfiguration: IOptions[] = [
-            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "invalidConfig1", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "invalidConfig2", ruleArguments: [], ruleSeverity: "off" },
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "invalidConfig1", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "invalidConfig2", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
         ];
 
         const rules = loadRules(invalidConfiguration, [builtRulesDir]);
@@ -63,8 +63,8 @@ describe("Rule Loader", () => {
 
     it("properly sets rule severity with options", () => {
         const withOptions: IOptions[] = [
-            { ruleName: "callable-types", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "max-line-length", ruleArguments: [140], ruleSeverity: "warning" },
+            { ruleName: "callable-types", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "max-line-length", ruleArguments: [140], ruleSeverity: "warning", disabledIntervals: [] },
         ];
 
         const rules = loadRules(withOptions, [builtRulesDir]);
@@ -75,11 +75,11 @@ describe("Rule Loader", () => {
 
     it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: IOptions[] = [
-            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error" },
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
         const rules = loadRules(validConfiguration, [builtRulesDir]);
@@ -88,8 +88,8 @@ describe("Rule Loader", () => {
 
     it("loads js rules", () => {
         const validConfiguration: IOptions[] = [
-            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error" },
-            { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error" },
+            { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
         const rules = loadRules(validConfiguration, builtRulesDir, true);

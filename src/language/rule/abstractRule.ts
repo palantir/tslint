@@ -62,4 +62,11 @@ export abstract class AbstractRule implements IRule {
         walkFn(ctx);
         return ctx.failures;
     }
+
+    /**
+     * @deprecated
+     * Failures will be filtered based on `tslint:disable` comments by tslint.
+     * This method now does nothing.
+     */
+    protected filterFailures(failures: RuleFailure[]) { return failures; }
 }

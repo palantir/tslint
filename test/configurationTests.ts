@@ -98,6 +98,7 @@ describe("Configuration", () => {
             const initial = getEmptyConfig();
             initial.rules.set("s", { ruleArguments: undefined, ruleSeverity: undefined });
             assert.deepEqual<IOptions>(convertRuleOptions(initial.rules)[0], {
+                disabledIntervals: [],
                 ruleArguments: [],
                 ruleName: "s",
                 ruleSeverity: "error",

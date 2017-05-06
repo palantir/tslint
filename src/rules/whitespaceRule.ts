@@ -263,6 +263,5 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         const fix = Lint.Replacement.appendText(position, " ");
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
-
     }
 }

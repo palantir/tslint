@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import {arrayify, flatMap} from "../../utils";
+import {IWalker} from "../walker";
 
 export interface RuleConstructor {
     metadata: IRuleMetadata;
@@ -98,12 +99,28 @@ export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
+    /**
+     * @deprecated
+     * Tslint now handles disables itself.
+     * This will be empty.
+     */
+    disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
+}
+
+/**
+ * @deprecated
+ * These are now handled internally.
+ */
+export interface IDisabledInterval {
+    startPosition: number;
+    endPosition: number;
 }
 
 export interface IRule {
     getOptions(): IOptions;
     isEnabled(): boolean;
     apply(sourceFile: ts.SourceFile): RuleFailure[];
+    applyWithWalker(walker: IWalker): RuleFailure[];
 }
 
 export interface ITypedRule extends IRule {
