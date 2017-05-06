@@ -19,11 +19,6 @@ import * as ts from "typescript";
 
 import {arrayify, flatMap} from "../../utils";
 
-export interface RuleStatic {
-    metadata: IRuleMetadata;
-    new(options: IOptions): IRule;
-}
-
 export interface RuleConstructor {
     metadata: IRuleMetadata;
     new(options: IOptions): IRule;
