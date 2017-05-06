@@ -265,6 +265,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
     }
 
+    // tslint:disable-next-line no-object-literal-type-assertion
     protected constructor(public readonly descriptor: TDescriptor = {} as TDescriptor) { }
 
     public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;

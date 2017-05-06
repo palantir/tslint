@@ -152,6 +152,8 @@ export const rules = {
         "parameters",
         "arguments",
         "statements",
+        "elements",
+        "members",
     ],
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
@@ -166,6 +168,7 @@ export const rules = {
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
+    "encoding": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,

@@ -1,6 +1,6 @@
 /* tslint:enable */
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
 /* tslint:disable */
 var AAAaA = 'test'
@@ -11,7 +11,7 @@ var AAAaA = 'test'
             ~~~~~~ [' should be "]
 /* tslint:enable */
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
 /* tslint:disable:quotemark variable-name */
 var AAAaA = 'test'
@@ -32,11 +32,11 @@ var AAAaA = 'test'
 var AAAaA = 'test'
 /* tslint:enable quotemark variable-name */
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
 /* tslint:disable quotemark */
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
 
 /* tslint:enable */
 var  re;
@@ -59,7 +59,7 @@ var AAAaA = 'test' // tslint:enable-line:quotemark
             ~~~~~~                                 [' should be "]
 // tslint:enable-next-line:variable-name
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
 // tslint:enable
 
 /* tslint:disable:quotemark */
@@ -101,7 +101,7 @@ var AAAaA = 'test' // line should not be affected
 // ensure that next-line switch only switches next line
 var AAAaA = 'test'; /*tslint:enable-next-line*/ var AAAaA = 'test'
 var AAAaA = 'test'
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
 var AAAaA = 'test'
 var AAAaA = 'test'; //tslint:enable-next-line
@@ -111,18 +111,18 @@ var AAAaA = 'test'; //tslint:enable-next-line
 var AAAaA = 'test'; //tslint:enable
                       ~~~~~~~~~~~~~ [comment must start with a space]
 var AAAaA = 'test'; //tslint:disable
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
 var AAAaA = 'test'
 
 // ensure that "all" switches all rules
 var AAAaA = 'test'; //tslint:enable-line all
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
                       ~~~~~~~~~~~~~~~~~~~~~~ [comment must start with a space]
 
 // ensure that "all" switches all rules even if others are in the list
 var AAAaA = 'test'; //tslint:enable-line quotemark all
-    ~~~~~          [variable name must be in camelcase or uppercase]
+    ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [comment must start with a space]

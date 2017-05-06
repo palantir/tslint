@@ -40,11 +40,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
-            * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
+            * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to camelCase.
-              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to camelCase.
+              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
+              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
               * These are: ${bannedKeywordsStr}`,
         options: {
@@ -164,14 +164,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 
     function formatFailure(): string {
-        let failureMessage = "variable name must be in camelcase";
+        let failureMessage = "variable name must be in lowerCamelCase";
         if (options.allowPascalCase) {
-            failureMessage += ", pascalcase";
+            failureMessage += ", PascalCase";
         }
         if (options.allowSnakeCase) {
-            failureMessage += ", snakecase";
+            failureMessage += ", snake_case";
         }
-        return failureMessage + " or uppercase";
+        return failureMessage + " or UPPER_CASE";
     }
 }
 

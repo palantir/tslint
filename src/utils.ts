@@ -147,3 +147,53 @@ export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undef
     }
     return out;
 }
+
+export function readBufferWithDetectedEncoding(buffer: Buffer): string {
+    switch (detectBufferEncoding(buffer)) {
+        case "utf8":
+            return buffer.toString();
+        case "utf8-bom":
+            return buffer.toString("utf-8", 2);
+        case "utf16le":
+            return buffer.toString("utf16le", 2);
+        case "utf16be":
+            // Round down to nearest multiple of 2.
+            const len = buffer.length & ~1; // tslint:disable-line no-bitwise
+            // Flip all byte pairs, then read as little-endian.
+            for (let i = 0; i < len; i += 2) {
+                const temp = buffer[i];
+                buffer[i] = buffer[i + 1];
+                buffer[i + 1] = temp;
+            }
+            return buffer.toString("utf16le", 2);
+    }
+}
+
+export type Encoding = "utf8" | "utf8-bom" | "utf16le" | "utf16be";
+
+export function detectBufferEncoding(buffer: Buffer, length = buffer.length): Encoding {
+    if (length < 2) {
+        return "utf8";
+    }
+
+    switch (buffer[0]) {
+        case 0xEF:
+            if (buffer[1] === 0xBB && length >= 3 && buffer[2] === 0xBF) {
+                return "utf8-bom";
+            }
+            break;
+
+        case 0xFE:
+            if (buffer[1] === 0xFF) {
+                return "utf16be";
+            }
+            break;
+
+        case 0xFF:
+            if (buffer[1] === 0xFE) {
+                return "utf16le";
+            }
+    }
+
+    return "utf8";
+}
