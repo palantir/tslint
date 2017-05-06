@@ -4,6 +4,9 @@
   },
   "extends": "tslint:all",
   "rules": {
+    // TODO: remove this when tslint 5.3 released
+    "prefer-switch": [true, { "min-cases": 3 }],
+
     // Don't want these
     "newline-before-return": false,
     "no-parameter-properties": false,
@@ -57,7 +60,6 @@
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,
-    "prefer-switch": false,
     "prefer-template": false,
     "restrict-plus-operands": false,
     "return-undefined": false,
@@ -82,7 +84,7 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],    
+    ],
     "no-console": {
       "options": ["log"]
     },

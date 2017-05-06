@@ -43,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.1.0";
+    public static VERSION = "5.2.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -56,11 +56,7 @@ class Linter {
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
-    public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
-        if (projectDirectory === undefined) {
-            projectDirectory = path.dirname(configFile);
-        }
-
+    public static createProgram(configFile: string, projectDirectory: string = path.dirname(configFile)): ts.Program {
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
         const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
@@ -68,7 +64,7 @@ class Linter {
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory));
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
