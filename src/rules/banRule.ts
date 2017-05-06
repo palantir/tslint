@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
+    public static FAILURE_STRING_FACTORY(expression: string, messageAddition?: string) {
         return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
     }
 

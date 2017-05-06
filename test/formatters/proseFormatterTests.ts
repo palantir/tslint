@@ -54,7 +54,7 @@ describe("Prose Formatter", () => {
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
         ];
 
-        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;
+        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;  // tslint:disable-line no-object-literal-type-assertion
 
         const fixes = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),

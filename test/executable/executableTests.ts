@@ -267,6 +267,27 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     done();
                 });
         });
+
+        it("can extend `tsconfig.json` with relative path", (done) => {
+            execCli(
+                ["-c", "test/files/tsconfig-extends-relative/tslint-ok.json", "-p",
+                 "test/files/tsconfig-extends-relative/test/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
+
+        it("can extend `tsconfig.json` with relative path II", (done) => {
+            execCli(
+                ["-c", "test/files/tsconfig-extends-relative/tslint-fail.json", "-p",
+                 "test/files/tsconfig-extends-relative/test/tsconfig.json"],
+                (err) => {
+                    assert.isNotNull(err, "process should exit with error");
+                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
     });
 
     describe("--type-check", () => {

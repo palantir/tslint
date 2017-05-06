@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
@@ -122,8 +121,8 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
     } else {
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && fs.existsSync(configFilePath)) {
+        let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
+        if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
 
@@ -138,6 +137,35 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
 
         // no path could be found
         return undefined;
+    }
+}
+
+/**
+ * Find a file by name in a directory or any ancestory directory.
+ * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
+ */
+function findup(filename: string, directory: string): string | undefined {
+    while (true) {
+        const res = findFile(directory);
+        if (res) {
+            return res;
+        }
+
+        const parent = path.dirname(directory);
+        if (parent === directory) {
+            return undefined;
+        }
+        directory = parent;
+    }
+
+    function findFile(cwd: string): string | undefined {
+        if (fs.existsSync(path.join(cwd, filename))) {
+            return filename;
+        }
+
+        // Try reading in the entire directory and looking for a file with different casing.
+        const filenameLower = filename.toLowerCase();
+        return fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
     }
 }
 
@@ -220,7 +248,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
 
-    const combineProperties = <T>(targetProperty: T | undefined, nextProperty: T | undefined): T => {
+    function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
@@ -237,9 +265,9 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
 
         }
-    };
+    }
 
-    const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
+    function combineMaps(target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) {
         const combined = new Map<string, Partial<IOptions>>();
         target.forEach((options, ruleName) => {
             combined.set(ruleName, options);
@@ -253,7 +281,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
         });
         return combined;
-    };
+    }
 
     const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
     const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));

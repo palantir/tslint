@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import {IOptions} from "../rule/rule";
 import {isBlockScopeBoundary} from "../utils";
+// tslint:disable deprecation
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**

@@ -113,9 +113,9 @@ function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.
 }
 
 function compare(a: string, b: string) {
-    const isLow = (value: string) => {
-        return [".", "/"].some((x) => value[0] === x);
-    };
+    function isLow(value: string) {
+        return value[0] === "." || value[0] === "/";
+    }
     if (isLow(a) && !isLow(b)) {
         return 1;
     } else if (!isLow(a) && isLow(b)) {

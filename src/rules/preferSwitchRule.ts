@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 [OPTION_MIN_CASES]: { type: "number" },
             },
         },
-        optionExamples: ["true", `["true", { "${OPTION_MIN_CASES}": 2 }]`],
+        optionExamples: [true, [true, { [OPTION_MIN_CASES]: 2 }]],
         type: "style",
         typescriptOnly: false,
     };

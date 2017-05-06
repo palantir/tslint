@@ -23,7 +23,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-object-literal-type-assertion",
-        description: "Forbids an object literal to appear in a type assertion expression.",
+        description: Lint.Utils.dedent`
+            Forbids an object literal to appear in a type assertion expression.
+            Casting to \`any\` is still allowed.`,
         rationale: Lint.Utils.dedent`
             Always prefer \`const x: T = { ... };\` to \`const x = { ... } as T;\`.
             The type assertion in the latter case is either unnecessary or hides an error.
@@ -45,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isTypeAssertionLike(node) && isObjectLiteral(node.expression)) {
+        if (isTypeAssertionLike(node) && isObjectLiteral(node.expression) && node.type.kind !== ts.SyntaxKind.AnyKeyword) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
