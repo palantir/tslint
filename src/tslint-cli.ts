@@ -24,7 +24,6 @@ import { IRunnerOptions, Runner } from "./runner";
 import { dedent } from "./utils";
 
 interface Argv {
-    args: string[];
     config?: string;
     exclude?: string;
     fix?: boolean;
@@ -198,16 +197,9 @@ commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as any)([], parsed.unknown);
 }
-const argv = commander as any as Argv;
+const argv = commander.opts() as any as Argv;
 
-// Commander makes flags `undefined` instead of `true`.
-for (const key in argv) {
-    if ((argv as any)[key] === undefined) {
-        (argv as any)[key] = true;
-    }
-}
-
-if (!(argv.init || argv.test || argv.project || argv.args.length > 0)) {
+if (!(argv.init || argv.test || argv.project || commander.args.length > 0)) {
     console.error("Missing files");
     process.exit(1);
 }
@@ -225,7 +217,7 @@ if (argv.out != null) {
 const runnerOptions: IRunnerOptions = {
     config: argv.config,
     exclude: argv.exclude,
-    files: argv.args,
+    files: commander.args,
     fix: argv.fix,
     force: argv.force,
     format: argv.format || "prose",
