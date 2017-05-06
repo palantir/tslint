@@ -57,11 +57,11 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     }
 
     for (const d of decSym.getDeclarations()) {
+      let commentNode: ts.Node = d;
       // Switch to the TS JSDoc parser in the future to avoid false positives here.
       // For example using '@deprecated' in a true comment.
       // However, a new TS API would be needed, track at
       // https://github.com/Microsoft/TypeScript/issues/7393.
-      let commentNode: ts.Node = d;
 
       if (commentNode.kind === ts.SyntaxKind.VariableDeclaration) {
           commentNode = commentNode.parent!;

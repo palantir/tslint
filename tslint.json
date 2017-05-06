@@ -44,7 +44,6 @@
     // TODO: Enable these
     "completed-docs": false,
     "cyclomatic-complexity": false,
-    "deprecation": false,
     "no-any": false,
     "no-boolean-literal-compare": false,
     "no-inferrable-types": false,
