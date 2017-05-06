@@ -30,14 +30,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             An optional object with the property '${OPTION_MIN_CASES}'.
             This is the number cases needed before a switch statement is recommended.
-            Defaults to 2.`,
+            Defaults to 3.`,
         options: {
             type: "object",
             properties: {
                 [OPTION_MIN_CASES]: { type: "number" },
             },
         },
-        optionExamples: ["true", `["true", { "${OPTION_MIN_CASES}": 2 }]`],
+        optionExamples: [true, [true, { [OPTION_MIN_CASES]: 2 }]],
         type: "style",
         typescriptOnly: false,
     };
@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use a switch statement instead of using multiple '===' checks.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let minCases = 2;
+        let minCases = 3;
         if (this.ruleArguments.length) {
             const obj = this.ruleArguments[0] as { "min-cases": number };
             minCases = obj[OPTION_MIN_CASES];
@@ -74,7 +74,7 @@ function walk(ctx: Lint.WalkContext<number>): void {
 }
 
 function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number): boolean {
-    let switchVariable: SimpleExpression | undefined;
+    let switchVariable: ts.Expression | undefined;
     let casesSeen = 0;
     const couldBeSwitch = everyCase(node, (expr) => {
         casesSeen++;
@@ -88,14 +88,14 @@ function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number
     return couldBeSwitch && casesSeen >= minCases;
 }
 
-function everyCase({ expression, elseStatement }: ts.IfStatement, test: (e: SimpleExpression) => boolean): boolean {
+function everyCase({ expression, elseStatement }: ts.IfStatement, test: (e: ts.Expression) => boolean): boolean {
     if (!everyCondition(expression, test)) {
         return false;
     }
     return !elseStatement || !utils.isIfStatement(elseStatement) || everyCase(elseStatement, test);
 }
 
-function everyCondition(node: ts.Expression, test: (e: SimpleExpression) => boolean): boolean {
+function everyCondition(node: ts.Expression, test: (e: ts.Expression) => boolean): boolean {
     if (!utils.isBinaryExpression(node)) {
         return false;
     }
@@ -115,16 +115,26 @@ function nodeEquals<T extends ts.Node>(a: T, b: T, sourceFile: ts.SourceFile): b
     return a.getText(sourceFile) === b.getText(sourceFile);
 }
 
-type SimpleExpression = ts.PropertyAccessEntityNameExpression | ts.Identifier | ts.NumericLiteral | ts.StringLiteral;
-
-function isSimple(node: ts.Node): node is SimpleExpression {
+function isSimple(node: ts.Node): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.PropertyAccessExpression:
             return isSimple((node as ts.PropertyAccessExpression).expression);
+        case ts.SyntaxKind.PrefixUnaryExpression:
+            switch ((node as ts.PrefixUnaryExpression).operator) {
+                case ts.SyntaxKind.PlusPlusToken:
+                case ts.SyntaxKind.MinusMinusToken:
+                    return false;
+                default:
+                    return isSimple((node as ts.PrefixUnaryExpression).operand);
+            }
         case ts.SyntaxKind.Identifier:
         case ts.SyntaxKind.NumericLiteral:
         case ts.SyntaxKind.StringLiteral:
         case ts.SyntaxKind.ThisKeyword:
+        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+        case ts.SyntaxKind.TrueKeyword:
+        case ts.SyntaxKind.FalseKeyword:
+        case ts.SyntaxKind.NullKeyword:
             return true;
         default:
             return false;

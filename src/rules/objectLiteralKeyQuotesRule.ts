@@ -94,7 +94,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (isObjectLiteralExpression(node)) {
                 const propertyNames = Lint.Utils.mapDefined(node.properties, mapPropertyName);
-                outer: switch (this.options.option) { // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                outer: switch (this.options.option) {
                     case "always":
                         for (const name of propertyNames) {
                             if (name.kind !== ts.SyntaxKind.StringLiteral) {
@@ -123,7 +123,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                                         this.reportMissing(propertyName);
                                     }
                                 }
-                                break outer; // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                                break outer;
                             }
                         }
                         for (const name of propertyNames) {
