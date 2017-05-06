@@ -214,17 +214,21 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (this.options.always && !hasSemicolon) {
             this.reportMissing(node.end);
         } else if (!this.options.always && hasSemicolon) {
-            switch (utils.getNextToken(node, this.sourceFile)!.kind) {
-                case ts.SyntaxKind.OpenParenToken:
-                case ts.SyntaxKind.OpenBracketToken:
-                case ts.SyntaxKind.PlusToken:
-                case ts.SyntaxKind.MinusToken:
-                case ts.SyntaxKind.RegularExpressionLiteral:
-                    break;
-                default:
-                    if (!this.isFollowedByStatement(node)) {
-                        this.reportUnnecessary(node.end - 1);
-                    }
+            let shouldReport = true;
+            const nextToken = utils.getNextToken(node, this.sourceFile);
+            if (nextToken) {
+                switch (nextToken.kind) {
+                    case ts.SyntaxKind.OpenParenToken:
+                    case ts.SyntaxKind.OpenBracketToken:
+                    case ts.SyntaxKind.PlusToken:
+                    case ts.SyntaxKind.MinusToken:
+                    case ts.SyntaxKind.RegularExpressionLiteral:
+                        shouldReport = false;
+                        break;
+                }
+            }
+            if (shouldReport && !this.isFollowedByStatement(node)) {
+                this.reportUnnecessary(node.end - 1);
             }
         }
     }
