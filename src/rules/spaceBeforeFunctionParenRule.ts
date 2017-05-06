@@ -109,8 +109,10 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
+            return options.named;
+
         case ts.SyntaxKind.FunctionExpression:
-            return (node as ts.FunctionLikeDeclaration).name !== undefined ? options.named : options.anonymous;
+            return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
