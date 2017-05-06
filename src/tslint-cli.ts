@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-// tslint:disable object-literal-sort-keys
+// tslint:disable no-console object-literal-sort-keys
 
+import commander = require("commander");
 import * as fs from "fs";
 
 import { IRunnerOptions, Runner } from "./runner";
 import { dedent } from "./utils";
 
 interface Argv {
-    files: string[];
+    args: string[];
     config?: string;
     exclude?: string;
     fix?: boolean;
@@ -32,17 +33,18 @@ interface Argv {
     init?: boolean;
     out?: string;
     project?: string;
-    "rules-dir"?: string;
-    "formatters-dir"?: string;
+    rulesDir?: string;
+    formattersDir: string;
     format?: string;
-    "type-check"?: boolean;
+    typeCheck?: boolean;
     test?: string;
     version?: boolean;
 }
 
 interface Option {
     short?: string;
-    name: keyof Argv;
+    // Commander will camelCase option names.
+    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
     type: "string" | "boolean";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
@@ -176,65 +178,38 @@ const options: Option[] = [
             Enables the type checker when running linting rules. --project must be
             specified in order to enable type checking.`,
     },
-    {
-        short: "v",
-        name: "version",
-        type: "boolean",
-        describe: "current version",
-        description: "The current version of tslint.",
-    },
-    {
-        short: "h",
-        name: "help",
-        type: "boolean",
-        describe: "display detailed help",
-        description: "Prints this help message.",
-    },
 ];
 
-function parseOptions(argv: string[]): Argv {
-    const files: string[] = [];
-    const res: Argv = { files };
-    let i = 0;
-    for (; i < argv.length; i++) {
-        const arg = argv[i];
-        if (arg.startsWith("--")) {
-            const x = arg.slice(2);
-            handleOption((o) => o.name === x);
-        } else if (arg.startsWith("-")) {
-            const x = arg.slice(1);
-            if (x === "f") {
-                throw exit("-f option is no longer available. Supply files directly to the tslint command instead.");
-            }
-            handleOption((o) => o.short === x);
-        } else {
-            files.push(arg);
-        }
-    }
-    return res;
+for (const option of options) {
+    const commanderStr = optionUsageTag(option) + (option.type === "string" ? ` [${option.name}]` : "");
+    commander.option(commanderStr, option.describe);
+}
 
-    function handleOption(pred: (option: Option) => boolean) {
-        const option = options.find(pred);
-        if (!option) {
-            throw exit(`No such option '${argv[i]}'\n\n${help()}`);
-        }
-        switch (option.type) {
-            case "boolean":
-                res[option.name] = true;
-                break;
-            case "string":
-                i++;
-                if (i === argv.length) {
-                    throw exit(`Must provide a value for ${option.name}`);
-                }
-                res[option.name] = argv[i];
-                break;
-        }
+commander.on("--help", () => {
+    const indent = "\n        ";
+    const optionDetails = options.map((o) =>
+        `${optionUsageTag(o)}:` + (o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description));
+    console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
+});
+
+// Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
+const parsed = commander.parseOptions(process.argv.slice(2));
+commander.args = parsed.args;
+if (parsed.unknown.length !== 0) {
+    (commander.parseArgs as any)([], parsed.unknown);
+}
+const argv = commander as any as Argv;
+
+// Commander makes flags `undefined` instead of `true`.
+for (const key in argv) {
+    if ((argv as any)[key] === undefined) {
+        (argv as any)[key] = true;
     }
 }
-const argv = parseOptions(process.argv.slice(2));
-if (!(argv.help || argv.init || argv.test || argv.version || argv.project || argv.files.length > 0)) {
-    exit("Missing files");
+
+if (!(argv.init || argv.test || argv.project || argv.args.length > 0)) {
+    console.error("Missing files");
+    process.exit(1);
 }
 
 let outputStream: NodeJS.WritableStream;
@@ -247,29 +222,20 @@ if (argv.out != null) {
     outputStream = process.stdout;
 }
 
-if (argv.help) {
-    const optionDetails = options.map((o) =>
-        `${optionUsageTag(o)}:` + o.description.replace(/\n/g, "\n        "));
-    const detailedHelp = `${help()}\n\ntslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`;
-    outputStream.write(detailedHelp);
-    process.exit(0);
-}
-
 const runnerOptions: IRunnerOptions = {
     config: argv.config,
     exclude: argv.exclude,
-    files: argv.files,
+    files: argv.args,
     fix: argv.fix,
     force: argv.force,
     format: argv.format || "prose",
-    formattersDirectory: argv["formatters-dir"],
+    formattersDirectory: argv.formattersDir,
     init: argv.init,
     out: argv.out,
     project: argv.project,
-    rulesDirectory: argv["rules-dir"],
+    rulesDirectory: argv.rulesDir,
     test: argv.test,
-    typeCheck: argv["type-check"],
-    version: argv.version,
+    typeCheck: argv.typeCheck,
 };
 
 new Runner(runnerOptions, outputStream)
@@ -277,19 +243,4 @@ new Runner(runnerOptions, outputStream)
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
-}
-
-function help() {
-    const maxLen = Math.max(...options.map((o) => optionUsageTag(o).length));
-    return "Usage: tslint [options] file ...\n\nOptions:\n  " + options.map((o) =>
-        rpad(optionUsageTag(o), maxLen + 2) + o.describe).join("\n  ");
-}
-
-function exit(msg: string): void {
-    console.error(msg);
-    process.exit(1);
-}
-
-function rpad(str: string, length: number) {
-    return str + " ".repeat(length - str.length);
 }

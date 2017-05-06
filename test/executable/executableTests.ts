@@ -63,7 +63,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr, "-f option is no longer available", "stderr should contain notification about removed flag");
+                assert.include(stderr, "error: unknown option `-f'");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });

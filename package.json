@@ -38,6 +38,7 @@
   "dependencies": {
     "babel-code-frame": "^6.22.0",
     "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "diff": "^3.2.0",
     "findup-sync": "~0.3.0",
     "glob": "^7.1.1",
@@ -53,6 +54,7 @@
     "@types/babel-code-frame": "^6.20.0",
     "@types/chai": "^3.5.0",
     "@types/colors": "^0.6.33",
+    "@types/commander": "^2.9.0",
     "@types/diff": "0.0.31",
     "@types/findup-sync": "^0.3.29",
     "@types/github": "^0.0.0",
