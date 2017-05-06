@@ -40,30 +40,28 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use of default exports is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDefaultExportWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDefaultExportWalker extends Lint.RuleWalker {
-    public visitExportAssignment(node: ts.ExportAssignment) {
-        const exportMember = node.getChildAt(1);
-        if (exportMember != null && exportMember.kind === ts.SyntaxKind.DefaultKeyword) {
-            this.addFailureAtNode(exportMember, Rule.FAILURE_STRING);
-        }
-        super.visitExportAssignment(node);
-    }
+function walk(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ExportAssignment:
+                if (!(node as ts.ExportAssignment).isExportEquals) {
+                    ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.DefaultKeyword)!, Rule.FAILURE_STRING);
+                }
+                break;
 
-    // inline class declaration and function declaration exports use modifiers
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.DefaultKeyword && node.parent != null) {
-            const nodes = node.parent.modifiers;
-            if (nodes != null &&
-                nodes.length === 2 &&
-                nodes[0].kind === ts.SyntaxKind.ExportKeyword &&
-                nodes[1].kind === ts.SyntaxKind.DefaultKeyword) {
-                    this.addFailureAtNode(nodes[1], Rule.FAILURE_STRING);
-            }
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.FunctionDeclaration:
+                const mod = Lint.findModifier(node.modifiers, ts.SyntaxKind.DefaultKeyword);
+                if (mod !== undefined) {
+                    ctx.addFailureAtNode(mod, Rule.FAILURE_STRING);
+                }
+                break;
         }
-        super.visitNode(node);
-    }
+
+        ts.forEachChild(node, cb);
+    });
 }

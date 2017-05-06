@@ -47,6 +47,11 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
     });
 }
 
+/** Finds a modifier with the specified kind. */
+export function findModifier<K extends ts.SyntaxKind>(modifiers: ts.ModifiersArray | undefined, modifierKind: K): ts.Token<K> | undefined {
+    return modifiers === undefined ? undefined : modifiers.find((m) => m.kind === modifierKind) as ts.Token<K> | undefined;
+}
+
 /**
  * Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
  * which indicates this is a "let" or "const".
