@@ -146,7 +146,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
-            const tempFile = createTempFile("ts");
+            const tempFile = path.relative(process.cwd(), createTempFile("ts"));
             fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
             execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
                 (err, stdout) => {
@@ -156,7 +156,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     fs.unlinkSync(tempFile);
                     assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
                     assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${path.relative(process.cwd(), denormalizedFileName)}`);
+                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
                     done();
                 });
         });
