@@ -43,6 +43,7 @@ Options:
 -p, --project         tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
+-- show-files         show files being linted
 -t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
 --type-check          enable type checking when linting a project
@@ -103,6 +104,9 @@ tslint accepts the following command-line options:
     directory, node_modules/tslint/build/formatters, will always be
     checked first, so user-created formatters with the same names
     as the base formatters will not be loaded.
+
+--show-files:
+    Show files being linted
 
 -t, --format:
     The formatter to use to format the results of the linter before

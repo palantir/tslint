@@ -108,6 +108,10 @@ const processed = optimist
             describe: "formatters directory",
             type: "string",
         },
+        "show-files": {
+            describe: "show files being linted",
+            type: "boolean",
+        },
         "t": {
             alias: "format",
             default: "prose",
@@ -239,6 +243,7 @@ const options: IRunnerOptions = {
     out: argv.out,
     project: argv.p,
     rulesDirectory: argv.r,
+    showFiles: argv["show-files"],
     test: argv.test,
     typeCheck: argv["type-check"],
     version: argv.v,
