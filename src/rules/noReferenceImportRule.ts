@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { moduleDeclarationBody } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -92,12 +93,4 @@ function allImports(sourceFile: ts.SourceFile): Set<string> {
             imports.add(moduleReference.text);
         }
     }
-}
-
-function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
-    let body = node.body;
-    while (body && body.kind === ts.SyntaxKind.ModuleDeclaration) {
-        body = body.body;
-    }
-    return body && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

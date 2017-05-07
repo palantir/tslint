@@ -424,3 +424,12 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
             return undefined;
     }
 }
+
+/** TODO: move to tsutils */
+export function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
+    let body = node.body;
+    while (body && body.kind === ts.SyntaxKind.ModuleDeclaration) {
+        body = body.body;
+    }
+    return body && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
+}
