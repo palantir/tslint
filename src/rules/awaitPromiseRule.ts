@@ -57,7 +57,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
         }
 
         if (isUnionType(type)) {
-            return type.types.some(isPromiseType);
+            return type.types.some(couldBePromise);
         }
 
         const bases = type.getBaseTypes();
