@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isBindingPattern } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -44,22 +44,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
-            case ts.SyntaxKind.VariableDeclaration: {
-                const { name } = node as ts.VariableDeclaration;
-                if (utils.isBindingPattern(name)) {
-                    for (const elem of name.elements) {
-                        if (elem.kind === ts.SyntaxKind.BindingElement) {
-                            checkInitializer(elem);
-                        }
-                    }
-                } else if (!Lint.isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
+            case ts.SyntaxKind.BindingElement:
+                checkInitializer(node as ts.BindingElement);
+                break;
+
+            case ts.SyntaxKind.VariableDeclaration:
+                if (!isBindingPattern((node as ts.VariableDeclaration).name) && !Lint.isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
                     checkInitializer(node as ts.VariableDeclaration);
                 }
                 break;
-            }
 
             case ts.SyntaxKind.MethodDeclaration:
             case ts.SyntaxKind.FunctionDeclaration:
