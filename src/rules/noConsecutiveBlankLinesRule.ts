@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: "$(Rule.MINIMUM_ALLOWED_BLANKS)",
         },
-        optionExamples: ["true", "[true, 2]"],
+        optionExamples: [true, [true, 2]],
         type: "style",
         typescriptOnly: false,
     };
@@ -52,17 +52,13 @@ export class Rule extends Lint.Rules.AbstractRule {
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
      */
     public isEnabled(): boolean {
-        return super.isEnabled() &&
-            (this.ruleArguments[0] === undefined ||
-             typeof this.ruleArguments[0] === "number" && this.ruleArguments[0] > 0);
+        const option = this.ruleArguments[0] as number | undefined;
+        return super.isEnabled() && (option === undefined || option > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let limit: number = this.ruleArguments[0];
-        if (limit === undefined) {
-             limit = Rule.DEFAULT_ALLOWED_BLANKS;
-        }
-        return this.applyWithFunction(sourceFile, walk, limit);
+        const limit = this.ruleArguments[0] as number | undefined ;
+        return this.applyWithFunction(sourceFile, walk, limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS);
     }
 }
 
@@ -73,7 +69,7 @@ function walk(ctx: Lint.WalkContext<number>) {
     let consecutiveBlankLines = 0;
 
     for (const line of utils.getLineRanges(ctx.sourceFile)) {
-        if (sourceText.substring(line.pos, line.end).search(/\S/) === -1) {
+        if (line.contentLength === 0 || sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1) {
             ++consecutiveBlankLines;
             if (consecutiveBlankLines === threshold) {
                 possibleFailures.push({
@@ -95,14 +91,14 @@ function walk(ctx: Lint.WalkContext<number>) {
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
         if (!templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
-            ctx.addFailureAt(possibleFailure.pos, 1, failureString, ctx.createFix(
+            ctx.addFailureAt(possibleFailure.pos, 1, failureString, [
                 Lint.Replacement.deleteFromTo(
                     // special handling for fixing blank lines at the end of the file
                     // to fix this we need to cut off the line break of the last allowed blank line, too
                     possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
                     possibleFailure.end,
                 ),
-            ));
+            ]);
         }
     }
 }
@@ -111,7 +107,7 @@ function getStartOfLineBreak(sourceText: string, pos: number) {
     return sourceText[pos - 2] === "\r" ? pos - 1 : pos - 1;
 }
 
-function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
+export function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     const cb = (node: ts.Node): void => {
         if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&

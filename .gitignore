@@ -20,3 +20,6 @@ typings/.basedir.ts
 
 docs/_data/rules.json
 docs/rules/*/index.html
+
+/coverage/
+/.nyc_output

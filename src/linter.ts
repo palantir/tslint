@@ -34,7 +34,7 @@ import { isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
-import { Fix, IRule, isTypedRule, RuleFailure, RuleSeverity } from "./language/rule/rule";
+import { Fix, IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
 import { arrayify, dedent } from "./utils";
@@ -43,7 +43,7 @@ import { arrayify, dedent } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "4.5.1";
+    public static VERSION = "5.2.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -56,11 +56,7 @@ class Linter {
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
-    public static createProgram(configFile: string, projectDirectory?: string): ts.Program {
-        if (projectDirectory === undefined) {
-            projectDirectory = path.dirname(configFile);
-        }
-
+    public static createProgram(configFile: string, projectDirectory: string = path.dirname(configFile)): ts.Program {
         const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
         const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
@@ -68,7 +64,7 @@ class Linter {
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, projectDirectory);
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory));
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
@@ -104,16 +100,8 @@ class Linter {
         if (this.options.fix) {
             for (const rule of enabledRules) {
                 const ruleFailures = this.applyRule(rule, sourceFile);
-                const fixes = ruleFailures.map((f) => f.getFix()).filter((f): f is Fix => f !== undefined) as Fix[];
-                source = fs.readFileSync(fileName, { encoding: "utf-8" });
-                if (fixes.length > 0) {
-                    this.fixes = this.fixes.concat(ruleFailures);
-                    source = Fix.applyAll(source, fixes);
-                    fs.writeFileSync(fileName, source, { encoding: "utf-8" });
-
-                    // reload AST if file is modified
-                    sourceFile = this.getSourceFile(fileName, source);
-                }
+                source = this.applyFixes(fileName, source, ruleFailures);
+                sourceFile = this.getSourceFile(fileName, source);
                 fileFailures = fileFailures.concat(ruleFailures);
             }
             hasLinterRun = true;
@@ -129,19 +117,20 @@ class Linter {
                 }
             }
         }
-        this.failures = this.failures.concat(fileFailures);
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map((rule) => {
             return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
         }));
-        for (const failure of this.failures) {
+        for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
             if (severity === undefined) {
-                throw new Error(`Severity for rule '${failure.getRuleName()} not found`);
+                throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
             }
             failure.setRuleSeverity(severity);
         }
+
+        this.failures = this.failures.concat(fileFailures);
     }
 
     public getResult(): LintResult {
@@ -167,6 +156,40 @@ class Linter {
             output,
             warningCount: this.failures.length - errorCount,
         };
+    }
+
+    // Applies fixes to the files where the failures are reported.
+    // Returns the content of the source file which AST needs to be reloaded.
+    protected applyFixes(sourceFilePath: string, sourceContent: string, ruleFailures: RuleFailure[]) {
+      const fixesPerFile: {[file: string]: Fix[]} = ruleFailures
+          .reduce((accum: {[file: string]: Fix[]}, c) => {
+              const currentFileName = c.getFileName();
+              const fix = c.getFix();
+              if (fix !== undefined) {
+                  if (accum[currentFileName] === undefined) {
+                      accum[currentFileName] = [];
+                  }
+                  accum[currentFileName].push(fix);
+              }
+              return accum;
+          }, {});
+
+      const hasFixes = Object.keys(fixesPerFile).length > 0;
+      let result = sourceContent;
+
+      if (hasFixes) {
+          this.fixes = this.fixes.concat(ruleFailures);
+          Object.keys(fixesPerFile).forEach((currentFileName: string) => {
+              const fixesForFile = fixesPerFile[currentFileName];
+              let source = fs.readFileSync(currentFileName, { encoding: "utf-8" });
+              source = Replacement.applyFixes(source, fixesForFile);
+              fs.writeFileSync(currentFileName, source, { encoding: "utf-8" });
+              if (sourceFilePath === currentFileName) {
+                  result = source;
+              }
+          });
+      }
+      return result;
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile) {

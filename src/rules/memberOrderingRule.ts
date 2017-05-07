@@ -17,6 +17,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import {flatMap, mapDefined} from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -150,36 +151,34 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionExamples: [
-            '[true, { "order": "fields-first" }]',
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        "static-field",
-                        "instance-field",
-                        "constructor",
-                        "public-instance-method",
-                        "protected-instance-method",
-                        "private-instance-method"
-                    ]
-                }]`,
-            Lint.Utils.dedent`
-                [true, {
-                    "order": [
-                        {
-                            "name": "static non-private",
-                            "kinds": [
-                                "public-static-field",
-                                "protected-static-field",
-                                "public-static-method",
-                                "protected-static-method"
-                            ]
-                        },
-                        "constructor"
-                    ]
-                }]`,
+            [true, { order: "fields-first" }],
+            [true, {
+                order: [
+                    "static-field",
+                    "instance-field",
+                    "constructor",
+                    "public-instance-method",
+                    "protected-instance-method",
+                    "private-instance-method",
+                ],
+            }],
+            [true, {
+                order: [
+                    {
+                        name: "static non-private",
+                        kinds: [
+                            "public-static-field",
+                            "protected-static-field",
+                            "public-static-method",
+                            "protected-static-method",
+                        ],
+                    },
+                    "constructor",
+                ],
+            }],
         ],
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: false,
     };
 
     public static FAILURE_STRING_ALPHABETIZE(prevName: string, curName: string) {
@@ -200,7 +199,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
-        this.opts = parseOptions(this.getOptions());
+        this.opts = parseOptions(this.getOptions() as any[]);
     }
 
     public visitClassDeclaration(node: ts.ClassDeclaration) {
@@ -309,11 +308,11 @@ function caseInsensitiveLess(a: string, b: string) {
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"];
+    return (MemberKind as any)[access + "Constructor"] as MemberKind;
 }
 
 function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
-    return (MemberKind as any)[access + membership + kind];
+    return (MemberKind as any)[access + membership + kind] as MemberKind;
 }
 
 const allAccess: Access[] = ["public", "protected", "private"];
@@ -391,7 +390,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0];
+    const firstOption = allOptions[0] as Options | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
@@ -481,23 +480,4 @@ function nameString(name: ts.PropertyName): string {
         default:
             return "";
     }
-}
-
-function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
-    const out = [];
-    for (const input of inputs) {
-        const output = getOutput(input);
-        if (output !== undefined) {
-            out.push(output);
-        }
-    }
-    return out;
-}
-
-function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
-    const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
-    }
-    return out;
 }

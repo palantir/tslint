@@ -22,7 +22,7 @@
   {
     "formatterName": "json",
     "description": "Formats errors as simple JSON.",
-    "sample": "\n[\n    {\n        \"endPosition\": {\n            \"character\": 13,\n            \"line\": 0,\n            \"position\": 13\n        },\n        \"failure\": \"Missing semicolon\",\n        \"fix\": {\n            \"innerRuleName\": \"semicolon\",\n            \"innerReplacements\": [\n                {\n                    \"innerStart\": 13,\n                    \"innerLength\": 0,\n                    \"innerText\": \";\"\n                }\n            ]\n        },\n        \"name\": \"myFile.ts\",\n        \"ruleName\": \"semicolon\",\n        \"startPosition\": {\n            \"character\": 13,\n            \"line\": 0,\n            \"position\": 13\n        }\n    }\n]",
+    "sample": "\n[\n    {\n        \"endPosition\": {\n            \"character\": 13,\n            \"line\": 0,\n            \"position\": 13\n        },\n        \"failure\": \"Missing semicolon\",\n        \"fix\": {\n            \"innerStart\": 13,\n            \"innerLength\": 0,\n            \"innerText\": \";\"\n        },\n        \"name\": \"myFile.ts\",\n        \"ruleName\": \"semicolon\",\n        \"startPosition\": {\n            \"character\": 13,\n            \"line\": 0,\n            \"position\": 13\n        }\n    }\n]",
     "consumer": "machine"
   },
   {

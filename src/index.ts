@@ -17,6 +17,7 @@
 
 import * as Configuration from "./configuration";
 import * as Formatters from "./formatters";
+import {FormatterConstructor} from "./language/formatter/formatter";
 import {RuleFailure} from "./language/rule/rule";
 import * as Linter from "./linter";
 import * as Rules from "./rules";
@@ -38,15 +39,13 @@ export interface LintResult {
     warningCount: number;
     failures: RuleFailure[];
     fixes?: RuleFailure[];
-    format: string | FormatterFunction;
+    format: string | FormatterConstructor;
     output: string;
 }
 
-export type FormatterFunction = (failures: RuleFailure[]) => string;
-
 export interface ILinterOptions {
     fix: boolean;
-    formatter?: string | FormatterFunction;
+    formatter?: string | FormatterConstructor;
     formattersDirectory?: string;
     rulesDirectory?: string | string[];
 }

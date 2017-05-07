@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable prefer-switch
+// (waiting on https://github.com/palantir/tslint/pull/2369)
+
 import * as utils from "tsutils";
 import * as ts from "typescript";
 import { IOptions } from "./language/rule/rule";

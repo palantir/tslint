@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "prefer-switch": [true, {
+        "min-cases": 2
+    }]
+  }
+}

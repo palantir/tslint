@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -92,9 +92,9 @@ class Walker extends Lint.RuleWalker {
     }
 
     private failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
-        const fix = this.createFix(this.deleteFromTo(
+        const fix = this.deleteFromTo(
             Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
-            node.end));
+            node.end);
         this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
     }
 }

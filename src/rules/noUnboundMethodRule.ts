@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Warns when a method is used as outside of a method call.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as colors from "colors";
 
 import * as ts from "typescript";

@@ -20,9 +20,32 @@ import * as optimist from "optimist";
 
 import { IRunnerOptions, Runner } from "./runner";
 
+interface Argv {
+    _: string[];
+    c?: string;
+    exclude?: string;
+    f?: boolean;
+    fix?: boolean;
+    force?: boolean;
+    h?: boolean;
+    help?: boolean;
+    i?: boolean;
+    init?: boolean;
+    o?: string;
+    out?: string;
+    p?: string;
+    project?: string;
+    r?: string;
+    s?: string;
+    t?: string;
+    "type-check"?: boolean;
+    test?: string;
+    v?: boolean;
+}
+
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
-    .check((argv: any) => {
+    .check((argv: Argv) => {
         // at least one of file, help, version, project or unqualified argument must be present
         // tslint:disable-next-line strict-boolean-expressions
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
@@ -107,7 +130,7 @@ const processed = optimist
             type: "boolean",
         },
     });
-const argv = processed.argv;
+const argv = processed.argv as Argv;
 
 let outputStream: NodeJS.WritableStream;
 if (argv.o != null) {

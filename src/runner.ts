@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// tslint:disable strict-boolean-expressions (wait on https://github.com/palantir/tslint/pull/2572)
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
@@ -110,12 +112,12 @@ export class Runner {
     constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
 
     public run(onComplete: (status: number) => void) {
-        if (this.options.version === true) {
+        if (this.options.version) {
             this.outputStream.write(Linter.VERSION + "\n");
             return onComplete(0);
         }
 
-        if (this.options.init === true) {
+        if (this.options.init) {
             if (fs.existsSync(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
                 return onComplete(1);
@@ -126,15 +128,14 @@ export class Runner {
             return onComplete(0);
         }
 
-        if (this.options.test !== undefined) {
-            const files = this.options.files !== undefined ? this.options.files : [];
-            const results = runTests(files.map(Runner.trimSingleQuotes), this.options.rulesDirectory);
+        if (this.options.test) {
+            const results = runTests((this.options.files || []).map(Runner.trimSingleQuotes), this.options.rulesDirectory);
             const didAllTestsPass = consoleTestResultsHandler(results);
             return onComplete(didAllTestsPass ? 0 : 1);
         }
 
         // when provided, it should point to an existing location
-        if (this.options.config !== undefined && !fs.existsSync(this.options.config)) {
+        if (this.options.config && !fs.existsSync(this.options.config)) {
             console.error("Invalid option for configuration: " + this.options.config);
             return onComplete(1);
         }
@@ -143,7 +144,7 @@ export class Runner {
         let files = this.options.files === undefined ? [] : this.options.files;
         let program: ts.Program | undefined;
 
-        if (this.options.project !== undefined) {
+        if (this.options.project != null) {
             if (!fs.existsSync(this.options.project)) {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
@@ -152,14 +153,14 @@ export class Runner {
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }
-            if (this.options.typeCheck === true) {
+            if (this.options.typeCheck) {
                 // if type checking, run the type checker
                 const diagnostics = ts.getPreEmitDiagnostics(program);
                 if (diagnostics.length > 0) {
                     const messages = diagnostics.map((diag) => {
                         // emit any error messages
                         let message = ts.DiagnosticCategory[diag.category];
-                        if (diag.file !== undefined) {
+                        if (diag.file) {
                             const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
                             message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
                         }
@@ -167,19 +168,19 @@ export class Runner {
                         return message;
                     });
                     console.error(messages.join("\n"));
-                    return onComplete(this.options.force === true ? 0 : 1);
+                    return onComplete(this.options.force ? 0 : 1);
                 }
             } else {
                 // if not type checking, we don't need to pass in a program object
                 program = undefined;
             }
-        } else if (this.options.typeCheck === true) {
+        } else if (this.options.typeCheck) {
             console.error("--project must be specified in order to enable type checking.");
             return onComplete(1);
         }
 
         let ignorePatterns: string[] = [];
-        if (this.options.exclude !== undefined) {
+        if (this.options.exclude) {
             const excludeArguments: string[] = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
 
             ignorePatterns = excludeArguments.map(Runner.trimSingleQuotes);
@@ -194,8 +195,8 @@ export class Runner {
         try {
             this.processFiles(onComplete, files, program);
         } catch (error) {
-            if (error.name === FatalError.NAME) {
-                console.error(error.message);
+            if ((error as FatalError).name === FatalError.NAME) {
+                console.error((error as FatalError).message);
                 return onComplete(1);
             }
             // rethrow unhandled error
@@ -206,10 +207,10 @@ export class Runner {
     private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
         const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
         const linter = new Linter({
-            fix: this.options.fix === true,
+            fix: !!this.options.fix,
             formatter: this.options.format,
-            formattersDirectory: this.options.formattersDirectory !== undefined ? this.options.formattersDirectory : "",
-            rulesDirectory: this.options.rulesDirectory !== undefined ? this.options.rulesDirectory : "",
+            formattersDirectory: this.options.formattersDirectory || "",
+            rulesDirectory: this.options.rulesDirectory || "",
         }, program);
 
         let lastFolder: string | undefined;
@@ -247,7 +248,7 @@ export class Runner {
         const lintResult = linter.getResult();
 
         this.outputStream.write(lintResult.output, () => {
-            if (this.options.force === true || lintResult.errorCount === 0) {
+            if (this.options.force || lintResult.errorCount === 0) {
                 onComplete(0);
             } else {
                 onComplete(2);

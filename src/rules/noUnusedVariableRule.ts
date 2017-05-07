@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.TypedRule {
             items: {
                 oneOf: [{
                     type: "string",
-                    enum: ["check-parameters", "react"],
+                    enum: ["check-parameters"],
                 }, {
                     type: "object",
                     properties: {
@@ -56,9 +56,10 @@ export class Rule extends Lint.Rules.TypedRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ['[true, "react"]', '[true, {"ignore-pattern": "^_"}]'],
+        optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
         type: "functionality",
         typescriptOnly: true,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -69,7 +70,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
 
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.getOptions().ruleArguments)));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
     }
 }
 
@@ -82,9 +83,13 @@ function parseOptions(options: any[]): Options {
 
     let ignorePattern: RegExp | undefined;
     for (const o of options) {
-        if (typeof o === "object" && o[OPTION_IGNORE_PATTERN] != null) {
-            ignorePattern = new RegExp(o[OPTION_IGNORE_PATTERN]);
-            break;
+        if (typeof o === "object") {
+            // tslint:disable-next-line no-unsafe-any
+            const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
+            if (ignore != null) {
+                ignorePattern = new RegExp(ignore);
+                break;
+            }
         }
     }
 
@@ -179,7 +184,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
             if (failure !== undefined) {
                 const start = defaultName.getStart();
                 const end = namedBindings !== undefined ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
-                const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
+                const fix = Lint.Replacement.deleteFromTo(start, end);
                 ctx.addFailureAtNode(defaultName, failure, fix);
             }
         }
@@ -187,7 +192,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         if (namedBindings !== undefined) {
             if (allNamedBindingsAreFailures) {
                 const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
-                const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, namedBindings.getEnd()));
+                const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
                 const failure = "All named bindings are unused.";
                 ctx.addFailureAtNode(namedBindings, failure, fix);
             } else {
@@ -202,8 +207,8 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
                     const prevElement = elements[i - 1];
                     const nextElement = elements[i + 1];
                     const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
-                    const end = nextElement !== undefined && prevElement === undefined ? nextElement.getStart() : element.getEnd();
-                    const fix = ctx.createFix(Lint.Replacement.deleteFromTo(start, end));
+                    const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
+                    const fix = Lint.Replacement.deleteFromTo(start, end);
                     ctx.addFailureAtNode(element.name, failure, fix);
                 }
             }
@@ -217,7 +222,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
 
         function removeAll(errorNode: ts.Node, failure: string): void {
-            const fix = ctx.createFix(Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd()));
+            const fix = Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd());
             ctx.addFailureAtNode(errorNode, failure, fix);
         }
     });

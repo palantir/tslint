@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isArrowFunction, isCallExpression, isIdentifier, isSpreadElement } from "tsutils";
+import { hasModifier, isArrowFunction, isCallExpression, isIdentifier, isSpreadElement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             To catch more cases, enable \`only-arrow-functions\` and \`arrow-return-shorthand\` too.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -47,12 +47,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
-        const fn = detectRedundantCallback(node);
-        if (fn !== undefined) {
-            const fix = ctx.createFix(
-                Lint.Replacement.deleteFromTo(node.getStart(), fn.getStart()),
-                Lint.Replacement.deleteFromTo(fn.getEnd(), node.getEnd()));
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(fn.getText()), fix);
+        if (isArrowFunction(node) && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
+            isCallExpression(node.body) && isIdentifier(node.body.expression) &&
+            isRedundantCallback(node.parameters, node.body.arguments, node.body.expression)) {
+            const start = node.getStart(ctx.sourceFile);
+            ctx.addFailure(start, node.end, Rule.FAILURE_STRING(node.body.expression.text), [
+                Lint.Replacement.deleteFromTo(start, node.body.getStart(ctx.sourceFile)),
+                Lint.Replacement.deleteFromTo(node.body.expression.end, node.end),
+            ]);
         } else {
             return ts.forEachChild(node, cb);
         }
@@ -60,38 +62,28 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 }
 
-// Returns the `f` in `x => f(x)`.
-function detectRedundantCallback(node: ts.Node): ts.Expression | undefined {
-    if (!isArrowFunction(node)) {
-        return undefined;
+function isRedundantCallback(
+        parameters: ts.NodeArray<ts.ParameterDeclaration>,
+        args: ts.NodeArray<ts.Node>,
+        expression: ts.Identifier,
+        ): boolean {
+    if (parameters.length !== args.length) {
+        return false;
     }
-
-    const { body, parameters } = node;
-    if (!isCallExpression(body)) {
-        return undefined;
-    }
-
-    const { arguments: args, expression } = body;
-
-    if (expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
-        // Allow `x => obj.f(x)`
-        return undefined;
-    }
-
-    // Bug in `strict-boolean-expressions` fixed in TSLint 5.0, remove this disable then.
-    // tslint:disable strict-boolean-expressions
-    const argumentsSameAsParameters = parameters.length === args.length && parameters.every(({dotDotDotToken, name}, i) => {
+    for (let i = 0; i < parameters.length; ++i) {
+        const {dotDotDotToken, name} = parameters[i];
         let arg = args[i];
         if (dotDotDotToken !== undefined) {
-            // Use SpreadElementExpression for ts2.0 compatibility
-            if (!(isSpreadElement(arg) || arg.kind === (ts.SyntaxKind as any).SpreadElementExpression)) {
+            if (!isSpreadElement(arg)) {
                 return false;
             }
-            arg = (arg as ts.SpreadElement).expression;
+            arg = arg.expression;
         }
-
-        return isIdentifier(name) && isIdentifier(arg) && name.text === arg.text;
-    });
-
-    return argumentsSameAsParameters ? expression : undefined;
+        if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text
+                // If the invoked expression is one of the parameters, bail.
+                || expression.text === name.text) {
+            return false;
+        }
+    }
+    return true;
 }

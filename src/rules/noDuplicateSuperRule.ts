@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isConstructorDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -27,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "The second call to 'super()' will fail at runtime.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -37,29 +38,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_LOOP = "'super()' called in a loop. It must be called only once.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    /** Whether we've seen 'super()' yet in the current constructor. */
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        if (node.body === undefined) {
-            return;
-        }
+function walk(ctx: Lint.WalkContext<void>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+       if (isConstructorDeclaration(node) && node.body !== undefined) {
+           getSuperForNode(node.body);
+       }
+       return ts.forEachChild(node, cb);
+    });
 
-        this.getSuperForNode(node.body);
-        super.visitConstructorDeclaration(node);
-    }
-
-    private getSuperForNode(node: ts.Node): Super {
+    function getSuperForNode(node: ts.Node): Super {
         if (Lint.isLoop(node)) {
-            const bodySuper = this.combineSequentialChildren(node);
+            const bodySuper = combineSequentialChildren(node);
             if (typeof bodySuper === "number") {
                 return Kind.NoSuper;
             }
             if (!bodySuper.break) {
-                this.addFailureAtNode(bodySuper.node, Rule.FAILURE_STRING_LOOP);
+                ctx.addFailureAtNode(bodySuper.node, Rule.FAILURE_STRING_LOOP);
             }
             return { ...bodySuper, break: false };
         }
@@ -84,26 +82,24 @@ class Walker extends Lint.RuleWalker {
 
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
-                return worse(
-                    this.getSuperForNode(thenStatement),
-                    elseStatement !== undefined ? this.getSuperForNode(elseStatement) : Kind.NoSuper);
+                return worse(getSuperForNode(thenStatement), elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper);
             }
 
             case ts.SyntaxKind.SwitchStatement:
-                return this.getSuperForSwitch(node as ts.SwitchStatement);
+                return getSuperForSwitch(node as ts.SwitchStatement);
 
             default:
-                return this.combineSequentialChildren(node);
+                return combineSequentialChildren(node);
         }
     }
 
-    private getSuperForSwitch(node: ts.SwitchStatement): Super {
+    function getSuperForSwitch(node: ts.SwitchStatement): Super {
         // 'super()' from any clause. Used to track whether 'super()' happens in the switch at all.
         let foundSingle: ts.CallExpression | undefined;
         // 'super()' from the previous clause if it did not 'break;'.
         let fallthroughSingle: ts.CallExpression | undefined;
         for (const clause of node.caseBlock.clauses) {
-            const clauseSuper = this.combineSequentialChildren(clause);
+            const clauseSuper = combineSequentialChildren(clause);
             switch (clauseSuper) {
                 case Kind.NoSuper:
                     break;
@@ -117,7 +113,7 @@ class Walker extends Lint.RuleWalker {
 
                 default:
                     if (fallthroughSingle !== undefined) {
-                        this.addDuplicateFailure(fallthroughSingle, clauseSuper.node);
+                        addDuplicateFailure(fallthroughSingle, clauseSuper.node);
                     }
                     if (!clauseSuper.break) {
                         fallthroughSingle = clauseSuper.node;
@@ -134,10 +130,10 @@ class Walker extends Lint.RuleWalker {
      * Combines children that come one after another.
      * (As opposed to if/else, switch, or loops, which need their own handling.)
      */
-    private combineSequentialChildren(node: ts.Node): Super {
+    function combineSequentialChildren(node: ts.Node): Super {
         let seenSingle: Single | undefined;
         const res = ts.forEachChild<Super | undefined>(node, (child) => {
-            const childSuper = this.getSuperForNode(child);
+            const childSuper = getSuperForNode(child);
             switch (childSuper) {
                 case Kind.NoSuper:
                     return;
@@ -153,7 +149,7 @@ class Walker extends Lint.RuleWalker {
 
                 default:
                     if (seenSingle !== undefined && !seenSingle.break) {
-                        this.addDuplicateFailure(seenSingle.node, childSuper.node);
+                        addDuplicateFailure(seenSingle.node, childSuper.node);
                     }
                     seenSingle = childSuper;
                     return;
@@ -162,8 +158,8 @@ class Walker extends Lint.RuleWalker {
         return res !== undefined ? res : seenSingle !== undefined ? seenSingle : Kind.NoSuper;
     }
 
-    private addDuplicateFailure(a: ts.Node, b: ts.Node) {
-        this.addFailureFromStartToEnd(a.getStart(), b.end, Rule.FAILURE_STRING_DUPLICATE);
+    function addDuplicateFailure(a: ts.Node, b: ts.Node): void {
+        ctx.addFailure(a.getStart(), b.end, Rule.FAILURE_STRING_DUPLICATE);
     }
 }
 

@@ -50,22 +50,22 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, {"destructuring": "${OPTION_DESTRUCTURING_ALL}"}]`,
+            true,
+            [true, {destructuring: OPTION_DESTRUCTURING_ALL}],
         ],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (identifier: string, blockScoped: boolean) => {
+    public static FAILURE_STRING_FACTORY(identifier: string, blockScoped: boolean) {
         return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${blockScoped ? "let" : "var"}'.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
             destructuringAll: this.ruleArguments.length !== 0 &&
-                this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
+                (this.ruleArguments[0] as any).destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -123,12 +123,21 @@ interface DestructuringInfo {
 class PreferConstWalker extends Lint.AbstractWalker<Options> {
     private scope: Scope;
     public walk(sourceFile: ts.SourceFile) {
+        // don't check anything on declaration files
+        if (sourceFile.isDeclarationFile) {
+            return;
+        }
+
         this.scope = new Scope();
         const cb = (node: ts.Node): void => {
             const savedScope = this.scope;
             const boundary = utils.isScopeBoundary(node);
             if (boundary !== utils.ScopeBoundary.None) {
                 if (boundary === utils.ScopeBoundary.Function) {
+                    if (node.kind === ts.SyntaxKind.ModuleDeclaration && utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                        // don't check ambient namespaces
+                        return;
+                    }
                     this.scope = new Scope();
                     if (utils.isFunctionDeclaration(node) ||
                         utils.isMethodDeclaration(node) ||
@@ -192,33 +201,41 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     }
 
     private handleExpression(node: ts.Expression): void {
-        if (node.kind === ts.SyntaxKind.Identifier) {
-            this.scope.reassigned.add((node as ts.Identifier).text);
-        } else if (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
-            return this.handleExpression((node as ts.ParenthesizedExpression).expression);
-        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
-            for (const element of (node as ts.ArrayLiteralExpression).elements) {
-                if (element.kind === ts.SyntaxKind.SpreadElement) {
-                    this.handleExpression((element as ts.SpreadElement).expression);
-                } else {
-                    this.handleExpression(element);
-                }
-            }
-        } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            for (const property of (node as ts.ObjectLiteralExpression).properties) {
-                if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
-                    this.scope.reassigned.add(property.name.text);
-                } else if (property.kind === ts.SyntaxKind.SpreadAssignment) {
-                    if (property.name !== undefined) {
-                        this.scope.reassigned.add((property.name as ts.Identifier).text);
+        switch (node.kind) {
+            case ts.SyntaxKind.Identifier:
+                this.scope.reassigned.add((node as ts.Identifier).text);
+                break;
+            case ts.SyntaxKind.ParenthesizedExpression:
+                this.handleExpression((node as ts.ParenthesizedExpression).expression);
+                break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                for (const element of (node as ts.ArrayLiteralExpression).elements) {
+                    if (element.kind === ts.SyntaxKind.SpreadElement) {
+                        this.handleExpression((element as ts.SpreadElement).expression);
                     } else {
-                        // handle `...(variable)`
-                        this.handleExpression(property.expression!);
+                        this.handleExpression(element);
                     }
-                } else {
-                    this.handleExpression((property as ts.PropertyAssignment).initializer);
                 }
-            }
+                break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                for (const property of (node as ts.ObjectLiteralExpression).properties) {
+                    switch (property.kind) {
+                        case ts.SyntaxKind.ShorthandPropertyAssignment:
+                            this.scope.reassigned.add(property.name.text);
+                            break;
+                        case ts.SyntaxKind.SpreadAssignment:
+                            if (property.name !== undefined) {
+                                this.scope.reassigned.add((property.name as ts.Identifier).text);
+                            } else {
+                                // handle `...(variable)`
+                                this.handleExpression(property.expression!);
+                            }
+                            break;
+                        default:
+                            this.handleExpression((property as ts.PropertyAssignment).initializer);
+                    }
+                }
+                break;
         }
     }
 
@@ -240,11 +257,11 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         let declarationInfo: DeclarationInfo;
         const kind = utils.getVariableDeclarationKind(declarationList);
         if (kind === utils.VariableDeclarationKind.Const ||
-            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword)) {
+            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
 
             declarationInfo = {
                 canBeConst: false,
-                isBlockScoped: true,
+                isBlockScoped: kind !== utils.VariableDeclarationKind.Var,
             };
         } else {
             declarationInfo = {
@@ -304,9 +321,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = this.createFix(
-                        new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const"),
-                    );
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }

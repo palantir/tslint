@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
         },
-        optionExamples: [`[true, "${OPTION_LINEBREAK_STYLE_LF}"]`, `[true, "${OPTION_LINEBREAK_STYLE_CRLF}"]`],
+        optionExamples: [[true, OPTION_LINEBREAK_STYLE_LF], [true, OPTION_LINEBREAK_STYLE_CRLF]],
         type: "maintainability",
         typescriptOnly: false,
         hasFix: true,
@@ -59,14 +59,10 @@ function walk(ctx: Lint.WalkContext<boolean>) {
         const lineEnd = lineStarts[i] - 1;
         if (sourceText[lineEnd - 1] === "\r") {
             if (!expectedCr) {
-                ctx.addFailure(lineStarts[i - 1], lineEnd - 1, Rule.FAILURE_LF, ctx.createFix(
-                    Lint.Replacement.deleteText(lineEnd - 1, 1),
-                ));
+                ctx.addFailure(lineStarts[i - 1], lineEnd - 1, Rule.FAILURE_LF, Lint.Replacement.deleteText(lineEnd - 1, 1));
             }
         } else if (expectedCr) {
-            ctx.addFailure(lineStarts[i - 1], lineEnd, Rule.FAILURE_CRLF, ctx.createFix(
-                Lint.Replacement.appendText(lineEnd, "\r"),
-            ));
+            ctx.addFailure(lineStarts[i - 1], lineEnd, Rule.FAILURE_CRLF, Lint.Replacement.appendText(lineEnd, "\r"));
         }
     }
 }

@@ -20,6 +20,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isLowerCase, isUpperCase } from "../utils";
 
 const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
@@ -39,11 +40,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
-            * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
+            * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to camelCase.
-              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to camelCase.
+              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
+              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
               * These are: ${bannedKeywordsStr}`,
         options: {
@@ -62,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 5,
         },
-        optionExamples: ['[true, "ban-keywords", "check-format", "allow-leading-underscore"]'],
+        optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -70,7 +71,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction<Options>(sourceFile, walk, parseOptions(this.ruleArguments));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
@@ -163,14 +164,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 
     function formatFailure(): string {
-        let failureMessage = "variable name must be in camelcase";
+        let failureMessage = "variable name must be in lowerCamelCase";
         if (options.allowPascalCase) {
-            failureMessage += ", pascalcase";
+            failureMessage += ", PascalCase";
         }
         if (options.allowSnakeCase) {
-            failureMessage += ", snakecase";
+            failureMessage += ", snake_case";
         }
-        return failureMessage + " or uppercase";
+        return failureMessage + " or UPPER_CASE";
     }
 }
 
@@ -203,12 +204,4 @@ function isCamelCase(name: string, options: Options): boolean {
         return false;
     }
     return true;
-}
-
-function isLowerCase(name: string): boolean {
-    return name === name.toLowerCase();
-}
-
-function isUpperCase(name: string): boolean {
-    return name === name.toUpperCase();
 }

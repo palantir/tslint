@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
             `,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         requiresTypeInfo: true,
         type: "functionality",
         typescriptOnly: false,
@@ -50,23 +50,20 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoForInArrayWalker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program));
     }
 }
 
-class NoForInArrayWalker extends Lint.ProgramAwareRuleWalker {
-    public visitForInStatement(node: ts.ForInStatement) {
-        const iteratee = node.expression;
-        const tc = this.getTypeChecker();
-        const type = tc.getTypeAtLocation(iteratee);
-
-        const isArrayType = type.symbol !== undefined && type.symbol.name === "Array";
-        const isStringType = Lint.isTypeFlagSet(type, ts.TypeFlags.StringLike);
-
-        if (isArrayType || isStringType) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>, program: ts.Program) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.ForInStatement) {
+            const type = program.getTypeChecker().getTypeAtLocation((node as ts.ForInStatement).expression);
+            if (type.symbol !== undefined && type.symbol.name === "Array" ||
+                // tslint:disable-next-line:no-bitwise
+                (type.flags & ts.TypeFlags.StringLike) !== 0) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
-
-        super.visitForInStatement(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
