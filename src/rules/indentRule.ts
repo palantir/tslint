@@ -49,97 +49,80 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_SPACES = "space indentation expected";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new IndentWalker(sourceFile, this.getOptions()));
+        const type = this.ruleArguments.indexOf(OPTION_USE_TABS) !== -1 ? "tabs" :
+            this.ruleArguments.indexOf(OPTION_USE_SPACES) !== -1 ? "spaces" : undefined;
+        return type === undefined ? [] : this.applyWithFunction(sourceFile, walk, { type });
     }
 }
 
 // visit every token and enforce that only the right character is used for indentation
-class IndentWalker extends Lint.RuleWalker {
-    private failureString: string;
-    private regExp: RegExp;
+function walk(ctx: Lint.WalkContext<{ type: "tabs" | "spaces" }>): void {
+    const { sourceFile } = ctx;
+    const badWhitespace = ctx.options.type === "tabs" ? " " : "\t";
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        if (this.hasOption(OPTION_USE_TABS)) {
-            this.regExp = new RegExp(" ");
-            this.failureString = Rule.FAILURE_STRING_TABS;
-        } else if (this.hasOption(OPTION_USE_SPACES)) {
-            this.regExp = new RegExp("\t");
-            this.failureString = Rule.FAILURE_STRING_SPACES;
-        }
-    }
-
-    public visitSourceFile(node: ts.SourceFile) {
-        if (!this.hasOption(OPTION_USE_TABS) && !this.hasOption(OPTION_USE_SPACES)) {
-            // if we don't have either option, no need to check anything, and no need to call super, so just return
-            return;
+    let endOfComment = -1;
+    let endOfTemplateString = -1;
+    const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
+    for (const lineStart of sourceFile.getLineStarts()) {
+        if (lineStart < endOfComment || lineStart < endOfTemplateString) {
+            // skip checking lines inside multi-line comments or template strings
+            continue;
         }
 
-        let endOfComment = -1;
-        let endOfTemplateString = -1;
-        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-        for (const lineStart of node.getLineStarts()) {
-            if (lineStart < endOfComment || lineStart < endOfTemplateString) {
-                // skip checking lines inside multi-line comments or template strings
-                continue;
+        scanner.setTextPos(lineStart);
+
+        let currentScannedType = scanner.scan();
+        let fullLeadingWhitespace = "";
+        let lastStartPos = -1;
+
+        while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
+            const startPos = scanner.getStartPos();
+            if (startPos === lastStartPos) {
+                break;
             }
+            lastStartPos = startPos;
 
-            scanner.setTextPos(lineStart);
+            fullLeadingWhitespace += scanner.getTokenText();
+            currentScannedType = scanner.scan();
+        }
 
-            let currentScannedType = scanner.scan();
-            let fullLeadingWhitespace = "";
-            let lastStartPos = -1;
+        const commentRanges = ts.getTrailingCommentRanges(sourceFile.text, lineStart);
+        if (commentRanges !== undefined) {
+            endOfComment = commentRanges[commentRanges.length - 1].end;
+        } else {
+            let scanType = currentScannedType;
 
-            while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
-                const startPos = scanner.getStartPos();
-                if (startPos === lastStartPos) {
-                    break;
-                }
-                lastStartPos = startPos;
-
-                fullLeadingWhitespace += scanner.getTokenText();
-                currentScannedType = scanner.scan();
-            }
-
-            const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
-            if (commentRanges) {
-                endOfComment = commentRanges[commentRanges.length - 1].end;
-            } else {
-                let scanType = currentScannedType;
-
-                // scan until we reach end of line, skipping over template strings
-                while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
-                        // template string without expressions - skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
-                        // find end of template string containing expressions...
-                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                            scanType = scanner.scan();
-                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
-                                scanType = scanner.reScanTemplateToken();
-                            }
+            // scan until we reach end of line, skipping over template strings
+            while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
+                    // template string without expressions - skip past it
+                    endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
+                } else if (scanType === ts.SyntaxKind.TemplateHead) {
+                    // find end of template string containing expressions...
+                    while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
+                        scanType = scanner.scan();
+                        if (scanType === ts.SyntaxKind.CloseBraceToken) {
+                            scanType = scanner.reScanTemplateToken();
                         }
-                        // ... and skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
                     }
-                    scanType = scanner.scan();
+                    // ... and skip past it
+                    endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
                 }
-            }
-
-            switch (currentScannedType) {
-                case ts.SyntaxKind.SingleLineCommentTrivia:
-                case ts.SyntaxKind.MultiLineCommentTrivia:
-                case ts.SyntaxKind.NewLineTrivia:
-                    // ignore lines that have comments before the first token
-                    continue;
-            }
-
-            if (fullLeadingWhitespace.match(this.regExp)) {
-                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
+                scanType = scanner.scan();
             }
         }
-        // no need to call super to visit the rest of the nodes, so don't call super here
+
+        switch (currentScannedType) {
+            case ts.SyntaxKind.SingleLineCommentTrivia:
+            case ts.SyntaxKind.MultiLineCommentTrivia:
+            case ts.SyntaxKind.NewLineTrivia:
+                // ignore lines that have comments before the first token
+                continue;
+        }
+
+        if (fullLeadingWhitespace.includes(badWhitespace)) {
+            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length,
+                ctx.options.type === "tabs" ? Rule.FAILURE_STRING_TABS : Rule.FAILURE_STRING_SPACES);
+        }
     }
 }
