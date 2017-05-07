@@ -52,7 +52,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                 if (isParameterProperty(parameter)) {
                     ctx.addFailure(parameter.getStart(ctx.sourceFile),
                                    parameter.name.pos,
-                                   Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text));
+                                   Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)));
                 }
             }
         }
