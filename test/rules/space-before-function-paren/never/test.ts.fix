@@ -42,6 +42,9 @@ class MyClass {
         two(): void {
         }
         three(a: string, cb: ()=>{}): void {}
+
+        get a() {}
+        set a() {}
 }
 
 

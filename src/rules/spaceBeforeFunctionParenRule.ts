@@ -85,7 +85,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         const option = getOption(node, options);
         if (option !== undefined) {
             const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken)!;
-            const hasSpace = sourceFile.text[openParen.pos] !== "(";
+            const hasSpace = ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(openParen.end - 2));
 
             if (hasSpace && option === "never") {
                 const pos = openParen.getStart() - 1;
@@ -116,6 +116,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
             return options.method;
 
         default:
