@@ -5,7 +5,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "rationale": "Improves readability and organization by grouping naturally related items together.",
     "type": "typescript",
@@ -16,22 +16,28 @@
     "description": "Enforces vertical alignment.",
     "hasFix": true,
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.\n* `\"members\"` checks alignment of members of classes, interfaces, type literal, object literals and\nobject destructuring.\n* `\"elements\"` checks alignment of elements of array iterals, array destructuring and tuple types.",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
           "arguments",
+          "elements",
+          "members",
           "parameters",
           "statements"
         ]
       },
       "minLength": 1,
-      "maxLength": 3
+      "maxLength": 5
     },
     "optionExamples": [
-      "[true, \"parameters\", \"statements\"]"
+      [
+        true,
+        "parameters",
+        "statements"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -50,9 +56,18 @@
       ]
     },
     "optionExamples": [
-      "[true, \"array\"]",
-      "[true, \"generic\"]",
-      "[true, \"array-simple\"]"
+      [
+        true,
+        "array"
+      ],
+      [
+        true,
+        "generic"
+      ],
+      [
+        true,
+        "array-simple"
+      ]
     ],
     "type": "style",
     "typescriptOnly": true
@@ -70,8 +85,11 @@
       ]
     },
     "optionExamples": [
-      "true",
-      "[true, \"ban-single-arg-parens\"]"
+      true,
+      [
+        true,
+        "ban-single-arg-parens"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -88,8 +106,11 @@
       ]
     },
     "optionExamples": [
-      "[true]",
-      "[true, \"multiline\"]"
+      true,
+      [
+        true,
+        "multiline"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -100,7 +121,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -122,7 +143,21 @@
       }
     },
     "optionExamples": [
-      "[true, [\"someGlobalMethod\"], [\"someObject\", \"someFunction\"],\n                          [\"someObject\", \"otherFunction\", \"Optional explanation\"]]"
+      [
+        true,
+        [
+          "someGlobalMethod"
+        ],
+        [
+          "someObject",
+          "someFunction"
+        ],
+        [
+          "someObject",
+          "otherFunction",
+          "Optional explanation"
+        ]
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -143,7 +178,16 @@
     },
     "optionsDescription": "\nA list of `[\"regex\", \"optional explanation here\"]`, which bans\ntypes that match `regex`",
     "optionExamples": [
-      "[true, [\"Object\", \"Use {} instead.\"], [\"String\"]]"
+      [
+        true,
+        [
+          "Object",
+          "Use {} instead."
+        ],
+        [
+          "String"
+        ]
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -155,7 +199,8 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "hasFix": true
   },
   {
     "ruleName": "class-name",
@@ -164,7 +209,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -208,9 +253,28 @@
       "maxLength": 4
     },
     "optionExamples": [
-      "[true, \"check-space\", \"check-uppercase\"]",
-      "[true, \"check-lowercase\", {\"ignore-words\": [\"TODO\", \"HACK\"]}]",
-      "[true, \"check-lowercase\", {\"ignore-pattern\": \"STD\\w{2,3}\\b\"}]"
+      [
+        true,
+        "check-space",
+        "check-uppercase"
+      ],
+      [
+        true,
+        "check-lowercase",
+        {
+          "ignore-words": [
+            "TODO",
+            "HACK"
+          ]
+        }
+      ],
+      [
+        true,
+        "check-lowercase",
+        {
+          "ignore-pattern": "STD\\w{2,3}\\b"
+        }
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -376,9 +440,31 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[true, \"enums\", \"functions\", \"methods\"]",
-      "[true, {\n                \"enums\": true,\n                \"functions\": {\n                    \"visibilities\": [\"exported\"]\n                },\n                \"methods\": {\n                    \"locations\": [\"instance\"]\n                    \"privacies\": [\"public\", \"protected\"]\n                }\n            }]"
+      true,
+      [
+        true,
+        "enums",
+        "functions",
+        "methods"
+      ],
+      [
+        true,
+        {
+          "enums": true,
+          "functions": {
+            "visibilities": [
+              "exported"
+            ]
+          },
+          "methods": {
+            "locations": "instance",
+            "privacies": [
+              "public",
+              "protected"
+            ]
+          }
+        }
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -398,8 +484,11 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[true, \"ignore-same-line\"]"
+      true,
+      [
+        true,
+        "ignore-same-line"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -415,11 +504,26 @@
       "minimum": "$(Rule.MINIMUM_THRESHOLD)"
     },
     "optionExamples": [
-      "true",
-      "[true, 20]"
+      true,
+      [
+        true,
+        20
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "deprecation",
+    "description": "Warns when deprecated APIs are used.",
+    "descriptionDetails": "Any usage of an identifier\n            with the @deprecated JSDoc annotation will trigger a warning.\n            See http://usejsdoc.org/tags-deprecated.html",
+    "rationale": "\nDeprecated APIs should be avoided, and usage updated.",
+    "optionsDescription": "",
+    "options": null,
+    "optionExamples": [],
+    "type": "maintainability",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "eofline",
@@ -428,7 +532,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "hasFix": true,
     "type": "maintainability",
@@ -442,7 +546,10 @@
       "type": "string"
     },
     "optionExamples": [
-      "[true, \"Copyright \\\\d{4}\"]"
+      [
+        true,
+        "Copyright \\d{4}"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -454,7 +561,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -472,8 +579,12 @@
       "minLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, \"rxjs\", \"lodash\"]"
+      true,
+      [
+        true,
+        "rxjs",
+        "lodash"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -484,7 +595,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -502,7 +613,10 @@
       ]
     },
     "optionExamples": [
-      "[true, \"spaces\"]"
+      [
+        true,
+        "spaces"
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -520,8 +634,14 @@
       ]
     },
     "optionExamples": [
-      "[true, \"always-prefix\"]",
-      "[true, \"never-prefix\"]"
+      [
+        true,
+        "always-prefix"
+      ],
+      [
+        true,
+        "never-prefix"
+      ]
     ],
     "type": "style",
     "typescriptOnly": true
@@ -533,10 +653,11 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "hasFix": true
   },
   {
     "ruleName": "jsdoc-format",
@@ -546,7 +667,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -559,7 +680,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -576,8 +697,14 @@
       ]
     },
     "optionExamples": [
-      "[true, \"LF\"]",
-      "[true, \"CRLF\"]"
+      [
+        true,
+        "LF"
+      ],
+      [
+        true,
+        "CRLF"
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false,
@@ -589,7 +716,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": true,
@@ -613,8 +740,14 @@
       "maxLength": 2
     },
     "optionExamples": [
-      "[true, 1]",
-      "[true, 5]"
+      [
+        true,
+        1
+      ],
+      [
+        true,
+        5
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -629,7 +762,10 @@
       "minimum": "1"
     },
     "optionExamples": [
-      "[true, 300]"
+      [
+        true,
+        300
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -644,7 +780,10 @@
       "minimum": "1"
     },
     "optionExamples": [
-      "[true, 120]"
+      [
+        true,
+        120
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -668,9 +807,15 @@
       "maxLength": 3
     },
     "optionExamples": [
-      "true",
-      "[true, \"no-public\"]",
-      "[true, \"check-accessor\"]"
+      true,
+      [
+        true,
+        "no-public"
+      ],
+      [
+        true,
+        "check-accessor"
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -723,9 +868,42 @@
       "additionalProperties": false
     },
     "optionExamples": [
-      "[true, { \"order\": \"fields-first\" }]",
-      "\n[true, {\n    \"order\": [\n        \"static-field\",\n        \"instance-field\",\n        \"constructor\",\n        \"public-instance-method\",\n        \"protected-instance-method\",\n        \"private-instance-method\"\n    ]\n}]",
-      "\n[true, {\n    \"order\": [\n        {\n            \"name\": \"static non-private\",\n            \"kinds\": [\n                \"public-static-field\",\n                \"protected-static-field\",\n                \"public-static-method\",\n                \"protected-static-method\"\n            ]\n        },\n        \"constructor\"\n    ]\n}]"
+      [
+        true,
+        {
+          "order": "fields-first"
+        }
+      ],
+      [
+        true,
+        {
+          "order": [
+            "static-field",
+            "instance-field",
+            "constructor",
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method"
+          ]
+        }
+      ],
+      [
+        true,
+        {
+          "order": [
+            {
+              "name": "static non-private",
+              "kinds": [
+                "public-static-field",
+                "protected-static-field",
+                "public-static-method",
+                "protected-static-method"
+              ]
+            },
+            "constructor"
+          ]
+        }
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -737,7 +915,7 @@
     "optionsDescription": "Not configurable.",
     "options": {},
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -749,7 +927,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -762,7 +940,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": true
@@ -775,7 +953,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -787,7 +965,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -800,7 +978,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -812,7 +990,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": true,
@@ -826,7 +1004,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -842,8 +1020,11 @@
       "minimum": "$(Rule.MINIMUM_ALLOWED_BLANKS)"
     },
     "optionExamples": [
-      "true",
-      "[true, 2]"
+      true,
+      [
+        true,
+        2
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -852,7 +1033,7 @@
     "ruleName": "no-console",
     "description": "Bans the use of specified `console` methods.",
     "rationale": "In general, `console` methods aren't appropriate for production code.",
-    "optionsDescription": "A list of method names to ban.",
+    "optionsDescription": "A list of method names to ban. If no method names are provided, all console methods are banned.",
     "options": {
       "type": "array",
       "items": {
@@ -860,7 +1041,11 @@
       }
     },
     "optionExamples": [
-      "[true, \"log\", \"error\"]"
+      [
+        true,
+        "log",
+        "error"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -873,7 +1058,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -885,7 +1070,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -898,7 +1083,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -910,7 +1095,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -923,7 +1108,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -945,7 +1130,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -957,7 +1142,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -965,6 +1150,7 @@
   {
     "ruleName": "no-floating-promises",
     "description": "Promises returned by functions must be handled appropriately.",
+    "descriptionDetails": "Use `no-unused-expressions` in addition to this rule to reveal even more floating promises.",
     "optionsDescription": "\nA list of 'string' names of any additional classes that should also be handled as Promises.\n        ",
     "options": {
       "type": "list",
@@ -976,8 +1162,11 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[true, \"JQueryPromise\"]"
+      true,
+      [
+        true,
+        "JQueryPromise"
+      ]
     ],
     "rationale": "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
     "type": "functionality",
@@ -991,7 +1180,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "requiresTypeInfo": true,
     "type": "functionality",
@@ -1000,8 +1189,13 @@
   {
     "description": "Avoid import statements with side-effect.",
     "optionExamples": [
-      "true",
-      "[true, { \"ignore-module\": \"(\\.html|\\.css)$\" }]"
+      true,
+      [
+        true,
+        {
+          "ignore-module": "(\\.html|\\.css)$"
+        }
+      ]
     ],
     "options": {
       "items": {
@@ -1041,9 +1235,16 @@
     },
     "hasFix": true,
     "optionExamples": [
-      "true",
-      "[true, \"ignore-params\"]",
-      "[true, \"ignore-params\", \"ignore-properties\"]"
+      true,
+      [
+        true,
+        "ignore-params"
+      ],
+      [
+        true,
+        "ignore-params",
+        "ignore-properties"
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -1054,7 +1255,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -1067,10 +1268,11 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "hasFix": true
   },
   {
     "ruleName": "no-invalid-template-strings",
@@ -1078,7 +1280,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1100,10 +1302,25 @@
       "maxLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, \"check-function-in-method\"]"
+      true,
+      [
+        true,
+        "check-function-in-method"
+      ]
     ],
     "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-irregular-whitespace",
+    "description": "Disallow irregular whitespace outside of strings and comments",
+    "hasFix": true,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
     "typescriptOnly": false
   },
   {
@@ -1119,8 +1336,13 @@
       "minLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, 1, 2, 3]"
+      true,
+      [
+        true,
+        1,
+        2,
+        3
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1131,7 +1353,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "maintainability",
     "typescriptOnly": true
@@ -1142,7 +1364,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true
@@ -1165,8 +1387,11 @@
       "maxLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-declarations\"]"
+      true,
+      [
+        true,
+        "allow-declarations"
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -1178,7 +1403,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -1190,10 +1415,22 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-object-literal-type-assertion",
+    "description": "Forbids an object literal to appear in a type assertion expression.",
+    "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\n`const x: { foo: number } = {}` will fail, but `const x = {} as { foo: number }` succeeds.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "functionality",
+    "typescriptOnly": true
   },
   {
     "ruleName": "no-parameter-properties",
@@ -1202,7 +1439,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": true
@@ -1222,7 +1459,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1234,7 +1471,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -1246,7 +1483,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1258,7 +1495,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1270,10 +1507,11 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   },
   {
     "ruleName": "no-string-throw",
@@ -1292,7 +1530,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1315,9 +1553,15 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[true, \"ignore-comments\"]",
-      "[true, \"ignore-jsdoc\"]"
+      true,
+      [
+        true,
+        "ignore-comments"
+      ],
+      [
+        true,
+        "ignore-jsdoc"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1328,7 +1572,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -1340,7 +1584,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1352,7 +1596,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1364,9 +1608,19 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "no-unnecessary-type-assertion",
+    "description": "Warns if a type assertion does not change the type of an expression.",
+    "options": null,
+    "optionsDescription": "Not configurable",
+    "type": "typescript",
+    "hasFix": true,
     "typescriptOnly": true,
     "requiresTypeInfo": true
   },
@@ -1376,7 +1630,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -1390,7 +1644,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1406,15 +1660,20 @@
       "items": {
         "type": "string",
         "enum": [
-          "allow-fast-null-checks"
+          "allow-fast-null-checks",
+          "allow-new",
+          "allow-tagged-template"
         ]
       },
       "minLength": 0,
-      "maxLength": 1
+      "maxLength": 3
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-fast-null-checks\"]"
+      true,
+      [
+        true,
+        "allow-fast-null-checks"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1449,11 +1708,17 @@
       "maxLength": 3
     },
     "optionExamples": [
-      "[true]",
-      "[true, {\"ignore-pattern\": \"^_\"}]"
+      true,
+      [
+        true,
+        {
+          "ignore-pattern": "^_"
+        }
+      ]
     ],
     "type": "functionality",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-use-before-declare",
@@ -1462,10 +1727,11 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-var-keyword",
@@ -1475,7 +1741,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1487,7 +1753,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -1512,6 +1778,17 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "number-literal-format",
+    "description": "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "object-literal-key-quotes",
     "description": "Enforces consistent object literal property quote style.",
     "descriptionDetails": "\nObject literal property names can be defined in two ways: using literals or using strings.\nFor example, these two objects are equivalent:\n\nvar object1 = {\n    property: true\n};\n\nvar object2 = {\n    \"property\": true\n};\n\nIn many cases, it doesn’t matter if you choose to use an identifier instead of a string\nor vice-versa. Even so, you might decide to enforce a consistent style in your code.\n\nThis rules lets you enforce consistent quoting of property names. Either they should always\nbe quoted (default behavior) or quoted only as needed (\"as-needed\").",
@@ -1527,8 +1804,14 @@
       ]
     },
     "optionExamples": [
-      "[true, \"as-needed\"]",
-      "[true, \"always\"]"
+      [
+        true,
+        "as-needed"
+      ],
+      [
+        true,
+        "always"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1540,7 +1823,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1552,7 +1835,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -1577,7 +1860,12 @@
       "maxLength": 5
     },
     "optionExamples": [
-      "[true, \"check-catch\", \"check-finally\", \"check-else\"]"
+      [
+        true,
+        "check-catch",
+        "check-finally",
+        "check-else"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1598,8 +1886,11 @@
       "maxLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, \"ignore-for-loop\"]"
+      true,
+      [
+        true,
+        "ignore-for-loop"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1622,8 +1913,12 @@
       "maxLength": 1
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-declarations\", \"allow-named-functions\"]"
+      true,
+      [
+        true,
+        "allow-declarations",
+        "allow-named-functions"
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1659,8 +1954,14 @@
       "additionalProperties": false
     },
     "optionExamples": [
-      "true",
-      "[true, {\"import-sources-order\": \"lowercase-last\", \"named-imports-order\": \"lowercase-first\"}]"
+      true,
+      [
+        true,
+        {
+          "import-sources-order": "lowercase-last",
+          "named-imports-order": "lowercase-first"
+        }
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1684,8 +1985,13 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[true, {\"destructuring\": \"all\"}]"
+      true,
+      [
+        true,
+        {
+          "destructuring": "all"
+        }
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -1697,7 +2003,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": false
@@ -1714,8 +2020,12 @@
       ]
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-public\", \"allow-protected\"]"
+      true,
+      [
+        true,
+        "allow-public",
+        "allow-protected"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1727,7 +2037,26 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "prefer-switch",
+    "description": "Prefer a `switch` statement to an `if` statement with simple `===` comparisons.",
+    "optionsDescription": "\nAn optional object with the property 'min-cases'.\nThis is the number cases needed before a switch statement is recommended.\nDefaults to 2.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "min-cases": {
+          "type": "number"
+        }
+      }
+    },
+    "optionExamples": [
+      "true",
+      "[\"true\", { \"min-cases\": 2 }]"
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1743,8 +2072,11 @@
       ]
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-single-concat\"]"
+      true,
+      [
+        true,
+        "allow-single-concat"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1756,7 +2088,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": false,
@@ -1783,8 +2115,16 @@
       "maxLength": 5
     },
     "optionExamples": [
-      "[true, \"single\", \"avoid-escape\"]",
-      "[true, \"single\", \"jsx-double\"]"
+      [
+        true,
+        "single",
+        "avoid-escape"
+      ],
+      [
+        true,
+        "single",
+        "jsx-double"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1796,7 +2136,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1807,7 +2147,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false,
@@ -1819,7 +2159,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false,
@@ -1850,10 +2190,24 @@
       "additionalItems": false
     },
     "optionExamples": [
-      "[true, \"always\"]",
-      "[true, \"never\"]",
-      "[true, \"always\", \"ignore-interfaces\"]",
-      "[true, \"always\", \"ignore-bound-class-methods\"]"
+      [
+        true,
+        "always"
+      ],
+      [
+        true,
+        "never"
+      ],
+      [
+        true,
+        "always",
+        "ignore-interfaces"
+      ],
+      [
+        true,
+        "always",
+        "ignore-bound-class-methods"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1862,10 +2216,23 @@
     "description": "Require or disallow a space before function parenthesis",
     "hasFix": true,
     "optionExamples": [
-      "true",
-      "[true, \"always\"]",
-      "[true, \"never\"]",
-      "[true, {\"anonymous\": \"always\", \"named\": \"never\", \"asyncArrow\": \"always\"}]"
+      true,
+      [
+        true,
+        "always"
+      ],
+      [
+        true,
+        "never"
+      ],
+      [
+        true,
+        {
+          "anonymous": "always",
+          "named": "never",
+          "asyncArrow": "always"
+        }
+      ]
     ],
     "options": {
       "properties": {
@@ -1931,8 +2298,14 @@
       "maxLength": 5
     },
     "optionExamples": [
-      "true",
-      "[true, allow-null-union, allow-undefined-union, allow-string, allow-number]"
+      true,
+      [
+        true,
+        "allow-null-union",
+        "allow-undefined-union",
+        "allow-string",
+        "allow-number"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -1944,7 +2317,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -1956,7 +2329,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1965,29 +2338,160 @@
     "ruleName": "trailing-comma",
     "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function typings,\nnamed imports and exports and function parameters.",
     "hasFix": true,
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth should be set to either `\"always\"` or `\"never\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nA array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function typings, named import statements\nand function parameters.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth can be set to a string (`\"always\"` or `\"never\"`) or an object.\n\nThe object can contain any of the following keys: `\"arrays\"`, `\"objects\"`, `\"functions\"`,\n`\"imports\"`, `\"exports\"`, and `\"typeLiterals\"`; each key can have one of the following\nvalues: `\"always\"`, `\"never\"`, and `\"ignore\"`. Any missing keys will default to `\"ignore\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nAn array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function typings, named import statements\nand function parameters.",
     "options": {
       "type": "object",
       "properties": {
         "multiline": {
-          "type": "string",
-          "enum": [
-            "always",
-            "never"
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "always",
+                "never"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "arrays": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "exports": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "functions": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "imports": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "objects": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "typeLiterals": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                }
+              }
+            }
           ]
         },
         "singleline": {
-          "type": "string",
-          "enum": [
-            "always",
-            "never"
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "always",
+                "never"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "arrays": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "exports": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "functions": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "imports": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "objects": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                },
+                "typeLiterals": {
+                  "type": "string",
+                  "enum": [
+                    "always",
+                    "never",
+                    "ignore"
+                  ]
+                }
+              }
+            }
           ]
         }
       },
       "additionalProperties": false
     },
     "optionExamples": [
-      "[true, {\"multiline\": \"always\", \"singleline\": \"never\"}]"
+      [
+        true,
+        {
+          "multiline": "always",
+          "singleline": "never"
+        }
+      ],
+      [
+        true,
+        {
+          "multiline": {
+            "objects": "always",
+            "arrays": "always",
+            "functions": "never",
+            "typeLiterals": "ignore"
+          }
+        }
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -2009,9 +2513,15 @@
       "maxLength": 2
     },
     "optionExamples": [
-      "true",
-      "[true, \"allow-null-check\"]",
-      "[true, \"allow-undefined-check\"]"
+      true,
+      [
+        true,
+        "allow-null-check"
+      ],
+      [
+        true,
+        "allow-undefined-check"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -2040,7 +2550,12 @@
       "maxLength": 7
     },
     "optionExamples": [
-      "[true, \"call-signature\", \"parameter\", \"member-variable-declaration\"]"
+      [
+        true,
+        "call-signature",
+        "parameter",
+        "member-variable-declaration"
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -2149,7 +2664,23 @@
       "additionalItems": false
     },
     "optionExamples": [
-      "\n[\n  true,\n  {\n    \"call-signature\": \"nospace\",\n    \"index-signature\": \"nospace\",\n    \"parameter\": \"nospace\",\n    \"property-declaration\": \"nospace\",\n    \"variable-declaration\": \"nospace\"\n  },\n  {\n    \"call-signature\": \"onespace\",\n    \"index-signature\": \"onespace\",\n    \"parameter\": \"onespace\",\n    \"property-declaration\": \"onespace\",\n    \"variable-declaration\": \"onespace\"\n  }\n]"
+      [
+        true,
+        {
+          "call-signature": "nospace",
+          "index-signature": "nospace",
+          "parameter": "nospace",
+          "property-declaration": "nospace",
+          "variable-declaration": "nospace"
+        },
+        {
+          "call-signature": "onespace",
+          "index-signature": "onespace",
+          "parameter": "onespace",
+          "property-declaration": "onespace",
+          "variable-declaration": "onespace"
+        }
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -2160,7 +2691,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -2171,7 +2702,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "typescript",
     "typescriptOnly": true
@@ -2183,7 +2714,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -2209,7 +2740,12 @@
       "maxLength": 5
     },
     "optionExamples": [
-      "[true, \"ban-keywords\", \"check-format\", \"allow-leading-underscore\"]"
+      [
+        true,
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -2238,7 +2774,12 @@
       "maxLength": 7
     },
     "optionExamples": [
-      "[true, \"check-branch\", \"check-operator\", \"check-typecast\"]"
+      [
+        true,
+        "check-branch",
+        "check-operator",
+        "check-typecast"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false

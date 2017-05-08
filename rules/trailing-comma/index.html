@@ -8,31 +8,57 @@ hasFix: true
 optionsDescription: |-
 
   One argument which is an object with the keys `multiline` and `singleline`.
-  Both should be set to either `"always"` or `"never"`.
+  Both can be set to a string (`"always"` or `"never"`) or an object.
+
+  The object can contain any of the following keys: `"arrays"`, `"objects"`, `"functions"`,
+  `"imports"`, `"exports"`, and `"typeLiterals"`; each key can have one of the following
+  values: `"always"`, `"never"`, and `"ignore"`. Any missing keys will default to `"ignore"`.
 
   * `"multiline"` checks multi-line object literals.
   * `"singleline"` checks single-line object literals.
 
-  A array is considered "multiline" if its closing bracket is on a line
+  An array is considered "multiline" if its closing bracket is on a line
   after the last array element. The same general logic is followed for
   object literals, function typings, named import statements
   and function parameters.
 options:
   type: object
   properties:
-    multiline:
-      type: string
-      enum:
-        - always
-        - never
-    singleline:
-      type: string
-      enum:
-        - always
-        - never
+    multiline: &ref_1
+      anyOf:
+        - type: string
+          enum:
+            - always
+            - never
+        - type: object
+          properties:
+            arrays: &ref_0
+              type: string
+              enum:
+                - always
+                - never
+                - ignore
+            exports: *ref_0
+            functions: *ref_0
+            imports: *ref_0
+            objects: *ref_0
+            typeLiterals: *ref_0
+    singleline: *ref_1
   additionalProperties: false
 optionExamples:
   - '[true, {"multiline": "always", "singleline": "never"}]'
+  - |-
+    [
+      true,
+      {
+        "multiline": {
+          "objects": "always",
+          "arrays": "always",
+          "functions": "never",
+          "typeLiterals": "ignore"
+        }
+      }
+    ]
 type: maintainability
 typescriptOnly: false
 layout: rule
@@ -42,17 +68,131 @@ optionsJSON: |-
     "type": "object",
     "properties": {
       "multiline": {
-        "type": "string",
-        "enum": [
-          "always",
-          "never"
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "always",
+              "never"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "arrays": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "exports": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "functions": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "imports": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "objects": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "typeLiterals": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              }
+            }
+          }
         ]
       },
       "singleline": {
-        "type": "string",
-        "enum": [
-          "always",
-          "never"
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "always",
+              "never"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "arrays": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "exports": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "functions": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "imports": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "objects": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              },
+              "typeLiterals": {
+                "type": "string",
+                "enum": [
+                  "always",
+                  "never",
+                  "ignore"
+                ]
+              }
+            }
+          }
         ]
       }
     },

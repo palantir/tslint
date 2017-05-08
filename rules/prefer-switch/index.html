@@ -1,0 +1,30 @@
+---
+ruleName: prefer-switch
+description: Prefer a `switch` statement to an `if` statement with simple `===` comparisons.
+optionsDescription: |-
+
+  An optional object with the property 'min-cases'.
+  This is the number cases needed before a switch statement is recommended.
+  Defaults to 2.
+options:
+  type: object
+  properties:
+    min-cases:
+      type: number
+optionExamples:
+  - 'true'
+  - '["true", { "min-cases": 2 }]'
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: prefer-switch'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "min-cases": {
+        "type": "number"
+      }
+    }
+  }
+---

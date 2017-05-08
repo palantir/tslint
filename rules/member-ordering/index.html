@@ -76,35 +76,39 @@ options:
           maxLength: 13
   additionalProperties: false
 optionExamples:
-  - '[true, { "order": "fields-first" }]'
+  - '[true, {"order": "fields-first"}]'
   - |-
-
-    [true, {
+    [
+      true,
+      {
         "order": [
-            "static-field",
-            "instance-field",
-            "constructor",
-            "public-instance-method",
-            "protected-instance-method",
-            "private-instance-method"
+          "static-field",
+          "instance-field",
+          "constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
         ]
-    }]
+      }
+    ]
   - |-
-
-    [true, {
+    [
+      true,
+      {
         "order": [
-            {
-                "name": "static non-private",
-                "kinds": [
-                    "public-static-field",
-                    "protected-static-field",
-                    "public-static-method",
-                    "protected-static-method"
-                ]
-            },
-            "constructor"
+          {
+            "name": "static non-private",
+            "kinds": [
+              "public-static-field",
+              "protected-static-field",
+              "public-static-method",
+              "protected-static-method"
+            ]
+          },
+          "constructor"
         ]
-    }]
+      }
+    ]
 type: typescript
 typescriptOnly: false
 layout: rule

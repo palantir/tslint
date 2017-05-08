@@ -20,7 +20,7 @@ named "tslint-config" as a configuration file. Specific files inside node module
 specified, eg. `"tslint-config/path/to/submodule"`. Relative paths to JSON files or JS modules
 are also supported, e.g. `"./tslint-config"`.
 * `rulesDirectory?: string | string[]`:
-A path or array of paths to a directories of [custom rules][2]. These may be relative or absolute paths.
+A path to a directory or an array of paths to directories of [custom rules][2]. These values are handled using node module resolution semantics, if an `index.js` is placed in your rules directory. We fallback to use relative or absolute paths, if the module can't be resolved. If you want to avoid module resolution you can directly use a relative or absolute path (e.g. with `./`).
 * `rules?: { [name: string]: RuleSetting }`: A map of rule names to their configuration settings.
   - These rules are applied to `.ts` and `.tsx` files.
   - Each rule is associated with an object containing:

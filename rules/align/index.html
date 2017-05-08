@@ -5,21 +5,26 @@ hasFix: true
 rationale: 'Helps maintain a readable, consistent style in your codebase.'
 optionsDescription: |-
 
-  Three arguments may be optionally provided:
+  Five arguments may be optionally provided:
 
   * `"parameters"` checks alignment of function parameters.
   * `"arguments"` checks alignment of function call arguments.
   * `"statements"` checks alignment of statements.
+  * `"members"` checks alignment of members of classes, interfaces, type literal, object literals and
+  object destructuring.
+  * `"elements"` checks alignment of elements of array iterals, array destructuring and tuple types.
 options:
   type: array
   items:
     type: string
     enum:
       - arguments
+      - elements
+      - members
       - parameters
       - statements
   minLength: 1
-  maxLength: 3
+  maxLength: 5
 optionExamples:
   - '[true, "parameters", "statements"]'
 type: style
@@ -33,11 +38,13 @@ optionsJSON: |-
       "type": "string",
       "enum": [
         "arguments",
+        "elements",
+        "members",
         "parameters",
         "statements"
       ]
     },
     "minLength": 1,
-    "maxLength": 3
+    "maxLength": 5
   }
 ---

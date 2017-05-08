@@ -82,16 +82,14 @@ optionExamples:
   - 'true'
   - '[true, "enums", "functions", "methods"]'
   - |-
-    [true, {
-                    "enums": true,
-                    "functions": {
-                        "visibilities": ["exported"]
-                    },
-                    "methods": {
-                        "locations": ["instance"]
-                        "privacies": ["public", "protected"]
-                    }
-                }]
+    [
+      true,
+      {
+        "enums": true,
+        "functions": {"visibilities": ["exported"]},
+        "methods": {"locations": "instance", "privacies": ["public", "protected"]}
+      }
+    ]
 type: style
 typescriptOnly: false
 layout: rule

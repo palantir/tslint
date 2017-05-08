@@ -1,0 +1,18 @@
+---
+ruleName: no-object-literal-type-assertion
+description: Forbids an object literal to appear in a type assertion expression.
+rationale: |-
+
+  Always prefer `const x: T = { ... };` to `const x = { ... } as T;`.
+  The type assertion in the latter case is either unnecessary or hides an error.
+  `const x: { foo: number } = {}` will fail, but `const x = {} as { foo: number }` succeeds.
+optionsDescription: Not configurable.
+options: null
+optionExamples:
+  - 'true'
+type: functionality
+typescriptOnly: true
+layout: rule
+title: 'Rule: no-object-literal-type-assertion'
+optionsJSON: 'null'
+---
