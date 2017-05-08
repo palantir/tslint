@@ -131,35 +131,42 @@ function parseOptions(options: Array<string | IExceptionsObject>): Options {
 }
 
 function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp, failureSuffix: string} {
-        if (typeof option !== "object") {
-            return undefined;
-        }
-        const ignorePattern = option["ignore-pattern"];
-        if (ignorePattern !== undefined) {
-            return {
-                exceptions: new RegExp(`^\\s*(${ignorePattern})`),
-                failureSuffix: Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern),
-            };
-        }
-
-        const ignoreWords = option["ignore-words"];
-        if (ignoreWords !== undefined && ignoreWords.length !== 0) {
-            return {
-                exceptions: new RegExp(`^\\s*(?:${ignoreWords.map((word) => escapeRegExp(word.trim())).join("|")})\\b`),
-                failureSuffix: Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords),
-            };
-        }
+    if (typeof option !== "object") {
         return undefined;
     }
+    const ignorePattern = option["ignore-pattern"];
+    if (ignorePattern !== undefined) {
+        return {
+            exceptions: new RegExp(`^\\s*(${ignorePattern})`),
+            failureSuffix: Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern),
+        };
+    }
+
+    const ignoreWords = option["ignore-words"];
+    if (ignoreWords !== undefined && ignoreWords.length !== 0) {
+        return {
+            exceptions: new RegExp(`^\\s*(?:${ignoreWords.map((word) => escapeRegExp(word.trim())).join("|")})\\b`),
+            failureSuffix: Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords),
+        };
+    }
+    return undefined;
+}
 
 function walk(ctx: Lint.WalkContext<Options>) {
     utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
-        const start = pos + 2;
+        let start = pos + 2;
         if (kind !== ts.SyntaxKind.SingleLineCommentTrivia ||
             // exclude empty comments
             start === end ||
             // exclude /// <reference path="...">
             fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos === pos && ref.end === end)) {
+            return;
+        }
+        // skip all leading slashes
+        while (fullText[start] === "/") {
+            ++start;
+        }
+        if (start === end) {
             return;
         }
         const commentText = fullText.slice(start, end);

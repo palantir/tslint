@@ -12,7 +12,8 @@ class Clazz { // this comment is correct
                                ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
     }
     /// <not a reference/>
-      ~~~~~~~~~~~~~~~~~~~~ [space]
+    ////foo
+        ~~~ [space]
 }
 
 //#region test
