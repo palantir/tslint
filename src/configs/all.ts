@@ -243,7 +243,7 @@ for (const key in rules) {
     }
 
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
-    if (Rule === "not-found") {
+    if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
     }
     if (!Rule.metadata.typescriptOnly) {

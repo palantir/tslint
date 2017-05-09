@@ -127,6 +127,17 @@ export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Eq
     return a === b || !!a && !!b && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }
 
+/** Returns the first non-`undefined` result. */
+export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U | undefined {
+    for (const element of inputs) {
+        const result = getResult(element);
+        if (result !== undefined) {
+            return result;
+        }
+    }
+    return undefined;
+}
+
 /** Returns an array that is the concatenation of all output arrays. */
 export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
     const out = [];

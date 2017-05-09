@@ -485,7 +485,7 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
     const output: IOptions[] = [];
     ruleConfiguration.forEach((partialOptions, ruleName) => {
         const options: IOptions = {
-            disabledIntervals: [],
+            disabledIntervals: [], // deprecated, so just provide an empty array.
             ruleArguments: partialOptions.ruleArguments || [],
             ruleName,
             ruleSeverity: partialOptions.ruleSeverity || "error",

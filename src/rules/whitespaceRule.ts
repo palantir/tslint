@@ -257,6 +257,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function addMissingWhitespaceErrorAt(position: number): void {
+        // TODO: this rule occasionally adds duplicate failures.
+        if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
+            return;
+        }
         const fix = Lint.Replacement.appendText(position, " ");
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }
