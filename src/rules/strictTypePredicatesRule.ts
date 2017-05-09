@@ -208,7 +208,7 @@ function isFunction(t: ts.Type): boolean {
         return true;
     }
     const symbol = t.getSymbol();
-    return symbol === undefined ? false : symbol.getName() === "Function";
+    return symbol !== undefined && symbol.getName() === "Function";
 }
 
 /** Returns a boolean value if that should always be the result of a type predicate. */

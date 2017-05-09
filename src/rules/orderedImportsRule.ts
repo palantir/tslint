@@ -163,8 +163,10 @@ class OrderedImportsWalker extends Lint.RuleWalker {
 
         interface Options { "import-sources-order"?: string; "named-imports-order"?: string; }
         const optionSet = (this.getOptions() as [Options])[0];
-        const { "import-sources-order": sources = "case-insensitive", "named-imports-order": named = "case-insensitive" } =
-            optionSet === undefined ? {} : optionSet;
+        const {
+            "import-sources-order": sources = "case-insensitive",
+            "named-imports-order": named = "case-insensitive",
+        } = optionSet === undefined ? {} : optionSet;
         this.importSourcesOrderTransform = TRANSFORMS[sources];
         this.namedImportsOrderTransform = TRANSFORMS[named];
     }

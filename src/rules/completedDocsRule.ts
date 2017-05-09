@@ -434,9 +434,6 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     private describeModifier(kind: ts.SyntaxKind) {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
         const alias = CompletedDocsWalker.modifierAliases[description];
-        if (alias !== undefined) {
-            return alias;
-        }
-        return description;
+        return alias !== undefined ? alias : description;
     }
 }

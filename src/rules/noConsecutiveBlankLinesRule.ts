@@ -57,7 +57,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit = this.ruleArguments[0] as number | undefined ;
+        const limit = this.ruleArguments[0] as number | undefined;
         return this.applyWithFunction(sourceFile, walk, limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS);
     }
 }
