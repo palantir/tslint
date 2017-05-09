@@ -29,7 +29,7 @@ const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
 export function loadRules(ruleOptionsList: IOptions[],
                           rulesDirectories?: string | string[],
-                          isJs?: boolean): IRule[] {
+                          isJs = false): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
     const notAllowedInJsRules: string[] = [];
@@ -44,7 +44,7 @@ export function loadRules(ruleOptionsList: IOptions[],
         const Rule = findRule(ruleName, rulesDirectories);
         if (Rule === undefined) {
             notFoundRules.push(ruleName);
-        } else if (isJs && Rule.metadata && Rule.metadata.typescriptOnly) {
+        } else if (isJs && Rule.metadata !== undefined && Rule.metadata.typescriptOnly) {
             notAllowedInJsRules.push(ruleName);
         } else {
             const rule = new Rule(ruleOptions);
@@ -52,7 +52,7 @@ export function loadRules(ruleOptionsList: IOptions[],
                 rules.push(rule);
             }
 
-            if (Rule.metadata && Rule.metadata.deprecationMessage) {
+            if (Rule.metadata !== undefined && Rule.metadata.deprecationMessage !== undefined) {
                 showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
             }
         }

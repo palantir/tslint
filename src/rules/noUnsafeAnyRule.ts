@@ -131,7 +131,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                if (args) {
+                if (args !== undefined) {
                     for (const arg of args) {
                         checkContextual(arg);
                     }
@@ -155,7 +155,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                if (expression) {
+                if (expression !== undefined) {
                     return checkContextual(expression);
                 }
                 return;
@@ -169,7 +169,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         function check(): boolean {
-            const isUnsafe = !anyOk && isNodeAny(node, checker);
+            const isUnsafe = anyOk !== true && isNodeAny(node, checker);
             if (isUnsafe) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

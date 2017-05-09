@@ -78,7 +78,7 @@ class Scope {
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
         // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
-        this.functionScope = functionScope || this;
+        this.functionScope = functionScope === undefined ? this : functionScope;
     }
 
     public addVariable(identifier: ts.Identifier, declarationInfo: DeclarationInfo, destructuringInfo?: DestructuringInfo) {
@@ -183,7 +183,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 this.handleExpression(node.left);
             }
 
-            if (boundary) {
+            if (boundary !== utils.ScopeBoundary.None) {
                 ts.forEachChild(node, cb);
                 this.onScopeEnd(savedScope);
                 this.scope = savedScope;

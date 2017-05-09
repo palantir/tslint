@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_FACTORY(typeName: string, messageAddition?: string) {
         return `Don't use '${typeName}' as a type.` +
-            (messageAddition ? " " + messageAddition : "");
+            (messageAddition !== undefined ? " " + messageAddition : "");
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

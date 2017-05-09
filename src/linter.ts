@@ -95,7 +95,7 @@ class Linter {
         const enabledRules = this.getEnabledRules(configuration, isJs);
 
         let fileFailures = this.getAllFailures(sourceFile, enabledRules);
-        if (!fileFailures.length) {
+        if (fileFailures.length === 0) {
             // Usual case: no errors.
             return;
         }
@@ -124,9 +124,9 @@ class Linter {
         let formatter: IFormatter;
         const formattersDirectory = getRelativePath(this.options.formattersDirectory);
 
-        const formatterName = this.options.formatter || "prose";
+        const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
         const Formatter = findFormatter(formatterName, formattersDirectory);
-        if (Formatter) {
+        if (Formatter !== undefined) {
             formatter = new Formatter();
         } else {
             throw new Error(`formatter '${formatterName}' not found`);
@@ -193,7 +193,7 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
         try {
-            if (this.program && isTypedRule(rule)) {
+            if (this.program !== undefined && isTypedRule(rule)) {
                 return rule.applyWithProgram(sourceFile, this.program);
             } else {
                 return rule.apply(sourceFile);
@@ -216,7 +216,7 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        if (this.program) {
+        if (this.program !== undefined) {
             const sourceFile = this.program.getSourceFile(fileName);
             if (sourceFile === undefined) {
                 const INVALID_SOURCE_ERROR = dedent`

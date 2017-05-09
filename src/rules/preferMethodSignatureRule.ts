@@ -46,7 +46,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (isPropertySignature(node)) {
             const { type } = node;
             if (type !== undefined && isFunctionTypeNode(type)) {
-                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type && [
+                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type === undefined ? undefined : [
                     Lint.Replacement.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
                     Lint.Replacement.replaceFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.pos, type.type.pos, ":"),
                 ]);

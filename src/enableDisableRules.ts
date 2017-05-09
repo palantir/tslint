@@ -22,7 +22,7 @@ import * as ts from "typescript";
 import { RuleFailure } from "./language/rule/rule";
 
 export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: RuleFailure[]): RuleFailure[] {
-    if (!failures.length) {
+    if (failures.length === 0) {
         // Usually there won't be failures anyway, so no need to look for "tslint:disable".
         return failures;
     }
@@ -31,7 +31,7 @@ export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: Rule
     const map = getDisableMap(sourceFile, failingRules);
     return failures.filter((failure) => {
         const disabledIntervals = map.get(failure.getRuleName());
-        return !disabledIntervals || !disabledIntervals.some(({ pos, end }) => {
+        return disabledIntervals === undefined || !disabledIntervals.some(({ pos, end }) => {
             const failPos = failure.getStartPosition().getPosition();
             const failEnd = failure.getEndPosition().getPosition();
             return failEnd >= pos && (end === -1 || failPos <= end);
@@ -51,10 +51,10 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
             ? fullText.substring(comment.pos + 2, comment.end)
             : fullText.substring(comment.pos + 2, comment.end - 2);
         const parsed = parseComment(commentText);
-        if (parsed) {
+        if (parsed !== undefined) {
             const { rulesList, isEnabled, modifier } = parsed;
             const switchRange = getSwitchRange(modifier, comment, sourceFile);
-            if (switchRange) {
+            if (switchRange !== undefined) {
                 const rulesToSwitch = rulesList === "all" ? Array.from(failingRules) : rulesList.filter((r) => failingRules.has(r));
                 for (const ruleToSwitch of rulesToSwitch) {
                     switchRuleState(ruleToSwitch, isEnabled, switchRange.pos, switchRange.end);
@@ -69,7 +69,7 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
         const disableRanges = map.get(ruleName);
 
         if (isEnable) {
-            if (disableRanges) {
+            if (disableRanges !== undefined) {
                 const lastDisable = disableRanges[disableRanges.length - 1];
                 if (lastDisable.end === -1) {
                     lastDisable.end = start;
@@ -80,7 +80,7 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
                 }
             }
         } else { // disable
-            if (!disableRanges) {
+            if (disableRanges === undefined) {
                 map.set(ruleName, [{ pos: start, end }]);
             } else if (disableRanges[disableRanges.length - 1].end !== -1) {
                 disableRanges.push({ pos: start, end });
@@ -138,9 +138,7 @@ function parseComment(commentText: string): { rulesList: string[] | "all", isEna
     // remove everything matched by the previous regex to get only the specified rules
     // split at whitespaces
     // filter empty items coming from whitespaces at start, at end or empty list
-    let rulesList: string[] | "all" = commentText.substr(match[0].length)
-        .split(/\s+/)
-        .filter((rule) => !!rule);
+    let rulesList: string[] | "all" = splitOnSpaces(commentText.substr(match[0].length));
     if (rulesList.length === 0 && match[3] === ":") {
         // nothing to do here: an explicit separator was specified but no rules to switch
         return undefined;
@@ -153,4 +151,8 @@ function parseComment(commentText: string): { rulesList: string[] | "all", isEna
     }
 
     return { rulesList, isEnabled: match[1] === "enable", modifier: match[2] as Modifier };
+}
+
+function splitOnSpaces(str: string): string[] {
+    return str.split(/\s+/).filter((s) => s !== "");
 }

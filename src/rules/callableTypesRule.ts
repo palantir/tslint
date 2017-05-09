@@ -66,7 +66,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 /** True if there is no supertype or if the supertype is `Function`. */
 function noSupertype(node: ts.InterfaceDeclaration): boolean {
-    if (!node.heritageClauses) {
+    if (node.heritageClauses === undefined) {
         return true;
     }
     if (node.heritageClauses.length !== 1) {

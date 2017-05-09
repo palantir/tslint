@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         let minCases = 3;
-        if (this.ruleArguments.length) {
+        if (this.ruleArguments.length !== 0) {
             const obj = this.ruleArguments[0] as { "min-cases": number };
             minCases = obj[OPTION_MIN_CASES];
         }
@@ -64,7 +64,7 @@ function walk(ctx: Lint.WalkContext<number>): void {
             // Be careful not to fail again for the "else if"
             ts.forEachChild(expression, cb);
             ts.forEachChild(thenStatement, cb);
-            if (elseStatement) {
+            if (elseStatement !== undefined) {
                 ts.forEachChild(elseStatement, cb);
             }
         } else {
@@ -78,7 +78,7 @@ function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number
     let casesSeen = 0;
     const couldBeSwitch = everyCase(node, (expr) => {
         casesSeen++;
-        if (switchVariable) {
+        if (switchVariable !== undefined) {
             return nodeEquals(expr, switchVariable, sourceFile);
         } else {
             switchVariable = expr;
@@ -92,7 +92,7 @@ function everyCase({ expression, elseStatement }: ts.IfStatement, test: (e: ts.E
     if (!everyCondition(expression, test)) {
         return false;
     }
-    return !elseStatement || !utils.isIfStatement(elseStatement) || everyCase(elseStatement, test);
+    return elseStatement === undefined || !utils.isIfStatement(elseStatement) || everyCase(elseStatement, test);
 }
 
 function everyCondition(node: ts.Expression, test: (e: ts.Expression) => boolean): boolean {

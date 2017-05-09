@@ -59,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
         }
 
         const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike) as FunctionLike | undefined;
-        if (!functionReturningFrom) {
+        if (functionReturningFrom === undefined) {
             // Return outside of function is invalid
             return;
         }
@@ -73,7 +73,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 }
 
 function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
-    if (!node.expression) {
+    if (node.expression === undefined) {
         return ReturnKind.Void;
     } else if (u.isIdentifier(node.expression) && node.expression.text === "undefined") {
         return ReturnKind.Value;

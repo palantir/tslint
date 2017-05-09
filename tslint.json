@@ -62,7 +62,6 @@
     "prefer-template": false,
     "restrict-plus-operands": false,
     "return-undefined": false,
-    "strict-boolean-expressions": false,
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
