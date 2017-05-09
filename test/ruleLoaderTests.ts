@@ -19,9 +19,7 @@ import { assert } from "chai";
 import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
-
 import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
-import { IEnableDisablePosition } from "../src/ruleLoader";
 import { camelize } from "../src/utils";
 import { IOptions } from "./../src/language/rule/rule";
 import { loadRules } from "./lint";
@@ -35,13 +33,21 @@ describe("Rule Loader", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
-            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
-        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir);
+        const rules = loadRules(validConfiguration, builtRulesDir);
         assert.equal(rules.length, 5);
+    });
+
+    it("ignores off rules", () => {
+        const validConfiguration: IOptions[] = [
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+        ];
+        const rules = loadRules(validConfiguration, builtRulesDir);
+        assert.equal(rules.length, 0);
     });
 
     it("ignores invalid rules", () => {
@@ -51,7 +57,7 @@ describe("Rule Loader", () => {
             { ruleName: "invalidConfig2", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
         ];
 
-        const rules = loadRules(invalidConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
+        const rules = loadRules(invalidConfiguration, [builtRulesDir]);
         assert.equal(rules.length, 1);
     });
 
@@ -61,33 +67,22 @@ describe("Rule Loader", () => {
             { ruleName: "max-line-length", ruleArguments: [140], ruleSeverity: "warning", disabledIntervals: [] },
         ];
 
-        const rules = loadRules(withOptions, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
+        const rules = loadRules(withOptions, [builtRulesDir]);
         assert.equal(rules.length, 2);
         assert.equal(rules[0].getOptions().ruleSeverity, "error");
         assert.equal(rules[1].getOptions().ruleSeverity, "warning");
-    });
-
-    it("loads disabled rules if rule in enableDisableRuleMap", () => {
-        const validConfiguration: IOptions[] = [
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
-        ];
-
-        const enableDisableMap = new Map<string, IEnableDisablePosition[]>();
-        enableDisableMap.set("forin", [{ isEnabled: true, position: 4 }]);
-        const rules = loadRules(validConfiguration, enableDisableMap, builtRulesDir);
-        assert.equal(rules.length, 1);
     });
 
     it("works with rulesDirectory argument as an Array", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "eofline", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
-            { ruleName: "forin", ruleArguments: [], ruleSeverity: "off", disabledIntervals: [] },
+            { ruleName: "forin", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "no-debugger", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
-            { ruleName: "quotemark", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
+            { ruleName: "quotemark", ruleArguments: ["double"], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
-        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), [builtRulesDir]);
+        const rules = loadRules(validConfiguration, [builtRulesDir]);
         assert.equal(rules.length, 5);
     });
 
@@ -97,7 +92,7 @@ describe("Rule Loader", () => {
             { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
         ];
 
-        const rules = loadRules(validConfiguration, new Map<string, IEnableDisablePosition[]>(), builtRulesDir, true);
+        const rules = loadRules(validConfiguration, builtRulesDir, true);
         assert.equal(rules.length, 1);
     });
 

@@ -18,7 +18,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
-import { FatalError } from "./error";
+import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
@@ -163,9 +163,14 @@ function findup(filename: string, directory: string): string | undefined {
             return filename;
         }
 
+        // TODO: remove in v6.0.0
         // Try reading in the entire directory and looking for a file with different casing.
         const filenameLower = filename.toLowerCase();
-        return fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+        const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+        if (result !== undefined) {
+            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ` + path.join(cwd, result));
+        }
+        return result;
     }
 }
 
@@ -480,7 +485,7 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
     const output: IOptions[] = [];
     ruleConfiguration.forEach(({ ruleArguments, ruleSeverity }, ruleName) => {
         const options: IOptions = {
-            disabledIntervals: [],
+            disabledIntervals: [], // deprecated, so just provide an empty array.
             ruleArguments: ruleArguments != null ? ruleArguments : [],
             ruleName,
             ruleSeverity: ruleSeverity != null ? ruleSeverity : "error",

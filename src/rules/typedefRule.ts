@@ -156,14 +156,6 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        switch (node.initializer.kind) {
-            case ts.SyntaxKind.ArrowFunction:
-            case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(node.initializer as ts.FunctionExpression);
-                break;
-            default:
-                break;
-        }
         super.visitPropertyAssignment(node);
     }
 
