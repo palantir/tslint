@@ -18,7 +18,7 @@ module TestModule {
         c: 3
     };
 
-	// ignore leading tabs inside template strings
+    // ignore leading tabs inside template strings
     var s1 = `
 		multiline` + ` template
 		string`;
@@ -158,4 +158,4 @@ var arr2 = [
     }
 ];
 
-[0]: space indentation expected
+[0]: 4 space indentation expected

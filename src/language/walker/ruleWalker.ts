@@ -56,7 +56,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
         return this.options;
     }
 
-    public hasOption(option: string): boolean {
+    public hasOption(option: any): boolean {
         if (this.options !== undefined) {
             return this.options.indexOf(option) !== -1;
         } else {

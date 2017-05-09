@@ -37,7 +37,7 @@ export class FooComponent extends React.Component<IFooProps, IFooState> {
             </div>
         );
 	} // indent failure
-~                    [space indentation expected]
+~                    [4 space indentation expected]
 
     private onClick() {
         console.info("foo component clicked");

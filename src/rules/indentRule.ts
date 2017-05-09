@@ -21,6 +21,9 @@ import * as Lint from "../index";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
+const OPTION_INDENT_SIZE_2 = 2;
+const OPTION_INDENT_SIZE_4 = 4;
+const OPTION_INDENT_SIZE_DEFAULT = OPTION_INDENT_SIZE_4;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,13 +36,30 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"spaces"\` enforces consistent spaces.
-            * \`"tabs"\` enforces consistent tabs.`,
+            * \`${OPTION_USE_SPACES}\` enforces consistent spaces.
+            * \`${OPTION_USE_TABS}\` enforces consistent tabs.
+
+            A second optional argument specifies indentation size, defaulting to 4:
+
+            * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
+            * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+            `,
         options: {
-            type: "string",
-            enum: ["tabs", "spaces"],
+            type: "array",
+            items: [{
+                type: "string",
+                enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
+            }, {
+                type: "number",
+                enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
+            }],
+            minLength: 0,
+            maxLength: 5,
         },
-        optionExamples: [[true, "spaces"]],
+        optionExamples: [
+            [true, "spaces", 4],
+            [true, OPTION_USE_TABS, 2],
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -57,16 +77,32 @@ export class Rule extends Lint.Rules.AbstractRule {
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;
+    private size: number;
+    private replaceRegExp: RegExp;
+    private replaceIndent: string;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
+        if (this.hasOption(OPTION_INDENT_SIZE_2)) {
+            this.size = OPTION_INDENT_SIZE_2;
+        } else if (this.hasOption(OPTION_INDENT_SIZE_4)) {
+            this.size = OPTION_INDENT_SIZE_4;
+        } else {
+            this.size = OPTION_INDENT_SIZE_DEFAULT;
+        }
+
         if (this.hasOption(OPTION_USE_TABS)) {
-            this.regExp = new RegExp(" ");
+            this.regExp = new RegExp(" ".repeat(this.size));
+            // we want to find every group of `this.size` spaces, plus up to one 'incomplete' group
+            this.replaceRegExp = new RegExp(`^( {${this.size}})+( {1,${this.size - 1}})?`, "g");
+            this.replaceIndent = "\t";
             this.failureString = Rule.FAILURE_STRING_TABS;
         } else if (this.hasOption(OPTION_USE_SPACES)) {
             this.regExp = new RegExp("\t");
-            this.failureString = Rule.FAILURE_STRING_SPACES;
+            this.replaceRegExp = new RegExp("\t", "g");
+            this.replaceIndent = " ".repeat(this.size);
+            this.failureString = `${this.size} ${Rule.FAILURE_STRING_SPACES}`;
         }
     }
 
@@ -137,7 +173,12 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             if (this.regExp.test(fullLeadingWhitespace)) {
-                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
+                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString,
+                    new Lint.Replacement(lineStart, fullLeadingWhitespace.length, fullLeadingWhitespace.replace(
+                        this.replaceRegExp,
+                        (match) => this.replaceIndent.repeat(Math.ceil(match.length / this.size)),
+                    )),
+                );
             }
         }
         // no need to call super to visit the rest of the nodes, so don't call super here
