@@ -175,10 +175,6 @@ class Linter {
     // Only "protected" because a test directly accesses it.
     // tslint:disable-next-line member-ordering
     protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
-        if (fixableFailures.some((f) => !f.hasFix())) {
-            throw new Error("!");
-        }
-
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
             let fileNewSource: string;
