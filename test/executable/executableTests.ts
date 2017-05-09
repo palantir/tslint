@@ -19,6 +19,7 @@ import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { dedent } from "../../src/utils";
 import { createTempFile, denormalizeWinPath } from "../utils";
 
 // when tests are run with mocha from npm scripts CWD points to project root
@@ -104,6 +105,18 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
                 assert.include(stderr, "tslint-invalid.json", "stderr should mention the problem file");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
+                done();
+            });
+        });
+
+        it("Warns for config file with bad case", (done) => {
+            const dir = path.join(__dirname, "..", "..", "..", "test", "config", "findup");
+            execCli(["a.ts"], { cwd: path.join(dir, "subdir") }, (err, stdout, stderr) => {
+                assert.isNull(err);
+                assert.equal(stdout, "");
+                assert.equal(stderr, dedent`
+                    Case-insensitive matching will be deprecated in tslint 6.0.
+                    Found '${path.join(dir, "Tslint.json")}', expected it to be named 'tslint.json'.`.trim());
                 done();
             });
         });
