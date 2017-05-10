@@ -23,7 +23,6 @@ const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
 const OPTION_INDENT_SIZE_2 = 2;
 const OPTION_INDENT_SIZE_4 = 4;
-const OPTION_INDENT_SIZE_DEFAULT = OPTION_INDENT_SIZE_4;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -39,10 +38,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${OPTION_USE_SPACES}\` enforces consistent spaces.
             * \`${OPTION_USE_TABS}\` enforces consistent tabs.
 
-            A second optional argument specifies indentation size, defaulting to 4:
+            A second optional argument specifies indentation size:
 
             * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
             * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+
+            Indentation size is required for auto-fixing, but not for rule checking.
             `,
         options: {
             type: "array",
@@ -77,32 +78,49 @@ export class Rule extends Lint.Rules.AbstractRule {
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;
-    private size: number;
-    private replaceRegExp: RegExp;
-    private replaceIndent: string;
+    private replacementFactory: (lineStart: number, fullLeadingWhitespace: string) => Lint.Replacement | undefined;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        if (this.hasOption(OPTION_INDENT_SIZE_2)) {
-            this.size = OPTION_INDENT_SIZE_2;
-        } else if (this.hasOption(OPTION_INDENT_SIZE_4)) {
-            this.size = OPTION_INDENT_SIZE_4;
-        } else {
-            this.size = OPTION_INDENT_SIZE_DEFAULT;
-        }
+        // fixer is only provided with the indent size arg
+        if (this.getOptions().length === 2) {
+            let size = OPTION_INDENT_SIZE_4;
+            let replaceRegExp: RegExp;
+            let replaceIndent: string;
 
-        if (this.hasOption(OPTION_USE_TABS)) {
-            this.regExp = new RegExp(" ".repeat(this.size));
-            // we want to find every group of `this.size` spaces, plus up to one 'incomplete' group
-            this.replaceRegExp = new RegExp(`^( {${this.size}})+( {1,${this.size - 1}})?`, "g");
-            this.replaceIndent = "\t";
-            this.failureString = Rule.FAILURE_STRING_TABS;
-        } else if (this.hasOption(OPTION_USE_SPACES)) {
-            this.regExp = new RegExp("\t");
-            this.replaceRegExp = new RegExp("\t", "g");
-            this.replaceIndent = " ".repeat(this.size);
-            this.failureString = `${this.size} ${Rule.FAILURE_STRING_SPACES}`;
+            if (this.getOptions()[1] === OPTION_INDENT_SIZE_2) {
+                size = OPTION_INDENT_SIZE_2;
+            } else if (this.getOptions()[1] === OPTION_INDENT_SIZE_4) {
+                size = OPTION_INDENT_SIZE_4;
+            }
+
+            if (this.hasOption(OPTION_USE_TABS)) {
+                this.regExp = new RegExp(" ".repeat(size));
+                this.failureString = Rule.FAILURE_STRING_TABS;
+                // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+                replaceRegExp = new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g");
+                replaceIndent = "\t";
+            } else if (this.hasOption(OPTION_USE_SPACES)) {
+                this.regExp = new RegExp("\t");
+                this.failureString = `${size} ${Rule.FAILURE_STRING_SPACES}`;
+                replaceRegExp = new RegExp("\t", "g");
+                replaceIndent = " ".repeat(size);
+            }
+
+            this.replacementFactory = (lineStart, fullLeadingWhitespace) =>
+                new Lint.Replacement(lineStart, fullLeadingWhitespace.length, fullLeadingWhitespace.replace(
+                    replaceRegExp, (match) => replaceIndent.repeat(Math.ceil(match.length / size)),
+                ));
+        } else {
+            if (this.hasOption(OPTION_USE_TABS)) {
+                this.regExp = new RegExp(" ");
+                this.failureString = Rule.FAILURE_STRING_TABS;
+            } else if (this.hasOption(OPTION_USE_SPACES)) {
+                this.regExp = new RegExp("\t");
+                this.failureString = Rule.FAILURE_STRING_SPACES;
+            }
+            this.replacementFactory = () => undefined;
         }
     }
 
@@ -174,10 +192,7 @@ class IndentWalker extends Lint.RuleWalker {
 
             if (this.regExp.test(fullLeadingWhitespace)) {
                 this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString,
-                    new Lint.Replacement(lineStart, fullLeadingWhitespace.length, fullLeadingWhitespace.replace(
-                        this.replaceRegExp,
-                        (match) => this.replaceIndent.repeat(Math.ceil(match.length / this.size)),
-                    )),
+                    this.replacementFactory(lineStart, fullLeadingWhitespace),
                 );
             }
         }
