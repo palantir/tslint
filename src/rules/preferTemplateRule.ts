@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const failure = getError(node, allowSingleConcat);
-        if (failure) {
+        if (failure !== undefined) {
             ctx.addFailureAtNode(node, failure);
         } else {
             return ts.forEachChild(node, cb);

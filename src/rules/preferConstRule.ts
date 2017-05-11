@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (identifier: string, blockScoped: boolean) => {
+    public static FAILURE_STRING_FACTORY(identifier: string, blockScoped: boolean) {
         return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${blockScoped ? "let" : "var"}'.`;
     }
 
@@ -78,7 +78,7 @@ class Scope {
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
         // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
-        this.functionScope = functionScope || this;
+        this.functionScope = functionScope === undefined ? this : functionScope;
     }
 
     public addVariable(identifier: ts.Identifier, declarationInfo: DeclarationInfo, destructuringInfo?: DestructuringInfo) {
@@ -183,7 +183,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 this.handleExpression(node.left);
             }
 
-            if (boundary) {
+            if (boundary !== utils.ScopeBoundary.None) {
                 ts.forEachChild(node, cb);
                 this.onScopeEnd(savedScope);
                 this.scope = savedScope;
@@ -201,33 +201,41 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     }
 
     private handleExpression(node: ts.Expression): void {
-        if (node.kind === ts.SyntaxKind.Identifier) {
-            this.scope.reassigned.add((node as ts.Identifier).text);
-        } else if (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
-            return this.handleExpression((node as ts.ParenthesizedExpression).expression);
-        } else if (node.kind === ts.SyntaxKind.ArrayLiteralExpression) {
-            for (const element of (node as ts.ArrayLiteralExpression).elements) {
-                if (element.kind === ts.SyntaxKind.SpreadElement) {
-                    this.handleExpression((element as ts.SpreadElement).expression);
-                } else {
-                    this.handleExpression(element);
-                }
-            }
-        } else if (node.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            for (const property of (node as ts.ObjectLiteralExpression).properties) {
-                if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
-                    this.scope.reassigned.add(property.name.text);
-                } else if (property.kind === ts.SyntaxKind.SpreadAssignment) {
-                    if (property.name !== undefined) {
-                        this.scope.reassigned.add((property.name as ts.Identifier).text);
+        switch (node.kind) {
+            case ts.SyntaxKind.Identifier:
+                this.scope.reassigned.add((node as ts.Identifier).text);
+                break;
+            case ts.SyntaxKind.ParenthesizedExpression:
+                this.handleExpression((node as ts.ParenthesizedExpression).expression);
+                break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                for (const element of (node as ts.ArrayLiteralExpression).elements) {
+                    if (element.kind === ts.SyntaxKind.SpreadElement) {
+                        this.handleExpression((element as ts.SpreadElement).expression);
                     } else {
-                        // handle `...(variable)`
-                        this.handleExpression(property.expression!);
+                        this.handleExpression(element);
                     }
-                } else {
-                    this.handleExpression((property as ts.PropertyAssignment).initializer);
                 }
-            }
+                break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                for (const property of (node as ts.ObjectLiteralExpression).properties) {
+                    switch (property.kind) {
+                        case ts.SyntaxKind.ShorthandPropertyAssignment:
+                            this.scope.reassigned.add(property.name.text);
+                            break;
+                        case ts.SyntaxKind.SpreadAssignment:
+                            if (property.name !== undefined) {
+                                this.scope.reassigned.add((property.name as ts.Identifier).text);
+                            } else {
+                                // handle `...(variable)`
+                                this.handleExpression(property.expression!);
+                            }
+                            break;
+                        default:
+                            this.handleExpression((property as ts.PropertyAssignment).initializer);
+                    }
+                }
+                break;
         }
     }
 

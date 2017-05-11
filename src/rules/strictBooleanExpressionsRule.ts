@@ -74,8 +74,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const strictNullChecks = !!program.getCompilerOptions().strictNullChecks;
-        const options = parseOptions(this.ruleArguments, strictNullChecks);
+        const options = parseOptions(this.ruleArguments, program.getCompilerOptions().strictNullChecks === true);
         return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
     }
 }
@@ -110,7 +109,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
                 const b = node as ts.BinaryExpression;
-                if (binaryBooleanExpressionKind(b)) {
+                if (binaryBooleanExpressionKind(b) !== undefined) {
                     const { left, right } = b;
                     const checkHalf = (expr: ts.Expression) => {
                         // If it's another boolean binary expression, we'll check it when recursing.
@@ -149,7 +148,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ForStatement: {
                 const { condition } = node as ts.ForStatement;
-                if (condition) {
+                if (condition !== undefined) {
                     checkExpression(condition, node as ts.ForStatement);
                 }
                 break;

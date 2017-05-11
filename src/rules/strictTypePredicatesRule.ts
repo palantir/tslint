@@ -60,7 +60,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isBinaryExpression(node)) {
             const equals = Lint.getEqualsKind(node.operatorToken);
-            if (equals) {
+            if (equals !== undefined) {
                 checkEquals(node, equals);
             }
         }
@@ -115,7 +115,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 /** Detects a type predicate given `left === right`. */
 function getTypePredicate(node: ts.BinaryExpression, isStrictEquals: boolean): TypePredicate | undefined {
     const { left, right } = node;
-    return getTypePredicateOneWay(left, right, isStrictEquals) || getTypePredicateOneWay(right, left, isStrictEquals);
+    const lr = getTypePredicateOneWay(left, right, isStrictEquals);
+    return lr !== undefined ? lr : getTypePredicateOneWay(right, left, isStrictEquals);
 }
 
 /** Only gets the type predicate if the expression is on the left. */
@@ -207,7 +208,7 @@ function isFunction(t: ts.Type): boolean {
         return true;
     }
     const symbol = t.getSymbol();
-    return (symbol && symbol.getName()) === "Function";
+    return symbol !== undefined && symbol.getName() === "Function";
 }
 
 /** Returns a boolean value if that should always be the result of a type predicate. */

@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable deprecation
+// (https://github.com/palantir/tslint/pull/2598)
+
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -33,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING_FACTORY(name: string) {
         return `Shadowed variable: '${name}'`;
     }
 
