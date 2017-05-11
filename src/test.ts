@@ -174,8 +174,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         });
 
         // test against fixed files
-        let fixedFileText: string = "";
-        let newFileText: string = "";
+        let fixedFileText = "";
+        let newFileText = "";
         try {
             const fixedFile = fileToLint.replace(/\.lint$/, FIXES_FILE_EXTENSION);
             const stat = fs.statSync(fixedFile);
