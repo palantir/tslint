@@ -61,7 +61,6 @@
     "prefer-function-over-method": false,
     "prefer-template": false,
     "restrict-plus-operands": false,
-    "return-undefined": false,
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
