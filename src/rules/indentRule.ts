@@ -58,8 +58,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 5,
         },
         optionExamples: [
-            [true, "spaces", 4],
-            [true, OPTION_USE_TABS, 2],
+            [true, OPTION_USE_SPACES],
+            [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
+            [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
         type: "maintainability",
         typescriptOnly: false,
@@ -84,16 +85,12 @@ class IndentWalker extends Lint.RuleWalker {
         super(sourceFile, options);
 
         // fixer is only provided with the indent size arg
-        if (this.getOptions().length === 2) {
-            let size = OPTION_INDENT_SIZE_4;
+        if (this.getOptions().length === 2 && typeof this.getOptions()[1] === "number"
+            && (this.getOptions()[1] === OPTION_INDENT_SIZE_2 || this.getOptions()[1] === OPTION_INDENT_SIZE_4)) {
+            // tslint:disable-next-line:no-unsafe-any
+            const size = this.getOptions()[1] as number;
             let replaceRegExp: RegExp;
             let replaceIndent: string;
-
-            if (this.getOptions()[1] === OPTION_INDENT_SIZE_2) {
-                size = OPTION_INDENT_SIZE_2;
-            } else if (this.getOptions()[1] === OPTION_INDENT_SIZE_4) {
-                size = OPTION_INDENT_SIZE_4;
-            }
 
             if (this.hasOption(OPTION_USE_TABS)) {
                 this.regExp = new RegExp(" ".repeat(size));
