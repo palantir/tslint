@@ -232,7 +232,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             }
 
             const optionValue = this.getLeftOption(option);
-            const message = "expected " + optionValue + " before colon in " + option;
+            const message = `expected ${optionValue} before colon in ${option}`;
             this.performFailureCheck(
                 optionValue!,
                 hasLeadingWhitespace,
@@ -274,7 +274,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             }
 
             const optionValue = this.getRightOption(option);
-            const message = "expected " + optionValue + " after colon in " + option;
+            const message = `expected ${optionValue} after colon in ${option}`;
             this.performFailureCheck(
                 optionValue!,
                 hasTrailingWhitespace,

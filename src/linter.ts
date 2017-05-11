@@ -81,7 +81,7 @@ class Linter {
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
-            throw new Error("Unknown Linter options type: " + typeof options);
+            throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
         if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +

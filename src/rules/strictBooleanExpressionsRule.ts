@@ -342,13 +342,13 @@ function stringOr(parts: string[]): string {
         case 1:
             return parts[0];
         case 2:
-            return parts[0] + " or " + parts[1];
+            return `${parts[0]} or ${parts[1]}`;
         default:
             let res = "";
             for (let i = 0; i < parts.length - 1; i++) {
-                res += parts[i] + ", ";
+                res += `${parts[i]}, `;
             }
-            return res + "or " + parts[parts.length - 1];
+            return `${res}or ${parts[parts.length - 1]}`;
     }
 }
 

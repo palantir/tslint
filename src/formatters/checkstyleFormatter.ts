@@ -54,14 +54,14 @@ export class Formatter extends AbstractFormatter {
                         output += "</file>";
                     }
                     previousFilename = failure.getFileName();
-                    output += "<file name=\"" + this.escapeXml(failure.getFileName()) + "\">";
+                    output += `<file name="${this.escapeXml(failure.getFileName())}">`;
                 }
-                output += "<error line=\"" + (failure.getStartPosition().getLineAndCharacter().line + 1) + "\" ";
-                output += "column=\"" + (failure.getStartPosition().getLineAndCharacter().character + 1) + "\" ";
-                output += "severity=\"" + severity + "\" ";
-                output += "message=\"" + this.escapeXml(failure.getFailure()) + "\" ";
+                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
+                output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
+                output += `severity="${severity}" `;
+                output += `message="${this.escapeXml(failure.getFailure())}" `;
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
-                output += "source=\"failure.tslint." + this.escapeXml(failure.getRuleName()) + "\" />";
+                output += `source="failure.tslint.${this.escapeXml(failure.getRuleName())}" />`;
             }
             if (previousFilename !== null) {
                 output += "</file>";

@@ -53,7 +53,7 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
                 // Delete from name start up to value to include the ':'.
                 const lengthToValueStart = value.getStart() - name.getStart();
                 const fix = this.deleteText(name.getStart(), lengthToValueStart);
-                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY + `('{${name.getText()}}').`, fix);
+                this.addFailureAtNode(node, `${Rule.LONGHAND_PROPERTY}('{${name.getText()}}').`, fix);
         }
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
@@ -62,7 +62,7 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
                 return;  // named function expressions are OK.
             }
             const star = fnNode.asteriskToken !== undefined ? fnNode.asteriskToken.getText() : "";
-            this.addFailureAtNode(node, Rule.LONGHAND_METHOD + `('{${name.getText()}${star}() {...}}').`);
+            this.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name.getText()}${star}() {...}}').`);
         }
 
         super.visitPropertyAssignment(node);
