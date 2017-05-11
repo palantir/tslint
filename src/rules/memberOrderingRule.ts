@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -190,39 +191,26 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
     }
 }
 
-export class MemberOrderingWalker extends Lint.RuleWalker {
-    private readonly opts: Options;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.opts = parseOptions(this.getOptions() as any[]);
+class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.ClassDeclaration:
+                case ts.SyntaxKind.ClassExpression:
+                case ts.SyntaxKind.InterfaceDeclaration:
+                case ts.SyntaxKind.TypeLiteral:
+                    this.checkMembers((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members);
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.visitMembers(node.members);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitClassExpression(node: ts.ClassExpression) {
-        this.visitMembers(node.members);
-        super.visitClassExpression(node);
-    }
-
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.visitMembers(node.members);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
-        this.visitMembers(node.members);
-        super.visitTypeLiteral(node);
-    }
-
-    private visitMembers(members: Member[]) {
+    private checkMembers(members: Member[]) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -243,7 +231,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                     `Instead, this should come ${locationHint}.`;
                 this.addFailureAtNode(member, errorLine1);
             } else {
-                if (this.opts.alphabetize && member.name !== undefined) {
+                if (this.options.alphabetize && member.name !== undefined) {
                     if (rank !== prevRank) {
                         // No alphabetical ordering between different ranks
                         prevName = undefined;
@@ -295,11 +283,11 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
         if (optionName === undefined) {
             return -1;
         }
-        return this.opts.order.findIndex((category) => category.has(optionName));
+        return this.options.order.findIndex((category) => category.has(optionName));
     }
 
     private rankName(rank: Rank): string {
-        return this.opts.order[rank].name;
+        return this.options.order[rank].name;
     }
 }
 
