@@ -390,7 +390,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0] as Options | string;
+    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string, alphabetize?: boolean } | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
@@ -398,7 +398,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
 
     return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: firstOption[OPTION_ALPHABETIZE] === true };
 }
-function categoryFromOption(orderOption: {}): MemberCategoryJson[] {
+function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {
     if (Array.isArray(orderOption)) {
         return orderOption;
     }

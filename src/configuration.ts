@@ -400,7 +400,7 @@ function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity
     } else if (typeof ruleConfigValue === "boolean") {
         // old style: boolean
         ruleArguments = [];
-        ruleSeverity = ruleConfigValue === true ? defaultRuleSeverity : "off";
+        ruleSeverity = ruleConfigValue ? defaultRuleSeverity : "off";
     } else if (typeof ruleConfigValue === "object") {
         if (ruleConfigValue.severity !== undefined) {
             switch (ruleConfigValue.severity.toLowerCase()) {
