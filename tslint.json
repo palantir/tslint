@@ -45,7 +45,6 @@
     "completed-docs": false,
     "cyclomatic-complexity": false,
     "no-any": false,
-    "no-boolean-literal-compare": false,
     "no-inferred-empty-object-type": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
