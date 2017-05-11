@@ -109,7 +109,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.RuleWalker {
     private exceptionsRegExp: ExceptionsRegExp;
-    private failureIgnorePart: string = "";
+    private failureIgnorePart = "";
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
