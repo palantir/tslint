@@ -8,4 +8,8 @@
 
 x as T;
 
-[0]: Type assertion applied to object literal.
+// Allow cast to 'any'
+{} as any;
+<any> {};
+
+[0]: Type assertion on object literals is forbidden, use a type annotation instead.

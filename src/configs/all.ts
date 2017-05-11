@@ -152,6 +152,8 @@ export const rules = {
         "parameters",
         "arguments",
         "statements",
+        "elements",
+        "members",
     ],
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
@@ -166,6 +168,7 @@ export const rules = {
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
+    "encoding": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -240,7 +243,7 @@ for (const key in rules) {
     }
 
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
-    if (Rule === "not-found") {
+    if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
     }
     if (!Rule.metadata.typescriptOnly) {

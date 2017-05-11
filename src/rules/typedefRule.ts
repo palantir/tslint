@@ -156,14 +156,6 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        switch (node.initializer.kind) {
-            case ts.SyntaxKind.ArrowFunction:
-            case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(node.initializer as ts.FunctionExpression);
-                break;
-            default:
-                break;
-        }
         super.visitPropertyAssignment(node);
     }
 
@@ -236,7 +228,7 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 }
 
-function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
+function getName(name?: ts.Node, prefix = "", suffix = ""): string {
     let ns = "";
 
     if (name != null) {
@@ -257,7 +249,7 @@ function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
                 break;
         }
     }
-    return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
+    return ns === "" ? "" : `${prefix}${ns}${suffix}`;
 }
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {

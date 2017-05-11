@@ -47,12 +47,14 @@ const processed = optimist
     .usage("Usage: $0 [options] file ...")
     .check((argv: Argv) => {
         // at least one of file, help, version, project or unqualified argument must be present
+        // tslint:disable-next-line strict-boolean-expressions
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "Missing files";
         }
 
+        // tslint:disable-next-line strict-boolean-expressions
         if (argv.f) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
@@ -140,6 +142,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
+// tslint:disable-next-line strict-boolean-expressions
 if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `

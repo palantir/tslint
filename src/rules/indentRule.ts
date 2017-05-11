@@ -103,7 +103,7 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
-            if (commentRanges) {
+            if (commentRanges !== undefined) {
                 endOfComment = commentRanges[commentRanges.length - 1].end;
             } else {
                 let scanType = currentScannedType;
@@ -128,14 +128,15 @@ class IndentWalker extends Lint.RuleWalker {
                 }
             }
 
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-                // ignore lines that have comments before the first token
-                continue;
+            switch (currentScannedType) {
+                case ts.SyntaxKind.SingleLineCommentTrivia:
+                case ts.SyntaxKind.MultiLineCommentTrivia:
+                case ts.SyntaxKind.NewLineTrivia:
+                    // ignore lines that have comments before the first token
+                    continue;
             }
 
-            if (fullLeadingWhitespace.match(this.regExp)) {
+            if (this.regExp.test(fullLeadingWhitespace)) {
                 this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
             }
         }

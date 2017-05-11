@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import findup = require("findup-sync");
 import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
-import { FatalError } from "./error";
+import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
@@ -122,8 +121,8 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
     } else {
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, { cwd: inputFilePath, nocase: true });
-        if (configFilePath != null && fs.existsSync(configFilePath)) {
+        let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
+        if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
 
@@ -138,6 +137,40 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
 
         // no path could be found
         return undefined;
+    }
+}
+
+/**
+ * Find a file by name in a directory or any ancestory directory.
+ * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
+ */
+function findup(filename: string, directory: string): string | undefined {
+    while (true) { // tslint:disable-line strict-boolean-expressions
+        const res = findFile(directory);
+        if (res !== undefined) {
+            return res;
+        }
+
+        const parent = path.dirname(directory);
+        if (parent === directory) {
+            return undefined;
+        }
+        directory = parent;
+    }
+
+    function findFile(cwd: string): string | undefined {
+        if (fs.existsSync(path.join(cwd, filename))) {
+            return filename;
+        }
+
+        // TODO: remove in v6.0.0
+        // Try reading in the entire directory and looking for a file with different casing.
+        const filenameLower = filename.toLowerCase();
+        const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+        if (result !== undefined) {
+            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ` + path.join(cwd, result));
+        }
+        return result;
     }
 }
 
@@ -170,7 +203,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             }
         } else {
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
-            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath]; // tslint:disable-line no-unsafe-any (Fixed in 5.2)
+            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
@@ -203,7 +236,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         }
     }
 
-    const basedir = relativeTo || process.cwd();
+    const basedir = relativeTo !== undefined ? relativeTo : process.cwd();
     try {
         return resolve.sync(filePath, { basedir });
     } catch (err) {
@@ -220,7 +253,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 export function extendConfigurationFile(targetConfig: IConfigurationFile,
                                         nextConfigSource: IConfigurationFile): IConfigurationFile {
 
-    const combineProperties = <T>(targetProperty: T | undefined, nextProperty: T | undefined): T => {
+    function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
@@ -228,7 +261,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
         return combinedProperty as T;
 
         function add(property: T | undefined): void {
-            if (property) {
+            if (property !== undefined) {
                 for (const name in property) {
                     if (hasOwnProperty(property, name)) {
                         combinedProperty[name] = property[name];
@@ -237,9 +270,9 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
 
         }
-    };
+    }
 
-    const combineMaps = (target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) => {
+    function combineMaps(target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) {
         const combined = new Map<string, Partial<IOptions>>();
         target.forEach((options, ruleName) => {
             combined.set(ruleName, options);
@@ -253,7 +286,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
             }
         });
         return combined;
-    };
+    }
 
     const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
     const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
@@ -288,7 +321,7 @@ function getHomeDir(): string | undefined {
 // returns the absolute path (contrary to what the name implies)
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != null) {
-        const basePath = relativeTo || process.cwd();
+        const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
         return path.resolve(basePath, directory);
     }
     return undefined;
@@ -338,7 +371,7 @@ function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity
     let ruleArguments: any[] | undefined;
     let defaultRuleSeverity: RuleSeverity = "error";
 
-    if (rawDefaultRuleSeverity) {
+    if (rawDefaultRuleSeverity !== undefined) {
         switch (rawDefaultRuleSeverity.toLowerCase()) {
             case "warn":
             case "warning":
@@ -369,7 +402,7 @@ function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity
         ruleArguments = [];
         ruleSeverity = ruleConfigValue === true ? defaultRuleSeverity : "off";
     } else if (typeof ruleConfigValue === "object") {
-        if (ruleConfigValue.severity) {
+        if (ruleConfigValue.severity !== undefined) {
             switch (ruleConfigValue.severity.toLowerCase()) {
                 case "default":
                     ruleSeverity = defaultRuleSeverity;
@@ -427,14 +460,14 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
     return {
         extends: arrayify(configFile.extends),
         jsRules: parseRules(configFile.jsRules),
-        linterOptions: configFile.linterOptions || {},
+        linterOptions: configFile.linterOptions !== undefined ? configFile.linterOptions : {},
         rules: parseRules(configFile.rules),
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
     };
 
     function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
         const map = new Map<string, Partial<IOptions>>();
-        if (config) {
+        if (config !== undefined) {
             for (const ruleName in config) {
                 if (hasOwnProperty(config, ruleName)) {
                     map.set(ruleName, parseRuleOptions(config[ruleName], configFile.defaultSeverity));
@@ -450,12 +483,12 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
  */
 export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptions>>): IOptions[] {
     const output: IOptions[] = [];
-    ruleConfiguration.forEach((partialOptions, ruleName) => {
+    ruleConfiguration.forEach(({ ruleArguments, ruleSeverity }, ruleName) => {
         const options: IOptions = {
-            disabledIntervals: [],
-            ruleArguments: partialOptions.ruleArguments || [],
+            disabledIntervals: [], // deprecated, so just provide an empty array.
+            ruleArguments: ruleArguments != null ? ruleArguments : [],
             ruleName,
-            ruleSeverity: partialOptions.ruleSeverity || "error",
+            ruleSeverity: ruleSeverity != null ? ruleSeverity : "error",
         };
         output.push(options);
     });

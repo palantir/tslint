@@ -243,7 +243,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
                     `Instead, this should come ${locationHint}.`;
                 this.addFailureAtNode(member, errorLine1);
             } else {
-                if (this.opts.alphabetize && member.name) {
+                if (this.opts.alphabetize && member.name !== undefined) {
                     if (rank !== prevRank) {
                         // No alphabetical ordering between different ranks
                         prevName = undefined;
@@ -267,7 +267,7 @@ export class MemberOrderingWalker extends Lint.RuleWalker {
     /** Finds the lowest name higher than 'targetName'. */
     private findLowerName(members: Member[], targetRank: Rank, targetName: string): string {
         for (const member of members) {
-            if (!member.name || this.memberRank(member) !== targetRank) {
+            if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
             }
             const name = nameString(member.name);
@@ -396,7 +396,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alpha
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
     }
 
-    return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: !!firstOption[OPTION_ALPHABETIZE] };
+    return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: firstOption[OPTION_ALPHABETIZE] === true };
 }
 function categoryFromOption(orderOption: {}): MemberCategoryJson[] {
     if (Array.isArray(orderOption)) {
@@ -404,7 +404,7 @@ function categoryFromOption(orderOption: {}): MemberCategoryJson[] {
     }
 
     const preset = PRESETS.get(orderOption as string);
-    if (!preset) {
+    if (preset === undefined) {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }
     return preset;
@@ -458,7 +458,11 @@ function splitOldStyleOptions(categories: NameAndKinds[], filter: (name: string)
 }
 
 function isFunctionLiteral(node: ts.Node | undefined) {
-    switch (node && node.kind) {
+    if (node === undefined) {
+        return false;
+    }
+
+    switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
         case ts.SyntaxKind.FunctionExpression:
             return true;
