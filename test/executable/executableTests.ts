@@ -115,7 +115,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNull(err);
                 assert.equal(stdout, "");
                 assert.equal(stderr, dedent`
-                    Case-insensitive matching will be deprecated in tslint 6.0.
+                    Case-insensitive matching will be removed in tslint 6.0.
                     Found '${path.join(dir, "Tslint.json")}', expected it to be named 'tslint.json'.`.trim());
                 done();
             });

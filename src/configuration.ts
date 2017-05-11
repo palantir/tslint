@@ -172,7 +172,7 @@ function findup(filename: string, directory: string): string | undefined {
         if (oddlyCasedFile !== undefined) {
             const fullOddlyCased = path.join(cwd, oddlyCasedFile);
             showWarningOnce(dedent`
-                Case-insensitive matching will be deprecated in tslint 6.0.
+                Case-insensitive matching will be removed in tslint 6.0.
                 Found '${fullOddlyCased}', expected it to be named '${filename}'.`);
             return fullOddlyCased;
         }
