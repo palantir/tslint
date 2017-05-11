@@ -40,8 +40,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             A second optional argument specifies indentation size:
 
-            * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
-            * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+            * \`${OPTION_INDENT_SIZE_2}\` enforces 2 space indentation.
+            * \`${OPTION_INDENT_SIZE_4}\` enforces 4 space indentation.
 
             Indentation size is required for auto-fixing, but not for rule checking.
             `,
