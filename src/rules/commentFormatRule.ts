@@ -120,10 +120,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function parseOptions(options: Array<string | IExceptionsObject>): Options {
+    let caseOption: Case;
+    if (options.indexOf(OPTION_LOWERCASE) !== -1) {
+        caseOption = Case.Lower;
+    } else if (options.indexOf(OPTION_UPPERCASE) !== -1) {
+        caseOption = Case.Upper;
+    } else {
+        caseOption = Case.None;
+    }
     return {
-        case: options.indexOf(OPTION_LOWERCASE) !== -1
-            ? Case.Lower
-            : options.indexOf(OPTION_UPPERCASE) !== -1 ? Case.Upper : Case.None,
+        case: caseOption,
         failureSuffix: "",
         space: options.indexOf(OPTION_SPACE) !== -1,
         ...composeExceptions(options[options.length - 1]),
@@ -171,7 +177,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         const commentText = fullText.slice(start, end);
         // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
-        if (/^(?:#(!?end)?region|noinspection\s)/.test(commentText)) {
+        if (/^(?:#(?:end)?region|noinspection\s)/.test(commentText)) {
             return;
         }
 
