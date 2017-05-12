@@ -90,6 +90,7 @@ function parseOptions(ruleArguments: string[]): Options {
 function walk(ctx: Lint.WalkContext<Options>) {
     const { sourceFile, options } = ctx;
 
+    // tslint:disable-next-line cyclomatic-complexity
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.ArrowFunction:
@@ -184,6 +185,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     });
 
     let prevTokenShouldBeFollowedByWhitespace = false;
+    // tslint:disable-next-line cyclomatic-complexity (Fixed in 5.3)
     utils.forEachTokenWithTrivia(sourceFile, (_text, tokenKind, range, parent) => {
         if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
             tokenKind === ts.SyntaxKind.NewLineTrivia ||

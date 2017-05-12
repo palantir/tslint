@@ -80,6 +80,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
+        // tslint:disable-next-line cyclomatic-complexity (Fixed in 5.3)
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
                 this.checkAlignment(node.statements.filter((s) => !isEmptyStatement(s)), OPTION_STATEMENTS);

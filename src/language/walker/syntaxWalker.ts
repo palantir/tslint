@@ -350,6 +350,7 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    // tslint:disable-next-line cyclomatic-complexity
     protected visitNode(node: ts.Node) {
         switch (node.kind) {
             case ts.SyntaxKind.AnyKeyword:
