@@ -54,7 +54,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             Three arguments may be optionally provided:
 
             * \`"check-space"\` requires that all single-line comments must begin with a space, as in \`// comment\`
-                * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
+                * note that for comments starting with multiple slashes, e.g. \`///\`, leading slashes are ignored
+                * TypeScript reference comments are ignored completely
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
             * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
 
