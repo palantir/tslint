@@ -34,4 +34,14 @@ c.method === i.foo;
 <button onClick={c.method}>Click me!</button>;
                  ~~~~~~~~ [0]
 
+class Validators {
+    static required() {
+        return null;
+    }
+    compose(...args: Function[]) {}
+}
+
+Validators.compose(Validators.required);
+                   ~~~~~~~~~~~~~~~~~~~ [0]
+
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
