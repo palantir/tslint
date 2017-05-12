@@ -221,35 +221,27 @@ class TypedefWalker extends Lint.RuleWalker {
     private checkTypeAnnotation(option: string,
                                 location: number,
                                 typeAnnotation: ts.TypeNode | undefined,
-                                name?: ts.Node) {
-        if (this.hasOption(option) && typeAnnotation == null) {
-            this.addFailureAt(location, 1, "expected " + option + getName(name, ": '", "'") + " to have a typedef");
+                                name?: ts.PropertyName | ts.BindingName) {
+        if (this.hasOption(option) && typeAnnotation === undefined) {
+            const nameStr = name === undefined ? "" : getName(name);
+            this.addFailureAt(location, 1, `expected ${option}${nameStr === "" ? "" : `: '${nameStr}'`} to have a typedef`);
         }
     }
 }
 
-function getName(name?: ts.Node, prefix = "", suffix = ""): string {
-    let ns = "";
-
-    if (name != null) {
-        switch (name.kind) {
-            case ts.SyntaxKind.Identifier:
-                ns = (name as ts.Identifier).text;
-                break;
-            case ts.SyntaxKind.BindingElement:
-                ns = getName((name as ts.BindingElement).name);
-                break;
-            case ts.SyntaxKind.ArrayBindingPattern:
-                ns = `[ ${(name as ts.ArrayBindingPattern).elements.map( (n) => getName(n) ).join(", ")} ]`;
-                break;
-            case ts.SyntaxKind.ObjectBindingPattern:
-                ns = `{ ${(name as ts.ObjectBindingPattern).elements.map( (n) => getName(n) ).join(", ")} }`;
-                break;
-            default:
-                break;
-        }
+function getName(name: ts.PropertyName | ts.BindingName | ts.BindingElement | ts.OmittedExpression): string {
+    switch (name.kind) {
+        case ts.SyntaxKind.Identifier:
+            return name.text;
+        case ts.SyntaxKind.BindingElement:
+            return getName(name.name);
+        case ts.SyntaxKind.ArrayBindingPattern:
+            return `[ ${name.elements.map(getName).join(", ")} ]`;
+        case ts.SyntaxKind.ObjectBindingPattern:
+            return `{ ${name.elements.map(getName).join(", ")} }`;
+        default:
+            return "";
     }
-    return ns === "" ? "" : `${prefix}${ns}${suffix}`;
 }
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {
