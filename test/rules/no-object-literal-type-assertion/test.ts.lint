@@ -12,4 +12,4 @@ x as T;
 {} as any;
 <any> {};
 
-[0]: Type assertion applied to object literal.
+[0]: Type assertion on object literals is forbidden, use a type annotation instead.

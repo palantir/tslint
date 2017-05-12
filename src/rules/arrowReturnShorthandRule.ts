@@ -81,7 +81,7 @@ function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, ex
     const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
     const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-        hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
+        hasComments(expr) || (semicolon !== undefined && hasComments(semicolon)) || hasComments(closeBrace);
     return anyComments ? undefined : [
         // Object literal must be wrapped in `()`
         ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [

@@ -140,7 +140,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             case ts.SyntaxKind.ImportDeclaration: {
                 const { importClause } = node as ts.ImportDeclaration;
-                if (options.module && importClause) {
+                if (options.module && importClause !== undefined) {
                     // an import clause can have _both_ named bindings and a name (the latter for the default import)
                     // but the named bindings always come last, so we only need to check that for whitespace
                     let position: number | undefined;
@@ -174,8 +174,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             case ts.SyntaxKind.VariableDeclaration:
                 const { name, type, initializer } = node as ts.VariableDeclaration;
-                if (options.decl && initializer) {
-                    checkForTrailingWhitespace((type || name).getEnd());
+                if (options.decl && initializer !== undefined) {
+                    checkForTrailingWhitespace((type !== undefined ? type :  name).getEnd());
                 }
                 break;
         }
@@ -242,7 +242,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
         const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
         // condition so we don't crash if the arrow is somehow missing
-        if (!equalsGreaterThanToken) {
+        if (equalsGreaterThanToken === undefined) {
             return;
         }
 
@@ -257,6 +257,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function addMissingWhitespaceErrorAt(position: number): void {
+        // TODO: this rule occasionally adds duplicate failures.
+        if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
+            return;
+        }
         const fix = Lint.Replacement.appendText(position, " ");
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
     }

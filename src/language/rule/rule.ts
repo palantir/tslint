@@ -99,9 +99,18 @@ export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
-    disabledIntervals: IDisabledInterval[];
+    /**
+     * @deprecated
+     * Tslint now handles disables itself.
+     * This will be empty.
+     */
+    disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
 }
 
+/**
+ * @deprecated
+ * These are now handled internally.
+ */
 export interface IDisabledInterval {
     startPosition: number;
     endPosition: number;

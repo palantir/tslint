@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(expression: string, messageAddition?: string) {
-        return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
+        return `Calls to '${expression}' are not allowed.${messageAddition !== undefined ? " " + messageAddition : ""}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

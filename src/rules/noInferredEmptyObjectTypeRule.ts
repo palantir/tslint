@@ -55,11 +55,9 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
             const objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
             if (isTypeFlagSet(objType, ts.TypeFlags.Object) && objType.typeArguments !== undefined) {
                 const typeArgs = objType.typeArguments as ts.ObjectType[];
-                typeArgs.forEach((a) => {
-                    if (this.isEmptyObjectInterface(a)) {
-                        this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
-                    }
-                });
+                if (typeArgs.some((a) => this.isEmptyObjectInterface(a))) {
+                    this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
+                }
             }
         }
         super.visitNewExpression(node);

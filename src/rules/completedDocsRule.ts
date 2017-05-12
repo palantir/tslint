@@ -271,7 +271,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
     public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;
 
     protected createSet<T extends All | string>(values?: T[]): Set<T> {
-        if (!values || values.length === 0) {
+        if (values === undefined || values.length === 0) {
             values = [ALL as T];
         }
 
@@ -394,12 +394,12 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
 
         const requirement = this.requirements.get(nodeType);
-        if (!requirement || !requirement.shouldNodeBeDocumented(node)) {
+        if (requirement === undefined || !requirement.shouldNodeBeDocumented(node)) {
             return;
         }
 
         const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
-        if (!symbol) {
+        if (symbol === undefined) {
             return;
         }
 
@@ -424,7 +424,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
-        if (node.modifiers) {
+        if (node.modifiers !== undefined) {
             description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
         }
 
@@ -433,7 +433,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
 
     private describeModifier(kind: ts.SyntaxKind) {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
-
-        return CompletedDocsWalker.modifierAliases[description] || description;
+        const alias = CompletedDocsWalker.modifierAliases[description];
+        return alias !== undefined ? alias : description;
     }
 }

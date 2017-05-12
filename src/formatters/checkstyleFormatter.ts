@@ -42,7 +42,7 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
-        if (failures.length) {
+        if (failures.length !== 0) {
             const failuresSorted = failures.sort((a, b) => {
                 return a.getFileName().localeCompare(b.getFileName());
             });
@@ -50,7 +50,7 @@ export class Formatter extends AbstractFormatter {
             for (const failure of failuresSorted) {
                 const severity = failure.getRuleSeverity();
                 if (failure.getFileName() !== previousFilename) {
-                    if (previousFilename) {
+                    if (previousFilename !== null) {
                         output += "</file>";
                     }
                     previousFilename = failure.getFileName();
@@ -63,7 +63,7 @@ export class Formatter extends AbstractFormatter {
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
                 output += "source=\"failure.tslint." + this.escapeXml(failure.getRuleName()) + "\" />";
             }
-            if (previousFilename) {
+            if (previousFilename !== null) {
                 output += "</file>";
             }
         }

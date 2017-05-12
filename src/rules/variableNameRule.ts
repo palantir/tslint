@@ -110,7 +110,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     handleVariableNameKeyword(name);
                     // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
                     // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName) {
+                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
                         handleVariableNameFormat(name, initializer);
                     }
                 }
@@ -148,7 +148,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         const { text } = name;
-        if (initializer && isAlias(text, initializer)) {
+        if (initializer !== undefined && isAlias(text, initializer)) {
             return;
         }
 

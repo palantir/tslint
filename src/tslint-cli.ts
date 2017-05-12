@@ -199,7 +199,7 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init || argv.test || argv.project || commander.args.length > 0)) {
+if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
     console.error("Missing files");
     process.exit(1);
 }
@@ -220,7 +220,7 @@ const runnerOptions: IRunnerOptions = {
     files: commander.args,
     fix: argv.fix,
     force: argv.force,
-    format: argv.format || "prose",
+    format: argv.format === undefined ? "prose" : argv.format,
     formattersDirectory: argv.formattersDir,
     init: argv.init,
     out: argv.out,
