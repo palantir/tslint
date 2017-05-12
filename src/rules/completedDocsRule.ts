@@ -328,7 +328,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.privacies.has(PRIVACY_PUBLIC);
     }
 }
 
