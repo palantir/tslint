@@ -223,24 +223,8 @@ class TypedefWalker extends Lint.RuleWalker {
                                 typeAnnotation: ts.TypeNode | undefined,
                                 name?: ts.PropertyName | ts.BindingName) {
         if (this.hasOption(option) && typeAnnotation === undefined) {
-            const nameStr = name === undefined ? "" : getName(name);
-            this.addFailureAt(location, 1, `expected ${option}${nameStr === "" ? "" : `: '${nameStr}'`} to have a typedef`);
+            this.addFailureAt(location, 1, `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`);
         }
-    }
-}
-
-function getName(name: ts.PropertyName | ts.BindingName | ts.BindingElement | ts.OmittedExpression): string {
-    switch (name.kind) {
-        case ts.SyntaxKind.Identifier:
-            return name.text;
-        case ts.SyntaxKind.BindingElement:
-            return getName(name.name);
-        case ts.SyntaxKind.ArrayBindingPattern:
-            return `[ ${name.elements.map(getName).join(", ")} ]`;
-        case ts.SyntaxKind.ObjectBindingPattern:
-            return `{ ${name.elements.map(getName).join(", ")} }`;
-        default:
-            return "";
     }
 }
 
