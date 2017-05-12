@@ -38,7 +38,7 @@ class Validators {
     static required() {
         return null;
     }
-    compose(...args: Function[]) {}
+    static compose(...args: Function[]) {}
 }
 
 Validators.compose(Validators.required);
