@@ -144,11 +144,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     // an import clause can have _both_ named bindings and a name (the latter for the default import)
                     // but the named bindings always come last, so we only need to check that for whitespace
                     let position: number | undefined;
-                    const { name, namedBindings } = importClause;
-                    if (namedBindings !== undefined) {
-                        position = namedBindings.getEnd();
-                    } else if (name !== undefined) {
-                        position = name.getEnd();
+                    if (importClause.namedBindings !== undefined) {
+                        position = importClause.namedBindings.getEnd();
+                    } else if (importClause.name !== undefined) {
+                        position = importClause.name.getEnd();
                     }
 
                     if (position !== undefined) {

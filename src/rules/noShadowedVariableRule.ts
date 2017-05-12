@@ -52,7 +52,7 @@ class Scope {
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
         // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
-        this.functionScope = functionScope || this;
+        this.functionScope = functionScope !== undefined ? functionScope : this;
     }
 
     public addVariable(identifier: ts.Identifier, blockScoped = true) {
