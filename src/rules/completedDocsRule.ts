@@ -425,10 +425,10 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         let description = Rule.FAILURE_STRING_EXIST;
 
         if (node.modifiers !== undefined) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(",")} `;
         }
 
-        return description + nodeType + ".";
+        return `${description}${nodeType}.`;
     }
 
     private describeModifier(kind: ts.SyntaxKind) {

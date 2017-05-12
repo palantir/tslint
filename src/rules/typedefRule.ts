@@ -223,7 +223,7 @@ class TypedefWalker extends Lint.RuleWalker {
                                 typeAnnotation: ts.TypeNode | undefined,
                                 name?: ts.Node) {
         if (this.hasOption(option) && typeAnnotation == null) {
-            this.addFailureAt(location, 1, "expected " + option + getName(name, ": '", "'") + " to have a typedef");
+            this.addFailureAt(location, 1, `expected ${option}${getName(name, ": '", "'")} to have a typedef`);
         }
     }
 }
