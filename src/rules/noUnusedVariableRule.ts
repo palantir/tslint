@@ -42,16 +42,19 @@ export class Rule extends Lint.Rules.TypedRule {
         options: {
             type: "array",
             items: {
-                oneOf: [{
-                    type: "string",
-                    enum: ["check-parameters"],
-                }, {
-                    type: "object",
-                    properties: {
-                        "ignore-pattern": {type: "string"},
+                oneOf: [
+                    {
+                        type: "string",
+                        enum: ["check-parameters"],
                     },
-                    additionalProperties: false,
-                }],
+                    {
+                        type: "object",
+                        properties: {
+                            "ignore-pattern": {type: "string"},
+                        },
+                        additionalProperties: false,
+                    },
+                ],
             },
             minLength: 0,
             maxLength: 3,

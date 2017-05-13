@@ -136,17 +136,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 order: {
-                    oneOf: [{
-                        type: "string",
-                        enum: PRESET_NAMES,
-                    }, {
-                        type: "array",
-                        items: {
+                    oneOf: [
+                        {
                             type: "string",
-                            enum: allMemberKindNames,
+                            enum: PRESET_NAMES,
                         },
-                        maxLength: 13,
-                    }],
+                        {
+                            type: "array",
+                            items: {
+                                type: "string",
+                                enum: allMemberKindNames,
+                            },
+                            maxLength: 13,
+                        },
+                    ],
                 },
             },
             additionalProperties: false,
