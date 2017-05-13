@@ -80,7 +80,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
-            // For some reason, these are of type "any".
+            // These show as type "any" if in type position.
+            case ts.SyntaxKind.NumericLiteral:
             case ts.SyntaxKind.StringLiteral:
                 return;
 

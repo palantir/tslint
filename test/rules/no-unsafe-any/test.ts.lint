@@ -15,8 +15,8 @@ const num: namespaceImport.T = 0;
     }
 }
 
-// Ignore string literal in type
-function returnsA(): "a";
+// Ignore number/string literal in type
+function returnsA(): 0 | "a" | null | undefined;
 
 label: for (const x of []) {
     break label;

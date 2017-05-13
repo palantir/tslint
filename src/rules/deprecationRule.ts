@@ -86,7 +86,7 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       for (const {pos, end} of range) {
         const jsDocText = commentNode.getFullText().substring(pos, end);
         if (jsDocText.includes("@deprecated")) {
-            this.addFailureAtNode(node, node.text + " is deprecated.");
+            this.addFailureAtNode(node, `${node.text} is deprecated.`);
         }
       }
     }

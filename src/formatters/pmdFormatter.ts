@@ -51,11 +51,11 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const priority = failure.getRuleSeverity() === "warning" ? 4 : 3;
 
-            output += "<file name=\"" + failure.getFileName();
-            output += "\"><violation begincolumn=\"" + (lineAndCharacter.character + 1);
-            output += "\" beginline=\"" + (lineAndCharacter.line + 1);
-            output += "\" priority=\"" + priority + "\"";
-            output += " rule=\"" + failureString + "\"> </violation></file>";
+            output += `<file name="${failure.getFileName()}`;
+            output += `"><violation begincolumn="${lineAndCharacter.character + 1}`;
+            output += `" beginline="${lineAndCharacter.line + 1}`;
+            output += `" priority="${priority}"`;
+            output += ` rule="${failureString}"></violation></file>`;
         }
 
         output += "</pmd>";
