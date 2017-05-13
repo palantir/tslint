@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             This reduces duplication and can eliminate an unnecessary variable declaration.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
