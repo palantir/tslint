@@ -134,6 +134,6 @@ function memberType(node: ts.ClassElement): string {
         case ts.SyntaxKind.SetAccessor:
             return "set property accessor";
         default:
-            throw new Error("unhandled node type " + ts.SyntaxKind[node.kind]);
+            throw new Error(`unhandled node type ${ts.SyntaxKind[node.kind]}`);
     }
 }

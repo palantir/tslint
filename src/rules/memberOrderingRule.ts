@@ -92,11 +92,11 @@ const PRESET_NAMES = Array.from(PRESETS.keys());
 
 const allMemberKindNames = mapDefined(Object.keys(MemberKind), (key) => {
     const mk = (MemberKind as any)[key];
-    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => "-" + cap.toLowerCase()) : undefined;
+    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => `-${cap.toLowerCase()}`) : undefined;
 });
 
 function namesMarkdown(names: string[]): string {
-    return names.map((name) => "* `" + name + "`").join("\n    ");
+    return names.map((name) => `* \`${name}\``).join("\n    ");
 }
 
 const optionsDescription = Lint.Utils.dedent`
@@ -296,7 +296,7 @@ function caseInsensitiveLess(a: string, b: string) {
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"] as MemberKind;
+    return (MemberKind as any)[`${access}Constructor`] as MemberKind;
 }
 
 function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
@@ -310,7 +310,7 @@ function memberKindFromName(name: string): MemberKind[] {
     return typeof kind === "number" ? [kind as MemberKind] : allAccess.map(addModifier);
 
     function addModifier(modifier: string) {
-        const modifiedKind = (MemberKind as any)[Lint.Utils.camelize(modifier + "-" + name)];
+        const modifiedKind = (MemberKind as any)[Lint.Utils.camelize(`${modifier}-${name}`)];
         if (typeof modifiedKind !== "number") {
             throw new Error(`Bad member kind: ${name}`);
         }

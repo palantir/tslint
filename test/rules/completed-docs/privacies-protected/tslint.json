@@ -5,7 +5,7 @@
   "rules": {
     "completed-docs": [true, {
       "methods": {
-        "privacies": ["all"]
+        "privacies": ["protected"]
       }
     }]
   }

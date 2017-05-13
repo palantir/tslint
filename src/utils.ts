@@ -62,9 +62,9 @@ export function isLowerCase(str: string): boolean {
 /**
  * Removes leading indents from a template string without removing all leading whitespace
  */
-export function dedent(strings: TemplateStringsArray, ...values: string[]) {
+export function dedent(strings: TemplateStringsArray, ...values: any[]) {
     let fullString = strings.reduce((accumulator, str, i) => {
-        return accumulator + values[i - 1] + str;
+        return `${accumulator}${values[i - 1]}${str}`;
     });
 
     // match all leading spaces/tabs at the start of each line
@@ -76,7 +76,7 @@ export function dedent(strings: TemplateStringsArray, ...values: string[]) {
 
     // find the smallest indent, we don't want to remove all leading whitespace
     const indent = Math.min(...match.map((el) => el.length));
-    const regexp = new RegExp("^[ \\t]{" + indent + "}", "gm");
+    const regexp = new RegExp(`^[ \\t]{${indent}}`, "gm");
     fullString = indent > 0 ? fullString.replace(regexp, "") : fullString;
     return fullString;
 }
