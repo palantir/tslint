@@ -30,16 +30,6 @@
         "allow-declarations",
         "allow-named-functions"
     ],
-    "whitespace": {
-        "options": [
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-            "check-typecast"
-        ]
-    },
 
     // TODO: Enable these
     "completed-docs": false,
