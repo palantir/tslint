@@ -152,6 +152,8 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - Unused imports are fixable.
  */
 function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+    // tslint:disable return-undefined
+    // (fixed in tslint 5.3)
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);

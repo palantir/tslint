@@ -105,36 +105,42 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Value;
     }
 
-    const contextual = isFunctionExpressionLike(node) ? tryGetReturnType(checker.getContextualType(node)) : undefined;
-    const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node));
+    const contextual = isFunctionExpressionLike(node) ? tryGetReturnType(checker.getContextualType(node), checker) : undefined;
+    const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node), checker);
 
     if (returnType === undefined) {
         return undefined;
-    } else if (Lint.isTypeFlagSet(returnType, ts.TypeFlags.Void)) {
+    } else if (isEffectivelyVoid(returnType)) {
         return ReturnKind.Void;
     } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
         // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
         // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
         const typeArguments = (returnType as ts.GenericType).typeArguments;
         if (typeArguments !== undefined && typeArguments.length === 1) {
-            return Lint.isTypeFlagSet(typeArguments[0], ts.TypeFlags.Void) ? ReturnKind.Void : ReturnKind.Value;
+            return isEffectivelyVoid(typeArguments[0]) ? ReturnKind.Void : ReturnKind.Value;
         }
     }
     return ReturnKind.Value;
+}
 
-    function tryGetReturnType(fnType: ts.Type | undefined): ts.Type | undefined {
-        if (fnType === undefined) {
-            return undefined;
-        }
+/** True for `void`, `undefined`, or `void | undefined`. */
+function isEffectivelyVoid(type: ts.Type): boolean {
+    // tslint:disable-next-line no-bitwise
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) || isUnionType(type) && type.types.every(isEffectivelyVoid);
+}
 
-        const sigs = checker.getSignaturesOfType(fnType, ts.SignatureKind.Call);
-        if (sigs.length !== 1) {
-            return undefined;
-        }
-
-        const ret = checker.getReturnTypeOfSignature(sigs[0]);
-        return Lint.isTypeFlagSet(ret, ts.TypeFlags.Any) ? undefined : ret;
+function tryGetReturnType(fnType: ts.Type | undefined, checker: ts.TypeChecker): ts.Type | undefined {
+    if (fnType === undefined) {
+        return undefined;
     }
+
+    const sigs = checker.getSignaturesOfType(fnType, ts.SignatureKind.Call);
+    if (sigs.length !== 1) {
+        return undefined;
+    }
+
+    const ret = checker.getReturnTypeOfSignature(sigs[0]);
+    return Lint.isTypeFlagSet(ret, ts.TypeFlags.Any) ? undefined : ret;
 }
 
 function isFunctionLike(node: ts.Node): node is FunctionLike {
@@ -154,4 +160,8 @@ function isFunctionLike(node: ts.Node): node is FunctionLike {
 
 function isFunctionExpressionLike(node: ts.Node): node is ts.FunctionExpression | ts.ArrowFunction {
     return node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.ArrowFunction;
+}
+
+function isUnionType(type: ts.Type): type is ts.UnionType {
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }
