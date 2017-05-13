@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { hasOwnProperty } from "../utils";
 
 export interface IBlockRequirementDescriptor {
     visibilities?: Visibility[];
@@ -197,18 +198,22 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [
-            "true",
-            `[true, "${ARGUMENT_ENUMS}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}"]`,
-            `[true, {
-                "${ARGUMENT_ENUMS}": true,
-                "${ARGUMENT_FUNCTIONS}": {
-                    "${DESCRIPTOR_VISIBILITIES}": ["${VISIBILITY_EXPORTED}"]
+            true,
+            [true, ARGUMENT_ENUMS, ARGUMENT_FUNCTIONS, ARGUMENT_METHODS],
+            [
+                true,
+                {
+                    [ARGUMENT_ENUMS]: true,
+                    [ARGUMENT_FUNCTIONS]: {
+                        [DESCRIPTOR_VISIBILITIES]: [VISIBILITY_EXPORTED],
+                    },
+                    [ARGUMENT_METHODS]: {
+                        [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
+                        [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
+                    },
                 },
-                "${ARGUMENT_METHODS}": {
-                    "${DESCRIPTOR_LOCATIONS}": ["${LOCATION_INSTANCE}"]
-                    "${DESCRIPTOR_PRIVACIES}": ["${PRIVACY_PUBLIC}", "${PRIVACY_PROTECTED}"]
-                }
-            }]`],
+            ],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -250,7 +255,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
 
         for (const type in descriptor) {
-            if (descriptor.hasOwnProperty(type)) {
+            if (hasOwnProperty(descriptor, type)) {
                 requirements.set(
                     type as DocType,
                     (type === "methods" || type === "properties")
@@ -260,12 +265,13 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
     }
 
+    // tslint:disable-next-line no-object-literal-type-assertion
     protected constructor(public readonly descriptor: TDescriptor = {} as TDescriptor) { }
 
     public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;
 
     protected createSet<T extends All | string>(values?: T[]): Set<T> {
-        if (!values || values.length === 0) {
+        if (values === undefined || values.length === 0) {
             values = [ALL as T];
         }
 
@@ -388,12 +394,12 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
 
         const requirement = this.requirements.get(nodeType);
-        if (!requirement || !requirement.shouldNodeBeDocumented(node)) {
+        if (requirement === undefined || !requirement.shouldNodeBeDocumented(node)) {
             return;
         }
 
         const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
-        if (!symbol) {
+        if (symbol === undefined) {
             return;
         }
 
@@ -418,7 +424,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
-        if (node.modifiers) {
+        if (node.modifiers !== undefined) {
             description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
         }
 
@@ -427,7 +433,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
 
     private describeModifier(kind: ts.SyntaxKind) {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
-
-        return CompletedDocsWalker.modifierAliases[description] || description;
+        const alias = CompletedDocsWalker.modifierAliases[description];
+        return alias !== undefined ? alias : description;
     }
 }

@@ -18,6 +18,8 @@ obj["invalid_accessor"];
     ~~~~~~~~~~~~~~~~~~   [0]
 obj["_AnotherInvalidAccessor"];
     ~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+obj["\u0061"]; // unicode value "a"
+    ~~~~~~~~ [0]
 
 // valid accessors
 obj["a-2"];

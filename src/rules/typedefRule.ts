@@ -87,7 +87,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 7,
         },
-        optionExamples: [`[true, "${OPTION_CALL_SIGNATURE}", "${OPTION_PARAMETER}", "${OPTION_MEMBER_VARIABLE_DECLARATION}"]`],
+        optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -199,7 +199,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
             location: ts.Node | ts.NodeArray<ts.Node>,
             typeAnnotation: ts.TypeNode | undefined,
             name?: ts.Node): void {
-        if (this.options[option] && typeAnnotation === undefined) {
+        if (this.options[option] === true && typeAnnotation === undefined) {
             const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
             if (Array.isArray(location)) {
                 this.addFailure(location.pos - 1, location.end + 1, failure);

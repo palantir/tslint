@@ -2,16 +2,75 @@
   "lintOptions": {
     "typeCheck": true
   },
-  "extends": "tslint:latest",
+  "extends": "tslint:all",
   "rules": {
+    // TODO: remove this when tslint 5.3 released
+    "prefer-switch": [true, { "min-cases": 3 }],
+
+    // Don't want these
+    "newline-before-return": false,
+    "no-parameter-properties": false,
+    "no-unused-variable": false,
+    // TODO: Enable stricter options for these
+    "align": {
+        "options": [
+            "parameters",
+            "statements",
+            "members"
+        ]
+    },
+    "arrow-return-shorthand": true,
+    "comment-format": [
+        true,
+        "check-space"
+    ],
+    "member-access": true,
+    "only-arrow-functions": [
+        true,
+        "allow-declarations",
+        "allow-named-functions"
+    ],
+    "whitespace": {
+        "options": [
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+            "check-typecast"
+        ]
+    },
+
+    // TODO: Enable these
+    "completed-docs": false,
+    "cyclomatic-complexity": false,
+    "no-any": false,
+    "no-inferred-empty-object-type": false,
+    "no-magic-numbers": false,
+    "no-non-null-assertion": false,
+    "no-null-keyword": false,
+    "no-require-imports": false,
+    "no-unbound-method": false,
+    "no-unnecessary-callback-wrapper": false,
+    "no-unnecessary-type-assertion": false,
+    "no-unnecessary-qualifier": false,
+    "no-use-before-declare": false,
+    "no-void-expression": false,
+    "prefer-function-over-method": false,
+    "prefer-template": false,
+    "restrict-plus-operands": false,
+    "return-undefined": false,
+    "strict-type-predicates": false,
+    "triple-equals": false,
+    "typedef": false,
+
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"]
+      ["it", "only"],
+      ["Object", "assign"]
     ],
 
-    "callable-types": true,
     "interface-name": false,
-    "interface-over-type-literal": true,
     "file-header": [true,
       "Copyright \\d{4} Palantir Technologies, Inc."
     ],
@@ -22,12 +81,10 @@
       "static-before-instance",
       "variables-before-functions"
     ],
-    "no-angle-bracket-type-assertion": true,
-    "no-default-export": true,
-    "no-empty-interface": true,
-    "no-string-throw": true,
+    "no-console": {
+      "options": ["log"]
+    },
     "no-switch-case-fall-through": true,
-    "prefer-const": true,
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",

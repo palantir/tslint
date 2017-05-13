@@ -59,24 +59,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: [SPACE_OBJECT, SPACE_OBJECT],
             additionalItems: false,
         },
-        optionExamples: [Lint.Utils.dedent`
+        optionExamples: [
             [
-              true,
-              {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace"
-              },
-              {
-                "call-signature": "onespace",
-                "index-signature": "onespace",
-                "parameter": "onespace",
-                "property-declaration": "onespace",
-                "variable-declaration": "onespace"
-              }
-            ]`,
+                true,
+                {
+                    "call-signature": "nospace",
+                    "index-signature": "nospace",
+                    "parameter": "nospace",
+                    "property-declaration": "nospace",
+                    "variable-declaration": "nospace",
+                },
+                {
+                    "call-signature": "onespace",
+                    "index-signature": "onespace",
+                    "parameter": "onespace",
+                    "property-declaration": "onespace",
+                    "variable-declaration": "onespace",
+                },
+            ],
         ],
         type: "typescript",
         typescriptOnly: true,
@@ -91,7 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWhitespaceWalker extends Lint.RuleWalker {
     private static getColonPosition(node: ts.Node) {
         const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
-        return colon && colon.getStart();
+        return colon === undefined ? undefined : colon.getStart();
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
@@ -162,49 +162,49 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         }
     }
 
-    public hasOption(option: string) {
+    public hasOption(option: string): boolean {
         return this.hasLeftOption(option) || this.hasRightOption(option);
     }
 
-    private hasLeftOption(option: string) {
-        const allOptions = this.getOptions();
+    private hasLeftOption(option: string): boolean {
+        const allOptions = this.getOptions() as any[];
 
         if (allOptions == null || allOptions.length === 0) {
             return false;
         }
 
-        const options = allOptions[0];
+        const options = allOptions[0] as { [key: string]: Option };
         return options != null && options[option] != null;
     }
 
-    private hasRightOption(option: string) {
-        const allOptions = this.getOptions();
+    private hasRightOption(option: string): boolean {
+        const allOptions = this.getOptions() as any[];
 
         if (allOptions == null || allOptions.length < 2) {
             return false;
         }
 
-        const options = allOptions[1];
+        const options = allOptions[1] as { [key: string]: Option };
         return options != null && options[option] != null;
     }
 
-    private getLeftOption(option: string) {
+    private getLeftOption(option: string): Option | null {
         if (!this.hasLeftOption(option)) {
             return null;
         }
 
-        const allOptions = this.getOptions();
-        const options = allOptions[0];
+        const allOptions = this.getOptions() as any[];
+        const options = allOptions[0] as { [key: string]: Option };
         return options[option];
     }
 
-    private getRightOption(option: string) {
+    private getRightOption(option: string): Option | null {
         if (!this.hasRightOption(option)) {
             return null;
         }
 
-        const allOptions = this.getOptions();
-        const options = allOptions[1];
+        const allOptions = this.getOptions() as any[];
+        const options = allOptions[1] as { [key: string]: Option };
         return options[option];
     }
 
@@ -234,7 +234,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             const optionValue = this.getLeftOption(option);
             const message = "expected " + optionValue + " before colon in " + option;
             this.performFailureCheck(
-                optionValue,
+                optionValue!,
                 hasLeadingWhitespace,
                 hasSeveralLeadingWhitespaces,
                 colonPosition - 1,
@@ -276,7 +276,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
             const optionValue = this.getRightOption(option);
             const message = "expected " + optionValue + " after colon in " + option;
             this.performFailureCheck(
-                optionValue,
+                optionValue!,
                 hasTrailingWhitespace,
                 hasSeveralTrailingWhitespaces,
                 colonPosition + 1,
@@ -285,7 +285,7 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         }
     }
 
-    private performFailureCheck(optionValue: string, hasWS: boolean, hasSeveralWS: boolean, failurePos: number, message: string) {
+    private performFailureCheck(optionValue: Option, hasWS: boolean, hasSeveralWS: boolean, failurePos: number, message: string) {
         // has several spaces but should have one or none
         let isFailure = hasSeveralWS &&
             (optionValue === "onespace" || optionValue === "nospace");
@@ -300,3 +300,5 @@ class TypedefWhitespaceWalker extends Lint.RuleWalker {
         }
     }
 }
+
+type Option = "nospace" | "onespace" | "space";

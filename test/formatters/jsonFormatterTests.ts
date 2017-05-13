@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as ts from "typescript";
 
-import { IFormatter, Replacement, TestUtils } from "../lint";
+import { IFormatter, IRuleFailureJson, Replacement, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
 describe("JSON Formatter", () => {
@@ -42,7 +43,7 @@ describe("JSON Formatter", () => {
         ];
 
         /* tslint:disable:object-literal-sort-keys */
-        const expectedResult: any = [{
+        const expectedResult: IRuleFailureJson[] = [{
             name: TEST_FILE,
             failure: "first failure",
             startPosition: {

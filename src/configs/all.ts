@@ -18,6 +18,7 @@
 import { join as joinPaths } from "path";
 
 import { findRule } from "../ruleLoader";
+import { hasOwnProperty } from "../utils";
 
 // tslint:disable object-literal-sort-keys
 // tslint:disable object-literal-key-quotes
@@ -99,12 +100,15 @@ export const rules = {
     "no-floating-promises": true,
     "no-for-in-array": true,
     "no-inferred-empty-object-type": true,
+    "no-invalid-template-strings": true,
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
+    "no-object-literal-type-assertion": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
+    "no-sparse-arrays": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
@@ -131,6 +135,7 @@ export const rules = {
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
     "no-default-export": true,
+    "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
     "no-require-imports": true,
     "no-trailing-whitespace": true,
@@ -147,6 +152,8 @@ export const rules = {
         "parameters",
         "arguments",
         "statements",
+        "elements",
+        "members",
     ],
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
@@ -160,6 +167,8 @@ export const rules = {
     ],
     "completed-docs": true,
     // "file-header": No sensible default
+    "deprecation": true,
+    "encoding": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -175,6 +184,8 @@ export const rules = {
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
+    "no-unnecessary-type-assertion": true,
+    "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
     "one-line": [true,
@@ -191,6 +202,7 @@ export const rules = {
     }],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
+    "prefer-switch": true,
     "prefer-template": true,
     "quotemark": [true, "double", "avoid-escape"],
     "return-undefined": true,
@@ -226,11 +238,14 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG =
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
 for (const key in rules) {
-    if (!Object.prototype.hasOwnProperty.call(rules, key)) {
+    if (!hasOwnProperty(rules, key)) {
         continue;
     }
 
-    const Rule = findRule(key, joinPaths(__dirname, "..", "rules"))!;
+    const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
+    if (Rule === undefined) {
+        throw new Error(`Couldn't find rule '${key}'.`);
+    }
     if (!Rule.metadata.typescriptOnly) {
         jsRules[key] = (rules as any)[key];
     }

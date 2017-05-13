@@ -1,8 +1,9 @@
 ---
-title: Custom Rules
+title: Developing TSLint rules
 layout: page
 permalink: "/develop/custom-rules/"
 ---
+
 TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint's internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.
 
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
@@ -44,8 +45,8 @@ Given a walker, TypeScript's parser visits the AST using the visitor pattern. So
 
 We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`:
 
-```bash
-tsc --noImplicitAny noImportsRule.ts
+```sh
+tsc noImportsRule.ts
 ```
 
 Then, if using the CLI, provide the directory that contains this rule as an option to `--rules-dir`. If using TSLint as a library or via `grunt-tslint`, the `options` hash must contain `"rulesDirectory": "..."`. If you run the linter, you'll see that we have now successfully banned all import statements via TSLint!
@@ -60,8 +61,7 @@ Instantiate a `Fix` object and pass it in as an argument to `addFailure`. This s
 
 ```typescript
 // create a fixer for this failure
-const replacement = new Lint.Replacement(node.getStart(), node.getWidth(), "");
-const fix = new Lint.Fix("no-imports", [replacement]);
+const fix = new Lint.Replacement(node.getStart(), node.getWidth(), "");
 
 // create a failure at the current position
 this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));

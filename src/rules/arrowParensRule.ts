@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [BAN_SINGLE_ARG_PARENS],
         },
-        optionExamples: [`true`, `[true, "${BAN_SINGLE_ARG_PARENS}"]`],
+        optionExamples: [true, [true, BAN_SINGLE_ARG_PARENS]],
         type: "style",
         typescriptOnly: false,
     };

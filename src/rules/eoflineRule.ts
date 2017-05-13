@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
@@ -48,8 +48,6 @@ export class Rule extends Lint.Rules.AbstractRule {
             fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
         }
 
-        return this.filterFailures([
-            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix),
-        ]);
+        return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix)];
     }
 }

@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -48,9 +48,10 @@ interface IncrementorState {
 }
 
 function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
     const scopes: IncrementorState[] = [];
 
-    return ts.forEachChild(ctx.sourceFile, cb);
+    return ts.forEachChild(sourceFile, cb);
 
     function cb(node: ts.Node): void {
         switch (node.kind) {
@@ -65,7 +66,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function visitForStatement(node: ts.ForStatement): void {
         const arrayNodeInfo = getForLoopHeaderInfo(node);
-        if (!arrayNodeInfo) {
+        if (arrayNodeInfo === undefined) {
             return ts.forEachChild(node, cb);
         }
 
@@ -85,8 +86,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function visitIdentifier(node: ts.Identifier): void {
         const state = getStateForVariable(node.text);
-        if (state) {
-            updateIncrementorState(node, state);
+        if (state !== undefined && state.onlyArrayReadAccess && isNonSimpleIncrementorUse(node, state.arrayExpr, sourceFile)) {
+            state.onlyArrayReadAccess = false;
         }
     }
 
@@ -101,28 +102,27 @@ function walk(ctx: Lint.WalkContext<void>): void {
     }
 }
 
-function updateIncrementorState(node: ts.Identifier, state: IncrementorState): void {
+function isNonSimpleIncrementorUse(node: ts.Identifier, arrayExpr: ts.Expression, sourceFile: ts.SourceFile): boolean {
     // check if iterator is used for something other than reading data from array
     const elementAccess = node.parent!;
-    if (!utils.isElementAccessExpression(elementAccess)) {
-        state.onlyArrayReadAccess = false;
-        return;
-    }
+    const accessParent = elementAccess.parent!;
+    return !utils.isElementAccessExpression(elementAccess)
+        // `a[i] = ...`
+        || isAssignment(accessParent)
+        // `delete a[i]`
+        || accessParent.kind === ts.SyntaxKind.DeleteExpression
+        // `b[i]`
+        || !nodeEquals(arrayExpr, unwrapParentheses(elementAccess.expression), sourceFile);
+}
 
-    const arrayExpr = unwrapParentheses(elementAccess.expression);
-    if (state.arrayExpr.getText() !== arrayExpr.getText()) {
-        // iterator used in array other than one iterated over
-        state.onlyArrayReadAccess = false;
-    } else if (isAssignment(elementAccess.parent!)) {
-        // array position is assigned a new value
-        state.onlyArrayReadAccess = false;
-    }
+function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {
+    return a.getText(sourceFile) === b.getText(sourceFile);
 }
 
 // returns the iterator and array of a `for` loop if the `for` loop is basic.
 function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier, arrayExpr: ts.Expression } | undefined {
     const { initializer, condition, incrementor } = forLoop;
-    if (!initializer || !condition || !incrementor) {
+    if (initializer === undefined || condition === undefined || incrementor === undefined) {
         return undefined;
     }
 

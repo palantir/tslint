@@ -26,7 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -58,10 +58,10 @@ class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
 
         if (value.kind === ts.SyntaxKind.FunctionExpression) {
             const fnNode = value as ts.FunctionExpression;
-            if (fnNode.name) {
+            if (fnNode.name !== undefined) {
                 return;  // named function expressions are OK.
             }
-            const star = fnNode.asteriskToken ? fnNode.asteriskToken.getText() : "";
+            const star = fnNode.asteriskToken !== undefined ? fnNode.asteriskToken.getText() : "";
             this.addFailureAtNode(node, Rule.LONGHAND_METHOD + `('{${name.getText()}${star}() {...}}').`);
         }
 
