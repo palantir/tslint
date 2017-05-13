@@ -1,0 +1,12 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "completed-docs": [true, {
+      "methods": {
+        "privacies": ["private"]
+      }
+    }]
+  }
+}

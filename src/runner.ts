@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-// tslint:disable strict-boolean-expressions (wait on https://github.com/palantir/tslint/pull/2572)
+// tslint:disable strict-boolean-expressions prefer-template
+// (wait on https://github.com/palantir/tslint/pull/2572)
 
 import * as fs from "fs";
 import * as glob from "glob";

@@ -171,7 +171,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         if (options.allowSnakeCase) {
             failureMessage += ", snake_case";
         }
-        return failureMessage + " or UPPER_CASE";
+        return `${failureMessage} or UPPER_CASE`;
     }
 }
 

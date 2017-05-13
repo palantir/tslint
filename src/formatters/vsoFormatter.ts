@@ -49,6 +49,6 @@ export class Formatter extends AbstractFormatter {
             return `##vso[task.logissue type=warning;${properties}]${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 }

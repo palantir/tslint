@@ -46,7 +46,7 @@ export class Formatter extends AbstractFormatter {
             outputLines.shift();
         }
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
@@ -84,9 +84,9 @@ export class Formatter extends AbstractFormatter {
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             if (failure.getRuleSeverity() === "warning") {
-                positionTuple = colors.blue(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+                positionTuple = colors.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
             } else {
-                positionTuple = colors.red(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
+                positionTuple = colors.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
             }
 
             // Output
