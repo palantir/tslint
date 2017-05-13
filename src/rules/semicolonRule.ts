@@ -49,13 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_ALWAYS, OPTION_NEVER],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_INTERFACES],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_INTERFACES],
+                },
+            ],
             additionalItems: false,
         },
         optionExamples: [

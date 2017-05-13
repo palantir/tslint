@@ -49,16 +49,19 @@ function normalizeOptions(options: OptionsJson): Options {
 
 /* tslint:disable:object-literal-sort-keys */
 const metadataOptionShape = {
-    anyOf: [{
-        type: "string",
-        enum: ["always", "never"],
-    }, {
-        type: "object",
-        properties: fillOptions({
+    anyOf: [
+        {
             type: "string",
-            enum: ["always", "never", "ignore"],
-        }),
-    }],
+            enum: ["always", "never"],
+        },
+        {
+            type: "object",
+            properties: fillOptions({
+                type: "string",
+                enum: ["always", "never", "ignore"],
+            }),
+        },
+    ],
 };
 /* tslint:enable:object-literal-sort-keys */
 

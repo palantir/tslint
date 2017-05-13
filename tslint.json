@@ -16,7 +16,8 @@
         "options": [
             "parameters",
             "statements",
-            "members"
+            "members",
+            "elements"
         ]
     },
     "arrow-return-shorthand": true,

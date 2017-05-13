@@ -252,8 +252,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with code 2 if both `tsconfig.json` and files arguments are passed and files contain lint errors", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test/tsconfig.json",
-                "test/files/tsconfig-test/other.test.ts"], (err) => {
+            execCli(
+                [
+                    "-c",
+                    "test/files/tsconfig-test/tslint.json",
+                    "--project",
+                    "test/files/tsconfig-test/tsconfig.json",
+                    "test/files/tsconfig-test/other.test.ts",
+                ],
+                (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
                     done();
