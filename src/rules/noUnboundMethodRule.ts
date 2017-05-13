@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Warns when a method is used as outside of a method call.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -43,8 +43,8 @@ class Walker extends Lint.ProgramAwareRuleWalker {
     public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
         if (!isSafeUse(node)) {
             const symbol = this.getTypeChecker().getSymbolAtLocation(node);
-            const declaration = symbol && symbol.valueDeclaration;
-            if (declaration && isMethod(declaration)) {
+            const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
+            if (declaration !== undefined && isMethod(declaration)) {
                 this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }

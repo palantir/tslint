@@ -10,13 +10,5 @@
       ["_", "forEach"],
       ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
     ]
-  },
-  "jsRules": {
-    "ban": [
-      true, 
-      ["window", "toString"], 
-      ["_", "forEach"],
-      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
-    ]
   }
 }

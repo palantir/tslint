@@ -6,8 +6,6 @@
     "comment-format": [
       true,
       "check-space"
-    ],
-    "no-switch-case-fall-through": true,
-    "switch-default": false
+    ]
   }
 }

@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 7,
         },
-        optionExamples: ['[true, "call-signature", "parameter", "member-variable-declaration"]'],
+        optionExamples: [[true, "call-signature", "parameter", "member-variable-declaration"]],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -156,14 +156,6 @@ class TypedefWalker extends Lint.RuleWalker {
     }
 
     public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        switch (node.initializer.kind) {
-            case ts.SyntaxKind.ArrowFunction:
-            case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(node.initializer as ts.FunctionExpression);
-                break;
-            default:
-                break;
-        }
         super.visitPropertyAssignment(node);
     }
 
@@ -231,12 +223,12 @@ class TypedefWalker extends Lint.RuleWalker {
                                 typeAnnotation: ts.TypeNode | undefined,
                                 name?: ts.Node) {
         if (this.hasOption(option) && typeAnnotation == null) {
-            this.addFailureAt(location, 1, "expected " + option + getName(name, ": '", "'") + " to have a typedef");
+            this.addFailureAt(location, 1, `expected ${option}${getName(name, ": '", "'")} to have a typedef`);
         }
     }
 }
 
-function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
+function getName(name?: ts.Node, prefix = "", suffix = ""): string {
     let ns = "";
 
     if (name != null) {
@@ -257,7 +249,7 @@ function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
                 break;
         }
     }
-    return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
+    return ns === "" ? "" : `${prefix}${ns}${suffix}`;
 }
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {

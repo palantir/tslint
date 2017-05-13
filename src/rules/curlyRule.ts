@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import { isIfStatement, isIterationStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
+
+interface Options {
+    ignoreSameLine: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,84 +41,60 @@ export class Rule extends Lint.Rules.AbstractRule {
             In the code above, the author almost certainly meant for both \`foo++\` and \`bar++\`
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            The rule may be set to \`true\`, or to the following:
+
+            * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
+            that are on one line and start on the same line as their control-flow keyword
+        `,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    OPTION_IGNORE_SAME_LINE,
+                ],
+            },
+        },
+        optionExamples: [true, [true, "ignore-same-line"]],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static DO_FAILURE_STRING = "do statements must be braced";
-    public static ELSE_FAILURE_STRING = "else statements must be braced";
-    public static FOR_FAILURE_STRING = "for statements must be braced";
-    public static IF_FAILURE_STRING = "if statements must be braced";
-    public static WHILE_FAILURE_STRING = "while statements must be braced";
+    public static FAILURE_STRING_FACTORY(kind: string) {
+        return `${kind} statements must be braced`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CurlyWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new CurlyWalker(sourceFile, this.ruleName, {
+            ignoreSameLine: this.ruleArguments.indexOf(OPTION_IGNORE_SAME_LINE) !== -1,
+        }));
     }
 }
 
-class CurlyWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: ts.ForInStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
-        super.visitForInStatement(node);
+class CurlyWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isIterationStatement(node)) {
+                this.checkStatement(node.statement, node, 0, node.end);
+            } else if (isIfStatement(node)) {
+                this.checkStatement(node.thenStatement, node, 0);
+                if (node.elseStatement !== undefined && node.elseStatement.kind !== ts.SyntaxKind.IfStatement) {
+                    this.checkStatement(node.elseStatement, node, 5);
+                }
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
+    private checkStatement(statement: ts.Statement, node: ts.Node, childIndex: number, end = statement.end) {
+        if (statement.kind !== ts.SyntaxKind.Block &&
+            !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
+            const token = node.getChildAt(childIndex, this.sourceFile);
+            const tokenText = ts.tokenToString(token.kind);
+            this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
         }
-
-        super.visitForOfStatement(node);
     }
-
-    public visitForStatement(node: ts.ForStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
-        super.visitForStatement(node);
-    }
-
-    public visitIfStatement(node: ts.IfStatement) {
-        if (!isStatementBraced(node.thenStatement)) {
-            this.addFailureFromStartToEnd(node.getStart(), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
-        }
-
-        if (node.elseStatement != null
-                && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
-                && !isStatementBraced(node.elseStatement)) {
-
-            // find the else keyword to place the error appropriately
-            const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
-        }
-
-        super.visitIfStatement(node);
-    }
-
-    public visitDoStatement(node: ts.DoStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureAtNode(node, Rule.DO_FAILURE_STRING);
-        }
-
-        super.visitDoStatement(node);
-    }
-
-    public visitWhileStatement(node: ts.WhileStatement) {
-        if (!isStatementBraced(node.statement)) {
-            this.addFailureAtNode(node, Rule.WHILE_FAILURE_STRING);
-        }
-
-        super.visitWhileStatement(node);
-    }
-}
-
-function isStatementBraced(node: ts.Statement) {
-    return node.kind === ts.SyntaxKind.Block;
 }

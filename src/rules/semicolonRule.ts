@@ -59,10 +59,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalItems: false,
         },
         optionExamples: [
-            `[true, "${OPTION_ALWAYS}"]`,
-            `[true, "${OPTION_NEVER}"]`,
-            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_INTERFACES}"]`,
-            `[true, "${OPTION_ALWAYS}", "${OPTION_IGNORE_BOUND_CLASS_METHODS}"]`,
+            [true, OPTION_ALWAYS],
+            [true, OPTION_NEVER],
+            [true, OPTION_ALWAYS, OPTION_IGNORE_INTERFACES],
+            [true, OPTION_ALWAYS, OPTION_IGNORE_BOUND_CLASS_METHODS],
         ],
         type: "style",
         typescriptOnly: false,
@@ -97,7 +97,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                 case ts.SyntaxKind.DoStatement:
                 case ts.SyntaxKind.ExportAssignment:
-                    this.checkSemicolonAt(node);
+                    this.checkSemicolonAt(node as ts.Statement);
                     break;
                 case ts.SyntaxKind.TypeAliasDeclaration:
                 case ts.SyntaxKind.ImportDeclaration:
@@ -154,7 +154,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private isFollowedByLineBreak(pos: number) {
-        const scanner = this.scanner ||
+        const scanner = this.scanner !== undefined ? this.scanner :
             (this.scanner = ts.createScanner(this.sourceFile.languageVersion, true, this.sourceFile.languageVariant, this.sourceFile.text));
         scanner.setTextPos(pos);
         return scanner.scan() === ts.SyntaxKind.EndOfFileToken || scanner.hasPrecedingLineBreak();
@@ -189,9 +189,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
             const hasSemicolon = lastChar === ";";
             if (this.options.always && !hasSemicolon) {
                 if (lastChar === ",") {
-                    this.addFailureAt(member.end - 1, 1, Rule.FAILURE_STRING_COMMA, this.createFix(
-                        new Lint.Replacement(member.end - 1, 1, ";"),
-                    ));
+                    this.addFailureAt(member.end - 1, 1, Rule.FAILURE_STRING_COMMA, new Lint.Replacement(member.end - 1, 1, ";"));
                 } else {
                     this.reportMissing(member.end);
                 }
@@ -203,18 +201,14 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private reportMissing(pos: number) {
-        this.addFailureAt(pos, 0, Rule.FAILURE_STRING_MISSING, this.createFix(
-            Lint.Replacement.appendText(pos, ";"),
-        ));
+        this.addFailureAt(pos, 0, Rule.FAILURE_STRING_MISSING, Lint.Replacement.appendText(pos, ";"));
     }
 
     private reportUnnecessary(pos: number, noFix?: boolean) {
-        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : this.createFix(
-            Lint.Replacement.deleteText(pos, 1),
-        ));
+        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix === true ? undefined : Lint.Replacement.deleteText(pos, 1));
     }
 
-    private checkSemicolonAt(node: ts.Node) {
+    private checkSemicolonAt(node: ts.Statement) {
         const hasSemicolon = this.sourceFile.text[node.end - 1] === ";";
 
         if (this.options.always && !hasSemicolon) {
@@ -228,8 +222,19 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.RegularExpressionLiteral:
                     break;
                 default:
-                    this.reportUnnecessary(node.end - 1);
+                    if (!this.isFollowedByStatement(node)) {
+                        this.reportUnnecessary(node.end - 1);
+                    }
             }
         }
+    }
+
+    private isFollowedByStatement(node: ts.Statement): boolean {
+        const nextStatement = utils.getNextStatement(node);
+        if (nextStatement === undefined) {
+            return false;
+        }
+        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
+            === ts.getLineAndCharacterOfPosition(this.sourceFile, nextStatement.getStart(this.sourceFile)).line;
     }
 }

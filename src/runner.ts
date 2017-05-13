@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable strict-boolean-expressions prefer-template
+// (wait on https://github.com/palantir/tslint/pull/2572)
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
@@ -193,8 +196,8 @@ export class Runner {
         try {
             this.processFiles(onComplete, files, program);
         } catch (error) {
-            if (error.name === FatalError.NAME) {
-                console.error(error.message);
+            if ((error as FatalError).name === FatalError.NAME) {
+                console.error((error as FatalError).message);
                 return onComplete(1);
             }
             // rethrow unhandled error

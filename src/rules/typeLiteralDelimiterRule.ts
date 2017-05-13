@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Does not check the last member, as that is done by 'trailing-comma'.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
     };
@@ -47,27 +47,29 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
-    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (utils.isTypeLiteralNode(node)) {
+    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        if (isTypeLiteralNode(node)) {
             check(node);
-        } else {
-            return ts.forEachChild(node, cb);
         }
+        ts.forEachChild(node, cb);
     });
 
     function check({ members }: ts.TypeLiteralNode): void {
         members.forEach((member, idx) => {
             const end = member.end - 1;
             const delimiter = sourceFile.text[end];
-            if (delimiter === ",") {
-                return;
-            }
-
-            // Allow missing trailing ',', but do not allow trailing ';'.
-            if (delimiter === ";") {
-                ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_SEMICOLON);
-            } else if (idx !== members.length - 1) {
-                ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_MISSING);
+            switch (delimiter) {
+                case ",":
+                    break;
+                case ";":
+                    ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_SEMICOLON);
+                    break;
+                default:
+                    // Allow missing trailing ','
+                    if (idx !== members.length - 1) {
+                        ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_MISSING);
+                    }
+                    break;
             }
         });
     }

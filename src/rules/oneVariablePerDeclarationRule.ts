@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isForStatement, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_IGNORE_FOR_LOOP}"]`],
+        optionExamples: [true, [true, OPTION_IGNORE_FOR_LOOP]],
         type: "style",
         typescriptOnly: false,
     };
@@ -48,33 +49,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Multiple variable declarations in the same statement are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const oneVarWalker = new OneVariablePerDeclarationWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(oneVarWalker);
+        return this.applyWithFunction(sourceFile, walk, { ignoreForLoop: this.ruleArguments.indexOf(OPTION_IGNORE_FOR_LOOP) !== -1 });
     }
 }
 
-class OneVariablePerDeclarationWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement) {
-        const { declarationList } = node;
-
-        if (declarationList.declarations.length > 1) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<{ ignoreForLoop: boolean }>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node) {
+        if (isVariableStatement(node) && node.declarationList.declarations.length > 1) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        } else if (isForStatement(node) && !ctx.options.ignoreForLoop) {
+            const { initializer } = node;
+            if (initializer !== undefined
+                    && initializer.kind === ts.SyntaxKind.VariableDeclarationList
+                    && (initializer as ts.VariableDeclarationList).declarations.length > 1) {
+                ctx.addFailureAtNode(initializer, Rule.FAILURE_STRING);
+            }
         }
-
-        super.visitVariableStatement(node);
-    }
-
-    public visitForStatement(node: ts.ForStatement) {
-        const initializer = node.initializer as ts.VariableDeclarationList;
-        const shouldIgnoreForLoop = this.hasOption(OPTION_IGNORE_FOR_LOOP);
-
-        if (!shouldIgnoreForLoop
-                && initializer != null
-                && initializer.kind === ts.SyntaxKind.VariableDeclarationList
-                && initializer.declarations.length > 1) {
-            this.addFailureAtNode(initializer, Rule.FAILURE_STRING);
-        }
-
-        super.visitForStatement(node);
-    }
+        ts.forEachChild(node, cb);
+    });
 }

@@ -17,17 +17,21 @@
 
 import * as ts from "typescript";
 
+import {IOptions} from "../rule/rule";
 import {isBlockScopeBoundary} from "../utils";
+// tslint:disable deprecation
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**
+ * @deprecated See comment on ScopeAwareRuleWalker.
+ *
  * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
  * are a superset of regular scopes (new block scopes are created more frequently in a program).
  */
 export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
     private blockScopeStack: U[];
 
-    constructor(sourceFile: ts.SourceFile, options?: any) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module

@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "In general, \`debugger\` statements aren't appropriate for production code.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -36,14 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use of debugger statements is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDebuggerWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDebuggerWalker extends Lint.RuleWalker {
-    public visitDebuggerStatement(node: ts.Statement) {
-        const debuggerKeywordNode = node.getChildAt(0);
-        this.addFailureAtNode(debuggerKeywordNode, Rule.FAILURE_STRING);
-        super.visitDebuggerStatement(node);
-   }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.DebuggerStatement) {
+            return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable deprecation
+// (https://github.com/palantir/tslint/pull/2598)
+
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -27,13 +30,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING_FACTORY(name: string) {
         return `Shadowed variable: '${name}'`;
     }
 

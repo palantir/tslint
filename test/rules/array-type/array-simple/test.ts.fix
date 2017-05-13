@@ -1,4 +1,5 @@
 let x: undefined[] = [undefined] as undefined[];
+let xx: object[] = [];
 let y: string[] = <string[]>["2"];
 let z: any[] = [3, "4"];
 
@@ -51,3 +52,4 @@ let w: Array<fooName.BazType<string>> = [["baz"]];
 interface FooInterface {
     '.bar': {baz: string[];};
 }
+

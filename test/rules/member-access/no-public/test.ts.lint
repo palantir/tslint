@@ -1,0 +1,10 @@
+class {
+    public x() {}
+    ~~~~~~ [0]
+    public constructor() {}
+    ~~~~~~ [0]
+    public get y() {}
+    ~~~~~~ [0]
+}
+
+[0]: 'public' is implicit.
