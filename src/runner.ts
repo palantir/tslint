@@ -146,10 +146,8 @@ export class Runner {
         let program: ts.Program | undefined;
 
         if (this.options.project != null) {
-            let project: string;
-            try {
-                project = findTsconfig(this.options.project);
-            } catch (e) {
+            const project = findTsconfig(this.options.project);
+            if (project === undefined) {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
@@ -258,11 +256,15 @@ export class Runner {
     }
 }
 
-function findTsconfig(project: string): string {
-    const stats = fs.statSync(project);
-    if (stats.isDirectory()) {
-        project = path.join(project, "tsconfig.json");
-        fs.accessSync(project);
+function findTsconfig(project: string): string | undefined {
+    try {
+        const stats = fs.statSync(project); // throws if file does not exist
+        if (stats.isDirectory()) {
+            project = path.join(project, "tsconfig.json");
+            fs.accessSync(project); // throws if file does not exist
+        }
+    } catch (e) {
+        return undefined;
     }
     return project;
 }
