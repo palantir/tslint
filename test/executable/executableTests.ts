@@ -251,6 +251,29 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("can be passed a directory and defaults to tsconfig.json", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test"], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+
+        it("exits with error if passed a directory and there is not tsconfig.json", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files"], (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
+        it("exits with error if passed directory does not exist", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existant"], (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
         it("exits with code 2 if both `tsconfig.json` and files arguments are passed and files contain lint errors", (done) => {
             execCli(
                 [

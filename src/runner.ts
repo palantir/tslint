@@ -146,11 +146,14 @@ export class Runner {
         let program: ts.Program | undefined;
 
         if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
+            let project: string;
+            try {
+                project = findTsconfig(this.options.project);
+            } catch (e) {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
-            program = Linter.createProgram(this.options.project);
+            program = Linter.createProgram(project);
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }
@@ -175,9 +178,6 @@ export class Runner {
                 // if not type checking, we don't need to pass in a program object
                 program = undefined;
             }
-        } else if (this.options.typeCheck) {
-            console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
         }
 
         let ignorePatterns: string[] = [];
@@ -256,4 +256,13 @@ export class Runner {
             }
         });
     }
+}
+
+function findTsconfig(project: string): string {
+    const stats = fs.statSync(project);
+    if (stats.isDirectory()) {
+        project = path.join(project, "tsconfig.json");
+        fs.accessSync(project);
+    }
+    return project;
 }
