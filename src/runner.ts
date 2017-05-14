@@ -80,6 +80,11 @@ export interface IRunnerOptions {
     out?: string;
 
     /**
+     * Whether to output absolute paths
+     */
+    outputAbsolutePaths?: boolean;
+
+    /**
      * tsconfig.json file.
      */
     project?: string;
@@ -163,8 +168,15 @@ export class Runner {
                         // emit any error messages
                         let message = ts.DiagnosticCategory[diag.category];
                         if (diag.file) {
-                            const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                            message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
+                            const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start);
+                            let file: string;
+                            const currentDirectory = program!.getCurrentDirectory();
+                            if (this.options.outputAbsolutePaths) {
+                                file = path.resolve(currentDirectory, diag.file.fileName);
+                            } else {
+                                file = path.relative(currentDirectory, diag.file.fileName);
+                            }
+                            message += ` at ${file}:${line + 1}:${character + 1}:`;
                         }
                         message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
                         return message;
@@ -189,7 +201,13 @@ export class Runner {
             // remove single quotes which break matching on Windows when glob is passed in single quotes
             .map(Runner.trimSingleQuotes)
             .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-            .reduce((a: string[], b: string[]) => a.concat(b), []);
+            .reduce((a: string[], b: string[]) => a.concat(b), [])
+            .map((file: string) => {
+                if (this.options.outputAbsolutePaths) {
+                    return path.resolve(file);
+                }
+                return path.relative(process.cwd(), file);
+            });
 
         try {
             this.processFiles(onComplete, files, program);

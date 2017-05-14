@@ -146,7 +146,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
-            const tempFile = createTempFile("ts");
+            const tempFile = path.relative(process.cwd(), createTempFile("ts"));
             fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
             execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
                 (err, stdout) => {
