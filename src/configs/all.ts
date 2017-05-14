@@ -210,7 +210,12 @@ export const rules = {
     "prefer-method-signature": true,
     "prefer-switch": true,
     "prefer-template": true,
-    "quotemark": [true, "double", "avoid-escape"],
+    "quotemark": [
+        true,
+        "double",
+        "avoid-escape",
+        "avoid-template",
+    ],
     "return-undefined": true,
     "semicolon": [true, "always"],
     "space-before-function-paren": [true, {
