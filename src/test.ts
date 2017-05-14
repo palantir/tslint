@@ -27,7 +27,7 @@ import {Replacement} from "./language/rule/rule";
 import * as Linter from "./linter";
 import {LintError} from "./test/lintError";
 import * as parse from "./test/parse";
-import {mapDefined, readBufferWithDetectedEncoding} from "./utils";
+import {denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding} from "./utils";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -89,7 +89,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     for (const fileToLint of filesToLint) {
         const isEncodingRule = path.basename(testDirectory) === "encoding";
 
-        const fileCompileName = path.resolve(fileToLint.replace(/\.lint$/, ""));
+        const fileCompileName = denormalizeWinPath(path.resolve(fileToLint.replace(/\.lint$/, "")));
         let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement !== undefined) {
@@ -128,7 +128,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                     if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
                         const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
                         return ts.createSourceFile(filenameToGet, fileContent, target);
-                    } else if (filenameToGet === fileCompileName) {
+                    } else if (denormalizeWinPath(filenameToGet) === fileCompileName) {
                         return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");

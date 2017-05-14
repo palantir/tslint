@@ -19,7 +19,8 @@ import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { createTempFile, denormalizeWinPath } from "../utils";
+import { denormalizeWinPath } from "../../src/utils";
+import { createTempFile } from "../utils";
 
 // when tests are run with mocha from npm scripts CWD points to project root
 const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
