@@ -23,7 +23,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "prefer-conditional",
+        ruleName: "prefer-conditional-expression",
         description: Lint.Utils.dedent`
             Recommends to use a conditional expression instead of assigning to the same thing in each branch of an if statement.`,
         rationale: Lint.Utils.dedent`
