@@ -43,12 +43,12 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const line = lineAndCharacter.line + 1;
             const character = lineAndCharacter.character + 1;
-            const code = (failure.getRuleName ? failure.getRuleName() : "");
+            const code = failure.getRuleName();
             const properties = `sourcepath=${fileName};linenumber=${line};columnnumber=${character};code=${code};`;
 
             return `##vso[task.logissue type=warning;${properties}]${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 }

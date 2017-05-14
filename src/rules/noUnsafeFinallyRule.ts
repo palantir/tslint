@@ -91,7 +91,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
 
     let node: ts.Node = jump;
     // This should only be called inside a finally block, so we'll eventually reach the TryStatement case and return.
-    while (true) {
+    while (true) { // tslint:disable-line strict-boolean-expressions
         const parent = node.parent!;
         switch (parent.kind) {
             case ts.SyntaxKind.TryStatement:
@@ -101,7 +101,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
                 break;
 
             case ts.SyntaxKind.SwitchStatement:
-                if (jump.kind === ts.SyntaxKind.BreakStatement && !label) {
+                if (jump.kind === ts.SyntaxKind.BreakStatement && label === undefined) {
                     return true;
                 }
                 break;
@@ -111,14 +111,14 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
             case ts.SyntaxKind.ForStatement:
             case ts.SyntaxKind.WhileStatement:
             case ts.SyntaxKind.DoStatement:
-                if (isBreakOrContinue && !label) {
+                if (isBreakOrContinue && label === undefined) {
                     return true;
                 }
                 break;
 
             case ts.SyntaxKind.LabeledStatement: {
                 const { text } = (parent as ts.LabeledStatement).label;
-                if (label && label.text === text) {
+                if (label !== undefined && label.text === text) {
                     return true;
                 }
                 break;

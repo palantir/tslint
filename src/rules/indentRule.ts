@@ -21,6 +21,8 @@ import * as Lint from "../index";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
+const OPTION_INDENT_SIZE_2 = 2;
+const OPTION_INDENT_SIZE_4 = 4;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,13 +35,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"spaces"\` enforces consistent spaces.
-            * \`"tabs"\` enforces consistent tabs.`,
+            * \`${OPTION_USE_SPACES}\` enforces consistent spaces.
+            * \`${OPTION_USE_TABS}\` enforces consistent tabs.
+
+            A second optional argument specifies indentation size:
+
+            * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
+            * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+
+            Indentation size is required for auto-fixing, but not for rule checking.
+            `,
         options: {
-            type: "string",
-            enum: ["tabs", "spaces"],
+            type: "array",
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
+                },
+                {
+                    type: "number",
+                    enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
+                },
+            ],
+            minLength: 0,
+            maxLength: 5,
         },
-        optionExamples: [[true, "spaces"]],
+        optionExamples: [
+            [true, OPTION_USE_SPACES],
+            [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
+            [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -57,16 +82,45 @@ export class Rule extends Lint.Rules.AbstractRule {
 class IndentWalker extends Lint.RuleWalker {
     private failureString: string;
     private regExp: RegExp;
+    private replacementFactory: (lineStart: number, fullLeadingWhitespace: string) => Lint.Replacement | undefined;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
 
-        if (this.hasOption(OPTION_USE_TABS)) {
-            this.regExp = new RegExp(" ");
-            this.failureString = Rule.FAILURE_STRING_TABS;
-        } else if (this.hasOption(OPTION_USE_SPACES)) {
-            this.regExp = new RegExp("\t");
-            this.failureString = Rule.FAILURE_STRING_SPACES;
+        // fixer is only provided with the indent size arg
+        if (this.getOptions().length === 2 && typeof this.getOptions()[1] === "number"
+            && (this.getOptions()[1] === OPTION_INDENT_SIZE_2 || this.getOptions()[1] === OPTION_INDENT_SIZE_4)) {
+            // tslint:disable-next-line:no-unsafe-any
+            const size = this.getOptions()[1] as number;
+            let replaceRegExp: RegExp;
+            let replaceIndent: string;
+
+            if (this.hasOption(OPTION_USE_TABS)) {
+                this.regExp = new RegExp(" ".repeat(size));
+                this.failureString = Rule.FAILURE_STRING_TABS;
+                // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+                replaceRegExp = new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g");
+                replaceIndent = "\t";
+            } else if (this.hasOption(OPTION_USE_SPACES)) {
+                this.regExp = new RegExp("\t");
+                this.failureString = `${size} ${Rule.FAILURE_STRING_SPACES}`;
+                replaceRegExp = new RegExp("\t", "g");
+                replaceIndent = " ".repeat(size);
+            }
+
+            this.replacementFactory = (lineStart, fullLeadingWhitespace) =>
+                new Lint.Replacement(lineStart, fullLeadingWhitespace.length, fullLeadingWhitespace.replace(
+                    replaceRegExp, (match) => replaceIndent.repeat(Math.ceil(match.length / size)),
+                ));
+        } else {
+            if (this.hasOption(OPTION_USE_TABS)) {
+                this.regExp = new RegExp(" ");
+                this.failureString = Rule.FAILURE_STRING_TABS;
+            } else if (this.hasOption(OPTION_USE_SPACES)) {
+                this.regExp = new RegExp("\t");
+                this.failureString = Rule.FAILURE_STRING_SPACES;
+            }
+            this.replacementFactory = () => undefined;
         }
     }
 
@@ -103,7 +157,7 @@ class IndentWalker extends Lint.RuleWalker {
             }
 
             const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
-            if (commentRanges) {
+            if (commentRanges !== undefined) {
                 endOfComment = commentRanges[commentRanges.length - 1].end;
             } else {
                 let scanType = currentScannedType;
@@ -128,15 +182,18 @@ class IndentWalker extends Lint.RuleWalker {
                 }
             }
 
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-                // ignore lines that have comments before the first token
-                continue;
+            switch (currentScannedType) {
+                case ts.SyntaxKind.SingleLineCommentTrivia:
+                case ts.SyntaxKind.MultiLineCommentTrivia:
+                case ts.SyntaxKind.NewLineTrivia:
+                    // ignore lines that have comments before the first token
+                    continue;
             }
 
-            if (fullLeadingWhitespace.match(this.regExp)) {
-                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
+            if (this.regExp.test(fullLeadingWhitespace)) {
+                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString,
+                    this.replacementFactory(lineStart, fullLeadingWhitespace),
+                );
             }
         }
         // no need to call super to visit the rest of the nodes, so don't call super here

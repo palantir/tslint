@@ -157,10 +157,11 @@ function buildDocumentationDataFile(documentation: IDocumentation, metadataJson:
  * Generates Jekyll data from any item's metadata.
  */
 function generateJekyllData(metadata: any, layout: string, type: string, name: string): any {
-    return Object.assign({}, metadata, {
+    return {
+        ...metadata,
         layout,
         title: `${type}: ${name}`,
-    });
+    };
 }
 
 /**

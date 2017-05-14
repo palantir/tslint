@@ -76,7 +76,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
             if (isPrefixUnaryExpression(node) &&
                 node.operator === ts.SyntaxKind.MinusToken &&
                 node.operand.kind === ts.SyntaxKind.NumericLiteral) {
-                return this.checkNumericLiteral(node, "-" + (node.operand as ts.NumericLiteral).text);
+                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
             }
             return ts.forEachChild(node, cb);
         };

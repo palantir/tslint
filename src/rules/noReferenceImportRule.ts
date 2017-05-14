@@ -66,7 +66,7 @@ function allImports(sourceFile: ts.SourceFile): Set<string> {
         if (utils.isImportEqualsDeclaration(node)) {
             const ref = node.moduleReference;
             if (ref.kind === ts.SyntaxKind.ExternalModuleReference) {
-                if (ref.expression) {
+                if (ref.expression !== undefined) {
                     addImport(ref.expression);
                 }
             }
@@ -79,7 +79,7 @@ function allImports(sourceFile: ts.SourceFile): Set<string> {
             }
 
             const body = moduleDeclarationBody(node);
-            if (body) {
+            if (body !== undefined) {
                 for (const statement of body.statements) {
                     recur(statement);
                 }
@@ -96,8 +96,8 @@ function allImports(sourceFile: ts.SourceFile): Set<string> {
 
 function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
     let body = node.body;
-    while (body && body.kind === ts.SyntaxKind.ModuleDeclaration) {
+    while (body !== undefined && body.kind === ts.SyntaxKind.ModuleDeclaration) {
         body = body.body;
     }
-    return body && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
+    return body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

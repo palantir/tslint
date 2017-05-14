@@ -1,5 +1,6 @@
-/* tslint:disable:max-file-line-count */
 //This file NEEDS to be very long, so we've disabled this rule here
+
+/* tslint:disable:max-file-line-count */
 
 namespace App {
     class GiveMeANumber {

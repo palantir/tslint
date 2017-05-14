@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getNextToken, isBlockLike } from "tsutils";
+import { getNextToken, isBlockLike, isEmptyStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -82,7 +82,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
-                this.checkAlignment(node.statements, OPTION_STATEMENTS);
+                this.checkAlignment(node.statements.filter((s) => !isEmptyStatement(s)), OPTION_STATEMENTS);
             } else {
                 switch (node.kind) {
                     case ts.SyntaxKind.NewExpression:
@@ -151,7 +151,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
         }
         const sourceFile = this.sourceFile;
 
-        let pos = ts.getLineAndCharacterOfPosition(sourceFile, this.getStart(nodes[0]));
+        let pos = getLineAndCharacterWithoutBom(sourceFile, this.getStart(nodes[0]));
         const alignToColumn = pos.character;
         let line = pos.line;
 
@@ -181,4 +181,12 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
             // find the comma token following the OmmitedExpression
             : getNextToken(node, this.sourceFile)!.getStart(this.sourceFile);
     }
+}
+
+function getLineAndCharacterWithoutBom(sourceFile: ts.SourceFile, pos: number): ts.LineAndCharacter {
+    const result = ts.getLineAndCharacterOfPosition(sourceFile, pos);
+    if (result.line === 0 && sourceFile.text[0] === "\uFEFF") {
+        result.character -= 1;
+    }
+    return result;
 }

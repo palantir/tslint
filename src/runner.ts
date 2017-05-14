@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable strict-boolean-expressions prefer-template
+// (wait on https://github.com/palantir/tslint/pull/2572)
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
@@ -170,18 +173,16 @@ async function runLinter(options: Options, errorStream: NodeJS.WritableStream): 
 
 function resolveFilesAndProgram({ files, project, exclude, typeCheck }: Options): { files: string[], program?: ts.Program } {
     // if both files and tsconfig are present, use files
-    if (project === undefined || files && files.length > 0) {
-        if (typeCheck) {
-            throw new FatalError("--project must be specified in order to enable type checking.");
-        }
+    if (project === undefined || files !== undefined && files.length > 0) {
         return { files: resolveGlobs(files, exclude) };
     }
 
-    if (!fs.existsSync(project)) {
+    const projectPath = findTsconfig(project);
+    if (projectPath === undefined) {
         throw new FatalError(`Invalid option for project: ${project}`);
     }
 
-    const program = Linter.createProgram(project);
+    const program = Linter.createProgram(projectPath);
     // if not type checking, we don't need to pass in a program object
     return { files: Linter.getFileNames(program), program: typeCheck ? program : undefined };
 }
@@ -257,8 +258,22 @@ function trimSingleQuotes(str: string): string {
     return str.replace(/^'|'$/g, "");
 }
 
+// tslint:disable-next-line promise-function-async
 function writeToStream(outputStream: NodeJS.WritableStream, output: string): Promise<void> {
     return new Promise<void>((resolve) => {
         outputStream.write(output, () => { resolve(); });
     });
+}
+
+function findTsconfig(project: string): string | undefined {
+    try {
+        const stats = fs.statSync(project); // throws if file does not exist
+        if (stats.isDirectory()) {
+            project = path.join(project, "tsconfig.json");
+            fs.accessSync(project); // throws if file does not exist
+        }
+    } catch (e) {
+        return undefined;
+    }
+    return project;
 }

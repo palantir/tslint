@@ -47,12 +47,20 @@ const processed = optimist
     .usage("Usage: $0 [options] file ...")
     .check((argv: Argv) => {
         // at least one of file, help, version, project or unqualified argument must be present
+        // tslint:disable-next-line strict-boolean-expressions
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "Missing files";
         }
 
+        // tslint:disable-next-line strict-boolean-expressions
+        if (argv["type-check"] && !argv.project) {
+            // tslint:disable-next-line:no-string-throw
+            throw "--project must be specified in order to enable type checking.";
+        }
+
+        // tslint:disable-next-line strict-boolean-expressions
         if (argv.f) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
@@ -140,6 +148,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
+// tslint:disable-next-line strict-boolean-expressions
 if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `
@@ -211,7 +220,7 @@ tslint accepts the following commandline options:
         this can be used to test custom rules.
 
     -p, --project:
-        The location of a tsconfig.json file that will be used to determine which
+        The path or directory containing a tsconfig.json file that will be used to determine which
         files will be linted.
 
     --type-check
@@ -227,6 +236,7 @@ tslint accepts the following commandline options:
     process.exit(0);
 }
 
+// tslint:disable-next-line no-floating-promises
 run({
     config: argv.c,
     exclude: argv.exclude,
