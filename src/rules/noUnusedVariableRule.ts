@@ -372,7 +372,10 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
             const s = sourceFilesByName.get(f)!;
             return s.text;
         },
-        getSourceFile: (f) => sourceFilesByName.get(f)!,
+        getSourceFile: (f) => {
+            const s = sourceFilesByName.get(f)!;
+            return ts.createSourceFile(s.fileName, s.text, s.languageVersion);
+        },
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
