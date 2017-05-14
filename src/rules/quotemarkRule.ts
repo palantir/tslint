@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isNoSubstitutionTemplateLiteral, isStringLiteral } from "tsutils";
+import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,14 +24,14 @@ const OPTION_SINGLE = "single";
 const OPTION_DOUBLE = "double";
 const OPTION_JSX_SINGLE = "jsx-single";
 const OPTION_JSX_DOUBLE = "jsx-double";
-const OPTION_NO_TEMPLATE = "no-template";
+const OPTION_AVOID_TEMPLATE = "avoid-template";
 const OPTION_AVOID_ESCAPE = "avoid-escape";
 
 interface Options {
     quoteMark: '"' | "'";
     jsxQuoteMark: '"' | "'";
     avoidEscape: boolean;
-    noTemplate: boolean;
+    avoidTemplate: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_DOUBLE}"\` enforces double quotes.
             * \`"${OPTION_JSX_SINGLE}"\` enforces single quotes for JSX attributes.
             * \`"${OPTION_JSX_DOUBLE}"\` enforces double quotes for JSX attributes.
-            * \`"${OPTION_NO_TEMPLATE}"\` forbids single-line template strings that do not contain string interpolations.
+            * \`"${OPTION_AVOID_TEMPLATE}"\` forbids single-line untagged template strings that do not contain string interpolations.
             * \`"${OPTION_AVOID_ESCAPE}"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
             For example, \`[true, "${OPTION_DOUBLE}", "${OPTION_AVOID_ESCAPE}"]\` would not report a failure on the string literal
             \`'Hello "World"'\`.`,
@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 5,
         },
         optionExamples: [
-            [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE, OPTION_NO_TEMPLATE],
+            [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE, OPTION_AVOID_TEMPLATE],
             [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
         ],
         type: "style",
@@ -87,8 +87,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
+            avoidTemplate: hasArg(OPTION_AVOID_TEMPLATE),
             jsxQuoteMark: hasArg(OPTION_JSX_SINGLE) ? "'" : hasArg(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
-            noTemplate: hasArg(OPTION_NO_TEMPLATE),
             quoteMark,
         });
 
@@ -102,9 +102,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const { sourceFile, options } = ctx;
     ts.forEachChild(sourceFile, function cb(node) {
         if (isStringLiteral(node)
-                || isNoSubstitutionTemplateLiteral(node)
+                || options.avoidTemplate && isNoSubstitutionTemplateLiteral(node)
                 && node.parent!.kind !== ts.SyntaxKind.TaggedTemplateExpression
-                && !isMultiLine(node, sourceFile)) {
+                && isSameLine(sourceFile, node.getStart(sourceFile), node.end)) {
             const expectedQuoteMark = node.parent!.kind === ts.SyntaxKind.JsxAttribute ? options.jsxQuoteMark : options.quoteMark;
             const actualQuoteMark = sourceFile.text[node.end - 1];
             if (actualQuoteMark === expectedQuoteMark) {
@@ -138,9 +138,4 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         ts.forEachChild(node, cb);
     });
-}
-
-function isMultiLine(node: ts.Node, sourceFile: ts.SourceFile): boolean {
-    return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line !==
-        sourceFile.getLineAndCharacterOfPosition(node.end).line;
 }

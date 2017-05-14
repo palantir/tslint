@@ -208,7 +208,7 @@ export const rules = {
         true,
         "double",
         "avoid-escape",
-        "no-template",
+        "avoid-template",
     ],
     "return-undefined": true,
     "semicolon": [true, "always"],
