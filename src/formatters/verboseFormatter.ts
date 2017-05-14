@@ -31,9 +31,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-
-        return this.mapToMessages(failures)
-            .join("\n") + "\n";
+        return `${this.mapToMessages(failures).join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
@@ -43,7 +41,7 @@ export class Formatter extends AbstractFormatter {
             const ruleName = failure.getRuleName();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
+            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
             return `${failure.getRuleSeverity().toUpperCase()}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });

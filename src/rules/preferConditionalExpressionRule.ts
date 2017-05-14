@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -48,16 +48,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (utils.isIfStatement(node)) {
+        if (isIfStatement(node)) {
             const assigned = detect(node, sourceFile);
-            if (assigned) {
+            if (assigned !== undefined) {
                 ctx.addFailureAtNode(
                     Lint.childOfKind(node, ts.SyntaxKind.IfKeyword)!,
                     Rule.FAILURE_STRING(assigned.getText(sourceFile)));
                 // Be careful not to fail again for the "else if"
                 ts.forEachChild(node.expression, cb);
                 ts.forEachChild(node.thenStatement, cb);
-                if (node.elseStatement) {
+                if (node.elseStatement !== undefined) {
                     ts.forEachChild(node.elseStatement, cb);
                 }
                 return;
@@ -68,31 +68,27 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile): ts.Expression | undefined {
-    if (!elseStatement) {
+    if (elseStatement === undefined) {
         return undefined;
     }
-    const elze = utils.isIfStatement(elseStatement) ? detect(elseStatement, sourceFile) : getAssigned(elseStatement, sourceFile);
-    if (!elze) {
+    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile) : getAssigned(elseStatement, sourceFile);
+    if (elze === undefined) {
         return undefined;
     }
     const then = getAssigned(thenStatement, sourceFile);
-    return then && nodeEquals(elze, then, sourceFile) ? then : undefined;
+    return then !== undefined && nodeEquals(elze, then, sourceFile) ? then : undefined;
 }
 
 /** Returns the left side of an assignment. */
 function getAssigned(node: ts.Statement, sourceFile: ts.SourceFile): ts.Expression | undefined {
-    if (utils.isBlock(node)) {
+    if (isBlock(node)) {
         return node.statements.length === 1 ? getAssigned(node.statements[0], sourceFile) : undefined;
-    } else if (utils.isExpressionStatement(node) && utils.isBinaryExpression(node.expression)) {
-        const { operatorToken, left, right } = node.expression;
-        return operatorToken.kind === ts.SyntaxKind.EqualsToken && !isMultiLine(right, sourceFile) ? left : undefined;
+    } else if (isExpressionStatement(node) && isBinaryExpression(node.expression)) {
+        const { operatorToken: { kind }, left, right } = node.expression;
+        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end) ? left : undefined;
     } else {
         return undefined;
     }
-}
-
-function isMultiLine(node: ts.Node, sourceFile: ts.SourceFile): boolean {
-    return node.getText(sourceFile).includes("\n");
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {

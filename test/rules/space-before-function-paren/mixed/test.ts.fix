@@ -1,9 +1,4 @@
 // Anonymous
-function () {}
-function (): void {
-}
-function (a: string, cb: ()=>{}): void {}
-
 var f = function () {};
 var f = function (): void {
 };

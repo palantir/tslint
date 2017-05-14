@@ -37,42 +37,40 @@ export class Rule extends Lint.Rules.TypedRule {
     public static EMPTY_INTERFACE_FUNCTION = "Explicit type parameter needs to be provided to the function call";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(sourceFile, this.getOptions(), program));
+        return this.applyWithWalker(new NoInferredEmptyObjectTypeRule(sourceFile, this.ruleName, program.getTypeChecker()));
     }
 }
 
-class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
-    private checker: ts.TypeChecker;
-
-    constructor(srcFile: ts.SourceFile, lintOptions: Lint.IOptions, program: ts.Program) {
-        super(srcFile, lintOptions, program);
-        this.checker = this.getTypeChecker();
+class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+        super(sourceFile, ruleName, undefined);
     }
 
-    public visitNewExpression(node: ts.NewExpression): void {
-        const nodeTypeArgs = node.typeArguments;
-        let isObjectReference: (o: ts.TypeReference) => boolean;
-        if ((ts.TypeFlags as any).Reference != null) {
-            // typescript 2.0.x specific code
-            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, (ts.TypeFlags as any).Reference as ts.TypeFlags);
-        } else {
-            isObjectReference = (o: ts.TypeReference) => isTypeFlagSet(o, ts.TypeFlags.Object);
-        }
-        if (nodeTypeArgs === undefined) {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (node.kind === ts.SyntaxKind.CallExpression) {
+                this.checkCallExpression(node as ts.CallExpression);
+            } else if (node.kind === ts.SyntaxKind.NewExpression) {
+                this.checkNewExpression(node as ts.NewExpression);
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
+    }
+
+    private checkNewExpression(node: ts.NewExpression): void {
+        if (node.typeArguments === undefined) {
             const objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
-            if (isObjectReference(objType) && objType.typeArguments !== undefined) {
+            if (isTypeFlagSet(objType, ts.TypeFlags.Object) && objType.typeArguments !== undefined) {
                 const typeArgs = objType.typeArguments as ts.ObjectType[];
-                typeArgs.forEach((a) => {
-                    if (this.isEmptyObjectInterface(a)) {
-                        this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
-                    }
-                });
+                if (typeArgs.some((a) => this.isEmptyObjectInterface(a))) {
+                    this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
+                }
             }
         }
-        super.visitNewExpression(node);
     }
 
-    public visitCallExpression(node: ts.CallExpression): void {
+    private checkCallExpression(node: ts.CallExpression): void {
         if (node.typeArguments === undefined) {
             const callSig = this.checker.getResolvedSignature(node);
             const retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
@@ -80,7 +78,6 @@ class NoInferredEmptyObjectTypeRule extends Lint.ProgramAwareRuleWalker {
                 this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
             }
         }
-        super.visitCallExpression(node);
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {

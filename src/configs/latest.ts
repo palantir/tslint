@@ -28,6 +28,9 @@ export const rules = {
     },
     "no-invalid-template-strings": true,
     "no-sparse-arrays": true,
+
+    // added in v5.2
+    "no-object-literal-type-assertion": true,
 };
 // tslint:enable object-literal-sort-keys
 

@@ -49,16 +49,19 @@ function normalizeOptions(options: OptionsJson): Options {
 
 /* tslint:disable:object-literal-sort-keys */
 const metadataOptionShape = {
-    anyOf: [{
-        type: "string",
-        enum: ["always", "never"],
-    }, {
-        type: "object",
-        properties: fillOptions({
+    anyOf: [
+        {
             type: "string",
-            enum: ["always", "never", "ignore"],
-        }),
-    }],
+            enum: ["always", "never"],
+        },
+        {
+            type: "object",
+            properties: fillOptions({
+                type: "string",
+                enum: ["always", "never", "ignore"],
+            }),
+        },
+    ],
 };
 /* tslint:enable:object-literal-sort-keys */
 
@@ -203,7 +206,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
         if (token !== undefined) {
-            return this.checkComma(list.hasTrailingComma, list, token.end, optionKey);
+            return this.checkComma(list.hasTrailingComma === true, list, token.end, optionKey);
         }
     }
 
@@ -211,11 +214,11 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         if (list.length === 0) {
             return;
         }
-        return this.checkComma(list.hasTrailingComma, list, closeElementPos, optionKey);
+        return this.checkComma(list.hasTrailingComma === true, list, closeElementPos, optionKey);
     }
 
     /* Expects `list.length !== 0` */
-    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
+    private checkComma(hasTrailingComma: boolean, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
         const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
         const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
         const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;

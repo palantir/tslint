@@ -49,13 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_ALWAYS, OPTION_NEVER],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_INTERFACES],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_INTERFACES],
+                },
+            ],
             additionalItems: false,
         },
         optionExamples: [
@@ -154,7 +157,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private isFollowedByLineBreak(pos: number) {
-        const scanner = this.scanner ||
+        const scanner = this.scanner !== undefined ? this.scanner :
             (this.scanner = ts.createScanner(this.sourceFile.languageVersion, true, this.sourceFile.languageVariant, this.sourceFile.text));
         scanner.setTextPos(pos);
         return scanner.scan() === ts.SyntaxKind.EndOfFileToken || scanner.hasPrecedingLineBreak();
@@ -205,7 +208,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private reportUnnecessary(pos: number, noFix?: boolean) {
-        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos, 1));
+        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix === true ? undefined : Lint.Replacement.deleteText(pos, 1));
     }
 
     private checkSemicolonAt(node: ts.Statement) {

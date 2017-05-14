@@ -65,19 +65,23 @@ export const rules = {
         "variable-declaration",
         "member-variable-declaration",
     ],
-    "typedef-whitespace": [true, {
-        "call-signature": "nospace",
-        "index-signature": "nospace",
-        "parameter": "nospace",
-        "property-declaration": "nospace",
-        "variable-declaration": "nospace",
-    }, {
-        "call-signature": "onespace",
-        "index-signature": "onespace",
-        "parameter": "onespace",
-        "property-declaration": "onespace",
-        "variable-declaration": "onespace",
-    }],
+    "typedef-whitespace": [
+        true,
+        {
+            "call-signature": "nospace",
+            "index-signature": "nospace",
+            "parameter": "nospace",
+            "property-declaration": "nospace",
+            "variable-declaration": "nospace",
+        },
+        {
+            "call-signature": "onespace",
+            "index-signature": "onespace",
+            "parameter": "onespace",
+            "property-declaration": "onespace",
+            "variable-declaration": "onespace",
+        },
+    ],
     "unified-signatures": true,
 
     // Functionality
@@ -149,10 +153,13 @@ export const rules = {
 
     // Style
 
-    "align": [true,
+    "align": [
+        true,
         "parameters",
         "arguments",
         "statements",
+        "elements",
+        "members",
     ],
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
@@ -167,6 +174,7 @@ export const rules = {
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
+    "encoding": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -186,7 +194,8 @@ export const rules = {
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
-    "one-line": [true,
+    "one-line": [
+        true,
         "check-catch",
         "check-else",
         "check-finally",
@@ -212,6 +221,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "type-literal-delimiter": true,
     "variable-name": [
         true,
         "ban-keywords",
@@ -241,7 +251,7 @@ for (const key in rules) {
     }
 
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
-    if (Rule === "not-found") {
+    if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
     }
     if (!Rule.metadata.typescriptOnly) {

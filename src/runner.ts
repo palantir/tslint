@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable strict-boolean-expressions prefer-template
+// (wait on https://github.com/palantir/tslint/pull/2572)
+
 import * as fs from "fs";
 import * as glob from "glob";
 import * as path from "path";
@@ -143,11 +146,12 @@ export class Runner {
         let program: ts.Program | undefined;
 
         if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
+            const project = findTsconfig(this.options.project);
+            if (project === undefined) {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
-            program = Linter.createProgram(this.options.project);
+            program = Linter.createProgram(project);
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }
@@ -172,9 +176,6 @@ export class Runner {
                 // if not type checking, we don't need to pass in a program object
                 program = undefined;
             }
-        } else if (this.options.typeCheck) {
-            console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
         }
 
         let ignorePatterns: string[] = [];
@@ -253,4 +254,17 @@ export class Runner {
             }
         });
     }
+}
+
+function findTsconfig(project: string): string | undefined {
+    try {
+        const stats = fs.statSync(project); // throws if file does not exist
+        if (stats.isDirectory()) {
+            project = path.join(project, "tsconfig.json");
+            fs.accessSync(project); // throws if file does not exist
+        }
+    } catch (e) {
+        return undefined;
+    }
+    return project;
 }

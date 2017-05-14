@@ -6,7 +6,7 @@ var passA = {
 var failA = {
     b: 1,
     a: 2
-    ~    [The key 'a' is not sorted alphabetically]
+    ~    [err % ('a')]
 };
 
 var passB = {
@@ -19,7 +19,7 @@ var passB = {
 var failB = {
     c: 3,
     a: 1,
-    ~     [The key 'a' is not sorted alphabetically]
+    ~     [err % ('a')]
     b: 2,
     d: 4
 };
@@ -37,7 +37,7 @@ var failC = {
     b: {
         bb: 2,
         aa: 1
-        ~~    [The key 'aa' is not sorted alphabetically]
+        ~~    [err % ('aa')]
     }
 };
 
@@ -57,7 +57,7 @@ var failD = {
         bb: 2
     },
     b: 3
-    ~    [The key 'b' is not sorted alphabetically]
+    ~    [err % ('b')]
 };
 
 var passE = {};
@@ -70,7 +70,7 @@ var passF = {
 var failF = {
     sdfa: {},
     asdf: [1, 2, 3]
-    ~~~~            [The key 'asdf' is not sorted alphabetically]
+    ~~~~            [err % ('asdf')]
 };
 
 var passG = {
@@ -81,7 +81,7 @@ var passG = {
 var failG = {
     sdafn: function () {},
     asdfn: function () {}
-    ~~~~~                 [The key 'asdfn' is not sorted alphabetically]
+    ~~~~~                 [err % ('asdfn')]
 };
 
 var passH = {
@@ -93,7 +93,7 @@ var passH = {
 var failH = {
     'b': 2,
     a: 1,
-    ~      [The key 'a' is not sorted alphabetically]
+    ~      [err % ('a')]
     c: 3
 }
 
@@ -106,7 +106,7 @@ var passI = {
 var failI = {
     À: 2,
     'Z': 1,
-    ~~~    [The key 'Z' is not sorted alphabetically]
+    ~~~    [err % ('Z')]
     è: 3,
 }
 
@@ -122,7 +122,7 @@ var failJ = {
     2: 4,
     A: 3,
     '11': 2
-    ~~~~   [The key '11' is not sorted alphabetically]
+    ~~~~   [err % ('11')]
 }
 
 var passK = {
@@ -138,10 +138,10 @@ var failK = {
     'b': {
         e: 5,
         'd': 4
-        ~~~    [The key 'd' is not sorted alphabetically]
+        ~~~    [err % ('d')]
     },
     a: 1,
-    ~     [The key 'a' is not sorted alphabetically]
+    ~     [err % ('a')]
     c: 3
 }
 
@@ -150,7 +150,7 @@ var passL = {z: 1, y: '1', x: [1, 2]};
 var failL = {x: 1, y: {
     b: 1,
     a: 2
-    ~    [The key 'a' is not sorted alphabetically]
+    ~    [err % ('a')]
 }, z: [1, 2]};
 
 var passM = {
@@ -161,3 +161,34 @@ var passM = {
     },
     z: {z: 1, y: '1', x: [1, 2]}
 };
+
+const spread = {
+    c,
+    ...x,
+    b: b,
+    a,
+    ~ [err % ('a')]
+};
+
+const numbers = {
+    1: true,
+    2: true,
+    100: true,
+    1e4: true,
+    2e-1: true,
+}
+
+const a = {
+  array: [],
+  objList: [{}, {}],
+  object: {},
+}
+
+const b = {
+  array: [],
+  object: {},
+  objList: [{}, {}],
+  ~~~~~~~ [err % ('objList')]
+}
+
+[err]: The key '%s' is not sorted alphabetically

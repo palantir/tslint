@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -39,12 +39,12 @@
     "babel-code-frame": "^6.22.0",
     "colors": "^1.1.2",
     "diff": "^3.2.0",
-    "findup-sync": "~0.3.0",
     "glob": "^7.1.1",
     "optimist": "~0.6.0",
     "resolve": "^1.3.2",
     "semver": "^5.3.0",
-    "tsutils": "^1.6.0"
+    "tslib": "^1.6.0",
+    "tsutils": "^1.9.1"
   },
   "peerDependencies": {
     "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev"
@@ -52,14 +52,12 @@
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
     "@types/chai": "^3.5.0",
-    "@types/colors": "^0.6.33",
+    "@types/colors": "^1.1.3",
     "@types/diff": "0.0.31",
-    "@types/findup-sync": "^0.3.29",
-    "@types/github": "^0.0.0",
     "@types/glob": "^5.0.30",
     "@types/js-yaml": "^3.5.29",
     "@types/mocha": "^2.2.35",
-    "@types/node": "^6.0.56",
+    "@types/node": "^7.0.16",
     "@types/optimist": "0.0.29",
     "@types/resolve": "0.0.4",
     "@types/semver": "^5.3.30",

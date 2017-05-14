@@ -46,10 +46,11 @@ class Walker extends Lint.AbstractWalker<void> {
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.TypeAssertionExpression ||
-                node.kind === ts.SyntaxKind.NonNullExpression ||
-                node.kind === ts.SyntaxKind.AsExpression) {
-                this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
+            switch (node.kind) {
+                case ts.SyntaxKind.TypeAssertionExpression:
+                case ts.SyntaxKind.NonNullExpression:
+                case ts.SyntaxKind.AsExpression:
+                    this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
             }
 
             return ts.forEachChild(node, cb);
