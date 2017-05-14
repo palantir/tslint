@@ -23,6 +23,10 @@ type T = {
     y: string
 }
 
+// Works even when there's extra whitespace
+type T = { x: number , y: number };
+type T = { x: number ; y: number };
+                     ~ [SEMI]
 
 [MISSING]: Expected type literal to use ',' to separate members.
 [SEMI]: Expected type literal to use ',' instead of ';'.
