@@ -1441,9 +1441,9 @@ tslint@latest:
     tslib "^1.6.0"
     tsutils "^1.8.0"
 
-tsutils@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.8.0.tgz#bf8118ed8e80cd5c9fc7d75728c7963d44ed2f52"
+tsutils@^1.8.0, tsutils@^1.9.1:
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.9.1.tgz#b9f9ab44e55af9681831d5f28d0aeeaf5c750cb0"
 
 type-detect@0.1.1:
   version "0.1.1"
