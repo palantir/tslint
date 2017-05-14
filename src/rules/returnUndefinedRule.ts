@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as u from "tsutils";
+import { isIdentifier, isReturnStatement, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (u.isReturnStatement(node)) {
+        if (isReturnStatement(node)) {
             check(node);
         }
         return ts.forEachChild(node, cb);
@@ -75,7 +75,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
     if (node.expression === undefined) {
         return ReturnKind.Void;
-    } else if (u.isIdentifier(node.expression) && node.expression.text === "undefined") {
+    } else if (isIdentifier(node.expression) && node.expression.text === "undefined") {
         return ReturnKind.Value;
     } else {
         return undefined;
@@ -126,7 +126,8 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
 /** True for `void`, `undefined`, or `void | undefined`. */
 function isEffectivelyVoid(type: ts.Type): boolean {
     // tslint:disable-next-line no-bitwise
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) || isUnionType(type) && type.types.every(isEffectivelyVoid);
+    return Lint.isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+        isUnionType(type) && type.types.every(isEffectivelyVoid);
 }
 
 function tryGetReturnType(fnType: ts.Type | undefined, checker: ts.TypeChecker): ts.Type | undefined {
@@ -160,8 +161,4 @@ function isFunctionLike(node: ts.Node): node is FunctionLike {
 
 function isFunctionExpressionLike(node: ts.Node): node is ts.FunctionExpression | ts.ArrowFunction {
     return node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.ArrowFunction;
-}
-
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }
