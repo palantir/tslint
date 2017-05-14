@@ -84,3 +84,7 @@ new MultiParamsClass<() => void, () => {}>();
 new MultiParamsClass<() => void, () => void>();
 new MultiParamsClass<{ [x: number]: string }, () => void>();
 new MultiParamsClass<{ [x: string]: string }, number>();
+
+// don't crash with stack overflow
+import {expect} from "chai";
+expect(1).to.eq(1);

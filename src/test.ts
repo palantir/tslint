@@ -89,8 +89,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     for (const fileToLint of filesToLint) {
         const isEncodingRule = path.basename(testDirectory) === "encoding";
 
-        const fileBasename = path.basename(fileToLint, MARKUP_FILE_EXTENSION);
-        const fileCompileName = fileBasename.replace(/\.lint$/, "");
+        const fileCompileName = path.resolve(fileToLint.replace(/\.lint$/, ""));
         let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement !== undefined) {
@@ -117,26 +116,25 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let program: ts.Program | undefined;
         if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
             const compilerHost: ts.CompilerHost = {
-                fileExists: () => true,
-                getCanonicalFileName: (filename: string) => filename,
-                getCurrentDirectory: () => "",
+                fileExists: (file) =>
+                    file === fileCompileName || fs.existsSync(file),
+                getCanonicalFileName: (filename) => filename,
+                getCurrentDirectory: () => process.cwd(),
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: (_path: string) => [],
+                getDirectories: (path) => fs.readdirSync(path),
                 getNewLine: () => "\n",
-                getSourceFile(filenameToGet: string) {
+                getSourceFile(filenameToGet) {
                     const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
                     if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
                         const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
                         return ts.createSourceFile(filenameToGet, fileContent, target);
                     } else if (filenameToGet === fileCompileName) {
-                        return ts.createSourceFile(fileBasename, fileTextWithoutMarkup, target, true);
-                    } else if (fs.existsSync(path.resolve(path.dirname(fileToLint), filenameToGet))) {
-                        const text = fs.readFileSync(path.resolve(path.dirname(fileToLint), filenameToGet), "utf8");
-                        return ts.createSourceFile(filenameToGet, text, target, true);
+                        return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
                     }
-                    throw new Error(`Couldn't get source file '${filenameToGet}'`);
+                    const text = fs.readFileSync(filenameToGet, "utf8");
+                    return ts.createSourceFile(filenameToGet, text, target, true);
                 },
-                readFile: (x: string) => x,
+                readFile: (x) => x,
                 useCaseSensitiveFileNames: () => true,
                 writeFile: () => null,
             };
@@ -154,7 +152,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         };
         const linter = new Linter(lintOptions, program);
         // Need to use the true path (ending in '.lint') for "encoding" rule so that it can read the file.
-        linter.lint(isEncodingRule ? fileToLint : fileBasename, fileTextWithoutMarkup, tslintConfig);
+        linter.lint(isEncodingRule ? fileToLint : fileCompileName, fileTextWithoutMarkup, tslintConfig);
         const failures = linter.getResult().failures;
         const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
