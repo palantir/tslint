@@ -86,9 +86,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
     }
+    // TODO remove in v6.0.0
     if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
         hasConfig = true;
-        showWarningOnce("Using linterOptions.typeCheck in tests is deprecated. Place a tsconfig.json in the directory instead");
+        showWarningOnce("Using linterOptions.typeCheck in tests is deprecated. Place a tsconfig.json next to tslint.json instead.");
     }
     const results: TestResult = { directory: testDirectory, results: {} };
 
