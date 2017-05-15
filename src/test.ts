@@ -105,11 +105,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             }
             // remove the first line from the file before continuing
             const lineBreak = fileText.search(/\n/);
-            if (lineBreak === -1) {
-                fileText = "";
-            } else {
-                fileText = fileText.substr(lineBreak + 1);
-            }
+            fileText = lineBreak === -1 ? "" : fileText.substr(lineBreak + 1);
         }
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);

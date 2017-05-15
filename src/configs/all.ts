@@ -121,6 +121,7 @@ export const rules = {
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
+    "prefer-conditional-expression": true,
     "radix": true,
     "restrict-plus-operands": true,
     "strict-boolean-expressions": true,
