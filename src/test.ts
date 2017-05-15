@@ -23,7 +23,6 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
-import { showWarningOnce } from "./error";
 import {Replacement} from "./language/rule/rule";
 import * as Linter from "./linter";
 import {LintError} from "./test/lintError";
