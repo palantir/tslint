@@ -71,7 +71,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
-    let hasConfig = fs.existsSync(tsConfig);
+    const hasConfig = fs.existsSync(tsConfig);
     if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
@@ -85,11 +85,6 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             useCaseSensitiveFileNames: true,
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
-    }
-    // TODO remove in v6.0.0
-    if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
-        hasConfig = true;
-        showWarningOnce("Using linterOptions.typeCheck in tests is deprecated. Place a tsconfig.json next to tslint.json instead.");
     }
     const results: TestResult = { directory: testDirectory, results: {} };
 
