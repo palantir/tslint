@@ -116,8 +116,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let program: ts.Program | undefined;
         if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
             const compilerHost: ts.CompilerHost = {
-                fileExists: (file) =>
-                    file === fileCompileName || fs.existsSync(file),
+                fileExists: (file) => file === fileCompileName || fs.existsSync(file),
                 getCanonicalFileName: (filename) => filename,
                 getCurrentDirectory: () => process.cwd(),
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
