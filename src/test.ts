@@ -23,6 +23,7 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "./error";
 import {Replacement} from "./language/rule/rule";
 import * as Linter from "./linter";
 import {LintError} from "./test/lintError";
@@ -70,7 +71,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
-    if (fs.existsSync(tsConfig)) {
+    let hasConfig = fs.existsSync(tsConfig);
+    if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
             throw new Error(JSON.stringify(error));
@@ -83,6 +85,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             useCaseSensitiveFileNames: true,
         };
         compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
+    }
+    if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
+        hasConfig = true;
+        showWarningOnce("Using linterOptions.typeCheck in tests is deprecated. Place a tsconfig.json in the directory instead");
     }
     const results: TestResult = { directory: testDirectory, results: {} };
 
@@ -115,7 +121,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
         let program: ts.Program | undefined;
-        if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
+        if (hasConfig) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
