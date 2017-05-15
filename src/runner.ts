@@ -171,11 +171,9 @@ export class Runner {
                             const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start);
                             let file: string;
                             const currentDirectory = program!.getCurrentDirectory();
-                            if (this.options.outputAbsolutePaths) {
-                                file = path.resolve(currentDirectory, diag.file.fileName);
-                            } else {
-                                file = path.relative(currentDirectory, diag.file.fileName);
-                            }
+                            file = this.options.outputAbsolutePaths
+                                ? path.resolve(currentDirectory, diag.file.fileName)
+                                : path.relative(currentDirectory, diag.file.fileName);
                             message += ` at ${file}:${line + 1}:${character + 1}:`;
                         }
                         message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
