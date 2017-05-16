@@ -20,11 +20,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+// tslint:disable object-literal-sort-keys
+
 const OPTION_CHECK_PARAMETERS = "check-parameters";
 const OPTION_IGNORE_PATTERN = "ignore-pattern";
 
 export class Rule extends Lint.Rules.TypedRule {
-    /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
         description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
@@ -61,7 +62,6 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: true,
         requiresTypeInfo: true,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const x = program.getCompilerOptions();
@@ -98,9 +98,9 @@ function parseOptions(options: any[]): Options {
 
 function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
     const { sourceFile } = ctx;
-    const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
+    const unusedCheckedProgram = getUnusedCheckedProgram(program, sourceFile, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
-    const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
+    const checker = program.getTypeChecker(); // Doesn't matter which program is used for this.
 
     // If all specifiers in an import are unused, we elide the entire import.
     const importSpecifierFailures = new Map<ts.Identifier, string>();
@@ -348,41 +348,29 @@ function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
     }
 }
 
-const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
-
-function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    // Assuming checkParameters will always have the same value, so only lookup by program.
-    let checkedProgram = programToUnusedCheckedProgram.get(program);
-    if (checkedProgram !== undefined) {
-        return checkedProgram;
-    }
-
-    checkedProgram = makeUnusedCheckedProgram(program, checkParameters);
-    programToUnusedCheckedProgram.set(program, checkedProgram);
-    return checkedProgram;
-}
-
-function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
-    // tslint:disable object-literal-sort-keys
-    return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
-        fileExists: (f) => sourceFilesByName.has(f),
+function getUnusedCheckedProgram(program: ts.Program, sourceFile: ts.SourceFile, checkParameters: boolean): ts.Program {
+    const options = {
+        ...program.getCompilerOptions(),
+        noUnusedLocals: true,
+        noLib: true,
+        ...(checkParameters ? { noUnusedParameters: true } : undefined),
+    };
+    return ts.createProgram([sourceFile.fileName], options, {
+        fileExists: (f) => f === sourceFile.fileName,
         readFile(f) {
-            const s = sourceFilesByName.get(f)!;
-            return s.text;
+            if (f !== sourceFile.fileName) { throw new Error(); }
+            return sourceFile.text;
         },
-        getSourceFile: (f) => {
-            const s = sourceFilesByName.get(f)!;
-            return ts.createSourceFile(s.fileName, s.text, s.languageVersion);
+        getSourceFile(f) {
+            if (f !== sourceFile.fileName) { throw new Error(); }
+            return ts.createSourceFile(sourceFile.fileName, sourceFile.text, sourceFile.languageVersion);
         },
-        getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
-        writeFile: () => {}, // tslint:disable-line no-empty
+        getDefaultLibFileName(): string { throw new Error(); },
+        writeFile() {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
         getDirectories: () => [],
         getCanonicalFileName: (f) => f,
         useCaseSensitiveFileNames: () => true,
         getNewLine: () => "\n",
     });
-    // tslint:enable object-literal-sort-keys
 }
