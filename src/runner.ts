@@ -182,9 +182,6 @@ export class Runner {
                     console.error(messages.join("\n"));
                     return onComplete(this.options.force ? 0 : 1);
                 }
-            } else {
-                // if not type checking, we don't need to pass in a program object
-                program = undefined;
             }
         }
 
