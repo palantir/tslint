@@ -27,7 +27,7 @@
     "compile:test": "tsc -p test",
     "lint": "npm-run-all -p lint:global lint:from-bin",
     "lint:global": "tslint --project test/tsconfig.json --format stylish --type-check # test includes 'src' too",
-    "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish --type-check",
+    "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\"",
