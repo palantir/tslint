@@ -243,7 +243,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
-    describe("tsconfig.json", () => {
+    describe("--project flag", () => {
         it("exits with code 0 if `tsconfig.json` is passed and it specifies files without errors", (done) => {
             execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test/tsconfig.json"], (err) => {
                 assert.isNull(err, "process should exit without an error");
@@ -274,7 +274,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
-        it("exits with code 2 if both `tsconfig.json` and files arguments are passed and files contain lint errors", (done) => {
+        it("exits with code 1 if file is not included in project", (done) => {
             execCli(
                 [
                     "-c",
@@ -285,7 +285,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 ],
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    assert.strictEqual(err.code, 1, "error code should be 1");
                     done();
                 });
         });
@@ -312,6 +312,16 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             execCli(
                 ["-c", "test/files/tsconfig-extends-relative/tslint-fail.json", "-p",
                  "test/files/tsconfig-extends-relative/test/tsconfig.json"],
+                (err) => {
+                    assert.isNotNull(err, "process should exit with error");
+                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
+
+        it("can execute typed rules without --type-check", (done) => {
+            execCli(
+                [ "-p", "test/files/typed-rule/tsconfig.json"],
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
