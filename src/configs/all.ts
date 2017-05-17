@@ -209,6 +209,7 @@ export const rules = {
     }],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
+    "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
     "quotemark": [
