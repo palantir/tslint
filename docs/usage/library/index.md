@@ -29,7 +29,7 @@ import * as fs from "fs";
 const fileName = "Specify input file name";
 const configurationFilename = "Specify configuration file name";
 const options = {
-	fix: "false",
+    fix: false,
     formatter: "json",
     rulesDirectory: "customRules/",
     formattersDirectory: "customFormatters/"
@@ -63,5 +63,4 @@ var linter = new tslint.Linter(options);
 var configuration = tslint.Configuration.findConfiguration(configurationFilename, fileName).results;
 linter.lint(fileName, fileContents, configuration);
 var result = linter.getResult();
-console.log(result);
 ```
