@@ -50,8 +50,6 @@ Thanks to our contributors!
 - Andy Hanson
 - Klaus Meinhardt
 - Martin Probst
-- Noah Chen
-- Adi Dahiya
 - Filipe Silva
 - walkerburgin
 - René Scheibe
