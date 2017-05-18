@@ -425,3 +425,8 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
             return undefined;
     }
 }
+
+export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
+    return options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false);
+}
