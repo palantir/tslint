@@ -72,7 +72,7 @@
     "rimraf": "^2.5.4",
     "tslint": "latest",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "^2.3.0"
+    "typescript": "next"
   },
   "license": "Apache-2.0",
   "engines": {

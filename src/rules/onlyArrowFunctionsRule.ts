@@ -104,5 +104,5 @@ function hasThisParameter(node: ts.FunctionLikeDeclaration): boolean {
 }
 
 function usesThisInBody(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody);
+    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody) === true;
 }
