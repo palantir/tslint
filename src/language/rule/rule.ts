@@ -159,7 +159,7 @@ export class Replacement {
 
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
-        replacements.sort((a, b) => b.end - a.end || b.start - a.start);
+        replacements.sort((a, b) => b.end !== a.end ? b.end - a.end : b.start - a.start);
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
