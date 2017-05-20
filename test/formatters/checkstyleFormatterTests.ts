@@ -47,21 +47,21 @@ describe("Checkstyle Formatter", () => {
             createFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape", undefined, "warning"),
             createFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name", undefined, "warning"),
         ];
+        // tslint:disable max-line-length
         const expectedResult =
-            '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">' +
-            `<file name="${TEST_FILE_1}">` +
-            '<error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />' +
-            '<error line="1" column="3" severity="error" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
-            'source="failure.tslint.escape" />' +
-            '<error line="6" column="3" severity="error" message="last failure" source="failure.tslint.last-name" />' +
-            "</file>" +
-            `<file name="${TEST_FILE_2}">` +
-            '<error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />' +
-            '<error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" ' +
-            'source="failure.tslint.escape" />' +
-            '<error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />' +
-            "</file>" +
-            "</checkstyle>";
+            `<?xml version="1.0" encoding="utf-8"?>
+            <checkstyle version="4.3">
+            <file name="${TEST_FILE_1}">
+                <error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />
+                <error line="1" column="3" severity="error" message="&amp;&lt;&gt;&#39;&quot; should be escaped" source="failure.tslint.escape" />
+                <error line="6" column="3" severity="error" message="last failure" source="failure.tslint.last-name" />
+            </file>
+            <file name="${TEST_FILE_2}">
+                <error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />
+                <error line="1" column="3" severity="warning" message="&amp;&lt;&gt;&#39;&quot; should be escaped" source="failure.tslint.escape" />
+                <error line="6" column="3" severity="warning" message="last failure" source="failure.tslint.last-name" />
+            </file>
+            </checkstyle>`.replace(/>\s+/g, ">"); // Remove whitespace between tags
 
         assert.equal(formatter.format(failures), expectedResult);
     });

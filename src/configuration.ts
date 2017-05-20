@@ -148,7 +148,7 @@ function findup(filename: string, directory: string): string | undefined {
     while (true) { // tslint:disable-line strict-boolean-expressions
         const res = findFile(directory);
         if (res !== undefined) {
-            return res;
+            return path.join(directory, res);
         }
 
         const parent = path.dirname(directory);
@@ -168,7 +168,7 @@ function findup(filename: string, directory: string): string | undefined {
         const filenameLower = filename.toLowerCase();
         const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
         if (result !== undefined) {
-            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ` + path.join(cwd, result));
+            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ${path.join(cwd, result)}`);
         }
         return result;
     }
@@ -243,6 +243,7 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(filePath);
         } catch (err) {
+            // tslint:disable-next-line prefer-template (fixed in 5.3)
             throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");

@@ -328,7 +328,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.privacies.has(PRIVACY_PUBLIC);
     }
 }
 
@@ -425,10 +425,10 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         let description = Rule.FAILURE_STRING_EXIST;
 
         if (node.modifiers !== undefined) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(",")} `;
         }
 
-        return description + nodeType + ".";
+        return `${description}${nodeType}.`;
     }
 
     private describeModifier(kind: ts.SyntaxKind) {

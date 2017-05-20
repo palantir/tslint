@@ -81,7 +81,7 @@ class Linter {
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
-            throw new Error("Unknown Linter options type: " + typeof options);
+            throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
         if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
@@ -178,7 +178,7 @@ class Linter {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
             let fileNewSource: string;
-            if (filePath === sourceFilePath) {
+            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
                 source = Replacement.applyFixes(source, fileFixes);
                 fileNewSource = source;
             } else {

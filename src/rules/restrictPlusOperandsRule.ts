@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression } from "tsutils";
+import { isBinaryExpression, isEnumLiteralType, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -63,16 +63,12 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
     } else if (isUnionType(type) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
-    } else if (Lint.isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
-        return getBaseTypeOfLiteralType((type as ts.EnumLiteralType).baseType);
+    } else if (isEnumLiteralType(type)) {
+        return getBaseTypeOfLiteralType(type.baseType);
     }
     return "invalid";
 }
 
 function allSame(array: string[]) {
     return array.every((value) => value === array[0]);
-}
-
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

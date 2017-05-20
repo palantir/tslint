@@ -82,7 +82,7 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
-    const suggestion = text.substr(0, colonPos) + " =>" + text.substr(colonPos + 1);
+    const suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
 
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {

@@ -42,16 +42,19 @@ export class Rule extends Lint.Rules.TypedRule {
         options: {
             type: "array",
             items: {
-                oneOf: [{
-                    type: "string",
-                    enum: ["check-parameters"],
-                }, {
-                    type: "object",
-                    properties: {
-                        "ignore-pattern": {type: "string"},
+                oneOf: [
+                    {
+                        type: "string",
+                        enum: ["check-parameters"],
                     },
-                    additionalProperties: false,
-                }],
+                    {
+                        type: "object",
+                        properties: {
+                            "ignore-pattern": {type: "string"},
+                        },
+                        additionalProperties: false,
+                    },
+                ],
             },
             minLength: 0,
             maxLength: 3,
@@ -149,6 +152,8 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - Unused imports are fixable.
  */
 function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+    // tslint:disable return-undefined
+    // (fixed in tslint 5.3)
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);

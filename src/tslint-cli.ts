@@ -31,6 +31,7 @@ interface Argv {
     help?: boolean;
     init?: boolean;
     out?: string;
+    outputAbsolutePaths: boolean;
     project?: string;
     rulesDir?: string;
     formattersDir: string;
@@ -111,6 +112,12 @@ const options: Option[] = [
             stdout, which is usually the console where you're running it from.`,
     },
     {
+        name: "outputAbsolutePaths",
+        type: "boolean",
+        describe: "whether or not outputted file paths are absolute",
+        description: "If true, all paths in the output will be absolute.",
+    },
+    {
         short: "r",
         name: "rules-dir",
         type: "string",
@@ -166,7 +173,7 @@ const options: Option[] = [
         type: "string",
         describe: "tsconfig.json file",
         description: dedent`
-            The location of a tsconfig.json file that will be used to determine which
+            The path or directory containing a tsconfig.json file that will be used to determine which
             files will be linted.`,
     },
     {
@@ -187,7 +194,7 @@ for (const option of options) {
 commander.on("--help", () => {
     const indent = "\n        ";
     const optionDetails = options.map((o) =>
-        `${optionUsageTag(o)}:` + (o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description));
+        `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
     console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
 });
 
@@ -201,6 +208,11 @@ const argv = commander.opts() as any as Argv;
 
 if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
     console.error("Missing files");
+    process.exit(1);
+}
+
+if (argv.typeCheck === true && argv.project === undefined) {
+    console.error("--project must be specified in order to enable type checking.");
     process.exit(1);
 }
 
@@ -224,6 +236,7 @@ const runnerOptions: IRunnerOptions = {
     formattersDirectory: argv.formattersDir,
     init: argv.init,
     out: argv.out,
+    outputAbsolutePaths: argv.outputAbsolutePaths,
     project: argv.project,
     rulesDirectory: argv.rulesDir,
     test: argv.test,
