@@ -49,13 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_ALWAYS, OPTION_NEVER],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_INTERFACES],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_INTERFACES],
+                },
+            ],
             additionalItems: false,
         },
         optionExamples: [
@@ -140,8 +143,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         // check if this is a multi-line arrow function
         if (node.initializer !== undefined &&
             node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
-            ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line
-                !== ts.getLineAndCharacterOfPosition(this.sourceFile, node.getEnd()).line) {
+            !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
             if (this.options.boundClassMethods) {
                 if (this.sourceFile.text[node.end - 1] === ";" &&
                     this.isFollowedByLineBreak(node.end)) {
@@ -234,7 +236,6 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (nextStatement === undefined) {
             return false;
         }
-        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
-            === ts.getLineAndCharacterOfPosition(this.sourceFile, nextStatement.getStart(this.sourceFile)).line;
+        return utils.isSameLine(this.sourceFile, node.end, nextStatement.getStart(this.sourceFile));
     }
 }

@@ -47,13 +47,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             `,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
-            }, {
-                type: "number",
-                enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
+                },
+                {
+                    type: "number",
+                    enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
+                },
+            ],
             minLength: 0,
             maxLength: 5,
         },

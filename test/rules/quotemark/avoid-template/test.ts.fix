@@ -1,0 +1,18 @@
+"fo`o";
+
+"a 'quote'";
+
+'a "quote"';
+
+`a "quote" 'quote'`;
+
+// Allow multi-line templates
+`
+foo
+bar
+`;
+
+// Allow tagged templates and templates with substitutions
+foo``;
+`${foo}`;
+

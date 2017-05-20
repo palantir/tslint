@@ -148,7 +148,7 @@ function findup(filename: string, directory: string): string | undefined {
     while (true) { // tslint:disable-line strict-boolean-expressions
         const res = findFile(directory);
         if (res !== undefined) {
-            return res;
+            return path.join(directory, res);
         }
 
         const parent = path.dirname(directory);
