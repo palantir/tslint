@@ -117,7 +117,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
-            const importName = findImport(diag.start, sourceFile);
+            const importName = findImport(diag.start!, sourceFile);
             if (importName !== undefined) {
                 if (isImportUsed(importName, sourceFile, checker)) {
                     continue;
@@ -138,7 +138,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start, diag.length, failure);
+        ctx.addFailureAt(diag.start!, diag.length!, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
@@ -251,12 +251,12 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
  * Workround for https://github.com/Microsoft/TypeScript/issues/9944
  */
 function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
-    let symbol = checker.getSymbolAtLocation(importSpecifier);
-    if (symbol === undefined) {
+    const importedSymbol = checker.getSymbolAtLocation(importSpecifier);
+    if (importedSymbol === undefined) {
         return false;
     }
 
-    symbol = checker.getAliasedSymbol(symbol);
+    const symbol = checker.getAliasedSymbol(importedSymbol);
     if (!Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
         return false;
     }
@@ -280,7 +280,8 @@ function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | unde
     if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && node.type === undefined) {
         return checker.getTypeAtLocation(node);
     } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
-        return checker.getSignatureFromDeclaration(node).getReturnType();
+        const sig = checker.getSignatureFromDeclaration(node);
+        return sig === undefined ? undefined : sig.getReturnType();
     } else {
         return undefined;
     }
