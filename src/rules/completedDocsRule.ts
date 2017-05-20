@@ -389,7 +389,8 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        if (node.name === undefined) {
+        const { name } = node;
+        if (name === undefined) {
             return;
         }
 
@@ -398,7 +399,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
             return;
         }
 
-        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
+        const symbol = this.getTypeChecker().getSymbolAtLocation(name);
         if (symbol === undefined) {
             return;
         }
