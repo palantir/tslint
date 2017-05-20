@@ -61,7 +61,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const lines = textWithMarkup.map(parseLine);
 
     if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
-        throw lintSyntaxError(`text cannot start with an error mark line.`);
+        throw lintSyntaxError("text cannot start with an error mark line.");
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];

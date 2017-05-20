@@ -163,19 +163,22 @@ export const rules = {
     },
     "typedef": false,
     "typedef-whitespace": {
-        options: [{
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            "parameter": "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        }, {
-            "call-signature": "onespace",
-            "index-signature": "onespace",
-            "parameter": "onespace",
-            "property-declaration": "onespace",
-            "variable-declaration": "onespace",
-        }],
+        options: [
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace",
+            },
+        ],
     },
     "typeof-compare": true,
     "unified-signatures": true,
