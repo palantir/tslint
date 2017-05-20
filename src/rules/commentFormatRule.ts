@@ -109,7 +109,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.RuleWalker {
     private exceptionsRegExp: ExceptionsRegExp;
-    private failureIgnorePart: string = "";
+    private failureIgnorePart = "";
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -155,18 +155,18 @@ class CommentWalker extends Lint.RuleWalker {
         const exceptionsObject = optionsList[optionsList.length - 1];
 
         // early return if last element is string instead of exceptions object
-        if (typeof exceptionsObject === "string" || !exceptionsObject) {
+        if (typeof exceptionsObject === "string" || exceptionsObject === undefined) {
             return null;
         }
 
-        if (exceptionsObject["ignore-pattern"]) {
+        if (exceptionsObject["ignore-pattern"] !== undefined) {
             const ignorePattern = exceptionsObject["ignore-pattern"] as string;
             this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern);
             // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
             return new RegExp(`^//\\s*(${ignorePattern})`);
         }
 
-        if (exceptionsObject["ignore-words"]) {
+        if (exceptionsObject["ignore-words"] !== undefined) {
             const ignoreWords = exceptionsObject["ignore-words"] as string[];
             this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
             // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation

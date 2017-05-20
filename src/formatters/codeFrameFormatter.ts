@@ -95,6 +95,6 @@ export class Formatter extends AbstractFormatter {
             outputLines.shift();
         }
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 }

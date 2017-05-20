@@ -70,9 +70,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
-    if (fs.existsSync(tsConfig)) {
+    const hasConfig = fs.existsSync(tsConfig);
+    if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
-        if (error) {
+        if (error !== undefined) {
             throw new Error(JSON.stringify(error));
         }
 
@@ -93,7 +94,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const fileCompileName = fileBasename.replace(/\.lint$/, "");
         let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
-        if (tsVersionRequirement) {
+        if (tsVersionRequirement !== undefined) {
             const tsVersion = new semver.SemVer(ts.version);
             // remove prerelease suffix when matching to allow testing with nightly builds
             if (!semver.satisfies(`${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`, tsVersionRequirement)) {
@@ -105,17 +106,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             }
             // remove the first line from the file before continuing
             const lineBreak = fileText.search(/\n/);
-            if (lineBreak === -1) {
-                fileText = "";
-            } else {
-                fileText = fileText.substr(lineBreak + 1);
-            }
+            fileText = lineBreak === -1 ? "" : fileText.substr(lineBreak + 1);
         }
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
         let program: ts.Program | undefined;
-        if (tslintConfig !== undefined && tslintConfig.linterOptions && tslintConfig.linterOptions.typeCheck) {
+        if (hasConfig) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
@@ -142,8 +139,6 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             };
 
             program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
-            // perform type checking on the program, updating nodes with symbol table references
-            ts.getPreEmitDiagnostics(program);
         }
 
         const lintOptions = {
@@ -174,8 +169,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         });
 
         // test against fixed files
-        let fixedFileText: string = "";
-        let newFileText: string = "";
+        let fixedFileText = "";
+        let newFileText = "";
         try {
             const fixedFile = fileToLint.replace(/\.lint$/, FIXES_FILE_EXTENSION);
             const stat = fs.statSync(fixedFile);
@@ -228,8 +223,8 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((diff) => !!diff.added || !!diff.removed);
-            const didFixesTestPass = !fixesDiffResults.some((diff) => !!diff.added || !!diff.removed);
+            const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
+            const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
                 console.log(colors.green(" Passed"));
@@ -257,9 +252,9 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) 
 
     for (const diffResult of diffResults) {
         let color = colors.grey;
-        if (diffResult.added) {
+        if (diffResult.added === true) {
             color = colors.green.underline;
-        } else if (diffResult.removed) {
+        } else if (diffResult.removed === true) {
             color = colors.red.underline;
         }
         process.stdout.write(color(diffResult.value));

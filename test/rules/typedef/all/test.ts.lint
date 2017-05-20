@@ -4,67 +4,65 @@ try {
 }
 
 var NoTypeObjectLiteralWithPropertyGetter = {
-                                         ~    [expected variable-declaration: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [expected variable-declaration: 'NoTypeObjectLiteralWithPropertyGetter' to have a typedef]
     Prop: "some property",
 
     get PropDef() {
-                ~   [expected call-signature: 'PropDef' to have a typedef]
+        ~~~~~~~ [expected call-signature: 'PropDef' to have a typedef]
         return this.Prop;
     },
 
     methodDef() {
-              ~   [expected call-signature: 'methodDef' to have a typedef]
+    ~~~~~~~~~ [expected call-signature: 'methodDef' to have a typedef]
         return 'untyped';
     },
 
     anotherMethodDef: function() {
-                               ~   [expected call-signature to have a typedef]
+                              ~~   [expected call-signature to have a typedef]
         return 'also untyped';
     },
 
     arrowMethodDef: () => {
-                     ~      [expected arrow-call-signature to have a typedef]
+                    ~~      [expected arrow-call-signature to have a typedef]
         return 'also untyped';
     }
 };
 
 interface NoTypeInterface {
     Prop;
-        ~ [expected property-declaration: 'Prop' to have a typedef]
+    ~~~~ [expected property-declaration: 'Prop' to have a typedef]
     PropWithType: string;
 }
 
-var NoTypesFn = function (
-             ~             [expected variable-declaration: 'NoTypesFn' to have a typedef]
-    a,
-     ~ [expected parameter: 'a' to have a typedef]
-    b) {
-     ~   [expected call-signature to have a typedef]
-     ~   [expected parameter: 'b' to have a typedef]
+var NoTypesFn = function (a, b) {
+    ~~~~~~~~~ [expected variable-declaration: 'NoTypesFn' to have a typedef]
+                          ~ [expected parameter: 'a' to have a typedef]
+                             ~ [expected parameter: 'b' to have a typedef]
+                         ~~~~~~ [expected call-signature to have a typedef]
     var c = a + b,
-         ~         [expected variable-declaration: 'c' to have a typedef]
+        ~         [expected variable-declaration: 'c' to have a typedef]
         d = a - b;
-         ~         [expected variable-declaration: 'd' to have a typedef]
+        ~         [expected variable-declaration: 'd' to have a typedef]
 
 class TsLint {
     helloWorld() {
-               ~   [expected call-signature: 'helloWorld' to have a typedef]
+    ~~~~~~~~~~ [expected call-signature: 'helloWorld' to have a typedef]
         return 'Hello World';
     };
 
     regularMemberWithType: string = this.getValue();
 
     regularMemberWithoutType = this.getValue();
-                            ~    [expected member-variable-declaration: 'regularMemberWithoutType' to have a typedef]
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [expected member-variable-declaration: 'regularMemberWithoutType' to have a typedef]
 
     arrowHelloWorld = () => {
-                       ~      [expected arrow-call-signature to have a typedef]
+                      ~~ [expected arrow-call-signature to have a typedef]
         return this.helloWorld();
     };
 
     arrowHelloWorldWithArgsNoTypedef = (arg1) => {
-                                            ~      [expected member-variable-declaration: 'arg1' to have a typedef]
-                                            ~      [expected arrow-call-signature to have a typedef]
+                                        ~~~~      [expected member-variable-declaration: 'arg1' to have a typedef]
+                                       ~~~~~~      [expected arrow-call-signature to have a typedef]
         return this.helloWorld();
     };
 
@@ -79,28 +77,28 @@ class TsLint {
 
 setTimeout(() => {}, 1000);
 setTimeout(function() {}, 1000);
-                    ~            [expected call-signature to have a typedef]
+                   ~~            [expected call-signature to have a typedef]
 
 someFunc(n => n+1);
-          ~        [expected arrow-parameter: 'n' to have a typedef]
+         ~        [expected arrow-parameter: 'n' to have a typedef]
 someFunc(n => {});
-          ~        [expected arrow-parameter: 'n' to have a typedef]
+         ~        [expected arrow-parameter: 'n' to have a typedef]
 
 class A {
     // property w/o an initializer
     public foo;
-              ~ [expected member-variable-declaration: 'foo' to have a typedef]
+           ~~~ [expected member-variable-declaration: 'foo' to have a typedef]
     private bar: number;
 }
 
 
 const { paramA, paramB } = { paramA: "test", paramB: 15 };
-                        ~    [expected object-destructuring: '{ paramA, paramB }' to have a typedef]
+      ~~~~~~~~~~~~~~~~~~ [expected object-destructuring: '{ paramA, paramB }' to have a typedef]
 
 const { paramA, paramB }: { paramA: string, paramB: number } = { paramA: "test", paramB: 15 };
 
 const [ paramA, paramB ] = [15, 'test'];
-                        ~    [expected array-destructuring: '[ paramA, paramB ]' to have a typedef]
+      ~~~~~~~~~~~~~~~~~~ [expected array-destructuring: '[ paramA, paramB ]' to have a typedef]
 
 const [ paramA3, paramB3 ]: [ number, string ] = [15, 'test'];
 

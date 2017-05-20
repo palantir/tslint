@@ -29,7 +29,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Always prefer \`const x: T = { ... };\` to \`const x = { ... } as T;\`.
             The type assertion in the latter case is either unnecessary or hides an error.
-            \`const x: { foo: number } = {}\` will fail, but \`const x = {} as { foo: number }\` succeeds.`,
+            The compiler will warn for excess properties with this syntax, but not missing required fields.
+            For example: \`const x: { foo: number } = {}\` will fail to compile, but
+            \`const x = {} as { foo: number }\` will succeed.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -38,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type assertion applied to object literal.";
+    public static FAILURE_STRING = "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
