@@ -44,7 +44,7 @@ export interface IConfigurationFile {
      * Other linter options, currently for testing. Not publicly supported.
      */
     linterOptions?: {
-        typeCheck?: boolean,
+        typeCheck?: boolean;
     };
 
     /**
@@ -148,7 +148,7 @@ function findup(filename: string, directory: string): string | undefined {
     while (true) { // tslint:disable-line strict-boolean-expressions
         const res = findFile(directory);
         if (res !== undefined) {
-            return res;
+            return path.join(directory, res);
         }
 
         const parent = path.dirname(directory);
@@ -447,8 +447,8 @@ export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
 export type RawRuleConfig = null | undefined | boolean | any[] | {
-    severity?: RuleSeverity | "warn" | "none" | "default",
-    options?: any,
+    severity?: RuleSeverity | "warn" | "none" | "default";
+    options?: any;
 };
 
 /**

@@ -34,7 +34,7 @@ export const rules = {
 
     // added in v5.3
     "prefer-conditional-expression": true,
-    "type-literal-delimiter": true,
+    "prefer-object-spread": true,
 };
 // tslint:enable object-literal-sort-keys
 
