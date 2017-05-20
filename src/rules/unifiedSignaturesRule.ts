@@ -279,7 +279,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
                 return true;
             }
         }
-        return !!ts.forEachChild(type, typeContainsTypeParameter);
+        return ts.forEachChild(type, typeContainsTypeParameter);
     }
 }
 
