@@ -36,13 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden non null assertion";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNonNullAssertionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoNonNullAssertionWalker extends Lint.RuleWalker {
-    public visitNonNullExpression(node: ts.NonNullExpression) {
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        super.visitNonNullExpression(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (node.kind === ts.SyntaxKind.NonNullExpression) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

@@ -48,13 +48,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_ALWAYS, OPTION_NEVER],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_INTERFACES],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_INTERFACES],
+                },
+            ],
             additionalItems: false,
         },
         optionExamples: [
@@ -110,10 +113,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (this.sourceFile.text[node.end - 1] !== ";") {
             return;
         }
-        const nextToken = utils.getNextToken(node, this.sourceFile);
-        if (nextToken === undefined) {
-            return this.reportUnnecessary(node.end);
-        }
+        const nextToken = utils.getNextToken(node, this.sourceFile)!;
         switch (nextToken.kind) {
             case ts.SyntaxKind.EndOfFileToken:
             case ts.SyntaxKind.CloseBraceToken:
@@ -137,10 +137,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
                 lastToken.parent!.parent!.kind === ts.SyntaxKind.ArrowFunction) {
             return this.checkSemicolonOrLineBreak(node);
         }
-        const nextToken = utils.getNextToken(node, this.sourceFile);
-        if (nextToken === undefined) {
-            return this.reportUnnecessary(node.end);
-        }
+        const nextToken = utils.getNextToken(node, this.sourceFile)!;
         switch (nextToken.kind) {
             case ts.SyntaxKind.OpenParenToken:
             case ts.SyntaxKind.OpenBracketToken:

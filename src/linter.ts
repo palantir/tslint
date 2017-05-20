@@ -178,7 +178,7 @@ class Linter {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
             let fileNewSource: string;
-            if (filePath === sourceFilePath) {
+            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
                 source = Replacement.applyFixes(source, fileFixes);
                 fileNewSource = source;
             } else {

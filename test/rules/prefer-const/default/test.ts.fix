@@ -195,3 +195,20 @@ declare namespace ambient {
     let foo = 0;
 }
 
+{
+    let someVar: string;
+    for (someVar in someObj) {}
+}
+{
+    let someVar: string;
+    for (someVar of someArr) {}
+}
+{
+    let someVar: string, someVar2: string;
+    for ({someVar, foo: someVar2} of someArr) {}
+}
+{
+    let someVar: string, someObj: any;
+    for ({someVar: someObj.val} of someArr) {}
+}
+
