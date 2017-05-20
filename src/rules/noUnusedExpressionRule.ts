@@ -123,11 +123,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             check(node.left);
             return cb(node.right);
         }
-        return ts.forEachChild(node, cb) === true;
+        return ts.forEachChild(node, cb);
     }
 
     function forEachChild(node: ts.Node): boolean {
-        return ts.forEachChild(node, cb) === true;
+        return ts.forEachChild(node, cb);
     }
 
     function check(node: ts.Node, failNode?: ts.Node): void {

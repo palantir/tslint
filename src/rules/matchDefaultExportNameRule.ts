@@ -59,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
 
         const {declarations} = tc.getAliasedSymbol(symbol);
         if (declarations !== undefined && declarations.length !== 0) {
-            const { name } = declarations[0] as ts.NamedDeclaration;
+            const { name } = declarations[0];
             if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && name.text !== defaultImport.text) {
                 ctx.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
             }

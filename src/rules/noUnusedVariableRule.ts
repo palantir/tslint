@@ -272,8 +272,8 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
             return true;
         }
 
-        return ts.forEachChild(child, cb) === true;
-    }) === true;
+        return ts.forEachChild(child, cb);
+    });
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {

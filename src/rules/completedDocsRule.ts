@@ -389,7 +389,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        const { name } = node as ts.NamedDeclaration;
+        const { name } = node;
         if (name === undefined) {
             return;
         }
