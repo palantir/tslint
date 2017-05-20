@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isBinaryExpression, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -58,9 +58,9 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isBinaryExpression(node)) {
+        if (isBinaryExpression(node)) {
             const equals = Lint.getEqualsKind(node.operatorToken);
-            if (equals) {
+            if (equals !== undefined) {
                 checkEquals(node, equals);
             }
         }
@@ -115,7 +115,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 /** Detects a type predicate given `left === right`. */
 function getTypePredicate(node: ts.BinaryExpression, isStrictEquals: boolean): TypePredicate | undefined {
     const { left, right } = node;
-    return getTypePredicateOneWay(left, right, isStrictEquals) || getTypePredicateOneWay(right, left, isStrictEquals);
+    const lr = getTypePredicateOneWay(left, right, isStrictEquals);
+    return lr !== undefined ? lr : getTypePredicateOneWay(right, left, isStrictEquals);
 }
 
 /** Only gets the type predicate if the expression is on the left. */
@@ -207,7 +208,7 @@ function isFunction(t: ts.Type): boolean {
         return true;
     }
     const symbol = t.getSymbol();
-    return (symbol && symbol.getName()) === "Function";
+    return symbol !== undefined && symbol.getName() === "Function";
 }
 
 /** Returns a boolean value if that should always be the result of a type predicate. */
@@ -253,9 +254,4 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
 
 function unionParts(type: ts.Type) {
     return isUnionType(type) ? type.types : [type];
-}
-
-/** Type predicate to test for a union type. */
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

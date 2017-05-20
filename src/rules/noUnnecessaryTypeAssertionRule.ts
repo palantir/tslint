@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-type-assertion",
-        description: `Warns if a type assertion does not change the type of an expression.`,
+        description: "Warns if a type assertion does not change the type of an expression.",
         options: null,
         optionsDescription: "Not configurable",
         type: "typescript",
@@ -46,10 +46,11 @@ class Walker extends Lint.AbstractWalker<void> {
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.TypeAssertionExpression ||
-                node.kind === ts.SyntaxKind.NonNullExpression ||
-                node.kind === ts.SyntaxKind.AsExpression) {
-                this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
+            switch (node.kind) {
+                case ts.SyntaxKind.TypeAssertionExpression:
+                case ts.SyntaxKind.NonNullExpression:
+                case ts.SyntaxKind.AsExpression:
+                    this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
             }
 
             return ts.forEachChild(node, cb);

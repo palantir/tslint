@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (ident: string) => {
+    public static FAILURE_STRING_FACTORY(ident: string) {
         return `Property '${ident}' cannot be declared in the constructor`;
     }
 

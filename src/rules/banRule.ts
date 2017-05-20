@@ -50,22 +50,26 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "list",
             listType: {
-                anyOf: [{
-                    type: "string",
-                }, {
-                    type: "array",
-                    items: {type: "string"},
-                    minLength: 1,
-                    maxLength: 3,
-                }, {
-                    type: "object",
-                    properties: {
-                        name: {type: "string"},
-                        object: {type: "string"},
-                        message: {type: "string"},
+                anyOf: [
+                    {
+                        type: "string",
                     },
-                    required: ["name"],
-                }],
+                    {
+                        type: "array",
+                        items: {type: "string"},
+                        minLength: 1,
+                        maxLength: 3,
+                    },
+                    {
+                        type: "object",
+                        properties: {
+                            name: {type: "string"},
+                            object: {type: "string"},
+                            message: {type: "string"},
+                        },
+                        required: ["name"],
+                    },
+                ],
             },
         },
         optionExamples: [
@@ -82,8 +86,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
-        return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
+    public static FAILURE_STRING_FACTORY(expression: string, messageAddition?: string) {
+        return `Calls to '${expression}' are not allowed.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -133,7 +137,7 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
             const name = expression.name.text;
             for (const ban of this.options.methods) {
                 if (ban.object === objectName && ban.name === name) {
-                    this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(objectName + "." + name, ban.message));
+                    this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${objectName}.${name}`, ban.message));
                     break;
                 }
             }

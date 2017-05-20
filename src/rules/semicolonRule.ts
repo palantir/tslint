@@ -49,13 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
         options: {
             type: "array",
-            items: [{
-                type: "string",
-                enum: [OPTION_ALWAYS, OPTION_NEVER],
-            }, {
-                type: "string",
-                enum: [OPTION_IGNORE_INTERFACES],
-            }],
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_INTERFACES],
+                },
+            ],
             additionalItems: false,
         },
         optionExamples: [
@@ -140,8 +143,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         // check if this is a multi-line arrow function
         if (node.initializer !== undefined &&
             node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
-            ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line
-                !== ts.getLineAndCharacterOfPosition(this.sourceFile, node.getEnd()).line) {
+            !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
             if (this.options.boundClassMethods) {
                 if (this.sourceFile.text[node.end - 1] === ";" &&
                     this.isFollowedByLineBreak(node.end)) {
@@ -154,7 +156,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private isFollowedByLineBreak(pos: number) {
-        const scanner = this.scanner ||
+        const scanner = this.scanner !== undefined ? this.scanner :
             (this.scanner = ts.createScanner(this.sourceFile.languageVersion, true, this.sourceFile.languageVariant, this.sourceFile.text));
         scanner.setTextPos(pos);
         return scanner.scan() === ts.SyntaxKind.EndOfFileToken || scanner.hasPrecedingLineBreak();
@@ -205,7 +207,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     private reportUnnecessary(pos: number, noFix?: boolean) {
-        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos, 1));
+        this.addFailureAt(pos, 1, Rule.FAILURE_STRING_UNNECESSARY, noFix === true ? undefined : Lint.Replacement.deleteText(pos, 1));
     }
 
     private checkSemicolonAt(node: ts.Statement) {
@@ -234,7 +236,6 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (nextStatement === undefined) {
             return false;
         }
-        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
-            === ts.getLineAndCharacterOfPosition(this.sourceFile, nextStatement.getStart(this.sourceFile)).line;
+        return utils.isSameLine(this.sourceFile, node.end, nextStatement.getStart(this.sourceFile));
     }
 }

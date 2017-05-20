@@ -112,8 +112,10 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
         }
         if (!noPublic && !isPublic) {
-            const nameNode = isConstructorDeclaration(node) ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)! : node.name || node;
-            const memberName = node.name && isIdentifier(node.name) ? node.name.text : undefined;
+            const nameNode = isConstructorDeclaration(node)
+                ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!
+                : node.name !== undefined ? node.name : node;
+            const memberName = node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
             ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
         }
     }
@@ -132,6 +134,6 @@ function memberType(node: ts.ClassElement): string {
         case ts.SyntaxKind.SetAccessor:
             return "set property accessor";
         default:
-            throw new Error("unhandled node type " + ts.SyntaxKind[node.kind]);
+            throw new Error(`unhandled node type ${ts.SyntaxKind[node.kind]}`);
     }
 }
