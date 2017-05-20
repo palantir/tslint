@@ -31,6 +31,9 @@ export const rules = {
 
     // added in v5.2
     "no-object-literal-type-assertion": true,
+
+    // added in v5.3
+    "prefer-object-spread": true,
 };
 // tslint:enable object-literal-sort-keys
 
