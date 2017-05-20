@@ -259,7 +259,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
 function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths: boolean): string {
     let message = ts.DiagnosticCategory[category];
     if (file) {
-        const {line, character} = file.getLineAndCharacterOfPosition(start);
+        const {line, character} = file.getLineAndCharacterOfPosition(start!);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths
             ? path.resolve(currentDirectory, file.fileName)
