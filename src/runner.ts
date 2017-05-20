@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-// tslint:disable strict-boolean-expressions prefer-template
-// (wait on https://github.com/palantir/tslint/pull/2572)
+// tslint:disable strict-boolean-expressions (TODO: Fix up options)
 
 import * as fs from "fs";
 import * as glob from "glob";
@@ -82,6 +81,11 @@ export interface Options {
     out?: string;
 
     /**
+     * Whether to output absolute paths
+     */
+    outputAbsolutePaths?: boolean;
+
+    /**
      * tsconfig.json file.
      */
     project?: string;
@@ -113,21 +117,26 @@ export const enum Status {
     LintError = 2,
 }
 
-export async function run(options: Options, outputStream: NodeJS.WritableStream, errorStream: NodeJS.WritableStream): Promise<Status> {
+export interface Logger {
+    log(message: string): void;
+    error(message: string): void;
+}
+
+export async function run(options: Options, logger: Logger): Promise<Status> {
     try {
-        return await runWorker(options, outputStream, errorStream);
+        return await runWorker(options, logger);
     } catch (error) {
         if ((error as FatalError).name === FatalError.NAME) {
-            await writeToStream(errorStream, (error as FatalError).message);
+            logger.error((error as FatalError).message);
             return Status.FatalError;
         }
         throw error;
     }
 }
 
-async function runWorker(options: Options, outputStream: NodeJS.WritableStream, errorStream: NodeJS.WritableStream): Promise<Status> {
+async function runWorker(options: Options, logger: Logger): Promise<Status> {
     if (options.version) {
-        await writeToStream(outputStream, Linter.VERSION + "\n");
+        logger.log(Linter.VERSION);
         return Status.Ok;
     }
 
@@ -149,32 +158,33 @@ async function runWorker(options: Options, outputStream: NodeJS.WritableStream, 
         throw new FatalError(`Invalid option for configuration: ${options.config}`);
     }
 
-    const { output, errorCount } = await runLinter(options, errorStream);
-    await writeToStream(outputStream, output);
+    const { output, errorCount } = await runLinter(options, logger);
+    logger.log(output);
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
-async function runLinter(options: Options, errorStream: NodeJS.WritableStream): Promise<LintResult> {
+async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options);
     // if type checking, run the type checker
     if (program) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map(showDiagnostic).join("\n");
+            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths === true)).join("\n");
             if (options.force) {
-                await writeToStream(errorStream, message);
+                logger.error(message);
             } else {
                 throw new FatalError(message);
             }
         }
     }
-    return doLinting(options, files, program, errorStream);
+    return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram({ files, project, exclude, typeCheck }: Options): { files: string[], program?: ts.Program } {
+function resolveFilesAndProgram(
+    { files, project, exclude, typeCheck, outputAbsolutePaths }: Options): { files: string[], program?: ts.Program } {
     // if both files and tsconfig are present, use files
     if (project === undefined || files !== undefined && files.length > 0) {
-        return { files: resolveGlobs(files, exclude) };
+        return { files: resolveGlobs(files, exclude, outputAbsolutePaths === true) };
     }
 
     const projectPath = findTsconfig(project);
@@ -187,15 +197,16 @@ function resolveFilesAndProgram({ files, project, exclude, typeCheck }: Options)
     return { files: Linter.getFileNames(program), program: typeCheck ? program : undefined };
 }
 
-function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"]): string[] {
+function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"], outputAbsolutePaths: boolean): string[] {
     const ignore = arrayify(exclude).map(trimSingleQuotes);
     return flatMap(arrayify(files), (file) =>
         // remove single quotes which break matching on Windows when glob is passed in single quotes
-        glob.sync(trimSingleQuotes(file), { ignore, nodir: true }));
+        glob.sync(trimSingleQuotes(file), { ignore, nodir: true }))
+        .map((file) => outputAbsolutePaths ? path.resolve(file) : path.relative(process.cwd(), file));
 }
 
 async function doLinting(
-        options: Options, files: string[], program: ts.Program | undefined, errorStream: NodeJS.WritableStream): Promise<LintResult> {
+        options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
     const linter = new Linter({
         fix: !!options.fix,
@@ -211,7 +222,7 @@ async function doLinting(
             throw new FatalError(`Unable to open file: ${file}`);
         }
 
-        const contents = await tryReadFile(file, errorStream);
+        const contents = await tryReadFile(file, logger);
         if (contents !== undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
@@ -226,7 +237,7 @@ async function doLinting(
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
-async function tryReadFile(filename: string, errorStream: NodeJS.WritableStream): Promise<string | undefined> {
+async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
     const buffer = new Buffer(256);
     const fd = fs.openSync(filename, "r");
     try {
@@ -235,7 +246,7 @@ async function tryReadFile(filename: string, errorStream: NodeJS.WritableStream)
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.
-            await writeToStream(errorStream, `${filename}: ignoring MPEG transport stream`);
+            logger.error(`${filename}: ignoring MPEG transport stream`);
             return undefined;
         }
     } finally {
@@ -245,35 +256,33 @@ async function tryReadFile(filename: string, errorStream: NodeJS.WritableStream)
     return fs.readFileSync(filename, "utf8");
 }
 
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic): string {
+function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths: boolean): string {
     let message = ts.DiagnosticCategory[category];
     if (file) {
         const {line, character} = file.getLineAndCharacterOfPosition(start);
-        message += ` at ${file.fileName}:${line + 1}:${character + 1}:`;
+        const currentDirectory = program.getCurrentDirectory();
+        const filePath = outputAbsolutePaths
+            ? path.resolve(currentDirectory, file.fileName)
+            : path.relative(currentDirectory, file.fileName);
+        message += ` at ${filePath}:${line + 1}:${character + 1}:`;
     }
-    return message + " " + ts.flattenDiagnosticMessageText(messageText, "\n");
+    return `${message} ${ts.flattenDiagnosticMessageText(messageText, "\n")}`;
 }
 
 function trimSingleQuotes(str: string): string {
     return str.replace(/^'|'$/g, "");
 }
 
-// tslint:disable-next-line promise-function-async
-function writeToStream(outputStream: NodeJS.WritableStream, output: string): Promise<void> {
-    return new Promise<void>((resolve) => {
-        outputStream.write(output, () => { resolve(); });
-    });
-}
-
 function findTsconfig(project: string): string | undefined {
     try {
         const stats = fs.statSync(project); // throws if file does not exist
-        if (stats.isDirectory()) {
-            project = path.join(project, "tsconfig.json");
-            fs.accessSync(project); // throws if file does not exist
+        if (!stats.isDirectory()) {
+            return project;
         }
+        const projectFile = path.join(project, "tsconfig.json");
+        fs.accessSync(projectFile); // throws if file does not exist
+        return projectFile;
     } catch (e) {
         return undefined;
     }
-    return project;
 }

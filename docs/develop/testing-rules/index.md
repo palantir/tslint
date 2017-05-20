@@ -160,6 +160,8 @@ The following part can be any [version range](https://github.com/npm/node-semver
 * You can use this system to test rules outside of the TSLint build! Use the `tslint --test path/to/dir` command to test your own custom rules.
 The directory you pass should contain a `tslint.json` file and `.ts.lint` files. You can try this out on the TSLint rule test cases, for example, `tslint --test path/to/tslint-code/test/rules/quotemark/single`.
 
+* To test rules that need type information, you can simply add a `tsconfig.json` with the desired configuration next to `tslint.json`.
+
 * Lint failures sometimes span over multiple lines. To handle this case, don't specify a message until the end of the error. For example:
 
 ```

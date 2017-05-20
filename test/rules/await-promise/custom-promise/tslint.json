@@ -3,6 +3,6 @@
     "typeCheck": true
   },
   "rules": {
-    "await-promise": true
+    "await-promise": [true, "CustomPromise"]
   }
 }

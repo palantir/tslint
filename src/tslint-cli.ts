@@ -33,6 +33,7 @@ interface Argv {
     init?: boolean;
     o?: string;
     out?: string;
+    outputAbsolutePaths?: boolean;
     p?: string;
     project?: string;
     r?: string;
@@ -101,6 +102,10 @@ const processed = optimist
             describe: "output file",
             type: "string",
         },
+        "outputAbsolutePaths": {
+            describe: "whether or not outputted file paths are absolute",
+            type: "boolean",
+        },
         "p": {
             alias: "project",
             describe: "tsconfig.json file",
@@ -138,19 +143,20 @@ const processed = optimist
     });
 const argv = processed.argv as Argv;
 
-let outputStream: NodeJS.WritableStream;
+let log: (message: string) => void;
 if (argv.o != null) {
-    outputStream = fs.createWriteStream(argv.o, {
+    const outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
         mode: 420,
     });
+    log = (message) => outputStream.write(`${message}\n`);
 } else {
-    outputStream = process.stdout;
+    log = console.log;
 }
 
 // tslint:disable-next-line strict-boolean-expressions
 if (argv.help) {
-    outputStream.write(processed.help());
+    log(processed.help());
     const outputString = `
 tslint accepts the following commandline options:
 
@@ -232,7 +238,7 @@ tslint accepts the following commandline options:
 
     -h, --help:
         Prints this help message.\n`;
-    outputStream.write(outputString);
+    log(outputString);
     process.exit(0);
 }
 
@@ -247,9 +253,10 @@ run({
     formattersDirectory: argv.s,
     init: argv.init,
     out: argv.out,
+    outputAbsolutePaths: argv.outputAbsolutePaths,
     project: argv.p,
     rulesDirectory: argv.r,
     test: argv.test,
     typeCheck: argv["type-check"],
     version: argv.v,
-}, outputStream, process.stderr).then(process.exit);
+}, { log, error(m) { console.error(m); } }).then(process.exit);

@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING(lineCount: number, lineLimit: number) {
         return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
-            `Consider breaking this file up into smaller parts`;
+            "Consider breaking this file up into smaller parts";
     }
 
     public isEnabled(): boolean {

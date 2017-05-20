@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-type-assertion",
-        description: `Warns if a type assertion does not change the type of an expression.`,
+        description: "Warns if a type assertion does not change the type of an expression.",
         options: null,
         optionsDescription: "Not configurable",
         type: "typescript",
