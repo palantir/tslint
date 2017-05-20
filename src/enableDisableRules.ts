@@ -124,7 +124,7 @@ function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.
 }
 
 type Modifier = "line" | "next-line" | undefined;
-function parseComment(commentText: string): { rulesList: string[] | "all"; isEnabled: boolean; modifier: Modifier } | undefined {
+function parseComment(commentText: string): { rulesList: string[] | "all", isEnabled: boolean, modifier: Modifier } | undefined {
     // regex is: start of string followed by any amount of whitespace
     // followed by tslint and colon
     // followed by either "enable" or "disable"

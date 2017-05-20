@@ -1,6 +1,6 @@
 type T = {
     x: number,
-             ~ [COMMA]
+             ~ [PREFER_SEMI]
     y: string
             ~ [MISSING]
 };
@@ -9,7 +9,7 @@ type T = {
     x: number
             ~ [MISSING]
     y: string,
-             ~ [COMMA]
+             ~ [PREFER_SEMI]
 };
 
 type T = {
@@ -17,14 +17,17 @@ type T = {
     y: string;
 };
 
-type T = { x: number; y: string };
+type T = { x: number, y: string };
 
 // Works even when there's extra whitespace
-type T = { x: number ; y: number };
+type T = { x: number , y: number };
+type T = { x: number ; y: number , };
+                     ~ [PREFER_COMMA]
+                                 ~ [EXTRA % (',')]
 type T = { x: number , y: number ; };
-                     ~ [COMMA]
-                                 ~ [EXTRA]
+                                 ~ [EXTRA % (';')]
 
-[MISSING]: Expected type literal to use ';' to separate members.
-[COMMA]: Expected type literal to use ';' instead of ','.
-[EXTRA]: Did not expect single-line type literal to have a trailing ';'.
+[MISSING]: Expected multi-line type literal to have a trailing ';'.
+[PREFER_SEMI]: Expected multi-line type literal to use ';' instead of ','.
+[PREFER_COMMA]: Expected single-line type literal to use ',' instead of ';'.
+[EXTRA]: Did not expect single-line type literal to have a trailing '%s'.

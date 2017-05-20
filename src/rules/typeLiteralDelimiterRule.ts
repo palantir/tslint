@@ -25,8 +25,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "type-literal-delimiter",
         description: Lint.Utils.dedent`
-            Checks that type literal members are separated by semicolons.
-            Enforces a trailing semicolon for multiline type literals.`,
+            Checks that single-line type literal members are separated by commas.
+            Checks that multi-line type literal members are separated by semicolons.
+            Enforces a trailing semicolon for multi-line type literals.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -36,11 +37,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_MISSING =
-        "Expected type literal to use ';' to separate members.";
-    public static FAILURE_STRING_COMMA =
-        "Expected type literal to use ';' instead of ','.";
-    public static FAILURE_STRING_TRAILING =
-        "Did not expect single-line type literal to have a trailing ';'.";
+        "Expected multi-line type literal to have a trailing ';'.";
+    public static FAILURE_STRING_PREFER_COMMA =
+        "Expected multi-line type literal to use ';' instead of ','.";
+    public static FAILURE_STRING_PREFER_SEMICOLON =
+        "Expected single-line type literal to use ',' instead of ';'.";
+    public static FAILURE_STRING_TRAILING(delimiter: string): string {
+        return `Did not expect single-line type literal to have a trailing '${delimiter}'.`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -57,25 +61,22 @@ function walk(ctx: Lint.WalkContext<void>): void {
     });
 
     function check(node: ts.TypeLiteralNode): void {
+        const preferComma = isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
         node.members.forEach((member, idx) => {
             const end = member.end - 1;
-            // Trailing delimiter should be ommitted for a single-line type literal.
-            const shouldOmit = idx === node.members.length - 1 && isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
             const delimiter = sourceFile.text[end];
-            switch (delimiter) {
-                case ";":
-                    if (shouldOmit) {
-                        fail(Rule.FAILURE_STRING_TRAILING);
-                    }
-                    break;
-                case ",":
-                    fail(Rule.FAILURE_STRING_COMMA);
-                    break;
-                default:
-                    if (!shouldOmit) {
-                        fail(Rule.FAILURE_STRING_MISSING);
-                    }
-                    break;
+            const anyDelimiter = delimiter === ";" || delimiter === ",";
+            // Trailing delimiter should be ommitted for a single-line type literal.
+            if (preferComma && idx === node.members.length - 1) {
+                if (anyDelimiter) {
+                    fail(Rule.FAILURE_STRING_TRAILING(delimiter));
+                }
+            } else if (anyDelimiter) {
+                if ((delimiter === ",") !== preferComma) {
+                    fail(preferComma ? Rule.FAILURE_STRING_PREFER_SEMICOLON : Rule.FAILURE_STRING_PREFER_COMMA);
+                }
+            } else {
+                fail(Rule.FAILURE_STRING_MISSING);
             }
 
             function fail(failure: string): void {
