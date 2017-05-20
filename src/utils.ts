@@ -29,6 +29,7 @@ export function arrayify<T>(arg?: T | T[]): T[] {
 }
 
 /**
+ * @deprecated (no longer used)
  * Enforces the invariant that the input is an object.
  */
 export function objectify(arg: any): any {

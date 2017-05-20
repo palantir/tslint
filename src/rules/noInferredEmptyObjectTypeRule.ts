@@ -69,11 +69,18 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     }
 
     private checkCallExpression(node: ts.CallExpression): void {
-        if (node.typeArguments === undefined) {
-            const retType = this.checker.getReturnTypeOfSignature(this.checker.getResolvedSignature(node));
-            if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
-                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
-            }
+        if (node.typeArguments !== undefined) {
+            return;
+        }
+
+        const callSig = this.checker.getResolvedSignature(node);
+        if (callSig === undefined) {
+            return;
+        }
+
+        const retType = this.checker.getReturnTypeOfSignature(callSig);
+        if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
+            this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
         }
     }
 

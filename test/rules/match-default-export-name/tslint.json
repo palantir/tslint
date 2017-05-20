@@ -1,7 +1,4 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
     "match-default-export-name": true
   }
