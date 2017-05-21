@@ -144,7 +144,7 @@ const processed = optimist
 const argv = processed.argv as Argv;
 
 let outputStream: NodeJS.WritableStream;
-if (argv.o != null) {
+if (argv.o !== undefined) {
     outputStream = fs.createWriteStream(argv.o, {
         flags: "w+",
         mode: 420,

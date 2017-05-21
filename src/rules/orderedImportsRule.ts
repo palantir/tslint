@@ -218,15 +218,15 @@ class OrderedImportsWalker extends Lint.RuleWalker {
         const prefixLength = node.getStart() - node.getFullStart();
         const prefix = node.getFullText().slice(0, prefixLength);
         const hasBlankLine = prefix.indexOf("\n\n") >= 0 || prefix.indexOf("\r\n\r\n") >= 0;
-        const notImportDeclaration = node.parent != null
+        const notImportDeclaration = node.parent !== undefined
             && node.parent.kind === ts.SyntaxKind.SourceFile
             && node.kind !== ts.SyntaxKind.ImportDeclaration;
 
         if (hasBlankLine || notImportDeclaration) {
             // end of block
-            if (this.lastFix != null) {
+            if (this.lastFix != undefined) {
                 const replacement = this.currentImportsBlock.getReplacement();
-                if (replacement != null) {
+                if (replacement !== null) {
                     this.lastFix.push(replacement);
                 }
                 this.lastFix = null;
@@ -271,7 +271,7 @@ class ImportsBlock {
     // replaces the named imports on the most recent import declaration
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
-        if (importDeclaration == null) {
+        if (importDeclaration == undefined) {
             // nothing to replace. This can happen if the block is skipped
             return;
         }

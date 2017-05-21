@@ -150,7 +150,7 @@ export class Runner {
         let files = this.options.files === undefined ? [] : this.options.files;
         let program: ts.Program | undefined;
 
-        if (this.options.project != null) {
+        if (this.options.project !== undefined) {
             const project = findTsconfig(this.options.project);
             if (project === undefined) {
                 console.error("Invalid option for project: " + this.options.project);
@@ -220,7 +220,7 @@ export class Runner {
     }
 
     private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
-        const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
+        const possibleConfigAbsolutePath = this.options.config != undefined ? path.resolve(this.options.config) : null;
         const linter = new Linter({
             fix: !!this.options.fix,
             formatter: this.options.format,

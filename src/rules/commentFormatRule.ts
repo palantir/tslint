@@ -143,7 +143,7 @@ class CommentWalker extends Lint.RuleWalker {
     }
 
     private startsWithException(commentText: string): boolean {
-        if (this.exceptionsRegExp == null) {
+        if (this.exceptionsRegExp === null) {
             return false;
         }
 
@@ -191,7 +191,7 @@ function startsWith(commentText: string, changeCase: (str: string) => string) {
 
     // regex is "start of string"//"any amount of whitespace"("word character")
     const firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
-    if (firstCharacterMatch != null) {
+    if (firstCharacterMatch !== null) {
         // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
         const firstCharacter = firstCharacterMatch[1];
         return firstCharacter === changeCase(firstCharacter);

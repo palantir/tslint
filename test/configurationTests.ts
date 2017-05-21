@@ -289,14 +289,14 @@ describe("Configuration", () => {
         });
 
         describe("with config not relative to tslint", () => {
-            let tmpfile: string | null;
+            let tmpfile: string | undefined;
 
             beforeEach(() => {
                 tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
-                if (tmpfile != null) {
+                if (tmpfile !== undefined) {
                     fs.unlinkSync(tmpfile);
                 }
             });
@@ -382,7 +382,7 @@ function getEmptyConfig(): IConfigurationFile {
 }
 
 function demap<T>(map: Map<string, T>) {
-    if (map == null) {
+    if (map == undefined) {
         return map;
     }
     const output: { [key: string]: T } = {};

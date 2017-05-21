@@ -64,7 +64,7 @@ class NoConditionalAssignmentWalker extends Lint.RuleWalker {
     }
 
     protected visitForStatement(node: ts.ForStatement) {
-        if (node.condition != null) {
+        if (node.condition !== undefined) {
             this.validateConditionalExpression(node.condition);
         }
         super.visitForStatement(node);

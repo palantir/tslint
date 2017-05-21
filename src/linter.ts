@@ -83,7 +83,7 @@ class Linter {
         if (typeof options !== "object") {
             throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
-        if ((options as any).configuration != null) {
+        if ((options as any).configuration != undefined) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
