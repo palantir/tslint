@@ -88,15 +88,16 @@ function getMisplacedOverloads<T extends ts.Node>(overloads: T[], getKey: (node:
         }
 
         const key = getKey(node);
-        if (key !== undefined) {
-            if (seen.has(key) && lastKey !== key) {
-                result.push(node as any as ts.SignatureDeclaration);
-            }
-            seen.add(key);
-            lastKey = key;
-        } else {
+        if (key === undefined) {
             lastKey = undefined;
+            continue;
         }
+
+        if (seen.has(key) && lastKey !== key) {
+            result.push(node as any as ts.SignatureDeclaration);
+        }
+        seen.add(key);
+        lastKey = key;
     }
     return result;
 }

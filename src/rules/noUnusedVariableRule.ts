@@ -86,13 +86,12 @@ function parseOptions(options: any[]): Options {
 
     let ignorePattern: RegExp | undefined;
     for (const o of options) {
-        if (typeof o === "object") {
-            // tslint:disable-next-line no-unsafe-any
-            const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
-            if (ignore != null) {
-                ignorePattern = new RegExp(ignore);
-                break;
-            }
+        if (typeof o !== "object") { continue; }
+        // tslint:disable-next-line no-unsafe-any
+        const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
+        if (ignore != null) {
+            ignorePattern = new RegExp(ignore);
+            break;
         }
     }
 

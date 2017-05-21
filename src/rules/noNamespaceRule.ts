@@ -70,11 +70,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
         return;
     }
     for (const node of ctx.sourceFile.statements) {
-        if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
-                (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
+        if (node.kind === ts.SyntaxKind.ModuleDeclaration
+            && (node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral
+            && (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
 }

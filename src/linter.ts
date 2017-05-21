@@ -158,14 +158,16 @@ class Linter {
 
         for (const rule of enabledRules) {
             const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
-            if (hasFixes) {
-                // Get new failures in case the file changed.
-                const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
-                const fixableFailures = updatedFailures.filter((f) => f.hasFix());
-                this.fixes = this.fixes.concat(fixableFailures);
-                source = this.applyFixes(sourceFileName, source, fixableFailures);
-                sourceFile = this.getSourceFile(sourceFileName, source);
+            if (!hasFixes) {
+                continue;
             }
+
+            // Get new failures in case the file changed.
+            const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
+            const fixableFailures = updatedFailures.filter((f) => f.hasFix());
+            this.fixes = this.fixes.concat(fixableFailures);
+            source = this.applyFixes(sourceFileName, source, fixableFailures);
+            sourceFile = this.getSourceFile(sourceFileName, source);
         }
 
         // If there were fixes, get the *new* list of failures.
@@ -216,22 +218,22 @@ class Linter {
     }
 
     private getSourceFile(fileName: string, source: string) {
-        if (this.program !== undefined) {
-            const sourceFile = this.program.getSourceFile(fileName);
-            if (sourceFile === undefined) {
-                const INVALID_SOURCE_ERROR = dedent`
-                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
-                `;
-                throw new Error(INVALID_SOURCE_ERROR);
-            }
-            // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
-            }
-            return sourceFile;
-        } else {
+        if (this.program === undefined) {
             return utils.getSourceFile(fileName, source);
         }
+
+        const sourceFile = this.program.getSourceFile(fileName);
+        if (sourceFile === undefined) {
+            const INVALID_SOURCE_ERROR = dedent`
+                Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+            `;
+            throw new Error(INVALID_SOURCE_ERROR);
+        }
+        // check if the program has been type checked
+        if (!("resolvedModules" in sourceFile)) {
+            throw new Error("Program must be type checked before linting");
+        }
+        return sourceFile;
     }
 }
 
@@ -244,14 +246,16 @@ function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | un
     const map = new Map<K, V[]>();
     for (const input of inputs) {
         const pair = getPair(input);
-        if (pair !== undefined) {
-            const [k, v] = pair;
-            const vs = map.get(k);
-            if (vs !== undefined) {
-                vs.push(v);
-            } else {
-                map.set(k, [v]);
-            }
+        if (pair === undefined) {
+            continue;
+        }
+
+        const [k, v] = pair;
+        const vs = map.get(k);
+        if (vs !== undefined) {
+            vs.push(v);
+        } else {
+            map.set(k, [v]);
         }
     }
     return map;

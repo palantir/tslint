@@ -187,37 +187,37 @@ function findup(filename: string, directory: string): string | undefined {
 export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
     if (configFilePath == null) {
         return DEFAULT_CONFIG;
-    } else {
-        const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let rawConfigFile: RawConfigFile;
-        if (path.extname(resolvedConfigFilePath) === ".json") {
-            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
-                .toString()
-                .replace(/^\uFEFF/, ""));
-            try {
-                rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
-            } catch (e) {
-                const error = e as Error;
-                // include the configuration file being parsed in the error since it may differ from the directly referenced config
-                throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
-            }
-        } else {
-            rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
-            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
-        }
-
-        const configFileDir = path.dirname(resolvedConfigFilePath);
-        const configFile = parseConfigFile(rawConfigFile, configFileDir);
-
-        // load configurations, in order, using their identifiers or relative paths
-        // apply the current configuration last by placing it last in this array
-        const configs: IConfigurationFile[] = configFile.extends.map((name) => {
-            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
-        }).concat([configFile]);
-
-        return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
     }
+
+    const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
+    let rawConfigFile: RawConfigFile;
+    if (path.extname(resolvedConfigFilePath) === ".json") {
+        const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
+            .toString()
+            .replace(/^\uFEFF/, ""));
+        try {
+            rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
+        } catch (e) {
+            const error = e as Error;
+            // include the configuration file being parsed in the error since it may differ from the directly referenced config
+            throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
+        }
+    } else {
+        rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
+        delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
+    }
+
+    const configFileDir = path.dirname(resolvedConfigFilePath);
+    const configFile = parseConfigFile(rawConfigFile, configFileDir);
+
+    // load configurations, in order, using their identifiers or relative paths
+    // apply the current configuration last by placing it last in this array
+    const configs: IConfigurationFile[] = configFile.extends.map((name) => {
+        const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
+        return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
+    }).concat([configFile]);
+
+    return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
 }
 
 /**
@@ -262,14 +262,15 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
         return combinedProperty as T;
 
         function add(property: T | undefined): void {
-            if (property !== undefined) {
-                for (const name in property) {
-                    if (hasOwnProperty(property, name)) {
-                        combinedProperty[name] = property[name];
-                    }
-                }
+            if (property === undefined) {
+                return;
             }
 
+            for (const name in property) {
+                if (hasOwnProperty(property, name)) {
+                    combinedProperty[name] = property[name];
+                }
+            }
         }
     }
 

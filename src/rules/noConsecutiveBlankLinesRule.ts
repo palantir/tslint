@@ -69,18 +69,16 @@ function walk(ctx: Lint.WalkContext<number>) {
     let consecutiveBlankLines = 0;
 
     for (const line of utils.getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength === 0 || sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1) {
-            ++consecutiveBlankLines;
-            if (consecutiveBlankLines === threshold) {
-                possibleFailures.push({
-                    end: line.end,
-                    pos: line.pos,
-                });
-            } else if (consecutiveBlankLines > threshold) {
-                possibleFailures[possibleFailures.length - 1].end = line.end;
-            }
-        } else {
+        if (line.contentLength !== 0 && sourceText.substr(line.pos, line.contentLength).search(/\S/) !== -1) {
             consecutiveBlankLines = 0;
+            continue;
+        }
+
+        ++consecutiveBlankLines;
+        if (consecutiveBlankLines === threshold) {
+            possibleFailures.push({ end: line.end, pos: line.pos });
+        } else if (consecutiveBlankLines > threshold) {
+            possibleFailures[possibleFailures.length - 1].end = line.end;
         }
     }
 
@@ -90,16 +88,18 @@ function walk(ctx: Lint.WalkContext<number>) {
     const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options);
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
-        if (!templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
-            ctx.addFailureAt(possibleFailure.pos, 1, failureString, [
-                Lint.Replacement.deleteFromTo(
-                    // special handling for fixing blank lines at the end of the file
-                    // to fix this we need to cut off the line break of the last allowed blank line, too
-                    possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
-                    possibleFailure.end,
-                ),
-            ]);
+        if (templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
+            continue;
         }
+
+        ctx.addFailureAt(possibleFailure.pos, 1, failureString, [
+            Lint.Replacement.deleteFromTo(
+                // special handling for fixing blank lines at the end of the file
+                // to fix this we need to cut off the line break of the last allowed blank line, too
+                possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
+                possibleFailure.end,
+            ),
+        ]);
     }
 }
 
@@ -110,12 +110,8 @@ function getStartOfLineBreak(sourceText: string, pos: number) {
 export function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     const cb = (node: ts.Node): void => {
-        if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
-            node.kind <= ts.SyntaxKind.LastTemplateToken) {
-            intervals.push({
-                end: node.end,
-                pos: node.getStart(sourceFile),
-            });
+        if (node.kind >= ts.SyntaxKind.FirstTemplateToken && node.kind <= ts.SyntaxKind.LastTemplateToken) {
+            intervals.push({ end: node.end, pos: node.getStart(sourceFile) });
         } else {
             return ts.forEachChild(node, cb);
         }

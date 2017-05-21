@@ -250,14 +250,16 @@ class OneLineWalker extends Lint.RuleWalker {
 
     private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
-        if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = body.getChildAt(0);
-            if (node.type != null) {
-                this.handleOpeningBrace(node.type, openBraceToken);
-            } else {
-                const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
-                this.handleOpeningBrace(closeParenToken, openBraceToken);
-            }
+        if (body === undefined || body.kind !== ts.SyntaxKind.Block) {
+            return;
+        }
+
+        const openBraceToken = body.getChildAt(0);
+        if (node.type !== undefined) {
+            this.handleOpeningBrace(node.type, openBraceToken);
+        } else {
+            const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
+            this.handleOpeningBrace(closeParenToken, openBraceToken);
         }
     }
 

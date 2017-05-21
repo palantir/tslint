@@ -45,8 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>) {
-    return ts.forEachChild(ctx.sourceFile, cb);
-    function cb(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isArrowFunction(node) && !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
             isCallExpression(node.body) && isIdentifier(node.body.expression) &&
             isRedundantCallback(node.parameters, node.body.arguments, node.body.expression)) {
@@ -55,11 +54,9 @@ function walk(ctx: Lint.WalkContext<void>) {
                 Lint.Replacement.deleteFromTo(start, node.body.getStart(ctx.sourceFile)),
                 Lint.Replacement.deleteFromTo(node.body.expression.end, node.end),
             ]);
-        } else {
-            return ts.forEachChild(node, cb);
         }
-    }
-
+        ts.forEachChild(node, cb);
+    });
 }
 
 function isRedundantCallback(

@@ -117,14 +117,16 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                         break;
                     case "consistent-as-needed":
                         for (const name of propertyNames) {
-                            if (name.kind === ts.SyntaxKind.StringLiteral && !isValidPropertyName(name.text)) {
-                                for (const propertyName of propertyNames) {
-                                    if (propertyName.kind !== ts.SyntaxKind.StringLiteral) {
-                                        this.reportMissing(propertyName);
-                                    }
-                                }
-                                break outer;
+                            if (name.kind !== ts.SyntaxKind.StringLiteral || isValidPropertyName(name.text)) {
+                                continue;
                             }
+
+                            for (const propertyName of propertyNames) {
+                                if (propertyName.kind !== ts.SyntaxKind.StringLiteral) {
+                                    this.reportMissing(propertyName);
+                                }
+                            }
+                            break outer;
                         }
                         for (const name of propertyNames) {
                             if (name.kind === ts.SyntaxKind.StringLiteral) {

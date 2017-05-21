@@ -220,24 +220,26 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         /* tslint:disable:no-console */
         if (results.skipped) {
             console.log(colors.yellow(` Skipped, requires typescript ${results.requirement}`));
-        } else {
-            const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-            const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
-            const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
+            continue;
+        }
 
-            if (didMarkupTestPass && didFixesTestPass) {
-                console.log(colors.green(" Passed"));
-            } else {
-                console.log(colors.red(" Failed!"));
-                didAllTestsPass = false;
-                if (!didMarkupTestPass) {
-                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
-                }
-                if (!didFixesTestPass) {
-                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
-                }
-            }
+        const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
+        const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
+        const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
+        const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
+
+        if (didMarkupTestPass && didFixesTestPass) {
+            console.log(colors.green(" Passed"));
+            continue;
+        }
+
+        console.log(colors.red(" Failed!"));
+        didAllTestsPass = false;
+        if (!didMarkupTestPass) {
+            displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
+        }
+        if (!didFixesTestPass) {
+            displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
         }
         /* tslint:enable:no-console */
     }

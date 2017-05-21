@@ -1,0 +1,135 @@
+switch (x) {
+    case 0:
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+        break;
+
+    // Also works with a block clause
+    case 0: {
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+        break;
+    }
+
+    case 0:
+        // Falls through, so can't use early return
+        if (so)
+            two(
+                lines);
+
+    case 0: {
+        if (so)
+            two(
+                lines);
+    }
+
+    case 0:
+        if (so)
+            two(
+                lines);
+        blah();
+        break;
+
+    case 0: {
+        if (so)
+            two(
+                lines);
+        blah();
+        break;
+    }
+}
+
+switch (x) {
+    case 0:
+        // Last case, so it's not fallthrough
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+}
+
+switch (x) {
+    case 0: {
+        // Last case, so it's not fallthrough
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+    }
+}
+
+switch (x) {
+    case 0:
+        if (so)
+            two(
+                lines);
+        blah();
+}
+
+switch (x) {
+    case 0: {
+        if (so)
+            two(
+                lines);
+        blah();
+    }
+}
+
+switch (x) {
+    case 0:
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+        break;
+}
+
+switch (x) {
+    case 0: {
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+        break;
+    }
+}
+
+switch (x) {
+    default:
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+}
+
+switch (x) {
+    default: {
+        if (so)
+        ~~ [BREAK]
+            two(
+                lines);
+    }
+}
+
+switch (x) {
+    default:
+        if (so)
+            two(
+                lines);
+        blah();
+}
+
+switch (x) {
+    default: {
+        if (so)
+            two(
+                lines);
+        blah();
+    }
+}
+
+[BREAK]: Remainder of block is inside 'if' statement. Prefer to invert the condition and 'break' early.

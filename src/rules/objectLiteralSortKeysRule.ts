@@ -70,16 +70,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
                         break;
                     case ts.SyntaxKind.ShorthandPropertyAssignment:
                     case ts.SyntaxKind.PropertyAssignment:
-                        if (property.name.kind === ts.SyntaxKind.Identifier ||
-                            property.name.kind === ts.SyntaxKind.StringLiteral) {
-                            const key = ignoreCase ? property.name.text.toLowerCase() : property.name.text;
-                            // comparison with undefined is expected
-                            if (lastKey! > key) {
-                                ctx.addFailureAtNode(property.name, Rule.FAILURE_STRING_FACTORY(property.name.text));
-                                break outer; // only show warning on first out-of-order property
-                            }
-                            lastKey = key;
+                        const { name } = property;
+                        if (name.kind !== ts.SyntaxKind.Identifier && name.kind !== ts.SyntaxKind.StringLiteral) {
+                            break;
                         }
+
+                        const key = ignoreCase ? name.text.toLowerCase() : name.text;
+                        // comparison with undefined is expected
+                        if (lastKey! > key) {
+                            ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(name.text));
+                            break outer; // only show warning on first out-of-order property
+                        }
+                        lastKey = key;
                 }
             }
         }

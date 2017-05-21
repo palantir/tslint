@@ -192,8 +192,7 @@ class IndentWalker extends Lint.RuleWalker {
 
             if (this.regExp.test(fullLeadingWhitespace)) {
                 this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString,
-                    this.replacementFactory(lineStart, fullLeadingWhitespace),
-                );
+                    this.replacementFactory(lineStart, fullLeadingWhitespace));
             }
         }
         // no need to call super to visit the rest of the nodes, so don't call super here

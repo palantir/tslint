@@ -1,0 +1,87 @@
+// Tests for all kinds of parent nodes it should work on
+// 'switch' cases are in test-switch
+
+function f() {
+    if (so)
+    ~~ [RET]
+        two(
+            lines);
+}
+
+f = function() {
+    if (so)
+    ~~ [RET]
+        two(
+            lines);
+}
+
+f = () => {
+    if (so)
+    ~~ [RET]
+        two(
+            lines);
+}
+
+class C {
+    constructor() {
+        if (so)
+        ~~ [RET]
+            two(
+                lines);
+    }
+
+    m() {
+        if (so)
+        ~~ [RET]
+            two(
+                lines);
+    }
+
+    get x() {
+        if (so)
+        ~~ [RET]
+            two(
+                lines);
+    }
+
+    set s() {
+        if (s)
+        ~~ [RET]
+            two(
+                lines);
+    }
+}
+
+for (const x in y)
+    if (so)
+    ~~ [CONT]
+        two(
+            lines);
+
+for (const x of y)
+    if (so)
+    ~~ [CONT]
+        two(
+            lines);
+
+for (let i = 0; i < 10; i++)
+    if (so)
+    ~~ [CONT]
+        two(
+            lines);
+
+while (so)
+    if (so)
+    ~~ [CONT]
+        two(
+            lines);
+
+do {
+    if (so)
+    ~~ [CONT]
+        two(
+            lines);
+} while (so);
+
+[CONT]: Remainder of block is inside 'if' statement. Prefer to invert the condition and 'continue' early.
+[RET]: Remainder of block is inside 'if' statement. Prefer to invert the condition and 'return' early.

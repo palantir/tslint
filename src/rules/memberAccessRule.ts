@@ -111,13 +111,15 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             const publicKeyword = node.modifiers!.find((m) => m.kind === ts.SyntaxKind.PublicKeyword)!;
             ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
         }
-        if (!noPublic && !isPublic) {
-            const nameNode = isConstructorDeclaration(node)
-                ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!
-                : node.name !== undefined ? node.name : node;
-            const memberName = node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
-            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
+        if (noPublic || isPublic) {
+            return;
         }
+
+        const nameNode = isConstructorDeclaration(node)
+            ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!
+            : node.name !== undefined ? node.name : node;
+        const memberName = node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
+        ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
     }
 }
 

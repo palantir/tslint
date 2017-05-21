@@ -119,25 +119,23 @@ class CommentWalker extends Lint.RuleWalker {
 
     public visitSourceFile(node: ts.SourceFile) {
         utils.forEachComment(node, (fullText, comment) => {
-            if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = fullText.substring(comment.pos, comment.end);
-                const startPosition = comment.pos + 2;
-                const width = commentText.length - 2;
-                if (this.hasOption(OPTION_SPACE)) {
-                    if (!startsWithSpace(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE);
-                    }
-                }
-                if (this.hasOption(OPTION_LOWERCASE)) {
-                    if (!startsWithLowercase(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE + this.failureIgnorePart);
-                    }
-                }
-                if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE + this.failureIgnorePart);
-                    }
-                }
+            if (comment.kind !== ts.SyntaxKind.SingleLineCommentTrivia) {
+                return;
+            }
+
+            const commentText = fullText.substring(comment.pos, comment.end);
+            const startPosition = comment.pos + 2;
+            const width = commentText.length - 2;
+            if (this.hasOption(OPTION_SPACE) && !startsWithSpace(commentText)) {
+                this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE);
+            }
+            if (this.hasOption(OPTION_LOWERCASE) && !startsWithLowercase(commentText) && !this.startsWithException(commentText)) {
+                this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE + this.failureIgnorePart);
+            }
+            if (this.hasOption(OPTION_UPPERCASE)
+                && !startsWithUppercase(commentText)
+                && !isEnableDisableFlag(commentText) && !this.startsWithException(commentText)) {
+                this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE + this.failureIgnorePart);
             }
         });
     }
