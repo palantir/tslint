@@ -82,8 +82,6 @@ class Walker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.ModuleDeclaration:
                 this.checkModuleDeclaration(body as ts.ModuleDeclaration);
                 break;
-            default:
-                break;
         }
     }
 

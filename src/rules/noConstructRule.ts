@@ -53,6 +53,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case "String":
                 case "Number":
                     ctx.addFailure(node.getStart(ctx.sourceFile), node.expression.end, Rule.FAILURE_STRING);
+                    break;
             }
         }
         return ts.forEachChild(node, cb);

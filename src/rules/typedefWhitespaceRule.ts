@@ -131,6 +131,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.PropertySignature:
                 case ts.SyntaxKind.PropertyDeclaration:
                     this.checkSpace(node as ts.PropertyDeclaration | ts.PropertySignature, "property-declaration");
+                    break;
             }
             return ts.forEachChild(node, cb);
         };
@@ -202,6 +203,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
                         this.addFailure(start + 1, end, Rule.FAILURE_STRING(option, location, key),
                                         Lint.Replacement.deleteFromTo(start + 1, end));
                 }
+                break;
         }
     }
 }

@@ -58,6 +58,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                     if (isExpressionNaN(node.right) || isExpressionNaN(node.left)) {
                         ctx.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText(ctx.sourceFile));
                     }
+                    break;
             }
         }
         return ts.forEachChild(node, cb);

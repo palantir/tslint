@@ -138,6 +138,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                             this.checkAlignment((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members,
                                                 OPTION_MEMBERS);
                         }
+                        break;
                 }
             }
             return ts.forEachChild(node, cb);

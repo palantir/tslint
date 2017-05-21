@@ -230,8 +230,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     prevTokenShouldBeFollowedByWhitespace = true;
                 }
                 break;
-            default:
-                break;
         }
     });
 

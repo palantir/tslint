@@ -75,7 +75,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     if (!shouldOmit) {
                         fail(Rule.FAILURE_STRING_MISSING);
                     }
-                    break;
             }
 
             function fail(failure: string): void {

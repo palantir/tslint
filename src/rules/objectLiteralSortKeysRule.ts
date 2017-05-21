@@ -80,6 +80,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                             }
                             lastKey = key;
                         }
+                        break;
                 }
             }
         }

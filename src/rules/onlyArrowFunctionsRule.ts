@@ -86,6 +86,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 if (!(allowNamedFunctions && f.name !== undefined) && !functionIsExempt(f)) {
                     ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
                 }
+                break;
             }
         }
         return ts.forEachChild(node, cb);

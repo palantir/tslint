@@ -205,6 +205,7 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
             if (buffer[1] === 0xFE) {
                 return "utf16le";
             }
+            break;
     }
 
     return "utf8";

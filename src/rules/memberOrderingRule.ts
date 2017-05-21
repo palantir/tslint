@@ -207,6 +207,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.InterfaceDeclaration:
                 case ts.SyntaxKind.TypeLiteral:
                     this.checkMembers((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members);
+                    break;
             }
             return ts.forEachChild(node, cb);
         };
