@@ -135,7 +135,7 @@ function getExit(node: ts.IfStatement): string | undefined {
         return isCaseOrDefaultClause(container) && container.statements.length === 1
             ? getCaseClauseExit(container, parent, node)
             // Must be the last statement in the block
-            : last(parent.statements) === node ? getEarlyExitKind(container) : undefined;
+            : isLastStatement(node, parent.statements) ? getEarlyExitKind(container) : undefined;
     } else {
         return isCaseOrDefaultClause(parent)
             ? getCaseClauseExit(parent, parent, node)
@@ -147,12 +147,12 @@ function getExit(node: ts.IfStatement): string | undefined {
 function getCaseClauseExit(
     clause: ts.CaseOrDefaultClause,
     { statements }: ts.CaseOrDefaultClause | ts.Block,
-    node: ts.Node): string | undefined {
+    node: ts.IfStatement): string | undefined {
     return last(statements).kind === ts.SyntaxKind.BreakStatement
         // Must be the last node before the break statement
-        ? statements[statements.length - 2] === node ? "break" : undefined
+        ? isLastStatement(node, statements, statements.length - 2) ? "break" : undefined
         // If no 'break' statement, this is a fallthrough, unless we're at the last clause.
-        : last(clause.parent!.clauses) === clause && last(statements) === node ? "break" : undefined;
+        : last(clause.parent!.clauses) === clause && isLastStatement(node, statements) ? "break" : undefined;
 }
 
 function getEarlyExitKind({ kind }: ts.Node): string | undefined {
@@ -178,6 +178,23 @@ function getEarlyExitKind({ kind }: ts.Node): string | undefined {
             // (TODO: maybe we could, but we would need more control flow information here.)
             // (Cause clauses handled separately.)
             return undefined;
+    }
+}
+
+function isLastStatement(ifStatement: ts.IfStatement, statements: ReadonlyArray<ts.Statement>, i: number = statements.length - 1): boolean {
+    while (true) { // tslint:disable-line strict-boolean-expressions (Fixed in tslint 5.3)
+        const statement = statements[i];
+        if (statement === ifStatement) {
+            return true;
+        }
+        if (statement.kind !== ts.SyntaxKind.FunctionDeclaration) {
+            return false;
+        }
+        if (i === 0) {
+            // ifStatement should have been in statements
+            throw new Error();
+        }
+        i--;
     }
 }
 

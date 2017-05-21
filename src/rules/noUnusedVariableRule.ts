@@ -193,29 +193,32 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
             }
         }
 
-        if (namedBindings !== undefined) {
-            if (allNamedBindingsAreFailures) {
-                const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
-                const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
-                const failure = "All named bindings are unused.";
-                ctx.addFailureAtNode(namedBindings, failure, fix);
-            } else {
-                const { elements } = namedBindings;
-                for (let i = 0; i < elements.length; i++) {
-                    const element = elements[i];
-                    const failure = tryDelete(element.name);
-                    if (failure === undefined) {
-                        continue;
-                    }
+        if (namedBindings === undefined) {
+            return;
+        }
 
-                    const prevElement = elements[i - 1];
-                    const nextElement = elements[i + 1];
-                    const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
-                    const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
-                    const fix = Lint.Replacement.deleteFromTo(start, end);
-                    ctx.addFailureAtNode(element.name, failure, fix);
-                }
+        if (allNamedBindingsAreFailures) {
+            const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
+            const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
+            const failure = "All named bindings are unused.";
+            ctx.addFailureAtNode(namedBindings, failure, fix);
+            return;
+        }
+
+        const { elements } = namedBindings;
+        for (let i = 0; i < elements.length; i++) {
+            const element = elements[i];
+            const failure = tryDelete(element.name);
+            if (failure === undefined) {
+                continue;
             }
+
+            const prevElement = elements[i - 1];
+            const nextElement = elements[i + 1];
+            const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
+            const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
+            const fix = Lint.Replacement.deleteFromTo(start, end);
+            ctx.addFailureAtNode(element.name, failure, fix);
         }
 
         function tryRemoveAll(name: ts.Identifier): void {

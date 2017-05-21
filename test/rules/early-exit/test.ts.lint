@@ -4,6 +4,9 @@ function f() {
     ~~ [0]
         two(
             lines);
+
+    // Function declarations after the 'if' are irrelevant
+    function inner() {}
 }
 
 // Block size is measured from first statement to last statement -- does *not* include curly braces.
