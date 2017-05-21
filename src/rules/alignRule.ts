@@ -163,7 +163,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
             if (line !== pos.line && pos.character !== alignToColumn) {
                 const diff = alignToColumn - pos.character;
                 let fix: Lint.Fix | undefined;
-                if (0 < diff) {
+                if (diff >= 0) {
                     fix = Lint.Replacement.appendText(start, " ".repeat(diff));
                 } else if (node.pos <= start + diff && /^\s+$/.test(sourceFile.text.substring(start + diff, start))) {
                     // only delete text if there is only whitespace

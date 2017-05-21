@@ -244,6 +244,7 @@ export const rules = {
         "check-typecast",
         "check-preblock",
     ],
+    "yoda": true,
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
