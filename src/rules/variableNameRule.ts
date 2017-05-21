@@ -106,9 +106,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         switch (node.kind) {
             case ts.SyntaxKind.BindingElement: {
                 const { initializer, name, propertyName } = node as ts.BindingElement;
-                if (name.kind !== ts.SyntaxKind.Identifier) {
-                    break;
-                }
+                if (name.kind !== ts.SyntaxKind.Identifier) { break; }
 
                 handleVariableNameKeyword(name);
                 // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
@@ -130,9 +128,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.VariableDeclaration: {
                 const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
-                if (name.kind !== ts.SyntaxKind.Identifier) {
-                    break;
-                }
+                if (name.kind !== ts.SyntaxKind.Identifier) { break; }
 
                 handleVariableNameFormat(name, initializer);
                 // do not check property declarations for keywords, they are allowed to be keywords

@@ -262,10 +262,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
         return combinedProperty as T;
 
         function add(property: T | undefined): void {
-            if (property === undefined) {
-                return;
-            }
-
+            if (property === undefined) { return; }
             for (const name in property) {
                 if (hasOwnProperty(property, name)) {
                     combinedProperty[name] = property[name];

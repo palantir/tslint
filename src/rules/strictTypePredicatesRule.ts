@@ -97,9 +97,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case TypePredicateKind.NonStructNullUndefined: {
                 const result = testNonStrictNullUndefined(exprType);
-                if (result === undefined) {
-                    break;
-                }
+                if (result === undefined) { break; }
 
                 fail(typeof result === "boolean"
                     ? Rule.FAILURE_STRING(result === isPositive)

@@ -171,9 +171,7 @@ class SemicolonWalker extends Lint.AbstractWalker<Options> {
 
     private checkEmptyStatement(node: ts.Node) {
         // An empty statement is only ever useful when it is the only statement inside a loop
-        if (utils.isIterationStatement(node.parent!)) {
-            return;
-        }
+        if (utils.isIterationStatement(node.parent!)) { return; }
 
         const parentKind = node.parent!.kind;
         // don't remove empty statement if it is a direct child of if, with or a LabeledStatement

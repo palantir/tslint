@@ -111,9 +111,7 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             const publicKeyword = node.modifiers!.find((m) => m.kind === ts.SyntaxKind.PublicKeyword)!;
             ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
         }
-        if (noPublic || isPublic) {
-            return;
-        }
+        if (noPublic || isPublic) { return; }
 
         const nameNode = isConstructorDeclaration(node)
             ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!

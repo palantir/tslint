@@ -65,9 +65,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
             const start = end - "module".length;
             this.addFailure(start, end, Rule.FAILURE_STRING, Lint.Replacement.replaceFromTo(start, end, "namespace"));
         }
-        if (node.body === undefined) {
-            return;
-        }
+        if (node.body === undefined) { return; }
 
         switch (node.body.kind) {
             case ts.SyntaxKind.ModuleBlock:

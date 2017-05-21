@@ -119,9 +119,7 @@ class CommentWalker extends Lint.RuleWalker {
 
     public visitSourceFile(node: ts.SourceFile) {
         utils.forEachComment(node, (fullText, comment) => {
-            if (comment.kind !== ts.SyntaxKind.SingleLineCommentTrivia) {
-                return;
-            }
+            if (comment.kind !== ts.SyntaxKind.SingleLineCommentTrivia) { return; }
 
             const commentText = fullText.substring(comment.pos, comment.end);
             const startPosition = comment.pos + 2;

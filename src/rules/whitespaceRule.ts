@@ -114,9 +114,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             // check for spaces between ternary operator symbols
             case ts.SyntaxKind.ConditionalExpression:
-                if (!options.operator) {
-                    break;
-                }
+                if (!options.operator) { break; }
 
                 const { condition, whenTrue } = node as ts.ConditionalExpression;
                 checkForTrailingWhitespace(condition.getEnd());
@@ -129,9 +127,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
 
             case ts.SyntaxKind.ExportAssignment: {
-                if (!options.module) {
-                    break;
-                }
+                if (!options.module) { break;  }
 
                 const exportKeyword = node.getChildAt(0);
                 const position = exportKeyword.getEnd();
@@ -145,9 +141,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             case ts.SyntaxKind.ImportDeclaration: {
                 const { importClause } = node as ts.ImportDeclaration;
-                if (!options.module || importClause === undefined) {
-                    break;
-                }
+                if (!options.module || importClause === undefined) { break; }
 
                 // an import clause can have _both_ named bindings and a name (the latter for the default import)
                 // but the named bindings always come last, so we only need to check that for whitespace

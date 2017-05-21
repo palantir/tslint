@@ -88,9 +88,7 @@ function walk(ctx: Lint.WalkContext<number>) {
     const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options);
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
-        if (templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
-            continue;
-        }
+        if (templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) { continue; }
 
         ctx.addFailureAt(possibleFailure.pos, 1, failureString, [
             Lint.Replacement.deleteFromTo(

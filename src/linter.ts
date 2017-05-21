@@ -158,9 +158,7 @@ class Linter {
 
         for (const rule of enabledRules) {
             const hasFixes = fileFailures.some((f) => f.hasFix() && f.getRuleName() === rule.getOptions().ruleName);
-            if (!hasFixes) {
-                continue;
-            }
+            if (!hasFixes) { continue; }
 
             // Get new failures in case the file changed.
             const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
@@ -246,9 +244,7 @@ function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | un
     const map = new Map<K, V[]>();
     for (const input of inputs) {
         const pair = getPair(input);
-        if (pair === undefined) {
-            continue;
-        }
+        if (pair === undefined) { continue; }
 
         const [k, v] = pair;
         const vs = map.get(k);

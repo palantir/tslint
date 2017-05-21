@@ -255,10 +255,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
         }
 
         for (const type in descriptor) {
-            if (!hasOwnProperty(descriptor, type)) {
-                continue;
-            }
-
+            if (!hasOwnProperty(descriptor, type)) { continue; }
             requirements.set(
                 type as DocType,
                 (type === "methods" || type === "properties")

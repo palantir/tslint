@@ -51,15 +51,11 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
             ? fullText.substring(comment.pos + 2, comment.end)
             : fullText.substring(comment.pos + 2, comment.end - 2);
         const parsed = parseComment(commentText);
-        if (parsed === undefined) {
-            return;
-        }
+        if (parsed === undefined) { return; }
 
         const { rulesList, isEnabled, modifier } = parsed;
         const switchRange = getSwitchRange(modifier, comment, sourceFile);
-        if (switchRange === undefined) {
-            return;
-        }
+        if (switchRange === undefined) { return; }
 
         const rulesToSwitch = rulesList === "all" ? Array.from(failingRules) : rulesList.filter((r) => failingRules.has(r));
         for (const ruleToSwitch of rulesToSwitch) {

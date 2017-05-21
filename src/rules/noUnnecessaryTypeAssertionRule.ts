@@ -66,9 +66,7 @@ class Walker extends Lint.AbstractWalker<void> {
         }
 
         const uncastType = this.checker.getTypeAtLocation(node.expression);
-        if (uncastType !== castType) {
-            return;
-        }
+        if (uncastType !== castType) { return; }
 
         this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
             ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())

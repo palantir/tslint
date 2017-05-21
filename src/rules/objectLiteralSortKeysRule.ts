@@ -71,9 +71,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     case ts.SyntaxKind.ShorthandPropertyAssignment:
                     case ts.SyntaxKind.PropertyAssignment:
                         const { name } = property;
-                        if (name.kind !== ts.SyntaxKind.Identifier && name.kind !== ts.SyntaxKind.StringLiteral) {
-                            break;
-                        }
+                        if (name.kind !== ts.SyntaxKind.Identifier && name.kind !== ts.SyntaxKind.StringLiteral) { break; }
 
                         const key = ignoreCase ? name.text.toLowerCase() : name.text;
                         // comparison with undefined is expected

@@ -250,9 +250,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
-        if (body === undefined || body.kind !== ts.SyntaxKind.Block) {
-            return;
-        }
+        if (body === undefined || body.kind !== ts.SyntaxKind.Block) { return; }
 
         const openBraceToken = body.getChildAt(0);
         if (node.type !== undefined) {

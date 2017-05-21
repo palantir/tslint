@@ -327,10 +327,7 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
         }
 
         function handleComments(comments: ts.CommentRange[] | undefined) {
-            if (comments === undefined) {
-                return;
-            }
-
+            if (comments === undefined) { return; }
             for (const comment of comments) {
                 cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
             }

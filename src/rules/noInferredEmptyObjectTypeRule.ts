@@ -59,14 +59,10 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     }
 
     private checkNewExpression(node: ts.NewExpression): void {
-        if (node.typeArguments !== undefined) {
-            return;
-        }
+        if (node.typeArguments !== undefined) { return; }
 
         const objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
-        if (!isTypeFlagSet(objType, ts.TypeFlags.Object) || objType.typeArguments === undefined) {
-            return;
-        }
+        if (!isTypeFlagSet(objType, ts.TypeFlags.Object) || objType.typeArguments === undefined) { return; }
 
         const typeArgs = objType.typeArguments as ts.ObjectType[];
         if (typeArgs.some((a) => this.isEmptyObjectInterface(a))) {

@@ -86,9 +86,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     }
 
     private checkForObjectMethodBan(expression: ts.LeftHandSideExpression) {
-        if (expression.kind !== ts.SyntaxKind.PropertyAccessExpression || expression.getChildCount() < 3) {
-            return;
-        }
+        if (expression.kind !== ts.SyntaxKind.PropertyAccessExpression || expression.getChildCount() < 3) { return; }
 
         const firstToken = expression.getFirstToken();
         const firstChild = expression.getChildAt(0);
@@ -100,9 +98,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             ? firstChild.getLastToken().getText()
             : firstToken.getText();
 
-        if (secondChild.kind !== ts.SyntaxKind.DotToken) {
-            return;
-        }
+        if (secondChild.kind !== ts.SyntaxKind.DotToken) { return; }
 
         for (const bannedFunction of this.bannedFunctions) {
             if (leftSideExpression === bannedFunction[0] && rightSideExpression === bannedFunction[1]) {
@@ -113,9 +109,7 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     }
 
     private checkForGlobalBan(expression: ts.LeftHandSideExpression) {
-        if (expression.kind !== ts.SyntaxKind.Identifier) {
-            return;
-        }
+        if (expression.kind !== ts.SyntaxKind.Identifier) { return; }
 
         const identifierName = (expression as ts.Identifier).text;
         if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {

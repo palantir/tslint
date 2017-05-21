@@ -109,9 +109,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
                 const b = node as ts.BinaryExpression;
-                if (binaryBooleanExpressionKind(b) === undefined) {
-                    break;
-                }
+                if (binaryBooleanExpressionKind(b) === undefined) { break; }
 
                 const { left, right } = b;
                 const checkHalf = (expr: ts.Expression) => {
