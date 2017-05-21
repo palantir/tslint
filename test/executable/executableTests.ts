@@ -146,7 +146,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
-            const tempFile = createTempFile("ts");
+            const tempFile = path.relative(process.cwd(), createTempFile("ts"));
             fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
             execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
                 (err, stdout) => {
@@ -251,9 +251,39 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("can be passed a directory and defaults to tsconfig.json", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test"], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+
+        it("exits with error if passed a directory and there is not tsconfig.json", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files"], (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
+        it("exits with error if passed directory does not exist", (done) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existant"], (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
         it("exits with code 2 if both `tsconfig.json` and files arguments are passed and files contain lint errors", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test/tsconfig.json",
-                "test/files/tsconfig-test/other.test.ts"], (err) => {
+            execCli(
+                [
+                    "-c",
+                    "test/files/tsconfig-test/tslint.json",
+                    "--project",
+                    "test/files/tsconfig-test/tsconfig.json",
+                    "test/files/tsconfig-test/other.test.ts",
+                ],
+                (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
                     done();

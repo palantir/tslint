@@ -50,7 +50,7 @@ export interface SkippedTest {
 export interface TestResult {
     directory: string;
     results: {
-        [fileName: string]: TestOutput | SkippedTest,
+        [fileName: string]: TestOutput | SkippedTest;
     };
 }
 
@@ -70,7 +70,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
-    if (fs.existsSync(tsConfig)) {
+    const hasConfig = fs.existsSync(tsConfig);
+    if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
             throw new Error(JSON.stringify(error));
@@ -105,17 +106,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             }
             // remove the first line from the file before continuing
             const lineBreak = fileText.search(/\n/);
-            if (lineBreak === -1) {
-                fileText = "";
-            } else {
-                fileText = fileText.substr(lineBreak + 1);
-            }
+            fileText = lineBreak === -1 ? "" : fileText.substr(lineBreak + 1);
         }
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
         let program: ts.Program | undefined;
-        if (tslintConfig !== undefined && tslintConfig.linterOptions !== undefined && tslintConfig.linterOptions.typeCheck === true) {
+        if (hasConfig) {
             const compilerHost: ts.CompilerHost = {
                 fileExists: () => true,
                 getCanonicalFileName: (filename: string) => filename,
@@ -142,8 +139,6 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             };
 
             program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
-            // perform type checking on the program, updating nodes with symbol table references
-            ts.getPreEmitDiagnostics(program);
         }
 
         const lintOptions = {
