@@ -227,7 +227,6 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
-    "type-literal-delimiter": true,
     "variable-name": [
         true,
         "ban-keywords",
