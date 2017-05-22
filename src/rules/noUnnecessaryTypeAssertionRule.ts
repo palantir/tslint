@@ -22,7 +22,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-type-assertion",
-        description: `Warns if a type assertion does not change the type of an expression.`,
+        description: "Warns if a type assertion does not change the type of an expression.",
         options: null,
         optionsDescription: "Not configurable",
         type: "typescript",
@@ -35,24 +35,22 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, program));
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, program.getTypeChecker()));
     }
 }
 
 class Walker extends Lint.AbstractWalker<void> {
-    private readonly typeChecker: ts.TypeChecker;
-    constructor(sourceFile: ts.SourceFile, ruleName: string, program: ts.Program) {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
-        this.typeChecker = program.getTypeChecker();
     }
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.TypeAssertionExpression ||
-                node.kind === ts.SyntaxKind.NonNullExpression ||
-                node.kind === ts.SyntaxKind.AsExpression) {
-                this.verifyCast(
-                    node as ts.TypeAssertion|ts.NonNullExpression|ts.AsExpression);
+            switch (node.kind) {
+                case ts.SyntaxKind.TypeAssertionExpression:
+                case ts.SyntaxKind.NonNullExpression:
+                case ts.SyntaxKind.AsExpression:
+                    this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
             }
 
             return ts.forEachChild(node, cb);
@@ -61,22 +59,17 @@ class Walker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private verifyCast(node: ts.TypeAssertion|ts.NonNullExpression|
-                       ts.AsExpression) {
-        const castType = this.typeChecker.getTypeAtLocation(node);
-        const uncastType = this.typeChecker.getTypeAtLocation(node.expression);
+    private verifyCast(node: ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression) {
+        const castType = this.checker.getTypeAtLocation(node);
+        if (castType === undefined) {
+            return;
+        }
 
-        if (uncastType != null && castType != null && uncastType === castType) {
-            const replacements: Lint.Replacement[] = [];
-            if (node.pos !== node.expression.pos) {
-                replacements.push(
-                    Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart()));
-            }
-            if (node.end !== node.expression.end) {
-                replacements.push(
-                    Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
-            }
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, replacements);
+        const uncastType = this.checker.getTypeAtLocation(node.expression);
+        if (uncastType === castType) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
+                ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
+                : Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
         }
     }
 }

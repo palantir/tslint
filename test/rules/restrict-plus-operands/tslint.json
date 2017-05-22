@@ -1,11 +1,5 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
-    "restrict-plus-operands": true
-  },
-  "jsRules": {
     "restrict-plus-operands": true
   }
 }

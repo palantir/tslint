@@ -49,14 +49,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (expression: string, messageAddition?: string) => {
-        return `Calls to '${expression}' are not allowed.${messageAddition ? " " + messageAddition : ""}`;
+    public static FAILURE_STRING_FACTORY(expression: string, messageAddition?: string) {
+        return `Calls to '${expression}' are not allowed.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const banFunctionWalker = new BanFunctionWalker(sourceFile, options);
-        const functionsToBan = options.ruleArguments;
+        const functionsToBan = options.ruleArguments as string[][];
         if (functionsToBan !== undefined) {
             functionsToBan.forEach((f) => banFunctionWalker.addBannedFunction(f));
         }
@@ -95,14 +95,9 @@ export class BanFunctionWalker extends Lint.RuleWalker {
             const thirdChild = expression.getChildAt(2);
 
             const rightSideExpression = thirdChild.getFullText();
-
-            let leftSideExpression: string;
-
-            if (firstChild.getChildCount() > 0) {
-                leftSideExpression = firstChild.getLastToken().getText();
-            } else {
-                leftSideExpression = firstToken.getText();
-            }
+            const leftSideExpression = firstChild.getChildCount() > 0
+                ? firstChild.getLastToken().getText()
+                : firstToken.getText();
 
             if (secondChild.kind === ts.SyntaxKind.DotToken) {
                 for (const bannedFunction of this.bannedFunctions) {

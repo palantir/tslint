@@ -20,6 +20,11 @@ import * as ts from "typescript";
 import {arrayify, flatMap} from "../../utils";
 import {IWalker} from "../walker";
 
+export interface RuleConstructor {
+    metadata: IRuleMetadata;
+    new(options: IOptions): IRule;
+}
+
 export interface IRuleMetadata {
     /**
      * The kebab-case name of the rule.
@@ -94,9 +99,18 @@ export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
-    disabledIntervals: IDisabledInterval[];
+    /**
+     * @deprecated
+     * Tslint now handles disables itself.
+     * This will be empty.
+     */
+    disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
 }
 
+/**
+ * @deprecated
+ * These are now handled internally.
+ */
 export interface IDisabledInterval {
     startPosition: number;
     endPosition: number;
@@ -116,7 +130,7 @@ export interface ITypedRule extends IRule {
 export interface IRuleFailureJson {
     endPosition: IRuleFailurePositionJson;
     failure: string;
-    fix?: Fix;
+    fix?: FixJson;
     name: string;
     ruleSeverity: string;
     ruleName: string;
@@ -133,6 +147,11 @@ export function isTypedRule(rule: IRule): rule is ITypedRule {
     return "applyWithProgram" in rule;
 }
 
+export interface ReplacementJson {
+    innerStart: number;
+    innerLength: number;
+    innerText: string;
+}
 export class Replacement {
     public static applyFixes(content: string, fixes: Fix[]): string {
         return this.applyAll(content, flatMap(fixes, arrayify));
@@ -140,7 +159,7 @@ export class Replacement {
 
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
-        replacements.sort((a, b) => b.end - a.end);
+        replacements.sort((a, b) => b.end !== a.end ? b.end - a.end : b.start - a.start);
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
@@ -164,27 +183,24 @@ export class Replacement {
         return new Replacement(start, 0, text);
     }
 
-    constructor(private innerStart: number, private innerLength: number, private innerText: string) {
-    }
-
-    get start() {
-        return this.innerStart;
-    }
-
-    get length() {
-        return this.innerLength;
-    }
+    constructor(readonly start: number, readonly length: number, readonly text: string) {}
 
     get end() {
-        return this.innerStart + this.innerLength;
-    }
-
-    get text() {
-        return this.innerText;
+        return this.start + this.length;
     }
 
     public apply(content: string) {
         return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+    }
+
+    public toJson(): ReplacementJson {
+        // tslint:disable object-literal-sort-keys
+        return {
+            innerStart: this.start,
+            innerLength: this.length,
+            innerText: this.text,
+        };
+        // tslint:enable object-literal-sort-keys
     }
 }
 
@@ -219,6 +235,7 @@ export class RuleFailurePosition {
 }
 
 export type Fix = Replacement | Replacement[];
+export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
     private fileName: string;
@@ -285,7 +302,7 @@ export class RuleFailure {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
-            fix: this.fix,
+            fix: this.fix === undefined ? undefined : Array.isArray(this.fix) ? this.fix.map((r) => r.toJson()) : this.fix.toJson(),
             name: this.fileName,
             ruleName: this.ruleName,
             ruleSeverity: this.ruleSeverity.toUpperCase(),

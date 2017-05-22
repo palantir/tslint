@@ -19,7 +19,7 @@ import { isNumericLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "./variableNameRule";
+import { isUpperCase } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };

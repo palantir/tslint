@@ -1,8 +1,5 @@
 {
   "rules": {
     "forin": true
-  },
-  "jsRules": {
-    "forin": true
   }
 }

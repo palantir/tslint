@@ -65,6 +65,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.LabeledStatement:
+                // Ignore label
+                return cb((node as ts.LabeledStatement).statement);
+
+            case ts.SyntaxKind.BreakStatement: // Ignore label
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -75,11 +80,13 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
-            // For some reason, these are of type "any".
+            // These show as type "any" if in type position.
+            case ts.SyntaxKind.NumericLiteral:
             case ts.SyntaxKind.StringLiteral:
                 return;
 
             // Recurse through these, but ignore the immediate child because it is allowed to be 'any'.
+            case ts.SyntaxKind.DeleteExpression:
             case ts.SyntaxKind.ExpressionStatement:
             case ts.SyntaxKind.TypeAssertionExpression:
             case ts.SyntaxKind.AsExpression:
@@ -88,6 +95,16 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 const { expression } =
                     node as ts.ExpressionStatement | ts.TypeAssertion | ts.AsExpression | ts.TemplateSpan | ts.ThrowStatement;
                 return cb(expression, /*anyOk*/ true);
+            }
+
+            case ts.SyntaxKind.PropertyAssignment: {
+                // Only check RHS.
+                const { name, initializer } = node as ts.PropertyAssignment;
+                // The LHS will be 'any' if the RHS is, so just handle the RHS.
+                // Still need to check the LHS in case it is a computed key.
+                cb(name, /*anyOk*/ true);
+                cb(initializer);
+                return;
             }
 
             case ts.SyntaxKind.PropertyDeclaration: {
@@ -115,8 +132,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                for (const arg of args) {
-                    checkContextual(arg);
+                if (args !== undefined) {
+                    for (const arg of args) {
+                        checkContextual(arg);
+                    }
                 }
                 // Also check the call expression itself
                 check();
@@ -137,7 +156,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                if (expression) {
+                if (expression !== undefined) {
                     return checkContextual(expression);
                 }
                 return;
@@ -151,7 +170,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         function check(): boolean {
-            const isUnsafe = !anyOk && isNodeAny(node, checker);
+            const isUnsafe = anyOk !== true && isNodeAny(node, checker);
             if (isUnsafe) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

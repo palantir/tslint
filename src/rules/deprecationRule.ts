@@ -48,20 +48,20 @@ class Walker extends Lint.ProgramAwareRuleWalker {
   protected visitIdentifier(node: ts.Identifier) {
     let decSym = this.getTypeChecker().getSymbolAtLocation(node);
 
-    if (decSym && Lint.isSymbolFlagSet(decSym, ts.SymbolFlags.Alias)) {
+    if (decSym !== undefined && Lint.isSymbolFlagSet(decSym, ts.SymbolFlags.Alias)) {
         decSym = this.getTypeChecker().getAliasedSymbol(decSym);
     }
-    if (!decSym || !decSym.getDeclarations()) {
+    const declarations = decSym === undefined ? undefined : decSym.getDeclarations() as ts.Node[] | undefined;
+    if (declarations === undefined) {
         super.visitIdentifier(node);
         return;
     }
 
-    for (const d of decSym.getDeclarations()) {
+    for (let commentNode of declarations) {
       // Switch to the TS JSDoc parser in the future to avoid false positives here.
       // For example using '@deprecated' in a true comment.
       // However, a new TS API would be needed, track at
       // https://github.com/Microsoft/TypeScript/issues/7393.
-      let commentNode: ts.Node = d;
 
       if (commentNode.kind === ts.SyntaxKind.VariableDeclaration) {
           commentNode = commentNode.parent!;
@@ -82,11 +82,11 @@ class Walker extends Lint.ProgramAwareRuleWalker {
       }
 
       const range = ts.getLeadingCommentRanges(commentNode.getFullText(), 0);
-      if (!range) { continue; }
+      if (range === undefined) { continue; }
       for (const {pos, end} of range) {
         const jsDocText = commentNode.getFullText().substring(pos, end);
         if (jsDocText.includes("@deprecated")) {
-            this.addFailureAtNode(node, node.text + " is deprecated.");
+            this.addFailureAtNode(node, `${node.text} is deprecated.`);
         }
       }
     }

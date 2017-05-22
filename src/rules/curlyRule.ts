@@ -15,11 +15,16 @@
  * limitations under the License.
  */
 
+import { isIfStatement, isIterationStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
+
+interface Options {
+    ignoreSameLine: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -57,109 +62,39 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static DO_FAILURE_STRING = "do statements must be braced";
-    public static ELSE_FAILURE_STRING = "else statements must be braced";
-    public static FOR_FAILURE_STRING = "for statements must be braced";
-    public static IF_FAILURE_STRING = "if statements must be braced";
-    public static WHILE_FAILURE_STRING = "while statements must be braced";
+    public static FAILURE_STRING_FACTORY(kind: string) {
+        return `${kind} statements must be braced`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CurlyWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new CurlyWalker(sourceFile, this.ruleName, {
+            ignoreSameLine: this.ruleArguments.indexOf(OPTION_IGNORE_SAME_LINE) !== -1,
+        }));
     }
 }
 
-class CurlyWalker extends Lint.RuleWalker {
-    private optionIgnoreSameLine: boolean;
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        const args = this.getOptions();
-
-        this.optionIgnoreSameLine = args.indexOf(OPTION_IGNORE_SAME_LINE) > -1;
-    }
-
-    public visitForInStatement(node: ts.ForInStatement) {
-        if (!isStatementBraced(node.statement)
-                && this.areBracketsRequired(node, node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
-        super.visitForInStatement(node);
-    }
-
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        if (!isStatementBraced(node.statement)
-                && this.areBracketsRequired(node, node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
-        super.visitForOfStatement(node);
-    }
-
-    public visitForStatement(node: ts.ForStatement) {
-        if (!isStatementBraced(node.statement)
-                && this.areBracketsRequired(node, node.statement)) {
-            this.addFailureAtNode(node, Rule.FOR_FAILURE_STRING);
-        }
-
-        super.visitForStatement(node);
-    }
-
-    public visitIfStatement(node: ts.IfStatement) {
-        if (!isStatementBraced(node.thenStatement)
-                && this.areBracketsRequired(node, node.thenStatement)) {
-            this.addFailureFromStartToEnd(node.getStart(), node.thenStatement.getEnd(), Rule.IF_FAILURE_STRING);
-        }
-
-        if (node.elseStatement != null
-                && node.elseStatement.kind !== ts.SyntaxKind.IfStatement
-                && !isStatementBraced(node.elseStatement)) {
-
-            // find the else keyword to check placement (and to place the error appropriately)
-            const elseKeywordNode = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            if (this.areBracketsRequired(elseKeywordNode, node.elseStatement)) {
-                this.addFailureFromStartToEnd(elseKeywordNode.getStart(), node.elseStatement.getEnd(), Rule.ELSE_FAILURE_STRING);
+class CurlyWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isIterationStatement(node)) {
+                this.checkStatement(node.statement, node, 0, node.end);
+            } else if (isIfStatement(node)) {
+                this.checkStatement(node.thenStatement, node, 0);
+                if (node.elseStatement !== undefined && node.elseStatement.kind !== ts.SyntaxKind.IfStatement) {
+                    this.checkStatement(node.elseStatement, node, 5);
+                }
             }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
+    }
+
+    private checkStatement(statement: ts.Statement, node: ts.Node, childIndex: number, end = statement.end) {
+        if (statement.kind !== ts.SyntaxKind.Block &&
+            !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
+            const token = node.getChildAt(childIndex, this.sourceFile);
+            const tokenText = ts.tokenToString(token.kind);
+            this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
         }
-
-        super.visitIfStatement(node);
     }
-
-    public visitDoStatement(node: ts.DoStatement) {
-        if (!isStatementBraced(node.statement)
-                && this.areBracketsRequired(node, node.statement)) {
-            this.addFailureAtNode(node, Rule.DO_FAILURE_STRING);
-        }
-
-        super.visitDoStatement(node);
-    }
-
-    public visitWhileStatement(node: ts.WhileStatement) {
-        if (!isStatementBraced(node.statement)
-                && this.areBracketsRequired(node, node.statement)) {
-            this.addFailureAtNode(node, Rule.WHILE_FAILURE_STRING);
-        }
-
-        super.visitWhileStatement(node);
-    }
-
-    private areBracketsRequired(keywordNode: ts.Node, queryStatement: ts.Statement) {
-        // Brackets are required if the node & statement don't fit any configured exceptions
-        return !(this.optionIgnoreSameLine && areOnSameLine(keywordNode, queryStatement));
-    }
-}
-
-function isStatementBraced(node: ts.Statement) {
-    return node.kind === ts.SyntaxKind.Block;
-}
-
-function areOnSameLine(node: ts.Node, statement: ts.Statement) {
-    const file = node.getSourceFile();
-    const nodeStartPos = file.getLineAndCharacterOfPosition(node.getStart());
-    const statementStartPos = file.getLineAndCharacterOfPosition(statement.getStart());
-    const statementEndPos = file.getLineAndCharacterOfPosition(statement.getEnd());
-
-    return nodeStartPos.line === statementStartPos.line
-        && nodeStartPos.line === statementEndPos.line;
 }

@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-duplicate-variable": true
-  },
-  "jsRules": {
-    "no-duplicate-variable": true
   }
 }

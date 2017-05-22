@@ -20,16 +20,48 @@ import * as optimist from "optimist";
 
 import { IRunnerOptions, Runner } from "./runner";
 
+interface Argv {
+    _: string[];
+    c?: string;
+    exclude?: string;
+    f?: boolean;
+    fix?: boolean;
+    force?: boolean;
+    h?: boolean;
+    help?: boolean;
+    i?: boolean;
+    init?: boolean;
+    o?: string;
+    out?: string;
+    outputAbsolutePaths?: boolean;
+    p?: string;
+    project?: string;
+    r?: string;
+    s?: string;
+    t?: string;
+    "type-check"?: boolean;
+    test?: string;
+    v?: boolean;
+}
+
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
-    .check((argv: any) => {
+    .check((argv: Argv) => {
         // at least one of file, help, version, project or unqualified argument must be present
+        // tslint:disable-next-line strict-boolean-expressions
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "Missing files";
         }
 
+        // tslint:disable-next-line strict-boolean-expressions
+        if (argv["type-check"] && !argv.project) {
+            // tslint:disable-next-line:no-string-throw
+            throw "--project must be specified in order to enable type checking.";
+        }
+
+        // tslint:disable-next-line strict-boolean-expressions
         if (argv.f) {
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
@@ -70,6 +102,10 @@ const processed = optimist
             describe: "output file",
             type: "string",
         },
+        "outputAbsolutePaths": {
+            describe: "whether or not outputted file paths are absolute",
+            type: "boolean",
+        },
         "p": {
             alias: "project",
             describe: "tsconfig.json file",
@@ -105,7 +141,7 @@ const processed = optimist
             type: "boolean",
         },
     });
-const argv = processed.argv;
+const argv = processed.argv as Argv;
 
 let outputStream: NodeJS.WritableStream;
 if (argv.o != null) {
@@ -117,6 +153,7 @@ if (argv.o != null) {
     outputStream = process.stdout;
 }
 
+// tslint:disable-next-line strict-boolean-expressions
 if (argv.help) {
     outputStream.write(processed.help());
     const outputString = `
@@ -188,7 +225,7 @@ tslint accepts the following commandline options:
         this can be used to test custom rules.
 
     -p, --project:
-        The location of a tsconfig.json file that will be used to determine which
+        The path or directory containing a tsconfig.json file that will be used to determine which
         files will be linted.
 
     --type-check
@@ -214,6 +251,7 @@ const options: IRunnerOptions = {
     formattersDirectory: argv.s,
     init: argv.init,
     out: argv.out,
+    outputAbsolutePaths: argv.outputAbsolutePaths,
     project: argv.p,
     rulesDirectory: argv.r,
     test: argv.test,

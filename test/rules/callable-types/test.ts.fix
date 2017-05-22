@@ -1,0 +1,20 @@
+type I = () => void;
+
+type J = () => void;
+
+type K<T> = <U extends T>(param1: U, param2: T) => U;
+
+type L<T> = () => T
+
+type T = () => void;
+
+type U = <T>(t: T) => T
+
+var fn: () => void;
+function f(x: () => void): void;
+
+// Overloads OK
+interface K {
+    (x: number): number;
+    (x: string): string;
+}

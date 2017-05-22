@@ -1,3 +1,7 @@
+function doIt() {}
+async function doAsync() {}
+function print(strs) {}
+
 [].forEach(x => console.log(x));
                 ~~~~~~~~~~~~~~ [0]
 

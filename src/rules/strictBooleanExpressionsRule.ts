@@ -74,8 +74,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const strictNullChecks = !!program.getCompilerOptions().strictNullChecks;
-        const options = parseOptions(this.ruleArguments, strictNullChecks);
+        const options = parseOptions(this.ruleArguments, program.getCompilerOptions().strictNullChecks === true);
         return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
     }
 }
@@ -110,7 +109,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
                 const b = node as ts.BinaryExpression;
-                if (binaryBooleanExpressionKind(b)) {
+                if (binaryBooleanExpressionKind(b) !== undefined) {
                     const { left, right } = b;
                     const checkHalf = (expr: ts.Expression) => {
                         // If it's another boolean binary expression, we'll check it when recursing.
@@ -149,7 +148,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ForStatement: {
                 const { condition } = node as ts.ForStatement;
-                if (condition) {
+                if (condition !== undefined) {
                     checkExpression(condition, node as ts.ForStatement);
                 }
                 break;
@@ -310,9 +309,9 @@ function getKind(type: ts.Type): TypeKind {
         : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void) ? TypeKind.Undefined // tslint:disable-line:no-bitwise
         : is(ts.TypeFlags.EnumLike) ? TypeKind.Enum
         : is(ts.TypeFlags.NumberLiteral) ?
-            ((type as ts.LiteralType).text === "0" ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
+            (numberLiteralIsZero(type as ts.LiteralType) ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.StringLiteral) ?
-            ((type as ts.LiteralType).text === "" ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
+            (stringLiteralIsEmpty(type as ts.LiteralType) ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.BooleanLiteral) ?
             ((type as ts.IntrinsicType).intrinsicName === "true" ? TypeKind.AlwaysTruthy : TypeKind.FalseBooleanLiteral)
         : TypeKind.AlwaysTruthy;
@@ -320,6 +319,14 @@ function getKind(type: ts.Type): TypeKind {
     function is(flags: ts.TypeFlags) {
         return Lint.isTypeFlagSet(type, flags);
     }
+}
+
+function numberLiteralIsZero(type: ts.LiteralType): boolean {
+    // Uses 'value' in TypeScript>=2.4.
+    return (type as any).value !== undefined ? (type as any).value === 0 : type.text === "0";
+}
+function stringLiteralIsEmpty(type: ts.LiteralType): boolean {
+    return ((type as any).value !== undefined ? (type as any).value : type.text) === "";
 }
 
 /** Matches `&&` and `||` operators. */
@@ -343,13 +350,13 @@ function stringOr(parts: string[]): string {
         case 1:
             return parts[0];
         case 2:
-            return parts[0] + " or " + parts[1];
+            return `${parts[0]} or ${parts[1]}`;
         default:
             let res = "";
             for (let i = 0; i < parts.length - 1; i++) {
-                res += parts[i] + ", ";
+                res += `${parts[i]}, `;
             }
-            return res + "or " + parts[parts.length - 1];
+            return `${res}or ${parts[parts.length - 1]}`;
     }
 }
 

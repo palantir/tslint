@@ -15,9 +15,12 @@ const num: namespaceImport.T = 0;
     }
 }
 
-// Ignore string literal in type
-function returnsA(): "a";
+// Ignore number/string literal in type
+function returnsA(): 0 | "a" | null | undefined;
 
+label: for (const x of []) {
+    break label;
+}
 
 importAlias.property;
 ~~~~~~~~~~~ [0]
@@ -152,5 +155,15 @@ function g(x: any): string {
 
     return `other: ${x}`;
 }
+
+function deleteOk(obj: { x: any }) {
+    delete obj.x;
+}
+
+const obj: { x: number, y: number } = {
+    x: "number" as any, // Cast OK, and doesn't warn for LHS either.
+    [x]: 1,
+     ~ [0]
+};
 
 [0]: Unsafe use of expression of type 'any'.

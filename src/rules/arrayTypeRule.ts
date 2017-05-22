@@ -79,9 +79,9 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
         const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-        const space = !parens && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+        const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
         const fix = [
-            new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
+            new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
             Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
         ];
@@ -96,7 +96,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         }
 
         const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
-        if (!typeArguments || typeArguments.length === 0) {
+        if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
             const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
             ctx.addFailureAtNode(node, failureString, fix);
@@ -152,7 +152,7 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type
             const { typeName, typeArguments } = nodeType as ts.TypeReferenceNode;
-            if (!typeArguments) {
+            if (typeArguments === undefined) {
                 return true;
             }
             switch (typeArguments.length) {

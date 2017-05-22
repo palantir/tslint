@@ -19,7 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "./variableNameRule";
+import { isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "interface name must start with a capitalized I";
-    public static FAILURE_STRING_NO_PREFIX = `interface name must not have an "I" prefix`;
+    public static FAILURE_STRING_NO_PREFIX = 'interface name must not have an "I" prefix';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, { never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1 });

@@ -1,4 +1,0 @@
-var x = null; // error
-        ~~~~           [Use 'undefined' instead of 'null']
-console.log(null, x); // error
-            ~~~~               [Use 'undefined' instead of 'null']

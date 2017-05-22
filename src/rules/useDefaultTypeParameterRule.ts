@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.TypedRule {
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const argsAndParams = getArgsAndParameters(node, checker);
-        if (argsAndParams) {
+        if (argsAndParams !== undefined) {
             checkArgsAndParameters(node, argsAndParams);
         }
         return ts.forEachChild(node, cb);
@@ -54,7 +54,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         const arg = typeArguments[i];
         const param = typeParameters[i];
         // TODO: would like checker.areTypesEquivalent. https://github.com/Microsoft/TypeScript/issues/13502
-        if (param.default && param.default.getText() === arg.getText()) {
+        if (param.default !== undefined && param.default.getText() === arg.getText()) {
             ctx.addFailureAtNode(arg, Rule.FAILURE_STRING, fix());
         }
 
@@ -83,7 +83,7 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
         case ts.SyntaxKind.ExpressionWithTypeArguments:
             const decl = node as ts.CallExpression | ts.NewExpression | ts.TypeReferenceNode | ts.ExpressionWithTypeArguments;
             const { typeArguments } = decl;
-            if (!typeArguments) {
+            if (typeArguments === undefined) {
                 return undefined;
             }
             const typeParameters = decl.kind === ts.SyntaxKind.TypeReference
@@ -91,7 +91,7 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
                 : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
                 ? typeParamsFromType(decl.expression, checker)
                 : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
-            return typeParameters && { typeArguments, typeParameters };
+            return typeParameters === undefined ? undefined : { typeArguments, typeParameters };
         default:
             return undefined;
     }
@@ -99,21 +99,17 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
 
 function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
     const sig = checker.getResolvedSignature(node);
-    const sigDecl = sig && sig.getDeclaration();
-    if (!sigDecl && node.kind === ts.SyntaxKind.NewExpression) {
-        return typeParamsFromType(node.expression, checker);
+    const sigDecl = sig === undefined ? undefined : sig.getDeclaration();
+    if (sigDecl === undefined) {
+        return node.kind === ts.SyntaxKind.NewExpression ? typeParamsFromType(node.expression, checker) : undefined;
     }
 
-    if (!sigDecl || !sigDecl.typeParameters) {
-        return; // Error
-    }
-
-    return sigDecl.typeParameters;
+    return sigDecl.typeParameters === undefined ? undefined : sigDecl.typeParameters;
 }
 
 function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
-    if (!sym || !sym.declarations) {
+    if (sym === undefined || sym.declarations === undefined) {
         return undefined;
     }
 
@@ -122,9 +118,7 @@ function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.Typ
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
             case ts.SyntaxKind.TypeAliasDeclaration:
-                const { typeParameters } = (decl as ts.ClassLikeDeclaration | ts.TypeAliasDeclaration);
-                return typeParameters;
-            default:
+                return (decl as ts.ClassLikeDeclaration | ts.TypeAliasDeclaration).typeParameters;
         }
     }
     return undefined;
