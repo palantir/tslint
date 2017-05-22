@@ -1,7 +1,4 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
     "object-literal-contextual-type": true
   }

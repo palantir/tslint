@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 }
 
             This has no compile error, but an excess property \`y\`.
-            The excess property can be detected by writing a type annotatino \`const res: I = { x: 0, y: 0 };\`.`,
+            The excess property can be detected by writing a type annotation \`const res: I = { x: 0, y: 0 };\`.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -55,11 +55,11 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (isObjectLiteralExpression(node)) {
             check(node);
         }
-        return ts.forEachChild(node, cb);
+        ts.forEachChild(node, cb);
     });
 
     function check(node: ts.ObjectLiteralExpression): void {
@@ -86,6 +86,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
                 return;
             }
-        } while (true);
+        } while (true); // tslint:disable-line strict-boolean-expressions (Fixed in tslint 5.3)
     }
 }

@@ -1,0 +1,8 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "await-promise": [true, "CustomPromise"]
+  }
+}

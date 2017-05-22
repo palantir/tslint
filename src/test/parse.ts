@@ -61,7 +61,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const lines = textWithMarkup.map(parseLine);
 
     if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
-        throw lintSyntaxError(`text cannot start with an error mark line.`);
+        throw lintSyntaxError("text cannot start with an error mark line.");
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
@@ -141,7 +141,7 @@ function substituteMessage(templates: Map<string, string>, message: string): str
  * If `name` is not found in `templates`, `message` is returned unchanged.
  */
 function formatMessage(templates: Map<string, string>, message: string): string {
-    const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
+    const formatMatch = /^([-\w]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
         const template = templates.get(formatMatch[1]);
         if (template !== undefined) {

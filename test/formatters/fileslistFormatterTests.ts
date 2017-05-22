@@ -39,7 +39,7 @@ describe("Files-list Formatter", () => {
         ];
 
         // we only print file-names in this formatter
-        const expectedResult = TEST_FILE + "\n";
+        const expectedResult = `${TEST_FILE}\n`;
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);

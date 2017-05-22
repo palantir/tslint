@@ -57,7 +57,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     }
 
     public hasOption(option: string): boolean {
-        if (this.options) {
+        if (this.options !== undefined) {
             return this.options.indexOf(option) !== -1;
         } else {
             return false;
@@ -78,6 +78,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
     public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        // tslint:disable-next-line deprecation
         this.addFailure(this.createFailure(start, width, failure, fix));
     }
 
