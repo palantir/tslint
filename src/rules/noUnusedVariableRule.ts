@@ -363,15 +363,12 @@ function getUnusedCheckedProgram(program: ts.Program, sourceFile: ts.SourceFile,
     };
     return ts.createProgram([sourceFile.fileName], options, {
         fileExists: (f) => f === sourceFile.fileName,
-        readFile(f) {
-            if (f !== sourceFile.fileName) { throw new Error(); }
-            return sourceFile.text;
-        },
+        readFile(): never { throw new Error(); },
         getSourceFile(f) {
             if (f !== sourceFile.fileName) { throw new Error(); }
             return ts.createSourceFile(sourceFile.fileName, sourceFile.text, sourceFile.languageVersion);
         },
-        getDefaultLibFileName(): string { throw new Error(); },
+        getDefaultLibFileName(): never { throw new Error(); },
         writeFile() {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
         getDirectories: () => [],
