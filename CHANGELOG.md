@@ -1,6 +1,11 @@
 Change Log
 ===
 
+<!-- TODO: for 5.4, add
+[new-rule] [`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/) (#2374)
+5.3 will be published without it since it's still discussed
+-->
+
 v5.3.0
 ---
 
@@ -9,9 +14,9 @@ v5.3.0
 
 ## :tada: Notable features & enhancements
 - [new-cli-option] cli: Add `outputAbsolutePaths` option (#2667)
+- [new-rule] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) (#2624)
 - [new-rule] [`encoding`](https://palantir.github.io/tslint/rules/encoding/) (#2368)
 - [new-rule] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/) (#2363)
-- [new-rule] [`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/) (#2374)
 - [new-rule-option] [`indent`](https://palantir.github.io/tslint/rules/indent/) support indent size (#2723)
 - [new-rule-option] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) adds `ignore-case` (#2592)
 - [new-rule-option] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/): Add `avoid-template` option (#2766)
