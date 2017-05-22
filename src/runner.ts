@@ -168,7 +168,7 @@ export class Runner {
                         // emit any error messages
                         let message = ts.DiagnosticCategory[diag.category];
                         if (diag.file) {
-                            const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start);
+                            const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
                             let file: string;
                             const currentDirectory = program!.getCurrentDirectory();
                             file = this.options.outputAbsolutePaths
