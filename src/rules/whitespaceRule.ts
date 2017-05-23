@@ -177,7 +177,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 if (options.decl && initializer !== undefined) {
                     checkForTrailingWhitespace((type !== undefined ? type :  name).getEnd());
                 }
-                break;
         }
 
         ts.forEachChild(node, cb);
@@ -229,7 +228,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 if (options.typecast) {
                     prevTokenShouldBeFollowedByWhitespace = true;
                 }
-                break;
         }
     });
 

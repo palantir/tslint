@@ -131,7 +131,6 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                                 this.reportUnnecessary(name);
                             }
                         }
-                        break;
                 }
             }
             return ts.forEachChild(node, cb);

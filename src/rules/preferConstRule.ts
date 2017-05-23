@@ -239,7 +239,6 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                             this.handleExpression((property as ts.PropertyAssignment).initializer);
                     }
                 }
-                break;
         }
     }
 

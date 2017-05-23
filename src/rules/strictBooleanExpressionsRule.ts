@@ -151,7 +151,6 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 if (condition !== undefined) {
                     checkExpression(condition, node as ts.ForStatement);
                 }
-                break;
             }
         }
 

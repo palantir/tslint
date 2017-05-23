@@ -101,7 +101,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                             noCheck(node.left, cb);
                             return cb(node.right);
                         }
-                        break;
                 }
             }
             noCheck(node, forEachChild);

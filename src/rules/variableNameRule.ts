@@ -135,7 +135,6 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                         handleVariableNameKeyword(name);
                     }
                 }
-                break;
             }
         }
 

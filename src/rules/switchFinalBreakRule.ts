@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { endsControlFlow, isBlock, isCaseBlock } from "tsutils";
+import { isBlock, isCaseBlock } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -25,9 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-final-break",
         description: Lint.Utils.dedent`
-            Enforces consistent use of 'break;' in the final clause of a 'switch' statement.
-            A 'default' clause should never have a 'break'.
-            A 'case' clause should always have a 'break' (or other control flow exit) even if it is the last clause.`,
+            Forbids the final clause of a switch statement to have an unnecessary \`break;\`.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -36,8 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_DEFAULT_BREAK = "'default' clause should not end in 'break;'.";
-    public static FAILURE_STRING_CASE_NEEDS_BREAK = "Final clause in 'switch' statement should end with 'break;'.";
+    public static FAILURE_STRING = "Final clause in 'switch' statement should not end with 'break;'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -56,18 +53,11 @@ function walk(ctx: Lint.WalkContext<void>): void {
         const clause = last(node.clauses);
         if (clause === undefined || clause.statements.length === 0) { return; }
 
-        if (clause.kind === ts.SyntaxKind.CaseClause) {
-            if (!endsControlFlow(clause)) {
-                ctx.addFailureAtNode(Lint.childOfKind(clause, ts.SyntaxKind.CaseKeyword)!, Rule.FAILURE_STRING_CASE_NEEDS_BREAK);
-            }
-            return;
-        }
-
         const block = clause.statements[0];
         const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
         const lastStatement = last(statements);
         if (lastStatement !== undefined && lastStatement.kind === ts.SyntaxKind.BreakStatement) {
-            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_DEFAULT_BREAK);
+            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING);
         }
     }
 }

@@ -1,26 +1,26 @@
 switch (x) {
     case 0:
-    ~~~~ [CASE]
         foo();
+}
+
+switch (x) {
+    case 0: {
+        foo();
+    }
 }
 
 switch (x) {
     case 0:
         foo();
         break;
-}
-
-switch (x) {
-    case 0: {
-    ~~~~ [CASE]
-        foo();
-    }
+        ~~~~~ [0]
 }
 
 switch (x) {
     case 0: {
         foo();
         break;
+        ~~~~~ [0]
     }
 }
 
@@ -28,7 +28,7 @@ switch (x) {
     default:
         foo();
         break;
-        ~~~~~~ [DEFAULT]
+        ~~~~~~ [0]
 }
 
 switch (x) {
@@ -42,5 +42,4 @@ switch (x) {
     }
 }
 
-[CASE]: Final clause in 'switch' statement should end with 'break;'.
-[DEFAULT]: 'default' clause should not end in 'break;'.
+[0]: Final clause in 'switch' statement should not end with 'break;'.
