@@ -69,7 +69,7 @@ describe("Configuration", () => {
                     p: null,
                     q: {},
                     r: "garbage",
-                    s: { junk: 1 } as any, // tslint:disable-line no-object-literal-type-assertion (Fixed in 5.3)
+                    s: { junk: 1 } as any,
                 },
             };
             const expected = getEmptyConfig();
