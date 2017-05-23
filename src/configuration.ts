@@ -258,7 +258,6 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(filePath);
         } catch (err) {
-            // tslint:disable-next-line prefer-template (fixed in 5.3)
             throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");
