@@ -34,5 +34,6 @@ undefined != x;
 1 >>> x;
 2 ** x;
 "key" in x;
+"foo", x;
 
 [0]: Literal expression should be on the right-hand side of a binary expression.

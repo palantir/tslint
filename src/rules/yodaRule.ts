@@ -66,6 +66,7 @@ function isAllowedOrderedOperator(node: ts.BinaryExpression): boolean {
         case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanToken:
         case ts.SyntaxKind.AsteriskAsteriskToken:
         case ts.SyntaxKind.InKeyword:
+        case ts.SyntaxKind.CommaToken:
             return true;
         default:
             return false;
