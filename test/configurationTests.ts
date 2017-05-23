@@ -209,6 +209,12 @@ describe("Configuration", () => {
                 findConfigurationPath(null, "./test/files/config-findup"),
                 path.resolve("./test/files/config-findup/tslint.json"),
             );
+
+            // gulp-tslint uses a path including the filename
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
         });
     });
 
