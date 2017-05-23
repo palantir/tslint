@@ -1,4 +1,4 @@
-/// <reference path="something.ts"/>
+///<reference path="something.ts"/>
 class Clazz { // this comment is correct
     /* block comment
      * adada

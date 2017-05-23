@@ -121,23 +121,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function parseOptions(options: Array<string | IExceptionsObject>): Options {
-    let caseOption: Case;
-    if (options.indexOf(OPTION_LOWERCASE) !== -1) {
-        caseOption = Case.Lower;
-    } else if (options.indexOf(OPTION_UPPERCASE) !== -1) {
-        caseOption = Case.Upper;
-    } else {
-        caseOption = Case.None;
-    }
     return {
-        case: caseOption,
+        case: options.indexOf(OPTION_LOWERCASE) !== -1
+                ? Case.Lower
+                : options.indexOf(OPTION_UPPERCASE) !== -1
+                    ? Case.Upper
+                    : Case.None,
         failureSuffix: "",
         space: options.indexOf(OPTION_SPACE) !== -1,
         ...composeExceptions(options[options.length - 1]),
     };
 }
 
-function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp, failureSuffix: string} {
+function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
     if (typeof option !== "object") {
         return undefined;
     }
@@ -166,7 +162,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             // exclude empty comments
             start === end ||
             // exclude /// <reference path="...">
-            fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos === pos && ref.end === end)) {
+            fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end)) {
             return;
         }
         // skip all leading slashes
