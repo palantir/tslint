@@ -1,3 +1,4 @@
+[typescript]: <2.4.0
 /// <reference types="foo" />
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [No need to reference "foo", since it is imported.]
 /// <reference types="bar" />

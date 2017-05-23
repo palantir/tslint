@@ -1,4 +1,3 @@
-[typescript]: >= 2.1.0
 {
     let d1 = 0;
     let d2 = 0;
