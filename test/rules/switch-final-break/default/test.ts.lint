@@ -1,0 +1,45 @@
+switch (x) {
+    case 0:
+        foo();
+}
+
+switch (x) {
+    case 0: {
+        foo();
+    }
+}
+
+switch (x) {
+    case 0:
+        foo();
+        break;
+        ~~~~~~ [0]
+}
+
+switch (x) {
+    case 0: {
+        foo();
+        break;
+        ~~~~~~ [0]
+    }
+}
+
+switch (x) {
+    default:
+        foo();
+        break;
+        ~~~~~~ [0]
+}
+
+switch (x) {
+    default:
+        foo();
+}
+
+switch (x) {
+    default: {
+        foo();
+    }
+}
+
+[0]: Final clause in 'switch' statement should not end with 'break;'.

@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-import { isBlock, isCaseBlock } from "tsutils";
+import { endsControlFlow, isBlock, isCaseBlock } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_ALWAYS = "always";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -26,23 +28,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "switch-final-break",
         description: Lint.Utils.dedent`
             Forbids the final clause of a switch statement to have an unnecessary \`break;\`.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            If the "always" option is passed this will require a 'break;' to always be present
+            unless control flow is escaped in some other way.`,
+        options: {
+            type: "string",
+            enum: [
+                OPTION_ALWAYS,
+            ],
+        },
+        optionExamples: [true, [true, OPTION_ALWAYS]],
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Final clause in 'switch' statement should not end with 'break;'.";
+    public static FAILURE_STRING_ALWAYS = "Final clause in 'switch' statement should end with 'break;'.";
+    public static FAILURE_STRING_NEVER = "Final clause in 'switch' statement should not end with 'break;'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, { always: this.ruleArguments.indexOf(OPTION_ALWAYS) !== -1 });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    ts.forEachChild(ctx.sourceFile, function cb(node) {
+interface Options {
+    always: boolean;
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { always } } = ctx;
+    ts.forEachChild(sourceFile, function cb(node) {
         if (isCaseBlock(node)) {
             check(node);
         }
@@ -53,11 +68,18 @@ function walk(ctx: Lint.WalkContext<void>): void {
         const clause = last(node.clauses);
         if (clause === undefined || clause.statements.length === 0) { return; }
 
+        if (always) {
+            if (!endsControlFlow(clause)) {
+                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS);
+            }
+            return;
+        }
+
         const block = clause.statements[0];
         const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
         const lastStatement = last(statements);
         if (lastStatement !== undefined && lastStatement.kind === ts.SyntaxKind.BreakStatement) {
-            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING);
+            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER);
         }
     }
 }
