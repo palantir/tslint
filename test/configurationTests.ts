@@ -21,6 +21,7 @@ import * as path from "path";
 import {
     convertRuleOptions,
     extendConfigurationFile,
+    findConfigurationPath,
     IConfigurationFile,
     loadConfigurationFromPath,
     parseConfigFile,
@@ -191,6 +192,29 @@ describe("Configuration", () => {
 
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
+        });
+    });
+
+    describe("findConfigurationPath", () => {
+        it("finds the closest tslint.json", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/contains-config"),
+                path.resolve("test/files/config-findup/contains-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/no-config"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+
+            // gulp-tslint uses a path including the filename
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
         });
     });
 

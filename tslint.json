@@ -16,7 +16,8 @@
         "options": [
             "parameters",
             "statements",
-            "members"
+            "members",
+            "elements"
         ]
     },
     "arrow-return-shorthand": true,
@@ -30,16 +31,6 @@
         "allow-declarations",
         "allow-named-functions"
     ],
-    "whitespace": {
-        "options": [
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-            "check-typecast"
-        ]
-    },
 
     // TODO: Enable these
     "completed-docs": false,
@@ -57,15 +48,13 @@
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,
-    "return-undefined": false,
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
 
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"],
-      ["Object", "assign"]
+      ["it", "only"]
     ],
 
     "interface-name": false,

@@ -44,7 +44,7 @@ export interface IConfigurationFile {
      * Other linter options, currently for testing. Not publicly supported.
      */
     linterOptions?: {
-        typeCheck?: boolean,
+        typeCheck?: boolean;
     };
 
     /**
@@ -86,19 +86,19 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 /**
  * Searches for a TSLint configuration and returns the data from the config.
  * @param configFile A path to a config file, this can be null if the location of a config is not known
- * @param inputFileLocation A path to the current file being linted. This is the starting location
+ * @param inputFilePath A path containing the current file being linted. This is the starting location
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
 export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
-    const path = findConfigurationPath(configFile, inputFilePath);
-    const loadResult: IConfigurationLoadResult = { path };
+    const configPath = findConfigurationPath(configFile, inputFilePath);
+    const loadResult: IConfigurationLoadResult = { path: configPath };
 
     try {
-        loadResult.results = loadConfigurationFromPath(path);
+        loadResult.results = loadConfigurationFromPath(configPath);
         return loadResult;
     } catch (error) {
-        throw new FatalError(`Failed to load ${path}: ${(error as Error).message}`, error as Error);
+        throw new FatalError(`Failed to load ${configPath}: ${(error as Error).message}`, error as Error);
     }
 }
 
@@ -120,6 +120,21 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
             return path.resolve(suppliedConfigFilePath);
         }
     } else {
+        // convert to dir if it's a file or doesn't exist
+        let useDirName = false;
+        try {
+            const stats = fs.statSync(inputFilePath);
+            if (stats.isFile()) {
+                useDirName = true;
+            }
+        } catch (e) {
+            // throws if file doesn't exist
+            useDirName = true;
+        }
+        if (useDirName) {
+            inputFilePath = path.dirname(inputFilePath);
+        }
+
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
         if (configFilePath !== undefined) {
@@ -148,7 +163,7 @@ function findup(filename: string, directory: string): string | undefined {
     while (true) { // tslint:disable-line strict-boolean-expressions
         const res = findFile(directory);
         if (res !== undefined) {
-            return res;
+            return path.join(directory, res);
         }
 
         const parent = path.dirname(directory);
@@ -447,8 +462,8 @@ export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
 export type RawRuleConfig = null | undefined | boolean | any[] | {
-    severity?: RuleSeverity | "warn" | "none" | "default",
-    options?: any,
+    severity?: RuleSeverity | "warn" | "none" | "default";
+    options?: any;
 };
 
 /**
