@@ -368,22 +368,29 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
     const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
+    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles()
+      .map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
+
     // tslint:disable object-literal-sort-keys
     return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
-        fileExists: (f) => sourceFilesByName.has(f),
+        fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
         readFile(f) {
-            const s = sourceFilesByName.get(f)!;
+            const s = sourceFilesByName.get(getCanonicalFileName(f))!;
             return s.text;
         },
-        getSourceFile: (f) => sourceFilesByName.get(f)!,
+        getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
         getDirectories: () => [],
-        getCanonicalFileName: (f) => f,
-        useCaseSensitiveFileNames: () => true,
+        getCanonicalFileName,
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
         getNewLine: () => "\n",
     });
     // tslint:enable object-literal-sort-keys
+
+    // We need to be carefull with file system case sensitivity
+    function getCanonicalFileName(f: string): string {
+      return ts.sys.useCaseSensitiveFileNames ? f : f.toLowerCase();
+    }
 }
