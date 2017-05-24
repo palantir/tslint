@@ -224,10 +224,6 @@ class Linter {
                 `;
                 throw new Error(INVALID_SOURCE_ERROR);
             }
-            // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
-            }
             return sourceFile;
         } else {
             return utils.getSourceFile(fileName, source);
