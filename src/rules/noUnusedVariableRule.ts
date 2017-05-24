@@ -367,7 +367,12 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
+    const options = {
+        ...program.getCompilerOptions(),
+        noEmit: true,
+        noUnusedLocals: true,
+        ...(checkParameters ? { noUnusedParameters: true } : null),
+    };
     const sourceFilesByName = new Map<string, ts.SourceFile>(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
 
