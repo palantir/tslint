@@ -212,18 +212,17 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
 }
 
 function isBooleanUndefined(type: ts.UnionType): boolean | undefined {
-    // tracks whether we've seen a possibly truthy boolean type
-    let isBoolean = false;
+    let isTruthy = false;
     for (const ty of type.types) {
         if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Boolean)) {
-            isBoolean = true;
+            isTruthy = true;
         } else if (Lint.isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
-            isBoolean = isBoolean || (ty as ts.IntrinsicType).intrinsicName === "true";
+            isTruthy = isTruthy || (ty as ts.IntrinsicType).intrinsicName === "true";
         } else if (!Lint.isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) { // tslint:disable-line:no-bitwise
             return undefined;
         }
     }
-    return isBoolean;
+    return isTruthy;
 }
 
 function handleUnion(type: ts.UnionType, options: Options): TypeFailure | undefined {
