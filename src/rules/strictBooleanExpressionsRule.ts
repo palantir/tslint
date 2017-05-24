@@ -435,7 +435,7 @@ function showExpectedTypes(options: Options): string[] {
     if (options.allowUndefinedUnion) { parts.push("undefined-union"); }
     if (options.allowString) { parts.push("string"); }
     if (options.allowNumber) { parts.push("number"); }
-    if (options.allowBooleanOrUndefined) { parts.push("boolean-undefined-union"); }
+    if (options.allowBooleanOrUndefined) { parts.push("boolean-or-undefined"); }
     return parts;
 }
 

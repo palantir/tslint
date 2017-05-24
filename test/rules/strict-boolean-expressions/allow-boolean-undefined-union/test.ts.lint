@@ -35,4 +35,4 @@ if (get<RegExp>() || get<RegExp>()) {}
 if (get<number | undefined>()) {}
     ~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'could be undefined')]
 
-[err]: This type is not allowed in the %s because it %s. Allowed types are boolean or boolean-undefined-union.
+[err]: This type is not allowed in the %s because it %s. Allowed types are boolean or boolean-or-undefined.
