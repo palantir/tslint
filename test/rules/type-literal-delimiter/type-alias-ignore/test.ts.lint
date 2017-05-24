@@ -1,0 +1,10 @@
+type T = {
+    x: number;
+    y: string,
+};
+
+let x: { x: number; y: string }
+                  ~ [PREFER_COMMA]
+
+[PREFER_COMMA]: Expected type literal to use ',' as a delimiter.
+[MISSING]: Expected multi-line type literal to have a trailing ','.

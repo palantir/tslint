@@ -1,6 +1,6 @@
 type T = {
-    x: number,
-             ~ [PREFER_SEMI]
+    x: number;
+             ~ [PREFER_COMMA]
     y: string
             ~ [MISSING]
 };
@@ -8,13 +8,13 @@ type T = {
 type T = {
     x: number
             ~ [MISSING]
-    y: string,
-             ~ [PREFER_SEMI]
+    y: string;
+             ~ [PREFER_COMMA]
 };
 
 type T = {
-    x: number;
-    y: string;
+    x: number,
+    y: string,
 };
 
 type T = { x: number, y: string };
@@ -27,7 +27,6 @@ type T = { x: number ; y: number , };
 type T = { x: number , y: number ; };
                                  ~ [EXTRA % (';')]
 
-[MISSING]: Expected multi-line type literal to have a trailing ';'.
-[PREFER_SEMI]: Expected multi-line type literal to use ';' instead of ','.
-[PREFER_COMMA]: Expected single-line type literal to use ',' instead of ';'.
+[PREFER_COMMA]: Expected type literal to use ',' as a delimiter.
+[MISSING]: Expected multi-line type literal to have a trailing ','.
 [EXTRA]: Did not expect single-line type literal to have a trailing '%s'.
