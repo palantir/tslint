@@ -328,6 +328,16 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     done();
                 });
         });
+
+        it("can handles 'allowJs' correctly", (done) => {
+            execCli(
+                [ "-p", "test/files/tsconfig-allow-js/tsconfig.json"],
+                (err) => {
+                    assert.isNotNull(err, "process should exit with error");
+                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
     });
 
     describe("--type-check", () => {
