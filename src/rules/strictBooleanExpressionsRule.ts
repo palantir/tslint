@@ -188,9 +188,12 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
 
     switch (triState(kind)) {
         case true:
-            return TypeFailure.AlwaysTruthy;
+            // Allow 'any'. Allow 'true' itself, but not any other always-truthy type.
+            // tslint:disable-next-line no-bitwise
+            return Lint.isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysTruthy;
         case false:
-            return TypeFailure.AlwaysFalsy;
+            // Allow 'false' itself, but not any other always-falsy type
+            return Lint.isTypeFlagSet(type, ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysFalsy;
         case undefined:
             return undefined;
     }
