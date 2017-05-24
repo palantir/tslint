@@ -26,9 +26,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-final-break",
-        description: Lint.Utils.dedent`
-            Forbids the final clause of a switch statement to have an unnecessary \`break;\`.`,
+        description: "Checks whether the final clause of a switch statement ends in \`break;\`.",
         optionsDescription: Lint.Utils.dedent`
+            If no options are passed, a final 'break;' is forbidden.
             If the "always" option is passed this will require a 'break;' to always be present
             unless control flow is escaped in some other way.`,
         options: {
@@ -66,7 +66,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
     function check(node: ts.CaseBlock): void {
         const clause = last(node.clauses);
-        if (clause === undefined || clause.statements.length === 0) { return; }
+        if (clause === undefined) { return; }
 
         if (always) {
             if (!endsControlFlow(clause)) {
@@ -75,6 +75,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return;
         }
 
+        if (clause.statements.length === 0) { return; }
         const block = clause.statements[0];
         const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
         const lastStatement = last(statements);

@@ -43,4 +43,9 @@ switch (x) {
     }
 }
 
+switch (x) {
+    case 0:
+    ~~~~ [0]
+}
+
 [0]: Final clause in 'switch' statement should end with 'break;'.
