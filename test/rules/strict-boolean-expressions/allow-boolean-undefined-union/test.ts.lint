@@ -7,9 +7,7 @@ if (get<true | false | undefined>()) {}
 if (get<true | false | undefined | void>()) {}
 
 if (get<true>()) {}
-    ~~~~~~~~~~~ [err % ("'if' condition", 'is always truthy')]
 if (get<true | true>()) {}
-    ~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'is always truthy')]
 if (get<false | undefined>()) {}
     ~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'is always falsy')]
 if (get<undefined>()) {}
