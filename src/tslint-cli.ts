@@ -173,15 +173,16 @@ const options: Option[] = [
         type: "string",
         describe: "tsconfig.json file",
         description: dedent`
-            The path or directory containing a tsconfig.json file that will be used to determine which
-            files will be linted.`,
+            The path or directory containing a tsconfig.json file that will be
+            used to determine which files will be linted. This flag also enables
+            rules that require the type checker.`,
     },
     {
         name: "type-check",
         type: "boolean",
-        describe: "enable type checking when linting a project",
+        describe: "check for type errors before linting the project",
         description: dedent`
-            Enables the type checker when running linting rules. --project must be
+            Checks for type errors before linting a project. --project must be
             specified in order to enable type checking.`,
     },
 ];

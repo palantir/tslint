@@ -36,7 +36,6 @@
     "completed-docs": false,
     "cyclomatic-complexity": false,
     "no-any": false,
-    "no-inferred-empty-object-type": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
@@ -72,6 +71,7 @@
       "options": ["log"]
     },
     "no-switch-case-fall-through": true,
+    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",
