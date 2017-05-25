@@ -20,7 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
-import { IRunnerOptions, Runner } from "./runner";
+import { run } from "./runner";
 import { dedent } from "./utils";
 
 interface Argv {
@@ -217,17 +217,19 @@ if (argv.typeCheck === true && argv.project === undefined) {
     process.exit(1);
 }
 
-let outputStream: NodeJS.WritableStream;
+let log: (message: string) => void;
 if (argv.out != null) {
-    outputStream = fs.createWriteStream(argv.out, {
+    const outputStream = fs.createWriteStream(argv.out, {
         flags: "w+",
         mode: 420,
     });
+    log = (message) => outputStream.write(`${message}\n`);
 } else {
-    outputStream = process.stdout;
+    log = console.log;
 }
 
-const runnerOptions: IRunnerOptions = {
+// tslint:disable-next-line no-floating-promises
+run({
     config: argv.config,
     exclude: argv.exclude,
     files: commander.args,
@@ -242,10 +244,7 @@ const runnerOptions: IRunnerOptions = {
     rulesDirectory: argv.rulesDir,
     test: argv.test,
     typeCheck: argv.typeCheck,
-};
-
-new Runner(runnerOptions, outputStream)
-    .run((status: number) => process.exit(status));
+}, { log, error(m) { console.error(m); } }).then(process.exit);
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

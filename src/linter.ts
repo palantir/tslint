@@ -30,7 +30,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { isError, showWarningOnce } from "./error";
+import { FatalError, isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -220,9 +220,9 @@ class Linter {
             const sourceFile = this.program.getSourceFile(fileName);
             if (sourceFile === undefined) {
                 const INVALID_SOURCE_ERROR = dedent`
-                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .d.ts, .js or .jsx extension.
                 `;
-                throw new Error(INVALID_SOURCE_ERROR);
+                throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
         } else {
