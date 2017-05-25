@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "use-default-type-parameter": true
+  }
+}

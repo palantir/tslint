@@ -104,11 +104,6 @@ export interface Options {
      * Whether to enable type checking when linting a project.
      */
     typeCheck?: boolean;
-
-    /**
-     * Whether to show the current TSLint version.
-     */
-    version?: boolean;
 }
 
 export const enum Status {
@@ -135,11 +130,6 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
 }
 
 async function runWorker(options: Options, logger: Logger): Promise<Status> {
-    if (options.version) {
-        logger.log(Linter.VERSION);
-        return Status.Ok;
-    }
-
     if (options.init) {
         if (fs.existsSync(CONFIG_FILENAME)) {
             throw new FatalError(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
