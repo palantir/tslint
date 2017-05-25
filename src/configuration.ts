@@ -367,7 +367,6 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
  *
  * @param ruleConfigValue The raw option setting of a rule
  */
-// tslint:disable-next-line cyclomatic-complexity (Fixed in 5.3)
 function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity: string | undefined): Partial<IOptions> {
     let ruleArguments: any[] | undefined;
     let defaultRuleSeverity: RuleSeverity = "error";

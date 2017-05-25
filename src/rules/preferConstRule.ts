@@ -129,7 +129,6 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         }
 
         this.scope = new Scope();
-        // tslint:disable-next-line cyclomatic-complexity
         const cb = (node: ts.Node): void => {
             const savedScope = this.scope;
             const boundary = utils.isScopeBoundary(node);

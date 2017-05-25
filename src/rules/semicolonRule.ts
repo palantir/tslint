@@ -86,7 +86,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 class SemicolonWalker extends Lint.AbstractWalker<Options> {
     private scanner?: ts.Scanner = undefined;
     public walk(sourceFile: ts.SourceFile) {
-        // tslint:disable-next-line cyclomatic-complexity (Fixed in 5.3)
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.VariableStatement:

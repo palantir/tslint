@@ -51,7 +51,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, cb);
 
     /** @param anyOk If true, this node will be allowed to be of type *any*. (But its children might not.) */
-    // tslint:disable-next-line cyclomatic-complexity
     function cb(node: ts.Node, anyOk?: boolean): void {
         switch (node.kind) {
             case ts.SyntaxKind.ParenthesizedExpression:

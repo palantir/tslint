@@ -127,7 +127,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
-        // tslint:disable-next-line cyclomatic-complexity (Fixed in 5.3)
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayLiteralExpression:
