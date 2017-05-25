@@ -55,7 +55,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
     }
 
     private checkModuleDeclaration(node: ts.ModuleDeclaration, nested?: boolean): void {
-        if (!nested &&
+        if (nested !== true &&
             node.name.kind === ts.SyntaxKind.Identifier &&
             !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace) &&
             // augmenting global uses a special syntax that is allowed

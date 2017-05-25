@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     private static FAILURE_STRING_START(otherLine?: number): string {
         // For only 2 overloads we don't need to specify which is the other one.
         const overloads = otherLine === undefined ? "These overloads" : `This overload and the one on line ${otherLine}`;
-        return overloads + " can be combined into one signature";
+        return `${overloads} can be combined into one signature`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -98,7 +98,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     break;
                 case ts.SyntaxKind.MethodDeclaration:
                 case ts.SyntaxKind.Constructor:
-                    if ((member as ts.MethodDeclaration | ts.ConstructorDeclaration).body) {
+                    if ((member as ts.MethodDeclaration | ts.ConstructorDeclaration).body !== undefined) {
                         return undefined;
                     }
                     break;
@@ -127,7 +127,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 case "extra-parameter": {
                     const { extraParameter, otherSignature } = unify;
                     const lineOfOtherOverload = only2 ? undefined : getLine(otherSignature.pos);
-                    ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken
+                    ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
                         ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
                         : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
                     break;
@@ -147,8 +147,8 @@ interface Failure {
     only2: boolean;
 }
 type Unify =
-    | { kind: "single-parameter-difference", p0: ts.ParameterDeclaration, p1: ts.ParameterDeclaration }
-    | { kind: "extra-parameter", extraParameter: ts.ParameterDeclaration, otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
+    | { kind: "single-parameter-difference"; p0: ts.ParameterDeclaration; p1: ts.ParameterDeclaration }
+    | { kind: "extra-parameter"; extraParameter: ts.ParameterDeclaration; otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
 
 function checkOverloads<T>(
         signatures: T[],
@@ -159,13 +159,13 @@ function checkOverloads<T>(
     for (const overloads of collectOverloads(signatures, getOverload)) {
         if (overloads.length === 2) {
             const unify = compareSignatures(overloads[0], overloads[1], isTypeParameter);
-            if (unify) {
+            if (unify !== undefined) {
                 result.push({ unify, only2: true });
             }
         } else {
             forEachPair(overloads, (a, b) => {
                 const unify = compareSignatures(a, b, isTypeParameter);
-                if (unify) {
+                if (unify !== undefined) {
                     result.push({ unify, only2: false });
                 }
             });
@@ -236,7 +236,7 @@ function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.Paramet
         }
     }
 
-    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken) {
+    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken !== undefined) {
         return undefined;
     }
 
@@ -247,7 +247,7 @@ function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.Paramet
  * Given a node, if it could potentially be an overload, return its signature and key.
  * All signatures which are overloads should have equal keys.
  */
-type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string } | undefined;
+type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration; key: string } | undefined;
 
 /**
  * Returns true if typeName is the name of an *outer* type parameter.
@@ -257,7 +257,7 @@ type IsTypeParameter = (typeName: string) => boolean;
 
 /** Given type parameters, returns a function to test whether a type is one of those parameters. */
 function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsTypeParameter {
-    if (!typeParameters) {
+    if (typeParameters === undefined) {
         return () => false;
     }
 
@@ -279,7 +279,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
                 return true;
             }
         }
-        return !!ts.forEachChild(type, typeContainsTypeParameter);
+        return ts.forEachChild(type, typeContainsTypeParameter);
     }
 }
 
@@ -291,13 +291,13 @@ function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.Signat
     const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
-        if (!overload) {
+        if (overload === undefined) {
             continue;
         }
 
         const { signature, key } = overload;
         const overloads = map.get(key);
-        if (overloads) {
+        if (overloads !== undefined) {
             overloads.push(signature);
         } else {
             map.set(key, [signature]);
@@ -312,12 +312,13 @@ function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclarati
 
 /** True for optional/rest parameters. */
 function parameterMayBeMissing(p: ts.ParameterDeclaration): boolean {
-    return !!p.dotDotDotToken || !!p.questionToken;
+    return p.dotDotDotToken !== undefined || p.questionToken !== undefined;
 }
 
 /** False if one is optional and the other isn't, or one is a rest parameter and the other isn't. */
 function parametersHaveEqualSigils(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
-    return !!a.dotDotDotToken === !!b.dotDotDotToken && !!a.questionToken === !!b.questionToken;
+    return (a.dotDotDotToken !== undefined) === (b.dotDotDotToken !== undefined) &&
+        (a.questionToken !== undefined) === (b.questionToken !== undefined);
 }
 
 function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParameterDeclaration): boolean {
@@ -326,7 +327,7 @@ function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParame
 
 function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): boolean {
     // TODO: Could traverse AST so that formatting differences don't affect this.
-    return a === b || !!a && !!b && a.getText() === b.getText();
+    return a === b || a !== undefined && b !== undefined && a.getText() === b.getText();
 }
 
 /** Returns the first index where `a` and `b` differ. */
@@ -344,7 +345,7 @@ function forEachPair<T, Out>(values: T[], action: (a: T, b: T) => Out | undefine
     for (let i = 0; i < values.length; i++) {
         for (let j = i + 1; j < values.length; j++) {
             const result = action(values[i], values[j]);
-            if (result) {
+            if (result !== undefined) {
                 return result;
             }
         }

@@ -1,12 +1,4 @@
 // Anonymous
-function() {}
-        ~  [missing-space]
-function(): void {
-        ~  [missing-space]
-}
-function(a: string, cb: ()=>{}): void {}
-        ~  [missing-space]
-
 var f = function() {};
                 ~  [missing-space]
 var f = function(): void {

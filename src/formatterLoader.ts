@@ -37,9 +37,9 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
         }
 
         // then check for rules within the first level of rulesDirectory
-        if (formattersDirectory) {
+        if (formattersDirectory !== undefined) {
             Formatter = loadFormatter(formattersDirectory, camelizedName);
-            if (Formatter) {
+            if (Formatter !== undefined) {
                 return Formatter;
             }
         }

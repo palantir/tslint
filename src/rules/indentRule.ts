@@ -21,6 +21,8 @@ import * as Lint from "../index";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
+const OPTION_INDENT_SIZE_2 = 2;
+const OPTION_INDENT_SIZE_4 = 4;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,32 +35,71 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"spaces"\` enforces consistent spaces.
-            * \`"tabs"\` enforces consistent tabs.`,
+            * \`${OPTION_USE_SPACES}\` enforces consistent spaces.
+            * \`${OPTION_USE_TABS}\` enforces consistent tabs.
+
+            A second optional argument specifies indentation size:
+
+            * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
+            * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+
+            Indentation size is required for auto-fixing, but not for rule checking.
+            `,
         options: {
-            type: "string",
-            enum: ["tabs", "spaces"],
+            type: "array",
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
+                },
+                {
+                    type: "number",
+                    enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
+                },
+            ],
+            minLength: 0,
+            maxLength: 5,
         },
-        optionExamples: [[true, "spaces"]],
+        optionExamples: [
+            [true, OPTION_USE_SPACES],
+            [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
+            [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_TABS = "tab indentation expected";
-    public static FAILURE_STRING_SPACES = "space indentation expected";
+    public static FAILURE_STRING(expected: string): string {
+        return `${expected} indentation expected`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const type = this.ruleArguments.indexOf(OPTION_USE_TABS) !== -1 ? "tabs" :
-            this.ruleArguments.indexOf(OPTION_USE_SPACES) !== -1 ? "spaces" : undefined;
-        return type === undefined ? [] : this.applyWithFunction(sourceFile, walk, { type });
+        const options = parseOptions(this.ruleArguments);
+        return options === undefined ? [] : this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
+function parseOptions(ruleArguments: any[]): Options | undefined {
+    const type = ruleArguments[0] as string;
+    if (type !== OPTION_USE_TABS && type !== OPTION_USE_SPACES) { return undefined; }
+
+    const size = ruleArguments[1] as number | undefined;
+    return {
+        size: size === OPTION_INDENT_SIZE_2 || size === OPTION_INDENT_SIZE_4 ? size : undefined,
+        tabs: type === OPTION_USE_TABS,
+    };
+}
+
+interface Options {
+    readonly tabs: boolean;
+    readonly size?: 2 | 4;
+}
+
 // visit every token and enforce that only the right character is used for indentation
-function walk(ctx: Lint.WalkContext<{ type: "tabs" | "spaces" }>): void {
-    const { sourceFile } = ctx;
-    const badWhitespace = ctx.options.type === "tabs" ? " " : "\t";
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { tabs, size } } = ctx;
+    const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
 
     let endOfComment = -1;
     let endOfTemplateString = -1;
@@ -120,9 +161,20 @@ function walk(ctx: Lint.WalkContext<{ type: "tabs" | "spaces" }>): void {
                 continue;
         }
 
-        if (fullLeadingWhitespace.includes(badWhitespace)) {
-            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length,
-                ctx.options.type === "tabs" ? Rule.FAILURE_STRING_TABS : Rule.FAILURE_STRING_SPACES);
+        if (regExp.test(fullLeadingWhitespace)) {
+            const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
+            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length, failure, fix(lineStart, fullLeadingWhitespace));
         }
+    }
+
+    function fix(lineStart: number, fullLeadingWhitespace: string): Lint.Fix | undefined {
+        if (size === undefined) { return undefined; }
+        const replaceRegExp = tabs
+            // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+            ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
+            : /\t/g;
+        const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
+            (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size!)));
+        return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
     }
 }
