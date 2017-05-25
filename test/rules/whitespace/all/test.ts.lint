@@ -106,10 +106,17 @@ import { importB }from "libB";
                   ~            [missing whitespace]
 import{importC}from"libC";
       ~                    [missing whitespace]
+       ~                   [missing whitespace]
+              ~            [missing whitespace]
                ~           [missing whitespace]
                    ~       [missing whitespace]
 import moduleD, {importD}from "libD";
+                 ~                    [missing whitespace]
+                        ~             [missing whitespace]
                          ~            [missing whitespace]
+import {importD, importE} from "libD";
+        ~                    [missing whitespace]
+                        ~    [missing whitespace]
 
 export default 123;
 

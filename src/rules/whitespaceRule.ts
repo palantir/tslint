@@ -146,6 +146,29 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     let position: number | undefined;
                     const { name, namedBindings } = importClause;
                     if (namedBindings !== undefined) {
+                        if (namedBindings.kind !== ts.SyntaxKind.NamespaceImport) {
+                            namedBindings.elements.forEach((element, idx, arr) => {
+                                const internalName = element.name;
+                                if (internalName !== undefined) {
+                                    if (arr.length === 1) {
+                                        const startPos = internalName.getStart() - 1;
+                                        if (startPos !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(startPos))) {
+                                            addMissingWhitespaceErrorAt(startPos + 1);
+                                        }
+                                        checkForTrailingWhitespace(internalName.getEnd());
+                                    } else {
+                                        if (idx === arr.length - 1) {
+                                            checkForTrailingWhitespace(internalName.getEnd());
+                                        } else if (idx === 0) {
+                                            const startPos = internalName.getStart() - 1;
+                                            if (startPos !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(startPos))) {
+                                                addMissingWhitespaceErrorAt(startPos + 1);
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
                         position = namedBindings.getEnd();
                     } else if (name !== undefined) {
                         position = name.getEnd();
