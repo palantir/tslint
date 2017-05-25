@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-// tslint:disable strict-boolean-expressions (wait on https://github.com/palantir/tslint/pull/2572)
+// tslint:disable strict-boolean-expressions prefer-template
+// (wait on https://github.com/palantir/tslint/pull/2572)
 
 import * as fs from "fs";
 import * as glob from "glob";
@@ -79,6 +80,11 @@ export interface IRunnerOptions {
     out?: string;
 
     /**
+     * Whether to output absolute paths
+     */
+    outputAbsolutePaths?: boolean;
+
+    /**
      * tsconfig.json file.
      */
     project?: string;
@@ -97,11 +103,6 @@ export interface IRunnerOptions {
      * Whether to enable type checking when linting a project.
      */
     typeCheck?: boolean;
-
-    /**
-     * Whether to show the current TSLint version.
-     */
-    version?: boolean;
 }
 
 export class Runner {
@@ -112,11 +113,6 @@ export class Runner {
     constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
 
     public run(onComplete: (status: number) => void) {
-        if (this.options.version) {
-            this.outputStream.write(Linter.VERSION + "\n");
-            return onComplete(0);
-        }
-
         if (this.options.init) {
             if (fs.existsSync(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
@@ -145,11 +141,12 @@ export class Runner {
         let program: ts.Program | undefined;
 
         if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
+            const project = findTsconfig(this.options.project);
+            if (project === undefined) {
                 console.error("Invalid option for project: " + this.options.project);
                 return onComplete(1);
             }
-            program = Linter.createProgram(this.options.project);
+            program = Linter.createProgram(project);
             if (files.length === 0) {
                 files = Linter.getFileNames(program);
             }
@@ -161,8 +158,13 @@ export class Runner {
                         // emit any error messages
                         let message = ts.DiagnosticCategory[diag.category];
                         if (diag.file) {
-                            const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                            message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
+                            const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+                            let file: string;
+                            const currentDirectory = program!.getCurrentDirectory();
+                            file = this.options.outputAbsolutePaths
+                                ? path.resolve(currentDirectory, diag.file.fileName)
+                                : path.relative(currentDirectory, diag.file.fileName);
+                            message += ` at ${file}:${line + 1}:${character + 1}:`;
                         }
                         message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
                         return message;
@@ -170,13 +172,7 @@ export class Runner {
                     console.error(messages.join("\n"));
                     return onComplete(this.options.force ? 0 : 1);
                 }
-            } else {
-                // if not type checking, we don't need to pass in a program object
-                program = undefined;
             }
-        } else if (this.options.typeCheck) {
-            console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
         }
 
         let ignorePatterns: string[] = [];
@@ -190,7 +186,13 @@ export class Runner {
             // remove single quotes which break matching on Windows when glob is passed in single quotes
             .map(Runner.trimSingleQuotes)
             .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-            .reduce((a: string[], b: string[]) => a.concat(b), []);
+            .reduce((a: string[], b: string[]) => a.concat(b), [])
+            .map((file: string) => {
+                if (this.options.outputAbsolutePaths) {
+                    return path.resolve(file);
+                }
+                return path.relative(process.cwd(), file);
+            });
 
         try {
             this.processFiles(onComplete, files, program);
@@ -255,4 +257,17 @@ export class Runner {
             }
         });
     }
+}
+
+function findTsconfig(project: string): string | undefined {
+    try {
+        const stats = fs.statSync(project); // throws if file does not exist
+        if (stats.isDirectory()) {
+            project = path.join(project, "tsconfig.json");
+            fs.accessSync(project); // throws if file does not exist
+        }
+    } catch (e) {
+        return undefined;
+    }
+    return project;
 }

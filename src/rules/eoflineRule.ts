@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "eofline",
         description: "Ensures the file ends with a newline.",
+        descriptionDetails: "Fix for single-line files is not supported.",
         rationale: "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
         optionsDescription: "Not configurable.",
         options: null,

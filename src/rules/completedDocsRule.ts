@@ -328,7 +328,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.privacies.has(PRIVACY_PUBLIC);
     }
 }
 
@@ -389,7 +389,8 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        if (node.name === undefined) {
+        const { name } = node;
+        if (name === undefined) {
             return;
         }
 
@@ -398,7 +399,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
             return;
         }
 
-        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
+        const symbol = this.getTypeChecker().getSymbolAtLocation(name);
         if (symbol === undefined) {
             return;
         }
@@ -425,10 +426,10 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         let description = Rule.FAILURE_STRING_EXIST;
 
         if (node.modifiers !== undefined) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(",")} `;
         }
 
-        return description + nodeType + ".";
+        return `${description}${nodeType}.`;
     }
 
     private describeModifier(kind: ts.SyntaxKind) {

@@ -6,8 +6,6 @@
     "max-line-length": [true, 120],
     "no-bitwise": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
-    "no-use-before-declare": true,
     "quotemark": [true, "double"],
     "semicolon": [true, "always"],
     "whitespace": [true,

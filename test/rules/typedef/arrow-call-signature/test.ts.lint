@@ -6,7 +6,7 @@ class TsLint {
     };
 
     arrowHelloWorld = () => {
-                       ~      [expected arrow-call-signature to have a typedef]
+                      ~~      [expected arrow-call-signature to have a typedef]
         return this.helloWorld();
     };
 }
@@ -14,7 +14,7 @@ class TsLint {
 var obj = {
     foge: function() {},
     bar: () => {}
-          ~       [expected arrow-call-signature to have a typedef]
+         ~~       [expected arrow-call-signature to have a typedef]
 }
 
 setTimeout(() => {}, 1000);

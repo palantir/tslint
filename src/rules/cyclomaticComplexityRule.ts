@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
-        return `The function${name === undefined ? "" : " " + name} has a cyclomatic complexity of ` +
+        return `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
             `${actual} which is higher than the threshold of ${expected}`;
     }
 

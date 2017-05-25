@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "await-promise": true
+  }
+}
