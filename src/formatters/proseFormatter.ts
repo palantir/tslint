@@ -58,6 +58,6 @@ export class Formatter extends AbstractFormatter {
             return `${failure.getRuleSeverity().toUpperCase()}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return fixLines.concat(errorLines).join("\n") + "\n";
+        return `${fixLines.concat(errorLines).join("\n")}\n`;
     }
 }

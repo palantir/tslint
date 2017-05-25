@@ -1,7 +1,4 @@
 {
-    "linterOptions": {
-        "typeCheck": true
-    },
     "rules": {
         "no-boolean-literal-compare": true
     }

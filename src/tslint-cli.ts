@@ -33,6 +33,7 @@ interface Argv {
     init?: boolean;
     o?: string;
     out?: string;
+    outputAbsolutePaths?: boolean;
     p?: string;
     project?: string;
     r?: string;
@@ -52,6 +53,12 @@ const processed = optimist
             // throw a string, otherwise a call stack is printed for this message
             // tslint:disable-next-line:no-string-throw
             throw "Missing files";
+        }
+
+        // tslint:disable-next-line strict-boolean-expressions
+        if (argv["type-check"] && !argv.project) {
+            // tslint:disable-next-line:no-string-throw
+            throw "--project must be specified in order to enable type checking.";
         }
 
         // tslint:disable-next-line strict-boolean-expressions
@@ -95,6 +102,10 @@ const processed = optimist
             describe: "output file",
             type: "string",
         },
+        "outputAbsolutePaths": {
+            describe: "whether or not outputted file paths are absolute",
+            type: "boolean",
+        },
         "p": {
             alias: "project",
             describe: "tsconfig.json file",
@@ -121,7 +132,7 @@ const processed = optimist
             type: "boolean",
         },
         "type-check": {
-            describe: "enable type checking when linting a project",
+            describe: "check for type errors before linting the project",
             type: "boolean",
         },
         "v": {
@@ -214,11 +225,12 @@ tslint accepts the following commandline options:
         this can be used to test custom rules.
 
     -p, --project:
-        The location of a tsconfig.json file that will be used to determine which
-        files will be linted.
+        The path or directory containing a tsconfig.json file that will be
+        used to determine which files will be linted. This flag also enables
+        rules that require the type checker.
 
     --type-check
-        Enables the type checker when running linting rules. --project must be
+        Checks for type errors before linting a project. --project must be
         specified in order to enable type checking.
 
     -v, --version:
@@ -240,6 +252,7 @@ const options: IRunnerOptions = {
     formattersDirectory: argv.s,
     init: argv.init,
     out: argv.out,
+    outputAbsolutePaths: argv.outputAbsolutePaths,
     project: argv.p,
     rulesDirectory: argv.r,
     test: argv.test,

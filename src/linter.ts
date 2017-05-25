@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.2.0";
+    public static VERSION = "5.3.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -64,7 +64,7 @@ class Linter {
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory));
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory), {noEmit: true});
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
@@ -81,7 +81,7 @@ class Linter {
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
-            throw new Error("Unknown Linter options type: " + typeof options);
+            throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
         if ((options as any).configuration != null) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
@@ -178,7 +178,7 @@ class Linter {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
             let fileNewSource: string;
-            if (filePath === sourceFilePath) {
+            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
                 source = Replacement.applyFixes(source, fileFixes);
                 fileNewSource = source;
             } else {
@@ -223,10 +223,6 @@ class Linter {
                     Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
                 `;
                 throw new Error(INVALID_SOURCE_ERROR);
-            }
-            // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
             }
             return sourceFile;
         } else {
