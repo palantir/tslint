@@ -166,7 +166,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options);
     // if type checking, run the type checker
-    if (program) {
+    if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
             const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths === true)).join("\n");
@@ -180,11 +180,10 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram(
-    { files, project, exclude, typeCheck, outputAbsolutePaths }: Options): { files: string[], program?: ts.Program } {
+function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
     // if both files and tsconfig are present, use files
-    if (project === undefined || files !== undefined && files.length > 0) {
-        return { files: resolveGlobs(files, exclude, outputAbsolutePaths === true) };
+    if (project === undefined) {
+        return { files: resolveFiles() };
     }
 
     const projectPath = findTsconfig(project);
@@ -193,8 +192,11 @@ function resolveFilesAndProgram(
     }
 
     const program = Linter.createProgram(projectPath);
-    // if not type checking, we don't need to pass in a program object
-    return { files: Linter.getFileNames(program), program: typeCheck ? program : undefined };
+    return { files: files === undefined || files.length === 0 ? Linter.getFileNames(program) : resolveFiles(), program };
+
+    function resolveFiles(): string[] {
+        return resolveGlobs(files, exclude, outputAbsolutePaths === true);
+    }
 }
 
 function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"], outputAbsolutePaths: boolean): string[] {

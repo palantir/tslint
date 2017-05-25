@@ -1,0 +1,8 @@
+{
+    "jsRules": {
+        "eofline": true,
+        "semicolon": [
+            true, "always"
+        ]
+    }
+}

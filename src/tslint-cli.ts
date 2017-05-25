@@ -132,7 +132,7 @@ const processed = optimist
             type: "boolean",
         },
         "type-check": {
-            describe: "enable type checking when linting a project",
+            describe: "check for type errors before linting the project",
             type: "boolean",
         },
         "v": {
@@ -226,11 +226,12 @@ tslint accepts the following commandline options:
         this can be used to test custom rules.
 
     -p, --project:
-        The path or directory containing a tsconfig.json file that will be used to determine which
-        files will be linted.
+        The path or directory containing a tsconfig.json file that will be
+        used to determine which files will be linted. This flag also enables
+        rules that require the type checker.
 
     --type-check
-        Enables the type checker when running linting rules. --project must be
+        Checks for type errors before linting a project. --project must be
         specified in order to enable type checking.
 
     -v, --version:
