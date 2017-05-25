@@ -90,14 +90,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
     if (possibleFailures.length === 0) {
         return;
     }
-    let excludedRanges: ts.TextRange[];
-    if (ctx.options.ignoreTemplates) {
-        excludedRanges = ctx.options.ignoreJsDoc ? getExcludedRanges(sourceFile, ctx.options) : getTemplateRanges(sourceFile);
-    } else if (ctx.options.ignoreJsDoc) {
-        excludedRanges = getExcludedComments(sourceFile, ctx.options);
-    } else {
-        excludedRanges = [];
-    }
+    const excludedRanges = ctx.options.ignoreTemplates
+        ? ctx.options.ignoreJsDoc ? getExcludedRanges(sourceFile, ctx.options) : getTemplateRanges(sourceFile)
+        : ctx.options.ignoreJsDoc ? getExcludedComments(sourceFile, ctx.options) : [];
     for (const possibleFailure of possibleFailures) {
         if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
             ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING,

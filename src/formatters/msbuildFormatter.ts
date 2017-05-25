@@ -47,6 +47,6 @@ export class Formatter extends AbstractFormatter {
             return `${fileName}${positionTuple}: ${severity} ${camelizedRule}: ${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 }

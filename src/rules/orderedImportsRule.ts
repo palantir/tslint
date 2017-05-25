@@ -19,7 +19,6 @@ import { isImportDeclaration, isModuleDeclaration, isNamedImports, isStringLiter
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { moduleDeclarationBody } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -91,11 +90,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function parseOptions(ruleArguments: any[]): Options {
-    interface JsonOptions { "import-sources-order": string; "named-imports-order": string; }
-    const optionSet = (ruleArguments as JsonOptions[])[0] || {};
+    interface JsonOptions { "import-sources-order"?: string; "named-imports-order"?: string; }
+    const optionSet = (ruleArguments as JsonOptions[])[0];
+    const {
+        "import-sources-order": sources = "case-insensitive",
+        "named-imports-order": named = "case-insensitive",
+    } = optionSet === undefined ? {} : optionSet;
     return {
-        importSourcesOrderTransform: TRANSFORMS.get(optionSet["import-sources-order"] || "case-insensitive")!,
-        namedImportsOrderTransform: TRANSFORMS.get(optionSet["named-imports-order"] || "case-insensitive")!,
+        importSourcesOrderTransform: TRANSFORMS.get(sources)!,
+        namedImportsOrderTransform: TRANSFORMS.get(named)!,
     };
 }
 
@@ -142,7 +145,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             const previousSource = this.currentImportsBlock.getLastImportSource();
             this.currentImportsBlock.addImportDeclaration(this.sourceFile, statement, source);
 
-            if (previousSource && compare(source, previousSource) === -1) {
+            if (previousSource !== null && compare(source, previousSource) === -1) {
                 this.lastFix = [];
                 this.addFailureAtNode(statement, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
             }
@@ -323,7 +326,7 @@ function compare(a: string, b: string): 0 | 1 | -1 {
 
 function removeQuotes(value: string): string {
     // strip out quotes
-    if (value && value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
+    if (value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
         value = value.substr(1, value.length - 2);
     }
     return value;
@@ -331,4 +334,12 @@ function removeQuotes(value: string): string {
 
 function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
     return xs.slice().sort((a, b) => compare(getSortKey(a), getSortKey(b)));
+}
+
+function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
+    let body = node.body;
+    while (body !== undefined && body.kind === ts.SyntaxKind.ModuleDeclaration) {
+        body = body.body;
+    }
+    return body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

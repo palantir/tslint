@@ -51,7 +51,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                     argument,
                     Rule.FAILURE_STRING,
                     // expr['foo'] -> expr.foo
-                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, "." + argument.text),
+                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${argument.text}`),
                 );
             }
         }

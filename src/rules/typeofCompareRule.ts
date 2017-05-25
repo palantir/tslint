@@ -47,7 +47,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (tsutils.isBinaryExpression(node)) {
             const { operatorToken, left, right } = node;
-            if (Lint.getEqualsKind(operatorToken) && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
+            if (Lint.getEqualsKind(operatorToken) !== undefined && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }

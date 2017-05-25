@@ -94,7 +94,7 @@ function shouldCheck(node: ts.Node, { ignoreParameters, ignoreProperties }: Opti
             return !ignoreParameters &&
                 !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword) &&
                 // "ignore-properties" also works for parameter properties
-                !(ignoreProperties && node.modifiers);
+                !(ignoreProperties && node.modifiers !== undefined);
         case ts.SyntaxKind.PropertyDeclaration:
             return !ignoreProperties && !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword);
         case ts.SyntaxKind.VariableDeclaration:

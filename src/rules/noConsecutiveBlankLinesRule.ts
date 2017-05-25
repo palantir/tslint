@@ -31,10 +31,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Helps maintain a readable style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
             An optional number of maximum allowed sequential blanks can be specified. If no value
-            is provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.`,
+            is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_ALLOWED_BLANKS)",
+            minimum: "1",
         },
         optionExamples: [true, [true, 2]],
         type: "style",
@@ -53,12 +53,12 @@ export class Rule extends Lint.Rules.AbstractRule {
      */
     public isEnabled(): boolean {
         const option = this.ruleArguments[0] as number | undefined;
-        return super.isEnabled() && (!option || option > 0);
+        return super.isEnabled() && (option === undefined || option > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit = this.ruleArguments[0] as number | undefined || Rule.DEFAULT_ALLOWED_BLANKS;
-        return this.applyWithFunction(sourceFile, walk, limit);
+        const limit = this.ruleArguments[0] as number | undefined;
+        return this.applyWithFunction(sourceFile, walk, limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS);
     }
 }
 

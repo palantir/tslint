@@ -21,5 +21,8 @@ const { g = undefined } = get<{ g?: number }>();
 const [h = undefined] = get<number[]>();
        ~~~~~~~~~~~~~ [0]
 
+function f({ x = undefined }: { x?: number }) {}
+             ~~~~~~~~~~~~~ [0]
+
 [0]: Unnecessary initialization to 'undefined'.
 [1]: Use an optional parameter instead of initializing to 'undefined'. Also, the type declaration does not need to include '| undefined'.
