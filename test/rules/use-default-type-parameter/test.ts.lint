@@ -19,4 +19,8 @@ new C<number>();
 class D extends C<number> {}
                   ~~~~~~ [0]
 
-[0]: This is the default value for this type parameter.
+interface I<T = number> {}
+class Impl implements I<number> {}
+                        ~~~~~~ [0]
+
+[0]: This is the default value for this type parameter, so it can be omitted.

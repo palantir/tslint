@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
+import { isClassLikeDeclaration, isInterfaceDeclaration, isTypeAliasDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { find } from "../utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -32,11 +34,16 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "This is the default value for this type parameter.";
+    public static FAILURE_STRING = "This is the default value for this type parameter, so it can be omitted.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
     }
+}
+
+interface ArgsAndParams {
+    typeArguments: ts.TypeNode[];
+    typeParameters: ts.TypeParameterDeclaration[];
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
@@ -55,10 +62,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         const param = typeParameters[i];
         // TODO: would like checker.areTypesEquivalent. https://github.com/Microsoft/TypeScript/issues/13502
         if (param.default !== undefined && param.default.getText() === arg.getText()) {
-            ctx.addFailureAtNode(arg, Rule.FAILURE_STRING, fix());
+            ctx.addFailureAtNode(arg, Rule.FAILURE_STRING, createFix());
         }
 
-        function fix(): Lint.Fix {
+        function createFix(): Lint.Fix {
             if (i === 0) {
                 const lt = Lint.childOfKind(node, ts.SyntaxKind.LessThanToken)!;
                 const gt = Lint.childOfKind(node, ts.SyntaxKind.GreaterThanToken)!;
@@ -68,11 +75,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             }
         }
     }
-}
-
-interface ArgsAndParams {
-    typeArguments: ts.TypeNode[];
-    typeParameters: ts.TypeParameterDeclaration[];
 }
 
 function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndParams | undefined {
@@ -113,15 +115,8 @@ function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.Typ
         return undefined;
     }
 
-    for (const decl of sym.declarations) {
-        switch (decl.kind) {
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.ClassExpression:
-            case ts.SyntaxKind.TypeAliasDeclaration:
-                return (decl as ts.ClassLikeDeclaration | ts.TypeAliasDeclaration).typeParameters;
-        }
-    }
-    return undefined;
+    return find(sym.declarations, (decl) =>
+        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl) ? decl.typeParameters : undefined);
 }
 
 function getAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol {

@@ -13,3 +13,6 @@ function h(c: C) {}
 new C();
 class D extends C {}
 
+interface I<T = number> {}
+class Impl implements I {}
+
