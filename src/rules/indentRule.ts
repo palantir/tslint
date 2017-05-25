@@ -163,11 +163,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
         if (regExp.test(fullLeadingWhitespace)) {
             const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
-            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length, failure, fix(lineStart, fullLeadingWhitespace));
+            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length, failure, createFix(lineStart, fullLeadingWhitespace));
         }
     }
 
-    function fix(lineStart: number, fullLeadingWhitespace: string): Lint.Fix | undefined {
+    function createFix(lineStart: number, fullLeadingWhitespace: string): Lint.Fix | undefined {
         if (size === undefined) { return undefined; }
         const replaceRegExp = tabs
             // we want to find every group of `size` spaces, plus up to one 'incomplete' group
