@@ -103,11 +103,6 @@ export interface IRunnerOptions {
      * Whether to enable type checking when linting a project.
      */
     typeCheck?: boolean;
-
-    /**
-     * Whether to show the current TSLint version.
-     */
-    version?: boolean;
 }
 
 export class Runner {
@@ -118,11 +113,6 @@ export class Runner {
     constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
 
     public run(onComplete: (status: number) => void) {
-        if (this.options.version) {
-            this.outputStream.write(Linter.VERSION + "\n");
-            return onComplete(0);
-        }
-
         if (this.options.init) {
             if (fs.existsSync(CONFIG_FILENAME)) {
                 console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
