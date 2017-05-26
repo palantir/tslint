@@ -164,6 +164,7 @@ export const rules = {
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
     "arrow-return-shorthand": [true, "multiline"],
+    "binary-expression-operand-order": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
@@ -244,7 +245,6 @@ export const rules = {
         "check-typecast",
         "check-preblock",
     ],
-    "yoda": true,
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =

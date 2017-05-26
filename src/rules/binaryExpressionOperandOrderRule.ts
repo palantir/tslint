@@ -24,7 +24,7 @@ import { isNegativeNumberLiteral } from "../language/utils";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "yoda",
+        ruleName: "binary-expression-operand-order",
         description: Lint.Utils.dedent`
             In a binary expression, a literal should always be on the right-hand side if possible.
             For example, prefer 'x + 1' over '1 + x'.`,
