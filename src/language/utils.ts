@@ -19,14 +19,15 @@ import * as path from "path";
 import { isBlockScopedVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule";
+import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
     return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
 }
 
-export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
+/** @deprecated See IDisabledInterval. */
+export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean { // tslint:disable-line deprecation
     return disabledIntervals.some((interval) => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
@@ -37,7 +38,7 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]): boolean {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
@@ -100,7 +101,7 @@ export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: t
             return cur as T;
         }
         cur = cur.parent;
-    } while (cur);
+    } while (cur !== undefined);
     return undefined;
 }
 

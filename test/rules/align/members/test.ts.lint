@@ -2,42 +2,52 @@ interface Foo {
     bar,
     baz
      bas
-     ~~~ [members are not aligned]
+     ~~~ [0]
   foo;
-  ~~~~ [members are not aligned]
+  ~~~~ [0]
 }
 
 class Foo {
     bar,
-    baz() {}
+    baz() {
+
+    };
      get bas() {}
-     ~~~~~~~~~~~~ [members are not aligned]
+     ~~~~~~~~~~~~ [0]
   foo;
-  ~~~~ [members are not aligned]
+  ~~~~ [0]
+}
+
+let Bar = class {
+  bar,
+    foo
+    ~~~ [0]
 }
 
 let foo = {
     foo,
     moep,
      baz,
-     ~~~ [members are not aligned]
+     ~~~ [0]
    baz: foo,
-   ~~~~~~~~ [members are not aligned]
+   ~~~~~~~~ [0]
 }
 
 let {
     foo,
     boo,
      baz,
-     ~~~ [members are not aligned]
+     ~~~ [0]
    baz,
-   ~~~ [members are not aligned]
+   ~~~ [0]
 } = foo;
 
 let foo: {
     foo
      bar
-     ~~~ [members are not aligned]
+     ~~~ [0]
    baz
-   ~~~ [members are not aligned]
+   ~~~ [0]
 }
+
+[0]: members are not aligned

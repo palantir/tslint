@@ -79,7 +79,7 @@ class Walker extends Lint.AbstractWalker<void> {
 
         if (importKeywordEnd === importClauseStart) {
             this.addFailureAt(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
-        } else if (importClauseStart > (importKeywordEnd + 1)) {
+        } else if (importClauseStart > importKeywordEnd + 1) {
             this.addFailure(nodeStart, importClauseStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
         }
 
@@ -122,9 +122,9 @@ class Walker extends Lint.AbstractWalker<void> {
         const nodeStart = node.getStart(this.sourceFile);
         const moduleSpecifierStart = node.moduleSpecifier.getStart(this.sourceFile);
 
-        if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
+        if (nodeStart + "import".length + 1 < moduleSpecifierStart) {
             this.addFailure(nodeStart, moduleSpecifierStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
-        } else if ((nodeStart + "import".length) === moduleSpecifierStart) {
+        } else if (nodeStart + "import".length === moduleSpecifierStart) {
             this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ImportKeyword)!, Rule.ADD_SPACE_AFTER_IMPORT);
         }
 

@@ -24,8 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-throw",
-        description: `Flags throwing plain strings or concatenations of strings ` +
-            `because only Errors produce proper stack traces.`,
+        description: "Flags throwing plain strings or concatenations of strings " +
+            "because only Errors produce proper stack traces.",
         hasFix: true,
         options: null,
         optionsDescription: "Not configurable.",

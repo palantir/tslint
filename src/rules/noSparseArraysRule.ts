@@ -89,7 +89,6 @@ function traverseExpressionsInLHS(node: ts.Node, cb: (node: ts.Expression) => vo
                 traverseExpressionsInLHS(left, cb);
                 cb(right);
             }
-            break;
         }
     }
 }

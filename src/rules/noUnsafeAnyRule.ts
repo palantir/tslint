@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {isExpression} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -80,7 +81,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
-            // For some reason, these are of type "any".
+            // These show as type "any" if in type position.
+            case ts.SyntaxKind.NumericLiteral:
             case ts.SyntaxKind.StringLiteral:
                 return;
 
@@ -131,7 +133,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                if (args) {
+                if (args !== undefined) {
                     for (const arg of args) {
                         checkContextual(arg);
                     }
@@ -155,21 +157,21 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                if (expression) {
+                if (expression !== undefined) {
                     return checkContextual(expression);
                 }
                 return;
             }
 
             default:
-                if (!(ts.isExpression(node) && check())) {
+                if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
                 }
                 return;
         }
 
         function check(): boolean {
-            const isUnsafe = !anyOk && isNodeAny(node, checker);
+            const isUnsafe = anyOk !== true && isNodeAny(node, checker);
             if (isUnsafe) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -237,9 +239,4 @@ function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
 
 function isAny(type: ts.Type | undefined): boolean {
     return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
-}
-
-declare module "typescript" {
-    // This is marked @internal, but we need it!
-    function isExpression(node: ts.Node): node is ts.Expression;
 }

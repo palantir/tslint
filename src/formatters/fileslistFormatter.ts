@@ -45,6 +45,6 @@ export class Formatter extends AbstractFormatter {
             }
         }
 
-        return files.join("\n") + "\n";
+        return `${files.join("\n")}\n`;
     }
 }
