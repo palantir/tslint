@@ -29,6 +29,7 @@ module TestModule {
      multiline ${ "A" }
      template ${ "B"
      + "C" }
+~~~~~ [0]
      string`;
 
 	export enum TestEnum {
