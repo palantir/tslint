@@ -77,6 +77,18 @@
       "check-format",
       "allow-leading-underscore",
       "allow-pascal-case"
+    ],
+    "whitespace": [true,
+        "check-branch",
+        "check-decl",
+        "check-operator",
+        // "check-module", <- this rule is not compatible with
+        // combination of "trailing-comma" & "no-trailing-whitespace"
+        // for multiline imports.
+        "check-separator",
+        "check-type",
+        "check-typecast",
+        "check-preblock"
     ]
   }
 }
