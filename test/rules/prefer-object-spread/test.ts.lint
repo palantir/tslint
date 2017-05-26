@@ -11,6 +11,14 @@ result = Object.assign(original, {c: 3});
          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
 var result = Object.assign({}, original, {c: 3});
              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+foo(Object.assign(original, {c: 3}));
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+[Object.assign(original, {c: 3})];
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+({
+    foo: Object.assign(original, {c: 3})
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+})
 
 Object.assign({}, {}, {a: 1,},);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
@@ -22,6 +30,10 @@ Object.assign({}, {});
 ~~~~~~~~~~~~~~~~~~~~~ [0]
 Object.assign({}, {},);
 ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+// allowed
+result = Object.assign(new Foo(), {});
+result = Object.assign(createFoo(), {});
 
 [0]: Use the object spread operator instead.
 [1]: 'Object.assign' returns the first argument. Prefer object spread if you want a new object.
