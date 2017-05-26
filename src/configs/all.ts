@@ -228,6 +228,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "switch-final-break": true,
     "type-literal-delimiter": true,
     "variable-name": [
         true,
