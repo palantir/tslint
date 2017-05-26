@@ -1,6 +1,64 @@
 Change Log
 ===
 
+<!-- TODO: for 5.4, add
+[new-rule] [`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/) (#2374)
+5.3 will be published without it since it's still discussed
+-->
+
+v5.3.0
+---
+
+## This change may require a change to tslint.json
+- [enhancement] [`prefer-switch`](https://palantir.github.io/tslint/rules/prefer-switch/): Change default `min-cases` to 3. (#2669)
+
+## :tada: Notable features & enhancements
+- [new-cli-option] cli: Add `outputAbsolutePaths` option (#2667)
+- [new-rule] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) (#2624)
+- [new-rule] [`encoding`](https://palantir.github.io/tslint/rules/encoding/) (#2368)
+- [new-rule] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/) (#2363)
+- [new-rule-option] [`indent`](https://palantir.github.io/tslint/rules/indent/) support indent size (#2723)
+- [new-rule-option] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) adds `ignore-case` (#2592)
+- [new-rule-option] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/): Add `avoid-template` option (#2766)
+- [new-rule-option] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise): What's considered a "Promise" is now configurable. (#2661)
+- [new-fixer] [`indent`](https://palantir.github.io/tslint/rules/indent/) (#2723)
+- [new-fixer] [`typedef-whitespace`](https://palantir.github.io/tslint/rules/typedef-whitespace/) (#2718)
+- [enhancement] better error messages in [`variable-name`](https://palantir.github.io/tslint/rules/variable-name/) (#2672)
+- [enhancement] [`typedef`](https://palantir.github.io/tslint/rules/typedef/): Use name or parameters for error location (#2460)
+- [enhancement] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): check shorthand properties (#2592)
+- [enhancement] [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/): Handle `get`/`set` accessor (#2700)
+- [enhancement] [`typedef-whitespace`](https://palantir.github.io/tslint/rules/typedef-whitespace/) added checks for arrow function, call and construct signature (#2718)
+- [enhancement] [`no-object-literal-type-assertion`](https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/): Allow cast to `any` (#2671)
+- [enhancement] cli: `-p` option handles directories (#2756)
+- [develop] testing rules with type information is enabled when a `tsconfig.json` is found next to `tslint.json` (#2769)
+- [configuration] deprecate mixed case tslint.json (#2713)
+- [bugfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/): Treat a return type `void | undefined` same as `void` (#2731)
+- [bugfix] [`no-unnecessary-initializer`](https://palantir.github.io/tslint/rules/no-unnecessary-initializer/): Handle `BindingElement` anywhere, not just in a `VariableDeclaration`. (#2707)
+- [bugfix] [`jsdoc-format`](https://palantir.github.io/tslint/rules/jsdoc-format/): correctly handle alignment in files with BOM (#2619)
+- [bugfix] [`jsdoc-format`](https://palantir.github.io/tslint/rules/jsdoc-format/): don't treat empty comments (`/**/`) as jsdoc (#2619)
+- [bugfix] [`typedef-whitespace`](https://palantir.github.io/tslint/rules/typedef-whitespace/) don't warn for leading whitespace if token is preceded by line break (#2718)
+- [bugfix] Make "completed-docs" rule respect "public" privacy (or lack thereof) (#2749)
+- [bugfix] [`jsdoc-format`](https://palantir.github.io/tslint/rules/jsdoc-format/): fixed error position if line ends with `\r\n` (#2619)
+- [bugfix] [`prefer-switch`](https://palantir.github.io/tslint/rules/prefer-switch/): add missing checks for some expressions (#2686)
+- [bugfix] [`prefer-template`](https://palantir.github.io/tslint/rules/prefer-template/): Allow `"a" + "b" + "c"`. (#2741)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/): fix false positive with variable declared outside of for-of or for-in (#2760)
+- [bugfix] `--project`: fix file matching with relative path to `tsconfig.json` (#2688)
+- [bugfix] [`no-default-export`](https://palantir.github.io/tslint/rules/no-default-export/): correctly handle `export default abstract class {...}` (#2630)
+- [bugfix] [`no-mergeable-namespace`](https://palantir.github.io/tslint/rules/no-mergeable-namespace/): display correct line in error message (#2656)
+- [bugfix] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): handle object spread correctly (#2592)
+- [bugfix] Consistently output absolute/relative paths (#2667)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise): Consider types derived from a Promise in union types too. (#2661)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): Fix bug where number literal in type position was flagged as an unsafe `any`. (#2712)
+- [api] Deprecate `Lint.Utils.objectify` (#2764)
+
+Thanks to our contributors!
+- Andy Hanson
+- Klaus Meinhardt
+- Martin Probst
+- Filipe Silva
+- walkerburgin
+- René Scheibe
+
 v5.2.0
 ---
 

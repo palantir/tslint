@@ -60,7 +60,6 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                 if (!hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) && returnsPromise(node as ts.FunctionLikeDeclaration, tc)) {
                     ctx.addFailure(node.getStart(ctx.sourceFile), (node as ts.FunctionLikeDeclaration).body!.pos, Rule.FAILURE_STRING);
                 }
-
         }
         return ts.forEachChild(node, cb);
     });
