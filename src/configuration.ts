@@ -19,6 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
+import { dedent } from "./utils";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
@@ -136,7 +137,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
 
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
+        let configFilePath = findup(CONFIG_FILENAME, path.resolve(inputFilePath));
         if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
@@ -163,7 +164,7 @@ function findup(filename: string, directory: string): string | undefined {
     while (true) { // tslint:disable-line strict-boolean-expressions
         const res = findFile(directory);
         if (res !== undefined) {
-            return path.join(directory, res);
+            return res;
         }
 
         const parent = path.dirname(directory);
@@ -174,18 +175,23 @@ function findup(filename: string, directory: string): string | undefined {
     }
 
     function findFile(cwd: string): string | undefined {
-        if (fs.existsSync(path.join(cwd, filename))) {
-            return filename;
+        const full = path.join(cwd, filename);
+        if (fs.existsSync(full)) {
+            return full;
         }
 
         // TODO: remove in v6.0.0
         // Try reading in the entire directory and looking for a file with different casing.
         const filenameLower = filename.toLowerCase();
-        const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
-        if (result !== undefined) {
-            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ${path.join(cwd, result)}`);
+        const oddlyCasedFile = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+        if (oddlyCasedFile !== undefined) {
+            const fullOddlyCased = path.join(cwd, oddlyCasedFile);
+            showWarningOnce(dedent`
+                Case-insensitive matching will be removed in tslint 6.0.
+                Found '${fullOddlyCased}', expected it to be named '${filename}'.`);
+            return fullOddlyCased;
         }
-        return result;
+        return undefined;
     }
 }
 
