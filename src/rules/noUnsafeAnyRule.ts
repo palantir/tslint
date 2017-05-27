@@ -71,6 +71,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb((node as ts.LabeledStatement).statement);
 
             case ts.SyntaxKind.BreakStatement: // Ignore label
+            case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
