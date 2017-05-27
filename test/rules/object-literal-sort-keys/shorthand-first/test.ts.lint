@@ -1,0 +1,14 @@
+const passA = {
+  a,
+  d,
+  b: [],
+  c: {},
+}
+
+const failA = {
+  a,
+  b: [],
+  c: {},
+  d,
+  ~ [The key 'd' should come before longhand assignments]
+}

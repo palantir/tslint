@@ -112,7 +112,7 @@ var failI = {
 
 var passJ = {
     1: 1,
-    '11': 2
+    '11': 2,
     2: 4,
     A: 3,
 }
@@ -171,9 +171,18 @@ const spread = {
 };
 
 const numbers = {
+    2e-1: true,
+    1: true,
+    100: true,
+    1e4: true,
+    2: true,
+}
+
+const numbersFail = {
     1: true,
     2: true,
     100: true,
+    ~~~ [err % ('100')]
     1e4: true,
     2e-1: true,
 }

@@ -10,3 +10,14 @@ const b = {
   object: {},
   objList: [{}, {}],
 }
+
+const c = {
+  array: [],
+  Arrays: [],
+}
+
+const d = {
+  Arrays: [],
+  array: [],
+  ~~~~~ [The key 'array' is not sorted alphabetically]
+}

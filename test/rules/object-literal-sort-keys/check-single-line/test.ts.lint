@@ -1,0 +1,21 @@
+const passA = { array: [], object: {} }
+
+const failA = { object: {}, array: [] }
+                            ~~~~~ [err % ('array')]
+
+const passB = { a: [], b: {}, c: {} }
+
+const failB = { a: [], c: {}, b: {} }
+                              ~ [err % ('b')]
+
+const passC = { CAT: {}, a: [], catch: {} }
+
+const failC = { a: [], catch: {}, CAT: {} }
+                                  ~~~ [err % ('CAT')]
+
+const passD = { array: [], objList: [{}, {}], object: {} }
+
+const failD = { array: [], object: {}, objList: [{}, {}] }
+                                       ~~~~~~~ [err % ('objList')]
+
+[err]: The key '%s' is not sorted alphabetically
