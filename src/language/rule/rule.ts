@@ -91,7 +91,7 @@ export interface IRuleMetadata {
     typescriptOnly: boolean;
 }
 
-export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
+export type RuleType = "functionality" | "maintainability" | "style" | "typescript" | "format";
 
 export type RuleSeverity = "warning" | "error" | "off";
 

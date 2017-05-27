@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_IGNORE_COMMENTS],
             [true, OPTION_IGNORE_JSDOC],
         ],
-        type: "style",
+        type: "format",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
