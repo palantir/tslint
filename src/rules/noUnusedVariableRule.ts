@@ -42,16 +42,19 @@ export class Rule extends Lint.Rules.TypedRule {
         options: {
             type: "array",
             items: {
-                oneOf: [{
-                    type: "string",
-                    enum: ["check-parameters"],
-                }, {
-                    type: "object",
-                    properties: {
-                        "ignore-pattern": {type: "string"},
+                oneOf: [
+                    {
+                        type: "string",
+                        enum: ["check-parameters"],
                     },
-                    additionalProperties: false,
-                }],
+                    {
+                        type: "object",
+                        properties: {
+                            "ignore-pattern": {type: "string"},
+                        },
+                        additionalProperties: false,
+                    },
+                ],
             },
             minLength: 0,
             maxLength: 3,
@@ -246,12 +249,12 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
  * Workround for https://github.com/Microsoft/TypeScript/issues/9944
  */
 function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
-    let symbol = checker.getSymbolAtLocation(importSpecifier);
-    if (symbol === undefined) {
+    const importedSymbol = checker.getSymbolAtLocation(importSpecifier);
+    if (importedSymbol === undefined) {
         return false;
     }
 
-    symbol = checker.getAliasedSymbol(symbol);
+    const symbol = checker.getAliasedSymbol(importedSymbol);
     if (!Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
         return false;
     }
@@ -275,7 +278,8 @@ function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | unde
     if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && node.type === undefined) {
         return checker.getTypeAtLocation(node);
     } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
-        return checker.getSignatureFromDeclaration(node).getReturnType();
+        const sig = checker.getSignatureFromDeclaration(node);
+        return sig === undefined ? undefined : sig.getReturnType();
     } else {
         return undefined;
     }
@@ -363,23 +367,32 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
+    const options = {
+        ...program.getCompilerOptions(),
+        noEmit: true,
+        noUnusedLocals: true,
+        ...(checkParameters ? { noUnusedParameters: true } : null),
+    };
+    const sourceFilesByName = new Map<string, ts.SourceFile>(
+        program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
+
     // tslint:disable object-literal-sort-keys
     return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
-        fileExists: (f) => sourceFilesByName.has(f),
-        readFile(f) {
-            const s = sourceFilesByName.get(f)!;
-            return s.text;
-        },
-        getSourceFile: (f) => sourceFilesByName.get(f)!,
+        fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
+        readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
+        getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
         getDirectories: () => [],
-        getCanonicalFileName: (f) => f,
-        useCaseSensitiveFileNames: () => true,
+        getCanonicalFileName,
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
         getNewLine: () => "\n",
     });
     // tslint:enable object-literal-sort-keys
+
+    // We need to be careful with file system case sensitivity
+    function getCanonicalFileName(fileName: string): string {
+        return ts.sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+    }
 }

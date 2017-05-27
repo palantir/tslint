@@ -30,7 +30,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { isError, showWarningOnce } from "./error";
+import { FatalError, isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.2.0";
+    public static VERSION = "5.3.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -64,7 +64,7 @@ class Linter {
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory));
+        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory), {noEmit: true});
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
@@ -179,7 +179,7 @@ class Linter {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
             let fileNewSource: string;
-            if (filePath === sourceFilePath) {
+            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
                 source = Replacement.applyFixes(source, fileFixes);
                 fileNewSource = source;
             } else {
@@ -221,13 +221,9 @@ class Linter {
             const sourceFile = this.program.getSourceFile(fileName);
             if (sourceFile === undefined) {
                 const INVALID_SOURCE_ERROR = dedent`
-                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .d.ts, .js or .jsx extension.
                 `;
-                throw new Error(INVALID_SOURCE_ERROR);
-            }
-            // check if the program has been type checked
-            if (!("resolvedModules" in sourceFile)) {
-                throw new Error("Program must be type checked before linting");
+                throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
         } else {

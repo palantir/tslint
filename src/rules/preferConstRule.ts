@@ -158,6 +158,10 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     }
                 } else {
                     this.scope = new Scope(this.scope.functionScope);
+                    if ((utils.isForInStatement(node) || utils.isForOfStatement(node)) &&
+                        node.initializer.kind !== ts.SyntaxKind.VariableDeclarationList) {
+                        this.handleExpression(node.initializer);
+                    }
                 }
             }
             if (node.kind === ts.SyntaxKind.VariableDeclarationList) {
@@ -234,7 +238,6 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                             this.handleExpression((property as ts.PropertyAssignment).initializer);
                     }
                 }
-                break;
         }
     }
 

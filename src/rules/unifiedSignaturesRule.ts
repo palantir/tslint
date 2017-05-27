@@ -72,7 +72,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
             }
             case ts.SyntaxKind.TypeLiteral:
                 checkMembers((node as ts.TypeLiteralNode).members);
-                break;
         }
 
         return ts.forEachChild(node, cb);
@@ -130,7 +129,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
                         ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
                         : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
-                    break;
                 }
             }
         }
@@ -147,8 +145,8 @@ interface Failure {
     only2: boolean;
 }
 type Unify =
-    | { kind: "single-parameter-difference", p0: ts.ParameterDeclaration, p1: ts.ParameterDeclaration }
-    | { kind: "extra-parameter", extraParameter: ts.ParameterDeclaration, otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
+    | { kind: "single-parameter-difference"; p0: ts.ParameterDeclaration; p1: ts.ParameterDeclaration }
+    | { kind: "extra-parameter"; extraParameter: ts.ParameterDeclaration; otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
 
 function checkOverloads<T>(
         signatures: T[],
@@ -247,7 +245,7 @@ function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.Paramet
  * Given a node, if it could potentially be an overload, return its signature and key.
  * All signatures which are overloads should have equal keys.
  */
-type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string } | undefined;
+type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration; key: string } | undefined;
 
 /**
  * Returns true if typeName is the name of an *outer* type parameter.
@@ -279,7 +277,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
                 return true;
             }
         }
-        return !!ts.forEachChild(type, typeContainsTypeParameter);
+        return ts.forEachChild(type, typeContainsTypeParameter);
     }
 }
 

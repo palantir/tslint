@@ -1,7 +1,4 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
     "promise-function-async": true
   }
