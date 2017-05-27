@@ -108,7 +108,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
         outer: for (const property of node.properties) {
             // Have we switched from shorthand/longhand
-            const hasSwitched = !!lastSyntax && lastSyntax !== property.kind;
+            const hasSwitched = lastSyntax !== undefined && lastSyntax !== property.kind;
 
             switch (property.kind) {
                 // Currently not checking spread, and starting the key-checking over
