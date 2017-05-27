@@ -135,7 +135,6 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
                     handleVariableNameKeyword(name);
                 }
-                break;
             }
         }
 

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isParameterDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,20 +41,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoParameterPropertiesWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-export class NoParameterPropertiesWalker extends Lint.RuleWalker {
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        const parameters = node.parameters;
-        for (const parameter of parameters) {
-            if (parameter.modifiers === undefined || parameter.modifiers.length === 0) { continue; }
-
-            const errorMessage = Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text);
-            const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
-            this.addFailureFromStartToEnd(parameter.getStart(), lastModifier.getEnd(), errorMessage);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isParameterDeclaration(node) && isParameterProperty(node)) {
+            ctx.addFailureAtNode(node.getChildAt(0), Rule.FAILURE_STRING_FACTORY(node.name.getText(ctx.sourceFile)));
         }
-        super.visitConstructorDeclaration(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

@@ -86,19 +86,19 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 /**
  * Searches for a TSLint configuration and returns the data from the config.
  * @param configFile A path to a config file, this can be null if the location of a config is not known
- * @param inputFileLocation A path to the current file being linted. This is the starting location
+ * @param inputFilePath A path containing the current file being linted. This is the starting location
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
 export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
-    const path = findConfigurationPath(configFile, inputFilePath);
-    const loadResult: IConfigurationLoadResult = { path };
+    const configPath = findConfigurationPath(configFile, inputFilePath);
+    const loadResult: IConfigurationLoadResult = { path: configPath };
 
     try {
-        loadResult.results = loadConfigurationFromPath(path);
+        loadResult.results = loadConfigurationFromPath(configPath);
         return loadResult;
     } catch (error) {
-        throw new FatalError(`Failed to load ${path}: ${(error as Error).message}`, error as Error);
+        throw new FatalError(`Failed to load ${configPath}: ${(error as Error).message}`, error as Error);
     }
 }
 
@@ -115,11 +115,26 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
 export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
-            throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
+            throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
         } else {
             return path.resolve(suppliedConfigFilePath);
         }
     } else {
+        // convert to dir if it's a file or doesn't exist
+        let useDirName = false;
+        try {
+            const stats = fs.statSync(inputFilePath);
+            if (stats.isFile()) {
+                useDirName = true;
+            }
+        } catch (e) {
+            // throws if file doesn't exist
+            useDirName = true;
+        }
+        if (useDirName) {
+            inputFilePath = path.dirname(inputFilePath);
+        }
+
         // search for tslint.json from input file location
         let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
         if (configFilePath !== undefined) {
@@ -243,7 +258,6 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(filePath);
         } catch (err) {
-            // tslint:disable-next-line prefer-template (fixed in 5.3)
             throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");
@@ -353,7 +367,7 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
             const absolutePath = getRelativePath(dir, relativeTo);
             if (absolutePath != null) {
                 if (!fs.existsSync(absolutePath)) {
-                    throw new Error(`Could not find custom rule directory: ${dir}`);
+                    throw new FatalError(`Could not find custom rule directory: ${dir}`);
                 }
             }
             return absolutePath;

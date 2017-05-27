@@ -58,7 +58,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 const { members } = node as ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeLiteralNode;
                 addFailures(getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, (member) =>
                     utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined));
-                break;
             }
         }
 

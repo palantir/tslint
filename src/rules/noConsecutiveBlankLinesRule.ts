@@ -31,10 +31,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Helps maintain a readable style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
             An optional number of maximum allowed sequential blanks can be specified. If no value
-            is provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.`,
+            is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_ALLOWED_BLANKS)",
+            minimum: "1",
         },
         optionExamples: [true, [true, 2]],
         type: "style",
