@@ -166,4 +166,16 @@ const obj: { x: number, y: number } = {
      ~ [0]
 };
 
+switch (x) {}
+switch (x.y) {
+        ~ [0]
+    case x:
+        x.y;
+        ~ [0]
+        break;
+    case x.y:
+         ~ [0]
+        break;
+}
+
 [0]: Unsafe use of expression of type 'any'.
