@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 3,
         },
-        optionExamples: ["true", `[true, "${OPTION_NO_PUBLIC}"]`, `[true, "${OPTION_CHECK_ACCESSOR}"]`],
+        optionExamples: [true, [true, OPTION_NO_PUBLIC], [true, OPTION_CHECK_ACCESSOR]],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -59,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = this.getOptions().ruleArguments;
+        const options = this.ruleArguments;
         const noPublic = options.indexOf(OPTION_NO_PUBLIC) !== -1;
         let checkAccessor = options.indexOf(OPTION_CHECK_ACCESSOR) !== -1;
         let checkConstructor = options.indexOf(OPTION_CHECK_CONSTRUCTOR) !== -1;
@@ -74,8 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boolean, checkConstructor: boolean) {
-    return ts.forEachChild(ctx.sourceFile, recur);
-    function recur(node: ts.Node): void {
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         if (isClassLikeDeclaration(node)) {
             for (const child of node.members) {
                 if (shouldCheck(child)) {
@@ -84,7 +83,7 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             }
         }
         return ts.forEachChild(node, recur);
-    }
+    });
 
     function shouldCheck(node: ts.ClassElement): boolean {
         switch (node.kind) {
@@ -93,10 +92,11 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
                 return checkAccessor;
-            case ts.SyntaxKind.SemicolonClassElement:
-                return false;
-            default:
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
                 return true;
+            default:
+                return false;
         }
     }
 
@@ -112,8 +112,10 @@ function walk(ctx: Lint.WalkContext<void>, noPublic: boolean, checkAccessor: boo
             ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
         }
         if (!noPublic && !isPublic) {
-            const nameNode = isConstructorDeclaration(node) ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)! : node.name || node;
-            const memberName = node.name && isIdentifier(node.name) ? node.name.text : undefined;
+            const nameNode = isConstructorDeclaration(node)
+                ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword)!
+                : node.name !== undefined ? node.name : node;
+            const memberName = node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
             ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
         }
     }
@@ -132,6 +134,6 @@ function memberType(node: ts.ClassElement): string {
         case ts.SyntaxKind.SetAccessor:
             return "set property accessor";
         default:
-            throw new Error("unhandled node type " + ts.SyntaxKind[node.kind]);
+            throw new Error(`unhandled node type ${ts.SyntaxKind[node.kind]}`);
     }
 }

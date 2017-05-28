@@ -41,8 +41,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: [OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
         },
         optionExamples: [
-            "true",
-            `[true, "${OPTION_ALLOW_PUBLIC}", "${OPTION_ALLOW_PROTECTED}"]`,
+            true,
+            [true, OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
         ],
         type: "style",
         typescriptOnly: false,
@@ -66,12 +66,12 @@ class PreferFunctionOverMethodWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (isMethodDeclaration(node) && !this.isExempt(node)) {
                 // currentScope is always undefined here, so we don't need to save it and just set it to undefined afterwards
-                const scope = this.currentScope = {
+                this.currentScope = {
                     isThisUsed: false,
                     name: getPropertyName(node.name),
                 };
                 ts.forEachChild(node, cb);
-                if (!scope.isThisUsed) {
+                if (!this.currentScope.isThisUsed) {
                     this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
                 }
                 this.currentScope = undefined;

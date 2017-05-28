@@ -1,20 +1,22 @@
 function f() {
-             ~ [Expected '{' to go on the line after the preceding token.]
+             ~ [0 % ('{')]
 }
 
 try
 {
 } catch ()
-  ~~~~~ [Expected 'catch' to go on the line after the preceding token.]
+  ~~~~~ [0 % ('catch')]
 {
 } finally
-  ~~~~~~~ [Expected 'finally' to go on the line after the preceding token.]
+  ~~~~~~~ [0 % ('finally')]
 {
 }
 
 if (so)
 {
 } else
-  ~~~~ [Expected 'else' to go on the line after the preceding token.]
+  ~~~~ [0 % ('else')]
 {
 }
+
+[0]: Expected '%s' to go on the line after the preceding token.

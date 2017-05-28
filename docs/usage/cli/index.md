@@ -1,26 +1,30 @@
 ---
-title: CLI
+title: TSLint command-line interface
 layout: page
-permalink: "/usage/cli/"
+permalink: /usage/cli/
 ---
+
 ### Installation
 
 __Local__ (in your project's working directory):
 
-```
-$ npm install tslint typescript --save-dev
+```sh
+npm install tslint typescript --save-dev
+# or
+yarn add tslint typescript
 ```
 
 __Global__:
 
+```sh
+npm install tslint typescript -g
+# or
+yarn global add tslint typescript
 ```
-$ npm install tslint typescript -g
-```
-
 
 {% include peer_dependencies.md %}
 
-### Usage ###
+### CLI Usage
 
 Please ensure that the TypeScript source files compile correctly _before_ running the linter.
 
@@ -36,6 +40,7 @@ Options:
 -h, --help            display detailed help
 -i, --init            generate a tslint.json config file in the current working directory
 -o, --out             output file
+--outputAbsolutePaths whether or not outputted file paths are absolute
 -p, --project         tsconfig.json file
 -r, --rules-dir       rules directory
 -s, --formatters-dir  formatters directory
@@ -85,6 +90,9 @@ tslint accepts the following command-line options:
     A filename to output the results to. By default, tslint outputs to
     stdout, which is usually the console where you're running it from.
 
+--outputAbsolutePaths:
+    Indicates whether or not outputted file paths are absolute paths.
+
 -r, --rules-dir:
     An additional rules directory, for user-created rules.
     tslint will always check its default rules directory, in
@@ -129,5 +137,13 @@ tslint accepts the following command-line options:
 -h, --help:
     Prints this help message.
 ```
+
+#### Exit Codes
+
+The CLI process may exit with the following codes:
+
+- `0`: Linting succeeded without errors (warnings may have ocurred)
+- `1`: An invalid command line argument or combination thereof was used
+- `2`: Linting failed with one or more rule violations with severity `error`
 
 [0]: {{site.baseurl | append: "/rules/"}}

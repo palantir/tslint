@@ -1,7 +1,7 @@
 const bad = {
-  w: function() {},
-  x: function *() {},
-  [y]: function() {},
+  w() {},
+  *x() {},
+  [y]() {},
   z
 };
 
@@ -21,7 +21,7 @@ const namedFunctions = {
 };
 
 const quotes = {
-  "foo-bar": function() {},
+  "foo-bar"() {},
   "foo-bar"() {}
 };
 
@@ -35,3 +35,7 @@ const extraCases = {
   }
 };
 
+const asyncFn = {
+  async foo() {},
+  async *bar() {}
+}

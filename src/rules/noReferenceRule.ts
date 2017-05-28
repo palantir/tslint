@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Use ES6-style imports to reference other files.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
     };

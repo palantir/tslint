@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isInterfaceDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -36,18 +37,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_FOR_EXTENDS = "An interface declaring no members is equivalent to its supertype.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        if (node.members.length === 0 &&
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isInterfaceDeclaration(node) &&
+            node.members.length === 0 &&
             (node.heritageClauses === undefined ||
              node.heritageClauses[0].types === undefined ||
              // allow interfaces that extend 2 or more interfaces
              node.heritageClauses[0].types!.length < 2)) {
-            this.addFailureAtNode(node.name, node.heritageClauses ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
+            return ctx.addFailureAtNode(node.name,
+                node.heritageClauses !== undefined ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
         }
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

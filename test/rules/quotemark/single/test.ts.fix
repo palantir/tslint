@@ -3,3 +3,4 @@ var single = 'single';
 var singleWithinDouble = '\'singleWithinDouble\'';
 var doubleWithinSingle = '"doubleWithinSingle"';
 var tabNewlineWithinDouble = 'tab\tNewline\nWithinDouble';
+'escaped"quotemark';

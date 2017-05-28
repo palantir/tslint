@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -37,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             minLength: 1,
         },
-        optionExamples: ["true", "[true, 1, 2, 3]"],
+        optionExamples: [true, [true, 1, 2, 3]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -70,13 +71,14 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
-                this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
-            } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
-                       (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.MinusToken) {
-                this.checkNumericLiteral(node, "-" + ((node as ts.PrefixUnaryExpression).operand as ts.NumericLiteral).text);
-            } else {
-                ts.forEachChild(node, cb);
+                return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
+            if (isPrefixUnaryExpression(node) &&
+                node.operator === ts.SyntaxKind.MinusToken &&
+                node.operand.kind === ts.SyntaxKind.NumericLiteral) {
+                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
+            }
+            return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }

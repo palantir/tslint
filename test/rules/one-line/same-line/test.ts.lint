@@ -1,9 +1,9 @@
 module Module
 {
-~ [BRACE]
+~ [0 % ('{')]
     export enum Enumeration
     {
-    ~ [BRACE]
+    ~ [0 % ('{')]
         A,
         B,
         C,
@@ -12,14 +12,14 @@ module Module
 
     export function Call()
     {
-    ~ [BRACE]
+    ~ [0 % ('{')]
         if (x == 3)
         {
-        ~ [BRACE]
+        ~ [0 % ('{')]
             x = 4;
         }
         else {
-        ~~~~   [ELSE]
+        ~~~~   [0 % ('else')]
             x = 5;
         }
         return "called";
@@ -28,29 +28,29 @@ module Module
 
 interface Class
 {
-~ [BRACE]
+~ [0 % ('{')]
     variable: string;
 }
 
 var object =
 {
-~ [BRACE]
+~ [0 % ('{')]
     a: 1,
     b: 2
 };
 
 for(var x= 0; x < 1; ++x)
 {
-~ [BRACE]
+~ [0 % ('{')]
     ++i;
 }
 
 switch(y)
 {
-~ [BRACE]
+~ [0 % ('{')]
     case 0:
     {
-    ~ [BRACE]
+    ~ [0 % ('{')]
         x--;
         break;
     }
@@ -61,19 +61,19 @@ switch(y)
 
 try
 {
-~ [BRACE]
+~ [0 % ('{')]
     throw new Error("hi");
 }
 catch (e)
-~~~~~     [CATCH]
+~~~~~     [0 % ('catch')]
 {
-~ [BRACE]
+~ [0 % ('{')]
     throw(e);
 }
 finally
-~~~~~~~ [FINALLY]
+~~~~~~~ [0 % ('finally')]
 {
-~ [BRACE]
+~ [0 % ('{')]
     // do something
 }
 
@@ -81,9 +81,9 @@ try {
     foo();
 }
 finally
-~~~~~~~ [FINALLY]
+~~~~~~~ [0 % ('finally')]
 {
-~ [BRACE]
+~ [0 % ('{')]
     bar();
 }
 
@@ -111,7 +111,7 @@ function f():
 
 class BarBooBaz
 {
-~ [BRACE]
+~ [0 % ('{')]
 
 }
 
@@ -153,8 +153,5 @@ if (true)
 else
     false;
 
-[BRACE]: Expected '{' to go on the same line as the preceding token.
-[ELSE]: Expected 'else' to go on the same line as the preceding token.
-[CATCH]: Expected 'catch' to go on the same line as the preceding token.
-[FINALLY]: Expected 'finally' to go on the same line as the preceding token.
+[0]: Expected '%s' to go on the same line as the preceding token.
 [SPACE]: Expected a space.

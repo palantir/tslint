@@ -45,11 +45,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
             * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
-            
+
             Exceptions to \`"check-lowercase"\` or \`"check-uppercase"\` can be managed with object that may be passed as last argument.
-            
+
             One of two options can be provided in this object:
-                
+
                 * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
                 * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
             `,
@@ -87,9 +87,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 4,
         },
         optionExamples: [
-            '[true, "check-space", "check-uppercase"]',
-            '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]',
-            '[true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}]',
+            [true, "check-space", "check-uppercase"],
+            [true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}],
+            [true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}],
         ],
         type: "style",
         typescriptOnly: false,
@@ -109,7 +109,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class CommentWalker extends Lint.RuleWalker {
     private exceptionsRegExp: ExceptionsRegExp;
-    private failureIgnorePart: string = "";
+    private failureIgnorePart = "";
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -155,18 +155,18 @@ class CommentWalker extends Lint.RuleWalker {
         const exceptionsObject = optionsList[optionsList.length - 1];
 
         // early return if last element is string instead of exceptions object
-        if (typeof exceptionsObject === "string" || !exceptionsObject) {
+        if (typeof exceptionsObject === "string" || exceptionsObject === undefined) {
             return null;
         }
 
-        if (exceptionsObject["ignore-pattern"]) {
+        if (exceptionsObject["ignore-pattern"] !== undefined) {
             const ignorePattern = exceptionsObject["ignore-pattern"] as string;
             this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern);
             // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
             return new RegExp(`^//\\s*(${ignorePattern})`);
         }
 
-        if (exceptionsObject["ignore-words"]) {
+        if (exceptionsObject["ignore-words"] !== undefined) {
             const ignoreWords = exceptionsObject["ignore-words"] as string[];
             this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
             // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation

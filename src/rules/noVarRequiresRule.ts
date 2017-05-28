@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+// tslint:disable deprecation
+// (https://github.com/palantir/tslint/pull/2341)
+
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -29,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };

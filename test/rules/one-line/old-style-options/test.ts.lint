@@ -1,0 +1,29 @@
+// "check-open-brace", "check-catch", "check-else", "check-finally", "check-whitespace"
+
+// check-open-brace
+function f()
+{
+~ [0 % ('{')]
+}
+
+// check-catch, check-finally
+try { }
+catch (e) {
+~~~~~ [0 % ('catch')]
+}
+finally {
+~~~~~~~ [0 % ('finally')]
+}
+
+// check-else
+if (1) { }
+else {
+~~~~ [0 % ('else')]
+}
+
+// check-whitespace
+if (1){}
+      ~ [Expected a space.]
+
+[0]: Expected '%s' to go on the same line as the preceding token.
+

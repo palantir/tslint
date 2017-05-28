@@ -15,9 +15,15 @@
  * limitations under the License.
  */
 
+import { getChildOfKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+type Option = "nospace" | "onespace" | "space";
+type OptionType = "call-signature" | "index-signature" | "parameter" | "property-declaration" | "variable-declaration";
+type OptionInput = Partial<Record<OptionType, Option>>;
+type Options = Partial<Record<"left" | "right", OptionInput>>;
 
 /* tslint:disable:object-literal-sort-keys */
 const SPACE_OPTIONS = {
@@ -46,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Two arguments which are both objects.
             The first argument specifies how much space should be to the _left_ of a typedef colon.
             The second argument specifies how much space should be to the _right_ of a typedef colon.
-            Each key should have a value of \`"space"\` or \`"nospace"\`.
+            Each key should have a value of \`"onespace"\`, \`"space"\` or \`"nospace"\`.
             Possible keys are:
 
             * \`"call-signature"\` checks return type of functions.
@@ -59,244 +65,148 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: [SPACE_OBJECT, SPACE_OBJECT],
             additionalItems: false,
         },
-        optionExamples: [Lint.Utils.dedent`
+        optionExamples: [
             [
-              true,
-              {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace"
-              },
-              {
-                "call-signature": "onespace",
-                "index-signature": "onespace",
-                "parameter": "onespace",
-                "property-declaration": "onespace",
-                "variable-declaration": "onespace"
-              }
-            ]`,
+                true,
+                {
+                    "call-signature": "nospace",
+                    "index-signature": "nospace",
+                    "parameter": "nospace",
+                    "property-declaration": "nospace",
+                    "variable-declaration": "nospace",
+                },
+                {
+                    "call-signature": "onespace",
+                    "index-signature": "onespace",
+                    "parameter": "onespace",
+                    "property-declaration": "onespace",
+                    "variable-declaration": "onespace",
+                },
+            ],
         ],
         type: "typescript",
         typescriptOnly: true,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static FAILURE_STRING(option: string, location: "before" | "after", type: string) {
+        return `expected ${option} ${location} colon in ${type}`;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new TypedefWhitespaceWalker(sourceFile, this.getOptions()));
+        const args = this.ruleArguments as Array<OptionInput | undefined>;
+        const options = {
+            left: args[0],
+            right: args[1],
+        };
+        return this.applyWithWalker(new TypedefWhitespaceWalker(sourceFile, this.ruleName, options));
     }
 }
 
-class TypedefWhitespaceWalker extends Lint.RuleWalker {
-    private static getColonPosition(node: ts.Node) {
-        const colon = Lint.childOfKind(node, ts.SyntaxKind.ColonToken);
-        return colon && colon.getStart();
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitGetAccessor(node);
-    }
-
-    public visitIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration) {
-        this.checkSpace("index-signature", node, node.type);
-        super.visitIndexSignatureDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitMethodSignature(node);
-    }
-
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        this.checkSpace("parameter", node, node.type);
-        super.visitParameterDeclaration(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.checkSpace("property-declaration", node, node.type);
-        super.visitPropertyDeclaration(node);
-    }
-
-    public visitPropertySignature(node: ts.PropertyDeclaration) {
-        this.checkSpace("property-declaration", node, node.type);
-        super.visitPropertySignature(node);
-    }
-
-    public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.checkSpace("call-signature", node, node.type);
-        super.visitSetAccessor(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        this.checkSpace("variable-declaration", node, node.type);
-        super.visitVariableDeclaration(node);
-    }
-
-    public checkSpace(option: string, node: ts.Node, typeNode: ts.TypeNode | ts.StringLiteral | undefined) {
-        if (this.hasOption(option) && typeNode != null) {
-            const colonPosition = TypedefWhitespaceWalker.getColonPosition(node);
-
-            if (colonPosition !== undefined) {
-                const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.getText());
-
-                this.checkLeft(option, node, scanner, colonPosition);
-                this.checkRight(option, node, scanner, colonPosition);
+class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            const optionType = getOptionType(node);
+            if (optionType !== undefined) {
+                this.checkSpace(node as ts.SignatureDeclaration | ts.VariableLikeDeclaration, optionType);
             }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
+    }
+
+    private checkSpace(node: ts.SignatureDeclaration | ts.VariableLikeDeclaration, key: OptionType) {
+        if (node.type === undefined) {
+            return;
+        }
+        const {left, right} = this.options;
+        const colon = getChildOfKind(node, ts.SyntaxKind.ColonToken, this.sourceFile)!;
+        if (right !== undefined && right[key] !== undefined) {
+            this.checkRight(colon.end, right[key]!, key);
+        }
+        if (left !== undefined && left[key] !== undefined) {
+            this.checkLeft(colon.end - 1, left[key]!, key);
         }
     }
 
-    public hasOption(option: string) {
-        return this.hasLeftOption(option) || this.hasRightOption(option);
+    private checkRight(colonEnd: number, option: Option, key: OptionType) {
+        let pos = colonEnd;
+        const {text} = this.sourceFile;
+        let current = text.charCodeAt(pos);
+        if (ts.isLineBreak(current)) {
+            return;
+        }
+        while (ts.isWhiteSpaceSingleLine(current)) {
+            ++pos;
+            current = text.charCodeAt(pos);
+        }
+        return this.validateWhitespace(colonEnd, pos, option, "after", key);
     }
 
-    private hasLeftOption(option: string) {
-        const allOptions = this.getOptions();
-
-        if (allOptions == null || allOptions.length === 0) {
-            return false;
+    private checkLeft(colonStart: number, option: Option, key: OptionType) {
+        let pos = colonStart;
+        const {text} = this.sourceFile;
+        let current = text.charCodeAt(pos - 1);
+        while (ts.isWhiteSpaceSingleLine(current)) {
+            --pos;
+            current = text.charCodeAt(pos - 1);
         }
-
-        const options = allOptions[0];
-        return options != null && options[option] != null;
+        if (ts.isLineBreak(current)) {
+            return;
+        }
+        return this.validateWhitespace(pos, colonStart, option, "before", key);
     }
 
-    private hasRightOption(option: string) {
-        const allOptions = this.getOptions();
-
-        if (allOptions == null || allOptions.length < 2) {
-            return false;
-        }
-
-        const options = allOptions[1];
-        return options != null && options[option] != null;
-    }
-
-    private getLeftOption(option: string) {
-        if (!this.hasLeftOption(option)) {
-            return null;
-        }
-
-        const allOptions = this.getOptions();
-        const options = allOptions[0];
-        return options[option];
-    }
-
-    private getRightOption(option: string) {
-        if (!this.hasRightOption(option)) {
-            return null;
-        }
-
-        const allOptions = this.getOptions();
-        const options = allOptions[1];
-        return options[option];
-    }
-
-    private checkLeft(option: string, node: ts.Node, scanner: ts.Scanner, colonPosition: number) {
-        if (this.hasLeftOption(option)) {
-            let positionToCheck = colonPosition - 1 - node.getStart();
-
-            let hasLeadingWhitespace: boolean;
-            if (positionToCheck < 0) {
-                hasLeadingWhitespace = false;
-            } else {
-                scanner.setTextPos(positionToCheck);
-                hasLeadingWhitespace = scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
-            }
-
-            positionToCheck = colonPosition - 2 - node.getStart();
-
-            let hasSeveralLeadingWhitespaces: boolean;
-            if (positionToCheck < 0) {
-                hasSeveralLeadingWhitespaces = false;
-            } else {
-                scanner.setTextPos(positionToCheck);
-                hasSeveralLeadingWhitespaces = hasLeadingWhitespace &&
-                    scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
-            }
-
-            const optionValue = this.getLeftOption(option);
-            const message = "expected " + optionValue + " before colon in " + option;
-            this.performFailureCheck(
-                optionValue,
-                hasLeadingWhitespace,
-                hasSeveralLeadingWhitespaces,
-                colonPosition - 1,
-                message,
-            );
+    private validateWhitespace(start: number, end: number, option: Option, location: "before" | "after", key: OptionType) {
+        switch (option) {
+            case "nospace":
+                if (start !== end) {
+                    this.addFailure(start, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.deleteFromTo(start, end));
+                }
+                break;
+            case "space":
+                if (start === end) {
+                    this.addFailure(end, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.appendText(end, " "));
+                }
+                break;
+            case "onespace":
+                switch (end - start) {
+                    case 0:
+                        this.addFailure(end, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.appendText(end, " "));
+                        break;
+                    case 1:
+                        break;
+                    default:
+                        this.addFailure(start + 1, end, Rule.FAILURE_STRING(option, location, key),
+                                        Lint.Replacement.deleteFromTo(start + 1, end));
+                }
         }
     }
+}
 
-    private checkRight(option: string, node: ts.Node, scanner: ts.Scanner, colonPosition: number) {
-        if (this.hasRightOption(option)) {
-            let positionToCheck = colonPosition + 1 - node.getStart();
-
-            // Don't enforce trailing spaces on newlines
-            // (https://github.com/palantir/tslint/issues/1354)
-            scanner.setTextPos(positionToCheck);
-            const kind = scanner.scan();
-            if (kind === ts.SyntaxKind.NewLineTrivia) {
-                return;
-            }
-
-            let hasTrailingWhitespace: boolean;
-            if (positionToCheck >= node.getWidth()) {
-                hasTrailingWhitespace = false;
-            } else {
-                hasTrailingWhitespace = kind === ts.SyntaxKind.WhitespaceTrivia;
-            }
-
-            positionToCheck = colonPosition + 2 - node.getStart();
-
-            let hasSeveralTrailingWhitespaces: boolean;
-            if (positionToCheck >= node.getWidth()) {
-                hasSeveralTrailingWhitespaces = false;
-            } else {
-                scanner.setTextPos(positionToCheck);
-                hasSeveralTrailingWhitespaces = hasTrailingWhitespace &&
-                    scanner.scan() === ts.SyntaxKind.WhitespaceTrivia;
-            }
-
-            const optionValue = this.getRightOption(option);
-            const message = "expected " + optionValue + " after colon in " + option;
-            this.performFailureCheck(
-                optionValue,
-                hasTrailingWhitespace,
-                hasSeveralTrailingWhitespaces,
-                colonPosition + 1,
-                message,
-            );
-        }
-    }
-
-    private performFailureCheck(optionValue: string, hasWS: boolean, hasSeveralWS: boolean, failurePos: number, message: string) {
-        // has several spaces but should have one or none
-        let isFailure = hasSeveralWS &&
-            (optionValue === "onespace" || optionValue === "nospace");
-        // has at least one space but should have none
-        isFailure = isFailure || hasWS && optionValue === "nospace";
-        // has no space but should have at least one
-        isFailure = isFailure || !hasWS &&
-            (optionValue === "onespace" || optionValue === "space");
-
-        if (isFailure) {
-            this.addFailureAt(failurePos, 1, message);
-        }
+function getOptionType(node: ts.Node): OptionType | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.ArrowFunction:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.CallSignature:
+            return "call-signature";
+        case ts.SyntaxKind.IndexSignature:
+            return "index-signature";
+        case ts.SyntaxKind.VariableDeclaration:
+            return "variable-declaration";
+        case ts.SyntaxKind.Parameter:
+            return "parameter";
+        case ts.SyntaxKind.PropertySignature:
+        case ts.SyntaxKind.PropertyDeclaration:
+            return "property-declaration";
+        default:
+            return undefined;
     }
 }

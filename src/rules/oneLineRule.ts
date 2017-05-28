@@ -26,11 +26,11 @@ const OPTION_FINALLY = "finally";
 const OPTION_WHITESPACE = "check-whitespace";
 
 type BraceSetting = "same-line" | "next-line";
-const OPTION_SAME_LINE = "same-line";
-const OPTION_NEXT_LINE = "next-line";
+const OPTION_SAME_LINE: BraceSetting = "same-line";
+const OPTION_NEXT_LINE: BraceSetting = "next-line";
 
 const optionSchema = {
-    enum: ["same-line", "next-line"] as BraceSetting[],
+    enum: [OPTION_SAME_LINE, OPTION_NEXT_LINE],
     type: "string",
 };
 
@@ -65,13 +65,18 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             additionalProperties: false,
         },
-        optionExamples: [JSON.stringify([true, {
-            "open-brace": "same-line",
-            "catch": "same-line",
-            "else": "same-line",
-            "finally": "same-line",
-            "check-whitespace": true,
-        }], undefined, 2)],
+        optionExamples: [
+            [
+                true,
+                {
+                    "open-brace": OPTION_SAME_LINE,
+                    "catch": OPTION_NEXT_LINE,
+                    "else": OPTION_NEXT_LINE,
+                    "finally": OPTION_NEXT_LINE,
+                    "check-whitespace": true,
+                },
+            ],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -80,7 +85,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static WHITESPACE_FAILURE_STRING = "Expected a space.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
+        const options = parseOptions(this.ruleArguments);
+        return options === undefined ? [] : this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
@@ -92,12 +98,38 @@ interface Options {
     "check-whitespace"?: boolean;
 }
 
-function parseOptions(options: any[]): Options {
-    if (options.length !== 1 || typeof options[0] !== "object") {
-        throw new Error(`Expected an options object, got: ${options[0]}`);
+function parseOptions(ruleArguments: any[]): Options | undefined {
+    if (ruleArguments.length === 0) {
+        return undefined;
+    }
+    if (typeof ruleArguments[0] === "object") {
+        return ruleArguments[0] as Options;
     }
 
-    return options[0];
+    // Parse old-style options (TODO: remove in tslint 6.0)
+    const options: Options = {};
+    for (const arg of ruleArguments) {
+        switch (arg) { // tslint:disable-line no-unsafe-any (fixed in tslint 5.4)
+            case "check-catch":
+                options.catch = "same-line";
+                break;
+            case "check-finally":
+                options.finally = "same-line";
+                break;
+            case "check-else":
+                options.else = "same-line";
+                break;
+            case "check-open-brace":
+                options["open-brace"] = "same-line";
+                break;
+            case "check-whitespace":
+                options["check-whitespace"] = true;
+                break;
+            default:
+                throw new Error(`bad option: ${arg}`);
+        }
+    }
+    return options;
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
@@ -126,6 +158,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 }
                 break;
             }
+
             case ts.SyntaxKind.CatchClause: {
                 const { block } = node as ts.CatchClause;
                 const catchClosingParen = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken)!;
@@ -133,6 +166,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 checkBrace(catchClosingParen, catchOpeningBrace);
                 break;
             }
+
             case ts.SyntaxKind.TryStatement: {
                 const { tryBlock, catchClause, finallyBlock } = node as ts.TryStatement;
                 const finallyKeyword = Lint.childOfKind(node, ts.SyntaxKind.FinallyKeyword);
@@ -275,10 +309,9 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     const openBraceToken = body.getChildAt(0);
                     checkBrace(arrowToken, openBraceToken);
                 }
-                break;
             }
         }
-        return ts.forEachChild(node, cb);
+        ts.forEachChild(node, cb);
     });
 
     function checkBrace(previousNode: ts.Node, openBraceToken: ts.Node): void {
@@ -296,7 +329,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         if (nl !== (braces === "next-line")) {
             const expected = braces === "next-line" ? "line after" : "same line as";
             ctx.addFailureAtNode(token, `Expected '${ts.tokenToString(token.kind)}' to go on the ${expected} the preceding token.`);
-        } else if (braces === "same-line" && options["check-whitespace"] && aEnd === bStart) {
+        } else if (braces === "same-line" && options["check-whitespace"] === true && aEnd === bStart) {
             ctx.addFailureAtNode(token, Rule.WHITESPACE_FAILURE_STRING);
         }
     }

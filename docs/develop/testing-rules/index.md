@@ -97,6 +97,49 @@ Then, at the bottom of our test file, we specify what full message each shortcut
 
 Again, we can run `grunt test` to make sure our rule is producing the output we expect. If it isn't we'll see the difference between the output from the rule and the output we marked.
 
+You can also use placeholders to format messages. That's useful if the error message contains non-static parts, e.g. variable names. But let's stick to the above example for now.
+
+``` 
+const octopus = 5;
+      ~~~~~~~     [no-animal]
+
+let giraffe: number, tiger: number;
+    ~~~~~~~                 [no-animal]
+                     ~~~~~  [no-animal]
+
+const tree = 5;
+      ~~~~      [error % ("plants")]
+const skyscraper = 100;
+
+[error] Variables named after %s are not allowed!
+[no-animal]: error % ('animals')
+```
+
+We created a message template called `error` which has one placeholder `%s`. For a complete list of supported placeholders, please refer to the documentation of node's [util.format()](https://nodejs.org/api/util.html#util_util_format_format_args).
+To use the template for formatting, you need to use a special syntax: `template_name % ('substitution1' [, "substitution2" [, ...]])`.
+Substitutions are passed as comma separated list of javascript string literals. The strings need to be wrapped in single or double quotes. Escaping characters works like you would expect in javascript.
+
+You may have noticed that the template is used for formatting in two different places. Use it in inline errors to pass another substitution every time.
+If you use formatting in another message shorthand (like we did for `[no-animal]`), you need to make sure the template is defined before its use. That means swapping the lines of `[error]` and `[no-animal]` will not work. There are no restrictions for the use of `[no-animal]` in inline errors, though.
+
+Now let's pretend the rule changed its error message to include the variable name at the end. The following example shows how to substitute multiple placeholders.
+
+``` 
+const octopus = 5;
+      ~~~~~~~     [no-animal % ('octopus')]
+
+let giraffe: number, tiger: number;
+    ~~~~~~~                 [no-animal % ('giraffe')]
+                     ~~~~~  [no-animal % ('tiger')]
+
+const tree = 5;
+      ~~~~      [error % ("plants", "tree")]
+const skyscraper = 100;
+
+[error] Variables named after %s are not allowed: '%s'
+[no-animal]: error % ('animals')
+```
+
 ##### Typescript version requirement #####
 
 Sometimes a rule requires a minimum version of the typescript compiler or your test contains syntax that older versions of the typescript parser cannot handle.
@@ -115,7 +158,11 @@ The following part can be any [version range](https://github.com/npm/node-semver
 ### Tips & Tricks ###
 
 * You can use this system to test rules outside of the TSLint build! Use the `tslint --test path/to/dir` command to test your own custom rules.
-The directory you pass should contain a `tslint.json` file and `.ts.lint` files. You can try this out on the TSLint rule test cases, for example, `tslint --test path/to/tslint-code/test/rules/quotemark/single`.
+You can specify one or more paths to `tslint.json` files or directories containing a `tslint.json`. Glob patterns are also supported.
+Besides the `tslint.json` each directory you pass should contain `*.ts.lint` files. You can try this out on the TSLint rule test cases, for example, `tslint --test path/to/tslint-code/test/rules/quotemark/single`.
+If you want to test all of your rules at once, you can use it like this: `tslint --test rules/test/**/tslint.json`
+
+* To test rules that need type information, you can simply add a `tsconfig.json` with the desired configuration next to `tslint.json`.
 
 * Lint failures sometimes span over multiple lines. To handle this case, don't specify a message until the end of the error. For example:
 
@@ -128,7 +175,5 @@ for (let key in obj) {
 ~ [for-in loops are not allowed]
 ```
 
-* If for some weird reason your lint rule generates a failure that has zero width, you can use the `~nil` mark to indicate this.
-In all reality though, you shouldn't have rules that do this, and this feature is more of a carryover to accomodate testing
-some of TSLint's legacy rules.
+* If for some reason your lint rule generates a failure that has zero width, you can use the `~nil` mark to indicate this.
 

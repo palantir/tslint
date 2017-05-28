@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_FUNCTION_IN_METHOD}"]`],
+        optionExamples: [true, [true, OPTION_FUNCTION_IN_METHOD]],
         type: "functionality",
         typescriptOnly: false,
     };
