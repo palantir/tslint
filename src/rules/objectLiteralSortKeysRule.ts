@@ -111,9 +111,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
             const hasSwitched = lastSyntax !== undefined && lastSyntax !== property.kind;
 
             switch (property.kind) {
-                // Currently not checking spread, and starting the key-checking over
+                // Currently not checking spread
                 case ts.SyntaxKind.SpreadAssignment:
-                    lastKey = undefined;
                     break;
 
                 case ts.SyntaxKind.ShorthandPropertyAssignment:
