@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-import { isIfStatement, isIterationStatement, isSameLine } from "tsutils";
+import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_NEVER = "never";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
 
 interface Options {
@@ -42,8 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: Lint.Utils.dedent`
-            The rule may be set to \`true\`, or to the following:
+            One of the following options may be provided:
 
+            * \`"${OPTION_NEVER}"\` forbids any unnecessary curly braces.
             * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
             that are on one line and start on the same line as their control-flow keyword
         `,
@@ -52,25 +54,45 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 type: "string",
                 enum: [
+                    OPTION_NEVER,
                     OPTION_IGNORE_SAME_LINE,
                 ],
             },
         },
-        optionExamples: [true, [true, "ignore-same-line"]],
+        optionExamples: [
+            true,
+            [true, "ignore-same-line"],
+            [true, "never"],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static FAILURE_STRING_NEVER = "Block contains only one statement; remove the curly braces.";
     public static FAILURE_STRING_FACTORY(kind: string) {
         return `${kind} statements must be braced`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        if (this.ruleArguments.indexOf(OPTION_NEVER) !== -1) {
+            return this.applyWithFunction(sourceFile, walkNever);
+        }
+
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.ruleName, {
             ignoreSameLine: this.ruleArguments.indexOf(OPTION_IGNORE_SAME_LINE) !== -1,
         }));
     }
+}
+
+function walkNever(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node) {
+        if (isBlock(node) && node.statements.length === 1
+            && (isIterationStatement(node.parent!) || isIfStatement(node.parent!))) {
+            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_NEVER);
+        }
+        ts.forEachChild(node, cb);
+    });
 }
 
 class CurlyWalker extends Lint.AbstractWalker<Options> {

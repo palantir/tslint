@@ -1,0 +1,24 @@
+if (so) {
+        ~ [0]
+    foo();
+} else {
+       ~ [0]
+    foo();
+}
+
+while (true) {
+             ~ [0]
+    foo();
+}
+
+// Some blocks are necessary.
+
+function f() {
+    foo();
+}
+
+() => { foo(); };
+
+try { foo(); } catch (e) { foo(); } finally { foo(); }
+
+[0]: Block contains only one statement; remove the curly braces.
