@@ -87,12 +87,30 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walkNever(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
-        if (isBlock(node) && node.statements.length === 1
-            && (isIterationStatement(node.parent!) || isIfStatement(node.parent!))) {
+        if (isBlock(node) && isBlockUnnecessary(node)) {
             ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_NEVER);
         }
         ts.forEachChild(node, cb);
     });
+}
+
+function isBlockUnnecessary(node: ts.Block): boolean {
+    const parent = node.parent!;
+    if (node.statements.length !== 1) { return false; }
+    const statement = node.statements[0];
+    if (isIterationStatement(parent)) { return true; }
+    /*
+    Watch out for this case:
+    if (so) {
+        if (also)
+            foo();
+    } else
+        bar();
+    */
+    return isIfStatement(parent) && !(isIfStatement(statement)
+        && statement.elseStatement === undefined
+        && parent.thenStatement === node
+        && parent.elseStatement !== undefined);
 }
 
 class CurlyWalker extends Lint.AbstractWalker<Options> {
