@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "object-literal-sort-keys": [true, "shorthand-first"]
-  }
-}

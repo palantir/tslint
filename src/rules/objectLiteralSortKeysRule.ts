@@ -15,138 +15,215 @@
  * limitations under the License.
  */
 
-import { isObjectLiteralExpression, isSameLine } from "tsutils";
+import {
+    isObjectLiteralExpression,
+    isPropertyAssignment,
+    isSameLine,
+    isShorthandPropertyAssignment,
+    isSpreadAssignment,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const OPTION_CHECK_SINGLE_LINE = "check-single-line";
 const OPTION_IGNORE_CASE = "ignore-case";
-const OPTION_SHORTHAND_FIRST = "shorthand-first";
-const OPTION_SHORTHAND_LAST = "shorthand-last";
 
-interface Options {
-    checkSingleLine: boolean;
-    ignoreCase: boolean;
-    shorthandFirst: boolean;
-    shorthandLast: boolean;
+const OPTION_ORDER_SPREAD = "spread";
+const OPTION_ORDER_SHORTHAND = "shorthand";
+const OPTION_ORDER_LONGHAND = "longhand";
+
+enum KEY_ORDER {
+  OPTION_ORDER_SPREAD,
+  OPTION_ORDER_SHORTHAND,
+  OPTION_ORDER_LONGHAND,
+}
+
+const KEY_ORDER_MAP = {
+    [ts.SyntaxKind.PropertyAssignment]: OPTION_ORDER_LONGHAND,
+    [ts.SyntaxKind.ShorthandPropertyAssignment]: OPTION_ORDER_SHORTHAND,
+    [ts.SyntaxKind.SpreadAssignment]: OPTION_ORDER_SPREAD,
+};
+
+type ORDER_OPTION = "spread" | "shorthand" | "longhand";
+
+const BEHAVIOR_OPTIONS = {
+    enum: [
+        OPTION_CHECK_SINGLE_LINE,
+        OPTION_IGNORE_CASE,
+    ],
+    type: "string",
+};
+
+const SORT_OPTIONS = {
+    items: {
+        enum: KEY_ORDER,
+        type: "string",
+    },
+    maxLength: 3,
+    type: "array",
+};
+
+interface IOptions {
+  checkSingleLine: boolean;
+  ignoreCase: boolean;
+  order?: ORDER_OPTION[];
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-sort-keys",
-        description: "Requires keys in object literals to be sorted alphabetically",
-        rationale: "Useful in preventing merge conflicts",
+        description: "Requires keys in object literals to be sorted as specified",
+        rationale: "Useful in ensuring consistency and preventing merge conflicts",
         optionsDescription: Lint.Utils.dedent`
+            Two types of options are available:
+
+            Individual strings that control general functionality.
             Possible settings are:
 
             * \`"${OPTION_CHECK_SINGLE_LINE}"\`: Check objects defined on a single line.
-            * \`"${OPTION_IGNORE_CASE}"\`: Compare keys without .
-            * \`"${OPTION_SHORTHAND_FIRST}"\`: Ensure shorthand properties are placed before longhand properties.
-            * \`"${OPTION_SHORTHAND_LAST}"\`: Ensure shorthand properties are placed after longhand properties.
-            `,
+            * \`"${OPTION_IGNORE_CASE}"\`: Ignore case when comparing keys.
+
+            An array of strings that control ordering of properties by type.
+            Possible settings are:
+
+            * \`"${OPTION_ORDER_SPREAD}"\`: Spread assignments \`{...props}\`.
+            * \`"${OPTION_ORDER_SHORTHAND}"\`: Shorthand properties \`{ isError, isValid }\`.
+            * \`"${OPTION_ORDER_LONGHAND}"\`: Normal, longhand properties \`{ isError: false }\`.
+        `,
         options: {
-            type: "string",
-            enum: [
-                OPTION_CHECK_SINGLE_LINE,
-                OPTION_IGNORE_CASE,
-                OPTION_SHORTHAND_FIRST,
-                OPTION_SHORTHAND_LAST,
-            ],
+          type: "array",
+          items: [BEHAVIOR_OPTIONS, SORT_OPTIONS],
+          additionalItems: false,
         },
         optionExamples: [
             true,
             [true, OPTION_IGNORE_CASE],
-            [true, OPTION_IGNORE_CASE, OPTION_SHORTHAND_FIRST],
+            [true, OPTION_IGNORE_CASE, [OPTION_ORDER_SPREAD, OPTION_ORDER_SHORTHAND]],
         ],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static SHORTHAND_FAILURE_FACTORY(name: string, shorthandFirst: boolean) {
-        if (shorthandFirst) {
-            return `The key '${name}' should come before longhand assignments`;
-        }
-        return `The key '${name}' should come before shorthand assignments`;
-    }
-
     public static FAILURE_STRING_FACTORY(name: string) {
         return `The key '${name}' is not sorted alphabetically`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
-            checkSingleLine: this.ruleArguments.indexOf(OPTION_CHECK_SINGLE_LINE) !== -1,
-            ignoreCase: this.ruleArguments.indexOf(OPTION_IGNORE_CASE) !== -1,
-            shorthandFirst: this.ruleArguments.indexOf(OPTION_SHORTHAND_FIRST) !== -1,
-            shorthandLast: this.ruleArguments.indexOf(OPTION_SHORTHAND_LAST) !== -1,
-        });
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-function walk(ctx: Lint.WalkContext<Options>) {
-    const { options, sourceFile } = ctx;
+function parseOptions(ruleArgs: any[]): IOptions {
+    const options: IOptions = {
+        checkSingleLine: ruleArgs.indexOf(OPTION_CHECK_SINGLE_LINE) !== -1,
+        ignoreCase: ruleArgs.indexOf(OPTION_IGNORE_CASE) !== -1,
+    };
 
-    return ts.forEachChild(sourceFile, function cb(node): void {
+    for (const arg of ruleArgs) {
+        if (Array.isArray(arg)) {
+            options.order = arg;
+            break;
+        }
+    }
+
+    return options;
+}
+
+function walk(ctx: Lint.WalkContext<IOptions>) {
+    const { options, sourceFile } = ctx;
+    const { checkSingleLine, ignoreCase, order } = options;
+
+    function canCheckNode(node: ts.Node) {
         // Only check object literals with at least one key
         if (!isObjectLiteralExpression(node) || node.properties.length <= 1) {
-            return ts.forEachChild(node, cb);
+            return false;
         }
 
         // Only check single-line object literals if explicitly asked
-        if (!options.checkSingleLine && isSameLine(sourceFile, node.properties.pos, node.end)) {
+        if (!checkSingleLine && isSameLine(sourceFile, node.properties.pos, node.end)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function propertyRank(property: ts.ObjectLiteralElementLike): number {
+        const propKind = KEY_ORDER_MAP[property.kind];
+
+        if (order == undefined || propKind == undefined) {
+            return -1;
+        }
+
+        return order.indexOf(propKind as ORDER_OPTION);
+    }
+
+    function cb(node: ts.Node): void {
+        if (!canCheckNode(node)) {
             return ts.forEachChild(node, cb);
         }
 
-        const { ignoreCase, shorthandFirst, shorthandLast } = options;
-        const checkSyntaxKind = shorthandFirst || shorthandLast;
-
         let lastKey: string | undefined;
-        let lastSyntax: ts.SyntaxKind | undefined;
+        let lastRank: number | undefined;
+        let lastRankKind: string | undefined;
 
-        outer: for (const property of node.properties) {
-            // Have we switched from shorthand/longhand
-            const hasSwitched = lastSyntax !== undefined && lastSyntax !== property.kind;
-
-            switch (property.kind) {
-                // Currently not checking spread
-                case ts.SyntaxKind.SpreadAssignment:
-                    break;
-
-                case ts.SyntaxKind.ShorthandPropertyAssignment:
-                case ts.SyntaxKind.PropertyAssignment:
-                    const propName = property.name;
-                    // Only evaluate non-computed property names
-                    if (propName.kind === ts.SyntaxKind.ComputedPropertyName) {
-                      break outer;
-                    }
-
-                    const propText = propName.text;
-                    if (checkSyntaxKind && hasSwitched) {
-                        const isFailed = shorthandFirst
-                            ? lastSyntax !== ts.SyntaxKind.ShorthandPropertyAssignment
-                            : lastSyntax === ts.SyntaxKind.ShorthandPropertyAssignment;
-
-                        if (isFailed) {
-                            ctx.addFailureAtNode(propName, Rule.SHORTHAND_FAILURE_FACTORY(propText, shorthandFirst));
-                            break outer;
-                        }
-                        // Switched syntax and didn't fail, start the key-checking over
-                        lastKey = undefined;
-                    }
-
-                    const key = ignoreCase ? propText.toLowerCase() : propText;
-                    // comparison with undefined is expected
-                    if (lastKey! > key) {
-                        ctx.addFailureAtNode(propName, Rule.FAILURE_STRING_FACTORY(propText));
-                        break outer; // only show warning on first out-of-order property
-                    }
-                    lastKey = key;
-                    lastSyntax = property.kind;
+        const { properties } = node as ts.ObjectLiteralExpression;
+        for (const property of properties) {
+            if (!(isPropertyAssignment(property)
+                || isShorthandPropertyAssignment(property)
+                || isSpreadAssignment(property))) {
+                continue;
             }
+
+            if (order != undefined) {
+                const propRank = propertyRank(property);
+                const hasError = typeof(lastRank) != undefined // not the first prop
+                    && propRank !== -1 // have a specified order
+                    && (lastRank! > propRank || lastRank! === -1); // last rank is higher order or not set
+
+                if (hasError) {
+                    let error2 = "first";
+                    if (typeof(lastRankKind) !== undefined) {
+                      error2 = `before ${lastRankKind} properties`;
+                    }
+
+                    const error = `${order[propRank]} properties should come ${error2}`;
+                    ctx.addFailureAtNode(property, error);
+                    break;
+                }
+
+                if (propRank !== lastRank) {
+                  lastKey = undefined;
+                }
+
+                lastRank = propRank;
+                lastRankKind = KEY_ORDER_MAP[property.kind];
+            }
+
+            // Not alpha-checking spread assignments
+            if (isSpreadAssignment(property)) {
+              continue;
+            }
+
+            const { name: propName } = property;
+            if (propName.kind === ts.SyntaxKind.ComputedPropertyName) {
+                continue;
+            }
+
+            const propText = propName.text;
+            const key = ignoreCase ? propText.toLowerCase() : propText;
+            // comparison with undefined is expected
+            if (lastKey! > key) {
+                ctx.addFailureAtNode(propName, Rule.FAILURE_STRING_FACTORY(propText));
+                break;
+            }
+            lastKey = key;
         }
+
         return ts.forEachChild(node, cb);
-    });
+    }
+
+    return ts.forEachChild(sourceFile, cb);
 }

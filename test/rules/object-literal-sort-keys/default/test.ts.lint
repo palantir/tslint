@@ -171,8 +171,8 @@ const passSpread = {
 
 const failSpread = {
     a,
-    ...x,
     c,
+    ...x,
     b: b,
     ~ [err % ('b')]
 };
