@@ -166,4 +166,6 @@ const obj: { x: number, y: number } = {
      ~ [0]
 };
 
+declare global {}
+
 [0]: Unsafe use of expression of type 'any'.
