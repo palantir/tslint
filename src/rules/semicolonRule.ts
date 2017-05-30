@@ -162,27 +162,25 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
 
     private checkEmptyStatement(node: ts.Node) {
         // An empty statement is only ever useful when it is the only statement inside a loop
-        if (!utils.isIterationStatement(node.parent!)) {
-            const parentKind = node.parent!.kind;
-            // don't remove empty statement if it is a direct child of if, with or a LabeledStatement
-            // otherwise this would unintentionally change control flow
-            const noFix = parentKind === ts.SyntaxKind.IfStatement ||
-                          parentKind === ts.SyntaxKind.LabeledStatement ||
-                          parentKind === ts.SyntaxKind.WithStatement;
-            this.reportUnnecessary(node.end, noFix);
-        }
+        if (utils.isIterationStatement(node.parent!)) { return; }
+
+        const parentKind = node.parent!.kind;
+        // don't remove empty statement if it is a direct child of if, with or a LabeledStatement
+        // otherwise this would unintentionally change control flow
+        const noFix = parentKind === ts.SyntaxKind.IfStatement ||
+                        parentKind === ts.SyntaxKind.LabeledStatement ||
+                        parentKind === ts.SyntaxKind.WithStatement;
+        this.reportUnnecessary(node.end, noFix);
     }
 
     private visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         // check if this is a multi-line arrow function
-        if (node.initializer !== undefined &&
-            node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
-            !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
-            if (this.options.boundClassMethods) {
-                this.checkUnnecessary(node);
-            }
-        } else {
+        if (node.initializer === undefined ||
+            node.initializer.kind !== ts.SyntaxKind.ArrowFunction ||
+            utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
             this.checkPropertyDeclaration(node);
+        } else if (this.options.boundClassMethods) {
+            this.checkUnnecessary(node);
         }
     }
 }

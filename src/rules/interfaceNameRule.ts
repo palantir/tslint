@@ -56,15 +56,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
     const { options: { never } } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isInterfaceDeclaration(node)) {
-            const { name } = node;
-            if (never && hasPrefixI(name.text)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-            } else if (!never && name.text[0] !== "I") {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
-            }
-        } else {
+        if (!utils.isInterfaceDeclaration(node)) {
             return ts.forEachChild(node, cb);
+        }
+
+        const { name } = node;
+        if (never && hasPrefixI(name.text)) {
+            ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
+        } else if (!never && name.text[0] !== "I") {
+            ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
         }
     });
 }

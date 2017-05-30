@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isParameterProperty } from "tsutils";
+import { isParameterDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -47,14 +47,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (node.kind === ts.SyntaxKind.Constructor) {
-            for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
-                if (isParameterProperty(parameter)) {
-                    ctx.addFailure(parameter.getStart(ctx.sourceFile),
-                                   parameter.name.pos,
-                                   Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)));
-                }
-            }
+        if (isParameterDeclaration(node) && isParameterProperty(node)) {
+            ctx.addFailureAtNode(node.getChildAt(0), Rule.FAILURE_STRING_FACTORY(node.name.getText(ctx.sourceFile)));
         }
         return ts.forEachChild(node, cb);
     });

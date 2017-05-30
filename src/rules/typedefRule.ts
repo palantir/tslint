@@ -198,13 +198,13 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
             location: ts.Node | ts.NodeArray<ts.Node>,
             typeAnnotation: ts.TypeNode | undefined,
             name?: ts.Node): void {
-        if (this.options[option] === true && typeAnnotation === undefined) {
-            const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
-            if (Array.isArray(location)) {
-                this.addFailure(location.pos - 1, location.end + 1, failure);
-            } else {
-                this.addFailureAtNode(location, failure);
-            }
+        if (this.options[option] !== true || typeAnnotation !== undefined) { return; }
+
+        const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
+        if (Array.isArray(location)) {
+            this.addFailure(location.pos - 1, location.end + 1, failure);
+        } else {
+            this.addFailureAtNode(location, failure);
         }
     }
 }

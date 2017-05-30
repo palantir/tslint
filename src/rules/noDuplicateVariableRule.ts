@@ -75,11 +75,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
 function forEachBoundIdentifier(name: ts.BindingName, action: (id: ts.Identifier) => void): void {
     if (name.kind === ts.SyntaxKind.Identifier) {
         action(name);
-    } else {
-        for (const e of name.elements) {
-            if (e.kind !== ts.SyntaxKind.OmittedExpression) {
-                forEachBoundIdentifier(e.name, action);
-            }
+        return;
+    }
+
+    for (const e of name.elements) {
+        if (e.kind !== ts.SyntaxKind.OmittedExpression) {
+            forEachBoundIdentifier(e.name, action);
         }
     }
 }

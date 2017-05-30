@@ -202,14 +202,15 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
         if (startPos.line === endPos.line) {
             // single line error
             errorLinesForCodeText[startPos.line].push(new EndErrorLine(startPos.col, endPos.col, message));
-        } else {
-            // multiline error
-            errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
-            for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
-                errorLinesForCodeText[lineNo].push(new MultilineErrorLine(0));
-            }
-            errorLinesForCodeText[endPos.line].push(new EndErrorLine(0, endPos.col, message));
+            continue;
         }
+
+        // multiline error
+        errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
+        for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
+            errorLinesForCodeText[lineNo].push(new MultilineErrorLine(0));
+        }
+        errorLinesForCodeText[endPos.line].push(new EndErrorLine(0, endPos.col, message));
     }
 
     return flatMap(codeText, (line, i) => [line, ...mapDefined(errorLinesForCodeText[i], (err) => printLine(err, line))]).join("\n");

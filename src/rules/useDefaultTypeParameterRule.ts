@@ -66,13 +66,13 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         function createFix(): Lint.Fix {
-            if (i === 0) {
-                const lt = Lint.childOfKind(node, ts.SyntaxKind.LessThanToken)!;
-                const gt = Lint.childOfKind(node, ts.SyntaxKind.GreaterThanToken)!;
-                return Lint.Replacement.deleteFromTo(lt.getStart(), gt.getEnd());
-            } else {
+            if (i !== 0) {
                 return Lint.Replacement.deleteFromTo(typeArguments[i - 1].getEnd(), arg.getEnd());
             }
+
+            const lt = Lint.childOfKind(node, ts.SyntaxKind.LessThanToken)!;
+            const gt = Lint.childOfKind(node, ts.SyntaxKind.GreaterThanToken)!;
+            return Lint.Replacement.deleteFromTo(lt.getStart(), gt.getEnd());
         }
     }
 }

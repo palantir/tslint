@@ -106,13 +106,13 @@ export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: t
 }
 
 export function isAssignment(node: ts.Node) {
-    if (node.kind === ts.SyntaxKind.BinaryExpression) {
-        const binaryExpression = node as ts.BinaryExpression;
-        return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
-            && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
-    } else {
+    if (node.kind !== ts.SyntaxKind.BinaryExpression) {
         return false;
     }
+
+    const binaryExpression = node as ts.BinaryExpression;
+    return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
+        && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
 }
 
 /**
@@ -320,22 +320,20 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
-            const comments = ts.getLeadingCommentRanges(fullText, pos.fullStart);
-            if (comments !== undefined) {
-                for (const comment of comments) {
-                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
-                }
-            }
+            handleComments(ts.getLeadingCommentRanges(fullText, pos.fullStart));
         }
         if (canHaveTrailingTrivia(tokenKind, parent)) {
-            const comments = ts.getTrailingCommentRanges(fullText, pos.end);
-            if (comments !== undefined) {
-                for (const comment of comments) {
-                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
-                }
+            handleComments(ts.getTrailingCommentRanges(fullText, pos.end));
+        }
+
+        function handleComments(comments: ts.CommentRange[] | undefined) {
+            if (comments === undefined) { return; }
+            for (const comment of comments) {
+                cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
             }
         }
     });
+
 }
 
 /** Exclude leading positions that would lead to scanning for trivia inside JsxText */

@@ -65,13 +65,13 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
             const start = end - "module".length;
             this.addFailure(start, end, Rule.FAILURE_STRING, Lint.Replacement.replaceFromTo(start, end, "namespace"));
         }
-        if (node.body !== undefined) {
-            switch (node.body.kind) {
-                case ts.SyntaxKind.ModuleBlock:
-                    return this.checkStatements(node.body.statements);
-                case ts.SyntaxKind.ModuleDeclaration:
-                    return this.checkModuleDeclaration(node.body, true);
-            }
+        if (node.body === undefined) { return; }
+
+        switch (node.body.kind) {
+            case ts.SyntaxKind.ModuleBlock:
+                return this.checkStatements(node.body.statements);
+            case ts.SyntaxKind.ModuleDeclaration:
+                return this.checkModuleDeclaration(node.body, true);
         }
     }
 }

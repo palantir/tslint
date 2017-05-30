@@ -187,13 +187,13 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 this.handleExpression(node.left);
             }
 
-            if (boundary !== utils.ScopeBoundary.None) {
-                ts.forEachChild(node, cb);
-                this.onScopeEnd(savedScope);
-                this.scope = savedScope;
-            } else {
+            if (boundary === utils.ScopeBoundary.None) {
                 return ts.forEachChild(node, cb);
             }
+
+            ts.forEachChild(node, cb);
+            this.onScopeEnd(savedScope);
+            this.scope = savedScope;
         };
 
         if (ts.isExternalModule(sourceFile)) {
@@ -245,15 +245,15 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     private handleBindingName(name: ts.BindingName, declarationInfo: DeclarationInfo) {
         if (name.kind === ts.SyntaxKind.Identifier) {
             this.scope.addVariable(name, declarationInfo);
-        } else {
-            const destructuringInfo: DestructuringInfo = {
-                reassignedSiblings: false,
-            };
-            utils.forEachDestructuringIdentifier(
-                name,
-                (declaration) => this.scope.addVariable(declaration.name, declarationInfo, destructuringInfo),
-            );
+            return;
         }
+
+        const destructuringInfo: DestructuringInfo = {
+            reassignedSiblings: false,
+        };
+        utils.forEachDestructuringIdentifier(
+            name,
+            (declaration) => this.scope.addVariable(declaration.name, declarationInfo, destructuringInfo));
     }
 
     private handleVariableDeclaration(declarationList: ts.VariableDeclarationList) {
@@ -308,28 +308,29 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         this.settle(parent);
         const appliedFixes = new Set<ts.VariableDeclarationList>();
         this.scope.variables.forEach((info, name) => {
-            if (info.declarationInfo.canBeConst &&
-                !info.reassigned &&
+            if (!info.declarationInfo.canBeConst ||
+                info.reassigned ||
                 // don't add failures for reassigned variables in for loop initializer
-                !(info.declarationInfo.reassignedSiblings && info.declarationInfo.isForLoop) &&
+                info.declarationInfo.reassignedSiblings && info.declarationInfo.isForLoop ||
                 // if {destructuring: "all"} is set, only add a failure if all variables in a destructuring assignment can be const
-                (!this.options.destructuringAll ||
-                 info.destructuringInfo === undefined ||
-                 !info.destructuringInfo.reassignedSiblings)) {
-
-                let fix: Lint.Fix | undefined;
-                // only apply fixes if the VariableDeclarationList has no reassigned variables
-                // and the variable is block scoped aka `let` and initialized
-                if (info.declarationInfo.allInitialized &&
-                    !info.declarationInfo.reassignedSiblings &&
-                    info.declarationInfo.isBlockScoped &&
-                    !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
-                    // add only one fixer per VariableDeclarationList
-                    appliedFixes.add(info.declarationInfo.declarationList);
-                }
-                this.addFailureAtNode(info.identifier, Rule.FAILURE_STRING_FACTORY(name, info.declarationInfo.isBlockScoped), fix);
+                this.options.destructuringAll &&
+                    info.destructuringInfo !== undefined &&
+                    info.destructuringInfo.reassignedSiblings) {
+                return;
             }
+
+            let fix: Lint.Fix | undefined;
+            // only apply fixes if the VariableDeclarationList has no reassigned variables
+            // and the variable is block scoped aka `let` and initialized
+            if (info.declarationInfo.allInitialized &&
+                !info.declarationInfo.reassignedSiblings &&
+                info.declarationInfo.isBlockScoped &&
+                !appliedFixes.has(info.declarationInfo.declarationList)) {
+                fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
+                // add only one fixer per VariableDeclarationList
+                appliedFixes.add(info.declarationInfo.declarationList);
+            }
+            this.addFailureAtNode(info.identifier, Rule.FAILURE_STRING_FACTORY(name, info.declarationInfo.isBlockScoped), fix);
         });
     }
 }

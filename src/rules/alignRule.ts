@@ -132,12 +132,10 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                         break;
                     case ts.SyntaxKind.ClassDeclaration:
                     case ts.SyntaxKind.ClassExpression:
-                        if (this.options.members) {
-                            this.checkAlignment(
-                                (node as ts.ClassLikeDeclaration).members.filter((m) => m.kind !== ts.SyntaxKind.SemicolonClassElement),
-                                OPTION_MEMBERS,
-                            );
-                        }
+                        if (!this.options.members) { break; }
+                        this.checkAlignment(
+                            (node as ts.ClassLikeDeclaration).members.filter((m) => m.kind !== ts.SyntaxKind.SemicolonClassElement),
+                            OPTION_MEMBERS);
                         break;
                     case ts.SyntaxKind.InterfaceDeclaration:
                     case ts.SyntaxKind.TypeLiteral:

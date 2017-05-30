@@ -1,0 +1,51 @@
+// Tests for 'if-else' statements.
+
+function f() {
+    if (so)
+    ~~ [SMALL_THEN]
+        1;
+    else {
+        1;
+        2;
+        3;
+    }
+}
+
+function f() {
+    if (so) {
+    ~~ [SMALL_ELSE]
+        1;
+        2;
+        3;
+    } else
+        1;
+}
+
+function f() {
+    if (so) {
+        1;
+        2;
+        3;
+    } else {
+        1;
+        2;
+        3;
+    }
+}
+
+function f() {
+    if (so)
+        1;
+    else
+        1;
+}
+
+function f() {
+    if (so)
+        1;
+    else if (os)
+        1;
+}
+
+[SMALL_THEN]: 'then' branch is small; prefer an early 'return' to a full if-else.
+[SMALL_ELSE]: 'else' branch is small; prefer an early 'return' to a full if-else.

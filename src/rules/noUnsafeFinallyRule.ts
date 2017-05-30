@@ -62,12 +62,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 if (catchClause !== undefined) {
                     ts.forEachChild(catchClause, cb);
                 }
-                if (finallyBlock !== undefined) {
-                    const old = inFinally;
-                    inFinally = true;
-                    cb(finallyBlock);
-                    inFinally = old;
-                }
+                if (finallyBlock === undefined) { break; }
+
+                const old = inFinally;
+                inFinally = true;
+                cb(finallyBlock);
+                inFinally = old;
                 break;
 
             case ts.SyntaxKind.BreakStatement:

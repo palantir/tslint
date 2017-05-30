@@ -1,0 +1,56 @@
+function f() {
+    blah; // Lines before the 'if' are irrelevant
+    if (so)
+    ~~ [0]
+        two(
+            lines);
+
+    // Function declarations after the 'if' are irrelevant
+    function inner() {}
+}
+
+// Block size is measured from first statement to last statement -- does *not* include curly braces.
+// So the size here is 1, not 3.
+function f() {
+    if (so) {
+        blah();
+    }
+}
+
+// Won't trigger if there are any more lines after the 'if'.
+function f() {
+    if (so) {
+        two(
+            lines);
+    }
+    blah();
+}
+
+// Won't trigger inside blocks (only inside functions or loops).
+if (so)
+    some(
+        long,
+        thing);
+else {
+    if (so)
+        two(
+            lines);
+}
+
+function f() {
+    if (so)
+        two(
+            lines);
+    else {
+        blah();
+        // Ideally it would ask for an early exit at this 'if'.
+        // But currently we only handle 'if' inside a function or loop.
+        if (so)
+            blah();
+        else
+            two(
+                lines);
+    }
+}
+
+[0]: Remainder of block is inside 'if' statement. Prefer to invert the condition and 'return' early.

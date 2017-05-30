@@ -48,15 +48,14 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isIdentifier(node)) {
-            if (!isDeclaration(node)) {
-                const deprecation = getDeprecation(node, tc);
-                if (deprecation !== undefined) {
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text, deprecation));
-                }
-            }
-        } else {
+        if (!isIdentifier(node)) {
             return ts.forEachChild(node, cb);
+        }
+        if (isDeclaration(node)) { return; }
+
+        const deprecation = getDeprecation(node, tc);
+        if (deprecation !== undefined) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text, deprecation));
         }
     });
 }

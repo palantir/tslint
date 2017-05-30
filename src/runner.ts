@@ -215,14 +215,14 @@ async function doLinting(
         }
 
         const contents = await tryReadFile(file, logger);
-        if (contents !== undefined) {
-            const folder = path.dirname(file);
-            if (lastFolder !== folder) {
-                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-                lastFolder = folder;
-            }
-            linter.lint(file, contents, configFile);
+        if (contents === undefined) { continue; }
+
+        const folder = path.dirname(file);
+        if (lastFolder !== folder) {
+            configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+            lastFolder = folder;
         }
+        linter.lint(file, contents, configFile);
     }
 
     return linter.getResult();

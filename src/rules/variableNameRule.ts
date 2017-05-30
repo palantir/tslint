@@ -106,13 +106,13 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         switch (node.kind) {
             case ts.SyntaxKind.BindingElement: {
                 const { initializer, name, propertyName } = node as ts.BindingElement;
-                if (name.kind === ts.SyntaxKind.Identifier) {
-                    handleVariableNameKeyword(name);
-                    // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
-                    // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
-                        handleVariableNameFormat(name, initializer);
-                    }
+                if (name.kind !== ts.SyntaxKind.Identifier) { break; }
+
+                handleVariableNameKeyword(name);
+                // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
+                // Only check if the name is rebound (`var {Foo: bar} = ...;`).
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
+                    handleVariableNameFormat(name, initializer);
                 }
                 break;
             }
@@ -128,12 +128,12 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.VariableDeclaration: {
                 const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
-                if (name.kind === ts.SyntaxKind.Identifier) {
-                    handleVariableNameFormat(name, initializer);
-                    // do not check property declarations for keywords, they are allowed to be keywords
-                    if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
-                        handleVariableNameKeyword(name);
-                    }
+                if (name.kind !== ts.SyntaxKind.Identifier) { break; }
+
+                handleVariableNameFormat(name, initializer);
+                // do not check property declarations for keywords, they are allowed to be keywords
+                if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
+                    handleVariableNameKeyword(name);
                 }
             }
         }

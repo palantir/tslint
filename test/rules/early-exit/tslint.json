@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "early-exit": [true, { "max-length": 1 }]
+    }
+}

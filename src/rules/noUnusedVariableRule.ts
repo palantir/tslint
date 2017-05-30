@@ -86,13 +86,12 @@ function parseOptions(options: any[]): Options {
 
     let ignorePattern: RegExp | undefined;
     for (const o of options) {
-        if (typeof o === "object") {
-            // tslint:disable-next-line no-unsafe-any
-            const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
-            if (ignore != null) {
-                ignorePattern = new RegExp(ignore);
-                break;
-            }
+        if (typeof o !== "object") { continue; }
+        // tslint:disable-next-line no-unsafe-any
+        const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
+        if (ignore != null) {
+            ignorePattern = new RegExp(ignore);
+            break;
         }
     }
 
@@ -192,29 +191,32 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
             }
         }
 
-        if (namedBindings !== undefined) {
-            if (allNamedBindingsAreFailures) {
-                const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
-                const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
-                const failure = "All named bindings are unused.";
-                ctx.addFailureAtNode(namedBindings, failure, fix);
-            } else {
-                const { elements } = namedBindings;
-                for (let i = 0; i < elements.length; i++) {
-                    const element = elements[i];
-                    const failure = tryDelete(element.name);
-                    if (failure === undefined) {
-                        continue;
-                    }
+        if (namedBindings === undefined) {
+            return;
+        }
 
-                    const prevElement = elements[i - 1];
-                    const nextElement = elements[i + 1];
-                    const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
-                    const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
-                    const fix = Lint.Replacement.deleteFromTo(start, end);
-                    ctx.addFailureAtNode(element.name, failure, fix);
-                }
+        if (allNamedBindingsAreFailures) {
+            const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
+            const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
+            const failure = "All named bindings are unused.";
+            ctx.addFailureAtNode(namedBindings, failure, fix);
+            return;
+        }
+
+        const { elements } = namedBindings;
+        for (let i = 0; i < elements.length; i++) {
+            const element = elements[i];
+            const failure = tryDelete(element.name);
+            if (failure === undefined) {
+                continue;
             }
+
+            const prevElement = elements[i - 1];
+            const nextElement = elements[i + 1];
+            const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
+            const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
+            const fix = Lint.Replacement.deleteFromTo(start, end);
+            ctx.addFailureAtNode(element.name, failure, fix);
         }
 
         function tryRemoveAll(name: ts.Identifier): void {

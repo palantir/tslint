@@ -86,37 +86,34 @@ export class BanFunctionWalker extends Lint.RuleWalker {
     }
 
     private checkForObjectMethodBan(expression: ts.LeftHandSideExpression) {
-        if (expression.kind === ts.SyntaxKind.PropertyAccessExpression
-            && expression.getChildCount() >= 3) {
+        if (expression.kind !== ts.SyntaxKind.PropertyAccessExpression || expression.getChildCount() < 3) { return; }
 
-            const firstToken = expression.getFirstToken();
-            const firstChild = expression.getChildAt(0);
-            const secondChild = expression.getChildAt(1);
-            const thirdChild = expression.getChildAt(2);
+        const firstToken = expression.getFirstToken();
+        const firstChild = expression.getChildAt(0);
+        const secondChild = expression.getChildAt(1);
+        const thirdChild = expression.getChildAt(2);
 
-            const rightSideExpression = thirdChild.getFullText();
-            const leftSideExpression = firstChild.getChildCount() > 0
-                ? firstChild.getLastToken().getText()
-                : firstToken.getText();
+        const rightSideExpression = thirdChild.getFullText();
+        const leftSideExpression = firstChild.getChildCount() > 0
+            ? firstChild.getLastToken().getText()
+            : firstToken.getText();
 
-            if (secondChild.kind === ts.SyntaxKind.DotToken) {
-                for (const bannedFunction of this.bannedFunctions) {
-                    if (leftSideExpression === bannedFunction[0] && rightSideExpression === bannedFunction[1]) {
-                        const failure = Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]);
-                        this.addFailureAtNode(expression, failure);
-                    }
-                }
+        if (secondChild.kind !== ts.SyntaxKind.DotToken) { return; }
+
+        for (const bannedFunction of this.bannedFunctions) {
+            if (leftSideExpression === bannedFunction[0] && rightSideExpression === bannedFunction[1]) {
+                const failure = Rule.FAILURE_STRING_FACTORY(`${leftSideExpression}.${rightSideExpression}`, bannedFunction[2]);
+                this.addFailureAtNode(expression, failure);
             }
         }
     }
 
     private checkForGlobalBan(expression: ts.LeftHandSideExpression) {
-        if (expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (expression as ts.Identifier).text;
-            if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
-                this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${identifierName}`));
-            }
+        if (expression.kind !== ts.SyntaxKind.Identifier) { return; }
 
+        const identifierName = (expression as ts.Identifier).text;
+        if (this.bannedGlobalFunctions.indexOf(identifierName) !== -1) {
+            this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${identifierName}`));
         }
     }
 }

@@ -62,13 +62,13 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.Constructor: {
                 const { parameters } = node as ts.FunctionLikeDeclaration;
                 parameters.forEach((parameter, i) => {
-                    if (isUndefined(parameter.initializer)) {
-                        if (parametersAllOptionalAfter(parameters, i)) {
-                            // No fix since they may want to remove '| undefined' from the type.
-                            ctx.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
-                        } else {
-                            failWithFix(parameter);
-                        }
+                    if (!isUndefined(parameter.initializer)) { return; }
+
+                    if (parametersAllOptionalAfter(parameters, i)) {
+                        // No fix since they may want to remove '| undefined' from the type.
+                        ctx.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
+                    } else {
+                        failWithFix(parameter);
                     }
                 });
             }

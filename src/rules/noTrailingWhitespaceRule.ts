@@ -80,10 +80,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(sourceFile)) {
         const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
         if (match !== null) {
-            possibleFailures.push({
-                end: line.pos + line.contentLength,
-                pos: line.pos + match.index!,
-            });
+            possibleFailures.push({ end: line.pos + line.contentLength, pos: line.pos + match.index! });
         }
     }
 
@@ -96,8 +93,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     for (const possibleFailure of possibleFailures) {
         if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
             ctx.addFailure(possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING,
-                Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end),
-            );
+                Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end));
         }
     }
 }

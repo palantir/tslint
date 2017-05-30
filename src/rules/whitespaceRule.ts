@@ -114,25 +114,26 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             // check for spaces between ternary operator symbols
             case ts.SyntaxKind.ConditionalExpression:
-                if (options.operator) {
-                    const { condition, whenTrue } = node as ts.ConditionalExpression;
-                    checkForTrailingWhitespace(condition.getEnd());
-                    checkForTrailingWhitespace(whenTrue.getFullStart());
-                    checkForTrailingWhitespace(whenTrue.getEnd());
-                }
+                if (!options.operator) { break; }
+
+                const { condition, whenTrue } = node as ts.ConditionalExpression;
+                checkForTrailingWhitespace(condition.getEnd());
+                checkForTrailingWhitespace(whenTrue.getFullStart());
+                checkForTrailingWhitespace(whenTrue.getEnd());
                 break;
 
             case ts.SyntaxKind.ConstructorType:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
 
-            case ts.SyntaxKind.ExportAssignment:
-                if (options.module) {
-                    const exportKeyword = node.getChildAt(0);
-                    const position = exportKeyword.getEnd();
-                    checkForTrailingWhitespace(position);
-                }
+            case ts.SyntaxKind.ExportAssignment: {
+                if (!options.module) { break;  }
+
+                const exportKeyword = node.getChildAt(0);
+                const position = exportKeyword.getEnd();
+                checkForTrailingWhitespace(position);
                 break;
+            }
 
             case ts.SyntaxKind.FunctionType:
                 checkEqualsGreaterThanTokenInNode(node);
@@ -140,20 +141,20 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             case ts.SyntaxKind.ImportDeclaration: {
                 const { importClause } = node as ts.ImportDeclaration;
-                if (options.module && importClause !== undefined) {
-                    // an import clause can have _both_ named bindings and a name (the latter for the default import)
-                    // but the named bindings always come last, so we only need to check that for whitespace
-                    let position: number | undefined;
-                    const { name, namedBindings } = importClause;
-                    if (namedBindings !== undefined) {
-                        position = namedBindings.getEnd();
-                    } else if (name !== undefined) {
-                        position = name.getEnd();
-                    }
+                if (!options.module || importClause === undefined) { break; }
 
-                    if (position !== undefined) {
-                        checkForTrailingWhitespace(position);
-                    }
+                // an import clause can have _both_ named bindings and a name (the latter for the default import)
+                // but the named bindings always come last, so we only need to check that for whitespace
+                let position: number | undefined;
+                const { name, namedBindings } = importClause;
+                if (namedBindings !== undefined) {
+                    position = namedBindings.getEnd();
+                } else if (name !== undefined) {
+                    position = name.getEnd();
+                }
+
+                if (position !== undefined) {
+                    checkForTrailingWhitespace(position);
                 }
                 break;
             }

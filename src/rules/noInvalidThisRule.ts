@@ -66,23 +66,21 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
-                if (!inClass) {
-                    inClass = true;
-                    ts.forEachChild(node, cb);
-                    inClass = false;
-                    return;
-                }
-                break;
+                if (inClass) { break; }
+
+                inClass = true;
+                ts.forEachChild(node, cb);
+                inClass = false;
+                return;
 
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
-                if (inClass) {
-                    inFunctionInClass = true;
-                    ts.forEachChild(node, cb);
-                    inFunctionInClass = false;
-                    return;
-                }
-                break;
+                if (!inClass) { break; }
+
+                inFunctionInClass = true;
+                ts.forEachChild(node, cb);
+                inFunctionInClass = false;
+                return;
 
             case ts.SyntaxKind.ThisKeyword:
                 if (!inClass) {

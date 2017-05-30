@@ -124,17 +124,17 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
                 const b = node as ts.BinaryExpression;
-                if (binaryBooleanExpressionKind(b) !== undefined) {
-                    const { left, right } = b;
-                    const checkHalf = (expr: ts.Expression) => {
-                        // If it's another boolean binary expression, we'll check it when recursing.
-                        if (!isBooleanBinaryExpression(expr)) {
-                            checkExpression(expr, b);
-                        }
-                    };
-                    checkHalf(left);
-                    checkHalf(right);
-                }
+                if (binaryBooleanExpressionKind(b) === undefined) { break; }
+
+                const { left, right } = b;
+                const checkHalf = (expr: ts.Expression) => {
+                    // If it's another boolean binary expression, we'll check it when recursing.
+                    if (!isBooleanBinaryExpression(expr)) {
+                        checkExpression(expr, b);
+                    }
+                };
+                checkHalf(left);
+                checkHalf(right);
                 break;
             }
 
@@ -175,17 +175,16 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
     function checkExpression(node: ts.Expression, location: Location): void {
         const type = checker.getTypeAtLocation(node);
         const failure = getTypeFailure(type, options);
-        if (failure !== undefined) {
-            if (failure === TypeFailure.AlwaysTruthy &&
+        if (failure === undefined ||
+            failure === TypeFailure.AlwaysTruthy &&
                 !options.strictNullChecks &&
                 (options.allowNullUnion || options.allowUndefinedUnion)) {
-                // OK; It might be null/undefined.
-                return;
-            }
-
-            ctx.addFailureAtNode(node,
-                showFailure(location, failure, isUnionType(type), options));
+            // OK; It might be null/undefined.
+            return;
         }
+
+        ctx.addFailureAtNode(node,
+            showFailure(location, failure, isUnionType(type), options));
     }
 }
 

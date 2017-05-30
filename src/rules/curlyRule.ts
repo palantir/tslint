@@ -90,11 +90,13 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkStatement(statement: ts.Statement, node: ts.Node, childIndex: number, end = statement.end) {
-        if (statement.kind !== ts.SyntaxKind.Block &&
-            !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
-            const token = node.getChildAt(childIndex, this.sourceFile);
-            const tokenText = ts.tokenToString(token.kind);
-            this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
+        if (statement.kind === ts.SyntaxKind.Block ||
+            this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end)) {
+            return;
         }
+
+        const token = node.getChildAt(childIndex, this.sourceFile);
+        const tokenText = ts.tokenToString(token.kind);
+        this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
     }
 }
