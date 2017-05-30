@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isBinaryExpression, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isBinaryExpression(node)) {
+        if (isBinaryExpression(node)) {
             const equals = Lint.getEqualsKind(node.operatorToken);
             if (equals !== undefined) {
                 checkEquals(node, equals);
@@ -102,7 +102,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                         ? Rule.FAILURE_STRING(result === isPositive)
                         : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive));
                 }
-                break;
             }
         }
 
@@ -254,9 +253,4 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
 
 function unionParts(type: ts.Type) {
     return isUnionType(type) ? type.types : [type];
-}
-
-/** Type predicate to test for a union type. */
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

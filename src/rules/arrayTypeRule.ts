@@ -65,7 +65,6 @@ function walk(ctx: Lint.WalkContext<Option>): void {
                 break;
             case ts.SyntaxKind.TypeReference:
                 checkTypeReference(node as ts.TypeReferenceNode);
-                break;
         }
         return ts.forEachChild(node, cb);
     });
@@ -81,7 +80,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
         const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
         const fix = [
-            new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
+            new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
             Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
         ];

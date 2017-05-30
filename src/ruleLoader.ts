@@ -19,7 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { getRelativePath } from "./configuration";
-import { showWarningOnce } from "./error";
+import { FatalError, showWarningOnce } from "./error";
 import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
 
@@ -96,10 +96,10 @@ function transformName(name: string): string {
     // camelize strips out leading and trailing underscores and dashes, so make sure they aren't passed to camelize
     // the regex matches the groups (leading underscores and dashes)(other characters)(trailing underscores and dashes)
     const nameMatch = name.match(/^([-_]*)(.*?)([-_]*)$/);
-    if (nameMatch == null) {
-        return name + "Rule";
+    if (nameMatch === null) {
+        return `${name}Rule`;
     }
-    return nameMatch[1] + camelize(nameMatch[2]) + nameMatch[3] + "Rule";
+    return `${nameMatch[1]}${camelize(nameMatch[2])}${nameMatch[3]}Rule`;
 }
 
 /**
@@ -108,7 +108,7 @@ function transformName(name: string): string {
  */
 function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
     const fullPath = path.join(directory, ruleName);
-    if (fs.existsSync(fullPath + ".js")) {
+    if (fs.existsSync(`${fullPath}.js`)) {
         const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
         if (ruleModule !== undefined) {
             return ruleModule.Rule;
@@ -130,7 +130,7 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
     if (isCustomPath) {
         absolutePath = getRelativePath(directory);
         if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
-            throw new Error(`Could not find custom rule directory: ${directory}`);
+            throw new FatalError(`Could not find custom rule directory: ${directory}`);
         }
     }
 

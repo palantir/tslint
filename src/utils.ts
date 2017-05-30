@@ -29,6 +29,7 @@ export function arrayify<T>(arg?: T | T[]): T[] {
 }
 
 /**
+ * @deprecated (no longer used)
  * Enforces the invariant that the input is an object.
  */
 export function objectify(arg: any): any {
@@ -62,9 +63,9 @@ export function isLowerCase(str: string): boolean {
 /**
  * Removes leading indents from a template string without removing all leading whitespace
  */
-export function dedent(strings: TemplateStringsArray, ...values: string[]) {
+export function dedent(strings: TemplateStringsArray, ...values: any[]) {
     let fullString = strings.reduce((accumulator, str, i) => {
-        return accumulator + values[i - 1] + str;
+        return `${accumulator}${values[i - 1]}${str}`;
     });
 
     // match all leading spaces/tabs at the start of each line
@@ -76,7 +77,7 @@ export function dedent(strings: TemplateStringsArray, ...values: string[]) {
 
     // find the smallest indent, we don't want to remove all leading whitespace
     const indent = Math.min(...match.map((el) => el.length));
-    const regexp = new RegExp("^[ \\t]{" + indent + "}", "gm");
+    const regexp = new RegExp(`^[ \\t]{${indent}}`, "gm");
     fullString = indent > 0 ? fullString.replace(regexp, "") : fullString;
     return fullString;
 }
@@ -139,10 +140,10 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
 }
 
 /** Returns an array that is the concatenation of all output arrays. */
-export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
+export function flatMap<T, U>(inputs: T[], getOutputs: (input: T, index: number) => U[]): U[] {
     const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
+    for (let i = 0; i < inputs.length; i++) {
+        out.push(...getOutputs(inputs[i], i));
     }
     return out;
 }
@@ -207,4 +208,9 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
     }
 
     return "utf8";
+}
+
+// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
+export function denormalizeWinPath(path: string): string {
+    return path.replace(/\\/g, "/");
 }
