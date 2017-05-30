@@ -2,7 +2,6 @@ var duplicated = 1;
 
 function f(x) {
     var x;
-        ~ [err % ('x')]
 }
 
 class Test {
@@ -164,7 +163,6 @@ function testDestructuring() {
 
     function myFunc2([a, b]) {
         var a;
-            ~ [err % ('a')]
         return b;
     }
 
