@@ -7,7 +7,7 @@ optionsDescription: |-
   Two arguments which are both objects.
   The first argument specifies how much space should be to the _left_ of a typedef colon.
   The second argument specifies how much space should be to the _right_ of a typedef colon.
-  Each key should have a value of `"space"` or `"nospace"`.
+  Each key should have a value of `"onespace"`, `"space"` or `"nospace"`.
   Possible keys are:
 
   * `"call-signature"` checks return type of functions.
@@ -55,6 +55,7 @@ optionExamples:
     ]
 type: typescript
 typescriptOnly: true
+hasFix: true
 layout: rule
 title: 'Rule: typedef-whitespace'
 optionsJSON: |-

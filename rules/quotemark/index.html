@@ -10,6 +10,7 @@ optionsDescription: |-
   * `"double"` enforces double quotes.
   * `"jsx-single"` enforces single quotes for JSX attributes.
   * `"jsx-double"` enforces double quotes for JSX attributes.
+  * `"avoid-template"` forbids single-line untagged template strings that do not contain string interpolations.
   * `"avoid-escape"` allows you to use the "other" quotemark in cases where escaping would normally be required.
   For example, `[true, "double", "avoid-escape"]` would not report a failure on the string literal
   `'Hello "World"'`.
@@ -26,7 +27,7 @@ options:
   minLength: 0
   maxLength: 5
 optionExamples:
-  - '[true, "single", "avoid-escape"]'
+  - '[true, "single", "avoid-escape", "avoid-template"]'
   - '[true, "single", "jsx-double"]'
 type: style
 typescriptOnly: false

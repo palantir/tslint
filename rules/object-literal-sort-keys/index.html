@@ -2,13 +2,23 @@
 ruleName: object-literal-sort-keys
 description: Requires keys in object literals to be sorted alphabetically
 rationale: Useful in preventing merge conflicts
-optionsDescription: Not configurable.
-options: null
+optionsDescription: You may optionally pass "ignore-case" to compare keys case insensitive.
+options:
+  type: string
+  enum:
+    - ignore-case
 optionExamples:
   - 'true'
+  - '[true, "ignore-case"]'
 type: maintainability
 typescriptOnly: false
 layout: rule
 title: 'Rule: object-literal-sort-keys'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "ignore-case"
+    ]
+  }
 ---
