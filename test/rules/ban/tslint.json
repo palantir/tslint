@@ -4,11 +4,13 @@
       true,
       "xit",
       {"name": "fit"},
-      ["xdescribe"],
+      {"name": ["xdescribe"]},
       ["fdescribe"],
       ["window", "toString"],
-      {"object": "_", "name": "forEach"},
-      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
+      {"name": ["_", "map"]},
+      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."],
+      {"name": ["*", "forEach"], "message": "Use a regular for loop instead."},
+      {"name": ["chai", "assert", "equal"], "message": "Use 'strictEqual' instead."}
     ]
   }
 }

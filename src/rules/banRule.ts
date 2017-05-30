@@ -24,11 +24,17 @@ interface FunctionBan {
     message?: string;
 }
 interface MethodBan extends FunctionBan {
-    object: string;
+    object: string[];
 }
+
 interface Options {
     functions: FunctionBan[];
     methods: MethodBan[];
+}
+
+interface OptionsInput {
+    name: string | string[];
+    message?: string;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -95,22 +101,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function parseOptions(args: Array<string | string[] | FunctionBan | MethodBan>): Options {
+function parseOptions(args: Array<string | string[] | OptionsInput>): Options {
     const functions: FunctionBan[] = [];
     const methods: MethodBan[] = [];
     for (const arg of args) {
         if (typeof arg === "string") {
             functions.push({name: arg});
         } else if (Array.isArray(arg)) {
-            if (arg.length === 1) {
-                functions.push({name: arg[0]});
-            } else {
-                methods.push({object: arg[0], name: arg[1], message: arg[2]});
+            switch (arg.length) {
+                case 0:
+                    break;
+                case 1:
+                    functions.push({name: arg[0]});
+                    break;
+                default:
+                    methods.push({object: [arg[0]], name: arg[1], message: arg[2]});
             }
-        } else if ("object" in arg) {
-            methods.push(arg as MethodBan);
+        } else if (!Array.isArray(arg.name)) {
+            functions.push(arg as FunctionBan);
         } else {
-            functions.push(arg);
+            switch (arg.name.length) {
+                case 0:
+                    break;
+                case 1:
+                    functions.push({name: arg.name[0], message: arg.message});
+                    break;
+                default:
+                    methods.push({name: arg.name[arg.name.length - 1], object: arg.name.slice(0, -1), message: arg.message});
+            }
         }
     }
     return { functions, methods };
@@ -132,14 +150,17 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkForObjectMethodBan(expression: ts.PropertyAccessExpression) {
-        if (isIdentifier(expression.expression)) {
-            const objectName = expression.expression.text;
-            const name = expression.name.text;
-            for (const ban of this.options.methods) {
-                if (ban.object === objectName && ban.name === name) {
-                    this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${objectName}.${name}`, ban.message));
-                    break;
-                }
+        for (const ban of this.options.methods) {
+            if (expression.name.text !== ban.name) { continue; }
+            let current = expression.expression;
+            for (let i = ban.object.length - 1; i > 0; --i) {
+                if (!isPropertyAccessExpression(current) || current.name.text !== ban.object[i]) { continue; }
+                current = current.expression;
+            }
+            if (ban.object[0] === "*" ||
+                isIdentifier(current) && current.text === ban.object[0]) {
+                this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${ban.object.join(".")}.${ban.name}`, ban.message));
+                break;
             }
         }
     }
