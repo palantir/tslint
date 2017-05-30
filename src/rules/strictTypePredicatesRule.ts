@@ -109,7 +109,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                         ? Rule.FAILURE_STRING(result === isPositive)
                         : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive));
                 }
-                break;
             }
         }
 

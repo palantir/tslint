@@ -119,7 +119,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                         fallthroughSingle = clauseSuper.node;
                     }
                     foundSingle = clauseSuper.node;
-                    break;
             }
         }
 

@@ -128,6 +128,7 @@ export const rules = {
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,
+    "use-default-type-parameter": true,
     "use-isnan": true,
 
     // Maintainability
@@ -227,6 +228,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "switch-final-break": true,
     "type-literal-delimiter": true,
     "variable-name": [
         true,

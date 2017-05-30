@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { isObjectFlagSet, isObjectType, isTypeReference } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isObjectFlagSet, isTypeFlagSet } from "../language/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -60,12 +60,10 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
 
     private checkNewExpression(node: ts.NewExpression): void {
         if (node.typeArguments === undefined) {
-            const objType = this.checker.getTypeAtLocation(node) as ts.TypeReference;
-            if (isTypeFlagSet(objType, ts.TypeFlags.Object) && objType.typeArguments !== undefined) {
-                const typeArgs = objType.typeArguments as ts.ObjectType[];
-                if (typeArgs.some((a) => this.isEmptyObjectInterface(a))) {
-                    this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
-                }
+            const type = this.checker.getTypeAtLocation(node);
+            if (isTypeReference(type) && type.typeArguments !== undefined &&
+                type.typeArguments.some((a) => isObjectType(a) && this.isEmptyObjectInterface(a))) {
+                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
             }
         }
     }
@@ -80,28 +78,20 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
             return;
         }
 
-        const retType = this.checker.getReturnTypeOfSignature(callSig) as ts.TypeReference;
-        if (this.isEmptyObjectInterface(retType)) {
+        const retType = this.checker.getReturnTypeOfSignature(callSig);
+        if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
             this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
         }
     }
 
     private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        const isAnonymous = isObjectFlagSet(objType, ts.ObjectFlags.Anonymous);
-        let hasProblematicCallSignatures = false;
-        const hasProperties = (objType.getProperties() !== undefined && objType.getProperties().length > 0);
-        const hasNumberIndexType = objType.getNumberIndexType() !== undefined;
-        const hasStringIndexType = objType.getStringIndexType() !== undefined;
-        const callSig = objType.getCallSignatures();
-        if (callSig !== undefined && callSig.length > 0) {
-            const isClean = callSig.every((sig) => {
-                const csigRetType = this.checker.getReturnTypeOfSignature(sig) as ts.TypeReference;
-                return this.isEmptyObjectInterface(csigRetType);
+        return isObjectFlagSet(objType, ts.ObjectFlags.Anonymous) &&
+            objType.getProperties().length === 0 &&
+            objType.getNumberIndexType() === undefined &&
+            objType.getStringIndexType() === undefined &&
+            objType.getCallSignatures().every((signature) => {
+                const type = this.checker.getReturnTypeOfSignature(signature);
+                return isObjectType(type) && this.isEmptyObjectInterface(type);
             });
-            if (!isClean) {
-                hasProblematicCallSignatures = true;
-            }
-        }
-        return (isAnonymous && !hasProblematicCallSignatures && !hasProperties && !hasNumberIndexType && !hasStringIndexType);
     }
 }
