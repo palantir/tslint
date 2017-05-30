@@ -164,6 +164,22 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.SwitchStatement: {
+                const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
+                // Allow `switch (x) {}` where `x` is any
+                cb(expression, /*anyOk*/ true);
+                for (const clause of clauses) {
+                    if (clause.kind === ts.SyntaxKind.CaseClause) {
+                        // Allow `case x:` where `x` is any
+                        cb(clause.expression, /*anyOk*/ true);
+                    }
+                    for (const statement of clause.statements) {
+                        cb(statement);
+                    }
+                }
+                break;
+            }
+
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
