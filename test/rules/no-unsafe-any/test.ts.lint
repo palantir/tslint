@@ -20,6 +20,7 @@ function returnsA(): 0 | "a" | null | undefined;
 
 label: for (const x of []) {
     break label;
+    continue label;
 }
 
 importAlias.property;
