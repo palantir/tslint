@@ -64,8 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            destructuringAll: this.ruleArguments.length !== 0 &&
-                (this.ruleArguments[0] as any).destructuring === OPTION_DESTRUCTURING_ALL,
+            destructuringAll: this.ruleArguments.length !== 0 && this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -232,7 +231,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                                 this.scope.reassigned.add((property.name as ts.Identifier).text);
                             } else {
                                 // handle `...(variable)`
-                                this.handleExpression(property.expression!);
+                                this.handleExpression(property.expression);
                             }
                             break;
                         default:
@@ -324,7 +323,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }
