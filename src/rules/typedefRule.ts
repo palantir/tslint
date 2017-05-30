@@ -127,7 +127,6 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
                 }
                 case ts.SyntaxKind.VariableDeclaration:
                     this.checkVariableDeclaration(node as ts.VariableDeclaration);
-                    break;
             }
 
             return ts.forEachChild(node, cb);

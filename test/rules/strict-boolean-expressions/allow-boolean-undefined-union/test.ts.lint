@@ -1,0 +1,36 @@
+declare function get<T>(): T;
+
+declare const bu: boolean | undefined;
+if (get<boolean | undefined>()) {}
+if (get<true | undefined>()) {}
+if (get<true | false | undefined>()) {}
+if (get<true | false | undefined | void>()) {}
+
+if (get<true>()) {}
+if (get<true | true>()) {}
+if (get<false | undefined>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'is always falsy')]
+if (get<undefined>()) {}
+    ~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'is always falsy')]
+
+if (get<void>()) {}
+    ~~~~~~~~~~~ [err % ("'if' condition", 'is always falsy')]
+
+if (get<RegExp | undefined>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'could be undefined')]
+if (get<RegExp | null>()) {}
+    ~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'could be null')]
+
+// Type of the condition is actually boolean | RegExp, but OK since we check each part separately.
+if (get<RegExp | undefined>() || get<boolean>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("operand for the '||' operator", 'could be undefined')]
+
+// This still fails of course!
+if (get<RegExp>() || get<RegExp>()) {}
+    ~~~~~~~~~~~~~ [err % ("operand for the '||' operator", 'is always truthy')]
+                     ~~~~~~~~~~~~~ [err % ("operand for the '||' operator", 'is always truthy')]
+
+if (get<number | undefined>()) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ("'if' condition", 'could be undefined')]
+
+[err]: This type is not allowed in the %s because it %s. Allowed types are boolean or boolean-or-undefined.
