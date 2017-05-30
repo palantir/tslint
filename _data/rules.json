@@ -118,10 +118,22 @@
   {
     "ruleName": "await-promise",
     "description": "Warns for an awaited value that is not a Promise.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nA list of 'string' names of any additional classes that should also be handled as Promises.\n        ",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "Thenable"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -526,8 +538,20 @@
     "requiresTypeInfo": true
   },
   {
+    "ruleName": "encoding",
+    "description": "Enforces UTF-8 file encoding.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "eofline",
     "description": "Ensures the file ends with a newline.",
+    "descriptionDetails": "Fix for single-line files is not supported.",
     "rationale": "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -604,18 +628,42 @@
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
     "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programmatic manipulation.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"spaces\"` enforces consistent spaces.\n* `\"tabs\"` enforces consistent tabs.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `spaces` enforces consistent spaces.\n* `tabs` enforces consistent tabs.\n\nA second optional argument specifies indentation size:\n\n* `2` enforces 2 space indentation.\n* `4` enforces 4 space indentation.\n\nIndentation size is required for auto-fixing, but not for rule checking.\n",
     "options": {
-      "type": "string",
-      "enum": [
-        "tabs",
-        "spaces"
-      ]
+      "type": "array",
+      "items": [
+        {
+          "type": "string",
+          "enum": [
+            "tabs",
+            "spaces"
+          ]
+        },
+        {
+          "type": "number",
+          "enum": [
+            2,
+            4
+          ]
+        }
+      ],
+      "minLength": 0,
+      "maxLength": 5
     },
     "optionExamples": [
       [
         true,
         "spaces"
+      ],
+      [
+        true,
+        "spaces",
+        4
+      ],
+      [
+        true,
+        "tabs",
+        2
       ]
     ],
     "type": "maintainability",
@@ -1318,7 +1366,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1422,8 +1470,8 @@
   },
   {
     "ruleName": "no-object-literal-type-assertion",
-    "description": "Forbids an object literal to appear in a type assertion expression.",
-    "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\n`const x: { foo: number } = {}` will fail, but `const x = {} as { foo: number }` succeeds.",
+    "description": "\nForbids an object literal to appear in a type assertion expression.\nCasting to `any` is still allowed.",
+    "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\nThe compiler will warn for excess properties with this syntax, but not missing required fields.\nFor example: `const x: { foo: number } = {}` will fail to compile, but\n`const x = {} as { foo: number }` will succeed.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -1783,7 +1831,7 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
-      "true"
+      true
     ],
     "type": "style",
     "typescriptOnly": false
@@ -1832,10 +1880,19 @@
     "ruleName": "object-literal-sort-keys",
     "description": "Requires keys in object literals to be sorted alphabetically",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "You may optionally pass \"ignore-case\" to compare keys case insensitive.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "ignore-case"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "ignore-case"
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -1967,6 +2024,18 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-conditional-expression",
+    "description": "\nRecommends to use a conditional expression instead of assigning to the same thing in each branch of an if statement.",
+    "rationale": "\nThis reduces duplication and can eliminate an unnecessary variable declaration.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "prefer-const",
     "description": "Requires that variable declarations use `const` instead of `let` and `var` if possible.",
     "descriptionDetails": "\nIf a variable is only assigned to once when it is declared, it should be declared using 'const'",
@@ -2043,9 +2112,22 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "prefer-object-spread",
+    "description": "Enforces the use of the ES2015 object spread operator over `Object.assign()` where appropriate.",
+    "rationale": "Object spread allows for better type checking and inference.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "functionality",
+    "typescriptOnly": false,
+    "hasFix": true
+  },
+  {
     "ruleName": "prefer-switch",
     "description": "Prefer a `switch` statement to an `if` statement with simple `===` comparisons.",
-    "optionsDescription": "\nAn optional object with the property 'min-cases'.\nThis is the number cases needed before a switch statement is recommended.\nDefaults to 2.",
+    "optionsDescription": "\nAn optional object with the property 'min-cases'.\nThis is the number cases needed before a switch statement is recommended.\nDefaults to 3.",
     "options": {
       "type": "object",
       "properties": {
@@ -2055,8 +2137,13 @@
       }
     },
     "optionExamples": [
-      "true",
-      "[\"true\", { \"min-cases\": 2 }]"
+      true,
+      [
+        true,
+        {
+          "min-cases": 2
+        }
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -2098,7 +2185,7 @@
     "ruleName": "quotemark",
     "description": "Requires single or double quotes for string literals.",
     "hasFix": true,
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-template\"` forbids single-line untagged template strings that do not contain string interpolations.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
     "options": {
       "type": "array",
       "items": {
@@ -2118,7 +2205,8 @@
       [
         true,
         "single",
-        "avoid-escape"
+        "avoid-escape",
+        "avoid-template"
       ],
       [
         true,
@@ -2564,7 +2652,7 @@
     "ruleName": "typedef-whitespace",
     "description": "Requires or disallows whitespace for type definitions.",
     "descriptionDetails": "Determines if a space is required or not before the colon in a type specifier.",
-    "optionsDescription": "\nTwo arguments which are both objects.\nThe first argument specifies how much space should be to the _left_ of a typedef colon.\nThe second argument specifies how much space should be to the _right_ of a typedef colon.\nEach key should have a value of `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
+    "optionsDescription": "\nTwo arguments which are both objects.\nThe first argument specifies how much space should be to the _left_ of a typedef colon.\nThe second argument specifies how much space should be to the _right_ of a typedef colon.\nEach key should have a value of `\"onespace\"`, `\"space\"` or `\"nospace\"`.\nPossible keys are:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"index-signature\"` checks index type specifier of indexers.\n* `\"parameter\"` checks function parameters.\n* `\"property-declaration\"` checks object property declarations.\n* `\"variable-declaration\"` checks variable declaration.",
     "options": {
       "type": "array",
       "items": [
@@ -2683,7 +2771,8 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "hasFix": true
   },
   {
     "ruleName": "typeof-compare",
@@ -2722,7 +2811,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only camelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to camelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to camelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only lowerCamelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to lowerCamelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to lowerCamelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
     "options": {
       "type": "array",
       "items": {

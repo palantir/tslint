@@ -1,14 +1,32 @@
 ---
 ruleName: await-promise
 description: Warns for an awaited value that is not a Promise.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  A list of 'string' names of any additional classes that should also be handled as Promises.
+          
+options:
+  type: list
+  listType:
+    type: array
+    items:
+      type: string
 optionExamples:
   - 'true'
+  - '[true, "Thenable"]'
 type: functionality
 typescriptOnly: true
 requiresTypeInfo: true
 layout: rule
 title: 'Rule: await-promise'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
 ---

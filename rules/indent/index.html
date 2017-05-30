@@ -5,29 +5,60 @@ rationale: |-
 
   Using only one of tabs or spaces for indentation leads to more consistent editor behavior,
   cleaner diffs in version control, and easier programmatic manipulation.
-optionsDescription: |-
+optionsDescription: |
 
   One of the following arguments must be provided:
 
-  * `"spaces"` enforces consistent spaces.
-  * `"tabs"` enforces consistent tabs.
+  * `spaces` enforces consistent spaces.
+  * `tabs` enforces consistent tabs.
+
+  A second optional argument specifies indentation size:
+
+  * `2` enforces 2 space indentation.
+  * `4` enforces 4 space indentation.
+
+  Indentation size is required for auto-fixing, but not for rule checking.
 options:
-  type: string
-  enum:
-    - tabs
-    - spaces
+  type: array
+  items:
+    - type: string
+      enum:
+        - tabs
+        - spaces
+    - type: number
+      enum:
+        - 2
+        - 4
+  minLength: 0
+  maxLength: 5
 optionExamples:
   - '[true, "spaces"]'
+  - '[true, "spaces", 4]'
+  - '[true, "tabs", 2]'
 type: maintainability
 typescriptOnly: false
 layout: rule
 title: 'Rule: indent'
 optionsJSON: |-
   {
-    "type": "string",
-    "enum": [
-      "tabs",
-      "spaces"
-    ]
+    "type": "array",
+    "items": [
+      {
+        "type": "string",
+        "enum": [
+          "tabs",
+          "spaces"
+        ]
+      },
+      {
+        "type": "number",
+        "enum": [
+          2,
+          4
+        ]
+      }
+    ],
+    "minLength": 0,
+    "maxLength": 5
   }
 ---
