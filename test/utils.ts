@@ -42,8 +42,3 @@ export function createTempFile(extension: string) {
     }
     throw new Error("Couldn't create temp file");
 }
-
-// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
-export function denormalizeWinPath(path: string): string {
-    return path.replace(/\\/g, "/");
-}

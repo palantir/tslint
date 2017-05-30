@@ -107,37 +107,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            switch (node.kind) {
-                case ts.SyntaxKind.FunctionDeclaration:
-                case ts.SyntaxKind.FunctionExpression:
-                case ts.SyntaxKind.MethodDeclaration:
-                case ts.SyntaxKind.ArrowFunction:
-                case ts.SyntaxKind.GetAccessor:
-                case ts.SyntaxKind.SetAccessor:
-                case ts.SyntaxKind.MethodSignature:
-                case ts.SyntaxKind.ConstructSignature:
-                case ts.SyntaxKind.CallSignature:
-                    this.checkSpace(node as ts.FunctionLikeDeclaration | ts.SignatureDeclaration, "call-signature");
-                    break;
-                case ts.SyntaxKind.IndexSignature:
-                    this.checkSpace(node as ts.IndexSignatureDeclaration, "index-signature");
-                    break;
-                case ts.SyntaxKind.VariableDeclaration:
-                    this.checkSpace(node as ts.VariableDeclaration, "variable-declaration");
-                    break;
-                case ts.SyntaxKind.Parameter:
-                    this.checkSpace(node as ts.ParameterDeclaration, "parameter");
-                    break;
-                case ts.SyntaxKind.PropertySignature:
-                case ts.SyntaxKind.PropertyDeclaration:
-                    this.checkSpace(node as ts.PropertyDeclaration | ts.PropertySignature, "property-declaration");
+            const optionType = getOptionType(node);
+            if (optionType !== undefined) {
+                this.checkSpace(node as ts.SignatureDeclaration | ts.VariableLikeDeclaration, optionType);
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkSpace(node: ts.FunctionLikeDeclaration | ts.SignatureDeclaration | ts.VariableLikeDeclaration, key: OptionType) {
+    private checkSpace(node: ts.SignatureDeclaration | ts.VariableLikeDeclaration, key: OptionType) {
         if (node.type === undefined) {
             return;
         }
@@ -203,5 +182,31 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
                                         Lint.Replacement.deleteFromTo(start + 1, end));
                 }
         }
+    }
+}
+
+function getOptionType(node: ts.Node): OptionType | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.ArrowFunction:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.CallSignature:
+            return "call-signature";
+        case ts.SyntaxKind.IndexSignature:
+            return "index-signature";
+        case ts.SyntaxKind.VariableDeclaration:
+            return "variable-declaration";
+        case ts.SyntaxKind.Parameter:
+            return "parameter";
+        case ts.SyntaxKind.PropertySignature:
+        case ts.SyntaxKind.PropertyDeclaration:
+            return "property-declaration";
+        default:
+            return undefined;
     }
 }
