@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         if (!Lint.isStrictNullChecksEnabled(program.getCompilerOptions())) {
-            showWarningOnce("strict-type-predicates does not work without strictNullChecks");
+            showWarningOnce("strict-type-predicates does not work without --strictNullChecks");
             return [];
         }
         return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
