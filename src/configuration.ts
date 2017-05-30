@@ -115,7 +115,7 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
 export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
-            throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
+            throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
         } else {
             return path.resolve(suppliedConfigFilePath);
         }
@@ -258,7 +258,6 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(filePath);
         } catch (err) {
-            // tslint:disable-next-line prefer-template (fixed in 5.3)
             throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
                 "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
                 "for the approximate method TSLint uses to find the referenced configuration file.");
@@ -370,7 +369,7 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
             const absolutePath = getRelativePath(dir, relativeTo);
             if (absolutePath != null) {
                 if (!fs.existsSync(absolutePath)) {
-                    throw new Error(`Could not find custom rule directory: ${dir}`);
+                    throw new FatalError(`Could not find custom rule directory: ${dir}`);
                 }
             }
             return absolutePath;

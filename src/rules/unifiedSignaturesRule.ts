@@ -72,7 +72,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
             }
             case ts.SyntaxKind.TypeLiteral:
                 checkMembers((node as ts.TypeLiteralNode).members);
-                break;
         }
 
         return ts.forEachChild(node, cb);
@@ -130,7 +129,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
                         ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
                         : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
-                    break;
                 }
             }
         }
