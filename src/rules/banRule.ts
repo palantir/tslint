@@ -51,7 +51,10 @@ export class Rule extends Lint.Rules.AbstractRule {
               * an object in the following format: \`{"name": "functionName", "message": "optional explanation message"}\`
             * banning methods:
               * an array with the object name, method name and optional message: \`["functionName", "methodName", "optional message"]\`
-              * an object in the following format: \`{"object": "objectName", "name": "methodName", "message": "optional message"}\`
+              * an object in the following format: \`{"name": ["objectName", "methodName"], "message": "optional message"}\`
+                * you can also ban deeply nested methods: \`{"name": ["foo", "bar", "baz"]}\` bans \`foo.bar.baz()\`
+                * the first element can contain a wildcard (\`*\`) that matches everything. \`{"name": ["*", "forEach"]}\` bans\
+                  \`[].forEach(...)\`, \`$(...).forEach(...)\`, \`arr.forEach(...)\`, etc.
             `,
         options: {
             type: "list",
@@ -69,8 +72,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                     {
                         type: "object",
                         properties: {
-                            name: {type: "string"},
-                            object: {type: "string"},
+                            name: {
+                                anyOf: [
+                                    {type: "string"},
+                                    {type: "array", items: {type: "string"}, minLength: 1},
+                                ],
+                            },
                             message: {type: "string"},
                         },
                         required: ["name"],
@@ -84,7 +91,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 "eval",
                 {name: "$", message: "please don't"},
                 ["describe", "only"],
-                {object: "it", name: "only", message: "don't fucus tests"},
+                {name: ["it", "only"], message: "don't focus tests"},
+                {name: ["chai", "assert", "equal"], message: "Use 'strictEqual' instead."},
+                {name: ["*", "forEach"], message: "Use a regular for loop instead."},
             ],
         ],
         type: "functionality",

@@ -6,7 +6,7 @@ document.window.toString();
 reference.randomContainer.window.toString();
 globals.getDocument().window.toString();
 _.keys(obj).forEach(fun);
-~~~~~~~~~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead')]
+~~~~~~~~~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead.')]
 _.map(fun, (x) => x);
 ~~~~~    [err % ('_.map')]
 _.filter(array);
@@ -28,10 +28,10 @@ assert.equal(1, "1");
 foo.assert.equal(1, "1");
 someObject.chai.assert.equal(1, "1");
 [].forEach(() => {});
-~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead')]
+~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead.')]
 arr.forEach(() => {});
-~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead')]
+~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead.')]
 someObject.someProperty.forEach(() => {});
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead')]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('*.forEach', 'Use a regular for loop instead.')]
 
 [err]: Calls to '%s' are not allowed.
