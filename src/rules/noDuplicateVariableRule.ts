@@ -20,6 +20,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_CHECK_PARAMETERS = "check-parameters";
+
+interface Options {
+    parameters: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -31,9 +37,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             A variable can be reassigned if necessary -
             there's no good reason to have a duplicate variable declaration.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a paramter.`,
+        options: {
+            type: "string",
+            enum: [OPTION_CHECK_PARAMETERS],
+        },
+        optionExamples: [
+            true,
+            [true, OPTION_CHECK_PARAMETERS],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -44,11 +56,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
+            parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== - 1,
+        }));
     }
 }
 
-class NoDuplicateVariableWalker extends Lint.AbstractWalker<void> {
+class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
     private scope: Set<string>;
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
@@ -60,17 +74,15 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<void> {
                 this.scope = oldScope;
                 return;
             }
-            if (utils.isParameterDeclaration(node)) {
+            if (this.options.parameters && utils.isParameterDeclaration(node)) {
                 this.handleBindingName(node.name, false);
             } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
                 for (const variable of node.declarations) {
                     this.handleBindingName(variable.name, true);
                 }
             }
-
             return ts.forEachChild(node, cb);
         };
-
         return ts.forEachChild(sourceFile, cb);
     }
 
