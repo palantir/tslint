@@ -179,13 +179,13 @@ function walk(ctx: Lint.WalkContext<IOptions>) {
 
             if (order != undefined) {
                 const propRank = propertyRank(property);
-                const hasError = typeof(lastRank) != undefined // not the first prop
+                const hasError = lastRank !== undefined // not the first prop
                     && propRank !== -1 // have a specified order
                     && (lastRank! > propRank || lastRank! === -1); // last rank is higher order or not set
 
                 if (hasError) {
                     let error2 = "first";
-                    if (typeof(lastRankKind) !== undefined) {
+                    if (lastRankKind !== undefined) {
                       error2 = `before ${lastRankKind} properties`;
                     }
 
