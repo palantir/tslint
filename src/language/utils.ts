@@ -16,7 +16,7 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
@@ -424,4 +424,10 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
         default:
             return undefined;
     }
+}
+
+export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
+    return isPrefixUnaryExpression(node) &&
+        node.operator === ts.SyntaxKind.MinusToken &&
+        node.operand.kind === ts.SyntaxKind.NumericLiteral;
 }

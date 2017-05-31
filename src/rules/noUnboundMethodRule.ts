@@ -92,6 +92,14 @@ function isSafeUse(node: ts.Node): boolean {
         case ts.SyntaxKind.TypeAssertionExpression:
         case ts.SyntaxKind.ParenthesizedExpression:
             return isSafeUse(parent);
+        // Allow use in conditions
+        case ts.SyntaxKind.ConditionalExpression:
+            return (parent as ts.ConditionalExpression).condition === node;
+        case ts.SyntaxKind.IfStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.DoStatement:
+        case ts.SyntaxKind.ForStatement:
+            return true;
         default:
             return false;
     }

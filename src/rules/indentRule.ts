@@ -174,7 +174,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
             : /\t/g;
         const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
-            (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size!)));
+            (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)));
         return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
     }
 }

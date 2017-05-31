@@ -71,6 +71,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb((node as ts.LabeledStatement).statement);
 
             case ts.SyntaxKind.BreakStatement: // Ignore label
+            case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -161,6 +162,22 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                     return checkContextual(expression);
                 }
                 return;
+            }
+
+            case ts.SyntaxKind.SwitchStatement: {
+                const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
+                // Allow `switch (x) {}` where `x` is any
+                cb(expression, /*anyOk*/ true);
+                for (const clause of clauses) {
+                    if (clause.kind === ts.SyntaxKind.CaseClause) {
+                        // Allow `case x:` where `x` is any
+                        cb(clause.expression, /*anyOk*/ true);
+                    }
+                    for (const statement of clause.statements) {
+                        cb(statement);
+                    }
+                }
+                break;
             }
 
             default:

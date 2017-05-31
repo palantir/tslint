@@ -117,7 +117,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
-            const importName = findImport(diag.start!, sourceFile);
+            const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
                 if (isImportUsed(importName, sourceFile, checker)) {
                     continue;
@@ -138,7 +138,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start!, diag.length!, failure);
+        ctx.addFailureAt(diag.start, diag.length, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
