@@ -59,9 +59,8 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isExpressionStatement(node)) {
             const { expression } = node;
-            if (isCallExpression(expression) &&
-                    !(isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch")) {
-                const {symbol} = tc.getTypeAtLocation(expression);
+            if (isCallExpression(expression) && !isPromiseCatchCall(expression)) {
+                const { symbol } = tc.getTypeAtLocation(expression);
                 if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
                     ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
                 }
@@ -69,4 +68,8 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isPromiseCatchCall(expression: ts.CallExpression): boolean {
+    return isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch";
 }
