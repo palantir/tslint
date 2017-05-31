@@ -65,7 +65,7 @@ yarn test
 Creating a new release
 ----------------------
 
-1. Bump the version number in `package.json` and `src/tslintMulti.ts`
+1. Bump the version number in `package.json` and `src/linter.ts`
 2. Add release notes in `CHANGELOG.md`
 3. `yarn verify` to build the latest sources from a clean state
 4. Commit with message `Prepare release <version>`
