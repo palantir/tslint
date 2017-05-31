@@ -53,7 +53,7 @@ Development
 Requirements:
 
 - `node` v7
-- `yarn` v0.18
+- `yarn` v0.23+
 
 #### Quick Start
 

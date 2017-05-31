@@ -25,7 +25,7 @@ type OptionName = "arrays" | "exports" | "functions" | "imports" | "objects" | "
 type CustomOptionValue = Record<OptionName, OptionValue>;
 type Options = Record<"multiline" | "singleline", CustomOptionValue>;
 
-const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore");
+const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore"); // tslint:disable-line no-unnecessary-type-assertion
 
 function fillOptions<T>(value: T): Record<OptionName, T> {
     return {

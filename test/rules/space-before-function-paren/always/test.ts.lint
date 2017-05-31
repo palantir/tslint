@@ -44,6 +44,7 @@ async() => {};
 var arrow = async() => {};
                  ~ [space-before-function-paren]
 
+async x => x;
 
 // Method
 interface IMyInterface {

@@ -203,7 +203,7 @@ commander.on("--help", () => {
 const parsed = commander.parseOptions(process.argv.slice(2));
 commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
-    (commander.parseArgs as any)([], parsed.unknown);
+    (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }
 const argv = commander.opts() as any as Argv;
 

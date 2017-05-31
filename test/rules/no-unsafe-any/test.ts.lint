@@ -20,6 +20,7 @@ function returnsA(): 0 | "a" | null | undefined;
 
 label: for (const x of []) {
     break label;
+    continue label;
 }
 
 importAlias.property;
@@ -165,5 +166,19 @@ const obj: { x: number, y: number } = {
     [x]: 1,
      ~ [0]
 };
+
+switch (x) {}
+switch (x.y) {
+        ~ [0]
+    case x:
+        x.y;
+        ~ [0]
+        break;
+    case x.y:
+         ~ [0]
+        break;
+}
+
+declare global {}
 
 [0]: Unsafe use of expression of type 'any'.
