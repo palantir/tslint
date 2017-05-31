@@ -426,6 +426,11 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
     }
 }
 
+export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
+    return options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false);
+}
+
 export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
     return isPrefixUnaryExpression(node) &&
         node.operator === ts.SyntaxKind.MinusToken &&
