@@ -37,6 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "comment-format",
         description: "Enforces formatting rules for single-line comments.",
+        hasFix: true,
         rationale: "Helps maintain a consistent, readable style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
             Three arguments may be optionally provided:
@@ -125,7 +126,8 @@ class CommentWalker extends Lint.RuleWalker {
                 const width = commentText.length - 2;
                 if (this.hasOption(OPTION_SPACE)) {
                     if (!startsWithSpace(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE);
+                        const fix = this.createFix(this.appendText(startPosition, " "));
+                        this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE, fix);
                     }
                 }
                 if (this.hasOption(OPTION_LOWERCASE)) {
