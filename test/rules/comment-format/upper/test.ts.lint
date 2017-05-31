@@ -10,7 +10,10 @@ class Clazz { // This comment is correct
         console.log("test"); //This comment has no space
                                ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
     }
-    /// <reference or something>
+    /// <not a reference>
+    ////foo
+        ~~~ [space]
+        ~~~ [upper]
 }
 
 //#region test
