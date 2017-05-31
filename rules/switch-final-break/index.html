@@ -1,0 +1,27 @@
+---
+ruleName: switch-final-break
+description: Checks whether the final clause of a switch statement ends in `break;`.
+optionsDescription: |-
+
+  If no options are passed, a final 'break;' is forbidden.
+  If the "always" option is passed this will require a 'break;' to always be present
+  unless control flow is escaped in some other way.
+options:
+  type: string
+  enum:
+    - always
+optionExamples:
+  - 'true'
+  - '[true, "always"]'
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: switch-final-break'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "always"
+    ]
+  }
+---

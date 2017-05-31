@@ -25,9 +25,14 @@ optionsDescription: |-
   * `allow-number` allows numbers.
     - It does *not* allow unions containing `number`.
     - It does *not* allow enums or number literal types.
-  * `allow-mix` allow multiple of the above to appear together.
+  * `allow-mix` allows multiple of the above to appear together.
     - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.
     - A type like `"foo" | "bar" | undefined` is always allowed, because it has only one way to be false.
+  * `allow-boolean-or-undefined` allows `boolean | undefined`.
+    - Also allows `true | false | undefined`.
+    - Does not allow `false | undefined`.
+    - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.
+          
 options:
   type: array
   items:
@@ -37,6 +42,7 @@ options:
       - allow-undefined-union
       - allow-string
       - allow-number
+      - allow-boolean-or-undefined
   minLength: 0
   maxLength: 5
 optionExamples:
@@ -49,6 +55,7 @@ optionExamples:
       "allow-string",
       "allow-number"
     ]
+  - '[true, "allow-boolean-or-undefined"]'
 type: functionality
 typescriptOnly: true
 requiresTypeInfo: true
@@ -63,7 +70,8 @@ optionsJSON: |-
         "allow-null-union",
         "allow-undefined-union",
         "allow-string",
-        "allow-number"
+        "allow-number",
+        "allow-boolean-or-undefined"
       ]
     },
     "minLength": 0,
