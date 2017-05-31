@@ -394,7 +394,7 @@ function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberC
         return orderOption;
     }
 
-    const preset = PRESETS.get(orderOption as string);
+    const preset = PRESETS.get(orderOption);
     if (preset === undefined) {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }
