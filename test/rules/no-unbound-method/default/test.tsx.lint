@@ -34,7 +34,7 @@ c.method ? 1 : 2;
                ~~~~~~~~ [0]
 if (c.method) {}
 while (c.method) {}
-do () while (c.method);
+do {} while (c.method);
 for (c.method; c.method; c.method) {}
 
 
