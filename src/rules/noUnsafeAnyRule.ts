@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {isExpression} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -70,6 +71,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb((node as ts.LabeledStatement).statement);
 
             case ts.SyntaxKind.BreakStatement: // Ignore label
+            case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -162,8 +164,31 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.SwitchStatement: {
+                const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
+                // Allow `switch (x) {}` where `x` is any
+                cb(expression, /*anyOk*/ true);
+                for (const clause of clauses) {
+                    if (clause.kind === ts.SyntaxKind.CaseClause) {
+                        // Allow `case x:` where `x` is any
+                        cb(clause.expression, /*anyOk*/ true);
+                    }
+                    for (const statement of clause.statements) {
+                        cb(statement);
+                    }
+                }
+                break;
+            }
+
+            case ts.SyntaxKind.ModuleDeclaration: {
+                // In `declare global { ... }`, don't mark `global` as unsafe any.
+                const { body } = node as ts.ModuleDeclaration;
+                if (body !== undefined) { cb(body); }
+                return;
+            }
+
             default:
-                if (!(ts.isExpression(node) && check())) {
+                if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
                 }
                 return;
@@ -238,9 +263,4 @@ function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
 
 function isAny(type: ts.Type | undefined): boolean {
     return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
-}
-
-declare module "typescript" {
-    // This is marked @internal, but we need it!
-    function isExpression(node: ts.Node): node is ts.Expression;
 }

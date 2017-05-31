@@ -58,7 +58,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 const { members } = node as ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeLiteralNode;
                 addFailures(getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, (member) =>
                     utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined));
-                break;
             }
         }
 
@@ -117,7 +116,7 @@ export function getOverloadKey(node: ts.SignatureDeclaration): string | undefine
     return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
 
-function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string, computed?: boolean } | undefined {
+function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string; computed?: boolean } | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.Constructor:

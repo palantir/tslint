@@ -19,7 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { getRelativePath } from "./configuration";
-import { showWarningOnce } from "./error";
+import { FatalError, showWarningOnce } from "./error";
 import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
 
@@ -130,7 +130,7 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath = fals
     if (isCustomPath) {
         absolutePath = getRelativePath(directory);
         if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
-            throw new Error(`Could not find custom rule directory: ${directory}`);
+            throw new FatalError(`Could not find custom rule directory: ${directory}`);
         }
     }
 

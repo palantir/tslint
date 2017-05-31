@@ -65,7 +65,6 @@ function walk(ctx: Lint.WalkContext<Option>): void {
                 break;
             case ts.SyntaxKind.TypeReference:
                 checkTypeReference(node as ts.TypeReferenceNode);
-                break;
         }
         return ts.forEachChild(node, cb);
     });

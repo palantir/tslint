@@ -163,15 +163,15 @@ export class Rule extends Lint.Rules.TypedRule {
 
             Types that may be enabled are:
 
-                * \`"${ARGUMENT_CLASSES}"\`
-                * \`"${ARGUMENT_ENUMS}"\`
-                * \`"${ARGUMENT_FUNCTIONS}"\`
-                * \`"${ARGUMENT_INTERFACES}"\`
-                * \`"${ARGUMENT_METHODS}"\`
-                * \`"${ARGUMENT_NAMESPACES}"\`
-                * \`"${ARGUMENT_PROPERTIES}"\`
-                * \`"${ARGUMENT_TYPES}"\`
-                * \`"${ARGUMENT_VARIABLES}"\``,
+            * \`"${ARGUMENT_CLASSES}"\`
+            * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_FUNCTIONS}"\`
+            * \`"${ARGUMENT_INTERFACES}"\`
+            * \`"${ARGUMENT_METHODS}"\`
+            * \`"${ARGUMENT_NAMESPACES}"\`
+            * \`"${ARGUMENT_PROPERTIES}"\`
+            * \`"${ARGUMENT_TYPES}"\`
+            * \`"${ARGUMENT_VARIABLES}"\``,
         options: {
             type: "array",
             items: {

@@ -117,7 +117,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
-            const importName = findImport(diag.start!, sourceFile);
+            const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
                 if (isImportUsed(importName, sourceFile, checker)) {
                     continue;
@@ -138,7 +138,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start!, diag.length!, failure);
+        ctx.addFailureAt(diag.start, diag.length, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
@@ -152,8 +152,6 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - Unused imports are fixable.
  */
 function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
-    // tslint:disable return-undefined
-    // (fixed in tslint 5.3)
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);
@@ -369,23 +367,32 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    const options = { ...program.getCompilerOptions(), noUnusedLocals: true, ...(checkParameters ? { noUnusedParameters: true } : null) };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [s.fileName, s]));
+    const options = {
+        ...program.getCompilerOptions(),
+        noEmit: true,
+        noUnusedLocals: true,
+        ...(checkParameters ? { noUnusedParameters: true } : null),
+    };
+    const sourceFilesByName = new Map<string, ts.SourceFile>(
+        program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
+
     // tslint:disable object-literal-sort-keys
     return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
-        fileExists: (f) => sourceFilesByName.has(f),
-        readFile(f) {
-            const s = sourceFilesByName.get(f)!;
-            return s.text;
-        },
-        getSourceFile: (f) => sourceFilesByName.get(f)!,
+        fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
+        readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
+        getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => {}, // tslint:disable-line no-empty
         getCurrentDirectory: () => "",
         getDirectories: () => [],
-        getCanonicalFileName: (f) => f,
-        useCaseSensitiveFileNames: () => true,
+        getCanonicalFileName,
+        useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
         getNewLine: () => "\n",
     });
     // tslint:enable object-literal-sort-keys
+
+    // We need to be careful with file system case sensitivity
+    function getCanonicalFileName(fileName: string): string {
+        return ts.sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase();
+    }
 }

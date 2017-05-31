@@ -69,7 +69,7 @@ describe("Configuration", () => {
                     p: null,
                     q: {},
                     r: "garbage",
-                    s: { junk: 1 } as any, // tslint:disable-line no-object-literal-type-assertion (Fixed in 5.3)
+                    s: { junk: 1 } as any,
                 },
             };
             const expected = getEmptyConfig();
@@ -209,6 +209,12 @@ describe("Configuration", () => {
                 findConfigurationPath(null, "./test/files/config-findup"),
                 path.resolve("./test/files/config-findup/tslint.json"),
             );
+
+            // gulp-tslint uses a path including the filename
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
         });
     });
 
@@ -315,8 +321,8 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
 
             const expectedConfig = getEmptyConfig();
             expectedConfig.rules.set("always-fail", { ruleSeverity: "off" });
