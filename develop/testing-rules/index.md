@@ -158,7 +158,9 @@ The following part can be any [version range](https://github.com/npm/node-semver
 ### Tips & Tricks ###
 
 * You can use this system to test rules outside of the TSLint build! Use the `tslint --test path/to/dir` command to test your own custom rules.
-The directory you pass should contain a `tslint.json` file and `.ts.lint` files. You can try this out on the TSLint rule test cases, for example, `tslint --test path/to/tslint-code/test/rules/quotemark/single`.
+You can specify one or more paths to `tslint.json` files or directories containing a `tslint.json`. Glob patterns are also supported.
+Besides the `tslint.json` each directory you pass should contain `*.ts.lint` files. You can try this out on the TSLint rule test cases, for example, `tslint --test path/to/tslint-code/test/rules/quotemark/single`.
+If you want to test all of your rules at once, you can use it like this: `tslint --test rules/test/**/tslint.json`
 
 * To test rules that need type information, you can simply add a `tsconfig.json` with the desired configuration next to `tslint.json`.
 
@@ -173,7 +175,5 @@ for (let key in obj) {
 ~ [for-in loops are not allowed]
 ```
 
-* If for some weird reason your lint rule generates a failure that has zero width, you can use the `~nil` mark to indicate this.
-In all reality though, you shouldn't have rules that do this, and this feature is more of a carryover to accomodate testing
-some of TSLint's legacy rules.
+* If for some reason your lint rule generates a failure that has zero width, you can use the `~nil` mark to indicate this.
 

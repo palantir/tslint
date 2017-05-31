@@ -1,25 +1,55 @@
 ---
 ruleName: ban
 description: Bans the use of specific functions or global methods.
-optionsDescription: |-
+optionsDescription: |
 
-  A list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()`
-  or respectively `globalMethod()`.
+  A list of banned functions or methods in the following format:
+
+  * banning functions:
+    * just the name of the function: `"functionName"`
+    * the name of the function in an array with one element: `["functionName"]`
+    * an object in the following format: `{"name": "functionName", "message": "optional explanation message"}`
+  * banning methods:
+    * an array with the object name, method name and optional message: `["functionName", "methodName", "optional message"]`
+    * an object in the following format: `{"name": ["objectName", "methodName"], "message": "optional message"}`
+      * you can also ban deeply nested methods: `{"name": ["foo", "bar", "baz"]}` bans `foo.bar.baz()`
+      * the first element can contain a wildcard (`*`) that matches everything. `{"name": ["*", "forEach"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.
 options:
   type: list
   listType:
-    type: array
-    items:
-      type: string
-    minLength: 1
-    maxLength: 3
+    anyOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+        minLength: 1
+        maxLength: 3
+      - type: object
+        properties:
+          name:
+            anyOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+                minLength: 1
+          message:
+            type: string
+        required:
+          - name
 optionExamples:
   - |-
     [
       true,
-      ["someGlobalMethod"],
-      ["someObject", "someFunction"],
-      ["someObject", "otherFunction", "Optional explanation"]
+      "eval",
+      {"name": "$", "message": "please don't"},
+      ["describe", "only"],
+      {"name": ["it", "only"], "message": "don't focus tests"},
+      {
+        "name": ["chai", "assert", "equal"],
+        "message": "Use 'strictEqual' instead."
+      },
+      {"name": ["*", "forEach"], "message": "Use a regular for loop instead."}
     ]
 type: functionality
 typescriptOnly: false
@@ -29,12 +59,44 @@ optionsJSON: |-
   {
     "type": "list",
     "listType": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minLength": 1,
-      "maxLength": 3
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 1,
+          "maxLength": 3
+        },
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minLength": 1
+                }
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name"
+          ]
+        }
+      ]
     }
   }
 ---

@@ -142,33 +142,84 @@
   {
     "ruleName": "ban",
     "description": "Bans the use of specific functions or global methods.",
-    "optionsDescription": "\nA list of `['object', 'method', 'optional explanation here']` or `['globalMethod']` which ban `object.method()`\nor respectively `globalMethod()`.",
+    "optionsDescription": "\nA list of banned functions or methods in the following format:\n\n* banning functions:\n  * just the name of the function: `\"functionName\"`\n  * the name of the function in an array with one element: `[\"functionName\"]`\n  * an object in the following format: `{\"name\": \"functionName\", \"message\": \"optional explanation message\"}`\n* banning methods:\n  * an array with the object name, method name and optional message: `[\"functionName\", \"methodName\", \"optional message\"]`\n  * an object in the following format: `{\"name\": [\"objectName\", \"methodName\"], \"message\": \"optional message\"}`\n    * you can also ban deeply nested methods: `{\"name\": [\"foo\", \"bar\", \"baz\"]}` bans `foo.bar.baz()`\n    * the first element can contain a wildcard (`*`) that matches everything. `{\"name\": [\"*\", \"forEach\"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.\n",
     "options": {
       "type": "list",
       "listType": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "minLength": 1,
-        "maxLength": 3
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minLength": 1,
+            "maxLength": 3
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minLength": 1
+                  }
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        ]
       }
     },
     "optionExamples": [
       [
         true,
+        "eval",
+        {
+          "name": "$",
+          "message": "please don't"
+        },
         [
-          "someGlobalMethod"
+          "describe",
+          "only"
         ],
-        [
-          "someObject",
-          "someFunction"
-        ],
-        [
-          "someObject",
-          "otherFunction",
-          "Optional explanation"
-        ]
+        {
+          "name": [
+            "it",
+            "only"
+          ],
+          "message": "don't focus tests"
+        },
+        {
+          "name": [
+            "chai",
+            "assert",
+            "equal"
+          ],
+          "message": "Use 'strictEqual' instead."
+        },
+        {
+          "name": [
+            "*",
+            "forEach"
+          ],
+          "message": "Use a regular for loop instead."
+        }
       ]
     ],
     "type": "functionality",
@@ -205,6 +256,17 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "binary-expression-operand-order",
+    "description": "\nIn a binary expression, a literal should always be on the right-hand side if possible.\nFor example, prefer 'x + 1' over '1 + x'.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "callable-types",
     "description": "An interface or literal type with just a call signature can be written as a function type.",
     "rationale": "style",
@@ -230,7 +292,7 @@
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
     "rationale": "Helps maintain a consistent, readable style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that comments starting with `///` are also allowed, for things such as `///<reference>`\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n\n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that for comments starting with multiple slashes, e.g. `///`, leading slashes are ignored\n    * TypeScript reference comments are ignored completely\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n\n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
     "options": {
       "type": "array",
       "items": {
@@ -294,7 +356,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n    * `\"classes\"`\n    * `\"enums\"`\n    * `\"functions\"`\n    * `\"interfaces\"`\n    * `\"methods\"`\n    * `\"namespaces\"`\n    * `\"properties\"`\n    * `\"types\"`\n    * `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -485,12 +547,13 @@
     "ruleName": "curly",
     "description": "Enforces braces for `if`/`for`/`do`/`while` statements.",
     "rationale": "\n```ts\nif (foo === bar)\n    foo++;\n    bar++;\n```\n\nIn the code above, the author almost certainly meant for both `foo++` and `bar++`\nto be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed\nno matter what. This rule could prevent such a mistake.",
-    "optionsDescription": "\nThe rule may be set to `true`, or to the following:\n\n* `\"ignore-same-line\"` skips checking braces for control-flow statements\nthat are on one line and start on the same line as their control-flow keyword\n        ",
+    "optionsDescription": "\nOne of the following options may be provided:\n\n* `\"as-needed\"` forbids any unnecessary curly braces.\n* `\"ignore-same-line\"` skips checking braces for control-flow statements\nthat are on one line and start on the same line as their control-flow keyword\n        ",
     "options": {
       "type": "array",
       "items": {
         "type": "string",
         "enum": [
+          "as-needed",
           "ignore-same-line"
         ]
       }
@@ -500,6 +563,10 @@
       [
         true,
         "ignore-same-line"
+      ],
+      [
+        true,
+        "as-needed"
       ]
     ],
     "type": "functionality",
@@ -529,7 +596,7 @@
     "ruleName": "deprecation",
     "description": "Warns when deprecated APIs are used.",
     "descriptionDetails": "Any usage of an identifier\n            with the @deprecated JSDoc annotation will trigger a warning.\n            See http://usejsdoc.org/tags-deprecated.html",
-    "rationale": "\nDeprecated APIs should be avoided, and usage updated.",
+    "rationale": "Deprecated APIs should be avoided, and usage updated.",
     "optionsDescription": "",
     "options": null,
     "optionExamples": [],
@@ -1062,10 +1129,10 @@
     "description": "Disallows one or more blank lines in a row.",
     "hasFix": true,
     "rationale": "Helps maintain a readable style in your codebase.",
-    "optionsDescription": "\nAn optional number of maximum allowed sequential blanks can be specified. If no value\nis provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.",
+    "optionsDescription": "\nAn optional number of maximum allowed sequential blanks can be specified. If no value\nis provided, a default of 1 will be used.",
     "options": {
       "type": "number",
-      "minimum": "$(Rule.MINIMUM_ALLOWED_BLANKS)"
+      "minimum": "1"
     },
     "optionExamples": [
       true,
@@ -1153,10 +1220,19 @@
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
     "rationale": "\nA variable can be reassigned if necessary -\nthere's no good reason to have a duplicate variable declaration.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "You can specify `\"check-parameters\"` to check for variables with the same name as a paramter.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "check-parameters"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "check-parameters"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1617,10 +1693,19 @@
   {
     "ruleName": "no-unbound-method",
     "description": "Warns when a method is used as outside of a method call.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "You may optionally pass \"ignore-static\" to ignore static methods.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "ignore-static"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "ignore-static"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": true,
@@ -2370,7 +2455,7 @@
   {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allow multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n        ",
     "options": {
       "type": "array",
       "items": {
@@ -2379,7 +2464,8 @@
           "allow-null-union",
           "allow-undefined-union",
           "allow-string",
-          "allow-number"
+          "allow-number",
+          "allow-boolean-or-undefined"
         ]
       },
       "minLength": 0,
@@ -2393,6 +2479,10 @@
         "allow-undefined-union",
         "allow-string",
         "allow-number"
+      ],
+      [
+        true,
+        "allow-boolean-or-undefined"
       ]
     ],
     "type": "functionality",
@@ -2401,7 +2491,7 @@
   },
   {
     "ruleName": "strict-type-predicates",
-    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\n(TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.",
+    "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\n(TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.\n\nThis rule requires `strictNullChecks` to work properly.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -2420,6 +2510,26 @@
       true
     ],
     "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "switch-final-break",
+    "description": "Checks whether the final clause of a switch statement ends in `break;`.",
+    "optionsDescription": "\nIf no options are passed, a final 'break;' is forbidden.\nIf the \"always\" option is passed this will require a 'break;' to always be present\nunless control flow is escaped in some other way.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "always"
+      ]
+    },
+    "optionExamples": [
+      true,
+      [
+        true,
+        "always"
+      ]
+    ],
+    "type": "style",
     "typescriptOnly": false
   },
   {
@@ -2775,6 +2885,17 @@
     "hasFix": true
   },
   {
+    "ruleName": "type-literal-delimiter",
+    "description": "\nChecks that type literal members are separated by semicolons.\nEnforces a trailing semicolon for multiline type literals.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "typeof-compare",
     "description": "Makes sure result of `typeof` is compared to correct string values",
     "optionsDescription": "Not configurable.",
@@ -2795,6 +2916,18 @@
     ],
     "type": "typescript",
     "typescriptOnly": true
+  },
+  {
+    "ruleName": "use-default-type-parameter",
+    "description": "Warns if an explicitly specified type argument is the default for that type parameter.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      "true"
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "use-isnan",

@@ -14,8 +14,9 @@ rationale: |-
   no matter what. This rule could prevent such a mistake.
 optionsDescription: |-
 
-  The rule may be set to `true`, or to the following:
+  One of the following options may be provided:
 
+  * `"as-needed"` forbids any unnecessary curly braces.
   * `"ignore-same-line"` skips checking braces for control-flow statements
   that are on one line and start on the same line as their control-flow keyword
           
@@ -24,10 +25,12 @@ options:
   items:
     type: string
     enum:
+      - as-needed
       - ignore-same-line
 optionExamples:
   - 'true'
   - '[true, "ignore-same-line"]'
+  - '[true, "as-needed"]'
 type: functionality
 typescriptOnly: false
 layout: rule
@@ -38,6 +41,7 @@ optionsJSON: |-
     "items": {
       "type": "string",
       "enum": [
+        "as-needed",
         "ignore-same-line"
       ]
     }
