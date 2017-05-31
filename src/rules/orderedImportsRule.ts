@@ -89,19 +89,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function parseOptions(ruleArguments: any[]): Options {
-    interface JsonOptions { "import-sources-order"?: string; "named-imports-order"?: string; }
-    const optionSet = (ruleArguments as JsonOptions[])[0];
-    const {
-        "import-sources-order": sources = "case-insensitive",
-        "named-imports-order": named = "case-insensitive",
-    } = optionSet === undefined ? {} : optionSet;
-    return {
-        importSourcesOrderTransform: TRANSFORMS.get(sources)!,
-        namedImportsOrderTransform: TRANSFORMS.get(named)!,
-    };
-}
-
 // Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
 type Transform = (x: string) => string;
@@ -115,6 +102,23 @@ const TRANSFORMS = new Map<string, Transform>([
 interface Options {
     importSourcesOrderTransform: Transform;
     namedImportsOrderTransform: Transform;
+}
+
+interface JsonOptions {
+    "import-sources-order"?: string;
+    "named-imports-order"?: string;
+}
+
+function parseOptions(ruleArguments: any[]): Options {
+    const optionSet = (ruleArguments as JsonOptions[])[0];
+    const {
+        "import-sources-order": sources = "case-insensitive",
+        "named-imports-order": named = "case-insensitive",
+    } = optionSet === undefined ? {} : optionSet;
+    return {
+        importSourcesOrderTransform: TRANSFORMS.get(sources)!,
+        namedImportsOrderTransform: TRANSFORMS.get(named)!,
+    };
 }
 
 class Walker extends Lint.AbstractWalker<Options> {
