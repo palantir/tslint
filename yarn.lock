@@ -58,8 +58,8 @@
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.3.31.tgz#b999d7d935f43f5207b01b00d3de20852f4ca75f"
 
 agent-base@2:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-2.1.0.tgz#193455e4347bca6b05847cb81e939bb325446da8"
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-2.1.1.tgz#d6de10d5af6132d5bd692427d46fc538539094c7"
   dependencies:
     extend "~3.0.0"
     semver "~5.0.1"
@@ -981,13 +981,9 @@ minimatch@^3.0.2, minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimist@0.0.8:
+minimist@0.0.8, minimist@~0.0.1:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
-
-minimist@~0.0.1:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
 
 mkdirp@0.5.1, mkdirp@^0.5.0, mkdirp@^0.5.1:
   version "0.5.1"
@@ -1479,9 +1475,9 @@ tslint@latest:
     tslib "^1.6.0"
     tsutils "^2.0.0"
 
-tsutils@^2.0.0, tsutils@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.2.0.tgz#218614657f21c677e4536b4ba75daf8ebce1b367"
+tsutils@2, tsutils@^2.0.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.3.0.tgz#96e661d7c2363f31adc8992ac67bbe7b7fc175e5"
 
 type-detect@0.1.1:
   version "0.1.1"
@@ -1492,8 +1488,8 @@ type-detect@^1.0.0:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
 
 typescript@^2.3.0:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.3.3.tgz#9639f3c3b40148e8ca97fe08a51dd1891bb6be22"
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.3.4.tgz#3d38321828231e434f287514959c37a82b629f42"
 
 uglify-js@^2.6:
   version "2.8.27"
