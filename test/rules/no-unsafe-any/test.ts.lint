@@ -179,4 +179,6 @@ switch (x.y) {
         break;
 }
 
+declare global {}
+
 [0]: Unsafe use of expression of type 'any'.

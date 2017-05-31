@@ -180,6 +180,13 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 break;
             }
 
+            case ts.SyntaxKind.ModuleDeclaration: {
+                // In `declare global { ... }`, don't mark `global` as unsafe any.
+                const { body } = node as ts.ModuleDeclaration;
+                if (body !== undefined) { cb(body); }
+                return;
+            }
+
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
