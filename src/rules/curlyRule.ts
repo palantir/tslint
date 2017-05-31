@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const OPTION_NEVER = "never";
+const OPTION_AS_NEEDED = "as-needed";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
 
 interface Options {
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following options may be provided:
 
-            * \`"${OPTION_NEVER}"\` forbids any unnecessary curly braces.
+            * \`"${OPTION_AS_NEEDED}"\` forbids any unnecessary curly braces.
             * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
             that are on one line and start on the same line as their control-flow keyword
         `,
@@ -54,29 +54,29 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 type: "string",
                 enum: [
-                    OPTION_NEVER,
+                    OPTION_AS_NEEDED,
                     OPTION_IGNORE_SAME_LINE,
                 ],
             },
         },
         optionExamples: [
             true,
-            [true, "ignore-same-line"],
-            [true, "never"],
+            [true, OPTION_IGNORE_SAME_LINE],
+            [true, OPTION_AS_NEEDED],
         ],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_NEVER = "Block contains only one statement; remove the curly braces.";
+    public static FAILURE_STRING_AS_NEEDED = "Block contains only one statement; remove the curly braces.";
     public static FAILURE_STRING_FACTORY(kind: string) {
         return `${kind} statements must be braced`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        if (this.ruleArguments.indexOf(OPTION_NEVER) !== -1) {
-            return this.applyWithFunction(sourceFile, walkNever);
+        if (this.ruleArguments.indexOf(OPTION_AS_NEEDED) !== -1) {
+            return this.applyWithFunction(sourceFile, walkAsNeeded);
         }
 
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.ruleName, {
@@ -85,10 +85,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walkNever(ctx: Lint.WalkContext<void>): void {
+function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (isBlock(node) && isBlockUnnecessary(node)) {
-            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_NEVER);
+            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_AS_NEEDED);
         }
         ts.forEachChild(node, cb);
     });
