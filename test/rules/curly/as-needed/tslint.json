@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "curly": [true, "as-needed"]
+  }
+}
