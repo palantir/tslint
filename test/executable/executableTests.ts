@@ -353,8 +353,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             execCli(
                 [
                     "-c", "test/files/multiple-excludes/tslint.json",
-                    "--exclude", "'test/files/multiple-excludes/invalid'",
-                    "--exclude", "'test/files/multiple-excludes/invalid2'",
+                    "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
+                    "--exclude", "'test/files/multiple-excludes/invalid2*'",
                     "'test/files/multiple-excludes/**.ts'",
                 ], (err) => {
                     assert.isNull(err, "process should exit without an error");
