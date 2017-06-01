@@ -20,6 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
+import { VERSION } from "./linter";
 import { run } from "./runner";
 import { dedent } from "./utils";
 
@@ -187,10 +188,7 @@ const options: Option[] = [
     },
 ];
 
-function collect(val: string, memo: string[]) {
-    memo.push(val);
-    return memo;
-}
+commander.version(VERSION);
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);
@@ -253,7 +251,10 @@ run({
     rulesDirectory: argv.rulesDir,
     test: argv.test,
     typeCheck: argv.typeCheck,
-}, { log, error(m) { console.error(m); } }).then(process.exit);
+}, {
+    log,
+    error: (m) => console.error(m),
+}).then(process.exit);
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
@@ -268,4 +269,8 @@ function optionParam(option: Option) {
         case "boolean":
             return "";
     }
+}
+function collect(val: string, memo: string[]) {
+    memo.push(val);
+    return memo;
 }
