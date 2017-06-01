@@ -348,6 +348,19 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     done();
                 });
         });
+
+        it("can handle multiple '--exclude' globs", (done) => {
+            execCli(
+                [
+                    "-c", "test/files/multiple-excludes/tslint.json",
+                    "--exclude", "'test/files/multiple-excludes/invalid'",
+                    "--exclude", "'test/files/multiple-excludes/invalid2'",
+                    "'test/files/multiple-excludes/**.ts'",
+                ], (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 
     describe("--type-check", () => {
