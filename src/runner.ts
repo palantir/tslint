@@ -189,7 +189,7 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
     if (files === undefined || files.length === 0) {
         filesFound = Linter.getFileNames(program);
         if (ignore.length !== 0) {
-            const mm = ignore.map((pattern) => new Minimatch(pattern));
+            const mm = ignore.map((pattern) => new Minimatch(path.resolve(pattern)));
             filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
         }
     } else {
