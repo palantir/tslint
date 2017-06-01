@@ -159,7 +159,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths === true)).join("\n");
+            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
             if (options.force) {
                 logger.error(message);
             } else {
@@ -185,11 +185,11 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
     return { files: files === undefined || files.length === 0 ? Linter.getFileNames(program) : resolveFiles(), program };
 
     function resolveFiles(): string[] {
-        return resolveGlobs(files, exclude, outputAbsolutePaths === true);
+        return resolveGlobs(files, exclude, outputAbsolutePaths);
     }
 }
 
-function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"], outputAbsolutePaths: boolean): string[] {
+function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"], outputAbsolutePaths?: boolean): string[] {
     const ignore = arrayify(exclude).map(trimSingleQuotes);
     return flatMap(arrayify(files), (file) =>
         // remove single quotes which break matching on Windows when glob is passed in single quotes
@@ -248,7 +248,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     return fs.readFileSync(filename, "utf8");
 }
 
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths: boolean): string {
+function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
     let message = ts.DiagnosticCategory[category];
     if (file) {
         const {line, character} = file.getLineAndCharacterOfPosition(start);

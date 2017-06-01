@@ -111,7 +111,7 @@ export function getOverloadKey(node: ts.SignatureDeclaration): string | undefine
         return undefined;
     }
 
-    const [computed, name] = typeof info === "string" ? [false, info] : [info.computed === true, info.name];
+    const [computed, name] = typeof info === "string" ? [false, info] : [info.computed, info.name];
     const isStatic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
     return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
