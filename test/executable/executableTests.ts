@@ -339,6 +339,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     done();
                 });
         });
+
+        it("works with '--exclude'", (done) => {
+            execCli(
+                [ "-p", "test/files/tsconfig-allow-js/tsconfig.json", "-e", "'**/testfile.test.js'"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 
     describe("--type-check", () => {
