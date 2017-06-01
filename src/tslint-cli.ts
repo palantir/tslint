@@ -45,7 +45,7 @@ interface Option {
     short?: string;
     // Commander will camelCase option names.
     name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
-    type: "string" | "boolean";
+    type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
 }
@@ -74,7 +74,7 @@ const options: Option[] = [
     {
         short: "e",
         name: "exclude",
-        type: "string",
+        type: "array",
         describe: "exclude globs from path expansion",
         description: dedent`
             A filename or glob which indicates files to exclude from linting.
@@ -187,9 +187,18 @@ const options: Option[] = [
     },
 ];
 
+function collect(val: string, memo: string[]) {
+    memo.push(val);
+    return memo;
+}
+
 for (const option of options) {
-    const commanderStr = optionUsageTag(option) + (option.type === "string" ? ` [${option.name}]` : "");
-    commander.option(commanderStr, option.describe);
+    const commanderStr = optionUsageTag(option) + optionParam(option);
+    if (option.type === "array") {
+        commander.option(commanderStr, option.describe, collect, []);
+    } else {
+        commander.option(commanderStr, option.describe);
+    }
 }
 
 commander.on("--help", () => {
@@ -248,4 +257,15 @@ run({
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
+}
+
+function optionParam(option: Option) {
+    switch (option.type) {
+        case "string":
+            return ` [${option.name}]`;
+        case "array":
+            return ` <${option.name}>`;
+        case "boolean":
+            return "";
+    }
 }
