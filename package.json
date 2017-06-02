@@ -64,7 +64,7 @@
     "@types/resolve": "^0.0.4",
     "@types/semver": "^5.3.30",
     "chai": "^4.0.1",
-    "github": "^9.2.0",
+    "github": "^8.2.1",
     "js-yaml": "^3.7.0",
     "json-stringify-pretty-compact": "^1.0.3",
     "mocha": "^3.2.0",
@@ -78,5 +78,10 @@
   "license": "Apache-2.0",
   "engines": {
     "node": ">=4.1.2"
+  },
+  "greenkeeper": {
+    "ignore": [
+      "github"
+    ]
   }
 }
