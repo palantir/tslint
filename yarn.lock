@@ -15,8 +15,8 @@
   resolved "https://registry.yarnpkg.com/@types/colors/-/colors-1.1.3.tgz#5413b0a7a1b16dd18be0e3fd57d2feecc81cc776"
 
 "@types/commander@^2.9.0":
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/@types/commander/-/commander-2.9.0.tgz#dd07af1fc35d76833e0da26ea67a2be088b5fafc"
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/@types/commander/-/commander-2.9.1.tgz#d4e464425baf4685bd49dd233be11de9c00c0784"
   dependencies:
     "@types/node" "*"
 
@@ -35,7 +35,7 @@
   version "3.5.30"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.5.30.tgz#f555118c022318e57e36d803379cb8ee38ee20a7"
 
-"@types/minimatch@*":
+"@types/minimatch@*", "@types/minimatch@^2.0.29":
   version "2.0.29"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-2.0.29.tgz#5002e14f75e2d71e564281df0431c8c1b4a2a36a"
 
@@ -44,8 +44,8 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-2.2.41.tgz#e27cf0817153eb9f2713b2d3f6c68f1e1c3ca608"
 
 "@types/node@*", "@types/node@^7.0.16":
-  version "7.0.22"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.22.tgz#4593f4d828bdd612929478ea40c67b4f403ca255"
+  version "7.0.24"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.24.tgz#dc94dab6cf1c372d8681d30557f9f2989fa08fb3"
 
 "@types/resolve@^0.0.4":
   version "0.0.4"
@@ -206,8 +206,8 @@ babel-types@^6.18.0, babel-types@^6.24.1:
     to-fast-properties "^1.0.1"
 
 babylon@^6.11.0, babylon@^6.13.0, babylon@^6.15.0:
-  version "6.17.1"
-  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.1.tgz#17f14fddf361b695981fe679385e4f1c01ebd86f"
+  version "6.17.2"
+  resolved "https://registry.yarnpkg.com/babylon/-/babylon-6.17.2.tgz#201d25ef5f892c41bae49488b08db0dd476e9f5c"
 
 balanced-match@^0.4.1:
   version "0.4.2"
@@ -1461,15 +1461,16 @@ tslib@^1.7.1:
 "tslint-test-config-non-relative@file:test/external/tslint-test-config-non-relative":
   version "0.0.1"
 
-tslint@^5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.4.0.tgz#e5e26524ca39fe950a51416456c2f296ccb69348"
+tslint@^5.4.2:
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.4.2.tgz#609b6640cc0424f4a395a9adf68c375563c549c7"
   dependencies:
     babel-code-frame "^6.22.0"
     colors "^1.1.2"
     commander "^2.9.0"
     diff "^3.2.0"
     glob "^7.1.1"
+    minimatch "^3.0.4"
     resolve "^1.3.2"
     semver "^5.3.0"
     tslib "^1.7.1"
