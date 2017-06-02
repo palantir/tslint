@@ -6,6 +6,8 @@
 TSLint
 ======
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/palantir/tslint.svg)](https://greenkeeper.io/)
+
 TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
 TSLint supports:
