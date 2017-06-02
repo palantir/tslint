@@ -105,7 +105,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    protected reportUnnecessary(pos: number, noFix = false) {
+    protected reportUnnecessary(pos: number, noFix?: boolean) {
         this.addFailure(pos - 1, pos, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos - 1, 1));
     }
 

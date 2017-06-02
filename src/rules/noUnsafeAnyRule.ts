@@ -195,7 +195,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         function check(): boolean {
-            const isUnsafe = anyOk !== true && isNodeAny(node, checker);
+            const isUnsafe = !anyOk && isNodeAny(node, checker);
             if (isUnsafe) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
