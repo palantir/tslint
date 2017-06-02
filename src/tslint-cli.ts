@@ -254,7 +254,12 @@ run({
 }, {
     log,
     error: (m) => console.error(m),
-}).then(process.exit);
+}).then((rc) => {
+    process.exitCode = rc;
+}).catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+});
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
