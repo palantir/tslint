@@ -28,10 +28,8 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
-    // tslint:disable:no-invalid-this
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
-    // tslint:enable:no-invalid-this
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
@@ -349,15 +347,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can handle multiple '--exclude' globs", (done) => {
+        it("can apply fixes from multiple rules", function(done) {
+            this.slow(4000);
+            this.timeout(6000);
+            fs.writeFileSync("test/files/project-multiple-fixes/testfile.test.ts",
+                             fs.readFileSync("test/files/project-multiple-fixes/before.test.ts", "utf-8"));
             execCli(
-                [
-                    "-c", "test/files/multiple-excludes/tslint.json",
-                    "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
-                    "--exclude", "'test/files/multiple-excludes/invalid2*'",
-                    "'test/files/multiple-excludes/**.ts'",
-                ], (err) => {
+                [ "-p", "test/files/project-multiple-fixes/", "--fix"],
+                (err) => {
+                    const actual = fs.readFileSync("test/files/project-multiple-fixes/testfile.test.ts", "utf-8");
+                    fs.unlinkSync("test/files/project-multiple-fixes/testfile.test.ts");
                     assert.isNull(err, "process should exit without an error");
+                    assert.strictEqual(
+                        actual,
+                        fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
+                    );
                     done();
                 });
         });
@@ -428,6 +432,18 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("can handle multiple '--exclude' globs", (done) => {
+            execCli(
+                [
+                    "-c", "test/files/multiple-excludes/tslint.json",
+                    "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
+                    "--exclude", "'test/files/multiple-excludes/invalid2*'",
+                    "'test/files/multiple-excludes/**.ts'",
+                ], (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 });
 
