@@ -206,7 +206,11 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
     const a = types1[index];
     const b = types2[index];
-    return parametersHaveEqualSigils(a, b) ? { kind: "single-parameter-difference", p0: a, p1: b } : undefined;
+    // Can unify `a?: string` and `b?: number`. Can't unify `...args: string[]` and `...args: number[]`.
+    // See https://github.com/Microsoft/TypeScript/issues/5077
+    return parametersHaveEqualSigils(a, b) && a.dotDotDotToken === undefined
+        ? { kind: "single-parameter-difference", p0: a, p1: b }
+        : undefined;
 }
 
 /**
