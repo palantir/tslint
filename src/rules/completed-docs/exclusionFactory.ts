@@ -54,7 +54,7 @@ export class ExclusionFactory {
             requirements.push(new BlockExclusion(descriptor));
         }
 
-        if ((descriptor as ITagExclusionDescriptor).tags) {
+        if ((descriptor as ITagExclusionDescriptor).tags !== undefined) {
             requirements.push(new TagExclusion(descriptor));
         }
 

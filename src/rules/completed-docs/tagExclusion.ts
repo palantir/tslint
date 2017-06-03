@@ -20,17 +20,25 @@ import * as ts from "typescript";
 import { Exclusion } from "./exclusion";
 
 export interface ITagExclusionDescriptor {
-    tags: {
-        content: {
-            [i: string]: string;
-        };
+    tags?: {
+        content: IContentTags;
         existence: string[];
     };
 }
 
+export interface IContentTags {
+    [i: string]: string;
+}
+
 export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
-    private readonly contentTags = this.descriptor.tags ? this.descriptor.tags.content : {};
-    private readonly existenceTags = new Set(this.descriptor.tags && this.descriptor.tags.existence);
+    private readonly contentTags: IContentTags = this.descriptor.tags === undefined
+        ? {}
+        : this.descriptor.tags.content;
+
+    private readonly existenceTags = new Set(
+        this.descriptor.tags !== undefined && this.descriptor.tags.existence !== undefined
+            ? this.descriptor.tags.existence
+            : undefined);
 
     public excludes(node: ts.Declaration) {
         const documentationNode = this.getDocumentationNode(node);
@@ -68,12 +76,12 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
         }
 
         const docMatches = nodeText.match((/\/\*\*\s*\n([^\*]*(\*[^\/])?)*\*\//));
-        if (!docMatches || docMatches.length === 0) {
+        if (docMatches === null || docMatches.length === 0) {
             return [];
         }
 
         const lines = docMatches[0].match(/[\r\n\s]*\*\s*@.*[\r\n\s]/g);
-        if (!lines) {
+        if (lines === null) {
             return [];
         }
 

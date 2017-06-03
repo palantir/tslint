@@ -364,7 +364,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
 
         const exclusions = this.exclusionsMap.get(nodeType);
-        if (!exclusions) {
+        if (exclusions === undefined) {
             return;
         }
 
