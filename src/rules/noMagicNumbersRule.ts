@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isNegativeNumberLiteral } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -73,10 +73,8 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
                 return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
-            if (isPrefixUnaryExpression(node) &&
-                node.operator === ts.SyntaxKind.MinusToken &&
-                node.operand.kind === ts.SyntaxKind.NumericLiteral) {
-                return this.checkNumericLiteral(node, "-" + (node.operand as ts.NumericLiteral).text);
+            if (isNegativeNumberLiteral(node)) {
+                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
             }
             return ts.forEachChild(node, cb);
         };

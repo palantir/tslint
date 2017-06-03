@@ -28,9 +28,9 @@ export function getSourceFile(fileName: string): ts.SourceFile {
     return Lint.getSourceFile(fileName, source);
 }
 
-export function getFormatter(formatterName: string) {
+export function getFormatter(formatterName: string): Lint.FormatterConstructor {
     const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
-    return Lint.findFormatter(formatterName, formattersDirectory);
+    return Lint.findFormatter(formatterName, formattersDirectory)!;
 }
 
 export function createTempFile(extension: string) {
@@ -46,9 +46,4 @@ export function createTempFile(extension: string) {
         throw new Error("Couldn't create temp file");
     }
     return tmpfile;
-}
-
-// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
-export function denormalizeWinPath(path: string): string {
-    return path.replace(/\\/g, "/");
 }

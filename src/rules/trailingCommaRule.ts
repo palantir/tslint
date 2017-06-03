@@ -15,100 +15,53 @@
  * limitations under the License.
  */
 
-import { getChildOfKind } from "tsutils";
+import { getChildOfKind, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 type OptionValue = "always" | "never" | "ignore";
+type OptionName = "arrays" | "exports" | "functions" | "imports" | "objects" | "typeLiterals";
+type CustomOptionValue = Record<OptionName, OptionValue>;
+type Options = Record<"multiline" | "singleline", CustomOptionValue>;
 
-interface CustomOptionValue {
-    arrays?: OptionValue;
-    exports?: OptionValue;
-    functions?: OptionValue;
-    imports?: OptionValue;
-    objects?: OptionValue;
-    typeLiterals?: OptionValue;
+const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore"); // tslint:disable-line no-unnecessary-type-assertion
+
+function fillOptions<T>(value: T): Record<OptionName, T> {
+    return {
+        arrays: value,
+        exports: value,
+        functions: value,
+        imports: value,
+        objects: value,
+        typeLiterals: value,
+    };
 }
 
-interface Options {
-    multiline: CustomOptionValue;
-    singleline: CustomOptionValue;
+type OptionsJson = Record<"multiline" | "singleline", Partial<CustomOptionValue> | OptionValue>;
+function normalizeOptions(options: OptionsJson): Options {
+    return { multiline: normalize(options.multiline), singleline: normalize(options.singleline) };
+
+    function normalize(value: OptionsJson["multiline"]): CustomOptionValue {
+        return typeof value === "string" ? fillOptions(value) : { ...defaultOptions, ...value };
+    }
 }
-
-const defaultOptions: CustomOptionValue = {
-    arrays: "ignore",
-    exports: "ignore",
-    functions: "ignore",
-    imports: "ignore",
-    objects: "ignore",
-    typeLiterals: "ignore",
-};
-
-const normalizeOptions = (options: Options): Options => {
-    if (typeof options.multiline === "string") {
-        options.multiline = {
-            arrays: options.multiline,
-            exports: options.multiline,
-            functions: options.multiline,
-            imports: options.multiline,
-            objects: options.multiline,
-            typeLiterals: options.multiline,
-        };
-    } else {
-        options.multiline = Object.assign({}, defaultOptions, options.multiline);
-    }
-
-    if (typeof options.singleline === "string") {
-        options.singleline = {
-            arrays: options.singleline,
-            exports: options.singleline,
-            functions: options.singleline,
-            imports: options.singleline,
-            objects: options.singleline,
-            typeLiterals: options.singleline,
-        };
-    } else {
-        options.singleline = Object.assign({}, defaultOptions, options.singleline);
-    }
-
-    return options;
-};
 
 /* tslint:disable:object-literal-sort-keys */
 const metadataOptionShape = {
-    anyOf: [{
-        type: "string",
-        enum: ["always", "never"],
-    }, {
-        type: "object",
-        properties: {
-            arrays: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
-            exports: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
-            functions: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
-            imports: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
-            objects: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
-            typeLiterals: {
-                type: "string",
-                enum: ["always", "never", "ignore"],
-            },
+    anyOf: [
+        {
+            type: "string",
+            enum: ["always", "never"],
         },
-    }],
+        {
+            type: "object",
+            properties: fillOptions({
+                type: "string",
+                enum: ["always", "never", "ignore"],
+            }),
+        },
+    ],
 };
 /* tslint:enable:object-literal-sort-keys */
 
@@ -166,7 +119,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_ALWAYS = "Missing trailing comma";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = normalizeOptions(this.ruleArguments[0]);
+        const options = normalizeOptions(this.ruleArguments[0] as Options);
         return this.applyWithWalker(new TrailingCommaWalker(sourceFile, this.ruleName, options));
     }
 
@@ -247,8 +200,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         return this.checkComma(hasTrailingComma, members, node.end, "typeLiterals");
     }
 
-    private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind,
-                                  optionKey: keyof CustomOptionValue) {
+    private checkListWithEndToken(node: ts.Node, list: ts.NodeArray<ts.Node>, closeTokenKind: ts.SyntaxKind, optionKey: OptionName) {
         if (list.length === 0) {
             return;
         }
@@ -258,7 +210,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    private checkList(list: ts.NodeArray<ts.Node>, closeElementPos: number, optionKey: keyof CustomOptionValue) {
+    private checkList(list: ts.NodeArray<ts.Node>, closeElementPos: number, optionKey: OptionName) {
         if (list.length === 0) {
             return;
         }
@@ -266,20 +218,15 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
     }
 
     /* Expects `list.length !== 0` */
-    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number,
-                       optionKey: keyof CustomOptionValue) {
-        const lastElementLine = ts.getLineAndCharacterOfPosition(this.sourceFile, list[list.length - 1].end).line;
-        const closeTokenLine = ts.getLineAndCharacterOfPosition(this.sourceFile, closeTokenPos).line;
-        const option = lastElementLine === closeTokenLine ? this.options.singleline : this.options.multiline;
-        const shouldHandle = option[optionKey];
+    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
+        const options = isSameLine(this.sourceFile, list[list.length - 1].end, closeTokenPos)
+            ? this.options.singleline
+            : this.options.multiline;
+        const option = options[optionKey];
 
-        if (shouldHandle === "ignore") {
-            return;
-        }
-
-        if (shouldHandle === "always" && !hasTrailingComma) {
+        if (option === "always" && !hasTrailingComma) {
             this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, Lint.Replacement.appendText(list.end, ","));
-        } else if (shouldHandle === "never" && hasTrailingComma) {
+        } else if (option === "never" && hasTrailingComma) {
             this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         }
     }

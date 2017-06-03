@@ -17,7 +17,9 @@
 
 import * as ts from "typescript";
 
+import {IOptions} from "../rule/rule";
 import {isBlockScopeBoundary} from "../utils";
+// tslint:disable deprecation
 import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 
 /**
@@ -29,7 +31,7 @@ import {ScopeAwareRuleWalker} from "./scopeAwareRuleWalker";
 export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
     private blockScopeStack: U[];
 
-    constructor(sourceFile: ts.SourceFile, options?: any) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module

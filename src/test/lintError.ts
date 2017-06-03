@@ -42,5 +42,5 @@ export function errorComparator(err1: LintError, err2: LintError) {
 }
 
 export function lintSyntaxError(message: string) {
-    return new Error(`Lint File Syntax Error: ${message}`) as Error;
+    return new Error(`Lint File Syntax Error: ${message}`);
 }

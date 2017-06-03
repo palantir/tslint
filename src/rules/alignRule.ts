@@ -82,7 +82,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (this.options.statements && isBlockLike(node)) {
-                this.checkAlignment(node.statements, OPTION_STATEMENTS);
+                this.checkAlignment(node.statements.filter((s) => s.kind !== ts.SyntaxKind.EmptyStatement), OPTION_STATEMENTS);
             } else {
                 switch (node.kind) {
                     case ts.SyntaxKind.NewExpression:
@@ -131,12 +131,18 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                         }
                         break;
                     case ts.SyntaxKind.ClassDeclaration:
-                    case ts.SyntaxKind.ClassDeclaration:
+                    case ts.SyntaxKind.ClassExpression:
+                        if (this.options.members) {
+                            this.checkAlignment(
+                                (node as ts.ClassLikeDeclaration).members.filter((m) => m.kind !== ts.SyntaxKind.SemicolonClassElement),
+                                OPTION_MEMBERS,
+                            );
+                        }
+                        break;
                     case ts.SyntaxKind.InterfaceDeclaration:
                     case ts.SyntaxKind.TypeLiteral:
                         if (this.options.members) {
-                            this.checkAlignment((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members,
-                                                OPTION_MEMBERS);
+                            this.checkAlignment((node as ts.InterfaceDeclaration | ts.TypeLiteralNode).members, OPTION_MEMBERS);
                         }
                 }
             }
@@ -151,7 +157,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
         }
         const sourceFile = this.sourceFile;
 
-        let pos = ts.getLineAndCharacterOfPosition(sourceFile, this.getStart(nodes[0]));
+        let pos = getLineAndCharacterWithoutBom(sourceFile, this.getStart(nodes[0]));
         const alignToColumn = pos.character;
         let line = pos.line;
 
@@ -163,7 +169,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
             if (line !== pos.line && pos.character !== alignToColumn) {
                 const diff = alignToColumn - pos.character;
                 let fix: Lint.Fix | undefined;
-                if (0 < diff) {
+                if (diff >= 0) {
                     fix = Lint.Replacement.appendText(start, " ".repeat(diff));
                 } else if (node.pos <= start + diff && /^\s+$/.test(sourceFile.text.substring(start + diff, start))) {
                     // only delete text if there is only whitespace
@@ -181,4 +187,12 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
             // find the comma token following the OmmitedExpression
             : getNextToken(node, this.sourceFile)!.getStart(this.sourceFile);
     }
+}
+
+function getLineAndCharacterWithoutBom(sourceFile: ts.SourceFile, pos: number): ts.LineAndCharacter {
+    const result = ts.getLineAndCharacterOfPosition(sourceFile, pos);
+    if (result.line === 0 && sourceFile.text[0] === "\uFEFF") {
+        result.character -= 1;
+    }
+    return result;
 }

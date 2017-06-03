@@ -74,17 +74,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
-    public static UNNEEDED_QUOTES = (name: string) => {
+    public static INCONSISTENT_PROPERTY = "All property names in this object literal must be consistently quoted or unquoted.";
+    public static UNNEEDED_QUOTES(name: string) {
         return `Unnecessarily quoted property '${name}' found.`;
     }
-    public static UNQUOTED_PROPERTY = (name: string) => {
+    public static UNQUOTED_PROPERTY(name: string) {
         return `Unquoted property '${name}' found.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new ObjectLiteralKeyQuotesWalker(sourceFile, this.ruleName, {
-            option: this.ruleArguments.length === 0 ? "always" : this.ruleArguments[0],
+            option: this.ruleArguments.length === 0 ? "always" : this.ruleArguments[0] as Option,
         }));
     }
 }

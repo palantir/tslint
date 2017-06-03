@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -35,25 +36,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (ident: string) => {
+    public static FAILURE_STRING_FACTORY(ident: string) {
         return `Property '${ident}' cannot be declared in the constructor`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoParameterPropertiesWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-export class NoParameterPropertiesWalker extends Lint.RuleWalker {
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        const parameters = node.parameters;
-        for (const parameter of parameters) {
-            if (parameter.modifiers != null && parameter.modifiers.length > 0) {
-                const errorMessage = Rule.FAILURE_STRING_FACTORY((parameter.name as ts.Identifier).text);
-                const lastModifier = parameter.modifiers[parameter.modifiers.length - 1];
-                this.addFailureFromStartToEnd(parameter.getStart(), lastModifier.getEnd(), errorMessage);
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (node.kind === ts.SyntaxKind.Constructor) {
+            for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
+                if (isParameterProperty(parameter)) {
+                    ctx.addFailure(parameter.getStart(ctx.sourceFile),
+                                   parameter.name.pos,
+                                   Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)));
+                }
             }
         }
-        super.visitConstructorDeclaration(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

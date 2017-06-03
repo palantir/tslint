@@ -208,15 +208,15 @@ export class Rule extends Lint.Rules.TypedRule {
 
             Types that may be enabled are:
 
-                * \`"${ARGUMENT_CLASSES}"\`
-                * \`"${ARGUMENT_ENUMS}"\`
-                * \`"${ARGUMENT_FUNCTIONS}"\`
-                * \`"${ARGUMENT_INTERFACES}"\`
-                * \`"${ARGUMENT_METHODS}"\`
-                * \`"${ARGUMENT_NAMESPACES}"\`
-                * \`"${ARGUMENT_PROPERTIES}"\`
-                * \`"${ARGUMENT_TYPES}"\`
-                * \`"${ARGUMENT_VARIABLES}"\``,
+            * \`"${ARGUMENT_CLASSES}"\`
+            * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_FUNCTIONS}"\`
+            * \`"${ARGUMENT_INTERFACES}"\`
+            * \`"${ARGUMENT_METHODS}"\`
+            * \`"${ARGUMENT_NAMESPACES}"\`
+            * \`"${ARGUMENT_PROPERTIES}"\`
+            * \`"${ARGUMENT_TYPES}"\`
+            * \`"${ARGUMENT_VARIABLES}"\``,
         options: {
             type: "array",
             items: {
@@ -358,7 +358,8 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        if (node.name === undefined) {
+        const { name } = node;
+        if (name === undefined) {
             return;
         }
 
@@ -406,16 +407,16 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
-        if (node.modifiers) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+        if (node.modifiers !== undefined) {
+            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(",")} `;
         }
 
-        return description + nodeType + ".";
+        return `${description}${nodeType}.`;
     }
 
     private describeModifier(kind: ts.SyntaxKind) {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
-
-        return CompletedDocsWalker.modifierAliases[description] || description;
+        const alias = CompletedDocsWalker.modifierAliases[description];
+        return alias !== undefined ? alias : description;
     }
 }

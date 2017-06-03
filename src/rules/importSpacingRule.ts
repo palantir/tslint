@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
+import { isImportDeclaration, isNamespaceImport } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const LINE_BREAK_REGEX = /\n|\r\n/;
+const LINE_BREAK_REGEX = /\r?\n/;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -44,57 +45,70 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NO_LINE_BREAKS = "Line breaks are not allowed in import declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const comparisonWalker = new ImportStatementWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(comparisonWalker);
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class ImportStatementWalker extends Lint.RuleWalker {
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        if (!node.importClause) {
-            this.checkModuleWithSideEffect(node);
-        } else {
-            const nodeStart = node.getStart();
-            const importKeywordEnd = node.getStart() + "import".length;
-            const moduleSpecifierStart = node.moduleSpecifier.getStart();
-            const importClauseEnd = node.importClause.getEnd();
-            const importClauseStart = node.importClause.getStart();
-
-            if (importKeywordEnd === importClauseStart) {
-                this.addFailureAt(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
-            } else if (importClauseStart > (importKeywordEnd + 1)) {
-                this.addFailureFromStartToEnd(nodeStart, importClauseStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
+class Walker extends Lint.AbstractWalker<void> {
+    public walk({ statements }: ts.SourceFile): void {
+        for (const statement of statements) {
+            if (!isImportDeclaration(statement)) {
+                continue;
             }
 
-            const fromString = node.getText().substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
-
-            if (/from$/.test(fromString)) {
-                this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM);
-            } else if (/from\s{2,}$/.test(fromString)) {
-                this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM);
-            }
-
-            if (/^\s{2,}from/.test(fromString)) {
-                this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM);
-            } else if (/^from/.test(fromString)) {
-                this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM);
-            }
-
-            const text = node.getText();
-            const beforeImportClauseText = text.substring(0, importClauseStart - nodeStart);
-            const afterImportClauseText = text.substring(importClauseEnd - nodeStart);
-            if (LINE_BREAK_REGEX.test(beforeImportClauseText)) {
-                this.addFailureFromStartToEnd(nodeStart, importClauseStart - 1, Rule.NO_LINE_BREAKS);
-            }
-            if (LINE_BREAK_REGEX.test(afterImportClauseText)) {
-                this.addFailureFromStartToEnd(importClauseEnd, node.getEnd(), Rule.NO_LINE_BREAKS);
+            const { importClause } = statement;
+            if (importClause === undefined) {
+                this.checkModuleWithSideEffect(statement);
+            } else {
+                this.checkImportClause(statement, importClause);
+                const { namedBindings } = importClause;
+                if (namedBindings !== undefined && isNamespaceImport(namedBindings)) {
+                    this.checkNamespaceImport(namedBindings);
+                }
             }
         }
-        super.visitImportDeclaration(node);
     }
 
-    public visitNamespaceImport(node: ts.NamespaceImport) {
-        const text = node.getText();
+    private checkImportClause(node: ts.ImportDeclaration, importClause: ts.ImportClause): void {
+        const text = node.getText(this.sourceFile);
+        const nodeStart = node.getStart(this.sourceFile);
+        const importKeywordEnd = nodeStart + "import".length;
+        const moduleSpecifierStart = node.moduleSpecifier.getStart(this.sourceFile);
+        const importClauseEnd = importClause.getEnd();
+        const importClauseStart = importClause.getStart(this.sourceFile);
+
+        if (importKeywordEnd === importClauseStart) {
+            this.addFailureAt(nodeStart, "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
+        } else if (importClauseStart > importKeywordEnd + 1) {
+            this.addFailure(nodeStart, importClauseStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
+        }
+
+        const fromString = text.substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
+
+        if (/from$/.test(fromString)) {
+            this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM);
+        } else if (/from\s{2,}$/.test(fromString)) {
+            this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_AFTER_FROM);
+        }
+
+        if (/^\s{2,}from/.test(fromString)) {
+            this.addFailureAt(importClauseEnd, fromString.length, Rule.TOO_MANY_SPACES_BEFORE_FROM);
+        } else if (/^from/.test(fromString)) {
+            this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_BEFORE_FROM);
+        }
+
+        const beforeImportClauseText = text.substring(0, importClauseStart - nodeStart);
+        const afterImportClauseText = text.substring(importClauseEnd - nodeStart);
+        if (LINE_BREAK_REGEX.test(beforeImportClauseText)) {
+            this.addFailure(nodeStart, importClauseStart - 1, Rule.NO_LINE_BREAKS);
+        }
+        if (LINE_BREAK_REGEX.test(afterImportClauseText)) {
+            this.addFailure(importClauseEnd, node.getEnd(), Rule.NO_LINE_BREAKS);
+        }
+    }
+
+    private checkNamespaceImport(node: ts.NamespaceImport): void {
+        const text = node.getText(this.sourceFile);
         if (text.indexOf("*as") > -1) {
             this.addFailureAtNode(node, Rule.ADD_SPACE_AFTER_STAR);
         } else if (/\*\s{2,}as/.test(text)) {
@@ -102,21 +116,20 @@ class ImportStatementWalker extends Lint.RuleWalker {
         } else if (LINE_BREAK_REGEX.test(text)) {
             this.addFailureAtNode(node, Rule.NO_LINE_BREAKS);
         }
-        super.visitNamespaceImport(node);
     }
 
-    private checkModuleWithSideEffect(node: ts.ImportDeclaration) {
-        const moduleSpecifierStart = node.moduleSpecifier.getStart();
-        const nodeStart = node.getStart();
+    private checkModuleWithSideEffect(node: ts.ImportDeclaration): void {
+        const nodeStart = node.getStart(this.sourceFile);
+        const moduleSpecifierStart = node.moduleSpecifier.getStart(this.sourceFile);
 
-        if ((nodeStart + "import".length + 1) < moduleSpecifierStart) {
-            this.addFailureFromStartToEnd(nodeStart, moduleSpecifierStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
-        } else if ((nodeStart + "import".length) === moduleSpecifierStart) {
-            this.addFailureAt(nodeStart,  "import".length, Rule.ADD_SPACE_AFTER_IMPORT);
+        if (nodeStart + "import".length + 1 < moduleSpecifierStart) {
+            this.addFailure(nodeStart, moduleSpecifierStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
+        } else if (nodeStart + "import".length === moduleSpecifierStart) {
+            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ImportKeyword)!, Rule.ADD_SPACE_AFTER_IMPORT);
         }
 
         if (LINE_BREAK_REGEX.test(node.getText())) {
-            this.addFailureAt(nodeStart, node.getWidth(), Rule.NO_LINE_BREAKS);
+            this.addFailureAtNode(node, Rule.NO_LINE_BREAKS);
         }
     }
 }

@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import { isObjectLiteralExpression, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_IGNORE_CASE = "ignore-case";
+
+interface Options {
+    ignoreCase: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -25,72 +32,57 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "object-literal-sort-keys",
         description: "Requires keys in object literals to be sorted alphabetically",
         rationale: "Useful in preventing merge conflicts",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: `You may optionally pass "${OPTION_IGNORE_CASE}" to compare keys case insensitive.`,
+        options: {
+            type: "string",
+            enum: [OPTION_IGNORE_CASE],
+        },
+        optionExamples: [
+            true,
+            [true, OPTION_IGNORE_CASE],
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING_FACTORY(name: string) {
         return `The key '${name}' is not sorted alphabetically`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ObjectLiteralSortKeysWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, {
+            ignoreCase: this.ruleArguments.indexOf(OPTION_IGNORE_CASE) !== -1,
+        });
     }
 }
 
-class ObjectLiteralSortKeysWalker extends Lint.RuleWalker {
-    // stacks are used to maintain state while recursing through nested object literals
-    private lastSortedKeyStack: string[] = [];
-    private multilineFlagStack: boolean[] = [];
-    private sortedStateStack: boolean[] = [];
-
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        // char code 0; every string should be >= to this
-        this.lastSortedKeyStack.push("");
-        // sorted state is always initially true
-        this.sortedStateStack.push(true);
-        this.multilineFlagStack.push(this.isMultilineListNode(node));
-        super.visitObjectLiteralExpression(node);
-        this.multilineFlagStack.pop();
-        this.lastSortedKeyStack.pop();
-        this.sortedStateStack.pop();
-    }
-
-    public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        const sortedState = this.sortedStateStack[this.sortedStateStack.length - 1];
-        const isMultiline = this.multilineFlagStack[this.multilineFlagStack.length - 1];
-
-        // skip remainder of object literal scan if a previous key was found
-        // in an unsorted position. This ensures only one error is thrown at
-        // a time and keeps error output clean. Skip also single line objects.
-        if (sortedState && isMultiline) {
-            const lastSortedKey = this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1];
-            const keyNode = node.name;
-            if (isIdentifierOrStringLiteral(keyNode)) {
-                const key = keyNode.text;
-                if (key < lastSortedKey) {
-                    const failureString = Rule.FAILURE_STRING_FACTORY(key);
-                    this.addFailureAtNode(keyNode, failureString);
-                    this.sortedStateStack[this.sortedStateStack.length - 1] = false;
-                } else {
-                    this.lastSortedKeyStack[this.lastSortedKeyStack.length - 1] = key;
+function walk(ctx: Lint.WalkContext<Options>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isObjectLiteralExpression(node) && node.properties.length > 1 &&
+            !isSameLine(ctx.sourceFile, node.properties.pos, node.end)) {
+            let lastKey: string | undefined;
+            const {options: {ignoreCase}} = ctx;
+            outer: for (const property of node.properties) {
+                switch (property.kind) {
+                    case ts.SyntaxKind.SpreadAssignment:
+                        lastKey = undefined; // reset at spread
+                        break;
+                    case ts.SyntaxKind.ShorthandPropertyAssignment:
+                    case ts.SyntaxKind.PropertyAssignment:
+                        if (property.name.kind === ts.SyntaxKind.Identifier ||
+                            property.name.kind === ts.SyntaxKind.StringLiteral) {
+                            const key = ignoreCase ? property.name.text.toLowerCase() : property.name.text;
+                            // comparison with undefined is expected
+                            if (lastKey! > key) {
+                                ctx.addFailureAtNode(property.name, Rule.FAILURE_STRING_FACTORY(property.name.text));
+                                break outer; // only show warning on first out-of-order property
+                            }
+                            lastKey = key;
+                        }
                 }
             }
         }
-        super.visitPropertyAssignment(node);
-    }
-
-    private isMultilineListNode(node: ts.ObjectLiteralExpression) {
-        const startLineOfNode = this.getLineAndCharacterOfPosition(node.getStart()).line;
-        const endLineOfNode = this.getLineAndCharacterOfPosition(node.getEnd()).line;
-        return endLineOfNode !== startLineOfNode;
-    }
-}
-
-function isIdentifierOrStringLiteral(node: ts.Node): node is (ts.Identifier | ts.StringLiteral) {
-    return node.kind === ts.SyntaxKind.Identifier || node.kind === ts.SyntaxKind.StringLiteral;
+        return ts.forEachChild(node, cb);
+    });
 }

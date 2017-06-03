@@ -17,6 +17,7 @@
 import * as ts from "typescript";
 import {format} from "util";
 
+import {flatMap, mapDefined} from "../utils";
 import {
     CodeLine,
     EndErrorLine,
@@ -61,7 +62,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const lines = textWithMarkup.map(parseLine);
 
     if (lines.length > 0 && !(lines[0] instanceof CodeLine)) {
-        throw lintSyntaxError(`text cannot start with an error mark line.`);
+        throw lintSyntaxError("text cannot start with an error mark line.");
     }
 
     const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
@@ -74,7 +75,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
-    function addError(errorLine: EndErrorLine, errorStartPos: { line: number, col: number }, lineNo: number) {
+    function addError(errorLine: EndErrorLine, errorStartPos: { line: number; col: number }, lineNo: number) {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
@@ -141,7 +142,7 @@ function substituteMessage(templates: Map<string, string>, message: string): str
  * If `name` is not found in `templates`, `message` is returned unchanged.
  */
 function formatMessage(templates: Map<string, string>, message: string): string {
-    const formatMatch = /^([\w_]+) % \((.+)\)$/.exec(message);
+    const formatMatch = /^([-\w]+) % \((.+)\)$/.exec(message);
     if (formatMatch !== null) {
         const template = templates.get(formatMatch[1]);
         if (template !== undefined) {
@@ -200,11 +201,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 
         if (startPos.line === endPos.line) {
             // single line error
-            errorLinesForCodeText[startPos.line].push(new EndErrorLine(
-                startPos.col,
-                endPos.col,
-                message,
-            ));
+            errorLinesForCodeText[startPos.line].push(new EndErrorLine(startPos.col, endPos.col, message));
         } else {
             // multiline error
             errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
@@ -215,19 +212,9 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
         }
     }
 
-    const finalText = combineCodeTextAndErrorLines(codeText, errorLinesForCodeText);
-    return finalText.join("\n");
+    return flatMap(codeText, (line, i) => [line, ...mapDefined(errorLinesForCodeText[i], (err) => printLine(err, line))]).join("\n");
 }
 /* tslint:enable:object-literal-sort-keys */
-
-function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
-    return codeText.reduce<string[]>((resultText, code, i) => {
-        resultText.push(code);
-        const errorPrintLines = errorLinesForCodeText[i].map((line) => printLine(line, code)).filter((line) => line !== null) as string[];
-        resultText.push(...errorPrintLines);
-        return resultText;
-    }, []);
-}
 
 function createCodeLineNoToErrorsMap(lines: Line[]) {
     const errorLinesForCodeLine: ErrorLine[][] = [];

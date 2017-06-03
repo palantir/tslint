@@ -28,6 +28,13 @@ export const rules = {
     },
     "no-invalid-template-strings": true,
     "no-sparse-arrays": true,
+
+    // added in v5.2
+    "no-object-literal-type-assertion": true,
+
+    // added in v5.3
+    "prefer-conditional-expression": true,
+    "prefer-object-spread": true,
 };
 // tslint:enable object-literal-sort-keys
 

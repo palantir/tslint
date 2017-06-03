@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-       if (isConstructorDeclaration(node) && node.body) {
+       if (isConstructorDeclaration(node) && node.body !== undefined) {
            getSuperForNode(node.body);
        }
        return ts.forEachChild(node, cb);
@@ -82,7 +82,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
-                return worse(getSuperForNode(thenStatement), elseStatement ? getSuperForNode(elseStatement) : Kind.NoSuper);
+                return worse(getSuperForNode(thenStatement), elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper);
             }
 
             case ts.SyntaxKind.SwitchStatement:
@@ -112,18 +112,17 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     return Kind.NoSuper;
 
                 default:
-                    if (fallthroughSingle) {
+                    if (fallthroughSingle !== undefined) {
                         addDuplicateFailure(fallthroughSingle, clauseSuper.node);
                     }
                     if (!clauseSuper.break) {
                         fallthroughSingle = clauseSuper.node;
                     }
                     foundSingle = clauseSuper.node;
-                    break;
             }
         }
 
-        return foundSingle ? { node: foundSingle, break: false } : Kind.NoSuper;
+        return foundSingle !== undefined ? { node: foundSingle, break: false } : Kind.NoSuper;
     }
 
     /**
@@ -136,10 +135,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
             const childSuper = getSuperForNode(child);
             switch (childSuper) {
                 case Kind.NoSuper:
-                    return;
+                    return undefined;
 
                 case Kind.Break:
-                    if (seenSingle) {
+                    if (seenSingle !== undefined) {
                         return { ...seenSingle, break: true };
                     }
                     return childSuper;
@@ -148,14 +147,14 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     return childSuper;
 
                 default:
-                    if (seenSingle && !seenSingle.break) {
+                    if (seenSingle !== undefined && !seenSingle.break) {
                         addDuplicateFailure(seenSingle.node, childSuper.node);
                     }
                     seenSingle = childSuper;
-                    return;
+                    return undefined;
             }
         });
-        return res || seenSingle || Kind.NoSuper;
+        return res !== undefined ? res : seenSingle !== undefined ? seenSingle : Kind.NoSuper;
     }
 
     function addDuplicateFailure(a: ts.Node, b: ts.Node): void {

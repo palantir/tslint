@@ -31,7 +31,7 @@ const multilineErrorRegex = /^\s*(~+|~nil)$/;
 // "    ~~~~~~~~~   [some error message]"
 const endErrorRegex = /^\s*(~+|~nil)\s*\[(.+)\]\s*$/;
 // "[shortcut]: full messages goes here!!  "
-const messageSubstitutionRegex = /^\[([\w\-\_]+?)]: \s*(.+?)\s*$/;
+const messageSubstitutionRegex = /^\[([-\w]+?)]: \s*(.+?)\s*$/;
 
 export const ZERO_LENGTH_ERROR = "~nil";
 
@@ -72,7 +72,7 @@ export function parseLine(text: string): Line {
  * @param code - If line represents error markup, this is the line of code preceding the markup.
  *               Otherwise, this parameter is not required.
  */
-export function printLine(line: Line, code?: string): string | null {
+export function printLine(line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
         if (code == null) {
            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
@@ -92,7 +92,7 @@ export function printLine(line: Line, code?: string): string | null {
             let tildes = "~".repeat(line.endCol - line.startCol);
             if (code.length < line.endCol) {
                 // Better than crashing in String.repeat
-                throw new Error("Bad error marker at " + JSON.stringify(line));
+                throw new Error(`Bad error marker at ${JSON.stringify(line)}`);
             }
             let endSpaces = " ".repeat(code.length - line.endCol);
             if (tildes.length === 0) {
@@ -108,5 +108,5 @@ export function printLine(line: Line, code?: string): string | null {
     } else if (line instanceof CodeLine) {
         return line.contents;
     }
-    return null;
+    return undefined;
 }

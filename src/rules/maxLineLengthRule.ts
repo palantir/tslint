@@ -40,12 +40,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (lineLimit: number) => {
+    public static FAILURE_STRING_FACTORY(lineLimit: number) {
         return `Exceeds maximum line length of ${lineLimit}`;
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] > 0;
+        return super.isEnabled() && this.ruleArguments[0] as number > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
