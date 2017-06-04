@@ -72,7 +72,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 }
 
 function isExcluded(node: ts.Node, options: Options): boolean {
-    if (options.allowEmptyCatch === true && node.kind === ts.SyntaxKind.CatchClause) {
+    if (options.allowEmptyCatch && node.kind === ts.SyntaxKind.CatchClause) {
         return true;
     }
 
