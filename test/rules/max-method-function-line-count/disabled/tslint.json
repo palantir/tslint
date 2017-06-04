@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "max-method-function-line-count": [
+      true, 10, "lf"
+    ]
+  }
+}

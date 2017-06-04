@@ -247,6 +247,7 @@ export const rules = {
         "check-typecast",
         "check-preblock",
     ],
+    "max-method-function-line-count" : [true,200,"lf"]
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
