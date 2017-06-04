@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isIdentifier } from "tsutils";
+import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -99,17 +99,56 @@ function isDeclaration(identifier: ts.Identifier): boolean {
     }
 }
 
+function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefined {
+    let parent = node.parent!;
+    if (isPropertyAccessExpression(parent) && parent.name === node) {
+        node = parent;
+        parent = node.parent!;
+    }
+    return isCallExpression(parent) && parent.expression === node ? parent : undefined;
+}
+
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {
+    const callExpression = getCallExpresion(node);
+    if (callExpression !== undefined) {
+        const result = findDeprecationTag(tc.getResolvedSignature(callExpression).getJsDocTags());
+        if (result !== undefined) {
+            return result;
+        }
+    }
     let symbol = tc.getSymbolAtLocation(node);
     if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
-    if (symbol !== undefined) {
-        for (const tag of symbol.getJsDocTags()) {
-            if (tag.name === "deprecated") {
-                return tag.text;
-            }
+    if (symbol === undefined ||
+        // if this is a CallExpression and the declaration is a function or method,
+        // stop here to avoid collecting JsDoc of all overload signatures
+        callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
+        return undefined;
+    }
+    return findDeprecationTag(symbol.getJsDocTags());
+}
+
+function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
+    for (const tag of tags) {
+        if (tag.name === "deprecated") {
+            return tag.text;
         }
     }
     return undefined;
+}
+
+function isFunctionOrMethod(declarations?: ts.Declaration[]) {
+    if (declarations === undefined || declarations.length === 0) {
+        return false;
+    }
+    switch (declarations[0].kind) {
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.MethodSignature:
+            return true;
+        default:
+            return false;
+    }
 }
