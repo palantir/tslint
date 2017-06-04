@@ -26,6 +26,46 @@ module M {
     var a,b;
           ~  [missing whitespace]
 
+    var c: number|string;
+                 ~   [missing whitespace]
+                  ~  [missing whitespace]
+
+    var d: number| string;
+                 ~   [missing whitespace]
+
+    var e: number |string;
+                   ~   [missing whitespace]
+
+    var f: boolean| number | string;
+                  ~   [missing whitespace]
+
+    var g: boolean |number| string;
+                    ~   [missing whitespace]
+                          ~   [missing whitespace]
+
+    var h: number&string;
+                 ~   [missing whitespace]
+                  ~  [missing whitespace]
+
+    var i: number& string;
+                 ~   [missing whitespace]
+
+    var j: number &string;
+                   ~   [missing whitespace]
+
+    var k: boolean& number & string;
+                  ~   [missing whitespace]
+
+    var l: boolean &number& string;
+                    ~   [missing whitespace]
+                          ~   [missing whitespace]
+
+    var m: boolean&(number|string);
+                  ~   [missing whitespace]
+                   ~   [missing whitespace]
+                          ~   [missing whitespace]
+                           ~   [missing whitespace]
+
     switch(x) {
           ~     [missing whitespace]
         case 1:break;
