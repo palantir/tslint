@@ -264,6 +264,7 @@ export const rules = {
         "check-type-operator",
         "check-rest-spread",
     ],
+    "max-method-function-line-count" : [true,200,"lf"]
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =

@@ -1,0 +1,81 @@
+namespace App {
+    class GiveMeANumber {
+
+        /* tslint:disable:no-any */
+        private num:any = 10;
+        /* tslint:enable:no-any */
+
+        //Th  some kind of comment
+        constructor(){
+                   ~~  [This method or function has 18 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+            this.giveNumber();
+
+            // some comment
+            this.giveNumber();
+            // some comment
+            this.giveNumber();
+
+            // some comment
+
+            this.giveNumber();
+            // some comment
+
+            this.giveNumber();
+
+            // some comment
+            this.giveNumber();
+        }
+
+        /*
+        Here  another comment
+        It's very helpful.
+        */
+
+        public test (val : number) {
+              ~~~~~~~~~~~~~~~~~~~~   [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            // some comments
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+        }
+
+        public giveNumber = () =>{
+                           ~~~~~~    [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]  
+            alert(this.num);
+            // some comment
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+            alert(this.num);
+        };
+    }
+
+    function test () {
+            ~~~~~~~~   [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        // comment 1
+        return true;
+    }
+
+}
+
