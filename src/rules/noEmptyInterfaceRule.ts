@@ -48,7 +48,8 @@ function walk(ctx: Lint.WalkContext<void>) {
             (node.heritageClauses === undefined ||
              // allow interfaces that extend 2 or more interfaces
              node.heritageClauses[0].types.length < 2)) {
-            return ctx.addFailureAtNode(node.name,
+            return ctx.addFailureAtNode(
+                node.name,
                 node.heritageClauses !== undefined ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

@@ -183,7 +183,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 return;
             }
 
-            ctx.addFailureAtNode(node,
+            ctx.addFailureAtNode(
+                node,
                 showFailure(location, failure, isUnionType(type), options));
         }
     }

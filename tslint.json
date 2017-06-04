@@ -13,14 +13,6 @@
     "no-parameter-properties": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
-    },
     "arrow-return-shorthand": true,
     "comment-format": [
         true,
