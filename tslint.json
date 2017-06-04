@@ -9,6 +9,7 @@
 
     // Don't want these
     "cyclomatic-complexity": false,
+    "max-method-function-line-count": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
     "no-unused-variable": false,
