@@ -1,13 +1,11 @@
 namespace App {
     class GiveMeANumber {
 
-        /* tslint:disable:no-any */
         private num:any = 10;
-        /* tslint:enable:no-any */
 
         //Th  some kind of comment
         constructor(){
-                   ~~  [This method or function has 18 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+        ~~~~~~~~~~~~~  [err % ("18")]
             this.giveNumber();
 
             // some comment
@@ -32,7 +30,7 @@ namespace App {
         */
 
         public test (val : number) {
-              ~~~~~~~~~~~~~~~~~~~~   [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("13")]
             alert(this.num);
             alert(this.num);
             alert(this.num);
@@ -47,7 +45,7 @@ namespace App {
         }
 
         public giveNumber = () =>{
-                           ~~~~~~    [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]  
+                            ~~~~~    [err % ("13")]
             alert(this.num);
             // some comment
             alert(this.num);
@@ -63,7 +61,7 @@ namespace App {
     }
 
     function test () {
-            ~~~~~~~~   [This method or function has 13 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts]
+    ~~~~~~~~~~~~~~~~   [err % ("13")]
         // comment 1
         // comment 1
         // comment 1
@@ -79,3 +77,4 @@ namespace App {
 
 }
 
+[err]: This method or function has %s lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts.
