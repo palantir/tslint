@@ -23,6 +23,8 @@ import * as Lint from "../index";
 const OPTION_IGNORE_PARMS = "ignore-params";
 const OPTION_IGNORE_PROPERTIES = "ignore-properties";
 
+const INFINITY_TEXT = "Infinity";
+
 interface Options {
     ignoreParameters: boolean;
     ignoreProperties: boolean;
@@ -77,7 +79,8 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (shouldCheck(node, this.options)) {
                 const { name, type, initializer } = node;
-                if (type !== undefined && initializer !== undefined && typeIsInferrable(type.kind, initializer.kind)) {
+                if (type !== undefined && initializer !== undefined
+                    && typeIsInferrable(type.kind, initializer.kind, initializer.getText())) {
                     const fix = Lint.Replacement.deleteFromTo(name.end, type.end);
                     this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)), fix);
                 }
@@ -104,12 +107,12 @@ function shouldCheck(node: ts.Node, { ignoreParameters, ignoreProperties }: Opti
     }
 }
 
-function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.SyntaxKind): boolean {
+function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.SyntaxKind, initializerText: string): boolean {
     switch (type) {
         case ts.SyntaxKind.BooleanKeyword:
             return initializer === ts.SyntaxKind.TrueKeyword || initializer === ts.SyntaxKind.FalseKeyword;
         case ts.SyntaxKind.NumberKeyword:
-            return initializer === ts.SyntaxKind.NumericLiteral;
+            return initializer === ts.SyntaxKind.NumericLiteral || initializerText.indexOf(INFINITY_TEXT) !== -1;
         case ts.SyntaxKind.StringKeyword:
             switch (initializer) {
                 case ts.SyntaxKind.StringLiteral:

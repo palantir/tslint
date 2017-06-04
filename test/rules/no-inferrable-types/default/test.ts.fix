@@ -1,7 +1,9 @@
 // errors, inferrable type is declared
-let x = 7;
-let y = false;
-let z = "foo";
+let a = 7;
+let b = false;
+let c = "foo";
+let d = Infinity;
+let e = -Infinity;
 class C {
     x = 1;
 }

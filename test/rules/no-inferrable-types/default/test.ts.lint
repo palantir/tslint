@@ -1,10 +1,14 @@
 // errors, inferrable type is declared
-let x: number = 7;
+let a: number = 7;
        ~~~~~~           [number]
-let y: boolean = false;
+let b: boolean = false;
        ~~~~~~~          [boolean]
-let z: string = "foo";
+let c: string = "foo";
        ~~~~~~           [string]
+let d: number = Infinity;
+       ~~~~~~           [number]
+let e: number = -Infinity;
+       ~~~~~~           [number]
 class C {
     x: number = 1;
        ~~~~~~           [number]
