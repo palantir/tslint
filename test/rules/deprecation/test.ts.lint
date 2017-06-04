@@ -107,6 +107,20 @@ declare let variableWithCallSignature2: () => void;
 variableWithCallSignature2();
 ~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature2')]
 
+function dedent(strings: TemplateStringsArray, ...values: string[]): string;
+function dedent(strings: TemplateStringsArray, ...values: number[]): string;
+/** @deprecated */
+function dedent(strings: TemplateStringsArray, ...values: any[]): string;
+function dedent(strings: TemplateStringsArray, ...values: any[]): string {
+    return "foo";
+}
+
+dedent``;
+dedent`${"foo"}`;
+dedent`${1}`;
+dedent`${[]}`;
+~~~~~~ [err % ('dedent')]
+
 // TODO: those should be an error
 let {f, g, h} = p;
 (function ({f, g}: I) {})

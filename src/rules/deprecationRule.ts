@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
+import { isCallExpression, isIdentifier, isPropertyAccessExpression, isTaggedTemplateExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -105,7 +105,7 @@ function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefine
         node = parent;
         parent = node.parent!;
     }
-    return isCallExpression(parent) && parent.expression === node ? parent : undefined;
+    return isTaggedTemplateExpression(parent) || isCallExpression(parent) && parent.expression === node ? parent : undefined;
 }
 
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {
