@@ -18,7 +18,9 @@
 import * as ts from "typescript";
 
 import * as Lint from "../../index";
-import { ALL, Location, LOCATION_INSTANCE, LOCATION_STATIC, Privacy, PRIVACY_PRIVATE, PRIVACY_PROTECTED } from "../completedDocsRule";
+import {
+    ALL, Location, LOCATION_INSTANCE, LOCATION_STATIC, Privacy, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC,
+} from "../completedDocsRule";
 import { Exclusion } from "./exclusion";
 
 export interface IClassExclusionDescriptor {
@@ -61,6 +63,6 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.privacies.has(PRIVACY_PUBLIC);
     }
 }
