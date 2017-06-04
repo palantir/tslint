@@ -145,9 +145,8 @@ class NoShadowedVariableWalker extends Lint.BlockScopeAwareRuleWalker<Set<string
     }
 
     private inPreviousBlockScope(varName: string) {
-        return this.getAllBlockScopes().some((scopeInfo) => {
-            return scopeInfo !== this.getCurrentBlockScope() && scopeInfo.has(varName);
-        });
+        return this.getAllBlockScopes()
+            .some((scopeInfo) => scopeInfo !== this.getCurrentBlockScope() && scopeInfo.has(varName));
     }
 
     private addFailureOnIdentifier(ident: ts.Identifier) {
