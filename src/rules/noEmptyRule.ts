@@ -20,6 +20,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const ALLOW_EMPTY_CATCH = "allow-empty-catch";
+
+interface Options {
+    allowEmptyCatch?: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -27,9 +33,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows empty blocks.",
         descriptionDetails: "Blocks with a comment inside are not considered empty.",
         rationale: "Empty blocks are often indicators of missing code.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            If \`${ALLOW_EMPTY_CATCH}\` is specified, then catch blocks are allowed to be empty.`,
+        options: {
+            type: "string",
+            enum: [ALLOW_EMPTY_CATCH],
+        },
+        optionExamples: [true, [true, ALLOW_EMPTY_CATCH]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -38,15 +48,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "block is empty";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowEmptyCatch: this.ruleArguments.indexOf(ALLOW_EMPTY_CATCH) !== -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext<Options>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.Block &&
             (node as ts.Block).statements.length === 0 &&
-            !isExcludedConstructor(node.parent!)) {
+            !isExcluded(node, ctx.options)) {
             const start = node.getStart(ctx.sourceFile);
             // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,
             // which can be used to conveniently check for comments between braces
@@ -57,6 +69,16 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isExcluded(node: ts.Node, options: Options): boolean {
+    const { parent } = node;
+    if (parent === undefined) {
+        return false;
+    }
+
+    return isExcludedConstructor(parent)
+        || (options.allowEmptyCatch === true && parent.kind === ts.SyntaxKind.CatchClause);
 }
 
 function isExcludedConstructor(node: ts.Node): boolean {
