@@ -203,7 +203,7 @@ class Linter {
             if (isError(error) && error.stack !== undefined) {
                 showWarningOnce(error.stack);
             } else {
-                showWarningOnce(error);
+                showWarningOnce(String(error));
             }
             return [];
         }
