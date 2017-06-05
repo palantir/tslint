@@ -140,6 +140,7 @@ export const rules = {
     "max-classes-per-file": [true, 1],
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
+    "max-method-function-line-count" : [true, 200],
     "no-default-export": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
@@ -247,7 +248,6 @@ export const rules = {
         "check-typecast",
         "check-preblock",
     ],
-    "max-method-function-line-count" : [true,200,"lf"]
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
