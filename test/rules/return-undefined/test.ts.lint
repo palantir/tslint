@@ -1,4 +1,6 @@
-[typescript]: >=2.2.0
+class Promise<T> {
+    then(): Promise<T>;
+}
 function valueWrong(): number | undefined {
     return;
     ~~~~~~~ [UNDEFINED]
