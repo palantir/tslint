@@ -36,10 +36,9 @@ interface I {
     b2(x: string): void;
     b2(...x: number[]): void;
 
-    // Error if both are rest parameters.
+    // No error if both are rest parameters. (https://github.com/Microsoft/TypeScript/issues/5077)
     b3(...x: number[]): void;
     b3(...x: string[]): void;
-       ~~~~~~~~~~~~~~ [These overloads can be combined into one signature taking `number[] | string[]`.]
 
     // Error if only one defines an optional parameter.
     c(): void;
