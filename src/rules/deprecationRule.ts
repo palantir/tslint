@@ -105,9 +105,35 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         symbol = tc.getAliasedSymbol(symbol);
     }
     if (symbol !== undefined) {
+        return getDeprecationValue(symbol);
+    }
+    return undefined;
+}
+
+function getDeprecationValue(symbol: ts.Symbol): string | undefined {
+    if (symbol.getJsDocTags !== undefined) {
         for (const tag of symbol.getJsDocTags()) {
             if (tag.name === "deprecated") {
                 return tag.text;
+            }
+        }
+        return undefined;
+    }
+    if (symbol.declarations !== undefined) {
+        for (const declaration of symbol.declarations) {
+            // TODO get documentation of variable statement for variables
+            for (const child of declaration.getChildren()) {
+                if (child.kind !== ts.SyntaxKind.JSDocComment) {
+                    break;
+                }
+                if ((child as ts.JSDoc).tags === undefined) {
+                    continue;
+                }
+                for (const tag of (child as ts.JSDoc).tags!) {
+                    if (tag.tagName.text === "deprecated") {
+                        return tag.comment === undefined ? "" : tag.comment;
+                    }
+                }
             }
         }
     }

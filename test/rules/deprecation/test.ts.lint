@@ -1,3 +1,4 @@
+[typescript]: >=2.3.0
 import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
        ~~~ [errmsg % ('def', 'deprecated default export')]
              ~~~~~          [errmsg % ('other', 'reason')]
