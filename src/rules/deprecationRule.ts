@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isIdentifier } from "tsutils";
+import { getDeclarationOfBindingElement, isBindingElement, isIdentifier, isVariableDeclaration, isVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -119,20 +119,35 @@ function getDeprecationValue(symbol: ts.Symbol): string | undefined {
         }
         return undefined;
     }
-    if (symbol.declarations !== undefined) {
-        for (const declaration of symbol.declarations) {
-            // TODO get documentation of variable statement for variables
-            for (const child of declaration.getChildren()) {
-                if (child.kind !== ts.SyntaxKind.JSDocComment) {
-                    break;
-                }
-                if ((child as ts.JSDoc).tags === undefined) {
-                    continue;
-                }
-                for (const tag of (child as ts.JSDoc).tags!) {
-                    if (tag.tagName.text === "deprecated") {
-                        return tag.comment === undefined ? "" : tag.comment;
-                    }
+    // for compatibility with typescript@<2.3.0
+    return getDeprecationFromDeclarations(symbol.declarations);
+}
+
+function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
+    if (declarations === undefined) {
+        return undefined;
+    }
+    let declaration: ts.Node;
+    for (declaration of declarations) {
+        if (isBindingElement(declaration)) {
+            declaration = getDeclarationOfBindingElement(declaration);
+        }
+        if (isVariableDeclaration(declaration)) {
+            declaration = declaration.parent!;
+        }
+        if (isVariableDeclarationList(declaration)) {
+            declaration = declaration.parent!;
+        }
+        for (const child of declaration.getChildren()) {
+            if (child.kind !== ts.SyntaxKind.JSDocComment) {
+                break;
+            }
+            if ((child as ts.JSDoc).tags === undefined) {
+                continue;
+            }
+            for (const tag of (child as ts.JSDoc).tags!) {
+                if (tag.tagName.text === "deprecated") {
+                    return tag.comment === undefined ? "" : tag.comment;
                 }
             }
         }
