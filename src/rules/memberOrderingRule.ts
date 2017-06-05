@@ -202,7 +202,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             showWarningOnce(`Warning: ${this.ruleName} - ${(e as Error).message}`);
             return [];
         }
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, options));
     }
 }
 
