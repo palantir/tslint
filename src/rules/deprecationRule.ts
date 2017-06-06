@@ -198,7 +198,6 @@ function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined
     return undefined;
 }
 
-
 function isFunctionOrMethod(declarations?: ts.Declaration[]) {
     if (declarations === undefined || declarations.length === 0) {
         return false;
