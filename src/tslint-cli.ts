@@ -214,12 +214,12 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
     console.error("Missing files");
     process.exit(1);
 }
 
-if (argv.typeCheck === true && argv.project === undefined) {
+if (argv.typeCheck && argv.project === undefined) {
     console.error("--project must be specified in order to enable type checking.");
     process.exit(1);
 }
@@ -254,7 +254,12 @@ run({
 }, {
     log,
     error: (m) => console.error(m),
-}).then(process.exit);
+}).then((rc) => {
+    process.exitCode = rc;
+}).catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+});
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isPropertyAccessExpression, isTaggedTemplateExpression } from "tsutils";
+import {
+    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier,
+    isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -111,7 +114,7 @@ function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefine
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {
     const callExpression = getCallExpresion(node);
     if (callExpression !== undefined) {
-        const result = findDeprecationTag(tc.getResolvedSignature(callExpression).getJsDocTags());
+        const result = getSignatureDeprecation(tc.getResolvedSignature(callExpression));
         if (result !== undefined) {
             return result;
         }
@@ -126,7 +129,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
         return undefined;
     }
-    return findDeprecationTag(symbol.getJsDocTags());
+    return getSymbolDeprecation(symbol);
 }
 
 function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
@@ -137,6 +140,64 @@ function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
     }
     return undefined;
 }
+
+function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
+    if (symbol.getJsDocTags !== undefined) {
+        return findDeprecationTag(symbol.getJsDocTags());
+    }
+    // for compatibility with typescript@<2.3.0
+    return getDeprecationFromDeclarations(symbol.declarations);
+}
+
+function getSignatureDeprecation(signature: ts.Signature): string | undefined {
+    if (signature.getJsDocTags !== undefined) {
+        return findDeprecationTag(signature.getJsDocTags());
+    }
+
+    // for compatibility with typescript@<2.3.0
+    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
+}
+
+function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
+    if (declarations === undefined) {
+        return undefined;
+    }
+    let declaration: ts.Node;
+    for (declaration of declarations) {
+        if (isBindingElement(declaration)) {
+            declaration = getDeclarationOfBindingElement(declaration);
+        }
+        if (isVariableDeclaration(declaration)) {
+            declaration = declaration.parent!;
+        }
+        if (isVariableDeclarationList(declaration)) {
+            declaration = declaration.parent!;
+        }
+        const result = getDeprecationFromDeclaration(declaration);
+        if (result !== undefined) {
+            return result;
+        }
+    }
+    return undefined;
+}
+
+function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
+    for (const child of declaration.getChildren()) {
+        if (child.kind !== ts.SyntaxKind.JSDocComment) {
+            break;
+        }
+        if ((child as ts.JSDoc).tags === undefined) {
+            continue;
+        }
+        for (const tag of (child as ts.JSDoc).tags!) {
+            if (tag.tagName.text === "deprecated") {
+                return tag.comment === undefined ? "" : tag.comment;
+            }
+        }
+    }
+    return undefined;
+}
+
 
 function isFunctionOrMethod(declarations?: ts.Declaration[]) {
     if (declarations === undefined || declarations.length === 0) {

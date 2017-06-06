@@ -436,3 +436,9 @@ export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryEx
         node.operator === ts.SyntaxKind.MinusToken &&
         node.operand.kind === ts.SyntaxKind.NumericLiteral;
 }
+
+/** Wrapper for compatibility with typescript@<2.3.1 */
+export function isWhiteSpace(ch: number): boolean {
+    // tslint:disable-next-line
+    return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
+}

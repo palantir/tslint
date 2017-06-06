@@ -252,9 +252,9 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) 
 
     for (const diffResult of diffResults) {
         let color = colors.grey;
-        if (diffResult.added === true) {
+        if (diffResult.added) {
             color = colors.green.underline;
-        } else if (diffResult.removed === true) {
+        } else if (diffResult.removed) {
             color = colors.red.underline;
         }
         process.stdout.write(color(diffResult.value));
