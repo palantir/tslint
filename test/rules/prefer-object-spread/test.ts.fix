@@ -6,9 +6,18 @@ Object.assign(original, {c: 3});
 var result = {...original, c: 3};
 result = {...original, c: 3};
 var result = {...original, c: 3};
+foo({...original, c: 3});
+[{...original, c: 3}];
+({
+    foo: {...original, c: 3}
+})
 
 {a: 1,};
 {a: 1, ...(foo ? {b: 2} : {c: 3})};
 {a: 1, ...{b: 2}};
 {};
 {};
+
+// allowed
+result = Object.assign(new Foo(), {});
+result = Object.assign(createFoo(), {});

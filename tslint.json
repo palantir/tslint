@@ -8,6 +8,7 @@
     "prefer-switch": [true, { "min-cases": 3 }],
 
     // Don't want these
+    "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
     "no-unused-variable": false,
@@ -34,7 +35,6 @@
 
     // TODO: Enable these
     "completed-docs": false,
-    "cyclomatic-complexity": false,
     "no-any": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,

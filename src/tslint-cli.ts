@@ -20,6 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
+import { VERSION } from "./linter";
 import { run } from "./runner";
 import { dedent } from "./utils";
 
@@ -45,7 +46,7 @@ interface Option {
     short?: string;
     // Commander will camelCase option names.
     name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
-    type: "string" | "boolean";
+    type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
 }
@@ -74,7 +75,7 @@ const options: Option[] = [
     {
         short: "e",
         name: "exclude",
-        type: "string",
+        type: "array",
         describe: "exclude globs from path expansion",
         description: dedent`
             A filename or glob which indicates files to exclude from linting.
@@ -187,9 +188,15 @@ const options: Option[] = [
     },
 ];
 
+commander.version(VERSION);
+
 for (const option of options) {
-    const commanderStr = optionUsageTag(option) + (option.type === "string" ? ` [${option.name}]` : "");
-    commander.option(commanderStr, option.describe);
+    const commanderStr = optionUsageTag(option) + optionParam(option);
+    if (option.type === "array") {
+        commander.option(commanderStr, option.describe, collect, []);
+    } else {
+        commander.option(commanderStr, option.describe);
+    }
 }
 
 commander.on("--help", () => {
@@ -207,12 +214,12 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
     console.error("Missing files");
     process.exit(1);
 }
 
-if (argv.typeCheck === true && argv.project === undefined) {
+if (argv.typeCheck && argv.project === undefined) {
     console.error("--project must be specified in order to enable type checking.");
     process.exit(1);
 }
@@ -244,8 +251,31 @@ run({
     rulesDirectory: argv.rulesDir,
     test: argv.test,
     typeCheck: argv.typeCheck,
-}, { log, error(m) { console.error(m); } }).then(process.exit);
+}, {
+    log,
+    error: (m) => console.error(m),
+}).then((rc) => {
+    process.exitCode = rc;
+}).catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+});
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
+}
+
+function optionParam(option: Option) {
+    switch (option.type) {
+        case "string":
+            return ` [${option.name}]`;
+        case "array":
+            return ` <${option.name}>`;
+        case "boolean":
+            return "";
+    }
+}
+function collect(val: string, memo: string[]) {
+    memo.push(val);
+    return memo;
 }

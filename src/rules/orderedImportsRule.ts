@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isImportDeclaration, isModuleDeclaration, isNamedImports, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -84,118 +85,109 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const orderedImportsWalker = new OrderedImportsWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(orderedImportsWalker);
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
     }
-}
-
-// Convert aBcD --> AbCd
-function flipCase(x: string): string {
-    return x.split("").map((char) => {
-        if (char >= "a" && char <= "z") {
-            return char.toUpperCase();
-        } else if (char >= "A" && char <= "Z") {
-            return char.toLowerCase();
-        }
-        return char;
-    }).join("");
-}
-
-// After applying a transformation, are the nodes sorted according to the text they contain?
-// If not, return the pair of nodes which are out of order.
-function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] | null {
-    for (let i = 1; i < xs.length; i++) {
-        if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
-            return [xs[i - 1], xs[i]];
-        }
-    }
-    return null;
-}
-
-function compare(a: string, b: string) {
-    function isLow(value: string) {
-        return value[0] === "." || value[0] === "/";
-    }
-    if (isLow(a) && !isLow(b)) {
-        return 1;
-    } else if (!isLow(a) && isLow(b)) {
-        return -1;
-    } else if (a > b) {
-        return 1;
-    } else if (a < b) {
-        return -1;
-    }
-    return 0;
-}
-
-function removeQuotes(value: string) {
-    // strip out quotes
-    if (value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
-        value = value.substr(1, value.length - 2);
-    }
-    return value;
-}
-
-function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
-    return xs.slice().sort((a, b) => {
-        return compare(getSortKey(a), getSortKey(b));
-    });
 }
 
 // Transformations to apply to produce the desired ordering of imports.
 // The imports must be lexicographically sorted after applying the transform.
-const TRANSFORMS: {[ordering: string]: (x: string) => string} = {
-    "any": () => "",
-    "case-insensitive": (x: string) => x.toLowerCase(),
-    "lowercase-first": flipCase,
-    "lowercase-last": (x: string) => x,
-};
+type Transform = (x: string) => string;
+const TRANSFORMS = new Map<string, Transform>([
+    ["any", () => ""],
+    ["case-insensitive", (x) => x.toLowerCase()],
+    ["lowercase-first", flipCase],
+    ["lowercase-last", (x) => x],
+]);
 
-class OrderedImportsWalker extends Lint.RuleWalker {
-    private currentImportsBlock: ImportsBlock = new ImportsBlock();
+interface Options {
+    importSourcesOrderTransform: Transform;
+    namedImportsOrderTransform: Transform;
+}
+
+interface JsonOptions {
+    "import-sources-order"?: string;
+    "named-imports-order"?: string;
+}
+
+function parseOptions(ruleArguments: any[]): Options {
+    const optionSet = (ruleArguments as JsonOptions[])[0];
+    const {
+        "import-sources-order": sources = "case-insensitive",
+        "named-imports-order": named = "case-insensitive",
+    } = optionSet === undefined ? {} : optionSet;
+    return {
+        importSourcesOrderTransform: TRANSFORMS.get(sources)!,
+        namedImportsOrderTransform: TRANSFORMS.get(named)!,
+    };
+}
+
+class Walker extends Lint.AbstractWalker<Options> {
+    private currentImportsBlock = new ImportsBlock();
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
-    private lastFix: Lint.Replacement[] | null;
-    private importSourcesOrderTransform: (x: string) => string;
-    private namedImportsOrderTransform: (x: string) => string;
+    private lastFix: Lint.Replacement[] | undefined;
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        interface Options { "import-sources-order"?: string; "named-imports-order"?: string; }
-        const optionSet = (this.getOptions() as [Options])[0];
-        const {
-            "import-sources-order": sources = "case-insensitive",
-            "named-imports-order": named = "case-insensitive",
-        } = optionSet === undefined ? {} : optionSet;
-        this.importSourcesOrderTransform = TRANSFORMS[sources];
-        this.namedImportsOrderTransform = TRANSFORMS[named];
+    public walk(sourceFile: ts.SourceFile): void {
+        for (const statement of sourceFile.statements) {
+            this.checkStatement(statement);
+        }
+        this.endBlock();
     }
 
-    // e.g. "import Foo from "./foo";"
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        let source = node.moduleSpecifier.getText();
-        source = removeQuotes(source);
-        source = this.importSourcesOrderTransform(source);
-        const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(this.getSourceFile(), node, source);
-
-        if (previousSource !== null && compare(source, previousSource) === -1) {
-            this.lastFix = [];
-            this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
+    private checkStatement(statement: ts.Statement): void {
+        if (!isImportDeclaration(statement) ||
+            /\r?\n\r?\n/.test(this.sourceFile.text.slice(statement.getFullStart(), statement.getStart(this.sourceFile)))) {
+            this.endBlock();
         }
 
-        super.visitImportDeclaration(node);
+        if (isImportDeclaration(statement)) {
+            if (!isStringLiteral(statement.moduleSpecifier)) {
+                // Ignore grammar error
+                return;
+            }
+
+            const source = this.options.importSourcesOrderTransform(removeQuotes(statement.moduleSpecifier.text));
+            const previousSource = this.currentImportsBlock.getLastImportSource();
+            this.currentImportsBlock.addImportDeclaration(this.sourceFile, statement, source);
+
+            if (previousSource !== null && compare(source, previousSource) === -1) {
+                this.lastFix = [];
+                this.addFailureAtNode(statement, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
+            }
+
+            const { importClause } = statement;
+            if (importClause !== undefined && importClause.namedBindings !== undefined && isNamedImports(importClause.namedBindings)) {
+                this.checkNamedImports(importClause.namedBindings);
+            }
+        } else if (isModuleDeclaration(statement)) {
+            const body = moduleDeclarationBody(statement);
+            if (body !== undefined) {
+                for (const subStatement of body.statements) {
+                    this.checkStatement(subStatement);
+                }
+                this.endBlock();
+            }
+        }
     }
 
-    // This is the "{A, B, C}" of "import {A, B, C} from "./foo";".
-    // We need to make sure they're alphabetized.
-    public visitNamedImports(node: ts.NamedImports) {
+    private endBlock(): void {
+        if (this.lastFix !== undefined) {
+            const replacement = this.currentImportsBlock.getReplacement();
+            if (replacement !== undefined) {
+                this.lastFix.push(replacement);
+            }
+            this.lastFix = undefined;
+        }
+        this.currentImportsBlock = new ImportsBlock();
+    }
+
+    private checkNamedImports(node: ts.NamedImports): void {
         const imports = node.elements;
 
-        const pair = findUnsortedPair(imports, this.namedImportsOrderTransform);
-        if (pair !== null) {
+        const pair = findUnsortedPair(imports, this.options.namedImportsOrderTransform);
+        if (pair !== undefined) {
             const [a, b] = pair;
-            const sortedDeclarations = sortByKey(imports, (x) => this.namedImportsOrderTransform(x.getText())).map((x) => x.getText());
+            const sortedDeclarations = sortByKey(imports, (x) =>
+                this.options.namedImportsOrderTransform(x.getText())).map((x) => x.getText());
             // replace in reverse order to preserve earlier offsets
             for (let i = imports.length - 1; i >= 0; i--) {
                 const start = imports[i].getStart();
@@ -206,34 +198,8 @@ class OrderedImportsWalker extends Lint.RuleWalker {
             }
 
             this.lastFix = [];
-            this.addFailureFromStartToEnd(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
+            this.addFailure(a.getStart(), b.getEnd(), Rule.NAMED_IMPORTS_UNORDERED, this.lastFix);
         }
-
-        super.visitNamedImports(node);
-    }
-
-    // keep reading the block of import declarations until the block ends, then replace the entire block
-    // this allows the reorder of named imports to work well with reordering lines
-    public visitNode(node: ts.Node) {
-        const prefixLength = node.getStart() - node.getFullStart();
-        const prefix = node.getFullText().slice(0, prefixLength);
-        const hasBlankLine = prefix.indexOf("\n\n") >= 0 || prefix.indexOf("\r\n\r\n") >= 0;
-        const notImportDeclaration = node.parent != null
-            && node.parent.kind === ts.SyntaxKind.SourceFile
-            && node.kind !== ts.SyntaxKind.ImportDeclaration;
-
-        if (hasBlankLine || notImportDeclaration) {
-            // end of block
-            if (this.lastFix != null) {
-                const replacement = this.currentImportsBlock.getReplacement();
-                if (replacement != null) {
-                    this.lastFix.push(replacement);
-                }
-                this.lastFix = null;
-            }
-            this.currentImportsBlock = new ImportsBlock();
-        }
-        super.visitNode(node);
     }
 }
 
@@ -295,7 +261,7 @@ class ImportsBlock {
     // creates a Lint.Replacement object with ordering fixes for the entire block
     public getReplacement() {
         if (this.importDeclarations.length === 0) {
-            return null;
+            return undefined;
         }
         const sortedDeclarations = sortByKey(this.importDeclarations.slice(), (x) => x.sourcePath);
         const fixedText = sortedDeclarations.map((x) => x.text).join("");
@@ -314,11 +280,70 @@ class ImportsBlock {
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
     private getEndOffset(sourceFile: ts.SourceFile, node: ts.ImportDeclaration) {
-        const endLineOffset = sourceFile.text.indexOf("\n", node.end) + 1;
-        return endLineOffset;
+        return sourceFile.text.indexOf("\n", node.end) + 1;
     }
 
     private getLastImportDeclaration() {
         return this.importDeclarations[this.importDeclarations.length - 1];
     }
+}
+
+// Convert aBcD --> AbCd
+function flipCase(str: string): string {
+    return Array.from(str).map((char) => {
+        if (char >= "a" && char <= "z") {
+            return char.toUpperCase();
+        } else if (char >= "A" && char <= "Z") {
+            return char.toLowerCase();
+        }
+        return char;
+    }).join("");
+}
+
+// After applying a transformation, are the nodes sorted according to the text they contain?
+// If not, return the pair of nodes which are out of order.
+function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] | undefined {
+    for (let i = 1; i < xs.length; i++) {
+        if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
+            return [xs[i - 1], xs[i]];
+        }
+    }
+    return undefined;
+}
+
+// tslint:disable-next-line no-unsafe-any (fixed in 5.3)
+function compare(a: string, b: string): 0 | 1 | -1 {
+    function isLow(value: string) {
+        return value[0] === "." || value[0] === "/";
+    }
+    if (isLow(a) && !isLow(b)) {
+        return 1;
+    } else if (!isLow(a) && isLow(b)) {
+        return -1;
+    } else if (a > b) {
+        return 1;
+    } else if (a < b) {
+        return -1;
+    }
+    return 0;
+}
+
+function removeQuotes(value: string): string {
+    // strip out quotes
+    if (value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
+        value = value.substr(1, value.length - 2);
+    }
+    return value;
+}
+
+function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
+    return xs.slice().sort((a, b) => compare(getSortKey(a), getSortKey(b)));
+}
+
+function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
+    let body = node.body;
+    while (body !== undefined && body.kind === ts.SyntaxKind.ModuleDeclaration) {
+        body = body.body;
+    }
+    return body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

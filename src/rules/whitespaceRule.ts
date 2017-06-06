@@ -246,7 +246,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function checkForTrailingWhitespace(position: number): void {
-        if (position !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(position))) {
+        if (position !== sourceFile.end && !Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
             addMissingWhitespaceErrorAt(position);
         }
     }
