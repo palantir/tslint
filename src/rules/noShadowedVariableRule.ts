@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(name: string) {
-        return `Shadowed variable: '${name}'`;
+        return `Shadowed name: '${name}'`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

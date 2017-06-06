@@ -317,4 +317,4 @@ function f(this): void {
     function inner(this): void {}
 }
 
-[err]: Shadowed variable: '%s'
+[err]: Shadowed name: '%s'
