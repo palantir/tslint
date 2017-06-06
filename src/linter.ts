@@ -200,10 +200,10 @@ class Linter {
                 return rule.apply(sourceFile);
             }
         } catch (error) {
-            if (isError(error)) {
-                showWarningOnce(`Warning: ${error.message}`);
+            if (isError(error) && error.stack !== undefined) {
+                showWarningOnce(error.stack);
             } else {
-                console.warn(`Warning: ${error}`);
+                showWarningOnce(String(error));
             }
             return [];
         }

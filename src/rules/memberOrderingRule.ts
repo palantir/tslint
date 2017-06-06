@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 import {flatMap, mapDefined} from "../utils";
 
@@ -194,7 +195,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        let options: Options;
+        try {
+            options = parseOptions(this.ruleArguments);
+        } catch (e) {
+            showWarningOnce(`Warning: ${this.ruleName} - ${(e as Error).message}`);
+            return [];
+        }
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, options));
     }
 }
 
