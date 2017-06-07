@@ -52,7 +52,8 @@ import d1, { d2 } from "a";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports are unused.]
 import d3, { d4 } from "a";
            ~~~~~~                                  [All named bindings are unused.]
-d3;
+d3;import d5 from "a";d3;
+   ~~~~~~~~~~~~~~~~~~~                          [All imports are unused.]
 
 bar.someFunc();
 baz();
