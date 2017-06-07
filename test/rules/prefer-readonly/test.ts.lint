@@ -25,6 +25,7 @@ class SampleClass {
     public mutate() {
         this.intentionallyModifiableDelayed = 7;
         this.intentionallyModifiableInline = 7;
+        this.correctlyModifiableMember = () => {};
     }
 
     public createConfusingChildClass() {
@@ -32,4 +33,9 @@ class SampleClass {
             private intentionallyModifiableInline = 7;
         }
     }
+
+    private incorrectlyModifiableMember = () => { };
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableMember' is never reassigned; mark it as 'readonly'.]
+
+    private correctlyModifiableMember = () => { };
 }
