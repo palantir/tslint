@@ -225,12 +225,14 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
 
         function removeAll(errorNode: ts.Node, failure: string): void {
+            const start = importNode.getStart();
             let end = importNode.getEnd();
-            if (ctx.sourceFile.getLineEndOfPosition(end) === end) {
+            if (ctx.sourceFile.getLineAndCharacterOfPosition(start).character === 0 &&
+                ctx.sourceFile.getLineEndOfPosition(end) === end) {
                 end++;
             }
 
-            const fix = Lint.Replacement.deleteFromTo(importNode.getStart(), end);
+            const fix = Lint.Replacement.deleteFromTo(start, end);
             ctx.addFailureAtNode(errorNode, failure, fix);
         }
     });

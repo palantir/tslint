@@ -31,6 +31,10 @@ import * as bar from "a";
 import baz from "a";
 import { namedExport } from "a";
 import d3 from "a";
+d3;
+
+d3;
+d3;
 d3;d3;
 
 bar.someFunc();
