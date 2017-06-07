@@ -333,7 +333,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
 }
 
 class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
-    private static modifierAliases: { [i: string]: string } = {
+    private static readonly modifierAliases: { [i: string]: string } = {
         export: "exported",
     };
 

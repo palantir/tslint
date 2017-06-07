@@ -61,7 +61,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         ts.forEachChild(sourceFile, this.visitNode);
     }
 
-    private visitNode = (node: ts.Node) => {
+    private readonly visitNode = (node: ts.Node) => {
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
                 this.handleClassDeclaration(node as ts.ClassDeclaration);

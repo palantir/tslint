@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
-    private imports = new Set<string>();
+    private readonly imports = new Set<string>();
     public walk(sourceFile: ts.SourceFile) {
         if (sourceFile.typeReferenceDirectives.length === 0) {
             return;

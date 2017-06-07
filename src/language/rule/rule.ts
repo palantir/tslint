@@ -238,10 +238,10 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private fileName: string;
-    private startPosition: RuleFailurePosition;
-    private endPosition: RuleFailurePosition;
-    private rawLines: string;
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
     constructor(private sourceFile: ts.SourceFile,

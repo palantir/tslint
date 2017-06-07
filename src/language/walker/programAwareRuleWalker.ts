@@ -21,7 +21,7 @@ import {IOptions} from "../rule/rule";
 import {RuleWalker} from "./ruleWalker";
 
 export class ProgramAwareRuleWalker extends RuleWalker {
-    private typeChecker: ts.TypeChecker;
+    private readonly typeChecker: ts.TypeChecker;
 
     constructor(sourceFile: ts.SourceFile, options: IOptions, private program: ts.Program) {
         super(sourceFile, options);
