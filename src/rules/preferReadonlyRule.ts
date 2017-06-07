@@ -48,9 +48,6 @@ class ClassScope {
     public declaredMembers = new Map<string, ts.Identifier>();
     public modifiedMembers = new Set<string>();
     public inConstructor = false;
-
-    // todo: use these
-    public inMemberInitializer = false;
 }
 
 class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
