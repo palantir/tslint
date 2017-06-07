@@ -1,0 +1,35 @@
+class SampleClass {
+    private readonly correctlyReadonlyInline = 7;
+
+    private readonly correctlyReadonlyDelayed;
+
+    private incorrectlyModifiableInline = 7;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableInline' is never reassigned; mark it as 'readonly'.]
+
+    private incorrectlyModifiableDelayed;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableDelayed' is never reassigned; mark it as 'readonly'.]
+
+    private intentionallyModifiableInline = 7;
+
+    private intentionallyModifiableDelayed;
+
+    protected protectedModifiable = 7;
+
+    protected publicModifiable = 7;
+
+    public constructor() {
+        this.correctlyReadonlyDelayed = 7;
+        this.incorrectlyModifiableDelayed = 7;
+    }
+
+    public mutate() {
+        this.intentionallyModifiableDelayed = 7;
+        this.intentionallyModifiableInline = 7;
+    }
+
+    public createConfusingChildClass() {
+        return class {
+            private intentionallyModifiableInline = 7;
+        }
+    }
+}
