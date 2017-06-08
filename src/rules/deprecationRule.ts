@@ -87,7 +87,7 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
-            return (parent as ts.Declaration).name === identifier;
+            return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.BindingElement:
         case ts.SyntaxKind.ExportSpecifier:
         case ts.SyntaxKind.ImportSpecifier:

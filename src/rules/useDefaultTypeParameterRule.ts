@@ -119,6 +119,9 @@ function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.Typ
         isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl) ? decl.typeParameters : undefined);
 }
 
-function getAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol {
+function getAliasedSymbol(symbol: ts.Symbol | undefined, checker: ts.TypeChecker): ts.Symbol | undefined {
+    if (symbol === undefined) {
+        return undefined;
+    }
     return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
 }

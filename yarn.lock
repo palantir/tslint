@@ -31,9 +31,9 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/js-yaml@^3.5.29":
-  version "3.5.30"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.5.30.tgz#f555118c022318e57e36d803379cb8ee38ee20a7"
+"@types/js-yaml@^3.5.31":
+  version "3.5.31"
+  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.5.31.tgz#54aeb8bcaaf94a7b1a64311bc318dbfe601a593a"
 
 "@types/minimatch@*", "@types/minimatch@^2.0.29":
   version "2.0.29"
@@ -1488,9 +1488,9 @@ type-detect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
 
-typescript@^2.3.0:
-  version "2.3.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.3.4.tgz#3d38321828231e434f287514959c37a82b629f42"
+typescript@next:
+  version "2.4.0-dev.20170608"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.0-dev.20170608.tgz#a6e7eff5ec3ba9f43eb10907b2d1bda4326bb65a"
 
 uglify-js@^2.6:
   version "2.8.27"
