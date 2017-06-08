@@ -214,6 +214,7 @@ declare namespace ambient {
 for (let [var1, var2] of someArr) {
     var1 = null;
 }
+for (const [var1, var2] of someArr) {}
 for (let {var1, var2} of someArr) {
     var2 = null;
 }

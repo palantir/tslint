@@ -251,6 +251,9 @@ declare namespace ambient {
 for (let [var1, var2] of someArr) {
     var1 = null;
 }
+for (let [var1, var2] of someArr) {}
+          ~~~~ [let % ('var1')]
+                ~~~~ [let % ('var2')]
 for (let {var1, var2} of someArr) {
     var2 = null;
 }
