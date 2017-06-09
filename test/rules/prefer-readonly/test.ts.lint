@@ -1,4 +1,14 @@
 class SampleClass {
+    private static readonly correctlyReadonlyStatic = 7;
+
+    private static incorrectlyModifiableStatic = 7;
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private static variable 'incorrectlyModifiableStatic' is never reassigned; mark it as 'readonly'.]
+
+    private static incorrectlyModifiableStaticArrow = () => {};
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private static variable 'incorrectlyModifiableStaticArrow' is never reassigned; mark it as 'readonly'.]
+
+    private static correctlyModifiableStatic = 7;
+
     private readonly correctlyReadonlyInline = 7;
 
     private readonly correctlyReadonlyDelayed;
@@ -9,33 +19,87 @@ class SampleClass {
     private incorrectlyModifiableDelayed;
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableDelayed' is never reassigned; mark it as 'readonly'.]
 
-    private intentionallyModifiableInline = 7;
+    private correctlyModifiableInline = 7;
 
-    private intentionallyModifiableDelayed;
+    private correctlyModifiableDelayed;
+
+    private childClassExpressionModifiable = 7;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'childClassExpressionModifiable' is never reassigned; mark it as 'readonly'.]
+
+    private correctlyModifiableWithinConstructor;
+
+    private correctlyModifiablePostDecremented;
+
+    private correctlyModifiablePostIncremented;
+
+    private correctlyModifiablePreDecremented;
+
+    private correctlyModifiablePreIncremented;
+
+    private overlappingClassVariable = 7;
+            ~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'overlappingClassVariable' is never reassigned; mark it as 'readonly'.]
 
     protected protectedModifiable = 7;
 
     protected publicModifiable = 7;
 
-    public constructor() {
+    public constructor(
+        private readonly correctlyReadonlyParameter: number = 7,
+        private incorrectlyModifiableParameter: number = 7,
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableParameter' is never reassigned; mark it as 'readonly'.]
+        private correctlyModifiableParameter: number = 7
+    ) {
         this.correctlyReadonlyDelayed = 7;
         this.incorrectlyModifiableDelayed = 7;
+        this.incorrectlyModifiableParameter = 7;
+
+        (() => {
+            this.correctlyModifiableWithinConstructor = 7;
+        })();
+
+        SampleClass.correctlyModifiableStatic += 1;
     }
 
     public mutate() {
-        this.intentionallyModifiableDelayed = 7;
-        this.intentionallyModifiableInline = 7;
+        this.correctlyModifiableDelayed = 7;
+        this.correctlyModifiableInline = 7;
         this.correctlyModifiableMember = () => {};
+        this.correctlyModifiableParameter = 7;
+        this.correctlyModifiablePostDecremented--;
+        this.correctlyModifiablePostIncremented++;
+        --this.correctlyModifiablePreDecremented;
+        ++this.correctlyModifiablePreIncremented;
     }
 
     public createConfusingChildClass() {
         return class {
-            private intentionallyModifiableInline = 7;
+            private correctlyModifiableInline = 7;
+
+            private incorrectlyModifiableInline = 7;
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableInline' is never reassigned; mark it as 'readonly'.]
+
+            private incorrectlyUniqueModifiableInline = 7;
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyUniqueModifiableInline' is never reassigned; mark it as 'readonly'.]
+
+            private childClassExpressionModifiable = 7;
+
+            mutate() {
+                this.correctlyModifiableInline = 7;
+                this.childClassExpressionModifiable = 7;
+            }
         }
+    }
+
+    public workWithSimilarClass(other: SimilarClass) {
+        other.overlappingClassVariable = 7;
     }
 
     private incorrectlyModifiableMember = () => { };
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableMember' is never reassigned; mark it as 'readonly'.]
 
     private correctlyModifiableMember = () => { };
+}
+
+class SimilarClass {
+    public overlappingClassVariable = 7;
 }

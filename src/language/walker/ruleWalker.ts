@@ -27,7 +27,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     private readonly failures: RuleFailure[];
     private readonly ruleName: string;
 
-    constructor(private sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(private readonly sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
         this.failures = [];

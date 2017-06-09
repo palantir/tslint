@@ -19,39 +19,38 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { ClassScope, ParameterOrPropertyDeclaration } from "./prefer-readonly/classScope";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Requires that private variables are marked as `readonly` if they're never modified outside of the constructor.",
         descriptionDetails: Lint.Utils.dedent`
-            If a variable is only assigned to in the constructor, it should be declared as \`readonly\`.
+            If a private variable is only assigned to in the constructor, it should be declared as \`readonly\`.
         `,
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
+        requiresTypeInfo: true,
         ruleName: "prefer-readonly",
         type: "maintainability",
         typescriptOnly: true,
     };
 
-    public static FAILURE_STRING_FACTORY(identifier: string) {
-        return `Private member variable '${identifier}' is never reassigned; mark it as 'readonly'.`;
-    }
-
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const preferReadonlyWalker = new PreferReadonlyWalker(sourceFile, this.ruleName, undefined);
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const preferReadonlyWalker = new PreferReadonlyWalker(sourceFile, this.ruleName, program.getTypeChecker());
         return this.applyWithWalker(preferReadonlyWalker);
     }
 }
 
-class ClassScope {
-    public declaredMembers = new Map<string, ts.Identifier>();
-    public modifiedMembers = new Set<string>();
-    public inConstructor = false;
-}
-
 class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
-    private scope: ClassScope;
+    private readonly typeChecker: ts.TypeChecker;
+    private scope?: ClassScope;
+
+    public constructor(sourceFile: ts.SourceFile, ruleName: string, typeChecker: ts.TypeChecker) {
+        super(sourceFile, ruleName, undefined);
+
+        this.typeChecker = typeChecker;
+    }
 
     public walk(sourceFile: ts.SourceFile) {
         if (sourceFile.isDeclarationFile) {
@@ -63,12 +62,27 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
 
     private readonly visitNode = (node: ts.Node) => {
         switch (node.kind) {
+            case ts.SyntaxKind.ArrowFunction:
+            case ts.SyntaxKind.FunctionExpression:
+                this.handleArrowFunctionOrFunctionExpression(node as ts.ArrowFunction | ts.FunctionExpression);
+                break;
+
             case ts.SyntaxKind.ClassDeclaration:
-                this.handleClassDeclaration(node as ts.ClassDeclaration);
+            case ts.SyntaxKind.ClassExpression:
+                this.handleClassDeclarationOrExpression(node as ts.ClassDeclaration | ts.ClassExpression);
                 break;
 
             case ts.SyntaxKind.Constructor:
                 this.handleConstructor(node as ts.ConstructorDeclaration);
+                break;
+
+            case ts.SyntaxKind.Parameter:
+                this.handleParameterDeclaration(node as ts.ParameterDeclaration);
+                break;
+
+            case ts.SyntaxKind.PostfixUnaryExpression:
+            case ts.SyntaxKind.PrefixUnaryExpression:
+                this.handlePostfixOrPrefixUnaryExpression(node as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:
@@ -76,7 +90,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 break;
 
             case ts.SyntaxKind.PropertyAccessExpression:
-                this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent);
+                this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!);
                 break;
 
             default:
@@ -84,9 +98,19 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private handleClassDeclaration(node: ts.ClassDeclaration) {
+    private handleArrowFunctionOrFunctionExpression(node: ts.ArrowFunction | ts.FunctionExpression) {
+        if (this.scope === undefined) {
+            return;
+        }
+
+        this.scope.enterNonConstructorScope();
+        ts.forEachChild(node, this.visitNode);
+        this.scope.exitNonConstructorScope();
+    }
+
+    private handleClassDeclarationOrExpression(node: ts.ClassDeclaration | ts.ClassExpression) {
         const parentScope = this.scope;
-        const childScope = this.scope = new ClassScope();
+        const childScope = this.scope = new ClassScope(node, this.typeChecker);
 
         ts.forEachChild(node, this.visitNode);
 
@@ -95,64 +119,73 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private handleConstructor(node: ts.ConstructorDeclaration) {
-        this.scope.inConstructor = true;
+        this.scope!.enterConstructor();
         ts.forEachChild(node, this.visitNode);
-        this.scope.inConstructor = false;
+        this.scope!.exitConstructor();
+    }
+
+    private handleParameterDeclaration(node: ts.ParameterDeclaration) {
+        this.scope!.addDeclaredVariable(node);
+        ts.forEachChild(node, this.visitNode);
+    }
+
+    private handlePostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
+        if (this.scope === undefined) {
+            return;
+        }
+
+        this.scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
     }
 
     private handlePropertyDeclaration(node: ts.PropertyDeclaration) {
-        if (this.scope !== undefined
-            && utils.isModfierFlagSet(node, ts.ModifierFlags.Private)
-            && !utils.isModfierFlagSet(node, ts.ModifierFlags.Readonly)) {
-            this.scope.declaredMembers.set(node.name.getText(), node.name as ts.Identifier);
+        this.scope!.addDeclaredVariable(node);
+        ts.forEachChild(node, this.visitNode);
+    }
+
+    private handlePropertyAccessExpression(node: ts.PropertyAccessExpression, parent: ts.Node) {
+        switch (parent.kind) {
+            case ts.SyntaxKind.BinaryExpression:
+                this.handleParentBinaryExpression(node, parent as ts.BinaryExpression);
+                break;
+
+            case ts.SyntaxKind.DeleteExpression:
+                this.handleParentDeleteExpression(node);
         }
 
         ts.forEachChild(node, this.visitNode);
     }
 
-    private handlePropertyAccessExpression(node: ts.PropertyAccessExpression, parent: ts.Node | undefined) {
-        if (parent !== undefined) {
-            switch (parent.kind) {
-                case ts.SyntaxKind.BinaryExpression:
-                    this.handleParentBinaryExpression(node, parent as ts.BinaryExpression);
-                    break;
-
-                case ts.SyntaxKind.DeleteExpression:
-                    this.handleParentDeleteExpression(node);
-            }
-        }
-
-        ts.forEachChild(node, this.visitNode);
-    }
     private handleParentBinaryExpression(node: ts.PropertyAccessExpression, parent: ts.BinaryExpression) {
-        if (parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
-            this.markMemberVariableAsModified(node.name.text);
+        if (this.scope !== undefined && parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
+            this.scope.addVariableModification(node);
         }
     }
 
     private handleParentDeleteExpression(node: ts.PropertyAccessExpression) {
-        this.markMemberVariableAsModified(node.name.text);
-    }
-
-    private markMemberVariableAsModified(name: string) {
-        if (this.scope !== undefined && !this.scope.inConstructor) {
-            this.scope.modifiedMembers.add(name);
+        if (this.scope !== undefined) {
+            this.scope.addVariableModification(node);
         }
     }
 
     private finalizeScope(scope: ClassScope) {
-        scope.modifiedMembers.forEach((modifiedMember) => {
-            scope.declaredMembers.delete(modifiedMember);
-        });
-
-        scope.declaredMembers.forEach((declaredMember, name) => {
-            this.complainOnNode(declaredMember, name);
-        });
+        for (const violatingNode of scope.finalizeUnmodifiedPrivateNonReadonlys()) {
+            this.complainOnNode(violatingNode);
+        }
     }
 
-    private complainOnNode(node: ts.Identifier, name: string) {
-        const fix = Lint.Replacement.appendText(node.getStart(), "readonly ");
+    private complainOnNode(node: ParameterOrPropertyDeclaration) {
+        const fix = Lint.Replacement.appendText(node.name.getStart(), "readonly ");
 
-        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name), fix);
+        this.addFailureAtNode(node.name, this.createFailureString(node), fix);
+    }
+
+    private createFailureString(node: ParameterOrPropertyDeclaration) {
+        const accessibility = utils.isModfierFlagSet(node, ts.ModifierFlags.Static)
+            ? "static"
+            : "member";
+
+        const text = node.name.getText();
+
+        return `Private ${accessibility} variable '${text}' is never reassigned; mark it as 'readonly'.`;
     }
 }

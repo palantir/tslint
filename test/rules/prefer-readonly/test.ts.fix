@@ -1,4 +1,12 @@
 class SampleClass {
+    private static readonly correctlyReadonlyStatic = 7;
+
+    private static readonly incorrectlyModifiableStatic = 7;
+
+    private static readonly incorrectlyModifiableStaticArrow = () => {};
+
+    private static correctlyModifiableStatic = 7;
+
     private readonly correctlyReadonlyInline = 7;
 
     private readonly correctlyReadonlyDelayed;
@@ -7,32 +15,81 @@ class SampleClass {
 
     private readonly incorrectlyModifiableDelayed;
 
-    private intentionallyModifiableInline = 7;
+    private correctlyModifiableInline = 7;
 
-    private intentionallyModifiableDelayed;
+    private correctlyModifiableDelayed;
+
+    private readonly childClassExpressionModifiable = 7;
+
+    private correctlyModifiableWithinConstructor;
+
+    private correctlyModifiablePostDecremented;
+
+    private correctlyModifiablePostIncremented;
+
+    private correctlyModifiablePreDecremented;
+
+    private correctlyModifiablePreIncremented;
+
+    private readonly overlappingClassVariable = 7;
 
     protected protectedModifiable = 7;
 
     protected publicModifiable = 7;
 
-    public constructor() {
+    public constructor(
+        private readonly correctlyReadonlyParameter: number = 7,
+        private readonly incorrectlyModifiableParameter: number = 7,
+        private correctlyModifiableParameter: number = 7
+    ) {
         this.correctlyReadonlyDelayed = 7;
         this.incorrectlyModifiableDelayed = 7;
+        this.incorrectlyModifiableParameter = 7;
+
+        (() => {
+            this.correctlyModifiableWithinConstructor = 7;
+        })();
+
+        SampleClass.correctlyModifiableStatic += 1;
     }
 
     public mutate() {
-        this.intentionallyModifiableDelayed = 7;
-        this.intentionallyModifiableInline = 7;
+        this.correctlyModifiableDelayed = 7;
+        this.correctlyModifiableInline = 7;
         this.correctlyModifiableMember = () => {};
+        this.correctlyModifiableParameter = 7;
+        this.correctlyModifiablePostDecremented--;
+        this.correctlyModifiablePostIncremented++;
+        --this.correctlyModifiablePreDecremented;
+        ++this.correctlyModifiablePreIncremented;
     }
 
     public createConfusingChildClass() {
         return class {
-            private intentionallyModifiableInline = 7;
+            private correctlyModifiableInline = 7;
+
+            private readonly incorrectlyModifiableInline = 7;
+
+            private readonly incorrectlyUniqueModifiableInline = 7;
+
+            private childClassExpressionModifiable = 7;
+
+            mutate() {
+                this.correctlyModifiableInline = 7;
+                this.childClassExpressionModifiable = 7;
+            }
         }
+    }
+
+    public workWithSimilarClass(other: SimilarClass) {
+        other.overlappingClassVariable = 7;
     }
 
     private readonly incorrectlyModifiableMember = () => { };
 
     private correctlyModifiableMember = () => { };
+}
+
+class SimilarClass {
+    public overlappingClassVariable = 7;
 }
