@@ -19,6 +19,8 @@ class SampleClass {
 
     private correctlyModifiableDelayed;
 
+    private correctlyModifiableDeleted = 7;
+
     private readonly childClassExpressionModifiable = 7;
 
     private correctlyModifiableWithinConstructor;
@@ -58,6 +60,9 @@ class SampleClass {
         this.correctlyModifiableInline = 7;
         this.correctlyModifiableMember = () => {};
         this.correctlyModifiableParameter = 7;
+
+        delete this.correctlyModifiableDeleted;
+
         this.correctlyModifiablePostDecremented--;
         this.correctlyModifiablePostIncremented++;
         --this.correctlyModifiablePreDecremented;

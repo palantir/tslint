@@ -23,6 +23,8 @@ class SampleClass {
 
     private correctlyModifiableDelayed;
 
+    private correctlyModifiableDeleted = 7;
+
     private childClassExpressionModifiable = 7;
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'childClassExpressionModifiable' is never reassigned; mark it as 'readonly'.]
 
@@ -65,6 +67,9 @@ class SampleClass {
         this.correctlyModifiableInline = 7;
         this.correctlyModifiableMember = () => {};
         this.correctlyModifiableParameter = 7;
+
+        delete this.correctlyModifiableDeleted;
+
         this.correctlyModifiablePostDecremented--;
         this.correctlyModifiablePostIncremented++;
         --this.correctlyModifiablePreDecremented;

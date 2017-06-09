@@ -149,7 +149,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 break;
 
             case ts.SyntaxKind.DeleteExpression:
-                this.handleParentDeleteExpression(node);
+                this.handleDeleteExpression(node);
         }
 
         ts.forEachChild(node, this.visitNode);
@@ -161,7 +161,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private handleParentDeleteExpression(node: ts.PropertyAccessExpression) {
+    private handleDeleteExpression(node: ts.PropertyAccessExpression) {
         if (this.scope !== undefined) {
             this.scope.addVariableModification(node);
         }
