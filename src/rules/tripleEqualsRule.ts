@@ -75,16 +75,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
                  node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
                 !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
-                let fail: string;
-                let fix: Lint.Replacement;
-                if (node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken) {
-                    fail = Rule.EQ_FAILURE_STRING;
-                    fix = Lint.Replacement.replaceNode(node.operatorToken, "===");
-                } else {
-                    fail = Rule.NEQ_FAILURE_STRING;
-                    fix = Lint.Replacement.replaceNode(node.operatorToken, "!==");
-                }
-                ctx.addFailureAtNode(node.operatorToken, fail, [fix]);
+                const failure = node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                    ? Rule.EQ_FAILURE_STRING : Rule.NEQ_FAILURE_STRING;
+                ctx.addFailureAtNode(node.operatorToken, failure, [
+                    Lint.Replacement.appendText(node.operatorToken.getEnd(), "="),
+                ]);
             }
         }
         return ts.forEachChild(node, cb);
