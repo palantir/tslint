@@ -205,7 +205,7 @@ export class Replacement {
 }
 
 export class RuleFailurePosition {
-    constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
+    constructor(private readonly position: number, private readonly lineAndCharacter: ts.LineAndCharacter) {
     }
 
     public getPosition() {
@@ -244,12 +244,12 @@ export class RuleFailure {
     private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
-    constructor(private sourceFile: ts.SourceFile,
+    constructor(private readonly sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                private failure: string,
-                private ruleName: string,
-                private fix?: Fix) {
+                private readonly failure: string,
+                private readonly ruleName: string,
+                private readonly fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);

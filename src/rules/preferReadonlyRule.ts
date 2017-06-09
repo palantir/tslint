@@ -76,10 +76,6 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 this.handleConstructor(node as ts.ConstructorDeclaration);
                 break;
 
-            case ts.SyntaxKind.Parameter:
-                this.handleParameterDeclaration(node as ts.ParameterDeclaration);
-                break;
-
             case ts.SyntaxKind.PostfixUnaryExpression:
             case ts.SyntaxKind.PrefixUnaryExpression:
                 this.handlePostfixOrPrefixUnaryExpression(node as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
@@ -120,13 +116,15 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
 
     private handleConstructor(node: ts.ConstructorDeclaration) {
         this.scope!.enterConstructor();
+
+        for (const parameter of node.parameters) {
+            if (utils.isModfierFlagSet(parameter, ts.ModifierFlags.Private)) {
+                this.scope!.addDeclaredVariable(parameter);
+            }
+        }
+
         ts.forEachChild(node, this.visitNode);
         this.scope!.exitConstructor();
-    }
-
-    private handleParameterDeclaration(node: ts.ParameterDeclaration) {
-        this.scope!.addDeclaredVariable(node);
-        ts.forEachChild(node, this.visitNode);
     }
 
     private handlePostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {

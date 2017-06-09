@@ -9,6 +9,8 @@ class SampleClass {
 
     private static correctlyModifiableStatic = 7;
 
+    private static correctlyModifiableByParameterProperty = 7;
+
     private readonly correctlyReadonlyInline = 7;
 
     private readonly correctlyReadonlyDelayed;
@@ -49,7 +51,10 @@ class SampleClass {
         private readonly correctlyReadonlyParameter: number = 7,
         private incorrectlyModifiableParameter: number = 7,
                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiableParameter' is never reassigned; mark it as 'readonly'.]
-        private correctlyModifiableParameter: number = 7
+        private correctlyModifiableParameter: number = 7,
+        public correctlyModifiablePublicParameter: number = (() => {
+            return SampleClass.correctlyModifiableByParameterProperty = 7;
+        })();
     ) {
         this.correctlyReadonlyDelayed = 7;
         this.incorrectlyModifiableDelayed = 7;
