@@ -18,10 +18,16 @@
 import * as fs from "fs";
 import * as optimist from "optimist";
 
+import { findConfiguration } from "./configuration";
 import { IRunnerOptions, Runner } from "./runner";
+
+const configuration = findConfiguration(optimist.argv.c || optimist.argv.config, __filename).results;
+
+const linterOptions = configuration ? configuration.linterOptions : undefined;
 
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
+    .default(linterOptions || {})
     .check((argv: any) => {
         // at least one of file, help, version, project or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {

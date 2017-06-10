@@ -122,6 +122,36 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    describe("Config with excluded files", () => {
+        it("exits with code 1 if linter options doesn't exclude file with lint errors", (done) => {
+            const tempFile = createTempFile("included.ts");
+            fs.writeFileSync(tempFile, "console.log(\"missing semi-colon at end of line\")", "utf8");
+            execCli(["-c", "./test/config/tslint-exclude.json", tempFile], (err) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+                done();
+            });
+        });
+
+        it("exits with code 0 if linter options exclude one file with lint errors", (done) => {
+            const tempFile = createTempFile("excluded.ts");
+            fs.writeFileSync(tempFile, "console.log(\"missing semi-colon at end of line\")", "utf8");
+            execCli(["-c", "./test/config/tslint-exclude-one.json", tempFile], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+
+        it("exits with code 0 if linter options excludes many files with lint errors", (done) => {
+            const tempFiles = [1, 2].map((x) => createTempFile(`excluded${x}.ts`));
+            tempFiles.forEach((f) => fs.writeFileSync(f, "console.log(\"missing semi-colon at end of line\")", "utf8"));
+            execCli(["-c", "./test/config/tslint-exclude-many.json", ...tempFiles], (err) => {
+                assert.isNull(err, "process should exit without an error");
+                done();
+            });
+        });
+    });
+
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
             const tempFile = createTempFile("ts");
@@ -251,7 +281,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("exits with code 1 if --project is not passed", (done) => {
             execCli(["--type-check"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
+                assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
             });
         });

@@ -29,6 +29,7 @@ export interface IConfigurationFile {
     jsRules: Map<string, Partial<IOptions>>;
     linterOptions?: {
         typeCheck?: boolean,
+        exclude?: string | string[],
     };
     rulesDirectory: string[];
     rules: Map<string, Partial<IOptions>>;
