@@ -17,8 +17,8 @@
 
 import * as ts from "typescript";
 
-import {AbstractRule} from "./abstractRule";
-import {ITypedRule, RuleFailure} from "./rule";
+import { AbstractRule } from "./abstractRule";
+import { ITypedRule, RuleFailure } from "./rule";
 
 export abstract class TypedRule extends AbstractRule implements ITypedRule {
 

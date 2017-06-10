@@ -150,21 +150,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                             namedBindings.elements.forEach((element, idx, arr) => {
                                 const internalName = element.name;
                                 if (internalName !== undefined) {
-                                    if (arr.length === 1) {
+                                    if (idx === arr.length - 1) {
+                                        const token = namedBindings.getLastToken();
+                                        checkForTrailingWhitespace(token.getFullStart());
+                                    }
+                                    if (idx === 0) {
                                         const startPos = internalName.getStart() - 1;
-                                        if (startPos !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(startPos))) {
-                                            addMissingWhitespaceErrorAt(startPos + 1);
-                                        }
-                                        checkForTrailingWhitespace(internalName.getEnd());
-                                    } else {
-                                        if (idx === arr.length - 1) {
-                                            checkForTrailingWhitespace(internalName.getEnd());
-                                        } else if (idx === 0) {
-                                            const startPos = internalName.getStart() - 1;
-                                            if (startPos !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(startPos))) {
-                                                addMissingWhitespaceErrorAt(startPos + 1);
-                                            }
-                                        }
+                                        checkForTrailingWhitespace(startPos, startPos + 1);
                                     }
                                 }
                             });
@@ -273,9 +265,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
         checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
     }
 
-    function checkForTrailingWhitespace(position: number): void {
+    function checkForTrailingWhitespace(position: number, whiteSpacePos: number = position): void {
         if (position !== sourceFile.end && !ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(position))) {
-            addMissingWhitespaceErrorAt(position);
+            addMissingWhitespaceErrorAt(whiteSpacePos);
         }
     }
 

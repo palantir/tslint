@@ -65,6 +65,11 @@ import { importC } from "libC";
 import moduleD, { importD } from "libD";
 import { importD, importE } from "libD";
 
+import {
+  importA,
+  importB
+} from "libC";
+
 export default 123;
 
 const D = 123;
