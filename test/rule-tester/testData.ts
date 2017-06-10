@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {LintError} from "../../src/test/lintError";
+import { LintError } from "../../src/test/lintError";
 
 /* tslint:disable:object-literal-sort-keys no-consecutive-blank-lines */
 
