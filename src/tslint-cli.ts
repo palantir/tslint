@@ -208,7 +208,6 @@ commander.on("--help", () => {
 
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
 const parsed = commander.parseOptions(process.argv.slice(2));
-
 commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
