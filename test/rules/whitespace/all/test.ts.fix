@@ -61,8 +61,14 @@ var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
 
 import { importA } from "libA";
 import { importB } from "libB";
-import {importC} from "libC";
-import moduleD, {importD} from "libD";
+import { importC } from "libC";
+import moduleD, { importD } from "libD";
+import { importD, importE } from "libD";
+
+import {
+  importA,
+  importB
+} from "libC";
 
 export default 123;
 

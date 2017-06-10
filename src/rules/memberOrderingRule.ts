@@ -19,7 +19,7 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import {flatMap, mapDefined} from "../utils";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";

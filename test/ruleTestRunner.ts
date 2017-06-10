@@ -18,7 +18,7 @@ import * as colors from "colors";
 import * as glob from "glob";
 import * as path from "path";
 
-import {consoleTestResultHandler, runTest} from "../src/test";
+import { consoleTestResultHandler, runTest } from "../src/test";
 
 /* tslint:disable:no-console */
 console.log();
