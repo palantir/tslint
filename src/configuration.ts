@@ -25,7 +25,6 @@ import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { arrayify, objectify, stripComments } from "./utils";
 
 export interface IConfigurationFile {
-    cliOptions: { [index: string]: any };
     extends: string[];
     jsRules: Map<string, Partial<IOptions>>;
     linterOptions?: {
@@ -43,7 +42,6 @@ export interface IConfigurationLoadResult {
 export const CONFIG_FILENAME = "tslint.json";
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
-    cliOptions: {},
     extends: ["tslint:recommended"],
     jsRules: new Map<string, Partial<IOptions>>(),
     rules: new Map<string, Partial<IOptions>>(),
@@ -51,7 +49,6 @@ export const DEFAULT_CONFIG: IConfigurationFile = {
 };
 
 export const EMPTY_CONFIG: IConfigurationFile = {
-    cliOptions: {},
     extends: [],
     jsRules: new Map<string, Partial<IOptions>>(),
     rules: new Map<string, Partial<IOptions>>(),
@@ -219,13 +216,7 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
     const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
 
-    const cliOptions = {
-        ...targetConfig.cliOptions,
-        ...nextConfigSource.cliOptions,
-    };
-
     return {
-        cliOptions,
         extends: [],
         jsRules: combineMaps(targetConfig.jsRules, nextConfigSource.jsRules),
         linterOptions: combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions),
@@ -355,7 +346,6 @@ export function parseConfigFile(configFile: any, configFileDir?: string): IConfi
     }
 
     return {
-        cliOptions: configFile.cliOptions || {},
         extends: arrayify(configFile.extends),
         jsRules,
         linterOptions: configFile.linterOptions || {},

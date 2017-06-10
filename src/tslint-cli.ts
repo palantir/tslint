@@ -18,15 +18,10 @@
 import * as fs from "fs";
 import * as optimist from "optimist";
 
-import { findConfigurationPath, loadConfigurationFromPath } from "./configuration";
 import { IRunnerOptions, Runner } from "./runner";
-
-const configPath = findConfigurationPath(optimist.argv.c || optimist.argv.config, __filename);
-const configuration = loadConfigurationFromPath(configPath);
 
 const processed = optimist
     .usage("Usage: $0 [options] file ...")
-    .default(configuration.cliOptions || {})
     .check((argv: any) => {
         // at least one of file, help, version, project or unqualified argument must be present
         if (!(argv.h || argv.i || argv.test || argv.v || argv.project || argv._.length > 0)) {

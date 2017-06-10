@@ -168,28 +168,6 @@ describe.only("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
-
-        it("merges cli options", () => {
-            const baseConfig = getEmptyConfig();
-            baseConfig.cliOptions.exclude = "src";
-            baseConfig.cliOptions.fix = true;
-
-            const extendingConfig = getEmptyConfig();
-            extendingConfig.cliOptions.exclude = [
-                "lib",
-                "bin",
-            ];
-
-            const expectedConfig = getEmptyConfig();
-            expectedConfig.cliOptions.exclude = [
-                "lib",
-                "bin",
-            ];
-            expectedConfig.cliOptions.fix = true;
-
-            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
-            assertConfigEquals(actualConfig, expectedConfig);
-        });
     });
 
     describe("loadConfigurationFromPath", () => {
@@ -337,7 +315,6 @@ describe.only("Configuration", () => {
 
 function getEmptyConfig(): IConfigurationFile {
     return {
-        cliOptions: {},
         extends: [],
         jsRules: new Map<string, Partial<IOptions>>(),
         linterOptions: {},
