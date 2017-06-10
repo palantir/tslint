@@ -19,6 +19,7 @@ import { Options, run, Status } from "../../src/runner";
 
 const customRulesOptions: Options = {
     config: "./test/config/tslint-custom-rules.json",
+    exclude: [],
     files: ["src/test.ts"],
     rulesDirectory: "./test/files/custom-rules",
 };

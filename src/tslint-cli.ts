@@ -20,8 +20,6 @@
 import commander = require("commander");
 import * as fs from "fs";
 
-import { findConfiguration } from "./configuration";
-
 import { VERSION } from "./linter";
 import { run } from "./runner";
 import { dedent } from "./utils";
@@ -238,20 +236,10 @@ if (argv.out != null) {
     log = console.log;
 }
 
-const configuration = findConfiguration(argv.config !== undefined ? argv.config : null, __filename).results;
-const linterOptions = (configuration !== undefined && configuration.linterOptions !== undefined) ? configuration.linterOptions : {};
-
-let exclude = argv.exclude;
-if (typeof linterOptions.exclude === "string") {
-    exclude = exclude.concat([linterOptions.exclude]);
-} else if (Array.isArray(linterOptions.exclude)) {
-    exclude = exclude.concat(linterOptions.exclude);
-}
-
 // tslint:disable-next-line no-floating-promises
 run({
     config: argv.config,
-    exclude,
+    exclude: argv.exclude,
     files: commander.args,
     fix: argv.fix,
     force: argv.force,

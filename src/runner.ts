@@ -44,7 +44,7 @@ export interface Options {
     /**
      * Exclude globs from path expansion.
      */
-    exclude?: string | string[];
+    exclude: string[];
 
     /**
      * File paths to lint.
@@ -147,6 +147,15 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 
     if (options.config && !fs.existsSync(options.config)) {
         throw new FatalError(`Invalid option for configuration: ${options.config}`);
+    }
+
+    const configuration = findConfiguration(options.config !== undefined ? options.config : null, __filename).results;
+    const linterOptions = (configuration !== undefined && configuration.linterOptions !== undefined) ? configuration.linterOptions : {};
+
+    if (typeof linterOptions.exclude === "string") {
+        options.exclude.push(linterOptions.exclude);
+    } else if (Array.isArray(linterOptions.exclude)) {
+        options.exclude = options.exclude.concat(linterOptions.exclude);
     }
 
     const { output, errorCount } = await runLinter(options, logger);
