@@ -68,7 +68,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const x = program.getCompilerOptions();
-        if (x.noUnusedLocals === true && x.noUnusedParameters === true) {
+        if (x.noUnusedLocals && x.noUnusedParameters) {
             console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
@@ -117,7 +117,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
-            const importName = findImport(diag.start!, sourceFile);
+            const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
                 if (isImportUsed(importName, sourceFile, checker)) {
                     continue;
@@ -138,7 +138,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start!, diag.length!, failure);
+        ctx.addFailureAt(diag.start, diag.length, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {

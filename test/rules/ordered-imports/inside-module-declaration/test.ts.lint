@@ -1,0 +1,7 @@
+declare module "foo" {
+    import y from "y";
+    import x from "x";
+    ~~~~~~~~~~~~~~~~~~ [0]
+}
+
+[0]: Import sources within a group must be alphabetized.

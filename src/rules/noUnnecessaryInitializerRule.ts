@@ -71,7 +71,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                         }
                     }
                 });
-                break;
             }
         }
         ts.forEachChild(node, cb);

@@ -105,6 +105,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
 function increasesComplexity(node: ts.Node): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.CaseClause:
+            return (node as ts.CaseClause).statements.length > 0;
         case ts.SyntaxKind.CatchClause:
         case ts.SyntaxKind.ConditionalExpression:
         case ts.SyntaxKind.DoStatement:

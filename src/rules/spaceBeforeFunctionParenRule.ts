@@ -84,20 +84,27 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         const option = getOption(node, options);
         if (option !== undefined) {
-            const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken)!;
-            const hasSpace = ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(openParen.end - 2));
-
-            if (hasSpace && option === "never") {
-                const pos = openParen.getStart() - 1;
-                ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
-            } else if (!hasSpace && option === "always") {
-                const pos = openParen.getStart();
-                ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
-            }
+            check(node, option);
         }
 
         ts.forEachChild(node, cb);
     });
+
+    function check(node: ts.Node, option: "always" | "never"): void {
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        // openParen may be missing for an async arrow function `async x => ...`.
+        if (openParen === undefined) { return; }
+
+        const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
+
+        if (hasSpace && option === "never") {
+            const pos = openParen.getStart() - 1;
+            ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
+        } else if (!hasSpace && option === "always") {
+            const pos = openParen.getStart();
+            ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
+        }
+    }
 }
 
 function getOption(node: ts.Node, options: Options): Option | undefined {

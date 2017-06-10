@@ -87,7 +87,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const options = parseOptions(this.ruleArguments, program.getCompilerOptions().strictNullChecks === true);
+        const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
         return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
     }
 }
@@ -166,7 +166,6 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 if (condition !== undefined) {
                     checkExpression(condition, node as ts.ForStatement);
                 }
-                break;
             }
         }
 
@@ -419,7 +418,7 @@ function showLocation(n: Location): string {
         case ts.SyntaxKind.DoStatement:
             return "'do-while' condition";
         case ts.SyntaxKind.BinaryExpression:
-            return `operand for the '${binaryBooleanExpressionKind(n as ts.BinaryExpression)}' operator`;
+            return `operand for the '${binaryBooleanExpressionKind(n)}' operator`;
     }
 }
 

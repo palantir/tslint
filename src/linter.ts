@@ -30,7 +30,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { isError, showWarningOnce } from "./error";
+import { FatalError, isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IFormatter } from "./language/formatter/formatter";
@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.3.0";
+    public static VERSION = "5.4.3";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -106,6 +106,7 @@ class Linter {
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map((rule) => {
+            // tslint:disable-next-line no-unnecessary-type-assertion
             return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
         }));
 
@@ -199,10 +200,10 @@ class Linter {
                 return rule.apply(sourceFile);
             }
         } catch (error) {
-            if (isError(error)) {
-                showWarningOnce(`Warning: ${error.message}`);
+            if (isError(error) && error.stack !== undefined) {
+                showWarningOnce(error.stack);
             } else {
-                console.warn(`Warning: ${error}`);
+                showWarningOnce(String(error));
             }
             return [];
         }
@@ -220,9 +221,9 @@ class Linter {
             const sourceFile = this.program.getSourceFile(fileName);
             if (sourceFile === undefined) {
                 const INVALID_SOURCE_ERROR = dedent`
-                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .js or .jsx extension.
+                    Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .d.ts, .js or .jsx extension.
                 `;
-                throw new Error(INVALID_SOURCE_ERROR);
+                throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
         } else {

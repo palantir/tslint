@@ -1,0 +1,45 @@
+"red" !== x;
+~~~~~~~~~~~ [0]
+
+true === x;
+~~~~~~~~~~ [0]
+
+false === x;
+~~~~~~~~~~~ [0]
+
+null == x;
+~~~~~~~~~ [0]
+
+undefined != x;
+~~~~~~~~~~~~~~ [0]
+
+5 < x;
+~~~~~ [0]
+
+-1 + x;
+~~~~~~ [0]
+
+(-1) + x;
+~~~~~~~~ [0]
+
+// Allows string literal left hand side.
+"foo" + x;
+
+// Allows certain ordered operators.
+1 - x;
+1 / x;
+1 % x;
+1 << x;
+1 >> x;
+1 >>> x;
+2 ** x;
+"key" in x;
+"foo", x;
+
+// Allows literals on both sides.
+1 + 1;
+1 + 1 + 1;
+1 + x + 1;
+~~~~~ [0]
+
+[0]: Literal expression should be on the right-hand side of a binary expression.

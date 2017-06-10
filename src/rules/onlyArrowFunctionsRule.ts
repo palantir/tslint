@@ -100,7 +100,7 @@ function functionIsExempt(node: ts.FunctionLikeDeclaration): boolean {
 function hasThisParameter(node: ts.FunctionLikeDeclaration): boolean {
     const first = node.parameters[0];
     return first !== undefined && first.name.kind === ts.SyntaxKind.Identifier &&
-        (first.name as ts.Identifier).originalKeywordKind === ts.SyntaxKind.ThisKeyword;
+        first.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword;
 }
 
 function usesThisInBody(node: ts.Node): boolean {

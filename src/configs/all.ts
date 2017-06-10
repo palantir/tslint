@@ -165,6 +165,7 @@ export const rules = {
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
     "arrow-return-shorthand": [true, "multiline"],
+    "binary-expression-operand-order": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
@@ -228,6 +229,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "switch-final-break": true,
     "type-literal-delimiter": true,
     "variable-name": [
         true,
