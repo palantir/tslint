@@ -1,8 +1,5 @@
 {
   "rules": {
     "only-arrow-functions": [true, "allow-declarations"]
-  },
-  "jsRules": {
-    "only-arrow-functions": [true, "allow-declarations"]
   }
 }

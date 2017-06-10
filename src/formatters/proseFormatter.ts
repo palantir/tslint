@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,15 +30,16 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[], fixes?: RuleFailure[]): string {
-        if (failures.length === 0 && (!fixes || fixes.length === 0)) {
+        if (failures.length === 0 && (fixes === undefined || fixes.length === 0)) {
             return "\n";
         }
 
         const fixLines: string[] = [];
-        if (fixes) {
+        if (fixes !== undefined) {
             const perFileFixes = new Map<string, number>();
             for (const fix of fixes) {
-                perFileFixes.set(fix.getFileName(), (perFileFixes.get(fix.getFileName()) || 0) + 1);
+                const prevFixes = perFileFixes.get(fix.getFileName());
+                perFileFixes.set(fix.getFileName(), (prevFixes !== undefined ? prevFixes : 0) + 1);
             }
 
             perFileFixes.forEach((fixCount, fixedFile) => {
@@ -57,6 +58,6 @@ export class Formatter extends AbstractFormatter {
             return `${failure.getRuleSeverity().toUpperCase()}: ${fileName}${positionTuple}: ${failureString}`;
         });
 
-        return fixLines.concat(errorLines).join("\n") + "\n";
+        return `${fixLines.concat(errorLines).join("\n")}\n`;
     }
 }

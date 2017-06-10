@@ -24,10 +24,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "eofline",
         description: "Ensures the file ends with a newline.",
+        descriptionDetails: "Fix for single-line files is not supported.",
         rationale: "It is a [standard convention](http://stackoverflow.com/q/729692/3124288) to end files with a newline.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -41,9 +43,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
-        return this.filterFailures([
-            new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING,
-              this.getOptions().ruleName),
-        ]);
+        let fix: Lint.Fix | undefined;
+        const lines = sourceFile.getLineStarts();
+        if (lines.length > 1) {
+            fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
+        }
+
+        return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix)];
     }
 }

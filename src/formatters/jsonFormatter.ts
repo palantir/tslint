@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -36,14 +36,9 @@ export class Formatter extends AbstractFormatter {
                 },
                 "failure": "Missing semicolon",
                 "fix": {
-                    "innerRuleName": "semicolon",
-                    "innerReplacements": [
-                        {
-                            "innerStart": 13,
-                            "innerLength": 0,
-                            "innerText": ";"
-                        }
-                    ]
+                    "innerStart": 13,
+                    "innerLength": 0,
+                    "innerText": ";"
                 },
                 "name": "myFile.ts",
                 "ruleName": "semicolon",

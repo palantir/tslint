@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as fs from "fs";
+import * as path from "path";
 
 import {
     convertRuleOptions,
     extendConfigurationFile,
+    findConfigurationPath,
     IConfigurationFile,
     loadConfigurationFromPath,
     parseConfigFile,
+    RawConfigFile,
 } from "../src/configuration";
-import { IOptions } from "./../src/language/rule/rule";
+import { IOptions, RuleSeverity } from "./../src/language/rule/rule";
 import { createTempFile } from "./utils";
 
-describe.only("Configuration", () => {
+describe("Configuration", () => {
     describe("parseConfigFile", () => {
         it("parses empty config", () => {
             const rawConfig = {
@@ -45,7 +49,7 @@ describe.only("Configuration", () => {
         });
 
         it("parses different ways of storing options", () => {
-            const rawConfig = {
+            const rawConfig: RawConfigFile = {
                 rules: {
                     a: true,
                     b: [true],
@@ -65,7 +69,7 @@ describe.only("Configuration", () => {
                     p: null,
                     q: {},
                     r: "garbage",
-                    s: { junk: 1 },
+                    s: { junk: 1 } as any,
                 },
             };
             const expected = getEmptyConfig();
@@ -80,26 +84,47 @@ describe.only("Configuration", () => {
             expected.rules.set("i", { ruleArguments: undefined, ruleSeverity: "warning" });
             expected.rules.set("j", { ruleArguments: undefined, ruleSeverity: "error" });
             expected.rules.set("k", { ruleArguments: undefined, ruleSeverity: "off" });
-            expected.rules.set("l", { ruleArguments: [1], ruleSeverity: undefined });
-            expected.rules.set("m", { ruleArguments: [2], ruleSeverity: undefined });
-            expected.rules.set("n", { ruleArguments: [{ no: false }], ruleSeverity: undefined });
+            expected.rules.set("l", { ruleArguments: [1], ruleSeverity: "error" });
+            expected.rules.set("m", { ruleArguments: [2], ruleSeverity: "error" });
+            expected.rules.set("n", { ruleArguments: [{ no: false }], ruleSeverity: "error" });
             expected.rules.set("o", { ruleArguments: [1], ruleSeverity: "warning" });
             expected.rules.set("p", { ruleArguments: [], ruleSeverity: "off" });
-            expected.rules.set("q", { ruleArguments: undefined, ruleSeverity: undefined });
-            expected.rules.set("r", { ruleArguments: undefined, ruleSeverity: "off" });
-            expected.rules.set("s", { ruleArguments: undefined, ruleSeverity: undefined });
+            expected.rules.set("q", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("r", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("s", { ruleArguments: undefined, ruleSeverity: "error" });
             assertConfigEquals(parseConfigFile(rawConfig), expected);
         });
 
         it("fills in default values", () => {
             const initial = getEmptyConfig();
             initial.rules.set("s", { ruleArguments: undefined, ruleSeverity: undefined });
-            assert.deepEqual(convertRuleOptions(initial.rules)[0], {
+            assert.deepEqual<IOptions>(convertRuleOptions(initial.rules)[0], {
                 disabledIntervals: [],
                 ruleArguments: [],
                 ruleName: "s",
                 ruleSeverity: "error",
             });
+        });
+    });
+
+    describe("defaultSeverity", () => {
+        it("uses defaultSeverity if severity is default", () => {
+            const rawConfig: RawConfigFile = {
+                defaultSeverity: "warning",
+                rules: {
+                    a: { severity: "error" },
+                    b: { severity: "warning" },
+                    c: { severity: "off" },
+                    d: { severity: "default" },
+                },
+            };
+
+            const expected = getEmptyConfig();
+            expected.rules.set("a", { ruleArguments: undefined, ruleSeverity: "error" });
+            expected.rules.set("b", { ruleArguments: undefined, ruleSeverity: "warning" });
+            expected.rules.set("c", { ruleArguments: undefined, ruleSeverity: "off" });
+            expected.rules.set("d", { ruleArguments: undefined, ruleSeverity: "warning" });
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
         });
     });
 
@@ -196,14 +221,43 @@ describe.only("Configuration", () => {
         });
     });
 
+    describe("findConfigurationPath", () => {
+        it("finds the closest tslint.json", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/contains-config"),
+                path.resolve("test/files/config-findup/contains-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/no-config"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+
+            // gulp-tslint uses a path including the filename
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+        });
+    });
+
     describe("loadConfigurationFromPath", () => {
         it("extends with relative path", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
             assert.isArray(config.rulesDirectory);
-            assert.equal("error", config.rules.get("no-fail")!.ruleSeverity, "did not pick up 'no-fail' in base config");
-            assert.equal("off", config.rules.get("always-fail")!.ruleSeverity, "did not set 'always-fail' in top config");
-            assert.equal("error", config.jsRules.get("no-fail")!.ruleSeverity);
-            assert.equal("off", config.jsRules.get("always-fail")!.ruleSeverity);
+            assert.equal<RuleSeverity | undefined>(
+                "error",
+                config.rules.get("no-fail")!.ruleSeverity,
+                "did not pick up 'no-fail' in base config");
+            assert.equal<RuleSeverity | undefined>(
+                "off",
+                config.rules.get("always-fail")!.ruleSeverity,
+                "did not set 'always-fail' in top config");
+            assert.equal<RuleSeverity | undefined>("error", config.jsRules.get("no-fail")!.ruleSeverity);
+            assert.equal<RuleSeverity | undefined>("off", config.jsRules.get("always-fail")!.ruleSeverity);
         });
 
         it("extends with package", () => {
@@ -251,9 +305,19 @@ describe.only("Configuration", () => {
         it("extends with builtin", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-builtin.json");
             assert.isUndefined(config.jsRules.get("no-var-keyword"));
-            assert.equal("off", config.jsRules.get("no-eval")!.ruleSeverity);
-            assert.equal("error", config.rules.get("no-var-keyword")!.ruleSeverity);
-            assert.equal("off", config.rules.get("no-eval")!.ruleSeverity);
+            assert.equal<RuleSeverity | undefined>("off", config.jsRules.get("no-eval")!.ruleSeverity);
+            assert.equal<RuleSeverity | undefined>("error", config.rules.get("no-var-keyword")!.ruleSeverity);
+            assert.equal<RuleSeverity | undefined>("off", config.rules.get("no-eval")!.ruleSeverity);
+        });
+
+        it("resolve rule directory from package", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package.json");
+            assert.deepEqual(config.rulesDirectory, [path.join(process.cwd(), "test/config/node_modules/tslint-test-custom-rules/rules")]);
+        });
+
+        it("resolve rule directory from package fallback", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-custom-rules-with-package-fallback.json");
+            assert.deepEqual(config.rulesDirectory, [path.join(process.cwd(), "test/config/relative-rules-directory")]);
         });
 
         describe("with config not relative to tslint", () => {
@@ -283,8 +347,8 @@ describe.only("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
 
             const expectedConfig = getEmptyConfig();
             expectedConfig.rules.set("always-fail", { ruleSeverity: "off" });
@@ -327,8 +391,8 @@ describe.only("Configuration", () => {
 
         it("can load a built-in configuration", () => {
             const config = loadConfigurationFromPath("tslint:recommended");
-            assert.strictEqual("error", config.jsRules.get("no-eval")!.ruleSeverity);
-            assert.strictEqual("error", config.rules.get("no-eval")!.ruleSeverity);
+            assert.strictEqual<RuleSeverity | undefined>("error", config.jsRules.get("no-eval")!.ruleSeverity);
+            assert.strictEqual<RuleSeverity | undefined>("error", config.rules.get("no-eval")!.ruleSeverity);
         });
 
         it("throws on an invalid built-in configuration path", () => {
@@ -363,8 +427,10 @@ function demap<T>(map: Map<string, T>) {
 // this is needed since `assertConfigEquals` doesn't go into Map object
 function assertConfigEquals(actual: any, expected: any) {
     assert.deepEqual(actual, expected);
+    // tslint:disable no-unsafe-any strict-boolean-expressions
     if (actual && (actual.jsRules || actual.rules)) {
         assert.deepEqual(demap(actual.jsRules), demap(expected.jsRules));
         assert.deepEqual(demap(actual.rules), demap(expected.rules));
     }
+    // tslint:enable no-unsafe-any
 }

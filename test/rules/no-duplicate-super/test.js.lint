@@ -1,8 +1,0 @@
-class {
-    constructor() {
-        super();
-        ~~~~~~~~
-        super();
-~~~~~~~~~~~~~~~ [Multiple calls to 'super()' found. It must be called only once.]
-    }
-}

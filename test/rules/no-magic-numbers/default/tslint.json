@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-magic-numbers": true
-  },
-  "jsRules": {
-    "no-magic-numbers": true
   }
 }

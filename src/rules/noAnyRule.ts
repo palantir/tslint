@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -39,16 +39,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         "or suppress this occurrence.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoAnyWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoAnyWalker extends Lint.RuleWalker {
-    public visitAnyKeyword(node: ts.Node) {
-        const fix = this.createFix(
-            this.createReplacement(node.getStart(), node.getWidth(), "{}"),
-        );
-        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
-        super.visitAnyKeyword(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.AnyKeyword) {
+            const start = node.end - 3;
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING, new Lint.Replacement(start, 3, "{}"));
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

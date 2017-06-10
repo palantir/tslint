@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_CHECK_PARAMETERS = "check-parameters";
+
+interface Options {
+    parameters: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,81 +37,68 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             A variable can be reassigned if necessary -
             there's no good reason to have a duplicate variable declaration.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a paramter.`,
+        options: {
+            type: "string",
+            enum: [OPTION_CHECK_PARAMETERS],
+        },
+        optionExamples: [
+            true,
+            [true, OPTION_CHECK_PARAMETERS],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING(name: string): string {
         return `Duplicate variable: '${name}'`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
+            parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== - 1,
+        }));
     }
 }
 
-class NoDuplicateVariableWalker extends Lint.BlockScopeAwareRuleWalker<{}, ScopeInfo> {
-    public createScope(): any {
-        return null;
+class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
+    private scope: Set<string>;
+    public walk(sourceFile: ts.SourceFile) {
+        this.scope = new Set();
+        const cb = (node: ts.Node): void => {
+            if (utils.isFunctionScopeBoundary(node)) {
+                const oldScope = this.scope;
+                this.scope = new Set();
+                ts.forEachChild(node, cb);
+                this.scope = oldScope;
+                return;
+            }
+            if (this.options.parameters && utils.isParameterDeclaration(node)) {
+                this.handleBindingName(node.name, false);
+            } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
+                for (const variable of node.declarations) {
+                    this.handleBindingName(variable.name, true);
+                }
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public createBlockScope(): ScopeInfo {
-        return new ScopeInfo();
-    }
-
-    public visitBindingElement(node: ts.BindingElement) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-        const isBlockScoped = Lint.isBlockScopedBindingElement(node);
-
-        // duplicate-variable errors for block-scoped vars are caught by tsc
-        if (isSingleVariable && !isBlockScoped) {
-            this.handleSingleVariableIdentifier(node.name as ts.Identifier);
-        }
-
-        super.visitBindingElement(node);
-    }
-
-    public visitCatchClause(node: ts.CatchClause) {
-        // don't visit the catch clause variable declaration, just visit the block
-        // the catch clause variable declaration has its own special scoping rules
-        this.visitBlock(node.block);
-    }
-
-    public visitMethodSignature(_node: ts.SignatureDeclaration) {
-        // don't call super, we don't want to walk method signatures either
-    }
-
-    public visitTypeLiteral(_node: ts.TypeLiteralNode) {
-        // don't call super, we don't want to walk the inside of type nodes
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const isSingleVariable = node.name.kind === ts.SyntaxKind.Identifier;
-
-        // destructuring is handled by this.visitBindingElement()
-        if (isSingleVariable && !Lint.isBlockScopedVariable(node)) {
-            this.handleSingleVariableIdentifier(node.name as ts.Identifier);
-        }
-
-        super.visitVariableDeclaration(node);
-    }
-
-    private handleSingleVariableIdentifier(variableIdentifier: ts.Identifier) {
-        const variableName = variableIdentifier.text;
-        const currentBlockScope = this.getCurrentBlockScope();
-
-        if (currentBlockScope.varNames.indexOf(variableName) >= 0) {
-            this.addFailureAtNode(variableIdentifier, Rule.FAILURE_STRING_FACTORY(variableIdentifier.text));
+    private handleBindingName(name: ts.BindingName, check: boolean) {
+        if (name.kind === ts.SyntaxKind.Identifier) {
+            if (check && this.scope.has(name.text)) {
+                this.addFailureAtNode(name, Rule.FAILURE_STRING(name.text));
+            } else {
+                this.scope.add(name.text);
+            }
         } else {
-            currentBlockScope.varNames.push(variableName);
+            for (const e of name.elements) {
+                if (e.kind !== ts.SyntaxKind.OmittedExpression) {
+                    this.handleBindingName(e.name, check);
+                }
+            }
         }
     }
-}
-
-class ScopeInfo {
-    public varNames: string[] = [];
 }

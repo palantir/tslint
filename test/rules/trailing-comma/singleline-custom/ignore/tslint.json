@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "trailing-comma": [
+      true,
+      {
+        "singleline": {
+          "arrays": "ignore",
+          "exports": "ignore",
+          "functions": "ignore",
+          "imports": "ignore",
+          "objects": "ignore",
+          "typeLiterals": "ignore"
+        }
+      }
+    ]
+  }
+}

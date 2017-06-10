@@ -92,3 +92,5 @@ class Greeter {
         return str;
     }
 }
+
+undefined;

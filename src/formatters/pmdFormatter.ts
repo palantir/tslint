@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
@@ -51,11 +51,11 @@ export class Formatter extends AbstractFormatter {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const priority = failure.getRuleSeverity() === "warning" ? 4 : 3;
 
-            output += "<file name=\"" + failure.getFileName();
-            output += "\"><violation begincolumn=\"" + (lineAndCharacter.character + 1);
-            output += "\" beginline=\"" + (lineAndCharacter.line + 1);
-            output += "\" priority=\"" + priority + "\"";
-            output += " rule=\"" + failureString + "\"> </violation></file>";
+            output += `<file name="${failure.getFileName()}`;
+            output += `"><violation begincolumn="${lineAndCharacter.character + 1}`;
+            output += `" beginline="${lineAndCharacter.line + 1}`;
+            output += `" priority="${priority}"`;
+            output += ` rule="${failureString}"></violation></file>`;
         }
 
         output += "</pmd>";

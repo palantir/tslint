@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
+
 import * as parse from "../../src/test/parse";
 import * as testData from "./testData";
 

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import { assert } from "chai";
 import * as colors from "colors";
 
 import * as ts from "typescript";
 
-import {IFormatter, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
 describe("CodeFrame Formatter", () => {

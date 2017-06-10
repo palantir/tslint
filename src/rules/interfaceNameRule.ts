@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -37,70 +39,37 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ALWAYS, OPTION_NEVER],
         },
-        optionExamples: [`[true, "${OPTION_ALWAYS}"]`, `[true, "${OPTION_NEVER}"]`],
+        optionExamples: [[true, OPTION_ALWAYS], [true, OPTION_NEVER]],
         type: "style",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "interface name must start with a capitalized I";
-    public static FAILURE_STRING_NO_PREFIX = `interface name must not have an "I" prefix`;
+    public static FAILURE_STRING_NO_PREFIX = 'interface name must not have an "I" prefix';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NameWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, { never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1 });
     }
 }
 
-class NameWalker extends Lint.RuleWalker {
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        const interfaceName = node.name.text;
-
-        const always = this.hasOption(OPTION_ALWAYS) || (this.getOptions() && this.getOptions().length === 0);
-
-        if (always) {
-            if (!this.startsWithI(interfaceName)) {
-                this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
+    const { options: { never } } = ctx;
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (utils.isInterfaceDeclaration(node)) {
+            const { name } = node;
+            if (never && hasPrefixI(name.text)) {
+                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
+            } else if (!never && name.text[0] !== "I") {
+                ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
             }
-        } else if (this.hasOption(OPTION_NEVER)) {
-            if (this.hasPrefixI(interfaceName)) {
-                this.addFailureAtNode(node.name, Rule.FAILURE_STRING_NO_PREFIX);
-            }
+        } else {
+            return ts.forEachChild(node, cb);
         }
+    });
+}
 
-        super.visitInterfaceDeclaration(node);
-    }
-
-    private startsWithI(name: string): boolean {
-        if (name.length <= 0) {
-            return true;
-        }
-
-        const firstCharacter = name.charAt(0);
-        return (firstCharacter === "I");
-    }
-
-    private hasPrefixI(name: string): boolean {
-        if (name.length <= 0) {
-            return true;
-        }
-
-        const firstCharacter = name.charAt(0);
-        if (firstCharacter !== "I") {
-            return false;
-        }
-
-        const secondCharacter = name.charAt(1);
-        if (secondCharacter === "") {
-            return false;
-        } else if (secondCharacter !== secondCharacter.toUpperCase()) {
-            return false;
-        }
-
-        if (name.indexOf("IDB") === 0) {
-            // IndexedDB
-            return false;
-        }
-
-        return true;
-    }
+function hasPrefixI(name: string): boolean {
+    // Allow IndexedDB interfaces
+    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !name.startsWith("IDB");
 }

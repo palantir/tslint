@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
+import { RuleFailure } from "../rule/rule";
 
 export interface IFormatterMetadata {
     /**
@@ -45,6 +45,10 @@ export interface IFormatterMetadata {
 }
 
 export type ConsumerType = "human" | "machine";
+
+export interface FormatterConstructor {
+    new(): IFormatter;
+}
 
 export interface IFormatter {
     /**

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import * as colors from "colors";
@@ -46,11 +46,11 @@ export class Formatter extends AbstractFormatter {
             outputLines.shift();
         }
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
-        if (!failures) {
+        if (failures.length === 0) {
             return [];
         }
         const outputLines: string[] = [];
@@ -83,11 +83,9 @@ export class Formatter extends AbstractFormatter {
             let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            if (failure.getRuleSeverity() === "warning") {
-                positionTuple = colors.blue(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
-            } else {
-                positionTuple = colors.red(failure.getRuleSeverity().toUpperCase() + ": " + positionTuple);
-            }
+            positionTuple = failure.getRuleSeverity() === "warning"
+                ? colors.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
+                : colors.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;

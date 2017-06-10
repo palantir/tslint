@@ -33,21 +33,21 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
-            * \`"check-catch"\` checks that \`catch\` is on the same line as the closing brace for \`try\`.
-            * \`"check-finally"\` checks that \`finally\` is on the same line as the closing brace for \`catch\`.
-            * \`"check-else"\` checks that \`else\` is on the same line as the closing brace for \`if\`.
-            * \`"check-open-brace"\` checks that an open brace falls on the same line as its preceding expression.
-            * \`"check-whitespace"\` checks preceding whitespace for the specified tokens.`,
+            * \`"${OPTION_CATCH}"\` checks that \`catch\` is on the same line as the closing brace for \`try\`.
+            * \`"${OPTION_FINALLY}"\` checks that \`finally\` is on the same line as the closing brace for \`catch\`.
+            * \`"${OPTION_ELSE}"\` checks that \`else\` is on the same line as the closing brace for \`if\`.
+            * \`"${OPTION_BRACE}"\` checks that an open brace falls on the same line as its preceding expression.
+            * \`"${OPTION_WHITESPACE}"\` checks preceding whitespace for the specified tokens.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-catch", "check-finally", "check-else", "check-open-brace", "check-whitespace"],
+                enum: [OPTION_CATCH, OPTION_FINALLY, OPTION_ELSE, OPTION_BRACE, OPTION_WHITESPACE],
             },
             minLength: 0,
             maxLength: 5,
         },
-        optionExamples: ['[true, "check-catch", "check-finally", "check-else"]'],
+        optionExamples: [[true, OPTION_CATCH, OPTION_FINALLY, OPTION_ELSE]],
         type: "style",
         typescriptOnly: false,
     };
@@ -299,7 +299,7 @@ class OneLineWalker extends Lint.RuleWalker {
             failure = Rule.WHITESPACE_FAILURE_STRING;
         }
 
-        if (failure) {
+        if (failure !== undefined) {
             this.addFailureAtNode(openBraceToken, failure);
         }
     }

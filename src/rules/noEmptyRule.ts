@@ -15,9 +15,16 @@
  * limitations under the License.
  */
 
+import { hasModifier, isConstructorDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const ALLOW_EMPTY_CATCH = "allow-empty-catch";
+
+interface Options {
+    allowEmptyCatch: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -26,9 +33,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows empty blocks.",
         descriptionDetails: "Blocks with a comment inside are not considered empty.",
         rationale: "Empty blocks are often indicators of missing code.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: ["true"],
+        optionsDescription: Lint.Utils.dedent`
+            If \`${ALLOW_EMPTY_CATCH}\` is specified, then catch blocks are allowed to be empty.`,
+        options: {
+            type: "string",
+            enum: [ALLOW_EMPTY_CATCH],
+        },
+        optionExamples: [true, [true, ALLOW_EMPTY_CATCH]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -37,44 +48,41 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "block is empty";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BlockWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, {
+            allowEmptyCatch: this.ruleArguments.indexOf(ALLOW_EMPTY_CATCH) !== -1,
+        });
     }
 }
 
-class BlockWalker extends Lint.RuleWalker {
-    public visitBlock(node: ts.Block) {
-        if (node.statements.length === 0 && !isExcludedConstructor(node.parent!)) {
-            const sourceFile = this.getSourceFile();
-            const start = node.getStart(sourceFile);
+function walk(ctx: Lint.WalkContext<Options>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (node.kind === ts.SyntaxKind.Block &&
+            (node as ts.Block).statements.length === 0 &&
+            !isExcluded(node.parent!, ctx.options)) {
+            const start = node.getStart(ctx.sourceFile);
             // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,
             // which can be used to conveniently check for comments between braces
-            if (!Lint.hasCommentAfterPosition(sourceFile.text, start + 1)) {
-                this.addFailureFromStartToEnd(start , node.getEnd(), Rule.FAILURE_STRING);
+            if (Lint.hasCommentAfterPosition(ctx.sourceFile.text, start + 1)) {
+                return;
             }
+            return ctx.addFailure(start , node.end, Rule.FAILURE_STRING);
         }
-
-        super.visitBlock(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
 
-function isExcludedConstructor(node: ts.Node): boolean {
-    if (node.kind === ts.SyntaxKind.Constructor) {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword)) {
+function isExcluded(node: ts.Node, options: Options): boolean {
+    if (options.allowEmptyCatch && node.kind === ts.SyntaxKind.CatchClause) {
+        return true;
+    }
+
+    return isConstructorDeclaration(node) &&
+        (
             /* If constructor is private or protected, the block is allowed to be empty.
                The constructor is there on purpose to disallow instantiation from outside the class */
             /* The public modifier does not serve a purpose here. It can only be used to allow instantiation of a base class where
                the super constructor is protected. But then the block would not be empty, because of the call to super() */
-            return true;
-        }
-        for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
-            if (Lint.hasModifier(parameter.modifiers,
-                                 ts.SyntaxKind.PrivateKeyword,
-                                 ts.SyntaxKind.ProtectedKeyword,
-                                 ts.SyntaxKind.PublicKeyword,
-                                 ts.SyntaxKind.ReadonlyKeyword)) {
-                return true;
-            }
-        }
-    }
-    return false;
+            hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword, ts.SyntaxKind.ProtectedKeyword) ||
+            node.parameters.some(isParameterProperty)
+        );
 }
