@@ -28,7 +28,7 @@ import { dedent } from "./utils";
 
 interface Argv {
     config?: string;
-    exclude?: string;
+    exclude: string[];
     fix?: boolean;
     force?: boolean;
     help?: boolean;
@@ -238,13 +238,20 @@ if (argv.out != null) {
     log = console.log;
 }
 
-const configuration = findConfiguration(argv.config || null, __filename).results;
-const linterOptions = (configuration && configuration.linterOptions) || {};
+const configuration = findConfiguration(argv.config !== undefined ? argv.config : null, __filename).results;
+const linterOptions = (configuration !== undefined && configuration.linterOptions !== undefined) ? configuration.linterOptions : {};
+
+let exclude = argv.exclude;
+if (typeof linterOptions.exclude === "string") {
+    exclude = exclude.concat([linterOptions.exclude]);
+} else if (Array.isArray(linterOptions.exclude)) {
+    exclude = exclude.concat(linterOptions.exclude);
+}
 
 // tslint:disable-next-line no-floating-promises
 run({
     config: argv.config,
-    exclude: argv.exclude || linterOptions.exclude,
+    exclude,
     files: commander.args,
     fix: argv.fix,
     force: argv.force,
