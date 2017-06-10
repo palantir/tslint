@@ -21,7 +21,6 @@ import commander = require("commander");
 import * as fs from "fs";
 
 import { findConfiguration } from "./configuration";
-import { IRunnerOptions, Runner } from "./runner";
 
 import { VERSION } from "./linter";
 import { run } from "./runner";
@@ -52,7 +51,6 @@ interface Option {
     type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
-    default?: string;
 }
 
 const options: Option[] = [
@@ -85,7 +83,6 @@ const options: Option[] = [
             A filename or glob which indicates files to exclude from linting.
             This option can be supplied multiple times if you need multiple
             globs to indicate which files to exclude.`,
-        default: 
     },
     {
         name: "fix",
@@ -214,9 +211,6 @@ commander.on("--help", () => {
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
 const parsed = commander.parseOptions(process.argv.slice(2));
 
-const configuration = findConfiguration(parsed.argv.c || parsed.argv.config, __filename).results;
-const linterOptions = (configuration && configuration.linterOptions) || {};
-
 commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
@@ -243,6 +237,9 @@ if (argv.out != null) {
 } else {
     log = console.log;
 }
+
+const configuration = findConfiguration(argv.config || null, __filename).results;
+const linterOptions = (configuration && configuration.linterOptions) || {};
 
 // tslint:disable-next-line no-floating-promises
 run({
