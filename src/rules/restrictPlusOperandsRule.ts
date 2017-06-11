@@ -63,7 +63,7 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
     } else if (isUnionType(type) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
-    } else if (Lint.isTypeFlagSet(type, (ts.TypeFlags as { EnumLiteral: ts.TypeFlags }).EnumLiteral)) {
+    } else if (Lint.isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         // Compatibility for TypeScript pre-2.4, which used EnumLiteralType instead of LiteralType
         getBaseTypeOfLiteralType((type as any as { baseType: ts.LiteralType }).baseType);
     }
