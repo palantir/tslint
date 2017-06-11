@@ -46,4 +46,25 @@ switch (x) {
     case 0:
 }
 
+outer: while (true) {
+    switch (x) {
+        case 0:
+            x++;
+            break;
+        default:
+            break outer;
+    }
+}
+
+outer2: while (true) {
+    inner: switch (x) {
+        case 0:
+            ++x;
+            break;
+        default:
+            break inner;
+            ~~~~~~~~~~~~ [0]
+    }
+}
+
 [0]: Final clause in 'switch' statement should not end with 'break;'.

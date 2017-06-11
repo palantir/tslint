@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { endsControlFlow, isBlock, isCaseBlock } from "tsutils";
+import { endsControlFlow, isBlock, isBreakStatement, isLabeledStatement, isSwitchStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -58,14 +58,14 @@ interface Options {
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { always } } = ctx;
     ts.forEachChild(sourceFile, function cb(node) {
-        if (isCaseBlock(node)) {
+        if (isSwitchStatement(node)) {
             check(node);
         }
         ts.forEachChild(node, cb);
     });
 
-    function check(node: ts.CaseBlock): void {
-        const clause = last(node.clauses);
+    function check(node: ts.SwitchStatement): void {
+        const clause = last(node.caseBlock.clauses);
         if (clause === undefined) { return; }
 
         if (always) {
@@ -79,7 +79,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         const block = clause.statements[0];
         const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
         const lastStatement = last(statements);
-        if (lastStatement !== undefined && lastStatement.kind === ts.SyntaxKind.BreakStatement) {
+        if (lastStatement !== undefined && isBreakStatement(lastStatement)) {
+            if (lastStatement.label !== undefined) {
+                const parent = node.parent!;
+                if (!isLabeledStatement(parent) || parent.label === lastStatement.label) {
+                    // break jumps somewhere else, don't complain
+                    return;
+                }
+            }
             ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER);
         }
     }
