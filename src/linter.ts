@@ -186,7 +186,7 @@ class Linter {
                 const oldSource = fs.readFileSync(filePath, "utf-8");
                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
             }
-            fs.writeFileSync(filePath, fileNewSource, "utf-8");
+            fs.writeFileSync(filePath, fileNewSource);
         });
 
         return source;
