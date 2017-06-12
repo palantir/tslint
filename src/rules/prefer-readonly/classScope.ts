@@ -19,7 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 const OUTSIDE_CONSTRUCTOR = -1;
-const DIRECTLY_INSIDE_CONSTRUCTOR = OUTSIDE_CONSTRUCTOR + 1;
+const DIRECTLY_INSIDE_CONSTRUCTOR = 0;
 
 export type ParameterOrPropertyDeclaration = ts.ParameterDeclaration | ts.PropertyDeclaration;
 
@@ -98,7 +98,7 @@ export class ClassScope {
     }
 
     public exitNonConstructorScope() {
-        if (this.constructorScopeDepth > DIRECTLY_INSIDE_CONSTRUCTOR) {
+        if (this.constructorScopeDepth !== OUTSIDE_CONSTRUCTOR) {
             this.constructorScopeDepth -= 1;
         }
     }
