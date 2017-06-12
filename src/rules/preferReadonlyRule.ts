@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,10 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
-    private readonly typeChecker: ts.TypeChecker;
     private scope?: ClassScope;
 
-    public constructor(sourceFile: ts.SourceFile, ruleName: string, typeChecker: ts.TypeChecker) {
+    public constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly typeChecker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
-
-        this.typeChecker = typeChecker;
     }
 
     public walk(sourceFile: ts.SourceFile) {
@@ -61,6 +58,10 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private readonly visitNode = (node: ts.Node) => {
+        if (utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+            return;
+        }
+
         switch (node.kind) {
             case ts.SyntaxKind.ArrowFunction:
             case ts.SyntaxKind.FunctionExpression:
@@ -69,7 +70,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
 
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
-                this.handleClassDeclarationOrExpression(node as ts.ClassDeclaration | ts.ClassExpression);
+                this.handleClassDeclarationOrExpression(node as ts.ClassLikeDeclaration);
                 break;
 
             case ts.SyntaxKind.Constructor:
@@ -104,7 +105,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         this.scope.exitNonConstructorScope();
     }
 
-    private handleClassDeclarationOrExpression(node: ts.ClassDeclaration | ts.ClassExpression) {
+    private handleClassDeclarationOrExpression(node: ts.ClassLikeDeclaration) {
         const parentScope = this.scope;
         const childScope = this.scope = new ClassScope(node, this.typeChecker);
 
@@ -118,7 +119,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         this.scope!.enterConstructor();
 
         for (const parameter of node.parameters) {
-            if (utils.isModfierFlagSet(parameter, ts.ModifierFlags.Private)) {
+            if (utils.isModifierFlagSet(parameter, ts.ModifierFlags.Private)) {
                 this.scope!.addDeclaredVariable(parameter);
             }
         }
@@ -128,7 +129,8 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private handlePostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
-        if (this.scope === undefined) {
+        if (this.scope === undefined
+            || (node.operator !== ts.SyntaxKind.PlusPlusToken && node.operator !== ts.SyntaxKind.MinusMinusToken)) {
             return;
         }
 
@@ -172,13 +174,13 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private complainOnNode(node: ParameterOrPropertyDeclaration) {
-        const fix = Lint.Replacement.appendText(node.name.getStart(), "readonly ");
+        const fix = Lint.Replacement.appendText(node.modifiers!.end, " readonly");
 
         this.addFailureAtNode(node.name, this.createFailureString(node), fix);
     }
 
     private createFailureString(node: ParameterOrPropertyDeclaration) {
-        const accessibility = utils.isModfierFlagSet(node, ts.ModifierFlags.Static)
+        const accessibility = utils.isModifierFlagSet(node, ts.ModifierFlags.Static)
             ? "static"
             : "member";
 

@@ -27,6 +27,8 @@ class SampleClass {
 
     private correctlyModifiableWithinConstructor;
 
+    private correctlyModifiableWithinConstructorDeep;
+
     private correctlyModifiablePostDecremented;
 
     private correctlyModifiablePostIncremented;
@@ -55,6 +57,10 @@ class SampleClass {
 
         (() => {
             this.correctlyModifiableWithinConstructor = 7;
+
+            (() => {
+                this.correctlyModifiableWithinConstructorDeep = 7;
+            })();
         })();
 
         SampleClass.correctlyModifiableStatic += 1;
@@ -102,4 +108,8 @@ class SampleClass {
 
 class SimilarClass {
     public overlappingClassVariable = 7;
+}
+
+declare class DeclaredClass {
+    private declaredMember = 7;
 }

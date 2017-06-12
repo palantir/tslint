@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ import * as ts from "typescript";
 const OUTSIDE_CONSTRUCTOR = -1;
 const DIRECTLY_INSIDE_CONSTRUCTOR = OUTSIDE_CONSTRUCTOR + 1;
 
-interface VariableModifications {
-    toMember?: boolean;
-    toStatic?: boolean;
-}
-
 export type ParameterOrPropertyDeclaration = ts.ParameterDeclaration | ts.PropertyDeclaration;
 
 function typeIsOrHasBaseType(type: ts.Type, parentType: ts.Type) {
@@ -45,7 +40,8 @@ function typeIsOrHasBaseType(type: ts.Type, parentType: ts.Type) {
 export class ClassScope {
     private readonly privateModifiableMembers = new Map<string, ParameterOrPropertyDeclaration>();
     private readonly privateModifiableStatics = new Map<string, ParameterOrPropertyDeclaration>();
-    private readonly variableModifications = new Map<string, VariableModifications>();
+    private readonly memberVariableModifications = new Set<string>();
+    private readonly staticVariableModifications = new Set<string>();
 
     private readonly typeChecker: ts.TypeChecker;
     private readonly classType: ts.Type;
@@ -59,7 +55,8 @@ export class ClassScope {
 
     public addDeclaredVariable(node: ParameterOrPropertyDeclaration) {
         if (!utils.isModfierFlagSet(node, ts.ModifierFlags.Private)
-            || utils.isModfierFlagSet(node, ts.ModifierFlags.Readonly)) {
+            || utils.isModfierFlagSet(node, ts.ModifierFlags.Readonly)
+            || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
             return;
         }
 
@@ -82,15 +79,8 @@ export class ClassScope {
         }
 
         const variable = node.name.text;
-        const modifications = this.variableModifications.get(variable);
-        const toMember = !toStatic;
 
-        if (modifications === undefined) {
-            this.variableModifications.set(variable, { toMember, toStatic });
-        } else {
-            modifications.toMember = modifications.toMember || toMember;
-            modifications.toStatic = modifications.toStatic || toStatic;
-        }
+        (toStatic ? this.staticVariableModifications : this.memberVariableModifications).add(variable);
     }
 
     public enterConstructor() {
@@ -102,26 +92,24 @@ export class ClassScope {
     }
 
     public enterNonConstructorScope() {
-        if (this.constructorScopeDepth === DIRECTLY_INSIDE_CONSTRUCTOR) {
+        if (this.constructorScopeDepth !== OUTSIDE_CONSTRUCTOR) {
             this.constructorScopeDepth += 1;
         }
     }
 
     public exitNonConstructorScope() {
         if (this.constructorScopeDepth > DIRECTLY_INSIDE_CONSTRUCTOR) {
-            this.constructorScopeDepth = Math.max(OUTSIDE_CONSTRUCTOR, this.constructorScopeDepth - 1);
+            this.constructorScopeDepth -= 1;
         }
     }
 
     public finalizeUnmodifiedPrivateNonReadonlys() {
-        this.variableModifications.forEach((modifications, variableName) => {
-            if (modifications.toMember) {
-                this.privateModifiableMembers.delete(variableName);
-            }
+        this.memberVariableModifications.forEach((variableName) => {
+            this.privateModifiableMembers.delete(variableName);
+        });
 
-            if (modifications.toStatic) {
-                this.privateModifiableStatics.delete(variableName);
-            }
+        this.staticVariableModifications.forEach((variableName) => {
+            this.privateModifiableStatics.delete(variableName);
         });
 
         return [
