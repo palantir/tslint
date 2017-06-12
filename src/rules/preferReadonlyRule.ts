@@ -119,7 +119,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         this.scope!.enterConstructor();
 
         for (const parameter of node.parameters) {
-            if (utils.isModifierFlagSet(parameter, ts.ModifierFlags.Private)) {
+            if (utils.isModfierFlagSet(parameter, ts.ModifierFlags.Private)) {
                 this.scope!.addDeclaredVariable(parameter);
             }
         }
@@ -180,7 +180,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private createFailureString(node: ParameterOrPropertyDeclaration) {
-        const accessibility = utils.isModifierFlagSet(node, ts.ModifierFlags.Static)
+        const accessibility = utils.isModfierFlagSet(node, ts.ModifierFlags.Static)
             ? "static"
             : "member";
 
