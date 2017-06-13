@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
+import { RuleFailure } from "../rule/rule";
 
 export interface IFormatterMetadata {
     /**

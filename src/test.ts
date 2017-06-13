@@ -23,11 +23,11 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
-import {Replacement} from "./language/rule/rule";
+import { Replacement } from "./language/rule/rule";
 import * as Linter from "./linter";
-import {LintError} from "./test/lintError";
+import { LintError } from "./test/lintError";
 import * as parse from "./test/parse";
-import {denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding} from "./utils";
+import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";

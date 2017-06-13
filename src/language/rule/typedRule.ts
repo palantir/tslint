@@ -18,8 +18,8 @@
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../../error";
-import {AbstractRule} from "./abstractRule";
-import {ITypedRule, RuleFailure} from "./rule";
+import { AbstractRule } from "./abstractRule";
+import { ITypedRule, RuleFailure } from "./rule";
 
 export abstract class TypedRule extends AbstractRule implements ITypedRule {
 
