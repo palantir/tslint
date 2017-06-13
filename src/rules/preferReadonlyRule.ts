@@ -63,11 +63,6 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         }
 
         switch (node.kind) {
-            case ts.SyntaxKind.ArrowFunction:
-            case ts.SyntaxKind.FunctionExpression:
-                this.handleArrowFunctionOrFunctionExpression(node as ts.ArrowFunction | ts.FunctionExpression);
-                break;
-
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
                 this.handleClassDeclarationOrExpression(node as ts.ClassLikeDeclaration);
@@ -91,12 +86,17 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 break;
 
             default:
-                ts.forEachChild(node, this.visitNode);
+                if (utils.isFunctionScopeBoundary(node)) {
+                    this.handleFunctionScopeBoundary(node);
+                } else {
+                    ts.forEachChild(node, this.visitNode);
+                }
         }
     }
 
-    private handleArrowFunctionOrFunctionExpression(node: ts.ArrowFunction | ts.FunctionExpression) {
+    private handleFunctionScopeBoundary(node: ts.Node) {
         if (this.scope === undefined) {
+            ts.forEachChild(node, this.visitNode);
             return;
         }
 
@@ -116,16 +116,21 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private handleConstructor(node: ts.ConstructorDeclaration) {
-        this.scope!.enterConstructor();
+        if (this.scope !== undefined) {
+            this.scope.enterConstructor();
 
-        for (const parameter of node.parameters) {
-            if (utils.isModfierFlagSet(parameter, ts.ModifierFlags.Private)) {
-                this.scope!.addDeclaredVariable(parameter);
+            for (const parameter of node.parameters) {
+                if (utils.isModifierFlagSet(parameter, ts.ModifierFlags.Private)) {
+                    this.scope.addDeclaredVariable(parameter);
+                }
             }
         }
 
         ts.forEachChild(node, this.visitNode);
-        this.scope!.exitConstructor();
+
+        if (this.scope !== undefined) {
+            this.scope.exitConstructor();
+        }
     }
 
     private handlePostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
@@ -138,7 +143,10 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private handlePropertyDeclaration(node: ts.PropertyDeclaration) {
-        this.scope!.addDeclaredVariable(node);
+        if (this.scope !== undefined) {
+            this.scope.addDeclaredVariable(node);
+        }
+
         ts.forEachChild(node, this.visitNode);
     }
 
@@ -180,7 +188,7 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
     }
 
     private createFailureString(node: ParameterOrPropertyDeclaration) {
-        const accessibility = utils.isModfierFlagSet(node, ts.ModifierFlags.Static)
+        const accessibility = utils.isModifierFlagSet(node, ts.ModifierFlags.Static)
             ? "static"
             : "member";
 

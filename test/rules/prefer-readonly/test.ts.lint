@@ -32,7 +32,15 @@ class SampleClass {
 
     private correctlyModifiableWithinConstructor;
 
-    private correctlyModifiableWithinConstructorDeep;
+    private correctlyModifiableWithinConstructorInArrowFunction;
+
+    private correctlyModifiableWithinConstructorInFunctionExpression;
+
+    private correctlyModifiableWithinConstructorInGetAccessor;
+
+    private correctlyModifiableWithinConstructorInMethodDeclaration;
+
+    private correctlyModifiableWithinConstructorInSetAccessor;
 
     private correctlyModifiablePostDecremented;
 
@@ -63,11 +71,31 @@ class SampleClass {
         this.incorrectlyModifiableParameter = 7;
 
         (() => {
+            const self = this;
+
             this.correctlyModifiableWithinConstructor = 7;
 
             (() => {
-                this.correctlyModifiableWithinConstructorDeep = 7;
+                this.correctlyModifiableWithinConstructorInArrowFunction = 7;
             })();
+
+            (function () {
+                self.correctlyModifiableWithinConstructorInFunctionExpression = 7;
+            })();
+
+            const confusingObject = {
+                get getAccessor() {
+                    return self.correctlyModifiableWithinConstructorInGetAccessor = 7;
+                }
+
+                methodDeclaration() {
+                    self.correctlyModifiableWithinConstructorInMethodDeclaration = 7;
+                }
+
+                set setAccessor() {
+                    self.correctlyModifiableWithinConstructorInSetAccessor = 7;
+                }
+            };
         })();
 
         SampleClass.correctlyModifiableStatic += 1;
