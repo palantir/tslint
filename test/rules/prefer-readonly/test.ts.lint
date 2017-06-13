@@ -46,9 +46,21 @@ class SampleClass {
 
     private correctlyModifiablePostIncremented;
 
+    private incorrectlyModifiablePostMinus;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiablePostMinus' is never reassigned; mark it as 'readonly'.]
+
+    private incorrectlyModifiablePostPlus;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiablePostPlus' is never reassigned; mark it as 'readonly'.]
+
     private correctlyModifiablePreDecremented;
 
     private correctlyModifiablePreIncremented;
+
+    private incorrectlyModifiablePreMinus;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiablePreMinus' is never reassigned; mark it as 'readonly'.]
+
+    private incorrectlyModifiablePrePlus;
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'incorrectlyModifiablePrePlus' is never reassigned; mark it as 'readonly'.]
 
     private overlappingClassVariable = 7;
             ~~~~~~~~~~~~~~~~~~~~~~~~ [Private member variable 'overlappingClassVariable' is never reassigned; mark it as 'readonly'.]
@@ -111,8 +123,12 @@ class SampleClass {
 
         this.correctlyModifiablePostDecremented--;
         this.correctlyModifiablePostIncremented++;
+        this.incorrectlyModifiablePostMinus+;
+        this.incorrectlyModifiablePostPlus+;
         --this.correctlyModifiablePreDecremented;
         ++this.correctlyModifiablePreIncremented;
+        -this.incorrectlyModifiablePreMinus;
+        +this.incorrectlyModifiablePrePlus;
     }
 
     public createConfusingChildClass() {

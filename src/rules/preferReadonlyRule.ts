@@ -72,11 +72,6 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 this.handleConstructor(node as ts.ConstructorDeclaration);
                 break;
 
-            case ts.SyntaxKind.PostfixUnaryExpression:
-            case ts.SyntaxKind.PrefixUnaryExpression:
-                this.handlePostfixOrPrefixUnaryExpression(node as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
-                break;
-
             case ts.SyntaxKind.PropertyDeclaration:
                 this.handlePropertyDeclaration(node as ts.PropertyDeclaration);
                 break;
@@ -133,15 +128,6 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private handlePostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
-        if (this.scope === undefined
-            || (node.operator !== ts.SyntaxKind.PlusPlusToken && node.operator !== ts.SyntaxKind.MinusMinusToken)) {
-            return;
-        }
-
-        this.scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
-    }
-
     private handlePropertyDeclaration(node: ts.PropertyDeclaration) {
         if (this.scope !== undefined) {
             this.scope.addDeclaredVariable(node);
@@ -158,6 +144,11 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
 
             case ts.SyntaxKind.DeleteExpression:
                 this.handleDeleteExpression(node);
+                break;
+
+            case ts.SyntaxKind.PostfixUnaryExpression:
+            case ts.SyntaxKind.PrefixUnaryExpression:
+                this.handleParentPostfixOrPrefixUnaryExpression(parent as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
         }
 
         ts.forEachChild(node, this.visitNode);
@@ -167,6 +158,15 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         if (this.scope !== undefined && parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
             this.scope.addVariableModification(node);
         }
+    }
+
+    private handleParentPostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
+        if (this.scope === undefined
+            || (node.operator !== ts.SyntaxKind.PlusPlusToken && node.operator !== ts.SyntaxKind.MinusMinusToken)) {
+            return;
+        }
+
+        this.scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
     }
 
     private handleDeleteExpression(node: ts.PropertyAccessExpression) {

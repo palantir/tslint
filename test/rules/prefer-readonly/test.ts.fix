@@ -41,9 +41,17 @@ class SampleClass {
 
     private correctlyModifiablePostIncremented;
 
+    private readonly incorrectlyModifiablePostMinus;
+
+    private readonly incorrectlyModifiablePostPlus;
+
     private correctlyModifiablePreDecremented;
 
     private correctlyModifiablePreIncremented;
+
+    private readonly incorrectlyModifiablePreMinus;
+
+    private readonly incorrectlyModifiablePrePlus;
 
     private readonly overlappingClassVariable = 7;
 
@@ -104,8 +112,12 @@ class SampleClass {
 
         this.correctlyModifiablePostDecremented--;
         this.correctlyModifiablePostIncremented++;
+        this.incorrectlyModifiablePostMinus+;
+        this.incorrectlyModifiablePostPlus+;
         --this.correctlyModifiablePreDecremented;
         ++this.correctlyModifiablePreIncremented;
+        -this.incorrectlyModifiablePreMinus;
+        +this.incorrectlyModifiablePrePlus;
     }
 
     public createConfusingChildClass() {
