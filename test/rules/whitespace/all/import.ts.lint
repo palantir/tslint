@@ -1,0 +1,3 @@
+[typescript]: >=2.4.0
+import('./foo')
+.then(foo => { foo.setup(); });
