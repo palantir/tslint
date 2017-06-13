@@ -63,3 +63,7 @@ class PublicClassConstructor {
     public constructor() {}
                          ~~ [block is empty]
 }
+
+try {
+    throw new Error();
+} catch (error) {}

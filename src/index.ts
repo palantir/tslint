@@ -17,8 +17,8 @@
 
 import * as Configuration from "./configuration";
 import * as Formatters from "./formatters";
-import {FormatterConstructor} from "./language/formatter/formatter";
-import {RuleFailure} from "./language/rule/rule";
+import { FormatterConstructor } from "./language/formatter/formatter";
+import { RuleFailure } from "./language/rule/rule";
 import * as Linter from "./linter";
 import * as Rules from "./rules";
 import * as Test from "./test";

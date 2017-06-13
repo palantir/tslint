@@ -144,8 +144,24 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     // an import clause can have _both_ named bindings and a name (the latter for the default import)
                     // but the named bindings always come last, so we only need to check that for whitespace
                     let position: number | undefined;
-                    if (importClause.namedBindings !== undefined) {
-                        position = importClause.namedBindings.getEnd();
+                    const { namedBindings } = importClause;
+                    if (namedBindings !== undefined) {
+                        if (namedBindings.kind !== ts.SyntaxKind.NamespaceImport) {
+                            namedBindings.elements.forEach((element, idx, arr) => {
+                                const internalName = element.name;
+                                if (internalName !== undefined) {
+                                    if (idx === arr.length - 1) {
+                                        const token = namedBindings.getLastToken();
+                                        checkForTrailingWhitespace(token.getFullStart());
+                                    }
+                                    if (idx === 0) {
+                                        const startPos = internalName.getStart() - 1;
+                                        checkForTrailingWhitespace(startPos, startPos + 1);
+                                    }
+                                }
+                            });
+                        }
+                        position = namedBindings.getEnd();
                     } else if (importClause.name !== undefined) {
                         position = importClause.name.getEnd();
                     }
@@ -245,9 +261,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
         checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
     }
 
-    function checkForTrailingWhitespace(position: number): void {
+    function checkForTrailingWhitespace(position: number, whiteSpacePos: number = position): void {
         if (position !== sourceFile.end && !Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
-            addMissingWhitespaceErrorAt(position);
+            addMissingWhitespaceErrorAt(whiteSpacePos);
         }
     }
 
