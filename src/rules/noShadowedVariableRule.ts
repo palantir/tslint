@@ -129,6 +129,16 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
                         (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier) {
                         parentScope.addVariable((node as ts.NamespaceDeclaration).name, false);
                     }
+                    break;
+                case ts.SyntaxKind.ImportClause:
+                    if ((node as ts.ImportClause).name !== undefined) {
+                        this.scope.addVariable((node as ts.ImportClause).name!, false);
+                    }
+                    break;
+                case ts.SyntaxKind.NamespaceImport:
+                case ts.SyntaxKind.ImportSpecifier:
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                    this.scope.addVariable((node as ts.NamespaceImport | ts.ImportSpecifier | ts.ImportEqualsDeclaration).name, false);
             }
             if (boundary !== ScopeBoundary.None) {
                 ts.forEachChild(node, cb);
