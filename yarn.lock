@@ -1500,9 +1500,9 @@ type-detect@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-1.0.0.tgz#762217cc06db258ec48908a1298e8b95121e8ea2"
 
-typescript@next:
-  version "2.4.0-dev.20170611"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.0-dev.20170611.tgz#fc5064e14705c15f0dbad9b9051e3a093b684285"
+typescript@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.4.0.tgz#aef5a8d404beba36ad339abf079ddddfffba86dd"
 
 uglify-js@^2.6:
   version "2.8.28"
