@@ -188,7 +188,7 @@ const options: Option[] = [
     },
 ];
 
-commander.version(VERSION);
+commander.version(VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);
