@@ -188,6 +188,23 @@ const options: Option[] = [
     },
 ];
 
+const builtinOptions: Option[] = [
+    {
+        short: "v",
+        name: "version",
+        type: "boolean",
+        describe: "current version",
+        description: "The current version of tslint.",
+    },
+    {
+        short: "h",
+        name: "help",
+        type: "boolean",
+        describe: "display detailed help",
+        description: "Prints this help message.",
+    },
+];
+
 commander.version(VERSION, "-v, --version");
 
 for (const option of options) {
@@ -201,7 +218,7 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.map((o) =>
+    const optionDetails = options.concat(builtinOptions).map((o) =>
         `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
     console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
 });
