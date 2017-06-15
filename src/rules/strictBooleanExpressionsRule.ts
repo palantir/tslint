@@ -348,9 +348,9 @@ function getKind(type: ts.Type): TypeKind {
         : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void) ? TypeKind.Undefined // tslint:disable-line:no-bitwise
         : is(ts.TypeFlags.EnumLike) ? TypeKind.Enum
         : is(ts.TypeFlags.NumberLiteral) ?
-            (numberLiteralIsZero(type as ts.LiteralType) ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
+            (numberLiteralIsZero(type as ts.NumberLiteralType) ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.StringLiteral) ?
-            (stringLiteralIsEmpty(type as ts.LiteralType) ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
+            (stringLiteralIsEmpty(type as ts.StringLiteralType) ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.BooleanLiteral) ?
             ((type as ts.IntrinsicType).intrinsicName === "true" ? TypeKind.AlwaysTruthy : TypeKind.FalseBooleanLiteral)
         : TypeKind.AlwaysTruthy;
@@ -360,12 +360,13 @@ function getKind(type: ts.Type): TypeKind {
     }
 }
 
-function numberLiteralIsZero(type: ts.LiteralType): boolean {
-    // Uses 'value' in TypeScript>=2.4.
-    return (type as any).value !== undefined ? (type as any).value === 0 : type.text === "0";
+function numberLiteralIsZero(type: ts.NumberLiteralType): boolean {
+    // for compatibility with typescript@<2.4.0
+    return type.value !== undefined ? type.value === 0 : (type as any).text === "0";
 }
-function stringLiteralIsEmpty(type: ts.LiteralType): boolean {
-    return ((type as any).value !== undefined ? (type as any).value : type.text) === "";
+function stringLiteralIsEmpty(type: ts.StringLiteralType): boolean {
+    // for compatibility with typescript@<2.4.0
+    return (type.value !== undefined ? type.value : (type as any).text) === "";
 }
 
 /** Matches `&&` and `||` operators. */

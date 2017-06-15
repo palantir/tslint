@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import {IWalker, WalkContext} from "../walker";
+import { IWalker, WalkContext } from "../walker";
 import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {

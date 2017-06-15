@@ -95,7 +95,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         // openParen may be missing for an async arrow function `async x => ...`.
         if (openParen === undefined) { return; }
 
-        const hasSpace = ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(openParen.end - 2));
+        const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
 
         if (hasSpace && option === "never") {
             const pos = openParen.getStart() - 1;

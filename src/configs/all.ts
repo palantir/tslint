@@ -99,7 +99,10 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
-    "no-duplicate-variable": true,
+    "no-duplicate-variable": [
+        true,
+        "check-parameters",
+    ],
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,

@@ -17,8 +17,8 @@
 
 import * as ts from "typescript";
 
-import {arrayify, flatMap} from "../../utils";
-import {IWalker} from "../walker";
+import { arrayify, flatMap } from "../../utils";
+import { IWalker } from "../walker";
 
 export interface RuleConstructor {
     metadata: IRuleMetadata;

@@ -259,8 +259,8 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
                 requirements.set(
                     type as DocType,
                     (type === "methods" || type === "properties")
-                        ? new ClassRequirement(descriptor[type])
-                        : new BlockRequirement(descriptor[type]));
+                        ? new ClassRequirement(descriptor[type] as IClassRequirementDescriptor)
+                        : new BlockRequirement(descriptor[type] as IBlockRequirementDescriptor));
             }
         }
     }
@@ -388,7 +388,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    private checkNode(node: ts.Declaration, nodeType: DocType): void {
+    private checkNode(node: ts.NamedDeclaration, nodeType: DocType): void {
         const { name } = node;
         if (name === undefined) {
             return;
