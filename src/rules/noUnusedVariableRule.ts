@@ -109,10 +109,9 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
     const importSpecifierFailures = new Map<ts.Identifier, string>();
 
     for (const diag of diagnostics) {
+        if (diag.start === undefined) { continue; }
         const kind = getUnusedDiagnostic(diag);
-        if (kind === undefined) {
-            continue;
-        }
+        if (kind === undefined) { continue; }
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
@@ -138,7 +137,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start, diag.length, failure);
+        ctx.addFailureAt(diag.start, diag.length!, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
@@ -259,7 +258,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         return false;
     }
 
-    return ts.forEachChild(sourceFile, function cb(child): boolean {
+    return ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
         if (isImportLike(child)) {
             return false;
         }
@@ -271,7 +270,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         }
 
         return ts.forEachChild(child, cb);
-    });
+    }) === true;
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
@@ -367,11 +366,12 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+    const originalOptions = program.getCompilerOptions();
     const options = {
-        ...program.getCompilerOptions(),
+        ...originalOptions,
         noEmit: true,
         noUnusedLocals: true,
-        ...(checkParameters ? { noUnusedParameters: true } : null),
+        noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
     };
     const sourceFilesByName = new Map<string, ts.SourceFile>(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));

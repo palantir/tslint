@@ -68,7 +68,7 @@ describe("Configuration", () => {
                     o: { severity: "warn", options: 1 },
                     p: null,
                     q: {},
-                    r: "garbage",
+                    r: "garbage" as any,
                     s: { junk: 1 } as any,
                 },
             };

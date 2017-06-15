@@ -272,9 +272,9 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
 
 /** True if any of the outer type parameters are used in a signature. */
 function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
-    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type));
+    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type) === true);
 
-    function typeContainsTypeParameter(type: ts.Node): boolean {
+    function typeContainsTypeParameter(type: ts.Node): boolean | undefined {
         if (utils.isTypeReferenceNode(type)) {
             const { typeName } = type;
             if (typeName.kind === ts.SyntaxKind.Identifier && isTypeParameter(typeName.text)) {
