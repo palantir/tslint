@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-self-this": [true, {
+      "allowed-this-names": ["^start"]
+    }]
+  }
+}
