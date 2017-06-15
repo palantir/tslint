@@ -238,6 +238,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             case ts.SyntaxKind.ImportKeyword:
+                if (parent.kind === ts.SyntaxKind.CallExpression &&
+                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword) {
+                    return; // Don't check ImportCall
+                }
+                // falls through
             case ts.SyntaxKind.ExportKeyword:
             case ts.SyntaxKind.FromKeyword:
                 if (options.typecast) {
