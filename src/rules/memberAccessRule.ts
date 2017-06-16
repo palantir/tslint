@@ -129,12 +129,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
                 : node.name !== undefined ? node.name : node;
             const memberName = node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier ? node.name.text : undefined;
-            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
+            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName));
         }
     }
 }
 
-function memberType(node: ts.ClassElement): string {
+function typeToString(node: ts.ClassElement): string {
     switch (node.kind) {
         case ts.SyntaxKind.MethodDeclaration:
             return "class method";
