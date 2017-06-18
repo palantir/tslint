@@ -36,4 +36,10 @@ undefined != x;
 "key" in x;
 "foo", x;
 
+// Allows literals on both sides.
+1 + 1;
+1 + 1 + 1;
+1 + x + 1;
+~~~~~ [0]
+
 [0]: Literal expression should be on the right-hand side of a binary expression.
