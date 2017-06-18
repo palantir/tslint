@@ -273,7 +273,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 canBeConst: true,
                 declarationList,
                 isBlockScoped: kind === utils.VariableDeclarationKind.Let,
-                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement,
+                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement ||
+                           declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement,
                 reassignedSiblings: false,
             };
         }

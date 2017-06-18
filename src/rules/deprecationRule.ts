@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isIdentifier } from "tsutils";
+import { getDeclarationOfBindingElement, isBindingElement, isIdentifier, isVariableDeclaration, isVariableDeclarationList } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -87,7 +87,7 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
-            return (parent as ts.Declaration).name === identifier;
+            return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.BindingElement:
         case ts.SyntaxKind.ExportSpecifier:
         case ts.SyntaxKind.ImportSpecifier:
@@ -105,9 +105,50 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         symbol = tc.getAliasedSymbol(symbol);
     }
     if (symbol !== undefined) {
+        return getDeprecationValue(symbol);
+    }
+    return undefined;
+}
+
+function getDeprecationValue(symbol: ts.Symbol): string | undefined {
+    if (symbol.getJsDocTags !== undefined) {
         for (const tag of symbol.getJsDocTags()) {
             if (tag.name === "deprecated") {
                 return tag.text;
+            }
+        }
+        return undefined;
+    }
+    // for compatibility with typescript@<2.3.0
+    return getDeprecationFromDeclarations(symbol.declarations);
+}
+
+function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
+    if (declarations === undefined) {
+        return undefined;
+    }
+    let declaration: ts.Node;
+    for (declaration of declarations) {
+        if (isBindingElement(declaration)) {
+            declaration = getDeclarationOfBindingElement(declaration);
+        }
+        if (isVariableDeclaration(declaration)) {
+            declaration = declaration.parent!;
+        }
+        if (isVariableDeclarationList(declaration)) {
+            declaration = declaration.parent!;
+        }
+        for (const child of declaration.getChildren()) {
+            if (child.kind !== ts.SyntaxKind.JSDocComment) {
+                break;
+            }
+            if ((child as ts.JSDoc).tags === undefined) {
+                continue;
+            }
+            for (const tag of (child as ts.JSDoc).tags!) {
+                if (tag.tagName.text === "deprecated") {
+                    return tag.comment === undefined ? "" : tag.comment;
+                }
             }
         }
     }

@@ -97,8 +97,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
         if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
-            const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
-            ctx.addFailureAtNode(node, failureString, fix);
+            ctx.addFailureAtNode(node, failureString, Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"));
             return;
         }
 
@@ -108,13 +107,12 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
         const type = typeArguments[0];
         const parens = typeNeedsParentheses(type);
-        const fix = [
+        ctx.addFailureAtNode(node, failureString, [
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
             Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
-        ];
-        ctx.addFailureAtNode(node, failureString, fix);
+        ]);
     }
 }
 

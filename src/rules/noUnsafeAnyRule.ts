@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {isExpression} from "tsutils";
+import { isExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 

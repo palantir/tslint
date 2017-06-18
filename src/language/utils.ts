@@ -19,7 +19,7 @@ import * as path from "path";
 import { isBlockScopedVariableDeclarationList, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+import { IDisabledInterval, RuleFailure } from "./rule/rule"; // tslint:disable-line deprecation
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -434,4 +434,10 @@ export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryEx
     return isPrefixUnaryExpression(node) &&
         node.operator === ts.SyntaxKind.MinusToken &&
         node.operand.kind === ts.SyntaxKind.NumericLiteral;
+}
+
+/** Wrapper for compatibility with typescript@<2.3.1 */
+export function isWhiteSpace(ch: number): boolean {
+    // tslint:disable-next-line
+    return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }

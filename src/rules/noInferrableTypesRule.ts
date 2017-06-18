@@ -79,7 +79,7 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
                 const { name, type, initializer } = node;
                 if (type !== undefined && initializer !== undefined && typeIsInferrable(type.kind, initializer.kind)) {
                     const fix = Lint.Replacement.deleteFromTo(name.end, type.end);
-                    this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)), fix);
+                    this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)!), fix);
                 }
             }
             return ts.forEachChild(node, cb);
