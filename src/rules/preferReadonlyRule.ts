@@ -80,7 +80,9 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 break;
 
             case ts.SyntaxKind.PropertyAccessExpression:
-                this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!, this.scope!);
+                if (this.scope !== undefined) {
+                    this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!, this.scope);
+                }
                 break;
 
             default:

@@ -28,7 +28,14 @@ function typeIsOrHasBaseType(type: ts.Type, parentType: ts.Type) {
         return false;
     }
 
-    for (const baseType of [type, ...type.getBaseTypes()]) {
+    const typeAndBaseTypes = [type];
+    const ancestorTypes = type.getBaseTypes();
+
+    if (ancestorTypes !== undefined) {
+        typeAndBaseTypes.push(...ancestorTypes);
+    }
+
+    for (const baseType of typeAndBaseTypes) {
         if (baseType.symbol !== undefined && baseType.symbol.name === parentType.symbol.name) {
             return true;
         }
