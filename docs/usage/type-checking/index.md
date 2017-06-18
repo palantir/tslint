@@ -20,4 +20,6 @@ const results = files.map(file => {
 });
 ```
 
-When using the CLI, the `--project` flag will automatically create a program from the specified `tsconfig.json` file. Adding the `--type-check` flag then enables rules that require the type checker.
+When using the CLI, the `--project` flag will automatically create a program from the specified `tsconfig.json` file and enable rules that require the type checker.
+
+Use the `--type-check` flag to make sure your program has no type errors. TSLint will check for any errors before before linting. This flag requires `--project` to be specified.

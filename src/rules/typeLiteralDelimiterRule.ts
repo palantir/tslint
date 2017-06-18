@@ -96,7 +96,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
     function check(node: ts.TypeLiteralNode): void {
         const preferred = node.parent!.kind === ts.SyntaxKind.TypeAliasDeclaration
-            ? typeAliasDelimiter === OPTION_SEMICOLON ? ";" : typeAliasDelimiter === OPTION_COMMA ? "," : typeAliasDelimiter
+            ? (typeAliasDelimiter === OPTION_SEMICOLON ? ";" : typeAliasDelimiter === OPTION_COMMA ? "," : typeAliasDelimiter)
             : ",";
         const singleLine = isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
         node.members.forEach((member, idx) => {

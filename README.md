@@ -12,23 +12,21 @@ TSLint supports:
 
 - custom lint rules
 - custom formatters (failure reporters)
-- inline disabling and enabling of rules
-- configuration presets (`tslint:latest`, `tslint-react`, etc.) & composition
+- inline disabling and enabling of rules with comment flags
+- configuration presets (`tslint:latest`, `tslint-react`, etc.) and plugin composition
 - automatic fixing of formatting & style violations
 - integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [emacs](http://flycheck.org), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
 
 Installation & Usage
 ------------
 
-Refer to the full installation & usage documentation on the [TSLint website](https://palantir.github.io/tslint/).
-
-There, you'll find information about
+Please refer to the full installation & usage documentation on the [TSLint website](https://palantir.github.io/tslint/). There, you'll find information about
 - [configuration](https://palantir.github.io/tslint/usage/configuration/),
-- [core rules](https://palantir.github.io/tslint/),
-- [core formatters](http://palantir.github.io/tslint/formatters/), and
+- [core rules](https://palantir.github.io/tslint/rules/),
+- [core formatters](https://palantir.github.io/tslint/formatters/), and
 - [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
 
-Custom Rules
+Custom Rules & Plugins
 ------------
 
 #### Custom rule sets from Palantir
@@ -38,7 +36,7 @@ Custom Rules
 
 #### Custom rule sets from the community
 
-If we don't have all the rules you're looking for, you can either write your own custom rules or use custom rules that others have developed. The repos below are a good source of custom rules:
+If we don't have all the rules you're looking for, you can either write your own [custom rules](https://palantir.github.io/tslint/develop/custom-rules/) or use rules implementations developed by the community. The repos below are a good source of custom rules:
 
 - [ESLint rules for TSLint](https://github.com/buzinas/tslint-eslint-rules) - Improve your TSLint with the missing ESLint Rules
 - [tslint-microsoft-contrib](https://github.com/Microsoft/tslint-microsoft-contrib) - A set of TSLint rules used on some Microsoft projects
@@ -53,13 +51,13 @@ Development
 Requirements:
 
 - `node` v7
-- `yarn` v0.18
+- `yarn` v0.23+
 
 #### Quick Start
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
-yarn install
+yarn
 yarn compile
 yarn test
 ```
@@ -67,9 +65,9 @@ yarn test
 Creating a new release
 ----------------------
 
-1. Bump the version number in `package.json` and `src/tslintMulti.ts`
+1. Bump the version number in `package.json` and `src/linter.ts`
 2. Add release notes in `CHANGELOG.md`
-3. `yarn verify` to build the latest sources
+3. `yarn verify` to build the latest sources from a clean state
 4. Commit with message `Prepare release <version>`
 5. Run `npm publish`
 6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))

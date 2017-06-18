@@ -115,7 +115,7 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
 export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
-            throw new Error(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
+            throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
         } else {
             return path.resolve(suppliedConfigFilePath);
         }
@@ -369,7 +369,7 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
             const absolutePath = getRelativePath(dir, relativeTo);
             if (absolutePath != null) {
                 if (!fs.existsSync(absolutePath)) {
-                    throw new Error(`Could not find custom rule directory: ${dir}`);
+                    throw new FatalError(`Could not find custom rule directory: ${dir}`);
                 }
             }
             return absolutePath;

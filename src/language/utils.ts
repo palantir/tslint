@@ -16,10 +16,10 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+import { IDisabledInterval, RuleFailure } from "./rule/rule"; // tslint:disable-line deprecation
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -424,4 +424,21 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
         default:
             return undefined;
     }
+}
+
+export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
+    return options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false);
+}
+
+export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
+    return isPrefixUnaryExpression(node) &&
+        node.operator === ts.SyntaxKind.MinusToken &&
+        node.operand.kind === ts.SyntaxKind.NumericLiteral;
+}
+
+/** Wrapper for compatibility with typescript@<2.3.1 */
+export function isWhiteSpace(ch: number): boolean {
+    // tslint:disable-next-line
+    return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }

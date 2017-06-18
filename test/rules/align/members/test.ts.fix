@@ -7,9 +7,16 @@ interface Foo {
 
 class Foo {
     bar,
-    baz() {}
+    baz() {
+
+    };
     get bas() {}
     foo;
+}
+
+let Bar = class {
+  bar,
+  foo
 }
 
 let foo = {

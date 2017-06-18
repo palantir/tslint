@@ -17,8 +17,9 @@
 
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import {flatMap, mapDefined} from "../utils";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -194,7 +195,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        let options: Options;
+        try {
+            options = parseOptions(this.ruleArguments);
+        } catch (e) {
+            showWarningOnce(`Warning: ${this.ruleName} - ${(e as Error).message}`);
+            return [];
+        }
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, options));
     }
 }
 
@@ -394,7 +402,7 @@ function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberC
         return orderOption;
     }
 
-    const preset = PRESETS.get(orderOption as string);
+    const preset = PRESETS.get(orderOption);
     if (preset === undefined) {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }

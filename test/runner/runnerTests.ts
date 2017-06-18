@@ -15,38 +15,34 @@
  */
 
 import { assert } from "chai";
-import * as streams from "memory-streams";
-import { Runner } from "../../src/runner";
-import { IRunnerOptions } from "./../../src/runner";
+import { Options, run, Status } from "../../src/runner";
 
-const customRulesOptions: IRunnerOptions = {
+const customRulesOptions: Options = {
     config: "./test/config/tslint-custom-rules.json",
     files: ["src/test.ts"],
     rulesDirectory: "./test/files/custom-rules",
 };
 
 describe("Runner Tests", () => {
-    it("outputs absolute path with --outputAbsolutePaths", () => {
-        const output = runLint({ ...customRulesOptions, outputAbsolutePaths: true });
-
+    it("outputs absolute path with --outputAbsolutePaths", async () => {
+        const { status, stdout, stderr } = await runLint({ ...customRulesOptions, outputAbsolutePaths: true });
+        assert.equal(status, 2);
         // match either a path starting with `/` or something like `C:`
-        assert.isTrue(/ERROR: (\/|\w:)/.test(output));
+        assert.isTrue(/ERROR: (\/|\w:)/.test(stdout));
+        assert.equal(stderr, "");
     });
 
-    it("outputs relative path without --outputAbsolutePaths", () => {
-        const output = runLint(customRulesOptions);
-        assert.include(output, "ERROR: src/");
+    it("outputs relative path without --outputAbsolutePaths", async () => {
+        const { status, stdout, stderr } = await runLint(customRulesOptions);
+        assert.equal(status, 2);
+        assert.include(stdout, "ERROR: src/");
+        assert.equal(stderr, "");
     });
 });
 
-function runLint(options: IRunnerOptions, callback?: (status: number) => void) {
-    const output = new streams.WritableStream();
-    const runner = new Runner(options, output);
-    if (callback === undefined) {
-        callback = () => {
-            // do nothing
-        };
-    }
-    runner.run(callback);
-    return output.toString();
+async function runLint(options: Options): Promise<{ status: Status, stdout: string, stderr: string }> {
+    let stdout = "";
+    let stderr = "";
+    const status = await run(options, { log(m) { stdout += m; }, error(m) { stderr += m; } });
+    return { status, stdout, stderr };
 }

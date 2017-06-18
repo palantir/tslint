@@ -4,10 +4,8 @@
   },
   "extends": "tslint:all",
   "rules": {
-    // TODO: remove this when tslint 5.3 released
-    "prefer-switch": [true, { "min-cases": 3 }],
-
     // Don't want these
+    "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
     "no-unused-variable": false,
@@ -34,16 +32,12 @@
 
     // TODO: Enable these
     "completed-docs": false,
-    "cyclomatic-complexity": false,
     "no-any": false,
-    "no-inferred-empty-object-type": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
     "no-require-imports": false,
     "no-unbound-method": false,
-    "no-unnecessary-callback-wrapper": false,
-    "no-unnecessary-type-assertion": false,
     "no-unnecessary-qualifier": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
@@ -51,6 +45,7 @@
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
+    "type-literal-delimiter": false, // Contradiction between global and latest
 
     "ban": [true,
       ["describe", "only"],
@@ -72,6 +67,7 @@
       "options": ["log"]
     },
     "no-switch-case-fall-through": true,
+    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",

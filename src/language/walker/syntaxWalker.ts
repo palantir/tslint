@@ -686,7 +686,6 @@ export class SyntaxWalker {
 
             default:
                 this.walkChildren(node);
-                break;
         }
     }
 

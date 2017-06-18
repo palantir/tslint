@@ -15,8 +15,9 @@
  */
 
 import * as ts from "typescript";
-import {format} from "util";
+import { format } from "util";
 
+import { flatMap, mapDefined } from "../utils";
 import {
     CodeLine,
     EndErrorLine,
@@ -27,7 +28,7 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import {errorComparator, LintError, lintSyntaxError} from "./lintError";
+import { errorComparator, LintError, lintSyntaxError } from "./lintError";
 
 let scanner: ts.Scanner | undefined;
 
@@ -200,11 +201,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 
         if (startPos.line === endPos.line) {
             // single line error
-            errorLinesForCodeText[startPos.line].push(new EndErrorLine(
-                startPos.col,
-                endPos.col,
-                message,
-            ));
+            errorLinesForCodeText[startPos.line].push(new EndErrorLine(startPos.col, endPos.col, message));
         } else {
             // multiline error
             errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
@@ -215,19 +212,9 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
         }
     }
 
-    const finalText = combineCodeTextAndErrorLines(codeText, errorLinesForCodeText);
-    return finalText.join("\n");
+    return flatMap(codeText, (line, i) => [line, ...mapDefined(errorLinesForCodeText[i], (err) => printLine(err, line))]).join("\n");
 }
 /* tslint:enable:object-literal-sort-keys */
-
-function combineCodeTextAndErrorLines(codeText: string[], errorLinesForCodeText: ErrorLine[][]) {
-    return codeText.reduce<string[]>((resultText, code, i) => {
-        resultText.push(code);
-        const errorPrintLines = errorLinesForCodeText[i].map((line) => printLine(line, code)).filter((line) => line !== null) as string[];
-        resultText.push(...errorPrintLines);
-        return resultText;
-    }, []);
-}
 
 function createCodeLineNoToErrorsMap(lines: Line[]) {
     const errorLinesForCodeLine: ErrorLine[][] = [];

@@ -16,8 +16,8 @@
  */
 
 import {
-    isBinaryExpression, isCallExpression, isIdentifier, isObjectLiteralExpression,
-    isPropertyAccessExpression, isSpreadElement,
+    hasSideEffects, isCallExpression, isIdentifier, isObjectLiteralExpression, isPropertyAccessExpression,
+    isSpreadElement, SideEffectOptions,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -54,16 +54,33 @@ function walk(ctx: Lint.WalkContext<void>) {
             !node.arguments.some(isSpreadElement)) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node, ctx.sourceFile));
-            } else {
-                const parent = node.parent!;
-                if (parent.kind === ts.SyntaxKind.VariableDeclaration ||
-                    isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-                    ctx.addFailureAtNode(node, Rule.ASSIGNMENT_FAILURE_STRING, createFix(node, ctx.sourceFile));
-                }
+            } else if (isReturnValueUsed(node) && !hasSideEffects(node.arguments[0], SideEffectOptions.Constructor)) {
+                ctx.addFailureAtNode(node, Rule.ASSIGNMENT_FAILURE_STRING, createFix(node, ctx.sourceFile));
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isReturnValueUsed(node: ts.Expression): boolean {
+    const parent = node.parent!;
+    switch (parent.kind) {
+        case ts.SyntaxKind.VariableDeclaration:
+        case ts.SyntaxKind.PropertyAssignment:
+        case ts.SyntaxKind.PropertyDeclaration:
+        case ts.SyntaxKind.ReturnStatement:
+        case ts.SyntaxKind.BindingElement:
+        case ts.SyntaxKind.ArrayLiteralExpression:
+            return true;
+        case ts.SyntaxKind.BinaryExpression:
+            return (parent as ts.BinaryExpression).operatorToken.kind === ts.SyntaxKind.EqualsToken;
+        case ts.SyntaxKind.NewExpression:
+        case ts.SyntaxKind.CallExpression:
+            return (parent as ts.NewExpression | ts.CallExpression).arguments !== undefined &&
+                (parent as ts.NewExpression | ts.CallExpression).arguments!.indexOf(node) !== -1;
+        default:
+            return false;
+    }
 }
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
@@ -79,7 +96,7 @@ function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix
                 let end = arg.end;
                 if (i !== args.length - 1) {
                     end = args[i + 1].getStart(sourceFile);
-                } else if (args.hasTrailingComma === true) {
+                } else if (args.hasTrailingComma) {
                     end = args.end;
                 }
                 // remove empty object iteral and the following comma if exists

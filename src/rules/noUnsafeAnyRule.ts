@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {isExpression} from "tsutils";
+import { isExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -71,6 +71,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb((node as ts.LabeledStatement).statement);
 
             case ts.SyntaxKind.BreakStatement: // Ignore label
+            case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -163,6 +164,29 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.SwitchStatement: {
+                const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
+                // Allow `switch (x) {}` where `x` is any
+                cb(expression, /*anyOk*/ true);
+                for (const clause of clauses) {
+                    if (clause.kind === ts.SyntaxKind.CaseClause) {
+                        // Allow `case x:` where `x` is any
+                        cb(clause.expression, /*anyOk*/ true);
+                    }
+                    for (const statement of clause.statements) {
+                        cb(statement);
+                    }
+                }
+                break;
+            }
+
+            case ts.SyntaxKind.ModuleDeclaration: {
+                // In `declare global { ... }`, don't mark `global` as unsafe any.
+                const { body } = node as ts.ModuleDeclaration;
+                if (body !== undefined) { cb(body); }
+                return;
+            }
+
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
@@ -171,7 +195,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         function check(): boolean {
-            const isUnsafe = anyOk !== true && isNodeAny(node, checker);
+            const isUnsafe = !anyOk && isNodeAny(node, checker);
             if (isUnsafe) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

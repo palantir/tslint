@@ -98,7 +98,10 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
-    "no-duplicate-variable": true,
+    "no-duplicate-variable": [
+        true,
+        "check-parameters",
+    ],
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
@@ -128,6 +131,7 @@ export const rules = {
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,
+    "use-default-type-parameter": true,
     "use-isnan": true,
 
     // Maintainability
@@ -164,6 +168,7 @@ export const rules = {
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
     "arrow-return-shorthand": [true, "multiline"],
+    "binary-expression-operand-order": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
@@ -227,6 +232,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "switch-final-break": true,
     "type-literal-delimiter": true,
     "variable-name": [
         true,

@@ -140,10 +140,10 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
 }
 
 /** Returns an array that is the concatenation of all output arrays. */
-export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
+export function flatMap<T, U>(inputs: T[], getOutputs: (input: T, index: number) => U[]): U[] {
     const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
+    for (let i = 0; i < inputs.length; i++) {
+        out.push(...getOutputs(inputs[i], i));
     }
     return out;
 }
@@ -208,4 +208,9 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
     }
 
     return "utf8";
+}
+
+// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
+export function denormalizeWinPath(path: string): string {
+    return path.replace(/\\/g, "/");
 }

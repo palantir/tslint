@@ -72,7 +72,7 @@ export function parseLine(text: string): Line {
  * @param code - If line represents error markup, this is the line of code preceding the markup.
  *               Otherwise, this parameter is not required.
  */
-export function printLine(line: Line, code?: string): string | null {
+export function printLine(line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
         if (code == null) {
            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
@@ -108,5 +108,5 @@ export function printLine(line: Line, code?: string): string | null {
     } else if (line instanceof CodeLine) {
         return line.contents;
     }
-    return null;
+    return undefined;
 }
