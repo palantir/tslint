@@ -1,6 +1,6 @@
 {
   "rules": {
-    "no-self-this": [true, {
+    "no-this-reassignment": [true, {
       "allowed-this-names": ["^start"]
     }]
   }

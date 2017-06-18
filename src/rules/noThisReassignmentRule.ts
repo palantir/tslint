@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`${ALLOWED_THIS_NAMES}\` may be specified as  a list of regular expressions to match allowed variable names.`,
         rationale: "Assigning a variable to `this` instead of properly using arrow lambdas"
             + "may be a symptom of pre-ES6 practices or not manging scope well.",
-        ruleName: "no-self-this",
+        ruleName: "no-this-reassignment",
         type: "functionality",
         typescriptOnly: false,
     };
@@ -68,13 +68,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             }
         }
 
-        const noSelfThisWalker = new NoSelfThisWalker(sourceFile, this.ruleName, { allowedThisNames });
+        const noThisReassignmentWalker = new NoThisReassignmentWalker(sourceFile, this.ruleName, { allowedThisNames });
 
-        return this.applyWithWalker(noSelfThisWalker);
+        return this.applyWithWalker(noThisReassignmentWalker);
     }
 }
 
-class NoSelfThisWalker extends Lint.AbstractWalker<Options> {
+class NoThisReassignmentWalker extends Lint.AbstractWalker<Options> {
     private readonly allowedThisNameTesters = this.options.allowedThisNames.map(
         (allowedThisName) => new RegExp(allowedThisName));
 
@@ -96,7 +96,7 @@ class NoSelfThisWalker extends Lint.AbstractWalker<Options> {
             && node.name.kind === ts.SyntaxKind.Identifier
             && this.variableNameIsBanned(node.name.text)
         ) {
-            this.addFailureAt(node.getStart(), node.getWidth(), Rule.FAILURE_STRING_FACTORY(node.name.text));
+            this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(node.name.text));
         }
     }
 
