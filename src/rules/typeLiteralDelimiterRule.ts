@@ -21,6 +21,9 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_TYPE_ALIAS_DELIMITER: keyof Options = "type-alias-delimiter";
+const OPTION_COMMA = "comma";
+const OPTION_SEMICOLON = "semicolon";
+const OPTION_IGNORE = "ignore";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,17 +36,17 @@ export class Rule extends Lint.Rules.AbstractRule {
             An options object may be passed with the following keys:
 
             * '${OPTION_TYPE_ALIAS_DELIMITER}': This may be set to one of:
-              - \`","\`: This is the default. Type aliases are treated the same as other type literals.
-              - \`";"\`: Use semicolons for type aliases instead of commas.
-              - \`"ignore\`: Do not check the delimiter used by a type alias. (Still check for a trailing delimiter.)`,
+              - \`"${OPTION_COMMA}"\`: This is the default. Type aliases are treated the same as other type literals.
+              - \`"${OPTION_SEMICOLON}"\`: Use semicolons for type aliases instead of commas.
+              - \`"ignore"\`: Do not check the delimiter used by a type alias. (Still check for a trailing delimiter.)`,
         options: {
             type: "object",
             properties: {
                 [OPTION_TYPE_ALIAS_DELIMITER]: {
                     enum: [
-                        ",",
-                        ";",
-                        "ignore",
+                        OPTION_COMMA,
+                        OPTION_SEMICOLON,
+                        OPTION_IGNORE,
                     ],
                     type: "string",
                 },
@@ -51,8 +54,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             true,
-            [true, { [OPTION_TYPE_ALIAS_DELIMITER]: ";" }],
-            [true, { [OPTION_TYPE_ALIAS_DELIMITER]: "ignore" }],
+            [true, { [OPTION_TYPE_ALIAS_DELIMITER]: OPTION_SEMICOLON }],
+            [true, { [OPTION_TYPE_ALIAS_DELIMITER]: OPTION_IGNORE }],
         ],
         type: "style",
         typescriptOnly: true,
@@ -71,7 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            "type-alias-delimiter": ",",
+            "type-alias-delimiter": OPTION_COMMA,
             ...(this.ruleArguments[0] as Options | undefined),
         };
         return this.applyWithFunction(sourceFile, walk, options);
@@ -79,7 +82,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 interface Options {
-    "type-alias-delimiter": "," | ";" | "ignore";
+    "type-alias-delimiter": typeof OPTION_COMMA | typeof OPTION_SEMICOLON | typeof OPTION_IGNORE;
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
@@ -92,7 +95,9 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 
     function check(node: ts.TypeLiteralNode): void {
-        const preferred = node.parent!.kind === ts.SyntaxKind.TypeAliasDeclaration ? typeAliasDelimiter : ",";
+        const preferred = node.parent!.kind === ts.SyntaxKind.TypeAliasDeclaration
+            ? typeAliasDelimiter === OPTION_SEMICOLON ? ";" : typeAliasDelimiter === OPTION_COMMA ? "," : typeAliasDelimiter
+            : ",";
         const singleLine = isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
         node.members.forEach((member, idx) => {
             const end = member.end - 1;

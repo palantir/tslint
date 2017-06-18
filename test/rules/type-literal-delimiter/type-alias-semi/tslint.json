@@ -1,7 +1,7 @@
 {
   "rules": {
     "type-literal-delimiter": [true, {
-        "type-alias-delimiter": ";"
+        "type-alias-delimiter": "semicolon"
     }]
   }
 }
