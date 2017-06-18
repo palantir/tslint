@@ -146,19 +146,22 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));
-            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
-            execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
-                (err, stdout) => {
-                    const content = fs.readFileSync(tempFile, "utf8");
-                    // compare against file name which will be returned by formatter (used in TypeScript)
-                    const denormalizedFileName = denormalizeWinPath(tempFile);
-                    fs.unlinkSync(tempFile);
-                    assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
-                    assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
-                    done();
+            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
+                .pipe(fs.createWriteStream(tempFile))
+                .on("finish", () => {
+                    execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
+                        (err, stdout) => {
+                            const content = fs.readFileSync(tempFile, "utf8");
+                            // compare against file name which will be returned by formatter (used in TypeScript)
+                            const denormalizedFileName = denormalizeWinPath(tempFile);
+                            fs.unlinkSync(tempFile);
+                            assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
+                            assert.isNull(err, "process should exit without an error");
+                            assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
+                            done();
+                        });
                 });
-        });
+        }).timeout(6000);
     });
 
     describe("--force flag", () => {
@@ -347,9 +350,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can apply fixes from multiple rules", function(done) {
-            this.slow(4000);
-            this.timeout(6000);
+        it("can apply fixes from multiple rules", (done) => {
             fs.writeFileSync("test/files/project-multiple-fixes/testfile.test.ts",
                              fs.readFileSync("test/files/project-multiple-fixes/before.test.ts", "utf-8"));
             execCli(
@@ -364,7 +365,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     );
                     done();
                 });
-        });
+        }).timeout(6000);
     });
 
     describe("--type-check", () => {
