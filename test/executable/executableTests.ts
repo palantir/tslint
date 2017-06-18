@@ -161,7 +161,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                             done();
                         });
                 });
-        }).timeout(6000);
+        }).timeout(8000);
     });
 
     describe("--force flag", () => {
@@ -365,7 +365,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     );
                     done();
                 });
-        }).timeout(6000);
+        }).timeout(8000);
     });
 
     describe("--type-check", () => {
