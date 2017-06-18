@@ -68,7 +68,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const x = program.getCompilerOptions();
-        if (x.noUnusedLocals === true && x.noUnusedParameters === true) {
+        if (x.noUnusedLocals && x.noUnusedParameters) {
             console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
@@ -109,10 +109,9 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
     const importSpecifierFailures = new Map<ts.Identifier, string>();
 
     for (const diag of diagnostics) {
+        if (diag.start === undefined) { continue; }
         const kind = getUnusedDiagnostic(diag);
-        if (kind === undefined) {
-            continue;
-        }
+        if (kind === undefined) { continue; }
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
@@ -138,7 +137,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        ctx.addFailureAt(diag.start, diag.length, failure);
+        ctx.addFailureAt(diag.start, diag.length!, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
@@ -225,8 +224,29 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
 
         function removeAll(errorNode: ts.Node, failure: string): void {
-            const fix = Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd());
+            const start = importNode.getStart();
+            let end = importNode.getEnd();
+            if (isEntireLine(start, end)) {
+                end = getNextLineStart(end);
+            }
+
+            const fix = Lint.Replacement.deleteFromTo(start, end);
             ctx.addFailureAtNode(errorNode, failure, fix);
+        }
+
+        function isEntireLine(start: number, end: number): boolean {
+            return ctx.sourceFile.getLineAndCharacterOfPosition(start).character === 0 &&
+                ctx.sourceFile.getLineEndOfPosition(end) === end;
+        }
+
+        function getNextLineStart(position: number): number {
+            const nextLine = ctx.sourceFile.getLineAndCharacterOfPosition(position).line + 1;
+            const lineStarts = ctx.sourceFile.getLineStarts();
+            if (nextLine < lineStarts.length) {
+                return lineStarts[nextLine];
+            } else {
+                return position;
+            }
         }
     });
 
@@ -259,7 +279,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         return false;
     }
 
-    return ts.forEachChild(sourceFile, function cb(child): boolean {
+    return ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
         if (isImportLike(child)) {
             return false;
         }
@@ -271,7 +291,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         }
 
         return ts.forEachChild(child, cb);
-    });
+    }) === true;
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
@@ -367,11 +387,12 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+    const originalOptions = program.getCompilerOptions();
     const options = {
-        ...program.getCompilerOptions(),
+        ...originalOptions,
         noEmit: true,
         noUnusedLocals: true,
-        ...(checkParameters ? { noUnusedParameters: true } : null),
+        noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
     };
     const sourceFilesByName = new Map<string, ts.SourceFile>(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));

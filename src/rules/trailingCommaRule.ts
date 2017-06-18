@@ -22,7 +22,7 @@ import * as Lint from "../index";
 
 type OptionValue = "always" | "never" | "ignore";
 type OptionName = "arrays" | "exports" | "functions" | "imports" | "objects" | "typeLiterals";
-type CustomOptionValue = Record<OptionName, OptionValue>;
+type CustomOptionValue = Partial<Record<OptionName, OptionValue>>;
 type Options = Record<"multiline" | "singleline", CustomOptionValue>;
 
 const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore"); // tslint:disable-line no-unnecessary-type-assertion
@@ -206,7 +206,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         }
         const token = getChildOfKind(node, closeTokenKind, this.sourceFile);
         if (token !== undefined) {
-            return this.checkComma(list.hasTrailingComma === true, list, token.end, optionKey);
+            return this.checkComma(list.hasTrailingComma, list, token.end, optionKey);
         }
     }
 
@@ -214,11 +214,11 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         if (list.length === 0) {
             return;
         }
-        return this.checkComma(list.hasTrailingComma === true, list, closeElementPos, optionKey);
+        return this.checkComma(list.hasTrailingComma, list, closeElementPos, optionKey);
     }
 
     /* Expects `list.length !== 0` */
-    private checkComma(hasTrailingComma: boolean, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
+    private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
         const options = isSameLine(this.sourceFile, list[list.length - 1].end, closeTokenPos)
             ? this.options.singleline
             : this.options.multiline;

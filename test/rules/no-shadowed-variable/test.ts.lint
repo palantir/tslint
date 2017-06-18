@@ -1,36 +1,53 @@
+import { Foo } from './foo';
+import * as Bar from '.bar';
+import Baz from './baz';
+import Bas = require('./bas');
+{
+    const Foo = 'bar';
+          ~~~ [err % ('Foo')]
+    const Bar = Foo;
+          ~~~ [err % ('Bar')]
+    const Baz = Bar;
+          ~~~ [err % ('Baz')]
+    const Bas = Baz;
+          ~~~ [err % ('Bas')]
+}
 function letTesting() {
     var a = 1;
+        ~ [err % ('a')]
     let b = 1;
 
     if (true) {
         let a = 2; // failure
-            ~                 [Shadowed variable: 'a']
+            ~                 [err % ('a')]
         let b = 2; // failure
-            ~                 [Shadowed variable: 'b']
+            ~                 [err % ('b')]
         let c = 2;
         var e = 2;
     } else {
         let b = 3; // failure
-            ~                 [Shadowed variable: 'b']
+            ~                 [err % ('b')]
         let c = 3;
         let e = 3; // failure
-            ~                 [Shadowed variable: 'e']
+            ~                 [err % ('e')]
         let f = 3;
+            ~ [err % ('f')]
     }
 
     var f = 4;
+        ~ [err % ('f')]
 }
 
 let a = 1;
 if (true) {
     let a = 2; // failure
-        ~                 [Shadowed variable: 'a']
+        ~                 [err % ('a')]
 }
 
 var g = 1;
 for (var index in [0, 1, 2]) {
-    var g = 2; // failure
-        ~                 [Shadowed variable: 'g']
+    let g = 2; // failure
+        ~                 [err % ('g')]
 }
 
 function constTesting() {
@@ -39,24 +56,21 @@ function constTesting() {
 
     if (true) {
         const h = 2; // failure
-              ~                 [Shadowed variable: 'h']
+              ~                 [err % ('h')]
         const i = 2; // failure
-              ~                 [Shadowed variable: 'i']
+              ~                 [err % ('i')]
     }
 }
 
 function testArguments(x: number, y: number): void {
     var x = 1; // failure
-        ~                 [Shadowed variable: 'x']
     let y = 2; // tsc error
-        ~                   [Shadowed variable: 'y']
 }
 
 let j = 1;
-for (var index in [0, 1, 2]) { // failure
-         ~~~~~                            [Shadowed variable: 'index']
+for (var index in [0, 1, 2]) {
     let j = 2; // failure
-        ~                 [Shadowed variable: 'j']
+        ~                 [err % ('j')]
 }
 
 function testTryStatement() {
@@ -69,7 +83,7 @@ function testTryStatement() {
     } finally {
         let foo = 3;
         let bar = 3; // failure
-            ~~~                 [Shadowed variable: 'bar']
+            ~~~                 [err % ('bar')]
     }
 }
 
@@ -78,7 +92,7 @@ function testWhileStatement() {
 
     while (true) {
         let foo = 2; // failure
-            ~~~                 [Shadowed variable: 'foo']
+            ~~~                 [err % ('foo')]
     }
 }
 
@@ -87,7 +101,7 @@ function testDoStatement() {
 
     do {
         let foo = 2; // failure
-            ~~~                 [Shadowed variable: 'foo']
+            ~~~                 [err % ('foo')]
     } while (true);
 }
 
@@ -101,21 +115,21 @@ function testDestructuring(x: number) {
     function innerFunc() {
         var [foo] = myFunc();
         var [x] = myFunc();   // failure
-             ~                           [Shadowed variable: 'x']
+             ~                           [err % ('x')]
         let [y] = myFunc();   // failure
-             ~                           [Shadowed variable: 'y']
+             ~                           [err % ('y')]
         const [z] = myFunc(); // failure
-               ~                         [Shadowed variable: 'z']
+               ~                         [err % ('z')]
     }
 
     function anotherInnerFunc() {
         var [{x}] = [{x: 1}];   // failure
-              ~                            [Shadowed variable: 'x']
+              ~                            [err % ('x')]
         let [[y]] = [[2]];      // failure
-              ~                            [Shadowed variable: 'y']
+              ~                            [err % ('y')]
         var [foo, ...bar] = [1, 2, 3, 4];
         var [...z] = [1, 2, 3, 4]; // failure
-                ~                             [Shadowed variable: 'z']
+                ~                             [err % ('z')]
     }
 }
 
@@ -139,17 +153,16 @@ interface FalsePositive4<T, TResult> {
 let p = 1;
 function testParameterDestructuring(
     { pos: p }: FalsePositive3, // failure
-           ~                               [Shadowed variable: 'p']
+           ~                               [err % ('p')]
     { pos: q, specular: r }: FalsePositive3,
     { pos }: FalsePositive3
 ) {
     p = 2;
-    var q = 1; // failure
-        ~                 [Shadowed variable: 'q']
+    var q = 1; // merges with parameter, should use no-duplicate-variable to catch this
 
     function someInnerFunc() {
         let pos = 3; // failure
-            ~~~                 [Shadowed variable: 'pos']
+            ~~~                 [err % ('pos')]
     }
 }
 
@@ -198,8 +211,10 @@ function constructorsWithArgsParamConst(
     derivedCtor: new (...args: any[]) => any,
     baseCtors: Array<new (...args: any[]) => any>,
     args: any[]): void {
-    const args = [];
-          ~~~~       [Shadowed variable: 'args']
+    {
+        const args = [];
+              ~~~~       [err % ('args')]
+    }
 }
 
 class MyClass { };
@@ -215,5 +230,105 @@ function creatorFunction(constructor: MyConstructor, filter: MyFunction): void {
 
 for (let i = 0; i < 3; i++) {
     let i = 34;
-        ~       [Shadowed variable: 'i']
+        ~       [err % ('i')]
 }
+
+(function f1() {
+    let f1;
+        ~~ [err % ('f1')]
+})();
+function f2() {
+    const f2 = 0;
+          ~~ [err % ('f2')]
+}
+(function f3() {
+    var f3;
+        ~~ [err % ('f3')]
+})();
+(function f4(f4) {
+             ~~ [err % ('f4')]
+})();
+let f5;
+(function f5(){})()
+          ~~ [err % ('f5')]
+
+class C<C> {
+        ~ [err % ('C')]
+    C<C>(C: C): C {
+      ~ [err % ('C')]
+         ~ [err % ('C')]
+        type C = C;
+             ~ [err % ('C')]
+        namespace C {
+                  ~ [err % ('C')]
+            interface C<C> {}
+                      ~ [err % ('C')]
+                        ~ [err % ('C')]
+        }
+    }
+}
+
+// allow nested namespaces
+namespace ns.C {}
+namespace ns {
+    export namespace C {}
+                     ~ [err % ('C')]
+}
+namespace ns {
+    namespace C {}
+              ~ [err % ('C')]
+}
+
+type Mapped<K, T> = {
+    [K in T]: K
+     ~ [err % ('K')]
+}
+
+// Allow parameters in signatures
+{
+    let param;
+    class TestClass {
+        myMethod(param): void;
+        myMethod(): void;
+        myMethod(param): void {}
+                 ~~~~~ [err % ('param')]
+    }
+    interface TestInterface {
+        (param): void;
+        myMethod(param): void
+        myMethod<param>(): void;
+                 ~~~~~ [err % ('param')]
+    }
+}
+
+// Handle variables in multiple child scopes
+{
+    {
+        {
+            let test;
+                ~~~~ [err % ('test')]
+        }
+        let test;
+            ~~~~ [err % ('test')]
+        {
+            let test;
+                ~~~~ [err % ('test')]
+        }
+    }
+    {
+        let test;
+            ~~~~ [err % ('test')]
+    }
+    let test;
+}
+
+// Allow mergeable declarations.
+interface I {}
+interface I {}
+
+// Exempt 'this'
+function f(this): void {
+    function inner(this): void {}
+}
+
+[err]: Shadowed name: '%s'

@@ -1,3 +1,6 @@
+class Promise<T> {
+    then(): Promise<T>;
+}
 function valueWrong(): number | undefined {
     return;
     ~~~~~~~ [UNDEFINED]

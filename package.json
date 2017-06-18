@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "5.4.2",
+  "version": "5.4.3",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -26,10 +26,10 @@
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
     "lint": "npm-run-all -p lint:global lint:from-bin",
-    "lint:global": "tslint --project test/tsconfig.json --format stylish --type-check # test includes 'src' too",
+    "lint:global": "tslint --project test/tsconfig.json --format stylish # test includes 'src' too",
     "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
-    "test:pre": "cd ./test/config && npm install",
+    "test:pre": "cd ./test/config && npm install --no-save",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\"",
     "test:rules": "node ./build/test/ruleTestRunner.js",
     "verify": "npm-run-all clean compile lint test docs",
@@ -57,10 +57,10 @@
     "@types/commander": "^2.9.0",
     "@types/diff": "^3.2.0",
     "@types/glob": "^5.0.30",
-    "@types/js-yaml": "^3.5.29",
+    "@types/js-yaml": "^3.5.31",
     "@types/minimatch": "^2.0.29",
     "@types/mocha": "^2.2.35",
-    "@types/node": "^7.0.16",
+    "@types/node": "^7.0.29",
     "@types/resolve": "^0.0.4",
     "@types/semver": "^5.3.30",
     "chai": "^3.5.0",
@@ -71,9 +71,9 @@
     "npm-run-all": "^4.0.2",
     "nyc": "^10.2.0",
     "rimraf": "^2.5.4",
-    "tslint": "latest",
+    "tslint": "^5.4.2",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "^2.3.0"
+    "typescript": "2.4.0"
   },
   "license": "Apache-2.0",
   "engines": {

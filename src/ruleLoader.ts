@@ -117,7 +117,7 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | "not-f
     return "not-found";
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | undefined {
+function loadCachedRule(directory: string, ruleName: string, isCustomPath?: boolean): RuleConstructor | undefined {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);

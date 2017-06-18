@@ -188,7 +188,24 @@ const options: Option[] = [
     },
 ];
 
-commander.version(VERSION);
+const builtinOptions: Option[] = [
+    {
+        short: "v",
+        name: "version",
+        type: "boolean",
+        describe: "current version",
+        description: "The current version of tslint.",
+    },
+    {
+        short: "h",
+        name: "help",
+        type: "boolean",
+        describe: "display detailed help",
+        description: "Prints this help message.",
+    },
+];
+
+commander.version(VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);
@@ -201,7 +218,7 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.map((o) =>
+    const optionDetails = options.concat(builtinOptions).map((o) =>
         `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
     console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
 });
@@ -214,12 +231,12 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
     console.error("Missing files");
     process.exit(1);
 }
 
-if (argv.typeCheck === true && argv.project === undefined) {
+if (argv.typeCheck && argv.project === undefined) {
     console.error("--project must be specified in order to enable type checking.");
     process.exit(1);
 }
@@ -254,7 +271,12 @@ run({
 }, {
     log,
     error: (m) => console.error(m),
-}).then(process.exit);
+}).then((rc) => {
+    process.exitCode = rc;
+}).catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+});
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

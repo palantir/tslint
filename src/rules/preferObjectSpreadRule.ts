@@ -96,7 +96,7 @@ function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix
                 let end = arg.end;
                 if (i !== args.length - 1) {
                     end = args[i + 1].getStart(sourceFile);
-                } else if (args.hasTrailingComma === true) {
+                } else if (args.hasTrailingComma) {
                     end = args.end;
                 }
                 // remove empty object iteral and the following comma if exists

@@ -160,7 +160,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths === true)).join("\n");
+            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
             if (options.force) {
                 logger.error(message);
             } else {
@@ -255,9 +255,9 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     return fs.readFileSync(filename, "utf8");
 }
 
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths: boolean): string {
+function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
     let message = ts.DiagnosticCategory[category];
-    if (file) {
+    if (file !== undefined && start !== undefined) {
         const {line, character} = file.getLineAndCharacterOfPosition(start);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths

@@ -18,6 +18,7 @@
 import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 
 const OPTION_SINGLE = "single";
@@ -81,7 +82,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         const args = this.ruleArguments;
         if (args.length > 0) {
             if (args[0] !== OPTION_SINGLE && args[0] !== OPTION_DOUBLE) {
-                throw new Error(`First argument to 'quotemark' rule should be "${OPTION_SINGLE}" or "${OPTION_DOUBLE}"`);
+                showWarningOnce(`Warning: First argument to 'quotemark' rule should be "${OPTION_SINGLE}" or "${OPTION_DOUBLE}"`);
+                return [];
             }
         }
         const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';

@@ -206,7 +206,11 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
     const a = types1[index];
     const b = types2[index];
-    return parametersHaveEqualSigils(a, b) ? { kind: "single-parameter-difference", p0: a, p1: b } : undefined;
+    // Can unify `a?: string` and `b?: number`. Can't unify `...args: string[]` and `...args: number[]`.
+    // See https://github.com/Microsoft/TypeScript/issues/5077
+    return parametersHaveEqualSigils(a, b) && a.dotDotDotToken === undefined
+        ? { kind: "single-parameter-difference", p0: a, p1: b }
+        : undefined;
 }
 
 /**
@@ -268,9 +272,9 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
 
 /** True if any of the outer type parameters are used in a signature. */
 function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
-    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type));
+    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type) === true);
 
-    function typeContainsTypeParameter(type: ts.Node): boolean {
+    function typeContainsTypeParameter(type: ts.Node): boolean | undefined {
         if (utils.isTypeReferenceNode(type)) {
             const { typeName } = type;
             if (typeName.kind === ts.SyntaxKind.Identifier && isTypeParameter(typeName.text)) {

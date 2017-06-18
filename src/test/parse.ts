@@ -15,9 +15,9 @@
  */
 
 import * as ts from "typescript";
-import {format} from "util";
+import { format } from "util";
 
-import {flatMap, mapDefined} from "../utils";
+import { flatMap, mapDefined } from "../utils";
 import {
     CodeLine,
     EndErrorLine,
@@ -28,7 +28,7 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import {errorComparator, LintError, lintSyntaxError} from "./lintError";
+import { errorComparator, LintError, lintSyntaxError } from "./lintError";
 
 let scanner: ts.Scanner | undefined;
 

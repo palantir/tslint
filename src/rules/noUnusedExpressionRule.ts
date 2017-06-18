@@ -81,7 +81,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     let allowFastNullChecks = true;
     return ts.forEachChild(ctx.sourceFile, cb);
 
-    function cb(node: ts.Node): boolean {
+    function cb(node: ts.Node): boolean | undefined {
         if (checking) {
             if (isParenthesizedExpression(node) || isVoidExpression(node)) {
                 return cb(node.expression);
@@ -126,7 +126,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         return ts.forEachChild(node, cb);
     }
 
-    function forEachChild(node: ts.Node): boolean {
+    function forEachChild(node: ts.Node) {
         return ts.forEachChild(node, cb);
     }
 
@@ -138,7 +138,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         checking = false;
     }
 
-    function noCheck(node: ts.Node, callback: (node: ts.Node) => boolean): void {
+    function noCheck(node: ts.Node, callback: (node: ts.Node) => void): void {
         const old = allowFastNullChecks;
         checking = false;
         allowFastNullChecks = true;
