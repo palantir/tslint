@@ -81,7 +81,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${ALLOWED_THIS_NAMES}\` may be specified as a list of regular expressions to match allowed variable names.`,
         rationale: "Assigning a variable to `this` instead of properly using arrow lambdas"
             + "may be a symptom of pre-ES6 practices or not manging scope well.",
-        ruleName: "no-this-reassignment",
+        ruleName: "no-this-assignment",
         type: "functionality",
         typescriptOnly: false,
     };
@@ -94,13 +94,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseConfigOptions((this.ruleArguments as [ConfigOptions])[0]);
-        const noThisReassignmentWalker = new NoThisReassignmentWalker(sourceFile, this.ruleName, options);
+        const noThisAssignmentWalker = new NoThisAssignmentWalker(sourceFile, this.ruleName, options);
 
-        return this.applyWithWalker(noThisReassignmentWalker);
+        return this.applyWithWalker(noThisAssignmentWalker);
     }
 }
 
-class NoThisReassignmentWalker extends Lint.AbstractWalker<Options> {
+class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
     private readonly allowedThisNameTesters = this.options.allowedNames.map(
         (allowedThisName) => new RegExp(allowedThisName));
 

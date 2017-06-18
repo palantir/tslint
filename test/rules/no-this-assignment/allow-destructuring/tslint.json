@@ -1,6 +1,6 @@
 {
   "rules": {
-    "no-this-reassignment": [true, {
+    "no-this-assignment": [true, {
       "allow-destructuring": true
     }]
   }
