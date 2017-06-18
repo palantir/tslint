@@ -41,6 +41,7 @@ export const rules = {
         true,
         "check-parameters",
     ],
+    "no-this-reassignment": true,
 };
 // tslint:enable object-literal-sort-keys
 

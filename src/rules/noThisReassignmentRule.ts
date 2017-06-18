@@ -20,17 +20,32 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const ALLOW_THIS_DESTRUCTURING = "allow-this-destructuring";
-const ALLOWED_THIS_NAMES = "allowed-this-names";
+const ALLOW_THIS_DESTRUCTURING = "allow-destructuring";
+const ALLOWED_THIS_NAMES = "allowed-names";
 
 interface Options {
-    allowedThisNames: string[];
-    allowThisDestructuring: boolean;
+    allowedNames: string[];
+    allowDestructuring: boolean;
 }
 
-type RuleArgument = boolean | {
-    "allow-this-destructuring"?: boolean;
-    "allowed-this-names"?: string[];
+interface ConfigOptions {
+    "allow-destructuring"?: boolean;
+    "allowed-names"?: string[];
+}
+
+const parseConfigOptions = (configOptions: ConfigOptions | undefined): Options => {
+    const allowedNames: string[] = [];
+    let allowDestructuring = false;
+
+    if (configOptions !== undefined) {
+        allowDestructuring = !!configOptions[ALLOW_THIS_DESTRUCTURING];
+
+        if (configOptions[ALLOWED_THIS_NAMES] !== undefined) {
+            allowedNames.push(...configOptions[ALLOWED_THIS_NAMES]!);
+        }
+    }
+
+    return { allowedNames, allowDestructuring };
 };
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -41,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
-                    [ALLOWED_THIS_NAMES]: ["self"],
+                    [ALLOWED_THIS_NAMES]: ["^self$"],
                     [ALLOW_THIS_DESTRUCTURING]: true,
                 },
             ],
@@ -71,27 +86,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static readonly FAILURE_STRING_BINDINGS = "Don't reassign members of `this` to local variables.";
+    public static FAILURE_STRING_BINDINGS = "Don't assign members of `this` to local variables.";
 
     public static FAILURE_STRING_FACTORY_IDENTIFIERS(name: string) {
         return `Assigning \`this\` reference to local variable not allowed: ${name}.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const allowedThisNames: string[] = [];
-        let allowThisDestructuring = false;
-
-        for (const ruleArgument of this.ruleArguments as RuleArgument[]) {
-            if (typeof ruleArgument === "object") {
-                allowThisDestructuring = !!ruleArgument[ALLOW_THIS_DESTRUCTURING];
-
-                if (ruleArgument[ALLOWED_THIS_NAMES] !== undefined) {
-                    allowedThisNames.push(...ruleArgument[ALLOWED_THIS_NAMES]!);
-                }
-            }
-        }
-
-        const options = { allowedThisNames, allowThisDestructuring };
+        const options = parseConfigOptions((this.ruleArguments as [ConfigOptions])[0]);
         const noThisReassignmentWalker = new NoThisReassignmentWalker(sourceFile, this.ruleName, options);
 
         return this.applyWithWalker(noThisReassignmentWalker);
@@ -99,7 +101,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoThisReassignmentWalker extends Lint.AbstractWalker<Options> {
-    private readonly allowedThisNameTesters = this.options.allowedThisNames.map(
+    private readonly allowedThisNameTesters = this.options.allowedNames.map(
         (allowedThisName) => new RegExp(allowedThisName));
 
     public walk(sourceFile: ts.SourceFile): void {
@@ -126,8 +128,8 @@ class NoThisReassignmentWalker extends Lint.AbstractWalker<Options> {
                 }
                 break;
 
-            case ts.SyntaxKind.ObjectBindingPattern:
-                if (!this.options.allowThisDestructuring) {
+            default:
+                if (!this.options.allowDestructuring) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING_BINDINGS);
                 }
         }

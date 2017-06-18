@@ -33,8 +33,14 @@ class TestClass {
 
         const { act, constructor } = this;
               ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [binding]
+
+        const [foo] = this;
+              ~~~~~~~~~~~~       [binding]
+
+        const [foo, bar] = this;
+              ~~~~~~~~~~~~~~~~~       [binding]
     }
 }
 
-[binding]: Don't reassign members of `this` to local variables.
+[binding]: Don't assign members of `this` to local variables.
 [identifier]: Assigning `this` reference to local variable not allowed: %s.
