@@ -1,3 +1,9 @@
 const { length } = this;
 
 const { length, toString } = this;
+
+const self = this;
+      ~~~~~~~~~~~       [name % ('self')]
+
+[name]: Assigning `this` reference to local variable not allowed: %s.
+
