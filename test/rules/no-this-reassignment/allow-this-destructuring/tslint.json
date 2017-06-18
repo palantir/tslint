@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-this-reassignment": [true, {
+      "allow-this-destructuring": true
+    }]
+  }
+}

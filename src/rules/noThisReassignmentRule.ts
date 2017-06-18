@@ -20,14 +20,17 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const ALLOW_THIS_DESTRUCTURING = "allow-this-destructuring";
 const ALLOWED_THIS_NAMES = "allowed-this-names";
 
 interface Options {
     allowedThisNames: string[];
+    allowThisDestructuring: boolean;
 }
 
 type RuleArgument = boolean | {
-    "allowed-this-names": string[];
+    "allow-this-destructuring"?: boolean;
+    "allowed-this-names"?: string[];
 };
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -39,15 +42,28 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     [ALLOWED_THIS_NAMES]: ["self"],
+                    [ALLOW_THIS_DESTRUCTURING]: true,
                 },
             ],
         ],
         options: {
-            listType: "string",
-            type: "list",
+            additionalProperties: false,
+            properties: {
+                [ALLOW_THIS_DESTRUCTURING]: {
+                    type: "boolean",
+                },
+                [ALLOWED_THIS_NAMES]: {
+                    listType: "string",
+                    type: "list",
+                },
+            },
+            type: "object",
         },
         optionsDescription: Lint.Utils.dedent`
-            \`${ALLOWED_THIS_NAMES}\` may be specified as  a list of regular expressions to match allowed variable names.`,
+            Two options may be provided on an object:
+
+            * \`${ALLOW_THIS_DESTRUCTURING}\` allows using destructuring to access members of \`this\` (e.g. \`{ foo, bar } = this;\`).
+            * \`${ALLOWED_THIS_NAMES}\` may be specified as a list of regular expressions to match allowed variable names.`,
         rationale: "Assigning a variable to `this` instead of properly using arrow lambdas"
             + "may be a symptom of pre-ES6 practices or not manging scope well.",
         ruleName: "no-this-reassignment",
@@ -55,20 +71,28 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING_FACTORY(name: string) {
+    public static readonly FAILURE_STRING_BINDINGS = "Don't reassign members of `this` to local variables.";
+
+    public static FAILURE_STRING_FACTORY_IDENTIFIERS(name: string) {
         return `Assigning \`this\` reference to local variable not allowed: ${name}.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const allowedThisNames: string[] = [];
+        let allowThisDestructuring = false;
 
         for (const ruleArgument of this.ruleArguments as RuleArgument[]) {
-            if (typeof ruleArgument === "object" && ruleArgument[ALLOWED_THIS_NAMES] !== undefined) {
-                allowedThisNames.push(...ruleArgument[ALLOWED_THIS_NAMES]);
+            if (typeof ruleArgument === "object") {
+                allowThisDestructuring = !!ruleArgument[ALLOW_THIS_DESTRUCTURING];
+
+                if (ruleArgument[ALLOWED_THIS_NAMES] !== undefined) {
+                    allowedThisNames.push(...ruleArgument[ALLOWED_THIS_NAMES]!);
+                }
             }
         }
 
-        const noThisReassignmentWalker = new NoThisReassignmentWalker(sourceFile, this.ruleName, { allowedThisNames });
+        const options = { allowedThisNames, allowThisDestructuring };
+        const noThisReassignmentWalker = new NoThisReassignmentWalker(sourceFile, this.ruleName, options);
 
         return this.applyWithWalker(noThisReassignmentWalker);
     }
@@ -91,12 +115,21 @@ class NoThisReassignmentWalker extends Lint.AbstractWalker<Options> {
     }
 
     private visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        if (node.initializer !== undefined
-            && node.initializer.kind === ts.SyntaxKind.ThisKeyword
-            && node.name.kind === ts.SyntaxKind.Identifier
-            && this.variableNameIsBanned(node.name.text)
-        ) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(node.name.text));
+        if (node.initializer === undefined || node.initializer.kind !== ts.SyntaxKind.ThisKeyword) {
+            return;
+        }
+
+        switch (node.name.kind) {
+            case ts.SyntaxKind.Identifier:
+                if (this.variableNameIsBanned(node.name.text)) {
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY_IDENTIFIERS(node.name.text));
+                }
+                break;
+
+            case ts.SyntaxKind.ObjectBindingPattern:
+                if (!this.options.allowThisDestructuring) {
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING_BINDINGS);
+                }
         }
     }
 
