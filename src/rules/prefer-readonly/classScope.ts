@@ -54,13 +54,13 @@ export class ClassScope {
     }
 
     public addDeclaredVariable(node: ParameterOrPropertyDeclaration) {
-        if (!utils.isModfierFlagSet(node, ts.ModifierFlags.Private)
-            || utils.isModfierFlagSet(node, ts.ModifierFlags.Readonly)
+        if (!utils.isModifierFlagSet(node, ts.ModifierFlags.Private)
+            || utils.isModifierFlagSet(node, ts.ModifierFlags.Readonly)
             || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
             return;
         }
 
-        if (utils.isModfierFlagSet(node, ts.ModifierFlags.Static)) {
+        if (utils.isModifierFlagSet(node, ts.ModifierFlags.Static)) {
             this.privateModifiableStatics.set(node.name.getText(), node);
         } else {
             this.privateModifiableMembers.set(node.name.getText(), node);

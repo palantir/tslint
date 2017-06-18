@@ -30,6 +30,9 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
+        rationale: Lint.Utils.dedent`
+            Marking never-modified variables as readonly helps enforce the code's intent of keeping them as never-modified.
+            It can also help prevent accidental changes of members not meant to be changed.`,
         requiresTypeInfo: true,
         ruleName: "prefer-readonly",
         type: "maintainability",
@@ -69,15 +72,15 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
                 break;
 
             case ts.SyntaxKind.Constructor:
-                this.handleConstructor(node as ts.ConstructorDeclaration);
+                this.handleConstructor(node as ts.ConstructorDeclaration, this.scope!);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:
-                this.handlePropertyDeclaration(node as ts.PropertyDeclaration);
+                this.handlePropertyDeclaration(node as ts.PropertyDeclaration, this.scope!);
                 break;
 
             case ts.SyntaxKind.PropertyAccessExpression:
-                this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!);
+                this.handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!, this.scope!);
                 break;
 
             default:
@@ -110,69 +113,58 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         this.scope = parentScope;
     }
 
-    private handleConstructor(node: ts.ConstructorDeclaration) {
-        if (this.scope !== undefined) {
-            this.scope.enterConstructor();
+    private handleConstructor(node: ts.ConstructorDeclaration, scope: ClassScope) {
+        scope.enterConstructor();
 
-            for (const parameter of node.parameters) {
-                if (utils.isModifierFlagSet(parameter, ts.ModifierFlags.Private)) {
-                    this.scope.addDeclaredVariable(parameter);
-                }
+        for (const parameter of node.parameters) {
+            if (utils.isModifierFlagSet(parameter, ts.ModifierFlags.Private)) {
+                scope.addDeclaredVariable(parameter);
             }
         }
 
         ts.forEachChild(node, this.visitNode);
 
-        if (this.scope !== undefined) {
-            this.scope.exitConstructor();
-        }
+        scope.exitConstructor();
     }
 
-    private handlePropertyDeclaration(node: ts.PropertyDeclaration) {
-        if (this.scope !== undefined) {
-            this.scope.addDeclaredVariable(node);
-        }
+    private handlePropertyDeclaration(node: ts.PropertyDeclaration, scope: ClassScope) {
+        scope.addDeclaredVariable(node);
 
         ts.forEachChild(node, this.visitNode);
     }
 
-    private handlePropertyAccessExpression(node: ts.PropertyAccessExpression, parent: ts.Node) {
+    private handlePropertyAccessExpression(node: ts.PropertyAccessExpression, parent: ts.Node, scope: ClassScope) {
         switch (parent.kind) {
             case ts.SyntaxKind.BinaryExpression:
-                this.handleParentBinaryExpression(node, parent as ts.BinaryExpression);
+                this.handleParentBinaryExpression(node, parent as ts.BinaryExpression, scope);
                 break;
 
             case ts.SyntaxKind.DeleteExpression:
-                this.handleDeleteExpression(node);
+                this.handleDeleteExpression(node, scope);
                 break;
 
             case ts.SyntaxKind.PostfixUnaryExpression:
             case ts.SyntaxKind.PrefixUnaryExpression:
-                this.handleParentPostfixOrPrefixUnaryExpression(parent as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
+                this.handleParentPostfixOrPrefixUnaryExpression(parent as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression, scope);
         }
 
         ts.forEachChild(node, this.visitNode);
     }
 
-    private handleParentBinaryExpression(node: ts.PropertyAccessExpression, parent: ts.BinaryExpression) {
-        if (this.scope !== undefined && parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
-            this.scope.addVariableModification(node);
+    private handleParentBinaryExpression(node: ts.PropertyAccessExpression, parent: ts.BinaryExpression, scope: ClassScope) {
+        if (parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
+            scope.addVariableModification(node);
         }
     }
 
-    private handleParentPostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
-        if (this.scope === undefined
-            || (node.operator !== ts.SyntaxKind.PlusPlusToken && node.operator !== ts.SyntaxKind.MinusMinusToken)) {
-            return;
+    private handleParentPostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression, scope: ClassScope) {
+        if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
+            scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
         }
-
-        this.scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
     }
 
-    private handleDeleteExpression(node: ts.PropertyAccessExpression) {
-        if (this.scope !== undefined) {
-            this.scope.addVariableModification(node);
-        }
+    private handleDeleteExpression(node: ts.PropertyAccessExpression, scope: ClassScope) {
+        scope.addVariableModification(node);
     }
 
     private finalizeScope(scope: ClassScope) {
