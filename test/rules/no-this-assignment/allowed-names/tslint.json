@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-this-assignment": [true, {
+      "allowed-names": ["^start"]
+    }]
+  }
+}
