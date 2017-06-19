@@ -187,9 +187,17 @@ class Linter {
                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
             }
             fs.writeFileSync(filePath, fileNewSource);
+            this.updateProgram(filePath);
         });
 
         return source;
+    }
+
+    private updateProgram(sourceFilePath: string) {
+        if (this.program !== undefined && this.program.getSourceFile(sourceFilePath) !== undefined) {
+            const options = this.program.getCompilerOptions();
+            this.program = ts.createProgram(this.program.getRootFileNames(), options, ts.createCompilerHost(options, true), this.program);
+        }
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
