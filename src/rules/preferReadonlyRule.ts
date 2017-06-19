@@ -19,7 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { ClassScope, ParameterOrPropertyDeclaration } from "./prefer-readonly/classScope";
+import { ClassScope } from "../language/classScope";
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -175,13 +175,13 @@ class PreferReadonlyWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private complainOnNode(node: ParameterOrPropertyDeclaration) {
+    private complainOnNode(node: ts.ParameterDeclaration | ts.PropertyDeclaration) {
         const fix = Lint.Replacement.appendText(node.modifiers!.end, " readonly");
 
         this.addFailureAtNode(node.name, this.createFailureString(node), fix);
     }
 
-    private createFailureString(node: ParameterOrPropertyDeclaration) {
+    private createFailureString(node: ts.ParameterDeclaration | ts.PropertyDeclaration) {
         const accessibility = utils.isModifierFlagSet(node, ts.ModifierFlags.Static)
             ? "static"
             : "member";

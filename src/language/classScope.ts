@@ -18,31 +18,12 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
+import { typeIsOrHasBaseType } from "./typeUtils";
+
 const OUTSIDE_CONSTRUCTOR = -1;
 const DIRECTLY_INSIDE_CONSTRUCTOR = 0;
 
 export type ParameterOrPropertyDeclaration = ts.ParameterDeclaration | ts.PropertyDeclaration;
-
-function typeIsOrHasBaseType(type: ts.Type, parentType: ts.Type) {
-    if (type.symbol === undefined || parentType.symbol === undefined) {
-        return false;
-    }
-
-    const typeAndBaseTypes = [type];
-    const ancestorTypes = type.getBaseTypes();
-
-    if (ancestorTypes !== undefined) {
-        typeAndBaseTypes.push(...ancestorTypes);
-    }
-
-    for (const baseType of typeAndBaseTypes) {
-        if (baseType.symbol !== undefined && baseType.symbol.name === parentType.symbol.name) {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 export class ClassScope {
     private readonly privateModifiableMembers = new Map<string, ParameterOrPropertyDeclaration>();
