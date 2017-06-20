@@ -46,27 +46,23 @@ const walk = (ctx: Lint.WalkContext<void>): void => {
         ts.forEachChild(node, cb);
     };
 
-    const visitCaseBlock = (() => {
+    const visitCaseBlock = (node: ts.CaseBlock): void => {
         const previousCases = new Set<string>();
 
-        return (node: ts.CaseBlock): void => {
-            previousCases.clear();
-
-            for (const clause of node.clauses) {
-                if (clause.kind === ts.SyntaxKind.DefaultClause) {
-                    continue;
-                }
-
-                const text = clause.expression.getText();
-                if (!previousCases.has(text)) {
-                    previousCases.add(text);
-                    continue;
-                }
-
-                ctx.addFailureAtNode(clause.expression, Rule.FAILURE_STRING_FACTORY(text));
+        for (const clause of node.clauses) {
+            if (clause.kind === ts.SyntaxKind.DefaultClause) {
+                continue;
             }
-        };
-    })();
+
+            const text = clause.expression.getText();
+            if (!previousCases.has(text)) {
+                previousCases.add(text);
+                continue;
+            }
+
+            ctx.addFailureAtNode(clause.expression, Rule.FAILURE_STRING_FACTORY(text));
+        }
+    };
 
     ts.forEachChild(ctx.sourceFile, cb);
 };
