@@ -54,7 +54,7 @@ const walk = (ctx: Lint.WalkContext<void>): void => {
                 continue;
             }
 
-            const text = clause.expression.getText();
+            const text = clause.expression.getText(ctx.sourceFile);
             if (!previousCases.has(text)) {
                 previousCases.add(text);
                 continue;
