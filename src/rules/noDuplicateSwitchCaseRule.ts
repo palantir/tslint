@@ -37,16 +37,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-const walk = (ctx: Lint.WalkContext<void>): void => {
-    const cb = (node: ts.Node): void => {
+function walk(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.CaseBlock) {
             visitCaseBlock(node as ts.CaseBlock);
         }
 
         ts.forEachChild(node, cb);
-    };
+    });
 
-    const visitCaseBlock = (node: ts.CaseBlock): void => {
+    function visitCaseBlock(node: ts.CaseBlock): void {
         const previousCases = new Set<string>();
 
         for (const clause of node.clauses) {
@@ -62,7 +62,5 @@ const walk = (ctx: Lint.WalkContext<void>): void => {
 
             ctx.addFailureAtNode(clause.expression, Rule.FAILURE_STRING_FACTORY(text));
         }
-    };
-
-    ts.forEachChild(ctx.sourceFile, cb);
-};
+    }
+}
