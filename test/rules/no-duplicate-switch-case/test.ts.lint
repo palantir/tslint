@@ -42,7 +42,7 @@ class WithString {
 
             case "eee":
             case "eee":
-                 ~~~~~       [error % ('"bbb"')]
+                 ~~~~~       [error % ('"eee"')]
                 break;
 
             case "default":
