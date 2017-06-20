@@ -238,6 +238,7 @@ export const rules = {
         true,
         "ban-keywords",
         "check-format",
+        "all-caps-for-const",
     ],
     "whitespace": [
         true,

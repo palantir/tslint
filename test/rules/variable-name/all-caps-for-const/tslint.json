@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "variable-name": [true, "all-caps-for-const"]
+  }
+}

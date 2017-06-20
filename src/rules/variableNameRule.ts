@@ -17,6 +17,7 @@
 
 // tslint:disable object-literal-sort-keys
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -30,6 +31,7 @@ const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
+const OPTION_ALL_CAPS_FOR_CONST = "all-caps-for-const";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
 const OPTION_ALLOW_SNAKE_CASE = "allow-snake-case";
 
@@ -38,11 +40,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "variable-name",
         description: "Checks variable names for various errors.",
         optionsDescription: Lint.Utils.dedent`
-            Five arguments may be optionally provided:
+            Six arguments may be optionally provided:
 
             * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
+              * \`"${OPTION_ALL_CAPS_FOR_CONST}"\`: enforces that only \`const\` variables may have UPPER_CASED names and vice-versa.
               * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
               * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
@@ -61,7 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
             minLength: 0,
-            maxLength: 5,
+            maxLength: 6,
         },
         optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
@@ -69,6 +72,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
+
+    public static FAILURE_STRING_CONST = "Only `const` variables may be UPPER_CASE.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
@@ -80,6 +85,7 @@ interface Options {
     checkFormat: boolean;
     leadingUnderscore: boolean;
     trailingUnderscore: boolean;
+    allCapsForConst: boolean;
     allowPascalCase: boolean;
     allowSnakeCase: boolean;
 }
@@ -91,6 +97,7 @@ function parseOptions(ruleArguments: string[]): Options {
         checkFormat: !banKeywords || hasOption(OPTION_CHECK_FORMAT),
         leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
         trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
+        allCapsForConst: hasOption(OPTION_ALL_CAPS_FOR_CONST),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
         allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
     };
@@ -126,20 +133,27 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
             case ts.SyntaxKind.Parameter:
             case ts.SyntaxKind.PropertyDeclaration:
-            case ts.SyntaxKind.VariableDeclaration: {
-                const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
-                if (name.kind === ts.SyntaxKind.Identifier) {
-                    handleVariableNameFormat(name, initializer);
-                    // do not check property declarations for keywords, they are allowed to be keywords
-                    if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
-                        handleVariableNameKeyword(name);
-                    }
-                }
-            }
+                handleDeclaredVariable(node as ts.ParameterDeclaration | ts.PropertyDeclaration);
+                break;
+
+            case ts.SyntaxKind.VariableDeclaration:
+                handleVariableDeclaration(node as ts.VariableDeclaration);
         }
 
         return ts.forEachChild(node, cb);
     });
+
+    function handleDeclaredVariable(node: ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration): void {
+        const { name, initializer } = node;
+
+        if (name.kind === ts.SyntaxKind.Identifier) {
+            handleVariableNameFormat(name, initializer);
+            // do not check property declarations for keywords, they are allowed to be keywords
+            if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
+                handleVariableNameKeyword(name);
+            }
+        }
+    }
 
     function handleVariableNameFormat(name: ts.Identifier, initializer?: ts.Expression): void {
         if (!options.checkFormat) {
@@ -159,6 +173,21 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     function handleVariableNameKeyword(name: ts.Identifier): void {
         if (options.banKeywords && bannedKeywordsSet.has(name.text)) {
             ctx.addFailureAtNode(name, Rule.KEYWORD_FAILURE);
+        }
+    }
+
+    function handleVariableDeclaration(node: ts.VariableDeclaration): void {
+        handleDeclaredVariable(node);
+
+        if (!ctx.options.allCapsForConst) {
+            return;
+        }
+
+        const declarationList = node.parent as ts.VariableDeclarationList;
+        const text = node.name.getText();
+
+        if (isUpperCase(text) && !utils.isNodeFlagSet(declarationList, ts.NodeFlags.Const)) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_CONST);
         }
     }
 
