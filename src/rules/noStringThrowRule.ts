@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-throw",
@@ -31,46 +31,38 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         type: "functionality",
         typescriptOnly: false,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING =
             "Throwing plain strings (not instances of Error) gives no stack traces";
 
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, program.getTypeChecker()));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    const { sourceFile } = ctx;
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isThrowStatement(node)) {
-            const { expression } = node;
-            if (isString(expression)) {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
-                    Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
-                    Lint.Replacement.appendText(expression.getEnd(), ")"),
-                ]);
-            }
-        }
-        return ts.forEachChild(node, cb);
-    });
-}
+class Walker extends Lint.AbstractWalker<void> {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
+        super(sourceFile, ruleName, undefined);
+    }
 
-function isString(node: ts.Node): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.StringLiteral:
-        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-        case ts.SyntaxKind.TemplateExpression:
-            return true;
-        case ts.SyntaxKind.BinaryExpression: {
-            const { operatorToken, left, right } = node as ts.BinaryExpression;
-            return operatorToken.kind === ts.SyntaxKind.PlusToken && (isString(left) || isString(right));
-        }
-        case ts.SyntaxKind.ParenthesizedExpression:
-            return isString((node as ts.ParenthesizedExpression).expression);
-        default:
-            return false;
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            if (isThrowStatement(node)) {
+                const type = this.checker.getTypeAtLocation(node.expression);
+                if (Lint.isTypeFlagSet(type, ts.TypeFlags.StringLike)) {
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING, [
+                        Lint.Replacement.appendText(node.expression.getStart(sourceFile), "new Error("),
+                        Lint.Replacement.appendText(node.expression.getEnd(), ")"),
+                    ]);
+                }
+            }
+
+            return ts.forEachChild(node, cb);
+        };
+
+        return ts.forEachChild(sourceFile, cb);
     }
 }
