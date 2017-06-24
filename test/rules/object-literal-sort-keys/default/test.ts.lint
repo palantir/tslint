@@ -170,11 +170,11 @@ const passSpread = {
 };
 
 const failSpread = {
-    a,
     c,
     ...x,
     b: b,
-    ~ [err % ('b')]
+    a,
+    ~ [err % ('a')]
 };
 
 const numbers = {

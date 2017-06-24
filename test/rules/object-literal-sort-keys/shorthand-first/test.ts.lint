@@ -1,0 +1,69 @@
+const passA = {
+  a,
+  d,
+  b: [],
+  c: {},
+}
+
+const failA = {
+  a,
+  b: [],
+  c: {},
+  d,
+  ~ [Shorthand property 'd' should come before normal properties]
+}
+
+const failB = {
+  d,
+  a,
+  ~ [The key 'a' is not sorted alphabetically]
+  b: [],
+  c: {},
+}
+
+const failC = {
+  a,
+  d,
+  c: [],
+  b: {},
+  ~ [The key 'b' is not sorted alphabetically]
+}
+
+const passSpreadA = {
+  a,
+  b,
+  f: {}.
+  ...test,
+  c,
+  d: {},
+}
+
+const passSpreadB = {
+  a,
+  f,
+  b: {}.
+  ...test,
+  c,
+  e,
+  d: {},
+}
+
+const failSpreadA = {
+  a,
+  b,
+  f: {}.
+  ...test,
+  d: {},
+  c,
+  ~ [Shorthand property 'c' should come before normal properties]
+}
+
+const failSpreadB = {
+  a,
+  d,
+  f: {}.
+  ...test,
+  c,
+  b,
+  ~ [The key 'b' is not sorted alphabetically]
+}
