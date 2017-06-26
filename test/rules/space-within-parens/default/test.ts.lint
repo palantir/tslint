@@ -1,0 +1,40 @@
+// simple call
+console.clear( );
+              ~ [0]
+
+// conditional
+if ( process.env === 'production' ) {
+    ~ [0]
+                                 ~ [0]
+    console.log( 'start' );
+                ~ [0]
+                        ~ [0]
+}
+
+// conditional and nested
+if (  x === 'string' &&
+    ~~ [0]
+        y === 'object'  ) {
+                      ~~ [0]
+
+    // skip this conditional
+    if (
+        true === true && false !=== false
+    ) {
+        // load
+        foo();
+    }
+    console.log( 'test'  );
+                ~ [0]
+                       ~~ [0]
+}
+
+// other expresions
+switch ( typeof x ) {
+        ~ [0]
+                 ~ [0]
+    default:
+        break;
+}
+
+[0]: No space within parentheses

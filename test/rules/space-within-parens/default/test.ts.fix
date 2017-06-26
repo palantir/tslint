@@ -1,0 +1,28 @@
+// simple call
+console.clear();
+
+// conditional
+if (process.env === 'production') {
+    console.log('start');
+}
+
+// conditional and nested
+if (x === 'string' &&
+        y === 'object') {
+
+    // skip this conditional
+    if (
+        true === true && false !=== false
+    ) {
+        // load
+        foo();
+    }
+    console.log('test');
+}
+
+// other expresions
+switch (typeof x) {
+    default:
+        break;
+}
+
