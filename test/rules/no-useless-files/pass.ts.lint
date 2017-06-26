@@ -1,0 +1,9 @@
+//function invalidParametersAlignment1(a: number, b: number) {
+//    var i = 0;
+//}
+
+var foo = "bar";
+
+//function myOldFunction(a: number, b: number, c: number) {
+//   var i = 0;
+//}
