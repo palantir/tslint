@@ -34,9 +34,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             Recommends to use a conditional expression instead of assigning to the same thing in each branch of an if statement.`,
         rationale: Lint.Utils.dedent`
             This reduces duplication and can eliminate an unnecessary variable declaration.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: `If \`${OPTION_CHECK_ELSE_IF}\` is specified, the rule also checks nested if-else-if statements.`,
+        options: {
+            type: "string",
+            enum: [OPTION_CHECK_ELSE_IF],
+        },
+        optionExamples: [true, [true, OPTION_CHECK_ELSE_IF]],
         type: "functionality",
         typescriptOnly: false,
     };
