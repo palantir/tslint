@@ -43,7 +43,12 @@ export const rules = {
     "comment-format": {
         options: ["check-space"],
     },
-    "curly": true,
+    "curly": {
+        options: [
+            "as-needed",
+            "ignore-same-line",
+        ],
+    },
     "cyclomatic-complexity": false,
     "eofline": true,
     "forin": true,
@@ -209,7 +214,12 @@ export const jsRules = {
         ],
     },
     "class-name": true,
-    "curly": true,
+    "curly": {
+        options: [
+            "as-needed",
+            "ignore-same-line",
+        ],
+    },
     "eofline": true,
     "forin": true,
     "import-spacing": true,
