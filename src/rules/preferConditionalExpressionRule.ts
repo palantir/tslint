@@ -20,6 +20,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_CHECK_ELSE_IF = "check-else-if";
+
+interface Options {
+    checkElseIf: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -41,19 +47,23 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            checkElseIf: this.ruleArguments.indexOf(OPTION_CHECK_ELSE_IF) !== -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    const { sourceFile } = ctx;
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { checkElseIf } } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isIfStatement(node)) {
-            const assigned = detect(node, sourceFile);
+            const assigned = detect(node, sourceFile, checkElseIf);
             if (assigned !== undefined) {
                 ctx.addFailureAtNode(
-                    Lint.childOfKind(node, ts.SyntaxKind.IfKeyword)!,
+                    node.getChildAt(0, sourceFile),
                     Rule.FAILURE_STRING(assigned.getText(sourceFile)));
+            }
+            if (assigned !== undefined || !checkElseIf) {
                 // Be careful not to fail again for the "else if"
                 ts.forEachChild(node.expression, cb);
                 ts.forEachChild(node.thenStatement, cb);
@@ -67,11 +77,11 @@ function walk(ctx: Lint.WalkContext<void>): void {
     });
 }
 
-function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile): ts.Expression | undefined {
-    if (elseStatement === undefined) {
+function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean): ts.Expression | undefined {
+    if (elseStatement === undefined || !elseIf && elseStatement.kind === ts.SyntaxKind.IfStatement) {
         return undefined;
     }
-    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile) : getAssigned(elseStatement, sourceFile);
+    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf) : getAssigned(elseStatement, sourceFile);
     if (elze === undefined) {
         return undefined;
     }
