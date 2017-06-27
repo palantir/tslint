@@ -88,7 +88,11 @@ export const rules = {
     // Functionality
     "await-promise": true,
     // "ban": no sensible default
-    "curly": true,
+    "curly": [
+        true,
+        "as-needed",
+        "ignore-same-line",
+    ],
     "forin": true,
     // "import-blacklist": no sensible default
     "label-position": true,
