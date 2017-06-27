@@ -18,3 +18,8 @@ interface K {
     (x: number): number;
     (x: string): string;
 }
+
+// handle modifiers
+export default type I = () => void;
+
+export type T = () => void
