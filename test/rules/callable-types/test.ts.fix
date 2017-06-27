@@ -20,6 +20,6 @@ interface K {
 }
 
 // handle modifiers
-export default type I = () => void;
+export type I = () => void;
 
 export type T = () => void

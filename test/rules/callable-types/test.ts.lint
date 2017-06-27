@@ -40,7 +40,7 @@ interface K {
 }
 
 // handle modifiers
-export default interface I {
+export interface I {
     (): void;
     ~~~~~~~~~ [interface % ('type I = () => void;')]
 }
