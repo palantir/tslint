@@ -1,6 +1,12 @@
 // simple call
 console.clear();
 
+// multiline call, this should be skipped
+foo(
+    first,
+    second,
+);
+
 // conditional
 if (process.env === 'production') {
     console.log('start');

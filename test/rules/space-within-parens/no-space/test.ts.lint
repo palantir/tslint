@@ -2,6 +2,12 @@
 console.clear( );
               ~ [0]
 
+// multiline call, this should be skipped
+foo(
+    first,
+    second,
+);
+
 // conditional
 if ( process.env === 'production' ) {
     ~ [0]
@@ -22,7 +28,8 @@ if (  x === 'string' &&
         true === true && false !=== false
     ) {
         // load
-        foo();
+        foo( );
+            ~ [0]
     }
     console.log( 'test'  );
                 ~ [0]
@@ -30,11 +37,11 @@ if (  x === 'string' &&
 }
 
 // other expresions
-switch ( typeof x ) {
-        ~ [0]
-                 ~ [0]
+switch (  typeof x ) {
+        ~~ [0]
+                  ~ [0]
     default:
         break;
 }
 
-[0]: No space within parentheses
+[0]: No whitespace within parentheses

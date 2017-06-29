@@ -3,32 +3,33 @@ var x = [{
     a: 1,
     b: 2,
     d: 34,
-    c: (a + b  ),
+    c: (a + b   ),
         ~nil [0]
              ~ [1]
 }];
 
 // simple expression on one liner
 var b = [{a: 1, b: 2, d: 34, c: (   a + b)}];
-                                  ~~ [1]
+                                   ~ [1]
                                          ~nil [0]
 
 // function parameters
 function foo( bar: string, baz: string);
+              ~nil [0]
                                       ~nil [0]
 
 // conditional & nested expression
 if (x === y) {
     ~nil [0]
            ~nil [0]
-    return ({result: true, error: ( x + y )}   );
+    return ({result: true, error: (  x + y  )}   );
             ~nil [0]
-                                            ~~ [1]
+                                              ~ [1]
 }
 
 // be well
 new Foo();
         ~nil [0]
 
-[0]: Needs space within parentheses
-[1]: No more than 1 space within parentheses allowed
+[0]: Needs whitespace within parentheses
+[1]: No more than 2 whitespace within parentheses allowed

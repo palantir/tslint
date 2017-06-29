@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
+import { forEachToken } from "tsutils";
+
 import * as ts from "typescript";
 import * as Lint from "../index";
-
-const OPTION_SPACE_SIZE_0 = 0;
-const OPTION_SPACE_SIZE_1 = 1;
 
 interface Options {
     size: number;
@@ -34,40 +33,32 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             You may enforce the amount of whitespace within parentheses.
         `,
-        options: {
-            type: "array",
-            items: [
-                {
-                    type: "number",
-                    enum: [OPTION_SPACE_SIZE_0, OPTION_SPACE_SIZE_1],
-                },
-            ],
-            minLength: 0,
-            maxLength: 4,
-        },
+        options: { type: "number", min: 0 },
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_NO_SPACE = "No space within parentheses";
-    public static FAILURE_NEEDS_SPACE = "Needs space within parentheses";
+    public static FAILURE_NO_SPACE = "No whitespace within parentheses";
+    public static FAILURE_NEEDS_SPACE = "Needs whitespace within parentheses";
     public static FAILURE_NO_EXTRA_SPACE(count: number): string {
-        return `No more than ${count} space within parentheses allowed`;
+        return `No more than ${count} whitespace within parentheses allowed`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SpaceWhitinParensWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0])));
+        return this.applyWithWalker(new SpaceWhitinParensWalker(sourceFile, this.ruleName, parseOptions(Number(this.ruleArguments[0]))));
     }
 }
 
-function parseOptions(whitespaceSize: number): Options {
+function parseOptions(whitespaceSize?: number): Options {
     let size = 0;
-    if (typeof whitespaceSize === 'number') {
-        size = whitespaceSize;
-    } else {
+    if (typeof whitespaceSize === "number") {
+        if (whitespaceSize >= 0) {
+            size = whitespaceSize;
+        }
+    } else if (whitespaceSize !== undefined) {
         const parsedSize = parseInt(whitespaceSize, 10);
-        if (!isNaN(parsedSize)) {
+        if (!Number.isNaN(parsedSize) && parsedSize >= 0) {
             size = parsedSize;
         }
     }
@@ -77,90 +68,96 @@ function parseOptions(whitespaceSize: number): Options {
 }
 
 class SpaceWhitinParensWalker extends Lint.AbstractWalker<Options> {
-    private openingParenRegex = /^([^\(]*\()( *)[^\n\r]*$/m;
-    private closingParenRegex = /([^\s])(\s*)\)$/;
-
     public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
+        return ts.forEachChild(sourceFile, (node: ts.Node): void => {
             this.checkNode(node);
-            ts.forEachChild(node, cb);
-        };
-        return ts.forEachChild(sourceFile, cb);
-    }
-
-    private getOpenParenToken(node: ts.Node): ts.Node | undefined {
-        return Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
-    }
-
-    private getCloseParenToken(node: ts.Node): ts.Node | undefined {
-        return Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
+        });
     }
 
     private checkNode(node: ts.Node): void {
-        let child: ts.Node | undefined;
-        if ((child = this.getOpenParenToken(node)) !== undefined) {
-            this.checkOpenParenToken(child);
-        }
-        if ((child = this.getCloseParenToken(node)) !== undefined) {
-            this.checkCloseParenToken(child);
-        }
+        forEachToken(node, (token: ts.Node) => {
+            if (token.kind === ts.SyntaxKind.OpenParenToken) {
+                this.checkOpenParenToken(token);
+            } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
+                this.checkCloseParenToken(token);
+            }
+        });
     }
 
-    private checkOpenParenToken(node: ts.Node) {
-        const code = this.sourceFile.text.substr(node.getFullStart());
-        const matchResult = this.openingParenRegex.exec(code);
-        if (matchResult) {
-            const whitespace = matchResult[2];
-            const whitespaceLength = whitespace.length;
-            if (whitespaceLength !== this.options.size) {
-                const skipChars = matchResult[1].length;
-                let length = whitespaceLength;
-                let position = node.getFullStart() + skipChars;
-                if (length > this.options.size) {
-                    length -= this.options.size;
-                    position += this.options.size;
+    private checkOpenParenToken(tokenNode: ts.Node) {
+        let currentPos = tokenNode.end;
+        let currentChar = this.sourceFile.text.charCodeAt(currentPos);
+        const allowedSpaceCount = this.options.size;
+
+        while (ts.isWhiteSpaceSingleLine(currentChar)) {
+            ++currentPos;
+            currentChar = this.sourceFile.text.charCodeAt(currentPos);
+        }
+        if (!ts.isLineBreak(currentChar)) {
+            const whitespaceCount = currentPos - tokenNode.end;
+            if (whitespaceCount !== allowedSpaceCount) {
+                let length = 0;
+                let pos = tokenNode.end;
+
+                if (whitespaceCount > allowedSpaceCount) {
+                    pos += allowedSpaceCount;
+                    length = whitespaceCount - allowedSpaceCount;
+                } else if (whitespaceCount > 0 && whitespaceCount < allowedSpaceCount) {
+                    pos += allowedSpaceCount - whitespaceCount;
                 }
-                this.checkAndAddFailureAt(position, length, whitespaceLength);
+                this.AddFailureAtWithFix(pos, length, whitespaceCount);
             }
         }
     }
 
-    private checkCloseParenToken(node: ts.Node) {
-        const code = this.sourceFile.text.substring(node.getFullStart() - 20, node.getEnd());
-        const matchResult = this.closingParenRegex.exec(code);
-        if (matchResult) {
-            const whitespace = matchResult[2];
-            const whitespaceLength = whitespace.length;
-            if (whitespaceLength !== this.options.size) {
-                let length = whitespaceLength;
-                const position = node.getEnd() - 1 - whitespaceLength;
-                if (length > this.options.size) {
-                    length -= this.options.size;
+    private checkCloseParenToken(tokenNode: ts.Node) {
+        let currentPos = tokenNode.getStart() - 1;
+        let currentChar = this.sourceFile.text.charCodeAt(currentPos);
+        const allowdSpaceCount = this.options.size;
+
+        while (ts.isWhiteSpaceSingleLine(currentChar)) {
+            --currentPos;
+            currentChar = this.sourceFile.text.charCodeAt(currentPos);
+        }
+        /**
+         * Number 40 is open parenthese char code, we skip this cause
+         * it's already been caught by `checkOpenParenToken`
+         */
+        if (!ts.isLineBreak(currentChar) && currentChar !== 40) {
+            const whitespaceCount = tokenNode.end - tokenNode.pos - 1;
+            if (whitespaceCount !== allowdSpaceCount) {
+                let length = 0;
+                const pos = tokenNode.pos;
+
+                if (whitespaceCount > allowdSpaceCount) {
+                    length = whitespaceCount - allowdSpaceCount;
                 }
-                this.checkAndAddFailureAt(position, length, whitespaceLength);
+                this.AddFailureAtWithFix(pos, length, whitespaceCount);
             }
         }
     }
 
-    private checkAndAddFailureAt(position: number, length: number, spaceCount: number = 0) {
-        if (this.failures.some(f => f.getStartPosition().getPosition() === position)) {
-            return;
-        }
+    private AddFailureAtWithFix(position: number, length: number, whitespaceCount: number = 0) {
         let lintMsg: string | undefined;
         let lintFix: Lint.Replacement | undefined;
+        const allowedSpaceCount = this.options.size;
 
-        if (this.options.size === 0) {
+        if (allowedSpaceCount === 0) {
             lintMsg = Rule.FAILURE_NO_SPACE;
             lintFix = Lint.Replacement.deleteText(position, length);
-        } else if (this.options.size > 0 && length === spaceCount) {
+        } else if (whitespaceCount < allowedSpaceCount) {
             lintMsg = Rule.FAILURE_NEEDS_SPACE;
-            lintFix = Lint.Replacement.appendText(position, " ");
-        } else if (this.options.size > 0 && length < spaceCount) {
-            lintMsg = Rule.FAILURE_NO_EXTRA_SPACE(this.options.size);
-            lintFix = Lint.Replacement.deleteText(position, spaceCount - this.options.size);
+            let whitespace = "";
+            for (let i = 0; i < allowedSpaceCount - whitespaceCount; i++) {
+                whitespace += " ";
+            }
+            lintFix = Lint.Replacement.appendText(position, whitespace);
+        } else if (whitespaceCount > allowedSpaceCount) {
+            lintMsg = Rule.FAILURE_NO_EXTRA_SPACE(allowedSpaceCount);
+            lintFix = Lint.Replacement.deleteText(position, whitespaceCount - allowedSpaceCount);
         }
 
-        if (lintMsg) {
+        if (lintMsg !== undefined) {
             this.addFailureAt(position, length, lintMsg, lintFix);
         }
     }
