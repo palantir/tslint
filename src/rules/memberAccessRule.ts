@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, isClassLikeDeclaration } from "tsutils";
+import { getChildOfKind, getNextToken, isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -131,12 +131,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
         if (noPublic && publicKeyword !== undefined) {
             const start = publicKeyword.end - "public".length;
-            const fixEnd = Lint.isWhiteSpace(ctx.sourceFile.text.charCodeAt(publicKeyword.end)) ? publicKeyword.end + 1 : publicKeyword.end;
             ctx.addFailure(
                 start,
                 publicKeyword.end,
                 Rule.FAILURE_STRING_NO_PUBLIC,
-                Lint.Replacement.deleteFromTo(start, fixEnd),
+                Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
             );
         }
         if (!noPublic && publicKeyword === undefined) {

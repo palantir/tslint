@@ -1,7 +1,7 @@
 class {
     x() {}
     constructor() {}
-    /*some comment*/ get y() {}
+    get y() {}
     public() {}
 }
 
