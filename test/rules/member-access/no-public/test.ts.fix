@@ -1,0 +1,7 @@
+class {
+    x() {}
+    constructor() {}
+    /*some comment*/ get y() {}
+    public() {}
+}
+

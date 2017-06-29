@@ -55,6 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_NO_PUBLIC], [true, OPTION_CHECK_ACCESSOR]],
         type: "typescript",
         typescriptOnly: true,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -118,18 +119,36 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
-        const isPublic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
-
-        if (noPublic && isPublic) {
-            const publicKeyword = node.modifiers!.find((m) => m.kind === ts.SyntaxKind.PublicKeyword)!;
-            ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
+        let publicKeyword: ts.Node | undefined;
+        if (node.modifiers !== undefined) {
+            for (const modifier of node.modifiers) {
+                if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
+                    publicKeyword = modifier;
+                    break;
+                }
+            }
         }
-        if (!noPublic && !isPublic) {
+
+        if (noPublic && publicKeyword !== undefined) {
+            const start = publicKeyword.end - "public".length;
+            const fixEnd = Lint.isWhiteSpace(ctx.sourceFile.text.charCodeAt(publicKeyword.end)) ? publicKeyword.end + 1 : publicKeyword.end;
+            ctx.addFailure(
+                start,
+                publicKeyword.end,
+                Rule.FAILURE_STRING_NO_PUBLIC,
+                Lint.Replacement.deleteFromTo(start, fixEnd),
+            );
+        }
+        if (!noPublic && publicKeyword === undefined) {
             const nameNode = node.kind === ts.SyntaxKind.Constructor
                 ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
                 : node.name !== undefined ? node.name : node;
             const memberName = node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier ? node.name.text : undefined;
-            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName));
+            ctx.addFailureAtNode(
+                nameNode,
+                Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName),
+                Lint.Replacement.appendText(node.getStart(ctx.sourceFile), "public "),
+            );
         }
     }
 }
