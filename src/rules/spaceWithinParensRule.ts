@@ -101,7 +101,7 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
                 } else if (whitespaceCount > 0 && whitespaceCount < allowedSpaceCount) {
                     pos += allowedSpaceCount - whitespaceCount;
                 }
-                this.AddFailureAtWithFix(pos, length, whitespaceCount);
+                this.addFailureAtWithFix(pos, length, whitespaceCount);
             }
         }
     }
@@ -128,30 +128,28 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
                 if (whitespaceCount > allowedSpaceCount) {
                     length = whitespaceCount - allowedSpaceCount;
                 }
-                this.AddFailureAtWithFix(pos, length, whitespaceCount);
+                this.addFailureAtWithFix(pos, length, whitespaceCount);
             }
         }
     }
 
-    private AddFailureAtWithFix(position: number, length: number, whitespaceCount: number = 0) {
-        let lintMsg: string | undefined;
-        let lintFix: Lint.Replacement | undefined;
+    private addFailureAtWithFix(position: number, length: number, whitespaceCount: number) {
+        let lintMsg: string;
+        let lintFix: Lint.Replacement;
         const allowedSpaceCount = this.options.size;
 
         if (allowedSpaceCount === 0) {
             lintMsg = Rule.FAILURE_NO_SPACE;
             lintFix = Lint.Replacement.deleteText(position, length);
-        } else if (whitespaceCount < allowedSpaceCount) {
+        } else if (allowedSpaceCount > whitespaceCount) {
             lintMsg = Rule.FAILURE_NEEDS_SPACE(allowedSpaceCount - whitespaceCount);
             const whitespace = " ".repeat(allowedSpaceCount - whitespaceCount);
             lintFix = Lint.Replacement.appendText(position, whitespace);
-        } else if (whitespaceCount > allowedSpaceCount) {
+        } else {
             lintMsg = Rule.FAILURE_NO_EXTRA_SPACE(allowedSpaceCount);
             lintFix = Lint.Replacement.deleteText(position, whitespaceCount - allowedSpaceCount);
         }
 
-        if (lintMsg !== undefined) {
-            this.addFailureAt(position, length, lintMsg, lintFix);
-        }
+        this.addFailureAt(position, length, lintMsg, lintFix);
     }
 }
