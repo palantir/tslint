@@ -39,24 +39,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_NO_SPACE = "No whitespace within parentheses";
-    public static FAILURE_NEEDS_SPACE = "Needs whitespace within parentheses";
+    public static FAILURE_NO_SPACE = "Whitespace within parentheses is not allowed";
+    public static FAILURE_NEEDS_SPACE(count: number): string {
+         return `Needs ${count} whitespace${count > 1 ? "s" : ""} within parentheses`;
+    }
     public static FAILURE_NO_EXTRA_SPACE(count: number): string {
-        return `No more than ${count} whitespace within parentheses allowed`;
+        return `No more than ${count} whitespace${count > 1 ? "s" : ""} within parentheses allowed`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SpaceWhitinParensWalker(sourceFile, this.ruleName, parseOptions(Number(this.ruleArguments[0]))));
+        return this.applyWithWalker(new SpaceWithinParensWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0])));
     }
 }
 
-function parseOptions(whitespaceSize?: number): Options {
+function parseOptions(whitespaceSize?: any): Options {
     let size = 0;
     if (typeof whitespaceSize === "number") {
         if (whitespaceSize >= 0) {
             size = whitespaceSize;
         }
-    } else if (whitespaceSize !== undefined) {
+    } else if (typeof whitespaceSize === "string") {
         const parsedSize = parseInt(whitespaceSize, 10);
         if (!Number.isNaN(parsedSize) && parsedSize >= 0) {
             size = parsedSize;
@@ -67,15 +69,9 @@ function parseOptions(whitespaceSize?: number): Options {
     };
 }
 
-class SpaceWhitinParensWalker extends Lint.AbstractWalker<Options> {
+class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
-        return ts.forEachChild(sourceFile, (node: ts.Node): void => {
-            this.checkNode(node);
-        });
-    }
-
-    private checkNode(node: ts.Node): void {
-        forEachToken(node, (token: ts.Node) => {
+        forEachToken(sourceFile, (token: ts.Node) => {
             if (token.kind === ts.SyntaxKind.OpenParenToken) {
                 this.checkOpenParenToken(token);
             } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
@@ -111,9 +107,9 @@ class SpaceWhitinParensWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkCloseParenToken(tokenNode: ts.Node) {
-        let currentPos = tokenNode.getStart() - 1;
+        let currentPos = tokenNode.end - 2;
         let currentChar = this.sourceFile.text.charCodeAt(currentPos);
-        const allowdSpaceCount = this.options.size;
+        const allowedSpaceCount = this.options.size;
 
         while (ts.isWhiteSpaceSingleLine(currentChar)) {
             --currentPos;
@@ -124,13 +120,13 @@ class SpaceWhitinParensWalker extends Lint.AbstractWalker<Options> {
          * it's already been caught by `checkOpenParenToken`
          */
         if (!ts.isLineBreak(currentChar) && currentChar !== 40) {
-            const whitespaceCount = tokenNode.end - tokenNode.pos - 1;
-            if (whitespaceCount !== allowdSpaceCount) {
+            const whitespaceCount = tokenNode.end - currentPos - 2;
+            if (whitespaceCount !== allowedSpaceCount) {
                 let length = 0;
-                const pos = tokenNode.pos;
+                const pos = currentPos + 1;
 
-                if (whitespaceCount > allowdSpaceCount) {
-                    length = whitespaceCount - allowdSpaceCount;
+                if (whitespaceCount > allowedSpaceCount) {
+                    length = whitespaceCount - allowedSpaceCount;
                 }
                 this.AddFailureAtWithFix(pos, length, whitespaceCount);
             }
@@ -146,11 +142,8 @@ class SpaceWhitinParensWalker extends Lint.AbstractWalker<Options> {
             lintMsg = Rule.FAILURE_NO_SPACE;
             lintFix = Lint.Replacement.deleteText(position, length);
         } else if (whitespaceCount < allowedSpaceCount) {
-            lintMsg = Rule.FAILURE_NEEDS_SPACE;
-            let whitespace = "";
-            for (let i = 0; i < allowedSpaceCount - whitespaceCount; i++) {
-                whitespace += " ";
-            }
+            lintMsg = Rule.FAILURE_NEEDS_SPACE(allowedSpaceCount - whitespaceCount);
+            const whitespace = " ".repeat(allowedSpaceCount - whitespaceCount);
             lintFix = Lint.Replacement.appendText(position, whitespace);
         } else if (whitespaceCount > allowedSpaceCount) {
             lintMsg = Rule.FAILURE_NO_EXTRA_SPACE(allowedSpaceCount);

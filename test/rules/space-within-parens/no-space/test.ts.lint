@@ -44,4 +44,4 @@ switch (  typeof x ) {
         break;
 }
 
-[0]: No whitespace within parentheses
+[0]: Whitespace within parentheses is not allowed

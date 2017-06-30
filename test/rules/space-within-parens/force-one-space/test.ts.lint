@@ -10,5 +10,9 @@ export function rgb2lab(r : number, g : number, b : number) : { L : number; a : 
                                                     ~nil [0]
 }
 
-[0]: Needs whitespace within parentheses
+foo(/*no param*/);
+    ~nil [0]
+                ~nil [0]
+
+[0]: Needs 1 whitespace within parentheses
 [1]: No more than 1 whitespace within parentheses allowed
