@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "style",
         typescriptOnly: true,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "type annotations in JSDoc comments are unnecessary in TypeScript";
 
