@@ -1,0 +1,20 @@
+/**
+ * Performs an action a number of times.
+ *
+ * @param action
+ * @param action   Does a thing.
+ * @param {function} action
+ * @param {() => {}} action
+ * @param {Function} action   Does a thing.
+ * @param {Function} action
+ * @param  {Function} action
+ * @param {Function}  action
+ * @param  {Function}  action
+ * @param times
+ * @param times   How many times to do the thing.
+ * @param {number} times   How many times to do the thing.
+ * @param {Number} times   How many times to do the thing.
+ * @returns {Array} results   Results of the action.
+ * @returns {any[]} results   Results of the action.
+ */
+function _() {}

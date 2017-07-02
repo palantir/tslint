@@ -1,0 +1,33 @@
+/**
+ * Performs an action a number of times.
+ *
+ * @param action
+ * @param action   Does a thing.
+ * @param {function} action
+   ~~~~~~~~~~~~~~~~~       [error]
+ * @param {() => {}} action
+   ~~~~~~~~~~~~~~~~~       [error]
+ * @param {Function} action   Does a thing.
+   ~~~~~~~~~~~~~~~~~       [error]
+ * @param {Function} action
+   ~~~~~~~~~~~~~~~~~       [error]
+ * @param  {Function} action
+   ~~~~~~~~~~~~~~~~~~       [error]
+ * @param {Function}  action
+   ~~~~~~~~~~~~~~~~~       [error]
+ * @param  {Function}  action
+   ~~~~~~~~~~~~~~~~~~       [error]
+ * @param times
+ * @param times   How many times to do the thing.
+ * @param {number} times   How many times to do the thing.
+   ~~~~~~~~~~~~~~~       [error]
+ * @param {Number} times   How many times to do the thing.
+   ~~~~~~~~~~~~~~~       [error]
+ * @returns {Array} results   Results of the action.
+   ~~~~~~~~~~~~~~~~       [error]
+ * @returns {any[]} results   Results of the action.
+   ~~~~~~~~~~~~~~~~       [error]
+ */
+function _() {}
+
+[error]: type annotations in JSDoc comments are unnecessary in TypeScript
