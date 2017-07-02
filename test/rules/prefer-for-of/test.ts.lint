@@ -170,4 +170,12 @@ for (let i = 0; i < arr.length; ++i) {
     let node = arr[i];
 }
 
+function test() {
+    function print() {
+        console.log(arr[i])
+    }
+    for (var i = 0, i < arr.length, ++i)
+        print();
+}
+
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

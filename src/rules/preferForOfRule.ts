@@ -63,9 +63,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (variables === undefined) {
             variables = utils.collectVariableUsage(sourceFile);
         }
-        for (const use of variables.get(indexVariable)!.uses) {
-            if (use.location.pos >= node.statement.pos && // only check uses in loop body
-                isNonSimpleIncrementorUse(use.location, arrayExpr, sourceFile)) {
+        for (const {location} of variables.get(indexVariable)!.uses) {
+            if (location.pos < node.initializer!.end || location.pos >= node.end || // bail out on use outside of for loop
+                location.pos >= node.statement.pos && // only check uses in loop body
+                isNonSimpleIncrementorUse(location, arrayExpr, sourceFile)) {
                 return;
             }
         }
