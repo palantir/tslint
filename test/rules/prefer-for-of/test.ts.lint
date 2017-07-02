@@ -155,4 +155,19 @@ for (let i = 0; i < arr.length; i++) {
     delete arr[i];
 }
 
+for (let i = 0; i < arr.length; ++i) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    {
+        let i = 1;
+        let x = i;
+        let obj = {i, x};
+    }
+    i: while(true) {
+        let obj = {i: 1};
+        break i;
+    }
+
+    let node = arr[i];
+}
+
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

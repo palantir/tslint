@@ -41,64 +41,35 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-interface IncrementorState {
-    indexVariableName: string;
-    arrayExpr: ts.Expression;
-    onlyArrayReadAccess: boolean;
-}
-
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
-    const scopes: IncrementorState[] = [];
+    let variables: Map<ts.Identifier, utils.VariableInfo> | undefined;
 
-    return ts.forEachChild(sourceFile, cb);
-
-    function cb(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.ForStatement:
-                return visitForStatement(node as ts.ForStatement);
-            case ts.SyntaxKind.Identifier:
-                return visitIdentifier(node as ts.Identifier);
-            default:
-                return ts.forEachChild(node, cb);
+    return ts.forEachChild(sourceFile, function cb(node): void {
+        if (utils.isForStatement(node)) {
+            visitForStatement(node);
         }
-    }
+        return ts.forEachChild(node, cb);
+    });
 
     function visitForStatement(node: ts.ForStatement): void {
         const arrayNodeInfo = getForLoopHeaderInfo(node);
         if (arrayNodeInfo === undefined) {
-            return ts.forEachChild(node, cb);
+            return;
         }
 
         const { indexVariable, arrayExpr } = arrayNodeInfo;
-        const indexVariableName = indexVariable.text;
 
-        // store `for` loop state
-        const state: IncrementorState = { indexVariableName, arrayExpr, onlyArrayReadAccess: true };
-        scopes.push(state);
-        ts.forEachChild(node.statement, cb);
-        scopes.pop();
-
-        if (state.onlyArrayReadAccess) {
-            ctx.addFailure(node.getStart(), node.statement.getFullStart(), Rule.FAILURE_STRING);
+        if (variables === undefined) {
+            variables = utils.collectVariableUsage(sourceFile);
         }
-    }
-
-    function visitIdentifier(node: ts.Identifier): void {
-        const state = getStateForVariable(node.text);
-        if (state !== undefined && state.onlyArrayReadAccess && isNonSimpleIncrementorUse(node, state.arrayExpr, sourceFile)) {
-            state.onlyArrayReadAccess = false;
-        }
-    }
-
-    function getStateForVariable(name: string): IncrementorState | undefined {
-        for (let i = scopes.length - 1; i >= 0; i--) {
-            const scope = scopes[i];
-            if (scope.indexVariableName === name) {
-                return scope;
+        for (const use of variables.get(indexVariable)!.uses) {
+            if (use.location.pos >= node.statement.pos && // only check uses in loop body
+                isNonSimpleIncrementorUse(use.location, arrayExpr, sourceFile)) {
+                return;
             }
         }
-        return undefined;
+        ctx.addFailure(node.getStart(sourceFile), node.statement.pos, Rule.FAILURE_STRING);
     }
 }
 
