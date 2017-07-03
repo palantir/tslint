@@ -521,3 +521,11 @@ const enum Foo {
     Baz = 2,
 }
 
+const foo = array.map(item =>
+    mapArrayItem(item),
+                      ~ [Unnecessary trailing comma]
+);
+
+const foo = array.map(
+    item => mapArrayItem(item),
+);

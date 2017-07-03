@@ -538,3 +538,10 @@ const enum Foo {
     Baz = 2,
 }
 
+const foo = array.map(item =>
+    mapArrayItem(item)
+);
+
+const foo = array.map(
+    item => mapArrayItem(item)
+);
