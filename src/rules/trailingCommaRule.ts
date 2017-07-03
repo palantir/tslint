@@ -219,7 +219,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
 
     /* Expects `list.length !== 0` */
     private checkComma(hasTrailingComma: boolean | undefined, list: ts.NodeArray<ts.Node>, closeTokenPos: number, optionKey: OptionName) {
-        const options = isSameLine(this.sourceFile, list[list.length - 1].end, closeTokenPos)
+        const options = isSameLine(this.sourceFile, list[list.length - 1].end, closeTokenPos) || this.isWrappedSingleExpression(list)
             ? this.options.singleline
             : this.options.multiline;
         const option = options[optionKey];
@@ -229,5 +229,17 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         } else if (option === "never" && hasTrailingComma) {
             this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
         }
+    }
+
+    private isWrappedSingleExpression(list: ts.NodeArray<ts.Node>) {
+        if (list.length !== 1) {
+            return false;
+        }
+
+        const parentNodeChildren = list[0].parent!.getChildren();
+        const openTokenIndex = parentNodeChildren.findIndex((node) => node.pos === list.pos) - 1;
+        const openToken = parentNodeChildren[openTokenIndex];
+
+        return isSameLine(this.sourceFile, openToken.end, list[0].getStart());
     }
 }
