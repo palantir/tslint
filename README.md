@@ -25,6 +25,7 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 - [core rules](https://palantir.github.io/tslint/rules/),
 - [core formatters](https://palantir.github.io/tslint/formatters/), and
 - [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
+- [inline disabling and enabling of rules with comment flags](https://palantir.github.io/tslint/usage/rule-flags/)
 
 Custom Rules & Plugins
 ------------
