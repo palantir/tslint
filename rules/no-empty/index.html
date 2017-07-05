@@ -3,13 +3,25 @@ ruleName: no-empty
 description: Disallows empty blocks.
 descriptionDetails: Blocks with a comment inside are not considered empty.
 rationale: Empty blocks are often indicators of missing code.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If `allow-empty-catch` is specified, then catch blocks are allowed to be empty.
+options:
+  type: string
+  enum:
+    - allow-empty-catch
 optionExamples:
   - 'true'
+  - '[true, "allow-empty-catch"]'
 type: functionality
 typescriptOnly: false
 layout: rule
 title: 'Rule: no-empty'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "allow-empty-catch"
+    ]
+  }
 ---

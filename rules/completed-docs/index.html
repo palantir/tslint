@@ -27,6 +27,7 @@ optionsDescription: |-
 
   * `"classes"`
   * `"enums"`
+  * `"enum-members"`
   * `"functions"`
   * `"interfaces"`
   * `"methods"`
@@ -56,6 +57,7 @@ options:
                 type: string
             type: object
           enums: *ref_0
+          enum-members: *ref_0
           functions: *ref_0
           interfaces: *ref_0
           methods: &ref_1
@@ -125,6 +127,19 @@ optionsJSON: |-
               "type": "object"
             },
             "enums": {
+              "properties": {
+                "visibilities": {
+                  "enum": [
+                    "all",
+                    "exported",
+                    "internal"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "enum-members": {
               "properties": {
                 "visibilities": {
                   "enum": [
