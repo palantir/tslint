@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-import { getDeclarationOfBindingElement, isBindingElement, isIdentifier, isVariableDeclaration, isVariableDeclarationList } from "tsutils";
+import {
+    getDeclarationOfBindingElement, isBindingElement, isIdentifier, isJsDoc, isVariableDeclaration, isVariableDeclarationList,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -139,13 +141,13 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
             declaration = declaration.parent!;
         }
         for (const child of declaration.getChildren()) {
-            if (child.kind !== ts.SyntaxKind.JSDocComment) {
+            if (!isJsDoc(child)) {
                 break;
             }
-            if ((child as ts.JSDoc).tags === undefined) {
+            if (child.tags === undefined) {
                 continue;
             }
-            for (const tag of (child as ts.JSDoc).tags!) {
+            for (const tag of child.tags) {
                 if (tag.tagName.text === "deprecated") {
                     return tag.comment === undefined ? "" : tag.comment;
                 }
