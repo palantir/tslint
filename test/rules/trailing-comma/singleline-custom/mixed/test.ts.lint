@@ -26,3 +26,27 @@ interface Foo { foo: string, bar: string }
 interface Foo { foo: string, bar: string, }
 
 interface Foo { foo: string; bar: string; }
+
+const foo = [isTrue
+    && valueWhenIsTrue
+    || valueWhenIsNot,
+                     ~ [Unnecessary trailing comma]
+];
+
+const foo = [
+    isTrue
+        && valueWhenIsTrue
+        || valueWhenIsNot,
+];
+
+const foo = { bar: isTrue
+    ? valueWhenIsTrue
+    : valueWhenIsNot
+                    ~nil [Missing trailing comma]
+};
+
+const foo = {
+    bar: isTrue
+        ? valueWhenIsTrue
+        : valueWhenIsNot
+};

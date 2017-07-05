@@ -547,3 +547,11 @@ export {
 
 // don't crash
 new Foo
+
+const foo = array.map(item =>
+    mapArrayItem(item)
+);
+
+const foo = array.map(
+    item => mapArrayItem(item)
+);
