@@ -1,0 +1,41 @@
+---
+description: Disallows unnecessary references to `this`.
+optionExamples:
+  - 'true'
+  - '[true, {"allowed-names": ["^self$"], "allow-destructuring": true}]'
+options:
+  additionalProperties: false
+  properties:
+    allow-destructuring:
+      type: boolean
+    allowed-names:
+      listType: string
+      type: list
+  type: object
+optionsDescription: |-
+
+  Two options may be provided on an object:
+
+  * `allow-destructuring` allows using destructuring to access members of `this` (e.g. `{ foo, bar } = this;`).
+  * `allowed-names` may be specified as a list of regular expressions to match allowed variable names.
+rationale: Assigning a variable to `this` instead of properly using arrow lambdasmay be a symptom of pre-ES6 practices or not manging scope well.
+ruleName: no-this-assignment
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-this-assignment'
+optionsJSON: |-
+  {
+    "additionalProperties": false,
+    "properties": {
+      "allow-destructuring": {
+        "type": "boolean"
+      },
+      "allowed-names": {
+        "listType": "string",
+        "type": "list"
+      }
+    },
+    "type": "object"
+  }
+---

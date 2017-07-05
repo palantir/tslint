@@ -356,7 +356,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -387,6 +387,19 @@
                 "type": "object"
               },
               "enums": {
+                "properties": {
+                  "visibilities": {
+                    "enum": [
+                      "all",
+                      "exported",
+                      "internal"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "enum-members": {
                 "properties": {
                   "visibilities": {
                     "enum": [
@@ -1063,7 +1076,7 @@
   {
     "ruleName": "no-any",
     "description": "Disallows usages of `any` as a type declaration.",
-    "hasFix": true,
+    "hasFix": false,
     "rationale": "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -1251,10 +1264,19 @@
     "description": "Disallows empty blocks.",
     "descriptionDetails": "Blocks with a comment inside are not considered empty.",
     "rationale": "Empty blocks are often indicators of missing code.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf `allow-empty-catch` is specified, then catch blocks are allowed to be empty.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "allow-empty-catch"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "allow-empty-catch"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1656,6 +1678,39 @@
     "optionExamples": [
       true
     ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "description": "Disallows unnecessary references to `this`.",
+    "optionExamples": [
+      true,
+      [
+        true,
+        {
+          "allowed-names": [
+            "^self$"
+          ],
+          "allow-destructuring": true
+        }
+      ]
+    ],
+    "options": {
+      "additionalProperties": false,
+      "properties": {
+        "allow-destructuring": {
+          "type": "boolean"
+        },
+        "allowed-names": {
+          "listType": "string",
+          "type": "list"
+        }
+      },
+      "type": "object"
+    },
+    "optionsDescription": "\nTwo options may be provided on an object:\n\n* `allow-destructuring` allows using destructuring to access members of `this` (e.g. `{ foo, bar } = this;`).\n* `allowed-names` may be specified as a list of regular expressions to match allowed variable names.",
+    "rationale": "Assigning a variable to `this` instead of properly using arrow lambdasmay be a symptom of pre-ES6 practices or not manging scope well.",
+    "ruleName": "no-this-assignment",
     "type": "functionality",
     "typescriptOnly": false
   },
