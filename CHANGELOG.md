@@ -9,7 +9,7 @@ __Editor's note__: This release features an important bugfix for overlapping fix
 ## :tada: New rules and options
 
 - [new-rule-option] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Add `enum-members` option (#2911)
-- [new-rule] `no-this-reassignment` (#2931)
+- [new-rule] [`no-this-assignment`](https://palantir.github.io/tslint/rules/no-this-assignment/) (#2931)
 
 ## :hammer_and_wrench: Bugfixes & enhancements
 
