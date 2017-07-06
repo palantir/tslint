@@ -93,10 +93,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker<void> {
 
     private isFallThroughAllowed(clause: ts.CaseOrDefaultClause): boolean {
         const comments = ts.getLeadingCommentRanges(this.sourceFile.text, clause.end);
-        return comments !== undefined && comments.some((comment) => commentText(comment, this.sourceFile).trim() === "falls through");
+        return comments !== undefined &&
+            comments.some((comment) => /^\s*falls through\b/i.test(this.sourceFile.text.slice(comment.pos + 2, comment.end)));
     }
-}
-
-function commentText({ pos, end, kind }: ts.CommentRange, sourceFile: ts.SourceFile): string {
-    return sourceFile.text.slice(pos + 2, kind === ts.SyntaxKind.MultiLineCommentTrivia ? end - 2 : end);
 }
