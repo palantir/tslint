@@ -211,6 +211,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb(statement);
             }
 
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+                cb((node as ts.IterationStatement).statement);
+                return cb((node as ts.DoStatement | ts.WhileStatement).expression, true);
+
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);

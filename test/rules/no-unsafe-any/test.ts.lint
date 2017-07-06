@@ -185,5 +185,7 @@ if (x) {}
 if (!x) {}
 if (!x || x) {}
 for (;x;) {}
+while (x) {}
+do {} while (x);
 
 [0]: Unsafe use of expression of type 'any'.
