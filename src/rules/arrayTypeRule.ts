@@ -145,6 +145,7 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.SymbolKeyword:
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
+        case ts.SyntaxKind.ThisType:
             return true;
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type
