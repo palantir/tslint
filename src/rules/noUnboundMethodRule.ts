@@ -115,27 +115,15 @@ function isSafeUse(node: ts.Node): boolean {
     }
 }
 
-function isMethodBoundInConstructor(declaration: ts.Declaration, tc: ts.TypeChecker): boolean {
-    if (declaration.parent && isClassDeclaration(declaration.parent)) {
-        for (const member of declaration.parent.members) {
-            if (isConstructorDeclaration(member) && member.body) {
+function isMethodBoundInConstructor(methodDeclaration: ts.Declaration, tc: ts.TypeChecker): boolean {
+    if (methodDeclaration.parent !== undefined && isClassDeclaration(methodDeclaration.parent)) {
+        for (const member of methodDeclaration.parent.members) {
+            if (isConstructorDeclaration(member) && member.body !== undefined) {
                 for (const statement of member.body.statements) {
-                    if (isExpressionStatement(statement) &&
-                        isBinaryExpression(statement.expression) &&
-                        isPropertyAccessExpression(statement.expression.left) &&
-                        statement.expression.left.expression.kind === ts.SyntaxKind.ThisKeyword &&
-                        isCallExpression(statement.expression.right) &&
-                        isPropertyAccessExpression(statement.expression.right.expression) &&
-                        statement.expression.right.expression.name.text === "bind" &&
-                        isPropertyAccessExpression(statement.expression.right.expression.expression) &&
-                        statement.expression.right.expression.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
-                        statement.expression.right.arguments.length === 1 &&
-                        statement.expression.right.arguments[0].kind === ts.SyntaxKind.ThisKeyword) {
-                        const leftSymbol = tc.getSymbolAtLocation(statement.expression.left);
-                        const rightSymbol = tc.getSymbolAtLocation(statement.expression.right.expression.expression);
-
-                        if (leftSymbol && declaration === leftSymbol.valueDeclaration &&
-                            rightSymbol && declaration === rightSymbol.valueDeclaration) {
+                    if (isExpressionStatement(statement) && isBinaryExpression(statement.expression)) {
+                        const {left, right} = statement.expression;
+                        if (isMethodPropertyAccessExpression(left, methodDeclaration, tc) &&
+                            isMethodBindCallExpression(right, methodDeclaration, tc)) {
                             return true;
                         }
                     }
@@ -144,4 +132,37 @@ function isMethodBoundInConstructor(declaration: ts.Declaration, tc: ts.TypeChec
         }
     }
     return false;
+}
+
+function isMethodPropertyAccessExpression(
+    node: ts.Node,
+    methodDeclaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    return isPropertyAccessExpression(node) &&
+        node.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        symbolForNodeMatchesDeclaration(node, methodDeclaration, tc);
+}
+
+function isMethodBindCallExpression(
+    node: ts.Node,
+    methodDeclaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    return isCallExpression(node) &&
+        isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === "bind" &&
+        isPropertyAccessExpression(node.expression.expression) &&
+        node.expression.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        node.arguments[0].kind === ts.SyntaxKind.ThisKeyword &&
+        symbolForNodeMatchesDeclaration(node.expression.expression, methodDeclaration, tc);
+}
+
+function symbolForNodeMatchesDeclaration(
+    node: ts.Node,
+    declaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    const symbol = tc.getSymbolAtLocation(node);
+    return symbol === undefined ? false : symbol.valueDeclaration === declaration;
 }
