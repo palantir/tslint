@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { hasModifier, isPropertyAccessExpression } from "tsutils";
+import {
+  hasModifier,
+  isBinaryExpression,
+  isCallExpression,
+  isClassDeclaration,
+  isConstructorDeclaration,
+  isExpressionStatement,
+  isPropertyAccessExpression,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -56,7 +64,9 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
         if (isPropertyAccessExpression(node) && !isSafeUse(node)) {
             const symbol = tc.getSymbolAtLocation(node);
             const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
-            if (declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic)) {
+            if (declaration !== undefined &&
+                isMethod(declaration, ctx.options.ignoreStatic) &&
+                !isMethodBoundInConstructor(declaration, tc)) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
@@ -103,4 +113,35 @@ function isSafeUse(node: ts.Node): boolean {
         default:
             return false;
     }
+}
+
+function isMethodBoundInConstructor(declaration: ts.Declaration, tc: ts.TypeChecker): boolean {
+    if (declaration.parent && isClassDeclaration(declaration.parent)) {
+        for (const member of declaration.parent.members) {
+            if (isConstructorDeclaration(member) && member.body) {
+                for (const statement of member.body.statements) {
+                    if (isExpressionStatement(statement) &&
+                        isBinaryExpression(statement.expression) &&
+                        isPropertyAccessExpression(statement.expression.left) &&
+                        statement.expression.left.expression.kind === ts.SyntaxKind.ThisKeyword &&
+                        isCallExpression(statement.expression.right) &&
+                        isPropertyAccessExpression(statement.expression.right.expression) &&
+                        statement.expression.right.expression.name.text === "bind" &&
+                        isPropertyAccessExpression(statement.expression.right.expression.expression) &&
+                        statement.expression.right.expression.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
+                        statement.expression.right.arguments.length === 1 &&
+                        statement.expression.right.arguments[0].kind === ts.SyntaxKind.ThisKeyword) {
+                        const leftSymbol = tc.getSymbolAtLocation(statement.expression.left);
+                        const rightSymbol = tc.getSymbolAtLocation(statement.expression.right.expression.expression);
+
+                        if (leftSymbol && declaration === leftSymbol.valueDeclaration &&
+                            rightSymbol && declaration === rightSymbol.valueDeclaration) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
