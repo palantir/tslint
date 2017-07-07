@@ -77,7 +77,8 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (shouldCheck(node, this.options)) {
                 const { name, type, initializer } = node;
-                if (type !== undefined && initializer !== undefined && typeIsInferrable(type.kind, initializer.kind)) {
+                if (type !== undefined && initializer !== undefined
+                    && typeIsInferrable(type.kind, initializer)) {
                     const fix = Lint.Replacement.deleteFromTo(name.end, type.end);
                     this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)!), fix);
                 }
@@ -104,14 +105,14 @@ function shouldCheck(node: ts.Node, { ignoreParameters, ignoreProperties }: Opti
     }
 }
 
-function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.SyntaxKind): boolean {
+function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.Expression): boolean {
     switch (type) {
         case ts.SyntaxKind.BooleanKeyword:
-            return initializer === ts.SyntaxKind.TrueKeyword || initializer === ts.SyntaxKind.FalseKeyword;
+            return initializer.kind === ts.SyntaxKind.TrueKeyword || initializer.kind === ts.SyntaxKind.FalseKeyword;
         case ts.SyntaxKind.NumberKeyword:
-            return initializer === ts.SyntaxKind.NumericLiteral;
+            return Lint.isNumeric(initializer);
         case ts.SyntaxKind.StringKeyword:
-            switch (initializer) {
+            switch (initializer.kind) {
                 case ts.SyntaxKind.StringLiteral:
                 case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
                 case ts.SyntaxKind.TemplateExpression:
