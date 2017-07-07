@@ -11,7 +11,7 @@ __Local__ (in your project's working directory):
 ```sh
 npm install tslint typescript --save-dev
 # or
-yarn add tslint typescript
+yarn add tslint typescript --dev
 ```
 
 __Global__:
