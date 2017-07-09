@@ -188,4 +188,7 @@ for (;x;) {}
 while (x) {}
 do {} while (x);
 
+takesNumber(x ? x : x);
+            ~~~~~~~~~ [0]
+
 [0]: Unsafe use of expression of type 'any'.

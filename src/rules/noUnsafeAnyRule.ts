@@ -216,6 +216,14 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 cb((node as ts.IterationStatement).statement);
                 return cb((node as ts.DoStatement | ts.WhileStatement).expression, true);
 
+            case ts.SyntaxKind.ConditionalExpression: {
+                const { condition, whenTrue, whenFalse } = node as ts.ConditionalExpression;
+                cb(condition, true);
+                cb(whenTrue, true);
+                cb(whenFalse, true);
+                check();
+                return;
+            }
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
