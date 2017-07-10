@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import { hasModifier, isPropertyAccessExpression } from "tsutils";
+import {
+  hasModifier,
+  isBinaryExpression,
+  isCallExpression,
+  isClassDeclaration,
+  isConstructorDeclaration,
+  isExpressionStatement,
+  isPropertyAccessExpression,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -56,7 +64,9 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
         if (isPropertyAccessExpression(node) && !isSafeUse(node)) {
             const symbol = tc.getSymbolAtLocation(node);
             const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
-            if (declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic)) {
+            if (declaration !== undefined &&
+                isMethod(declaration, ctx.options.ignoreStatic) &&
+                !isMethodBoundInConstructor(declaration, tc)) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
@@ -103,4 +113,56 @@ function isSafeUse(node: ts.Node): boolean {
         default:
             return false;
     }
+}
+
+function isMethodBoundInConstructor(methodDeclaration: ts.Declaration, tc: ts.TypeChecker): boolean {
+    if (methodDeclaration.parent !== undefined && isClassDeclaration(methodDeclaration.parent)) {
+        for (const member of methodDeclaration.parent.members) {
+            if (isConstructorDeclaration(member) && member.body !== undefined) {
+                for (const statement of member.body.statements) {
+                    if (isExpressionStatement(statement) && isBinaryExpression(statement.expression)) {
+                        const {left, right} = statement.expression;
+                        if (isMethodPropertyAccessExpression(left, methodDeclaration, tc) &&
+                            isMethodBindCallExpression(right, methodDeclaration, tc)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function isMethodPropertyAccessExpression(
+    node: ts.Node,
+    methodDeclaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    return isPropertyAccessExpression(node) &&
+        node.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        symbolForNodeMatchesDeclaration(node, methodDeclaration, tc);
+}
+
+function isMethodBindCallExpression(
+    node: ts.Node,
+    methodDeclaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    return isCallExpression(node) &&
+        isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === "bind" &&
+        isPropertyAccessExpression(node.expression.expression) &&
+        node.expression.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
+        node.arguments[0].kind === ts.SyntaxKind.ThisKeyword &&
+        symbolForNodeMatchesDeclaration(node.expression.expression, methodDeclaration, tc);
+}
+
+function symbolForNodeMatchesDeclaration(
+    node: ts.Node,
+    declaration: ts.Declaration,
+    tc: ts.TypeChecker,
+): boolean {
+    const symbol = tc.getSymbolAtLocation(node);
+    return symbol === undefined ? false : symbol.valueDeclaration === declaration;
 }
