@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isExpression } from "tsutils";
+import { isInterfaceType, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -40,45 +40,41 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Unsafe use of expression of type 'any'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithWalker(new NoUnsafeAnyWalker(sourceFile, this.ruleName, program.getTypeChecker()));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
-    if (ctx.sourceFile.isDeclarationFile) {
-        // Not possible in a declaration file.
-        return;
+class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+        super(sourceFile, ruleName, undefined);
     }
-    return ts.forEachChild(ctx.sourceFile, cb);
 
-    /** @param anyOk If true, this node will be allowed to be of type *any*. (But its children might not.) */
-    function cb(node: ts.Node, anyOk?: boolean): void {
+    public walk(sourceFile: ts.SourceFile) {
+        if (sourceFile.isDeclarationFile) {
+            return; // Not possible in a declaration file.
+        }
+        sourceFile.statements.forEach(this.noCheck);
+    }
+
+    private noCheck = (node: ts.Node) =>  {
+        return void this.visitNode(node);
+    }
+
+    private visitNode(node: ts.Node, anyOk?: boolean): boolean | undefined {
         switch (node.kind) {
             case ts.SyntaxKind.ParenthesizedExpression:
                 // Don't warn on a parenthesized expression, warn on its contents.
-                return cb((node as ts.ParenthesizedExpression).expression, anyOk);
-
-            case ts.SyntaxKind.Parameter: {
-                const { type, initializer } = node as ts.ParameterDeclaration;
-                // TODO handle destructuring
-                if (initializer !== undefined) {
-                    return cb(initializer, /*anyOk*/ type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword);
-                }
-                return;
-            }
-
+                return this.visitNode((node as ts.ParenthesizedExpression).expression, anyOk);
             case ts.SyntaxKind.LabeledStatement:
                 // Ignore label
-                return cb((node as ts.LabeledStatement).statement);
-
-            case ts.SyntaxKind.BreakStatement: // Ignore label
+                return this.visitNode((node as ts.LabeledStatement).statement);
+            // ignore labels
+            case ts.SyntaxKind.BreakStatement:
             case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
-            case ts.SyntaxKind.QualifiedName:
-            case ts.SyntaxKind.TypePredicate:
-            case ts.SyntaxKind.TypeOfExpression:
+            case ts.SyntaxKind.TypeParameter:
             // Ignore imports
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
@@ -86,214 +82,281 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             // These show as type "any" if in type position.
             case ts.SyntaxKind.NumericLiteral:
             case ts.SyntaxKind.StringLiteral:
-                return;
-
+            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+            case ts.SyntaxKind.NullKeyword:
+            case ts.SyntaxKind.UndefinedKeyword:
+            case ts.SyntaxKind.NumberKeyword:
+            case ts.SyntaxKind.StringKeyword:
+            case ts.SyntaxKind.NeverKeyword:
+            case ts.SyntaxKind.AnyKeyword:
+                return false;
+            case ts.SyntaxKind.ThisKeyword:
+            case ts.SyntaxKind.SuperKeyword:
+            case ts.SyntaxKind.Identifier:
+                return anyOk ? false : this.check(node as ts.Expression);
             // Recurse through these, but ignore the immediate child because it is allowed to be 'any'.
             case ts.SyntaxKind.DeleteExpression:
             case ts.SyntaxKind.ExpressionStatement:
             case ts.SyntaxKind.TypeAssertionExpression:
             case ts.SyntaxKind.AsExpression:
             case ts.SyntaxKind.TemplateSpan: // Allow stringification (works on all values). Note: tagged templates handled differently.
-            case ts.SyntaxKind.ThrowStatement: {
-                const { expression } =
-                    node as ts.ExpressionStatement | ts.TypeAssertion | ts.AsExpression | ts.TemplateSpan | ts.ThrowStatement;
-                return cb(expression, /*anyOk*/ true);
-            }
-
-            case ts.SyntaxKind.PropertyAssignment: {
-                // Only check RHS.
-                const { name, initializer } = node as ts.PropertyAssignment;
+            case ts.SyntaxKind.ThrowStatement:
+            case ts.SyntaxKind.TypeOfExpression:
+                return this.visitNode(
+                    (node as ts.ExpressionStatement | ts.AssertionExpression | ts.TemplateSpan | ts.ThrowStatement | ts.TypeOfExpression)
+                        .expression,
+                    /*anyOk*/ true,
+                );
+            case ts.SyntaxKind.PropertyAssignment:
                 // The LHS will be 'any' if the RHS is, so just handle the RHS.
                 // Still need to check the LHS in case it is a computed key.
-                cb(name, /*anyOk*/ true);
-                cb(initializer);
-                return;
-            }
-
+                this.visitNode((node as ts.PropertyAssignment).name, /*anyOk*/ true);
+                // TODO verify this
+                return this.checkContextual((node as ts.PropertyAssignment).initializer);
             case ts.SyntaxKind.PropertyDeclaration: {
                 const { name, initializer } = node as ts.PropertyDeclaration;
+                this.visitNode(name, true);
                 if (initializer !== undefined) {
-                    return cb(initializer, /*anyOk*/ isNodeAny(name, checker));
+                    // TODO verify this
+                    return this.visitNode(initializer, /*anyOk*/ isNodeAny(name, this.checker));
                 }
-                return;
+                return false;
             }
-
+            case ts.SyntaxKind.Parameter: {
+                const { name, type, initializer } = node as ts.ParameterDeclaration;
+                this.visitNode(name, true);
+                if (initializer !== undefined) {
+                    // TODO verify this
+                    return this.visitNode(initializer, /*anyOk*/ type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword);
+                }
+                return false;
+            }
             case ts.SyntaxKind.TaggedTemplateExpression: {
                 const { tag, template } = node as ts.TaggedTemplateExpression;
-                cb(tag);
                 if (template.kind === ts.SyntaxKind.TemplateExpression) {
                     for (const { expression } of template.templateSpans) {
-                        checkContextual(expression);
+                        this.checkContextual(expression);
                     }
                 }
                 // Also check the template expression itself
-                check();
-                return;
+                if (this.visitNode(tag)) {
+                    return true;
+                }
+                return anyOk ? false : this.check(node as ts.Expression);
             }
-
             case ts.SyntaxKind.CallExpression:
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
-                cb(expression);
                 if (args !== undefined) {
                     for (const arg of args) {
-                        checkContextual(arg);
+                        this.checkContextual(arg);
                     }
                 }
+                if (this.visitNode(expression)) {
+                    return true;
+                }
                 // Also check the call expression itself
-                check();
-                return;
+                return anyOk ? false : this.check(node as ts.Expression);
             }
-
             case ts.SyntaxKind.PropertyAccessExpression:
                 // Don't warn for right hand side; this is redundant if we warn for the access itself.
-                cb((node as ts.PropertyAccessExpression).expression);
-                check();
-                return;
-
-            case ts.SyntaxKind.VariableDeclaration:
-                return checkVariableDeclaration(node as ts.VariableDeclaration);
-
-            case ts.SyntaxKind.BinaryExpression:
-                return checkBinaryExpression(node);
-
+                if (this.visitNode((node as ts.PropertyAccessExpression).expression)) {
+                    return true;
+                }
+                return anyOk ? false : this.check(node as ts.Expression);
+            case ts.SyntaxKind.ElementAccessExpression: {
+                const { expression, argumentExpression } = node as ts.ElementAccessExpression;
+                if (argumentExpression !== undefined) {
+                    this.visitNode(argumentExpression, true);
+                }
+                if (this.visitNode(expression)) {
+                    return true;
+                }
+                return anyOk ? false : this.check(node as ts.Expression);
+            }
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                if (expression !== undefined) {
-                    return checkContextual(expression);
-                }
-                return;
+                return expression !== undefined  && this.checkContextual(expression);
             }
-
+            case ts.SyntaxKind.ReturnStatement: {
+                const { expression } = node as ts.ReturnStatement;
+                return expression !== undefined  && this.checkContextual(expression);
+            }
             case ts.SyntaxKind.SwitchStatement: {
                 const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
                 // Allow `switch (x) {}` where `x` is any
-                cb(expression, /*anyOk*/ true);
+                this.visitNode(expression, /*anyOk*/ true);
                 for (const clause of clauses) {
                     if (clause.kind === ts.SyntaxKind.CaseClause) {
                         // Allow `case x:` where `x` is any
-                        cb(clause.expression, /*anyOk*/ true);
+                        this.visitNode(clause.expression, /*anyOk*/ true);
                     }
                     for (const statement of clause.statements) {
-                        cb(statement);
+                        this.visitNode(statement);
                     }
                 }
-                break;
+                return false;
             }
-
             case ts.SyntaxKind.ModuleDeclaration: {
                 // In `declare global { ... }`, don't mark `global` as unsafe any.
                 const { body } = node as ts.ModuleDeclaration;
-                if (body !== undefined) { cb(body); }
-                return;
+                return body !== undefined && this.visitNode(body);
             }
-
             case ts.SyntaxKind.IfStatement: {
                 const { expression, thenStatement, elseStatement } = node as ts.IfStatement;
-                cb(expression, true); // allow truthyness check
-                cb(thenStatement);
-                if (elseStatement !== undefined) { cb(elseStatement); }
-                return;
+                this.visitNode(expression, true); // allow truthyness check
+                this.visitNode(thenStatement);
+                return elseStatement !== undefined && this.visitNode(elseStatement);
             }
-
             case ts.SyntaxKind.PrefixUnaryExpression: {
                 const {operator, operand} = node as ts.PrefixUnaryExpression;
-                cb(operand, operator === ts.SyntaxKind.ExclamationToken); // allow falsyness check
-                check();
-                return;
+                this.visitNode(operand, operator === ts.SyntaxKind.ExclamationToken); // allow falsyness check
+                return false;
             }
-
             case ts.SyntaxKind.ForStatement: {
                 const { initializer, condition, incrementor, statement } = node as ts.ForStatement;
-                if (initializer !== undefined) { cb(initializer); }
-                if (condition !== undefined) { cb(condition, true); } // allow truthyness check
-                if (incrementor !== undefined) { cb(incrementor); }
-                return cb(statement);
+                if (initializer !== undefined) { this.visitNode(initializer, true); }
+                if (condition !== undefined) { this.visitNode(condition, true); } // allow truthyness check
+                if (incrementor !== undefined) { this.visitNode(incrementor, true); }
+                return this.visitNode(statement);
             }
-
             case ts.SyntaxKind.DoStatement:
             case ts.SyntaxKind.WhileStatement:
-                cb((node as ts.IterationStatement).statement);
-                return cb((node as ts.DoStatement | ts.WhileStatement).expression, true);
-
+                this.visitNode((node as ts.DoStatement | ts.WhileStatement).expression, true);
+                return this.visitNode((node as ts.IterationStatement).statement);
             case ts.SyntaxKind.ConditionalExpression: {
                 const { condition, whenTrue, whenFalse } = node as ts.ConditionalExpression;
-                cb(condition, true);
-                cb(whenTrue, true);
-                cb(whenFalse, true);
-                check();
-                return;
+                this.visitNode(condition, true);
+                const left = this.visitNode(whenTrue, anyOk);
+                return this.visitNode(whenFalse, anyOk) || left;
             }
-            default:
-                if (!(isExpression(node) && check())) {
-                    return ts.forEachChild(node, cb);
+            case ts.SyntaxKind.VariableDeclaration:
+                return this.checkVariableDeclaration(node as ts.VariableDeclaration);
+            case ts.SyntaxKind.BinaryExpression:
+                return this.checkBinaryExpression(node as ts.BinaryExpression, anyOk);
+            case ts.SyntaxKind.BindingElement: {
+                const {name, initializer} = node as ts.BindingElement;
+                if (name.kind !== ts.SyntaxKind.Identifier) {
+                    this.visitNode(name);
                 }
+                // TODO verify this
+                return initializer !== undefined && this.checkContextual(initializer);
+            }
+            case ts.SyntaxKind.AwaitExpression:
+                this.visitNode((node as ts.AwaitExpression).expression);
+                return anyOk ? false : this.check(node as ts.Expression);
+            case ts.SyntaxKind.YieldExpression:
+                return this.checkYieldExpression(node as ts.YieldExpression, anyOk);
+            case ts.SyntaxKind.ClassExpression:
+                if (!anyOk) {
+                    this.check(node as ts.Expression);
+                }
+                // falls through
+            case ts.SyntaxKind.ClassDeclaration:
+                this.checkClassLikeDeclaration(node as ts.ClassLikeDeclaration);
                 return;
         }
-
-        function check(): boolean {
-            const isUnsafe = !anyOk && isNodeAny(node, checker);
-            if (isUnsafe) {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-            return isUnsafe;
+        if (isTypeNodeKind(node.kind) || node.kind >= ts.SyntaxKind.FirstKeyword && node.kind <= ts.SyntaxKind.LastKeyword) {
+            return false;
         }
+        return ts.forEachChild(node, this.noCheck);
     }
 
-    /** OK for this value to be 'any' if that's its contextual type. */
-    function checkContextual(arg: ts.Expression): void {
-        return cb(arg, /*anyOk*/ isAny(checker.getContextualType(arg)));
+    private check(node: ts.Expression): boolean {
+        if (!isNodeAny(node, this.checker)) {
+            return false;
+        }
+        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+        return true;
+    }
+
+    private checkContextual(node: ts.Expression) {
+        return this.visitNode(node, isAny(this.checker.getContextualType(node)));
     }
 
     // Allow `const x = foo;` and `const x: any = foo`, but not `const x: Foo = foo;`.
-    function checkVariableDeclaration({ type, initializer }: ts.VariableDeclaration): void {
+    private checkVariableDeclaration({ name, type, initializer }: ts.VariableDeclaration) {
+        this.visitNode(name, true);
         // Always allow the LHS to be `any`. Just don't allow RHS to be `any` when LHS isn't.
-        // TODO: handle destructuring
-        if (initializer !== undefined) {
-            return cb(initializer, /*anyOk*/ type === undefined || type.kind === ts.SyntaxKind.AnyKeyword);
-        }
-        return;
+        return initializer !== undefined &&
+            this.visitNode(
+                initializer,
+                /*anyOk*/ name.kind === ts.SyntaxKind.Identifier && (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword),
+            );
     }
 
-    function checkBinaryExpression(node: ts.Node): void {
-        const { left, right, operatorToken } = node as ts.BinaryExpression;
-        // Allow equality since all values support equality.
-        if (Lint.getEqualsKind(operatorToken) !== undefined) {
-            return;
-        }
-
-        switch (operatorToken.kind) {
-            case ts.SyntaxKind.InstanceOfKeyword: // Allow test
-                return cb(right);
-
+    private checkBinaryExpression(node: ts.BinaryExpression, anyOk: boolean | undefined) {
+        let allowAnyLeft = false;
+        let allowAnyRight = false;
+        switch (node.operatorToken.kind) {
+            case ts.SyntaxKind.ExclamationEqualsEqualsToken:
+            case ts.SyntaxKind.ExclamationEqualsToken:
+            case ts.SyntaxKind.EqualsEqualsEqualsToken:
+            case ts.SyntaxKind.EqualsEqualsToken:
             case ts.SyntaxKind.CommaToken: // Allow `any, any`
             case ts.SyntaxKind.BarBarToken: // Allow `any || any`
             case ts.SyntaxKind.AmpersandAmpersandToken: // Allow `any && any`
-                cb(left, /*anyOk*/ true);
-                return cb(right, /*anyOk*/ true);
-
+                allowAnyLeft = allowAnyRight = true;
+                break;
+            case ts.SyntaxKind.InstanceOfKeyword: // Allow test
+                allowAnyLeft = true;
+                break;
             case ts.SyntaxKind.EqualsToken:
                 // Allow assignment if the lhs is also *any*.
                 // TODO: handle destructuring
-                cb(right, /*anyOk*/ isNodeAny(left, checker));
-                return;
-
+                allowAnyLeft = true;
+                allowAnyRight = isNodeAny(node.left, this.checker);
+                break;
             case ts.SyntaxKind.PlusToken: // Allow implicit stringification
             case ts.SyntaxKind.PlusEqualsToken:
-                const anyOk = isStringLike(left, checker)
-                    || (isStringLike(right, checker) && operatorToken.kind === ts.SyntaxKind.PlusToken);
-                cb(left, anyOk);
-                return cb(right, anyOk);
-
-            default:
-                cb(left);
-                return cb(right);
+                allowAnyLeft = allowAnyRight = isStringLike(node.left, this.checker)
+                    || (isStringLike(node.right, this.checker) && node.operatorToken.kind === ts.SyntaxKind.PlusToken);
         }
+        this.visitNode(node.left, allowAnyLeft);
+        this.visitNode(node.right, allowAnyRight);
+        return anyOk ? false : this.check(node);
+    }
+
+    private checkYieldExpression(node: ts.YieldExpression, anyOk: boolean | undefined) {
+        if (node.expression !== undefined) {
+            this.visitNode(node.expression, true); // TODO get return type
+        }
+        if (anyOk) {
+            return false;
+        }
+        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+        return true;
+    }
+
+    private checkClassLikeDeclaration(node: ts.ClassLikeDeclaration) {
+        if (node.decorators !== undefined) {
+            node.decorators.forEach(this.noCheck);
+        }
+        if (node.heritageClauses !== undefined) {
+            node.heritageClauses.forEach(this.noCheck);
+        }
+        return node.members.forEach(this.noCheck);
     }
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
-    return isAny(checker.getTypeAtLocation(node));
+    const type = checker.getTypeAtLocation(node);
+    if (isAny(type)) {
+        return true;
+    }
+    if (type === undefined) {
+        return false;
+    }
+    // check if type extends any
+    if (isInterfaceType(type) && isAny(checker.getBaseTypes(type)[0])) {
+        return true;
+    }
+    // check if declared type extends any
+    if (type.symbol === undefined) {
+        return false;
+    }
+    const declaredType = checker.getDeclaredTypeOfSymbol(type.symbol);
+    return isInterfaceType(declaredType) && isAny(checker.getBaseTypes(declaredType)[0]);
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
