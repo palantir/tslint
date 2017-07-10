@@ -76,19 +76,9 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.TypeAliasDeclaration:
             case ts.SyntaxKind.TypeParameter:
             // Ignore imports
-            case ts.SyntaxKind.ImportEqualsDeclaration:
+            case ts.SyntaxKind.ImportEqualsDeclaration: // TODO import Foo from Bar.Foo, where Bar is any
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
-            // These show as type "any" if in type position.
-            case ts.SyntaxKind.NumericLiteral:
-            case ts.SyntaxKind.StringLiteral:
-            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-            case ts.SyntaxKind.NullKeyword:
-            case ts.SyntaxKind.UndefinedKeyword:
-            case ts.SyntaxKind.NumberKeyword:
-            case ts.SyntaxKind.StringKeyword:
-            case ts.SyntaxKind.NeverKeyword:
-            case ts.SyntaxKind.AnyKeyword:
                 return false;
             case ts.SyntaxKind.ThisKeyword:
             case ts.SyntaxKind.SuperKeyword:
@@ -102,9 +92,10 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.TemplateSpan: // Allow stringification (works on all values). Note: tagged templates handled differently.
             case ts.SyntaxKind.ThrowStatement:
             case ts.SyntaxKind.TypeOfExpression:
+            case ts.SyntaxKind.VoidExpression:
                 return this.visitNode(
-                    (node as ts.ExpressionStatement | ts.AssertionExpression | ts.TemplateSpan | ts.ThrowStatement | ts.TypeOfExpression)
-                        .expression,
+                    (node as ts.ExpressionStatement | ts.AssertionExpression | ts.TemplateSpan | ts.ThrowStatement | ts.TypeOfExpression |
+                             ts.VoidExpression).expression,
                     /*anyOk*/ true,
                 );
             case ts.SyntaxKind.PropertyAssignment:
@@ -248,13 +239,15 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.YieldExpression:
                 return this.checkYieldExpression(node as ts.YieldExpression, anyOk);
             case ts.SyntaxKind.ClassExpression:
-                if (!anyOk) {
-                    this.check(node as ts.Expression);
-                }
-                // falls through
+                this.checkClassLikeDeclaration(node as ts.ClassExpression);
+                return anyOk ? false : this.check(node as ts.Expression);
             case ts.SyntaxKind.ClassDeclaration:
-                this.checkClassLikeDeclaration(node as ts.ClassLikeDeclaration);
-                return;
+                this.checkClassLikeDeclaration(node as ts.ClassDeclaration);
+                return false;
+            // TODO JsxExpression
+            // TODO JsxElement
+            // TODO failing Tests for declared type on ts<2.4
+
         }
         if (isTypeNodeKind(node.kind) || node.kind >= ts.SyntaxKind.FirstKeyword && node.kind <= ts.SyntaxKind.LastKeyword) {
             return false;

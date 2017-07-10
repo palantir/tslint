@@ -234,4 +234,6 @@ obj.foo;
     ~ [0]
 }
 
+void x;
+
 [0]: Unsafe use of expression of type 'any'.
