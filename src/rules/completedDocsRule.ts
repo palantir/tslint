@@ -39,6 +39,7 @@ export const ALL = "all";
 
 export const ARGUMENT_CLASSES = "classes";
 export const ARGUMENT_ENUMS = "enums";
+export const ARGUMENT_ENUM_MEMBERS = "enum-members";
 export const ARGUMENT_FUNCTIONS = "functions";
 export const ARGUMENT_INTERFACES = "interfaces";
 export const ARGUMENT_METHODS = "methods";
@@ -66,6 +67,7 @@ export type All = typeof ALL;
 export type DocType = All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
+    | typeof ARGUMENT_ENUM_MEMBERS
     | typeof ARGUMENT_FUNCTIONS
     | typeof ARGUMENT_INTERFACES
     | typeof ARGUMENT_METHODS
@@ -165,6 +167,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * \`"${ARGUMENT_CLASSES}"\`
             * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_ENUM_MEMBERS}"\`
             * \`"${ARGUMENT_FUNCTIONS}"\`
             * \`"${ARGUMENT_INTERFACES}"\`
             * \`"${ARGUMENT_METHODS}"\`
@@ -185,6 +188,7 @@ export class Rule extends Lint.Rules.TypedRule {
                         properties: {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_INTERFACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
@@ -353,6 +357,13 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         super.visitEnumDeclaration(node);
     }
 
+    public visitEnumMember(node: ts.EnumMember): void {
+        // Enum members don't have modifiers, so use the parent
+        // enum declaration when checking the requirements.
+        this.checkNode(node, ARGUMENT_ENUM_MEMBERS, node.parent);
+        super.visitEnumMember(node);
+    }
+
     public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
         this.checkNode(node, ARGUMENT_FUNCTIONS);
         super.visitFunctionDeclaration(node);
@@ -388,14 +399,14 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         super.visitVariableDeclaration(node);
     }
 
-    private checkNode(node: ts.NamedDeclaration, nodeType: DocType): void {
+    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Declaration = node): void {
         const { name } = node;
         if (name === undefined) {
             return;
         }
 
         const requirement = this.requirements.get(nodeType);
-        if (requirement === undefined || !requirement.shouldNodeBeDocumented(node)) {
+        if (requirement === undefined || !requirement.shouldNodeBeDocumented(requirementNode)) {
             return;
         }
 
@@ -405,19 +416,23 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
 
         const comments = symbol.getDocumentationComment();
-        this.checkComments(node, nodeType, comments);
+        this.checkComments(node, this.describeNode(nodeType), comments, requirementNode);
     }
 
-    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[]) {
+    private describeNode(nodeType: DocType): string {
+        return nodeType.replace("-", " ");
+    }
+
+    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Declaration) {
         if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
-            this.addDocumentationFailure(node, nodeDescriptor);
+            this.addDocumentationFailure(node, nodeDescriptor, requirementNode);
         }
     }
 
-    private addDocumentationFailure(node: ts.Declaration, nodeType: string): void {
+    private addDocumentationFailure(node: ts.Declaration, nodeType: string, requirementNode: ts.Declaration): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = this.describeDocumentationFailure(node, nodeType);
+        const description = this.describeDocumentationFailure(requirementNode, nodeType);
 
         this.addFailureAt(start, width, description);
     }

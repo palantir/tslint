@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isAwaitExpression } from "tsutils";
+import { isAwaitExpression, isUnionOrIntersectionType } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -65,7 +65,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set
             return true;
         }
 
-        if (isUnionType(type)) {
+        if (isUnionOrIntersectionType(type)) {
             return type.types.some(couldBePromise);
         }
 
@@ -77,8 +77,4 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set
         const { target } = type as ts.TypeReference;
         return target !== undefined && target.symbol !== undefined && promiseTypes.has(target.symbol.name);
     }
-}
-
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

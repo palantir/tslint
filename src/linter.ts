@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.4.3";
+    public static VERSION = "5.5.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
