@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, getNextToken, isClassLikeDeclaration } from "tsutils";
+import { getChildOfKind, getModifier, getNextToken, isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -118,17 +118,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
-
-        let publicKeyword: ts.Node | undefined;
-        if (node.modifiers !== undefined) {
-            for (const modifier of node.modifiers) {
-                if (modifier.kind === ts.SyntaxKind.PublicKeyword) {
-                    publicKeyword = modifier;
-                    break;
-                }
-            }
-        }
-
+        const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
         if (noPublic && publicKeyword !== undefined) {
             const start = publicKeyword.end - "public".length;
             ctx.addFailure(
