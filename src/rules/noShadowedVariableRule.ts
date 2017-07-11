@@ -237,7 +237,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
             if (!hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
                 return cb(node);
             }
-            /* Don't handle static members as children of the class' scope. That avoid shadowed type parameter warnings on static members.
+            /* Don't treat static members as children of the class' scope. That avoid shadowed type parameter warnings on static members.
                class C<T> {
                    static method<T>() {}
                }
