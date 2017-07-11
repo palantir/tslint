@@ -29,9 +29,30 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-shadowed-variable",
         description: "Disallows shadowing variable declarations.",
         rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            You can optionally pass an object to disable checking for certain kinds of declarations.
+            Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
+            and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
+            All checks default to \`true\`, i.e. are enabled by default.
+            Not that you cannot disable variables and parameters.
+        `,
+        options: {
+            type: "object",
+            properties: {
+                class: {type: "boolean"},
+                enum: {type: "boolean"},
+                function: {type: "boolean"},
+                import: {type: "boolean"},
+                interface: {type: "boolean"},
+                namespace: {type: "boolean"},
+                typeAlias: {type: "boolean"},
+                typeParameter: {type: "boolean"},
+            },
+        },
+        optionExamples: [
+            true,
+            [true, {class: true, enum: true, function: true, interface: false, namespace: true, typeAlias: false, typeParameter: false}],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
