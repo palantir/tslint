@@ -21,3 +21,6 @@ foo({...original, c: 3});
 // allowed
 result = Object.assign(new Foo(), {});
 result = Object.assign(createFoo(), {});
+
+let fn = () => ({...original});
+
