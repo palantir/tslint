@@ -9,9 +9,12 @@ function f3(foo: number) {
 let noParam: number = 0;
 noParam++;
 noParam = 0;
+let [alsoNoParam] = [0];
+--alsoNoParam;
 
 function f4(foo: number, {bar}: {bar: number}, baz: string) {
     --noParam;
+    alsoNoParam += alsoNoParam;
     foo += 1;
     ~~~ [err % ('foo')]
     foo++;
