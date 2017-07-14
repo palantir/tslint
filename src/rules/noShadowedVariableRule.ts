@@ -195,7 +195,9 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     }
                     break;
                 case ts.SyntaxKind.Parameter:
-                    if (!isThisParameter(node as ts.ParameterDeclaration) && isFunctionWithBody(node.parent!)) {
+                    if (node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                        !isThisParameter(node as ts.ParameterDeclaration) &&
+                        isFunctionWithBody(node.parent!)) {
                         this.handleBindingName((node as ts.ParameterDeclaration).name, false);
                     }
                     break;

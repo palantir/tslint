@@ -352,4 +352,7 @@ class Clazz<T> {
     }
 }
 
+// allow IndexSignature names
+function baz(param: {[baz: string]: string}) {}
+
 [err]: Shadowed name: '%s'
