@@ -178,4 +178,20 @@ function test() {
         print();
 }
 
+for (let i = 0; i < arr.length; ++i) {
+    arr[i]++;
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    ({...arr[i]} = foo);
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    for (arr[i] of otherArr) {}
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    ++(arr[i]);
+}
+
 [0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration
