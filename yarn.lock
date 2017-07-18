@@ -1488,15 +1488,9 @@ tslint@^5.5.0:
     tslib "^1.7.1"
     tsutils "^2.5.1"
 
-tsutils@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.5.1.tgz#c2001390c79eec1a5ccfa7ac12d599639683e0cf"
-  dependencies:
-    tslib "^1.7.1"
-
-tsutils@^2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.6.0.tgz#e5e99c79a8accd3977ce18d83fdf1d235a6c2ebb"
+tsutils@^2.5.1, tsutils@^2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-2.7.1.tgz#411a0e9466525a2b2869260a55620d7292155e24"
   dependencies:
     tslib "^1.7.1"
 
