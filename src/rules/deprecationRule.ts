@@ -16,7 +16,7 @@
  */
 
 import {
-    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier,
+    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc,
     isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
@@ -90,7 +90,7 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
-            return (parent as ts.Declaration).name === identifier;
+            return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.BindingElement:
         case ts.SyntaxKind.ExportSpecifier:
         case ts.SyntaxKind.ImportSpecifier:
@@ -149,7 +149,10 @@ function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
     return getDeprecationFromDeclarations(symbol.declarations);
 }
 
-function getSignatureDeprecation(signature: ts.Signature): string | undefined {
+function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
+    if (signature === undefined) {
+        return undefined;
+    }
     if (signature.getJsDocTags !== undefined) {
         return findDeprecationTag(signature.getJsDocTags());
     }
@@ -183,13 +186,13 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
 
 function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
     for (const child of declaration.getChildren()) {
-        if (child.kind !== ts.SyntaxKind.JSDocComment) {
+        if (!isJsDoc(child)) {
             break;
         }
-        if ((child as ts.JSDoc).tags === undefined) {
+        if (child.tags === undefined) {
             continue;
         }
-        for (const tag of (child as ts.JSDoc).tags!) {
+        for (const tag of child.tags) {
             if (tag.tagName.text === "deprecated") {
                 return tag.comment === undefined ? "" : tag.comment;
             }

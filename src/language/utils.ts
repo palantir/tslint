@@ -16,10 +16,10 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList, isPrefixUnaryExpression } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+import { IDisabledInterval, RuleFailure } from "./rule/rule"; // tslint:disable-line deprecation
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -216,6 +216,19 @@ export function isLoop(node: ts.Node): node is ts.IterationStatement {
         || node.kind === ts.SyntaxKind.ForStatement
         || node.kind === ts.SyntaxKind.ForInStatement
         || node.kind === ts.SyntaxKind.ForOfStatement;
+}
+
+/**
+ * @returns Whether node is a numeric expression.
+ */
+export function isNumeric(node: ts.Expression) {
+    while (isPrefixUnaryExpression(node) &&
+           (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+        node = node.operand;
+    }
+
+    return node.kind === ts.SyntaxKind.NumericLiteral ||
+        isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity");
 }
 
 export interface TokenPosition {

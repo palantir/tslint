@@ -35,6 +35,13 @@ export const rules = {
     // added in v5.3
     "prefer-conditional-expression": true,
     "prefer-object-spread": true,
+
+    // added in v5.4
+    "no-duplicate-variable": [
+        true,
+        "check-parameters",
+    ],
+    "no-this-assignment": true,
 };
 // tslint:enable object-literal-sort-keys
 

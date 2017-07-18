@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {isExpression} from "tsutils";
+import { isExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -60,6 +60,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.Parameter: {
                 const { type, initializer } = node as ts.ParameterDeclaration;
+                // TODO handle destructuring
                 if (initializer !== undefined) {
                     return cb(initializer, /*anyOk*/ type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword);
                 }
@@ -187,6 +188,34 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return;
             }
 
+            case ts.SyntaxKind.IfStatement: {
+                const { expression, thenStatement, elseStatement } = node as ts.IfStatement;
+                cb(expression, true); // allow truthyness check
+                cb(thenStatement);
+                if (elseStatement !== undefined) { cb(elseStatement); }
+                return;
+            }
+
+            case ts.SyntaxKind.PrefixUnaryExpression: {
+                const {operator, operand} = node as ts.PrefixUnaryExpression;
+                cb(operand, operator === ts.SyntaxKind.ExclamationToken); // allow falsyness check
+                check();
+                return;
+            }
+
+            case ts.SyntaxKind.ForStatement: {
+                const { initializer, condition, incrementor, statement } = node as ts.ForStatement;
+                if (initializer !== undefined) { cb(initializer); }
+                if (condition !== undefined) { cb(condition, true); } // allow truthyness check
+                if (incrementor !== undefined) { cb(incrementor); }
+                return cb(statement);
+            }
+
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+                cb((node as ts.IterationStatement).statement);
+                return cb((node as ts.DoStatement | ts.WhileStatement).expression, true);
+
             default:
                 if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
@@ -230,6 +259,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb(right);
 
             case ts.SyntaxKind.CommaToken: // Allow `any, any`
+            case ts.SyntaxKind.BarBarToken: // Allow `any || any`
+            case ts.SyntaxKind.AmpersandAmpersandToken: // Allow `any && any`
                 cb(left, /*anyOk*/ true);
                 return cb(right, /*anyOk*/ true);
 

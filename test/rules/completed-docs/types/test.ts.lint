@@ -138,6 +138,19 @@ enum EmptyEnum { }
  */
 enum GoodEnum { }
 
+/**
+ * ...
+ */
+enum EnumWithMembers {
+    BadEnumMember
+    ~~~~~~~~~~~~~       [Documentation must exist for enum members.]
+
+    /**
+     * ...
+     */
+    GoodEnumMember
+}
+
 function BadFunction() { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for functions.]
 

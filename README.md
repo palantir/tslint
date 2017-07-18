@@ -15,7 +15,7 @@ TSLint supports:
 - inline disabling and enabling of rules with comment flags
 - configuration presets (`tslint:latest`, `tslint-react`, etc.) and plugin composition
 - automatic fixing of formatting & style violations
-- integration with [msbuild](https://github.com/joshuakgoldberg/tslint.msbuild), [grunt](https://github.com/palantir/grunt-tslint), [gulp](https://github.com/panuhorsmalahti/gulp-tslint), [atom](https://github.com/AtomLinter/linter-tslint), [eclipse](https://github.com/palantir/eclipse-tslint), [emacs](http://flycheck.org), [sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [vim](https://github.com/scrooloose/syntastic), [visual studio](https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d), [vscode](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [webstorm](https://www.jetbrains.com/webstorm/help/tslint.html), and more
+- integration with [MSBuild](https://github.com/joshuakgoldberg/tslint.msbuild), [Grunt](https://github.com/palantir/grunt-tslint), [Gulp](https://github.com/panuhorsmalahti/gulp-tslint), [Atom](https://github.com/AtomLinter/linter-tslint), [Eclipse](https://github.com/palantir/eclipse-tslint), [Emacs](http://flycheck.org), [Sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [Vim](https://github.com/scrooloose/syntastic), [Visual Studio 2015](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebAnalyzer), [Visual Studio 2017](https://marketplace.visualstudio.com/items?itemName=RichNewman.TypeScriptAnalyzer) [Visual Studio code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [WebStorm](https://www.jetbrains.com/webstorm/help/tslint.html) and [more](https://palantir.github.io/tslint/usage/third-party-tools/)
 
 Installation & Usage
 ------------
@@ -25,6 +25,7 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 - [core rules](https://palantir.github.io/tslint/rules/),
 - [core formatters](https://palantir.github.io/tslint/formatters/), and
 - [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
+- [inline disabling and enabling of rules with comment flags](https://palantir.github.io/tslint/usage/rule-flags/)
 
 Custom Rules & Plugins
 ------------
