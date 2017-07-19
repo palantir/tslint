@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
 
-# Publishes TSLint to NPM
-# This script must be run with yarn: "yarn run publish:local gitTagToPublish"
+# Publishes TSLint to NPM based on the current version in package.json
+# This script must be run with yarn: "yarn run publish:local"
 # A user running this script must have Palantir NPM organization credentials
 
 set -e
-
-if [[ $# -ne 1 ]]; then
-    echo "usage: yarn run publish:local gitTagToPublish"
-    exit 1
-fi
 
 rm -rf tempPublish
 mkdir tempPublish
 
 git clone git@github.com:palantir/tslint.git tempPublish
 cd tempPublish
-git checkout $1
+git checkout $npm_package_version
 
 yarn install --pure-lockfile
 yarn run verify
