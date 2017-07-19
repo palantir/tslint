@@ -33,6 +33,9 @@ var f = function foobar (): void{
 var f = function foobar (a: string, cb: ()=>{}): void{};
                        ~ [0]
 
+// Default export (name ommited)
+export default function () {}
+                       ~ [0]
 
 // Async Arrow
 // ignore
