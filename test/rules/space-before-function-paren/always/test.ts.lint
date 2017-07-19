@@ -34,6 +34,10 @@ var f = function foobar(a: string, cb: ()=>{}): void{};
                        ~  [space-before-function-paren]
 
 
+// Default export (name ommited)
+export default function() {}
+                       ~  [space-before-function-paren]
+
 // Async Arrow
 // ignore
 () => {};

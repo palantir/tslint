@@ -116,8 +116,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
-            return options.named;
-
+            // name is optional for function declaration which is default export (TS will emit error in other cases).
+            // Can be handled in the same way as function expression.
         case ts.SyntaxKind.FunctionExpression:
             return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
 
