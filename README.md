@@ -71,5 +71,6 @@ Creating a new release
 4. Commit with message `Prepare release <version>`
 5. Push your branch to GitHub and make a PR
 6. Once your PR is merged, wait for the tests to pass on CircleCI for develop
-7. Create a "Release" on GitHub with the proper tag version and notes from the changelog
-8. Run 'yarn run publish:local 4.1.0' (replace with the appropriate tag name for the release)
+7. Create a "Release" on GitHub with the proper tag version and notes from the changelog.
+   The tag should be identical to the version in `package.json`
+8. Run 'yarn run publish:local'
