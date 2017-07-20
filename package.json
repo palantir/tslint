@@ -28,6 +28,7 @@
     "lint": "npm-run-all -p lint:global lint:from-bin",
     "lint:global": "tslint --project test/tsconfig.json --format stylish # test includes 'src' too",
     "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
+    "publish:local": "./scripts/npmPublish.sh",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
     "test:pre": "cd ./test/config && npm install --no-save",
     "test:mocha": "mocha --reporter spec --colors \"build/test/**/*Tests.js\"",
@@ -71,9 +72,9 @@
     "npm-run-all": "^4.0.2",
     "nyc": "^10.2.0",
     "rimraf": "^2.5.4",
-    "tslint": "^5.4.2",
+    "tslint": "^5.5.0",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "2.4.1"
+    "typescript": "~2.4.1"
   },
   "license": "Apache-2.0",
   "engines": {

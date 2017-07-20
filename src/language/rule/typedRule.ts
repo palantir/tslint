@@ -25,7 +25,7 @@ export abstract class TypedRule extends AbstractRule implements ITypedRule {
 
     public apply(): RuleFailure[] {
         // if no program is given to the linter, show an error
-        showWarningOnce(`Warning: The '${this.ruleName}' rule requires type infomation.`);
+        showWarningOnce(`Warning: The '${this.ruleName}' rule requires type information.`);
         return [];
     }
 

@@ -1,4 +1,3 @@
-[typescript]: < 2.5.0
 namespace N {
     export type T = number;
     export const x: N.T = 0;
