@@ -1,0 +1,6 @@
+import {bar} from '../bar';
+
+import {foo} from 'foo';
+~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: libraries, parent directories, current directory]
+
+import './baz';

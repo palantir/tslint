@@ -46,6 +46,7 @@ export const rules = {
 
     // added in v5.6
     "no-duplicate-imports": true,
+    "grouped-imports": true,
 };
 // tslint:enable object-literal-sort-keys
 
