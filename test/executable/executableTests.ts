@@ -37,7 +37,9 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr, "Missing files", "stderr should contain notification about missing files");
+                assert.include(stderr,
+                    "No files specified. Use --project to lint a project folder.",
+                    "stderr should contain notification about ");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });
