@@ -39,7 +39,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
                 assert.include(stderr,
                     "No files specified. Use --project to lint a project folder.",
-                    "stderr should contain notification about ");
+                    "stderr should contain notification about missing files");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });
