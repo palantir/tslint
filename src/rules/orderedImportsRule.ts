@@ -302,7 +302,7 @@ function flipCase(str: string): string {
 
 // After applying a transformation, are the nodes sorted according to the text they contain?
 // If not, return the pair of nodes which are out of order.
-function findUnsortedPair(xs: ts.Node[], transform: (x: string) => string): [ts.Node, ts.Node] | undefined {
+function findUnsortedPair(xs: ReadonlyArray<ts.Node>, transform: (x: string) => string): [ts.Node, ts.Node] | undefined {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
             return [xs[i - 1], xs[i]];
@@ -336,7 +336,7 @@ function removeQuotes(value: string): string {
     return value;
 }
 
-function sortByKey<T>(xs: T[], getSortKey: (x: T) => string): T[] {
+function sortByKey<T>(xs: ReadonlyArray<T>, getSortKey: (x: T) => string): T[] {
     return xs.slice().sort((a, b) => compare(getSortKey(a), getSortKey(b)));
 }
 
