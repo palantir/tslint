@@ -1,0 +1,7 @@
+import * as fs from 'fs';
+declare module "foo" {
+    import {readFile} from 'fs';
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Multiple imports from 'fs' can be combined into one.]
+}
+
+declare module "*";

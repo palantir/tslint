@@ -145,6 +145,7 @@ export const rules = {
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
     "no-default-export": true,
+    "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
     "no-require-imports": true,
