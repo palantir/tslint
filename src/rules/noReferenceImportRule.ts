@@ -55,7 +55,7 @@ class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private findImports(statements: ts.Statement[]) {
+    private findImports(statements: ReadonlyArray<ts.Statement>) {
         for (const statement of statements) {
             if (isImportDeclaration(statement)) {
                 this.addImport(statement.moduleSpecifier);
