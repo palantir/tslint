@@ -16,7 +16,7 @@
  */
 
 import * as Lint from "tslint";
-import { isImportDeclaration } from "tsutils";
+import { isImportDeclaration, isTextualLiteral } from "tsutils";
 import * as ts from "typescript";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,8 +47,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 enum ImportStatementType {
     LIBRARY_IMPORT = 1,
-    PARENT_DIRECTORY_IMPORT = 2,
-    CURRENT_DIRECTORY_IMPORT = 3,
+    PARENT_DIRECTORY_IMPORT = 2, // starts with "../"
+    CURRENT_DIRECTORY_IMPORT = 3, // starts with "./"
 }
 
 interface ImportStatement {
@@ -60,9 +60,51 @@ interface ImportStatement {
 
 class Walker extends Lint.AbstractWalker<Lint.IOptions> {
     private lastImportStatement: ImportStatement;
+    private newLine: string;
+    private allImportsFix: boolean;
 
-    private static getImportStatementType(statement: ts.Statement): ImportStatementType {
-        const path = Walker.getImportPath(statement);
+    public walk(sourceFile: ts.SourceFile): void {
+        this.newLine = this.getEofChar(sourceFile);
+        sourceFile.statements
+            .filter(isImportDeclaration)
+            .forEach(this.checkStatement);
+    }
+
+    private getEofChar(sourceFile: ts.SourceFile): string {
+        const lineEnd = sourceFile.getLineEndOfPosition(0);
+        let newLine;
+        if (lineEnd > 0) {
+            if (lineEnd > 1 && sourceFile.text[lineEnd - 1] === "\r") {
+                newLine = "\r\n";
+            } else if (sourceFile.text[lineEnd] === "\n") {
+                newLine = "\n";
+            }
+        }
+        return newLine == null ? ts.sys.newLine : newLine;
+    }
+
+    private checkStatement = (statement: ts.ImportDeclaration): void => {
+        if (this.allImportsFix) {
+            return;
+        }
+        const importStatement = this.toImportStatement(statement);
+        if (this.lastImportStatement != null) {
+            this.checkForFailure(importStatement);
+        }
+        this.lastImportStatement = importStatement;
+    }
+
+    private toImportStatement(statement: ts.ImportDeclaration): ImportStatement {
+        return {
+            lineEnd: this.sourceFile.getLineAndCharacterOfPosition(statement.getEnd()).line,
+            lineStart: this.sourceFile.getLineAndCharacterOfPosition(statement.getStart()).line,
+            statement,
+            type: this.getImportStatementType(statement),
+        };
+    }
+
+    private getImportStatementType(statement: ts.ImportDeclaration): ImportStatementType {
+        const path = this.getImportPath(statement);
         if (path.charAt(0) === ".") {
             if (path.charAt(1) === ".") {
                 return ImportStatementType.PARENT_DIRECTORY_IMPORT;
@@ -74,71 +116,59 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
         }
     }
 
-    private static getImportPath(statement: ts.Statement): string {
-        const str = statement.getText();
-        let index;
-        let lastIndex;
-        index = str.indexOf("'");
-        if (index > 0) {
-            lastIndex = str.lastIndexOf("'");
-        } else {
-            index = str.indexOf("\"");
-            lastIndex = str.lastIndexOf("\"");
+    private getImportPath(statement: ts.ImportDeclaration): string {
+        if (isTextualLiteral(statement.moduleSpecifier)) {
+            return statement.moduleSpecifier.text;
         }
-        if (index < 0 || lastIndex < 0) {
-            throw new Error(`Unable to extract path from import statement \`${statement.getText()}\``);
-        }
-        return str.substring(index + 1, lastIndex);
+        return "";
     }
 
-    public walk(sourceFile: ts.SourceFile): void {
-        sourceFile.statements
-            .filter(isImportDeclaration)
-            .forEach((st) => this.checkStatement(st));
-    }
-
-    private toImportStatement(statement: ts.Statement): ImportStatement {
-        return {
-            lineEnd: this.sourceFile.getLineAndCharacterOfPosition(statement.getEnd()).line,
-            lineStart: this.sourceFile.getLineAndCharacterOfPosition(statement.getStart()).line,
-            statement,
-            type: Walker.getImportStatementType(statement),
-        };
-    }
-
-    private checkStatement(statement: ts.Statement): void {
-        const importStatement = this.toImportStatement(statement);
-        if (this.lastImportStatement) {
-            this.checkImportStatement(importStatement);
-        }
-        this.lastImportStatement = importStatement;
-    }
-
-    private checkImportStatement(importStatement: ImportStatement) {
+    private checkForFailure(importStatement: ImportStatement): void {
         if (importStatement.type === this.lastImportStatement.type) {
             if (importStatement.lineStart !== this.lastImportStatement.lineEnd + 1) {
-                const replacement = Lint.Replacement.deleteFromTo(
-                    this.lastImportStatement.statement.getEnd() + 1, importStatement.statement.getStart());
-                this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_SEPARATED, replacement);
+                this.addSeparatedImportsFailure(importStatement);
             }
-        } else if (importStatement.type.valueOf() < this.lastImportStatement.type.valueOf()) {
-            this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_ORDER, this.getAllImportsFix());
         } else {
-            if (importStatement.lineStart !== this.lastImportStatement.lineEnd + 2) {
-                const replacement = Lint.Replacement.appendText(importStatement.statement.getStart(), ts.sys.newLine);
-                this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_NOT_SEPARATED, replacement);
+            if (importStatement.type < this.lastImportStatement.type) {
+                this.addIncorrectlyOrderedImportsFailure(importStatement);
+            } else if (importStatement.lineStart !== this.lastImportStatement.lineEnd + 2) {
+                this.addNotSeparatedImportsFailure(importStatement);
             }
         }
+    }
+
+    private addSeparatedImportsFailure(importStatement: ImportStatement): void {
+        const text = [this.lastImportStatement, importStatement]
+            .map((st) => st.statement.getText())
+            .join(this.newLine);
+        const replacement = Lint.Replacement.replaceFromTo(
+            this.lastImportStatement.statement.getStart(), importStatement.statement.getEnd(), text);
+        this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_SEPARATED, replacement);
+    }
+
+    private addIncorrectlyOrderedImportsFailure(importStatement: ImportStatement): void {
+        this.allImportsFix = true;
+        this.failures.length = 0;
+        this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_ORDER, this.getAllImportsFix());
+    }
+
+    private addNotSeparatedImportsFailure(importStatement: ImportStatement): void {
+        const replacement = Lint.Replacement.replaceFromTo(this.lastImportStatement.statement.getEnd(),
+            importStatement.statement.getStart(), this.newLine + this.newLine);
+        this.addFailureAtNode(importStatement.statement, Rule.IMPORT_SOURCES_NOT_SEPARATED, replacement);
     }
 
     private getAllImportsFix(): Lint.Fix {
         const importStatements = this.sourceFile.statements.filter(isImportDeclaration);
-        const libs = importStatements.filter((st) => Walker.getImportStatementType(st) === ImportStatementType.LIBRARY_IMPORT);
-        const parent = importStatements.filter((st) => Walker.getImportStatementType(st) === ImportStatementType.PARENT_DIRECTORY_IMPORT);
-        const current = importStatements.filter((st) => Walker.getImportStatementType(st) === ImportStatementType.CURRENT_DIRECTORY_IMPORT);
+        const libs = importStatements.filter(
+            (st) => this.getImportStatementType(st) === ImportStatementType.LIBRARY_IMPORT);
+        const parent = importStatements.filter(
+            (st) => this.getImportStatementType(st) === ImportStatementType.PARENT_DIRECTORY_IMPORT);
+        const current = importStatements.filter(
+            (st) => this.getImportStatementType(st) === ImportStatementType.CURRENT_DIRECTORY_IMPORT);
         let imports: string[] = [];
         [libs, parent, current].forEach((statements) => {
-            if (statements.length) {
+            if (statements.length > 0) {
                 imports = imports.concat(statements.map((st) => st.getText()));
                 imports.push("");
             }
@@ -146,7 +176,7 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
         return Lint.Replacement.replaceFromTo(
             importStatements[0].getStart(),
             importStatements[importStatements.length - 1].getEnd(),
-            imports.join(ts.sys.newLine),
+            imports.join(this.newLine),
         );
     }
 }
