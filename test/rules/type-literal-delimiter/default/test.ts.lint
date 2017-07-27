@@ -1,0 +1,32 @@
+type T = {
+    x: number;
+             ~ [PREFER_COMMA]
+    y: string
+            ~ [MISSING]
+};
+
+type T = {
+    x: number
+            ~ [MISSING]
+    y: string;
+             ~ [PREFER_COMMA]
+};
+
+type T = {
+    x: number,
+    y: string,
+};
+
+type T = { x: number, y: string };
+
+// Works even when there's extra whitespace
+type T = { x: number , y: number };
+type T = { x: number ; y: number , };
+                     ~ [PREFER_COMMA]
+                                 ~ [EXTRA % (',')]
+type T = { x: number , y: number ; };
+                                 ~ [EXTRA % (';')]
+
+[PREFER_COMMA]: Expected type literal to use ',' as a delimiter.
+[MISSING]: Expected multi-line type literal to have a trailing ','.
+[EXTRA]: Did not expect single-line type literal to have a trailing '%s'.

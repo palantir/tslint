@@ -40,7 +40,7 @@ describe("Runner Tests", () => {
     });
 });
 
-async function runLint(options: Options): Promise<{ status: Status; stdout: string; stderr: string }> {
+async function runLint(options: Options): Promise<{ status: Status, stdout: string, stderr: string }> {
     let stdout = "";
     let stderr = "";
     const status = await run(options, { log(m) { stdout += m; }, error(m) { stderr += m; } });

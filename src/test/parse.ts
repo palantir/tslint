@@ -75,7 +75,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
-    function addError(errorLine: EndErrorLine, errorStartPos: { line: number; col: number }, lineNo: number) {
+    function addError(errorLine: EndErrorLine, errorStartPos: { line: number, col: number }, lineNo: number) {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },

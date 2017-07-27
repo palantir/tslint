@@ -45,6 +45,7 @@
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
+    "type-literal-delimiter": false, // Contradiction between global and latest
 
     "ban": [true,
       ["describe", "only"],

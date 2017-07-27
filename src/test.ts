@@ -50,7 +50,7 @@ export interface SkippedTest {
 export interface TestResult {
     directory: string;
     results: {
-        [fileName: string]: TestOutput | SkippedTest;
+        [fileName: string]: TestOutput | SkippedTest,
     };
 }
 

@@ -133,7 +133,8 @@ function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.
 }
 
 type Modifier = "line" | "next-line" | undefined;
-function parseComment(commentText: string): { rulesList: string[] | "all"; isEnabled: boolean; modifier: Modifier } | undefined {
+
+function parseComment(commentText: string): { rulesList: string[] | "all", isEnabled: boolean, modifier: Modifier } | undefined {
     const match = ENABLE_DISABLE_REGEX.exec(commentText);
     if (match === null) {
         return undefined;

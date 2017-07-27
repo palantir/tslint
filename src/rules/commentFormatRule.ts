@@ -133,7 +133,7 @@ function parseOptions(options: Array<string | IExceptionsObject>): Options {
     };
 }
 
-function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
+function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp, failureSuffix: string} {
     if (typeof option !== "object") {
         return undefined;
     }

@@ -44,7 +44,7 @@ export interface IConfigurationFile {
      * Other linter options, currently for testing. Not publicly supported.
      */
     linterOptions?: {
-        typeCheck?: boolean;
+        typeCheck?: boolean,
     };
 
     /**
@@ -461,8 +461,8 @@ export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
 export type RawRuleConfig = null | undefined | boolean | any[] | {
-    severity?: RuleSeverity | "warn" | "none" | "default";
-    options?: any;
+    severity?: RuleSeverity | "warn" | "none" | "default",
+    options?: any,
 };
 
 /**

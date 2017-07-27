@@ -361,7 +361,7 @@ function getMemberKind(member: Member): MemberKind | undefined {
     }
 }
 
-type MemberCategoryJson = { name: string; kinds: string[] } | string;
+type MemberCategoryJson = { name: string, kinds: string[] } | string;
 class MemberCategory {
     constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
     public has(kind: MemberKind) { return this.kinds.has(kind); }
@@ -384,12 +384,12 @@ function parseOptions(options: any[]): Options {
         : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))));
     return { order, alphabetize };
 }
-function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
+function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alphabetize: boolean } {
     if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string; alphabetize?: boolean } | string;
+    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string, alphabetize?: boolean } | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]

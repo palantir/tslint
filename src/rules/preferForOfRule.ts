@@ -89,7 +89,7 @@ function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean 
 }
 
 // returns the iterator and array of a `for` loop if the `for` loop is basic.
-function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier; arrayExpr: ts.Expression } | undefined {
+function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier, arrayExpr: ts.Expression } | undefined {
     const { initializer, condition, incrementor } = forLoop;
     if (initializer === undefined || condition === undefined || incrementor === undefined) {
         return undefined;
