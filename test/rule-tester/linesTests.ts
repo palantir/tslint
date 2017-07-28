@@ -16,7 +16,7 @@
 
 import { assert } from "chai";
 
-import * as lines from "../../src/test/lines";
+import * as lines from "../../src/verify/lines";
 
 describe("Rule Test Lines", () => {
     describe("createErrorString", () => {
