@@ -1,0 +1,13 @@
+import {foo} from 'foo';
+
+import {bar} from '../bar';
+
+import './baz';
+
+let bar2 = false;
+
+const one = 1; // some comment
+
+const two = 2;
+// another comment
+let q = 'a';

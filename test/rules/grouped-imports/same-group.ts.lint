@@ -1,4 +1,4 @@
 import {foo} from 'foo';
 
 import {bar} from 'bar';
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must not be separated by blank lines]
+~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: libraries, parent directories, current directory]
