@@ -27,6 +27,7 @@ const OPTION_DECL = "check-decl";
 const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
 const OPTION_SEPARATOR = "check-separator";
+const OPTION_SPREAD = "check-spread";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
 const OPTION_PREBLOCK = "check-preblock";
@@ -37,13 +38,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Eight arguments may be optionally provided:
+            Nine arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
             * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
+            * \`"check-spread"\` checks that there is no whitespace after spread operator (\`...\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
             * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
@@ -52,10 +54,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 type: "string",
                 enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                       "check-separator", "check-spread", "check-type", "check-typecast", "check-preblock"],
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 9,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
@@ -63,13 +65,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static FAILURE_STRING = "missing whitespace";
+    public static FAILURE_STRING_2 = "invalid whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock", boolean>;
+type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "spread" | "type" | "typecast" | "preblock", boolean>;
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
@@ -77,6 +80,7 @@ function parseOptions(ruleArguments: string[]): Options {
         operator: has(OPTION_OPERATOR),
         module: has(OPTION_MODULE),
         separator: has(OPTION_SEPARATOR),
+        spread: has(OPTION_SPREAD),
         type: has(OPTION_TYPE),
         typecast: has(OPTION_TYPECAST),
         preblock: has(OPTION_PREBLOCK),
