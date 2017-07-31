@@ -12,7 +12,7 @@ var noPreceedingSpaceWithSubsequentSpaceObject = {
     _Prop: "some property",
 
     get Prop(): string {
-               ~           [expected nospace after colon in call-signature]
+               ~ [after-call]
         return this._Prop;
     }
 };
@@ -21,7 +21,7 @@ var noPreceedingSpaceWithSubsequentSpacesObject = {
     _Prop: "some property",
 
     get Prop():   string {
-               ~           [expected nospace after colon in call-signature]
+               ~~~ [after-call]
         return this._Prop;
     }
 };
@@ -38,7 +38,7 @@ var withPreceedingSpaceWithSubsequentSpaceObject = {
     _Prop: "some property",
 
     get Prop() : string {
-                ~         [expected nospace after colon in call-signature]
+                ~ [after-call]
         return this._Prop;
     }
 };
@@ -47,7 +47,7 @@ var withPreceedingSpaceWithSubsequentSpacesObject = {
     _Prop: "some property",
 
     get Prop() :   string {
-                ~         [expected nospace after colon in call-signature]
+                ~~~ [after-call]
         return this._Prop;
     }
 };
@@ -64,7 +64,7 @@ var withPreceedingSpacesWithSubsequentSpaceObject = {
     _Prop: "some property",
 
     get Prop()   : string {
-                  ~         [expected nospace after colon in call-signature]
+                  ~ [after-call]
         return this._Prop;
     }
 };
@@ -73,7 +73,7 @@ var withPreceedingSpacesWithSubsequentSpacesObject = {
     _Prop: "some property",
 
     get Prop()   :   string {
-                  ~         [expected nospace after colon in call-signature]
+                  ~~~ [after-call]
         return this._Prop;
     }
 };
@@ -98,12 +98,12 @@ interface NoPreceedingSpaceNoSubsequentSpaceInterface {
 
 interface NoPreceedingSpaceWithSubsequentSpaceInterface {
     Prop: string;
-         ~           [expected nospace after colon in property-declaration]
+         ~ [after-property]
 }
 
 interface NoPreceedingSpaceWithSubsequentSpacesInterface {
     Prop:   string;
-         ~           [expected nospace after colon in property-declaration]
+         ~~~ [after-property]
 }
 
 interface WithPreceedingSpaceNoSubsequentSpaceInterface {
@@ -112,12 +112,12 @@ interface WithPreceedingSpaceNoSubsequentSpaceInterface {
 
 interface WithPreceedingSpaceWithSubsequentSpaceInterface {
     Prop : string;
-          ~         [expected nospace after colon in property-declaration]
+          ~ [after-property]
 }
 
 interface WithPreceedingSpaceWithSubsequentSpacesInterface {
     Prop :   string;
-          ~         [expected nospace after colon in property-declaration]
+          ~~~ [after-property]
 }
 
 interface WithPreceedingSpacesNoSubsequentSpaceInterface {
@@ -126,12 +126,12 @@ interface WithPreceedingSpacesNoSubsequentSpaceInterface {
 
 interface WithPreceedingSpacesWithSubsequentSpaceInterface {
     Prop   : string;
-            ~         [expected nospace after colon in property-declaration]
+            ~ [after-property]
 }
 
 interface WithPreceedingSpacesWithSubsequentSpacesInterface {
     Prop   :   string;
-            ~         [expected nospace after colon in property-declaration]
+            ~~~ [after-property]
 }
 
 interface NoPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
@@ -155,35 +155,35 @@ function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
 }
 
 function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
-                                                  ~                              [expected nospace after colon in parameter]
-                                                             ~                   [expected nospace after colon in parameter]
-                                                                      ~          [expected nospace after colon in call-signature]
+                                                  ~ [after-parameter]
+                                                             ~ [after-parameter]
+                                                                      ~ [after-call]
     var c: number = a + b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~ [after-variable]
     var d: number = a - b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex: Exception) {
-                ~          [expected nospace after colon in variable-declaration]
+                ~ [after-variable]
         console.log(ex);
     }
 }
 
 function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   number {
-                                                   ~                             [expected nospace after colon in parameter]
-                                                                ~                [expected nospace after colon in parameter]
-                                                                           ~     [expected nospace after colon in call-signature]
+                                                   ~~~ [after-parameter]
+                                                                ~~~ [after-parameter]
+                                                                           ~~~ [after-call]
     var c:   number = a + b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~~~ [after-variable]
     var d:   number = a - b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex:   Exception) {
-                ~          [expected nospace after colon in variable-declaration]
+                ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -200,35 +200,35 @@ function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
 }
 
 function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : number {
-                                                     ~                           [expected nospace after colon in parameter]
-                                                                 ~               [expected nospace after colon in parameter]
-                                                                           ~     [expected nospace after colon in call-signature]
+                                                     ~ [after-parameter]
+                                                                 ~ [after-parameter]
+                                                                           ~ [after-call]
     var c : number = a + b;
-           ~        [expected nospace after colon in variable-declaration]
+           ~ [after-variable]
     var d : number = a - b;
-           ~        [expected nospace after colon in variable-declaration]
+           ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex : Exception) {
-                 ~        [expected nospace after colon in variable-declaration]
+                 ~ [after-variable]
         console.log(ex);
     }
 }
 
 function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :   number {
-                                                      ~                               [expected nospace after colon in parameter]
-                                                                    ~                 [expected nospace after colon in parameter]
-                                                                                ~     [expected nospace after colon in call-signature]
+                                                      ~~~ [after-parameter]
+                                                                    ~~~ [after-parameter]
+                                                                                ~~~ [after-call]
     var c :   number = a + b;
-           ~        [expected nospace after colon in variable-declaration]
+           ~~~ [after-variable]
     var d :   number = a - b;
-           ~        [expected nospace after colon in variable-declaration]
+           ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex :   Exception) {
-                 ~        [expected nospace after colon in variable-declaration]
+                 ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -245,35 +245,35 @@ function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :nu
 }
 
 function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)   : number {
-                                                        ~                               [expected nospace after colon in parameter]
-                                                                      ~                 [expected nospace after colon in parameter]
-                                                                                  ~     [expected nospace after colon in call-signature]
+                                                        ~ [after-parameter]
+                                                                      ~ [after-parameter]
+                                                                                  ~ [after-call]
     var c   : number = a + b;
-             ~        [expected nospace after colon in variable-declaration]
+             ~ [after-variable]
     var d   : number = a - b;
-             ~        [expected nospace after colon in variable-declaration]
+             ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex   : Exception) {
-                   ~        [expected nospace after colon in variable-declaration]
+                   ~ [after-variable]
         console.log(ex);
     }
 }
 
 function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   number)   :   number {
-                                                         ~                                   [expected nospace after colon in parameter]
-                                                                         ~                   [expected nospace after colon in parameter]
-                                                                                       ~     [expected nospace after colon in call-signature]
+                                                         ~~~ [after-parameter]
+                                                                         ~~~ [after-parameter]
+                                                                                       ~~~ [after-call]
     var c   :   number = a + b;
-             ~        [expected nospace after colon in variable-declaration]
+             ~~~ [after-variable]
     var d   :   number = a - b;
-             ~        [expected nospace after colon in variable-declaration]
+             ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex   :   Exception) {
-                   ~        [expected nospace after colon in variable-declaration]
+                   ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -284,8 +284,9 @@ function noPreceedingSpaceNoSubsequentSpaceAndNewLineFn(a:
     number {
     var c:
         number = a + b;
-    var d:
-        number = a - b;
+    var d
+        : number = a - b;
+         ~ [after-variable]
 
     try {
         return c / d;
@@ -315,40 +316,40 @@ function noPreceedingSpaceNoSubsequentSpaceMultiLineFn(
 
 function noPreceedingSpaceWithSubsequentSpaceMultiLineFn(
     a: number,
-      ~          [expected nospace after colon in parameter]
+      ~ [after-parameter]
     b: number
-      ~          [expected nospace after colon in parameter]
+      ~ [after-parameter]
 ): number {
-  ~          [expected nospace after colon in call-signature]
+  ~ [after-call]
     var c: number = a + b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~ [after-variable]
     var d: number = a - b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex: Exception) {
-                ~          [expected nospace after colon in variable-declaration]
+                ~ [after-variable]
         console.log(ex);
     }
 }
 
 function noPreceedingSpaceWithSubsequentSpacesMultiLineFn(
     a:   number,
-      ~          [expected nospace after colon in parameter]
+      ~~~ [after-parameter]
     b:   number
-      ~          [expected nospace after colon in parameter]
+      ~~~ [after-parameter]
 ):   number {
-  ~          [expected nospace after colon in call-signature]
+  ~~~ [after-call]
     var c:   number = a + b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~~~ [after-variable]
     var d:   number = a - b;
-          ~          [expected nospace after colon in variable-declaration]
+          ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex:   Exception) {
-                ~          [expected nospace after colon in variable-declaration]
+                ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -369,40 +370,40 @@ function withPreceedingSpaceNoSubsequentSpaceMultiLineFn(
 
 function withPreceedingSpaceWithSubsequentSpaceMultiLineFn(
     a : number,
-       ~          [expected nospace after colon in parameter]
+       ~ [after-parameter]
     b : number
-       ~          [expected nospace after colon in parameter]
+       ~ [after-parameter]
 ) : number {
-   ~          [expected nospace after colon in call-signature]
+   ~ [after-call]
     var c : number = a + b;
-           ~          [expected nospace after colon in variable-declaration]
+           ~ [after-variable]
     var d : number = a - b;
-           ~          [expected nospace after colon in variable-declaration]
+           ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex : Exception) {
-                 ~          [expected nospace after colon in variable-declaration]
+                 ~ [after-variable]
         console.log(ex);
     }
 }
 
 function withPreceedingSpaceWithSubsequentSpacesMultiLineFn(
     a :   number,
-       ~          [expected nospace after colon in parameter]
+       ~~~ [after-parameter]
     b :   number
-       ~          [expected nospace after colon in parameter]
+       ~~~ [after-parameter]
 ) :   number {
-   ~          [expected nospace after colon in call-signature]
+   ~~~ [after-call]
     var c :   number = a + b;
-           ~          [expected nospace after colon in variable-declaration]
+           ~~~ [after-variable]
     var d :   number = a - b;
-           ~          [expected nospace after colon in variable-declaration]
+           ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex :   Exception) {
-                 ~          [expected nospace after colon in variable-declaration]
+                 ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -423,40 +424,40 @@ function withPreceedingSpacesNoSubsequentSpaceMultiLineFn(
 
 function withPreceedingSpacesWithSubsequentSpaceMultiLineFn(
     a   : number,
-         ~          [expected nospace after colon in parameter]
+         ~ [after-parameter]
     b   : number
-         ~          [expected nospace after colon in parameter]
+         ~ [after-parameter]
 )   : number {
-     ~          [expected nospace after colon in call-signature]
+     ~ [after-call]
     var c   : number = a + b;
-             ~          [expected nospace after colon in variable-declaration]
+             ~ [after-variable]
     var d   : number = a - b;
-             ~          [expected nospace after colon in variable-declaration]
+             ~ [after-variable]
 
     try {
         return c / d;
     } catch (ex   : Exception) {
-                   ~          [expected nospace after colon in variable-declaration]
+                   ~ [after-variable]
         console.log(ex);
     }
 }
 
 function withPreceedingSpacesWithSubsequentSpacesMultiLineFn(
     a   :   number,
-         ~          [expected nospace after colon in parameter]
+         ~~~ [after-parameter]
     b   :   number
-         ~          [expected nospace after colon in parameter]
+         ~~~ [after-parameter]
 )   :   number {
-     ~          [expected nospace after colon in call-signature]
+     ~~~ [after-call]
     var c   :   number = a + b;
-             ~          [expected nospace after colon in variable-declaration]
+             ~~~ [after-variable]
     var d   :   number = a - b;
-             ~          [expected nospace after colon in variable-declaration]
+             ~~~ [after-variable]
 
     try {
         return c / d;
     } catch (ex   :   Exception) {
-                   ~          [expected nospace after colon in variable-declaration]
+                   ~~~ [after-variable]
         console.log(ex);
     }
 }
@@ -468,26 +469,26 @@ function withPreceedingSpacesWithSubsequentSpacesMultiLineFn(
 function noPreceedingSpaceNoSubsequentSpaceSignature( ):{};
 
 function noPreceedingSpaceWithSubsequentSpaceSignature( ): {};
-                                                          ~          [expected nospace after colon in call-signature]
+                                                          ~ [after-call]
 
 function noPreceedingSpaceWithSubsequentSpacesSignature( ):   {};
-                                                           ~          [expected nospace after colon in call-signature]
+                                                           ~~~ [after-call]
 
 function withPreceedingSpaceNoSubsequentSpaceSignature( ) :{};
 
 function withPreceedingSpaceWithSubsequentSpaceSignature( ) : {};
-                                                             ~          [expected nospace after colon in call-signature]
+                                                             ~ [after-call]
 
 function withPreceedingSpaceWithSubsequentSpacesSignature( ) :   {};
-                                                              ~          [expected nospace after colon in call-signature]
+                                                              ~~~ [after-call]
 
 function withPreceedingSpacesNoSubsequentSpaceSignature( )   :{};
 
 function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
-                                                                ~          [expected nospace after colon in call-signature]
+                                                                ~ [after-call]
 
 function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
-                                                                 ~          [expected nospace after colon in call-signature]
+                                                                 ~~~ [after-call]
 
 function noPreceedingSpaceNoSubsequentSpaceAndNewLineSignature( ):
     {};
@@ -515,54 +516,54 @@ class NoPreceedingSpaceNoSubsequentSpaceClass {
 
 class NoPreceedingSpaceWithSubsequentSpaceClass {
     [index: number]: string
-           ~                   [expected nospace after colon in parameter]
-                    ~          [expected nospace after colon in index-signature]
+           ~ [after-parameter]
+                    ~ [after-index]
 
     Prop: string = "some property";
-         ~          [expected nospace after colon in property-declaration]
+         ~ [after-property]
 
     public get name(): string {
-                      ~          [expected nospace after colon in call-signature]
+                      ~ [after-call]
         return "some name";
     }
 
     public set name(a: string): void {}
-                      ~                   [expected nospace after colon in parameter]
-                               ~          [expected nospace after colon in call-signature]
+                      ~ [after-parameter]
+                               ~ [after-call]
 
     public shemp(
         a: number,
-          ~          [expected nospace after colon in parameter]
+          ~ [after-parameter]
         b: number
-          ~          [expected nospace after colon in parameter]
+          ~ [after-parameter]
     ): void {}
-      ~          [expected nospace after colon in call-signature]
+      ~ [after-call]
 }
 
 class NoPreceedingSpaceWithSubsequentSpacesClass {
     [index:   number]:   string
-           ~                     [expected nospace after colon in parameter]
-                      ~          [expected nospace after colon in index-signature]
+           ~~~ [after-parameter]
+                      ~~~ [after-index]
 
     Prop:   string = "some property";
-         ~          [expected nospace after colon in property-declaration]
+         ~~~ [after-property]
 
     public get name():   string {
-                      ~          [expected nospace after colon in call-signature]
+                      ~~~ [after-call]
         return "some name";
     }
 
     public set name(a:   string):   void {}
-                      ~                     [expected nospace after colon in parameter]
-                                 ~          [expected nospace after colon in call-signature]
+                      ~~~ [after-parameter]
+                                 ~~~ [after-call]
 
     public shemp(
         a:   number,
-          ~          [expected nospace after colon in parameter]
+          ~~~ [after-parameter]
         b:   number
-          ~          [expected nospace after colon in parameter]
+          ~~~ [after-parameter]
     ):   void {}
-      ~          [expected nospace after colon in call-signature]
+      ~~~ [after-call]
 }
 
 class WithPreceedingSpaceNoSubsequentSpaceClass {
@@ -584,54 +585,54 @@ class WithPreceedingSpaceNoSubsequentSpaceClass {
 
 class WithPreceedingSpaceWithSubsequentSpaceClass {
     [index : number] : string
-            ~                    [expected nospace after colon in parameter]
-                      ~          [expected nospace after colon in index-signature]
+            ~ [after-parameter]
+                      ~ [after-index]
 
     Prop : string = "some property";
-          ~          [expected nospace after colon in property-declaration]
+          ~ [after-property]
 
     public get name() : string {
-                       ~          [expected nospace after colon in call-signature]
+                       ~ [after-call]
         return "some name";
     }
 
     public set name(a : string) : void {}
-                       ~                    [expected nospace after colon in parameter]
-                                 ~          [expected nospace after colon in call-signature]
+                       ~ [after-parameter]
+                                 ~ [after-call]
 
     public shemp(
         a : number,
-           ~          [expected nospace after colon in parameter]
+           ~ [after-parameter]
         b : number
-           ~          [expected nospace after colon in parameter]
+           ~ [after-parameter]
     ) : void {}
-       ~          [expected nospace after colon in call-signature]
+       ~ [after-call]
 }
 
 class WithPreceedingSpaceWithSubsequentSpacesClass {
     [index :   number] :   string
-            ~                      [expected nospace after colon in parameter]
-                        ~          [expected nospace after colon in index-signature]
+            ~~~ [after-parameter]
+                        ~~~ [after-index]
 
     Prop :   string = "some property";
-          ~          [expected nospace after colon in property-declaration]
+          ~~~ [after-property]
 
     public get name() :   string {
-                       ~          [expected nospace after colon in call-signature]
+                       ~~~ [after-call]
         return "some name";
     }
 
     public set name(a :   string) :   void {}
-                       ~                      [expected nospace after colon in parameter]
-                                   ~          [expected nospace after colon in call-signature]
+                       ~~~ [after-parameter]
+                                   ~~~ [after-call]
 
     public shemp(
         a :   number,
-           ~          [expected nospace after colon in parameter]
+           ~~~ [after-parameter]
         b :   number
-           ~          [expected nospace after colon in parameter]
+           ~~~ [after-parameter]
     ) :   void {}
-       ~          [expected nospace after colon in call-signature]
+       ~~~ [after-call]
 }
 
 class WithPreceedingSpacesNoSubsequentSpaceClass {
@@ -653,54 +654,54 @@ class WithPreceedingSpacesNoSubsequentSpaceClass {
 
 class WithPreceedingSpacesWithSubsequentSpaceClass {
     [index   : number]   : string
-              ~                      [expected nospace after colon in parameter]
-                          ~          [expected nospace after colon in index-signature]
+              ~ [after-parameter]
+                          ~ [after-index]
 
     Prop   : string = "some property";
-            ~          [expected nospace after colon in property-declaration]
+            ~ [after-property]
 
     public get name()   : string {
-                         ~          [expected nospace after colon in call-signature]
+                         ~ [after-call]
         return "some name";
     }
 
     public set name(a   : string)   : void {}
-                         ~                      [expected nospace after colon in parameter]
-                                     ~          [expected nospace after colon in call-signature]
+                         ~ [after-parameter]
+                                     ~ [after-call]
 
     public shemp(
         a   : number,
-             ~          [expected nospace after colon in parameter]
+             ~ [after-parameter]
         b   : number
-             ~          [expected nospace after colon in parameter]
+             ~ [after-parameter]
     )   : void {}
-         ~          [expected nospace after colon in call-signature]
+         ~ [after-call]
 }
 
 class WithPreceedingSpacesWithSubsequentSpacesClass {
     [index   :   number]   :   string
-              ~                        [expected nospace after colon in parameter]
-                            ~          [expected nospace after colon in index-signature]
+              ~~~ [after-parameter]
+                            ~~~ [after-index]
 
     Prop   :   string = "some property";
-            ~          [expected nospace after colon in property-declaration]
+            ~~~ [after-property]
 
     public get name()   :   string {
-                         ~          [expected nospace after colon in call-signature]
+                         ~~~ [after-call]
         return "some name";
     }
 
     public set name(a   :   string)   :   void {}
-                         ~                        [expected nospace after colon in parameter]
-                                       ~          [expected nospace after colon in call-signature]
+                         ~~~ [after-parameter]
+                                       ~~~ [after-call]
 
     public shemp(
         a   :   number,
-             ~          [expected nospace after colon in parameter]
+             ~~~ [after-parameter]
         b   :   number
-             ~          [expected nospace after colon in parameter]
+             ~~~ [after-parameter]
     )   :   void {}
-         ~          [expected nospace after colon in call-signature]
+         ~~~ [after-call]
 }
 
 class NoPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
@@ -728,4 +729,17 @@ class NoPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
     void {}
 }
 
+let foo = ():void => {};
+let foo = () : void => {};
+              ~ [after-call]
+let foo = ()   :   void => {};
+                ~~~ [after-call]
+
 // endregion
+
+[_base]: expected nospace %s colon in %s
+[after-call]: _base % ('after', 'call-signature')
+[after-parameter]: _base % ('after', 'parameter')
+[after-index]: _base % ('after', 'index-signature')
+[after-variable]: _base % ('after', 'variable-declaration')
+[after-property]: _base % ('after', 'property-declaration')

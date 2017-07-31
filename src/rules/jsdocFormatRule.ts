@@ -45,68 +45,56 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new JsdocWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class JsdocWalker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        utils.forEachComment(node, (fullText, comment) => {
-            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-                this.findFailuresForJsdocComment(fullText.substring(comment.pos, comment.end), comment.pos);
-            }
-        });
-    }
-
-    private findFailuresForJsdocComment(commentText: string, startingPosition: number) {
-        const currentPosition = startingPosition;
-        // the file may be different depending on the OS it was originally authored on
-        // can't rely on require('os').EOL or process.platform as that is the execution env
-        // regex is: split optionally on \r\n, but alwasy split on \n if no \r exists
-        const lines = commentText.split(/\r?\n/);
-        const firstLine = lines[0];
-        let jsdocPosition = currentPosition;
-
-        // regex is: start of string, followed by any amount of whitespace, followed by /** but not more than 2 **
-        const isJsdocMatch = firstLine.match(/^\s*\/\*\*([^*]|$)/);
-        if (isJsdocMatch != null) {
-            if (lines.length === 1) {
-                const firstLineMatch = firstLine.match(/^\s*\/\*\* (.* )?\*\/$/);
-                if (firstLineMatch == null) {
-                    this.addFailureAt(jsdocPosition, firstLine.length, Rule.FORMAT_FAILURE_STRING);
-                }
-                return;
-            }
-
-            const indexToMatch = firstLine.indexOf("**") + this.getLineAndCharacterOfPosition(currentPosition).character;
-            // all lines but the first and last
-            const otherLines = lines.splice(1, lines.length - 2);
-            jsdocPosition += firstLine.length + 1; // + 1 for the splitted-out newline
-            for (const line of otherLines) {
-                // regex is: start of string, followed by any amount of whitespace, followed by *,
-                // followed by either a space or the end of the string
-                const asteriskMatch = line.match(/^\s*\*( |$)/);
-                if (asteriskMatch == null) {
-                    this.addFailureAt(jsdocPosition, line.length, Rule.FORMAT_FAILURE_STRING);
-                }
-                const asteriskIndex = line.indexOf("*");
-                if (asteriskIndex !== indexToMatch) {
-                    this.addFailureAt(jsdocPosition, line.length, Rule.ALIGNMENT_FAILURE_STRING);
-                }
-                jsdocPosition += line.length + 1; // + 1 for the splitted-out newline
-            }
-
-            const lastLine = lines[lines.length - 1];
-            // regex is: start of string, followed by any amount of whitespace, followed by */,
-            // followed by the end of the string
-            const endBlockCommentMatch = lastLine.match(/^\s*\*\/$/);
-            if (endBlockCommentMatch == null) {
-                this.addFailureAt(jsdocPosition, lastLine.length,  Rule.FORMAT_FAILURE_STRING);
-            }
-            const lastAsteriskIndex = lastLine.indexOf("*");
-            if (lastAsteriskIndex !== indexToMatch) {
-                this.addFailureAt(jsdocPosition, lastLine.length, Rule.ALIGNMENT_FAILURE_STRING);
-            }
+function walk(ctx: Lint.WalkContext<void>) {
+    return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
+        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
+            fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
+            return;
         }
-    }
+        const lines = fullText.slice(pos + 3, end - 2).split("\n");
+        const firstLine = lines[0];
+        if (lines.length === 1) {
+            if (firstLine[0] !== " " || !firstLine.endsWith(" ")) {
+                ctx.addFailure(pos, end, Rule.FORMAT_FAILURE_STRING);
+            }
+            return;
+        }
+
+        const alignColumn = getAlignColumn(ctx.sourceFile, pos + 1);
+        let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
+        const endIndex = lines.length - 1;
+        for (let i = 1; i < endIndex; ++i) {
+            const line = lines[i].endsWith("\r") ? lines[i].slice(0, -1) : lines[i];
+            // regex is: start of string, followed by any amount of whitespace, followed by *,
+            // followed by either a space or the end of the string
+            if (!/^\s*\*(?: |$)/.test(line)) {
+                ctx.addFailureAt(lineStart, line.length, Rule.FORMAT_FAILURE_STRING);
+            }
+            if (line.indexOf("*") !== alignColumn) {
+                ctx.addFailureAt(lineStart, line.length, Rule.ALIGNMENT_FAILURE_STRING);
+            }
+            lineStart += lines[i].length + 1; // + 1 for the splitted-out newline
+        }
+        const lastLine = lines[endIndex];
+        // last line should only consist of whitespace
+        if (lastLine.search(/\S/) !== -1) {
+            ctx.addFailure(lineStart, end, Rule.FORMAT_FAILURE_STRING);
+        }
+        if (lastLine.length !== alignColumn) {
+            ctx.addFailure(lineStart, end, Rule.ALIGNMENT_FAILURE_STRING);
+        }
+
+    });
+}
+
+function getAlignColumn(sourceFile: ts.SourceFile, pos: number) {
+    const result = ts.getLineAndCharacterOfPosition(sourceFile, pos);
+    // handle files starting with BOM
+    return result.line === 0 && sourceFile.text[0] === "\uFEFF"
+        ? result.character - 1
+        : result.character;
 }

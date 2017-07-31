@@ -21,6 +21,7 @@ import * as path from "path";
 import {
     convertRuleOptions,
     extendConfigurationFile,
+    findConfigurationPath,
     IConfigurationFile,
     loadConfigurationFromPath,
     parseConfigFile,
@@ -67,8 +68,8 @@ describe("Configuration", () => {
                     o: { severity: "warn", options: 1 },
                     p: null,
                     q: {},
-                    r: "garbage",
-                    s: { junk: 1 } as any, // tslint:disable-line no-unsafe-any (Fixed in 5.2)
+                    r: "garbage" as any,
+                    s: { junk: 1 } as any,
                 },
             };
             const expected = getEmptyConfig();
@@ -194,6 +195,29 @@ describe("Configuration", () => {
         });
     });
 
+    describe("findConfigurationPath", () => {
+        it("finds the closest tslint.json", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/contains-config"),
+                path.resolve("test/files/config-findup/contains-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/no-config"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+
+            // gulp-tslint uses a path including the filename
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
+                path.resolve("./test/files/config-findup/tslint.json"),
+            );
+        });
+    });
+
     describe("loadConfigurationFromPath", () => {
         it("extends with relative path", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-relative.json");
@@ -297,8 +321,8 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
 
             const expectedConfig = getEmptyConfig();
             expectedConfig.rules.set("always-fail", { ruleSeverity: "off" });
@@ -377,7 +401,7 @@ function demap<T>(map: Map<string, T>) {
 // this is needed since `assertConfigEquals` doesn't go into Map object
 function assertConfigEquals(actual: any, expected: any) {
     assert.deepEqual(actual, expected);
-    // tslint:disable no-unsafe-any
+    // tslint:disable no-unsafe-any strict-boolean-expressions
     if (actual && (actual.jsRules || actual.rules)) {
         assert.deepEqual(demap(actual.jsRules), demap(expected.jsRules));
         assert.deepEqual(demap(actual.rules), demap(expected.rules));

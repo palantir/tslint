@@ -1,9 +1,4 @@
 // Anonymous
-function () {}
-function (): void {
-}
-function (a: string, cb: ()=>{}): void {}
-
 var f = function () {};
 var f = function (): void {
 };
@@ -21,6 +16,8 @@ var f = function foobar(): void{
 };
 var f = function foobar(a: string, cb: ()=>{}): void{};
 
+// Default export (name ommited)
+export default function () {}
 
 // Async Arrow
 // ignore

@@ -15,7 +15,7 @@
  */
 
 import { assert } from "chai";
-import {arrayify, dedent, escapeRegExp, objectify} from "../src/utils";
+import { arrayify, dedent, escapeRegExp } from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
@@ -27,14 +27,6 @@ describe("Utils", () => {
         assert.deepEqual(arrayify({foo: 2}), [{foo: 2}]);
         assert.deepEqual(arrayify([1, 2]), [1, 2]);
         assert.deepEqual(arrayify(["foo"]), ["foo"]);
-    });
-
-    it("objectify", () => {
-        assert.deepEqual(objectify(undefined), {});
-        assert.deepEqual(objectify(null), {});
-        assert.deepEqual(objectify("foo"), {});
-        assert.deepEqual(objectify(1), {});
-        assert.deepEqual(objectify({foo: 1, mar: {baz: 2}}), {foo: 1, mar: {baz: 2}});
     });
 
     it("dedent", () => {

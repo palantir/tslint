@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import {camelize, dedent} from "../utils";
+import { camelize, dedent } from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -47,6 +47,6 @@ export class Formatter extends AbstractFormatter {
             return `${fileName}${positionTuple}: ${severity} ${camelizedRule}: ${failureString}`;
         });
 
-        return outputLines.join("\n") + "\n";
+        return `${outputLines.join("\n")}\n`;
     }
 }

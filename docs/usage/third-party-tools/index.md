@@ -19,6 +19,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [mocha-tslint][15] ([Mocha][16])
 * [tslint.tmbundle][17] ([TextMate][18])
 * [generator-tslint][19]
+* [Flycheck][20] ([Emacs][21])
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -41,3 +42,5 @@ _Note: Most of these tools are not maintained by TSLint._
 [17]: https://github.com/natesilva/tslint.tmbundle
 [18]: https://macromates.com
 [19]: https://github.com/greybax/generator-tslint
+[20]: http://www.flycheck.org/
+[21]: https://www.gnu.org/software/emacs/

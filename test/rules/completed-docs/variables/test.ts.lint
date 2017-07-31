@@ -1,0 +1,38 @@
+export const exportedVariable = 1;
+             ~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for exported variables.]
+
+const internalVariable = 2;
+      ~~~~~~~~~~~~~~~~~~~~              [Documentation must exist for variables.]
+
+// Variables in `catch` clauses should not be checked.
+try {
+} catch (ex) {
+}
+
+// Variables in `for` statements should not be checked.
+for (let i = 0; i < 1; i++) {}
+
+// Variables in `for in` statements should not be checked.
+for (let p in {}) {}
+
+// Variables in `for of` statements should not be checked.
+for (let p of [1,2,3]) {}
+
+// Variables that are not at the outer-most scope should not be checked.
+function(x) {
+    let foo = 1;
+}
+
+namespace FooNamespace {
+    export const exportedFromNamespace = 1;
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for exported variables.]
+    let inNamespace = 1;
+        ~~~~~~~~~~~~~~~                         [Documentation must exist for variables.]
+}
+
+module FooModule {
+    export const exportedFromModule = 1;
+                 ~~~~~~~~~~~~~~~~~~~~~~         [Documentation must exist for exported variables.]
+    let inModule = 1;
+        ~~~~~~~~~~~~                            [Documentation must exist for variables.]
+}

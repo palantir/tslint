@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasAccessModifier, hasModifier } from "tsutils";
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,7 +23,7 @@ import * as Lint from "../index";
 const OPTION_IGNORE_PARMS = "ignore-params";
 const OPTION_IGNORE_PROPERTIES = "ignore-properties";
 
-interface IOptions {
+interface Options {
     ignoreParameters: boolean;
     ignoreProperties: boolean;
 }
@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (type: string) => {
+    public static FAILURE_STRING_FACTORY(type: string) {
         return `Type ${type} trivially inferred from a ${type} literal, remove type annotation`;
     }
 
@@ -72,68 +72,55 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoInferrableTypesWalker extends Lint.AbstractWalker<IOptions> {
+class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            switch (node.kind) {
-                case ts.SyntaxKind.Parameter:
-                    if (!this.options.ignoreParameters &&
-                        !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword) &&
-                        // "ignore-properties" also works for parameter properties
-                        (!this.options.ignoreProperties || !hasAccessModifier(node as ts.ParameterDeclaration))) {
-                        this.checkDeclaration(node as ts.ParameterDeclaration);
-                    }
-                    break;
-                case ts.SyntaxKind.PropertyDeclaration:
-                    if (this.options.ignoreProperties ||
-                        hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)) {
-                        break;
-                    }
-                    /* falls through*/
-                case ts.SyntaxKind.VariableDeclaration:
-                    this.checkDeclaration(node as ts.VariableLikeDeclaration);
+            if (shouldCheck(node, this.options)) {
+                const { name, type, initializer } = node;
+                if (type !== undefined && initializer !== undefined
+                    && typeIsInferrable(type.kind, initializer)) {
+                    const fix = Lint.Replacement.deleteFromTo(name.end, type.end);
+                    this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)!), fix);
+                }
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
+}
 
-    private checkDeclaration(node: ts.VariableLikeDeclaration) {
-        if (node.type != null && node.initializer != null) {
-            let failure: string | null = null;
+function shouldCheck(node: ts.Node, { ignoreParameters, ignoreProperties }: Options): node is ts.VariableLikeDeclaration {
+    switch (node.kind) {
+        case ts.SyntaxKind.Parameter:
+            return !ignoreParameters &&
+                !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword) &&
+                // "ignore-properties" also works for parameter properties
+                !(ignoreProperties && node.modifiers !== undefined);
+        case ts.SyntaxKind.PropertyDeclaration:
+            return !ignoreProperties && !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword);
+        case ts.SyntaxKind.VariableDeclaration:
+            return true;
+        default:
+            return false;
+    }
+}
 
-            switch (node.type.kind) {
-                case ts.SyntaxKind.BooleanKeyword:
-                    if (node.initializer.kind === ts.SyntaxKind.TrueKeyword || node.initializer.kind === ts.SyntaxKind.FalseKeyword) {
-                        failure = "boolean";
-                    }
-                    break;
-                case ts.SyntaxKind.NumberKeyword:
-                    if (node.initializer.kind === ts.SyntaxKind.NumericLiteral) {
-                        failure = "number";
-                    }
-                    break;
-                case ts.SyntaxKind.StringKeyword:
-                    switch (node.initializer.kind) {
-                        case ts.SyntaxKind.StringLiteral:
-                        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-                        case ts.SyntaxKind.TemplateExpression:
-                            failure = "string";
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
+function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.Expression): boolean {
+    switch (type) {
+        case ts.SyntaxKind.BooleanKeyword:
+            return initializer.kind === ts.SyntaxKind.TrueKeyword || initializer.kind === ts.SyntaxKind.FalseKeyword;
+        case ts.SyntaxKind.NumberKeyword:
+            return Lint.isNumeric(initializer);
+        case ts.SyntaxKind.StringKeyword:
+            switch (initializer.kind) {
+                case ts.SyntaxKind.StringLiteral:
+                case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+                case ts.SyntaxKind.TemplateExpression:
+                    return true;
                 default:
-                    break;
+                    return false;
             }
-
-            if (failure != null) {
-                this.addFailureAtNode(node.type,
-                                      Rule.FAILURE_STRING_FACTORY(failure),
-                                      Lint.Replacement.deleteFromTo(node.name.end, node.type.end),
-                );
-            }
-        }
+        default:
+            return false;
     }
 }

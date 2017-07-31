@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const failure = getError(node, allowSingleConcat);
-        if (failure) {
+        if (failure !== undefined) {
             ctx.addFailureAtNode(node, failure);
         } else {
             return ts.forEachChild(node, cb);
@@ -78,14 +78,15 @@ function getError(node: ts.Node, allowSingleConcat: boolean): string | undefined
         // Otherwise ignore. ("a" + "b", probably writing a long newline-less string on many lines.)
         return containsNewline(left as StringLike) || containsNewline(right as StringLike) ? Rule.FAILURE_STRING_MULTILINE : undefined;
     } else if (!l && !r) {
-        // Watch out for `"a" + b + c`.
+        // Watch out for `"a" + b + c`. Parsed as `("a" + b) + c`.
         return containsAnyStringLiterals(left) ? Rule.FAILURE_STRING : undefined;
     } else if (l) {
         // `"x" + y`
         return !allowSingleConcat ? Rule.FAILURE_STRING : undefined;
     } else {
         // `? + "b"`
-        return !allowSingleConcat || isPlusExpression(left) ? Rule.FAILURE_STRING : undefined;
+        // If LHS consists of only string literals (as in `"a" + "b" + "c"`, allow it.)
+        return !containsOnlyStringLiterals(left) && (!allowSingleConcat || isPlusExpression(left))  ? Rule.FAILURE_STRING : undefined;
     }
 }
 
@@ -99,13 +100,12 @@ function containsNewline(node: StringLike): boolean {
     }
 }
 
-function containsAnyStringLiterals(node: ts.Expression): boolean {
-    if (!isPlusExpression(node)) {
-        return false;
-    }
+function containsOnlyStringLiterals(node: ts.Expression): boolean {
+    return isPlusExpression(node) && isStringLike(node.right) && (isStringLike(node.left) || containsAnyStringLiterals(node.left));
+}
 
-    const { left, right } = node;
-    return isStringLike(right) || isStringLike(left) || containsAnyStringLiterals(left);
+function containsAnyStringLiterals(node: ts.Expression): boolean {
+    return isPlusExpression(node) && (isStringLike(node.right) || isStringLike(node.left) || containsAnyStringLiterals(node.left));
 }
 
 function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {

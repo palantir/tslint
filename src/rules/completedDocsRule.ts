@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -39,6 +40,7 @@ export const ALL = "all";
 
 export const ARGUMENT_CLASSES = "classes";
 export const ARGUMENT_ENUMS = "enums";
+export const ARGUMENT_ENUM_MEMBERS = "enum-members";
 export const ARGUMENT_FUNCTIONS = "functions";
 export const ARGUMENT_INTERFACES = "interfaces";
 export const ARGUMENT_METHODS = "methods";
@@ -66,6 +68,7 @@ export type All = typeof ALL;
 export type DocType = All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
+    | typeof ARGUMENT_ENUM_MEMBERS
     | typeof ARGUMENT_FUNCTIONS
     | typeof ARGUMENT_INTERFACES
     | typeof ARGUMENT_METHODS
@@ -163,15 +166,16 @@ export class Rule extends Lint.Rules.TypedRule {
 
             Types that may be enabled are:
 
-                * \`"${ARGUMENT_CLASSES}"\`
-                * \`"${ARGUMENT_ENUMS}"\`
-                * \`"${ARGUMENT_FUNCTIONS}"\`
-                * \`"${ARGUMENT_INTERFACES}"\`
-                * \`"${ARGUMENT_METHODS}"\`
-                * \`"${ARGUMENT_NAMESPACES}"\`
-                * \`"${ARGUMENT_PROPERTIES}"\`
-                * \`"${ARGUMENT_TYPES}"\`
-                * \`"${ARGUMENT_VARIABLES}"\``,
+            * \`"${ARGUMENT_CLASSES}"\`
+            * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_ENUM_MEMBERS}"\`
+            * \`"${ARGUMENT_FUNCTIONS}"\`
+            * \`"${ARGUMENT_INTERFACES}"\`
+            * \`"${ARGUMENT_METHODS}"\`
+            * \`"${ARGUMENT_NAMESPACES}"\`
+            * \`"${ARGUMENT_PROPERTIES}"\`
+            * \`"${ARGUMENT_TYPES}"\`
+            * \`"${ARGUMENT_VARIABLES}"\``,
         options: {
             type: "array",
             items: {
@@ -185,6 +189,7 @@ export class Rule extends Lint.Rules.TypedRule {
                         properties: {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_INTERFACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
@@ -259,18 +264,19 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
                 requirements.set(
                     type as DocType,
                     (type === "methods" || type === "properties")
-                        ? new ClassRequirement(descriptor[type])
-                        : new BlockRequirement(descriptor[type]));
+                        ? new ClassRequirement(descriptor[type] as IClassRequirementDescriptor)
+                        : new BlockRequirement(descriptor[type] as IBlockRequirementDescriptor));
             }
         }
     }
 
+    // tslint:disable-next-line no-object-literal-type-assertion
     protected constructor(public readonly descriptor: TDescriptor = {} as TDescriptor) { }
 
     public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;
 
     protected createSet<T extends All | string>(values?: T[]): Set<T> {
-        if (!values || values.length === 0) {
+        if (values === undefined || values.length === 0) {
             values = [ALL as T];
         }
 
@@ -281,7 +287,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
 class BlockRequirement extends Requirement<IBlockRequirementDescriptor> {
     public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
 
-    public shouldNodeBeDocumented(node: ts.Declaration): boolean {
+    public shouldNodeBeDocumented(node: ts.Node): boolean {
         if (this.visibilities.has(ALL)) {
             return true;
         }
@@ -298,11 +304,11 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
     public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
-    public shouldNodeBeDocumented(node: ts.Declaration) {
+    public shouldNodeBeDocumented(node: ts.Node) {
         return this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node);
     }
 
-    private shouldLocationBeDocumented(node: ts.Declaration) {
+    private shouldLocationBeDocumented(node: ts.Node) {
         if (this.locations.has(ALL)) {
             return true;
         }
@@ -314,7 +320,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
         return this.locations.has(LOCATION_INSTANCE);
     }
 
-    private shouldPrivacyBeDocumented(node: ts.Declaration) {
+    private shouldPrivacyBeDocumented(node: ts.Node) {
         if (this.privacies.has(ALL)) {
             return true;
         }
@@ -327,7 +333,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
+        return this.privacies.has(PRIVACY_PUBLIC);
     }
 }
 
@@ -350,6 +356,13 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     public visitEnumDeclaration(node: ts.EnumDeclaration): void {
         this.checkNode(node, ARGUMENT_ENUMS);
         super.visitEnumDeclaration(node);
+    }
+
+    public visitEnumMember(node: ts.EnumMember): void {
+        // Enum members don't have modifiers, so use the parent
+        // enum declaration when checking the requirements.
+        this.checkNode(node, ARGUMENT_ENUM_MEMBERS, node.parent);
+        super.visitEnumMember(node);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
@@ -383,56 +396,83 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.checkNode(node, ARGUMENT_VARIABLES);
+        this.checkVariable(node);
         super.visitVariableDeclaration(node);
     }
 
-    private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        if (node.name === undefined) {
+    private checkVariable(node: ts.VariableDeclaration) {
+        // Only check variables in variable declaration lists
+        // and not variables in catch clauses and for loops.
+        const list = node.parent!;
+        if (!isVariableDeclarationList(list)) {
+            return;
+        }
+
+        const statement = list.parent!;
+        if (!isVariableStatement(statement)) {
+            return;
+        }
+
+        // Only check variables at the namespace/module-level or file-level
+        // and not variables declared inside functions and other things.
+        switch (statement.parent!.kind) {
+            case ts.SyntaxKind.SourceFile:
+            case ts.SyntaxKind.ModuleBlock:
+                this.checkNode(node, ARGUMENT_VARIABLES, statement);
+        }
+    }
+
+    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
+        const { name } = node;
+        if (name === undefined) {
             return;
         }
 
         const requirement = this.requirements.get(nodeType);
-        if (!requirement || !requirement.shouldNodeBeDocumented(node)) {
+        if (requirement === undefined || !requirement.shouldNodeBeDocumented(requirementNode)) {
             return;
         }
 
-        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
-        if (!symbol) {
+        const symbol = this.getTypeChecker().getSymbolAtLocation(name);
+        if (symbol === undefined) {
             return;
         }
 
         const comments = symbol.getDocumentationComment();
-        this.checkComments(node, nodeType, comments);
+        this.checkComments(node, this.describeNode(nodeType), comments, requirementNode);
     }
 
-    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[]) {
+    private describeNode(nodeType: DocType): string {
+        return nodeType.replace("-", " ");
+    }
+
+    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
         if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
-            this.addDocumentationFailure(node, nodeDescriptor);
+            this.addDocumentationFailure(node, nodeDescriptor, requirementNode);
         }
     }
 
-    private addDocumentationFailure(node: ts.Declaration, nodeType: string): void {
+    private addDocumentationFailure(node: ts.Declaration, nodeType: string, requirementNode: ts.Node): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = this.describeDocumentationFailure(node, nodeType);
+        const description = this.describeDocumentationFailure(requirementNode, nodeType);
 
         this.addFailureAt(start, width, description);
     }
 
-    private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
+    private describeDocumentationFailure(node: ts.Node, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
-        if (node.modifiers) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+        if (node.modifiers !== undefined) {
+            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(",")} `;
         }
 
-        return description + nodeType + ".";
+        return `${description}${nodeType}.`;
     }
 
     private describeModifier(kind: ts.SyntaxKind) {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
-
-        return CompletedDocsWalker.modifierAliases[description] || description;
+        const alias = CompletedDocsWalker.modifierAliases[description];
+        return alias !== undefined ? alias : description;
     }
 }

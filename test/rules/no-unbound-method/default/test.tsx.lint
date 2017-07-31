@@ -1,0 +1,59 @@
+class C {
+    method(x: number) {}
+    property: () => void;
+    template(strs: TemplateStringsArray, x: any) {}
+}
+
+const c = new C();
+[0].forEach(c.method);
+            ~~~~~~~~ [0]
+[0].forEach(x => c.method(x));
+[0].forEach(c.property);
+
+c.template;
+~~~~~~~~~~ [0]
+c.template`foo${0}`;
+String.raw`${c.template}`;
+             ~~~~~~~~~~ [0]
+
+interface I {
+    foo(): void;
+    bar: () => void;
+}
+declare var i: I;
+i.foo;
+~~~~~ [0]
+i.bar;
+
+c.method === i.foo;
+
+// OK in condition
+c.method ? 1 : 2;
+1 ? c.method : c.method;
+    ~~~~~~~~ [0]
+               ~~~~~~~~ [0]
+if (c.method) {}
+while (c.method) {}
+do {} while (c.method);
+for (c.method; c.method; c.method) {}
+
+
+[0].forEach(c.method || i.foo);
+            ~~~~~~~~ [0]
+                        ~~~~~ [0]
+[0].forEach(c.method.bind(c));
+
+<button onClick={c.method}>Click me!</button>;
+                 ~~~~~~~~ [0]
+
+class Validators {
+    static required() {
+        return null;
+    }
+    static compose(...args: Function[]) {}
+}
+
+Validators.compose(Validators.required);
+                   ~~~~~~~~~~~~~~~~~~~ [0]
+
+[0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.

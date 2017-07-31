@@ -17,6 +17,7 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
+import { dedent } from "../../src/utils";
 import { IFormatter, RuleFailure, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
@@ -40,10 +41,10 @@ describe("Prose Formatter", () => {
             createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
         ];
 
-        const expectedResult =
-            "ERROR: " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            "ERROR: " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            "WARNING: " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
+        const expectedResult = dedent`
+            ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure
+            ERROR: ${TEST_FILE}${getPositionString(2, 12)}mid failure
+            WARNING: ${TEST_FILE}${getPositionString(9, 2)}last failure\n`.slice(1); // remove leading newline
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -54,7 +55,7 @@ describe("Prose Formatter", () => {
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
         ];
 
-        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;
+        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;  // tslint:disable-line no-object-literal-type-assertion
 
         const fixes = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
@@ -62,10 +63,11 @@ describe("Prose Formatter", () => {
             mockFix,
         ];
 
-        const expectedResult =
-            `Fixed 2 error(s) in ${TEST_FILE}\n` +
-            `Fixed 1 error(s) in file2\n\n` +
-            `ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure\n`;
+        const expectedResult = dedent`
+            Fixed 2 error(s) in ${TEST_FILE}
+            Fixed 1 error(s) in file2
+
+            ERROR: ${TEST_FILE}${getPositionString(1, 1)}first failure\n`.slice(1); // remove leading newline
 
         const actualResult = formatter.format(failures, fixes);
         assert.equal(actualResult, expectedResult);

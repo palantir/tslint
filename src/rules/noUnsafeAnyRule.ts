@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -59,6 +60,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.Parameter: {
                 const { type, initializer } = node as ts.ParameterDeclaration;
+                // TODO handle destructuring
                 if (initializer !== undefined) {
                     return cb(initializer, /*anyOk*/ type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword);
                 }
@@ -70,6 +72,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb((node as ts.LabeledStatement).statement);
 
             case ts.SyntaxKind.BreakStatement: // Ignore label
+            case ts.SyntaxKind.ContinueStatement:
             // Ignore types
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
@@ -80,7 +83,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
-            // For some reason, these are of type "any".
+            // These show as type "any" if in type position.
+            case ts.SyntaxKind.NumericLiteral:
             case ts.SyntaxKind.StringLiteral:
                 return;
 
@@ -131,7 +135,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.NewExpression: {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 cb(expression);
-                if (args) {
+                if (args !== undefined) {
                     for (const arg of args) {
                         checkContextual(arg);
                     }
@@ -155,14 +159,65 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                if (expression) {
+                if (expression !== undefined) {
                     return checkContextual(expression);
                 }
                 return;
             }
 
+            case ts.SyntaxKind.SwitchStatement: {
+                const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
+                // Allow `switch (x) {}` where `x` is any
+                cb(expression, /*anyOk*/ true);
+                for (const clause of clauses) {
+                    if (clause.kind === ts.SyntaxKind.CaseClause) {
+                        // Allow `case x:` where `x` is any
+                        cb(clause.expression, /*anyOk*/ true);
+                    }
+                    for (const statement of clause.statements) {
+                        cb(statement);
+                    }
+                }
+                break;
+            }
+
+            case ts.SyntaxKind.ModuleDeclaration: {
+                // In `declare global { ... }`, don't mark `global` as unsafe any.
+                const { body } = node as ts.ModuleDeclaration;
+                if (body !== undefined) { cb(body); }
+                return;
+            }
+
+            case ts.SyntaxKind.IfStatement: {
+                const { expression, thenStatement, elseStatement } = node as ts.IfStatement;
+                cb(expression, true); // allow truthyness check
+                cb(thenStatement);
+                if (elseStatement !== undefined) { cb(elseStatement); }
+                return;
+            }
+
+            case ts.SyntaxKind.PrefixUnaryExpression: {
+                const {operator, operand} = node as ts.PrefixUnaryExpression;
+                cb(operand, operator === ts.SyntaxKind.ExclamationToken); // allow falsyness check
+                check();
+                return;
+            }
+
+            case ts.SyntaxKind.ForStatement: {
+                const { initializer, condition, incrementor, statement } = node as ts.ForStatement;
+                if (initializer !== undefined) { cb(initializer); }
+                if (condition !== undefined) { cb(condition, true); } // allow truthyness check
+                if (incrementor !== undefined) { cb(incrementor); }
+                return cb(statement);
+            }
+
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+                cb((node as ts.IterationStatement).statement);
+                return cb((node as ts.DoStatement | ts.WhileStatement).expression, true);
+
             default:
-                if (!(ts.isExpression(node) && check())) {
+                if (!(isExpression(node) && check())) {
                     return ts.forEachChild(node, cb);
                 }
                 return;
@@ -204,6 +259,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 return cb(right);
 
             case ts.SyntaxKind.CommaToken: // Allow `any, any`
+            case ts.SyntaxKind.BarBarToken: // Allow `any || any`
+            case ts.SyntaxKind.AmpersandAmpersandToken: // Allow `any && any`
                 cb(left, /*anyOk*/ true);
                 return cb(right, /*anyOk*/ true);
 
@@ -237,9 +294,4 @@ function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
 
 function isAny(type: ts.Type | undefined): boolean {
     return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
-}
-
-declare module "typescript" {
-    // This is marked @internal, but we need it!
-    function isExpression(node: ts.Node): node is ts.Expression;
 }

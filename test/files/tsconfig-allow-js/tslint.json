@@ -1,0 +1,14 @@
+{
+    "rules": {
+        "eofline": true,
+        "semicolon": [
+            true, "always"
+        ]
+    },
+    "jsRules": {
+        "eofline": true,
+        "semicolon": [
+            true, "always"
+        ]
+    }
+}

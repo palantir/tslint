@@ -34,6 +34,10 @@ var f = function foobar(a: string, cb: ()=>{}): void{};
                        ~  [space-before-function-paren]
 
 
+// Default export (name ommited)
+export default function() {}
+                       ~  [space-before-function-paren]
+
 // Async Arrow
 // ignore
 () => {};
@@ -44,6 +48,7 @@ async() => {};
 var arrow = async() => {};
                  ~ [space-before-function-paren]
 
+async x => x;
 
 // Method
 interface IMyInterface {

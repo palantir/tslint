@@ -8,3 +8,17 @@
 class MyClass {
    
 }
+
+/**
+ *here comes some invalid jsdoc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+ to ensure that the error is shown in the right place
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [asterisks]
+ *
+*/
+~~ [asterisks]
+function foo() {}
+
+[format]: jsdoc is not formatted correctly on this line
+[asterisks]: asterisks in jsdoc must be aligned

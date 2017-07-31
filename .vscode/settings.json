@@ -11,7 +11,7 @@
     "editor.wrappingIndent": "none",
 
     // The folders to exclude when doing a full text search in the workspace.
-    "files.exclude": {
+    "search.exclude": {
         ".git": true,
         ".tscache": true,
         "bower_components": true,

@@ -16,17 +16,18 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule";
+import { IDisabledInterval, RuleFailure } from "./rule/rule"; // tslint:disable-line deprecation
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
     return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
 }
 
-export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]) {
+/** @deprecated See IDisabledInterval. */
+export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean { // tslint:disable-line deprecation
     return disabledIntervals.some((interval) => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
@@ -37,7 +38,7 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
  */
-export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]) {
+export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]): boolean {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
@@ -100,7 +101,7 @@ export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: t
             return cur as T;
         }
         cur = cur.parent;
-    } while (cur);
+    } while (cur !== undefined);
     return undefined;
 }
 
@@ -215,6 +216,19 @@ export function isLoop(node: ts.Node): node is ts.IterationStatement {
         || node.kind === ts.SyntaxKind.ForStatement
         || node.kind === ts.SyntaxKind.ForInStatement
         || node.kind === ts.SyntaxKind.ForOfStatement;
+}
+
+/**
+ * @returns Whether node is a numeric expression.
+ */
+export function isNumeric(node: ts.Expression) {
+    while (isPrefixUnaryExpression(node) &&
+           (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+        node = node.operand;
+    }
+
+    return node.kind === ts.SyntaxKind.NumericLiteral ||
+        isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity");
 }
 
 export interface TokenPosition {
@@ -339,44 +353,58 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
 
 /** Exclude leading positions that would lead to scanning for trivia inside JsxText */
 function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
-    if (tokenKind === ts.SyntaxKind.JsxText) {
-        return false; // there is no trivia before JsxText
+    switch (tokenKind) {
+        case ts.SyntaxKind.JsxText:
+            return false; // there is no trivia before JsxText
+
+        case ts.SyntaxKind.OpenBraceToken:
+            // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+        case ts.SyntaxKind.LessThanToken:
+            switch (parent.kind) {
+                case ts.SyntaxKind.JsxClosingElement:
+                    return false; // would be inside the element body
+                case ts.SyntaxKind.JsxOpeningElement:
+                case ts.SyntaxKind.JsxSelfClosingElement:
+                    // there can only be leading trivia if we are at the end of the top level element
+                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                default:
+                    return true;
+            }
+
+        default:
+            return true;
     }
-    if (tokenKind === ts.SyntaxKind.OpenBraceToken) {
-        // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
-    }
-    if (tokenKind === ts.SyntaxKind.LessThanToken) {
-        if (parent.kind === ts.SyntaxKind.JsxClosingElement) {
-            return false; // would be inside the element body
-        }
-        if (parent.kind === ts.SyntaxKind.JsxOpeningElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
-            // there can only be leading trivia if we are at the end of the top level element
-            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
-        }
-    }
-    return true;
 }
 
 /** Exclude trailing positions that would lead to scanning for trivia inside JsxText */
 function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolean {
-    if (tokenKind === ts.SyntaxKind.JsxText) {
-        return false; // there is no trivia after JsxText
+    switch (tokenKind) {
+        case ts.SyntaxKind.JsxText:
+            // there is no trivia after JsxText
+            return false;
+
+        case ts.SyntaxKind.CloseBraceToken:
+            // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
+            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+        case ts.SyntaxKind.GreaterThanToken:
+            switch (parent.kind) {
+                case ts.SyntaxKind.JsxOpeningElement:
+                    return false; // would be inside the element
+                case ts.SyntaxKind.JsxClosingElement:
+                case ts.SyntaxKind.JsxSelfClosingElement:
+                    // there can only be trailing trivia if we are at the end of the top level element
+                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+
+                default:
+                    return true;
+            }
+
+        default:
+            return true;
     }
-    if (tokenKind === ts.SyntaxKind.CloseBraceToken) {
-        // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-        return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
-    }
-    if (tokenKind === ts.SyntaxKind.GreaterThanToken) {
-        if (parent.kind === ts.SyntaxKind.JsxOpeningElement) {
-            return false; // would be inside the element
-        }
-        if (parent.kind === ts.SyntaxKind.JsxClosingElement || parent.kind === ts.SyntaxKind.JsxSelfClosingElement) {
-            // there can only be trailing trivia if we are at the end of the top level element
-            return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
-        }
-    }
-    return true;
 }
 
 /**
@@ -409,4 +437,21 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
         default:
             return undefined;
     }
+}
+
+export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
+    return options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false);
+}
+
+export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
+    return isPrefixUnaryExpression(node) &&
+        node.operator === ts.SyntaxKind.MinusToken &&
+        node.operand.kind === ts.SyntaxKind.NumericLiteral;
+}
+
+/** Wrapper for compatibility with typescript@<2.3.1 */
+export function isWhiteSpace(ch: number): boolean {
+    // tslint:disable-next-line
+    return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }

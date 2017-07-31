@@ -48,7 +48,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isBinaryExpression(node)) {
             const cmp = getBooleanComparison(node, checker);
-            if (cmp) {
+            if (cmp !== undefined) {
                 ctx.addFailureAtNode(cmp.expression, Rule.FAILURE_STRING(cmp.negate), fix(node, cmp));
             }
         }
@@ -99,7 +99,7 @@ function needsParenthesesForNegate(node: ts.Expression): boolean {
 function deconstructComparison(node: ts.BinaryExpression): Compare | undefined {
     const { left, operatorToken, right } = node;
     const eq = Lint.getEqualsKind(operatorToken);
-    if (!eq) {
+    if (eq === undefined) {
         return undefined;
     }
 

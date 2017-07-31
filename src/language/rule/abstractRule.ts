@@ -17,8 +17,7 @@
 
 import * as ts from "typescript";
 
-import {doesIntersect} from "../utils";
-import {IWalker, WalkContext} from "../walker";
+import { IWalker, WalkContext } from "../walker";
 import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export abstract class AbstractRule implements IRule {
@@ -41,7 +40,7 @@ export abstract class AbstractRule implements IRule {
 
     public applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
-        return this.filterFailures(walker.getFailures());
+        return walker.getFailures();
     }
 
     public isEnabled(): boolean {
@@ -53,17 +52,13 @@ export abstract class AbstractRule implements IRule {
     protected applyWithFunction<T>(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<T | void>) => void, options?: T): RuleFailure[] {
         const ctx = new WalkContext(sourceFile, this.ruleName, options);
         walkFn(ctx);
-        return this.filterFailures(ctx.failures);
+        return ctx.failures;
     }
 
-    protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
-        const result: RuleFailure[] = [];
-        for (const failure of failures) {
-            // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-            if (!doesIntersect(failure, this.options.disabledIntervals) && !result.some((f) => f.equals(failure))) {
-                result.push(failure);
-            }
-        }
-        return result;
-    }
+    /**
+     * @deprecated
+     * Failures will be filtered based on `tslint:disable` comments by tslint.
+     * This method now does nothing.
+     */
+    protected filterFailures(failures: RuleFailure[]) { return failures; }
 }

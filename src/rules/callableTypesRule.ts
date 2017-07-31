@@ -66,13 +66,13 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 /** True if there is no supertype or if the supertype is `Function`. */
 function noSupertype(node: ts.InterfaceDeclaration): boolean {
-    if (!node.heritageClauses) {
+    if (node.heritageClauses === undefined) {
         return true;
     }
     if (node.heritageClauses.length !== 1) {
         return false;
     }
-    const expr = node.heritageClauses[0].types![0].expression;
+    const expr = node.heritageClauses[0].types[0].expression;
     return isIdentifier(expr) && expr.text === "Function";
 }
 
@@ -82,7 +82,7 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
-    const suggestion = text.substr(0, colonPos) + " =>" + text.substr(colonPos + 1);
+    const suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
 
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {

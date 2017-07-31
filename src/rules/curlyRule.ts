@@ -15,11 +15,12 @@
  * limitations under the License.
  */
 
-import { isIfStatement, isIterationStatement, isSameLine } from "tsutils";
+import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_AS_NEEDED = "as-needed";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
 
 interface Options {
@@ -42,8 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: Lint.Utils.dedent`
-            The rule may be set to \`true\`, or to the following:
+            One of the following options may be provided:
 
+            * \`"${OPTION_AS_NEEDED}"\` forbids any unnecessary curly braces.
             * \`"${OPTION_IGNORE_SAME_LINE}"\` skips checking braces for control-flow statements
             that are on one line and start on the same line as their control-flow keyword
         `,
@@ -52,25 +54,63 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 type: "string",
                 enum: [
+                    OPTION_AS_NEEDED,
                     OPTION_IGNORE_SAME_LINE,
                 ],
             },
         },
-        optionExamples: [true, [true, "ignore-same-line"]],
+        optionExamples: [
+            true,
+            [true, OPTION_IGNORE_SAME_LINE],
+            [true, OPTION_AS_NEEDED],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static FAILURE_STRING_AS_NEEDED = "Block contains only one statement; remove the curly braces.";
     public static FAILURE_STRING_FACTORY(kind: string) {
         return `${kind} statements must be braced`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        if (this.ruleArguments.indexOf(OPTION_AS_NEEDED) !== -1) {
+            return this.applyWithFunction(sourceFile, walkAsNeeded);
+        }
+
         return this.applyWithWalker(new CurlyWalker(sourceFile, this.ruleName, {
             ignoreSameLine: this.ruleArguments.indexOf(OPTION_IGNORE_SAME_LINE) !== -1,
         }));
     }
+}
+
+function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node) {
+        if (isBlock(node) && isBlockUnnecessary(node)) {
+            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_AS_NEEDED);
+        }
+        ts.forEachChild(node, cb);
+    });
+}
+
+function isBlockUnnecessary(node: ts.Block): boolean {
+    const parent = node.parent!;
+    if (node.statements.length !== 1) { return false; }
+    const statement = node.statements[0];
+    if (isIterationStatement(parent)) { return true; }
+    /*
+    Watch out for this case:
+    if (so) {
+        if (also)
+            foo();
+    } else
+        bar();
+    */
+    return isIfStatement(parent) && !(isIfStatement(statement)
+        && statement.elseStatement === undefined
+        && parent.thenStatement === node
+        && parent.elseStatement !== undefined);
 }
 
 class CurlyWalker extends Lint.AbstractWalker<Options> {
@@ -93,7 +133,7 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
         if (statement.kind !== ts.SyntaxKind.Block &&
             !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
             const token = node.getChildAt(childIndex, this.sourceFile);
-            const tokenText = ts.tokenToString(token.kind);
+            const tokenText = ts.tokenToString(token.kind)!;
             this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
         }
     }

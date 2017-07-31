@@ -60,10 +60,10 @@ interface Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { multiline } } = ctx;
-    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (utils.isArrowFunction(node) && utils.isBlock(node.body)) {
             const expr = getSimpleReturnExpression(node.body);
-            if (expr !== undefined && (multiline || !node.body.getText(sourceFile).includes("\n"))) {
+            if (expr !== undefined && (multiline || utils.isSameLine(sourceFile, node.body.getStart(sourceFile), node.body.end))) {
                 const isObjectLiteral = expr.kind === ts.SyntaxKind.ObjectLiteralExpression;
                 ctx.addFailureAtNode(node.body, Rule.FAILURE_STRING(isObjectLiteral), createFix(node, node.body, expr, sourceFile.text));
             }
@@ -81,7 +81,7 @@ function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, ex
     const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
     const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-        hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
+        hasComments(expr) || (semicolon !== undefined && hasComments(semicolon)) || hasComments(closeBrace);
     return anyComments ? undefined : [
         // Object literal must be wrapped in `()`
         ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [

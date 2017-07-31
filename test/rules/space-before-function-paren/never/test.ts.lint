@@ -1,38 +1,41 @@
 // Anonymous
 function () {}
-        ~  [space-before-function-paren]
+        ~ [0]
 function (): void {
-        ~  [space-before-function-paren]
+        ~ [0]
 }
 function (a: string, cb: ()=>{}): void {}
-        ~  [space-before-function-paren]
+        ~ [0]
 
 var f = function () {};
-                ~  [space-before-function-paren]
+                ~ [0]
 var f = function (): void {
-                ~  [space-before-function-paren]
+                ~ [0]
 };
 var f = function (a: string, cb: ()=>{}): void {};
-                ~  [space-before-function-paren]
+                ~ [0]
 
 
 // Named
 function foobar (){}
-               ~  [space-before-function-paren]
+               ~ [0]
 function foobar (): void{
-               ~  [space-before-function-paren]
+               ~ [0]
 }
 function foobar (a: string, cb: ()=>{}): void{}
-               ~  [space-before-function-paren]
+               ~ [0]
 
 var f = function foobar (){};
-                       ~  [space-before-function-paren]
+                       ~ [0]
 var f = function foobar (): void{
-                       ~  [space-before-function-paren]
+                       ~ [0]
 };
 var f = function foobar (a: string, cb: ()=>{}): void{};
-                       ~  [space-before-function-paren]
+                       ~ [0]
 
+// Default export (name ommited)
+export default function () {}
+                       ~ [0]
 
 // Async Arrow
 // ignore
@@ -40,44 +43,49 @@ var f = function foobar (a: string, cb: ()=>{}): void{};
 var arrow = () => {};
 
 async () => {};
-     ~ [space-before-function-paren]
+     ~ [0]
 var arrow = async () => {};
-                 ~ [space-before-function-paren]
+                 ~ [0]
 
 
 // Method
 interface IMyInterface {
         one ();
-           ~  [space-before-function-paren]
+           ~ [0]
         two (): void;
-           ~  [space-before-function-paren]
+           ~ [0]
         three (a: string, cb: ()=>{}): void;
-             ~  [space-before-function-paren]
+             ~ [0]
 }
 class MyClass {
         one () {}
-           ~  [space-before-function-paren]
+           ~ [0]
         two (): void {
-           ~  [space-before-function-paren]
+           ~ [0]
         }
         three (a: string, cb: ()=>{}): void {}
-             ~  [space-before-function-paren]
+             ~ [0]
+
+        get a () {}
+             ~ [0]
+        set a () {}
+             ~ [0]
 }
 
 
 // Constructor
 class MyClass {
         constructor () {}
-                   ~  [space-before-function-paren]
+                   ~ [0]
 }
 class MyClass {
         constructor (): void {
-                   ~  [space-before-function-paren]
+                   ~ [0]
         }
 }
 class MyClass {
         constructor (a: string, cb: ()=>{}): void {}
-                   ~  [space-before-function-paren]
+                   ~ [0]
 }
 
-[space-before-function-paren]: Spaces before function parens are disallowed
+[0]: Spaces before function parens are disallowed

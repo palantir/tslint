@@ -61,130 +61,73 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static MISSING_WHITESPACE_ERROR = "Missing whitespace before function parens";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new FunctionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments[0] as Option | Options | undefined));
     }
 }
 
 type OptionName = "anonymous" | "asyncArrow" | "constructor" | "method" | "named";
-
+const optionNames: OptionName[] = ["anonymous", "asyncArrow", "constructor", "method", "named"];
 type Option = "always" | "never";
+type Options = Partial<Record<OptionName, Option>>;
 
-interface CachedOptions {
-    anonymous?: Option;
-    asyncArrow?: Option;
-    constructor?: Option;
-    method?: Option;
-    named?: Option;
+function parseOptions(json: Option | Options | undefined): Options {
+    // Need to specify constructor or it will be Object
+    const options: Options = { constructor: undefined };
+    for (const optionName of optionNames) {
+        options[optionName] = typeof json === "object" ? json[optionName] : json === undefined ? "always" : json;
+    }
+    return options;
 }
 
-class FunctionWalker extends Lint.RuleWalker {
-    private scanner: ts.Scanner;
-    // assign constructor now to avoid typescript assuming its a function type
-    private cachedOptions: CachedOptions = {constructor: undefined};
-
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
-        this.cacheOptions();
-    }
-
-    protected visitArrowFunction(node: ts.ArrowFunction): void {
-        const option = this.getOption("asyncArrow");
-        const syntaxList = Lint.childOfKind(node, ts.SyntaxKind.SyntaxList)!;
-        const isAsyncArrow = syntaxList.getStart() === node.getStart() && syntaxList.getText() === "async";
-        const openParen = isAsyncArrow ? Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken) : undefined;
-        this.evaluateRuleAt(openParen, option);
-
-        super.visitArrowFunction(node);
-    }
-
-    protected visitConstructorDeclaration(node: ts.ConstructorDeclaration): void {
-        const option = this.getOption("constructor");
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
-        this.evaluateRuleAt(openParen, option);
-
-        super.visitConstructorDeclaration(node);
-    }
-
-    protected visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        this.visitFunction(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    protected visitFunctionExpression(node: ts.FunctionExpression): void {
-        this.visitFunction(node);
-        super.visitFunctionExpression(node);
-    }
-
-    protected visitMethodDeclaration(node: ts.MethodDeclaration): void {
-        this.visitMethod(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    protected visitMethodSignature(node: ts.SignatureDeclaration): void {
-        this.visitMethod(node);
-        super.visitMethodSignature(node);
-    }
-
-    private cacheOptions(): void {
-        const options = (this.getOptions() as any[])[0] as Option | { [K in OptionName]: Option } | undefined;
-        const optionNames: OptionName[] = ["anonymous", "asyncArrow", "constructor", "method", "named"];
-
-        optionNames.forEach((optionName) => {
-            switch (options) {
-                case undefined:
-                case "always":
-                    this.cachedOptions[optionName] = "always";
-                    break;
-
-                case "never":
-                    this.cachedOptions[optionName] = "never";
-                    break;
-
-                default:
-                    this.cachedOptions[optionName] = options[optionName];
-            }
-        });
-    }
-
-    private getOption(optionName: OptionName): Option | undefined {
-        return this.cachedOptions[optionName];
-    }
-
-    private evaluateRuleAt(openParen?: ts.Node, option?: Option): void {
-        if (openParen === undefined || option === undefined) {
-            return;
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { options, sourceFile } = ctx;
+    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        const option = getOption(node, options);
+        if (option !== undefined) {
+            check(node, option);
         }
 
-        const hasSpace = this.isSpaceAt(openParen.getStart() - 1);
+        ts.forEachChild(node, cb);
+    });
+
+    function check(node: ts.Node, option: "always" | "never"): void {
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        // openParen may be missing for an async arrow function `async x => ...`.
+        if (openParen === undefined) { return; }
+
+        const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
 
         if (hasSpace && option === "never") {
             const pos = openParen.getStart() - 1;
-            this.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, this.deleteText(pos, 1));
+            ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
         } else if (!hasSpace && option === "always") {
             const pos = openParen.getStart();
-            this.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, this.appendText(pos, " "));
+            ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
         }
     }
+}
 
-    private isSpaceAt(textPos: number): boolean {
-        this.scanner.setTextPos(textPos);
-        const prevTokenKind = this.scanner.scan();
-        return prevTokenKind === ts.SyntaxKind.WhitespaceTrivia;
-    }
+function getOption(node: ts.Node, options: Options): Option | undefined {
+    switch (node.kind) {
+        case ts.SyntaxKind.ArrowFunction:
+            return Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? options.asyncArrow : undefined;
 
-    private visitFunction(node: ts.Node): void {
-        const identifier = Lint.childOfKind(node, ts.SyntaxKind.Identifier);
-        const hasIdentifier = identifier !== undefined && (identifier.getEnd() !== identifier.getStart());
-        const optionName = hasIdentifier ? "named" : "anonymous";
-        const option = this.getOption(optionName);
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
-        this.evaluateRuleAt(openParen, option);
-    }
+        case ts.SyntaxKind.Constructor:
+            return options.constructor;
 
-    private visitMethod(node: ts.Node): void {
-        const option = this.getOption("method");
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
-        this.evaluateRuleAt(openParen, option);
+        case ts.SyntaxKind.FunctionDeclaration:
+            // name is optional for function declaration which is default export (TS will emit error in other cases).
+            // Can be handled in the same way as function expression.
+        case ts.SyntaxKind.FunctionExpression:
+            return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
+
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+            return options.method;
+
+        default:
+            return undefined;
     }
 }

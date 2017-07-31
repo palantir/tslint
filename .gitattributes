@@ -6,3 +6,4 @@
 *.fix text eol=lf
 /test/rules/linebreak-style/**/CRLF/*.lint text eol=crlf
 /test/rules/linebreak-style/**/LF/*.fix text eol=crlf
+/test/rules/jsdoc-format/**/jsdoc-windows.ts.lint text eol=crlf
