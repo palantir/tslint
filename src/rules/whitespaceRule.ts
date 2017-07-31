@@ -196,6 +196,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 if (options.decl && initializer !== undefined) {
                     checkForTrailingWhitespace((type !== undefined ? type :  name).getEnd());
                 }
+                break;
+
+            case ts.SyntaxKind.SpreadAssignment:
+                if (options.spread) {
+                    const position = (node as ts.SpreadAssignment).expression.getFullStart();
+                    checkForExcessiveWhitespace(position);
+                }
         }
 
         ts.forEachChild(node, cb);
@@ -283,5 +290,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         const fix = Lint.Replacement.appendText(position, " ");
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
+    }
+
+    function checkForExcessiveWhitespace(position: number): void {
+        if (position !== sourceFile.end && Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+            addInvalidWhitespaceErrorAt(position);
+        }
+    }
+
+    function addInvalidWhitespaceErrorAt(position: number): void {
+        const fix = Lint.Replacement.deleteText(position, 1);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_2, fix);
     }
 }
