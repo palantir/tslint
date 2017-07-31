@@ -110,7 +110,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 function getOption(node: ts.Node, options: Options): Option | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
-            return Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? options.asyncArrow : undefined;
+            return (node as ts.SignatureDeclaration).typeParameters === undefined
+                && Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+                    ? options.asyncArrow
+                    : undefined;
 
         case ts.SyntaxKind.Constructor:
             return options.constructor;
@@ -119,7 +122,12 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             // name is optional for function declaration which is default export (TS will emit error in other cases).
             // Can be handled in the same way as function expression.
         case ts.SyntaxKind.FunctionExpression:
-            return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
+            const functionName = (node as ts.FunctionExpression).name;
+            return functionName !== undefined && functionName.text !== ""
+                ? options.named
+                : (node as ts.SignatureDeclaration).typeParameters === undefined
+                    ? options.anonymous
+                    : undefined;
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
