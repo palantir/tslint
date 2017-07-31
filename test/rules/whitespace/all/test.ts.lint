@@ -161,3 +161,8 @@ else
     const foo = 123;
     // code that just wants to be encapsulated in a block scope
 }
+
+const foo = {
+    ... bar
+       ~ [invalid whitespace]
+};

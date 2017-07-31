@@ -7,6 +7,7 @@
       "check-module",
       "check-preblock",
       "check-separator",
+      "check-spread",
       "check-type",
       "check-typecast"
     ]
