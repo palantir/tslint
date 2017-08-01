@@ -64,8 +64,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "missing whitespace";
-    public static FAILURE_STRING_2 = "invalid whitespace";
+    public static FAILURE_STRING_MISSING = "missing whitespace";
+    public static FAILURE_STRING_INVALID = "invalid whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
@@ -289,7 +289,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
         const fix = Lint.Replacement.appendText(position, " ");
-        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_MISSING, fix);
     }
 
     function checkForExcessiveWhitespace(position: number): void {
@@ -300,6 +300,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     function addInvalidWhitespaceErrorAt(position: number): void {
         const fix = Lint.Replacement.deleteText(position, 1);
-        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_2, fix);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_INVALID, fix);
     }
 }
