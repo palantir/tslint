@@ -1,5 +1,5 @@
 {
   "rules": {
-    "import-blacklist-submodules": [true, "rxjs", "lodash"]
+    "import-blacklist-submodules": [true, "@blueprintjs/core"]
   }
 }

@@ -1,14 +1,25 @@
-import { Observable } from 'rxjs';
+import { submodule } from '@blueprintjs/core';
 
-import { Observable } from 'rxjs/Observable';
-                                ~~~~~~~~~~~ [0]
-import forOwn = require('lodash');
+import { submodule } from '@blueprintjs/core/sub-module';
+                                            ~~~~~~~~~~~ [0]
 
-import forOwn = require('lodash/forOwn');
-                               ~~~~~~~ [0]
+import submodule = require('@blueprintjs/core');
+
+import submodule = require('@blueprintjs/core/sub-module');
+                                             ~~~~~~~~~~~ [0]
+
+import { submodule } from '@blueprintjs/core';
+
+import { submodule } from '@blueprintjs/core/a/b/c/sub-module';
+                                            ~~~~~~~~~~~~~~~~~ [0]
+
+import sub-module = require('@blueprintjs/core');
+
+import sub-module = require('@blueprintjs/core/a/b/c/sub-module');
+                                              ~~~~~~~~~~~~~~~~~ [0]
 
 // non-static imports cannot be checked
 import {Observable} from rxjs;
 import forOwn = require(lodash);
 
-[0]: This submodule is blacklisted, try importing the parent module instead
+[0]: This submodule is blacklisted, try importing from a parent module

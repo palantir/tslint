@@ -37,12 +37,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             minLength: 1,
         },
-        optionExamples: [true, [true, "rxjs", "lodash"]],
+        optionExamples: [true, [true, "rxjs", "lodash", "@blueprintjs/core"]],
         type: "functionality",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "This submodule is blacklisted, try importing the parent module instead";
+    public static FAILURE_STRING = "This submodule is blacklisted, try importing from a parent module";
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
@@ -91,7 +91,8 @@ class ImportBlacklistSubmodulesWalker extends Lint.AbstractWalker<string[]> {
             const failText = `${blacklistOption}/`;
             if (expression.text.indexOf(failText) !== -1) {
                 this.addFailure(
-                    expression.getStart(this.sourceFile) + (blacklistOption.length + 1),
+                    expression.getStart(this.sourceFile) +
+                    (blacklistOption.length + 1),
                     expression.end - 1,
                     Rule.FAILURE_STRING,
                 );
