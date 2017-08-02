@@ -1,6 +1,3 @@
-
-
-
 /**
  * @license
  * Copyright 2016 Palantir Technologies, Inc.
@@ -42,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [true, [true, "rxjs", "lodash"]],
         type: "functionality",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
 
     public static FAILURE_STRING = "This submodule is blacklisted, try importing the parent module instead";
@@ -81,22 +78,19 @@ class ImportBlacklistSubmodulesWalker extends Lint.AbstractWalker<string[]> {
 
     private checkForBannedImport(expression: ts.Expression) {
         if (isTextualLiteral(expression)) {
-            let blacklistOption = '';
+            let blacklistOption = "";
 
-            /**
-             * Loop through 
-             */
             this.options.forEach((option: string) => {
-                if(expression.text.indexOf(option) !== -1) {
+                if (expression.text.indexOf(option) !== -1) {
                     blacklistOption = option;
                 }
             });
 
-            if(blacklistOption === '') { return; }
+            if (blacklistOption === "") { return; }
 
             const failText = blacklistOption + '/';
-            if(expression.text.indexOf(failText) !== -1) {
-                this.addFailure(expression.getStart(this.sourceFile) + 1, expression.end - 1, Rule.FAILURE_STRING);
+            if (expression.text.indexOf(failText) !== -1) {
+                this.addFailure(expression.getStart(this.sourceFile) + (blacklistOption.length + 1), expression.end - 1, Rule.FAILURE_STRING);
             }
         }
     }
