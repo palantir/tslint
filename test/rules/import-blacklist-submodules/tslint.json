@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "import-blacklist-submodules": [true, "rxjs", "lodash"]
+  }
+}
