@@ -61,15 +61,15 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
     public walk(sourceFile: ts.SourceFile): void {
         const importsStatements = sourceFile.statements
             .filter(isImportDeclaration)
-            .map(this.toImportStatement);
-        const firstFailure = importsStatements.find(this.isBadlyPositioned);
+            .map(this.toImportStatement, this);
+        const firstFailure = importsStatements.find(this.isBadlyPositioned, this);
         if (firstFailure != null) {
             const fix = this.createFix(importsStatements);
             this.addFailureAtNode(firstFailure.statement, Rule.GROUPED_IMPORTS, fix);
         }
     }
 
-    private isBadlyPositioned = (importStatement: ImportStatement): boolean => {
+    private isBadlyPositioned(importStatement: ImportStatement): boolean {
         if (this.previousImportStatement != null) {
             if (importStatement.type === this.previousImportStatement.type) {
                 if (importStatement.lineStart !== this.previousImportStatement.lineEnd + 1) {
@@ -87,7 +87,7 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
         return false;
     }
 
-    private toImportStatement = (statement: ts.ImportDeclaration): ImportStatement => {
+    private toImportStatement(statement: ts.ImportDeclaration): ImportStatement {
         return {
             lineEnd: this.sourceFile.getLineAndCharacterOfPosition(statement.getEnd()).line,
             lineStart: this.sourceFile.getLineAndCharacterOfPosition(statement.getStart()).line,
@@ -117,11 +117,13 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
     }
 
     private createFix(importStatements: ImportStatement[]): Lint.Fix {
-        const newLine = this.getEofChar(this.sourceFile);
+        const newLine = this.getEolChar(this.sourceFile);
         const imports = this.getOrderedImports(importStatements);
-        const addition = Lint.Replacement.appendText(0, imports.join(newLine));
-        const deletions = importStatements.map((imp) => {
-            const [start, end] = this.getRangeIncludingWhitespace(imp.statement);
+        const firstStatement = importStatements[0].statement;
+        const addition = Lint.Replacement.appendText(firstStatement.getStart(this.sourceFile), imports.join(newLine));
+        const lastIndex = importStatements.length - 1;
+        const deletions = importStatements.map((imp, index) => {
+            const [start, end] = this.getRangeIncludingWhitespace(imp.statement, index === 0, index === lastIndex);
             return Lint.Replacement.deleteFromTo(start, end);
         });
         return [...deletions, addition];
@@ -135,19 +137,25 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
             if (imps.length == 0) {
                 return arr;
             }
-            return arr.concat(imps.map((imp) => imp.statement.getText()), "");
+            return arr.concat(imps.map((imp) => imp.statement.getText(this.sourceFile)), "");
         }, [] as string[]).concat("");
     }
 
-    private getRangeIncludingWhitespace(statement: ts.ImportDeclaration): [number, number] {
+    private getRangeIncludingWhitespace(statement: ts.ImportDeclaration,
+                                        fixedStart: boolean,
+                                        fixedEnd: boolean): [number, number] {
         const text = this.sourceFile.text;
-        let start = statement.getStart();
-        while (this.isWhiteSpaceChar(text[start - 1])) {
-            start--;
+        let start = statement.getStart(this.sourceFile);
+        if (!fixedStart) {
+            while (this.isWhiteSpaceChar(text[start - 1])) {
+                start--;
+            }
         }
         let end = statement.getEnd();
-        while (this.isWhiteSpaceChar(text[end + 1])) {
-            end++;
+        if (!fixedEnd) {
+            while (this.isWhiteSpaceChar(text[end + 1])) {
+                end++;
+            }
         }
         return [start, end];
     }
@@ -156,7 +164,7 @@ class Walker extends Lint.AbstractWalker<Lint.IOptions> {
         return char === undefined ? false : Lint.isWhiteSpace(char.charCodeAt(0));
     }
 
-    private getEofChar(sourceFile: ts.SourceFile): string {
+    private getEolChar(sourceFile: ts.SourceFile): string {
         const lineEnd = sourceFile.getLineEndOfPosition(0);
         let newLine;
         if (lineEnd > 0) {

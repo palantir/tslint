@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {foo} from 'foo';
 
 import {bar} from '../bar';
@@ -10,4 +12,5 @@ const one = 1; // some comment
 
 const two = 2;
 // another comment
+
 let q = 'a';
