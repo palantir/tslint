@@ -91,6 +91,7 @@ export const rules = {
     "curly": true,
     "forin": true,
     // "import-blacklist": no sensible default
+    // "import-blacklist-submodules": no sensible default
     "label-position": true,
     "no-arg": true,
     "no-bitwise": true,
@@ -256,7 +257,7 @@ export const rules = {
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
-    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
+    ["ban", "fileHeader", "importBlacklist", "importBlacklistSubmodules", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
