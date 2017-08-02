@@ -104,6 +104,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
     const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
+    const declaration = program.getCompilerOptions().declaration;
 
     // If all specifiers in an import are unused, we elide the entire import.
     const importSpecifierFailures = new Map<ts.Identifier, string>();
@@ -118,7 +119,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
             const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
-                if (isImportUsed(importName, sourceFile, checker)) {
+                if (declaration && isImportUsed(importName, sourceFile, checker)) {
                     continue;
                 }
 
@@ -295,7 +296,9 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
-    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && node.type === undefined) {
+    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) &&
+        node.type === undefined && node.name.kind === ts.SyntaxKind.Identifier ||
+        utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier) {
         return checker.getTypeAtLocation(node);
     } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
         const sig = checker.getSignatureFromDeclaration(node);
