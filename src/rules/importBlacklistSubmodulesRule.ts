@@ -88,9 +88,13 @@ class ImportBlacklistSubmodulesWalker extends Lint.AbstractWalker<string[]> {
 
             if (blacklistOption === "") { return; }
 
-            const failText = blacklistOption + '/';
+            const failText = `${blacklistOption}/`;
             if (expression.text.indexOf(failText) !== -1) {
-                this.addFailure(expression.getStart(this.sourceFile) + (blacklistOption.length + 1), expression.end - 1, Rule.FAILURE_STRING);
+                this.addFailure(
+                    expression.getStart(this.sourceFile) + (blacklistOption.length + 1),
+                    expression.end - 1,
+                    Rule.FAILURE_STRING,
+                );
             }
         }
     }
