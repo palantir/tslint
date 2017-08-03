@@ -27,7 +27,7 @@ const OPTION_DECL = "check-decl";
 const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
 const OPTION_SEPARATOR = "check-separator";
-const OPTION_SPREAD = "check-spread";
+const OPTION_REST_SPREAD = "check-rest-spread";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
 const OPTION_PREBLOCK = "check-preblock";
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
-            * \`"check-spread"\` checks that there is no whitespace after spread operator (\`...\`).
+            * \`"check-rest-spread"\` checks that there is no whitespace after rest/spread operator (\`...\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
             * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
@@ -54,7 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 type: "string",
                 enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-spread", "check-type", "check-typecast", "check-preblock"],
+                       "check-separator", "check-rest-spread", "check-type", "check-typecast", "check-preblock"],
             },
             minLength: 0,
             maxLength: 9,
@@ -72,7 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "spread" | "type" | "typecast" | "preblock", boolean>;
+type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "preblock", boolean>;
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
@@ -80,7 +80,7 @@ function parseOptions(ruleArguments: string[]): Options {
         operator: has(OPTION_OPERATOR),
         module: has(OPTION_MODULE),
         separator: has(OPTION_SEPARATOR),
-        spread: has(OPTION_SPREAD),
+        restSpread: has(OPTION_REST_SPREAD),
         type: has(OPTION_TYPE),
         typecast: has(OPTION_TYPECAST),
         preblock: has(OPTION_PREBLOCK),
@@ -198,8 +198,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
 
+            case ts.SyntaxKind.BindingElement:
+            case ts.SyntaxKind.Parameter:
+                const { dotDotDotToken } = node as ts.BindingElement | ts.ParameterDeclaration;
+                if (options.restSpread && dotDotDotToken !== undefined) {
+                    checkForExcessiveWhitespace(dotDotDotToken.end);
+                }
+                break;
+
             case ts.SyntaxKind.SpreadAssignment:
-                if (options.spread) {
+            case ts.SyntaxKind.SpreadElement:
+                if (options.restSpread) {
                     const position = (node as ts.SpreadAssignment).expression.getFullStart();
                     checkForExcessiveWhitespace(position);
                 }
