@@ -162,7 +162,14 @@ else
     // code that just wants to be encapsulated in a block scope
 }
 
-const foo = {
-    ... bar
-       ~ [invalid whitespace]
-};
+const foo = { ... bar };
+                 ~ [invalid whitespace]
+
+const foo = [ ... bar ];
+                 ~ [invalid whitespace]
+
+function foo (bar, ... baz) {}
+                      ~ [invalid whitespace]
+
+const { foo, ... bar } = baz;
+                ~ [invalid whitespace]

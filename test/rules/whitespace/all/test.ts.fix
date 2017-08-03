@@ -105,6 +105,10 @@ else
     // code that just wants to be encapsulated in a block scope
 }
 
-const foo = {
-    ...bar
-};
+const foo = { ...bar };
+
+const foo = [ ...bar ];
+
+function foo (bar, ...baz) {}
+
+const { foo, ...bar } = baz;
