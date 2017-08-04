@@ -17,7 +17,6 @@
 
 import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -29,12 +28,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             Limiting the length of a line of code improves code readability.
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
-        optionsDescription: "An integer indicating the max length of lines.",
+        optionsDescription: Lint.Utils.dedent`It can take up to 2 arguments, but only first one is required:
+
+        * integer indicating the max length of lines.
+        * string defining ignore pattern, being parsed by \`new RegExp()\`.
+        For example the \`^import \` pattern will ignore import statements.`,
         options: {
-            type: "number",
-            minimum: "1",
+            type: "array",
+            items: {
+                type: "any",
+            },
+            minLength: "1",
+            maxLength: "2",
         },
-        optionExamples: [[true, 120]],
+        optionExamples: [[true, 120], [true, 120, "^import "]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -49,15 +56,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
     }
 }
 
-function walk(ctx: Lint.WalkContext<number>) {
-    const limit = ctx.options;
-    for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength > limit) {
-            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
-        }
+function walk(ctx: Lint.WalkContext<any[]>) {
+    const limit = ctx.options[0];
+    const ignorePattern = ctx.options[1] && new RegExp(ctx.options[1]);
+    const lines = ctx.sourceFile.text.split("\n");
+    const lineRanges = getLineRanges(ctx.sourceFile);
+    for (let i = 0; i < lines.length; i++) {
+        if (ignorePattern && ignorePattern.test(lines[i])) { continue; }
+        if (lineRanges[i].contentLength <= limit) { continue; }
+        ctx.addFailureAt(lineRanges[i].pos, lineRanges[i].contentLength, Rule.FAILURE_STRING_FACTORY(limit));
     }
 }
