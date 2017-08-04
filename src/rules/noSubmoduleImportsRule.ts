@@ -29,7 +29,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-import-submodules",
+        ruleName: "no-submodule-imports",
         description: Lint.Utils.dedent`
             Disallows importing any submodule of the listed modules.`,
         rationale: Lint.Utils.dedent`
