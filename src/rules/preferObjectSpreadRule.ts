@@ -51,6 +51,7 @@ function walk(ctx: Lint.WalkContext<void>) {
             isPropertyAccessExpression(node.expression) && node.expression.name.text === "assign" &&
             isIdentifier(node.expression.expression) && node.expression.expression.text === "Object" &&
             // Object.assign(...someArray) cannot be written as object spread
+            !ts.isFunctionLike(node.arguments[0]) &&
             !node.arguments.some(isSpreadElement)) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node, ctx.sourceFile));
