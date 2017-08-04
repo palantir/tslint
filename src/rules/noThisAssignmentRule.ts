@@ -79,7 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${ALLOW_THIS_DESTRUCTURING}\` allows using destructuring to access members of \`this\` (e.g. \`{ foo, bar } = this;\`).
             * \`${ALLOWED_THIS_NAMES}\` may be specified as a list of regular expressions to match allowed variable names.`,
-        rationale: "Assigning a variable to `this` instead of properly using arrow lambdas"
+        rationale: "Assigning a variable to `this` instead of properly using arrow lambdas "
             + "may be a symptom of pre-ES6 practices or not manging scope well.",
         ruleName: "no-this-assignment",
         type: "functionality",
