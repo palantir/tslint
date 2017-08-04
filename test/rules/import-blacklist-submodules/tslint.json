@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "import-blacklist-submodules": [true, "@blueprintjs/core"]
-  }
-}

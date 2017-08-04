@@ -1,0 +1,21 @@
+import { submodule } from "@blueprintjs/core";
+
+import { submodule } from "@blueprintjs/core/sub-module";
+                                            ~~~~~~~~~~~ [0]
+
+import submodule = require("@blueprintjs/core");
+
+import submodule = require("@blueprintjs/core/sub-module");
+                                             ~~~~~~~~~~~ [0]
+
+import { submodule } from "@blueprintjs/core";
+
+import { submodule } from "@blueprintjs/core/a/b/c/sub-module";
+                                            ~~~~~~~~~~~~~~~~~ [0]
+
+import sub-module = require("@blueprintjs/core");
+
+import sub-module = require("@blueprintjs/core/a/b/c/sub-module");
+                                              ~~~~~~~~~~~~~~~~~ [0]
+
+[0]: Submodule import paths from this package are disallowed; import from the root instead

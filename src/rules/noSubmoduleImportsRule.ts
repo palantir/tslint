@@ -16,7 +16,12 @@
  */
 
 import {
-    isCallExpression, isExternalModuleReference, isIdentifier, isImportDeclaration, isImportEqualsDeclaration, isTextualLiteral,
+    isCallExpression,
+    isExternalModuleReference,
+    isIdentifier,
+    isImportDeclaration,
+    isImportEqualsDeclaration,
+    isTextualLiteral,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -24,12 +29,14 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "import-blacklist-submodules",
+        ruleName: "no-import-submodules",
         description: Lint.Utils.dedent`
             Disallows importing any submodule of the listed modules.`,
         rationale: Lint.Utils.dedent`
-            Not sure on this exactly...`,
-        optionsDescription: "A list of modules whose submodules are blacklisted.",
+            Submodules of some packages are treated as private APIs and the import
+            paths may change without deprecation periods. It's best to stick with
+            top-level package exports.`,
+        optionsDescription: "A list of packages whose submodules are blacklisted.",
         options: {
             type: "array",
             items: {
@@ -42,22 +49,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "This submodule is blacklisted, try importing from a parent module";
-
-    public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments.length > 0;
-    }
+    public static FAILURE_STRING = "Submodule import paths from this package are disallowed; import from the root instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ImportBlacklistSubmodulesWalker(sourceFile, this.ruleName, this.ruleArguments));
+        return this.applyWithWalker(new NoSubmoduleImportsWalker(sourceFile, this.ruleName, this.ruleArguments));
     }
 }
 
-class ImportBlacklistSubmodulesWalker extends Lint.AbstractWalker<string[]> {
+class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const findRequire = (node: ts.Node): void => {
             if (isCallExpression(node) && node.arguments.length === 1 &&
-                isIdentifier(node.expression) && node.expression.text === "require") {
+                (isIdentifier(node.expression) && node.expression.text === "require" ||
+                node.expression.kind === ts.SyntaxKind.ImportKeyword)) {
                 this.checkForBannedImport(node.arguments[0]);
             }
             return ts.forEachChild(node, findRequire);
@@ -80,11 +84,11 @@ class ImportBlacklistSubmodulesWalker extends Lint.AbstractWalker<string[]> {
         if (isTextualLiteral(expression)) {
             let blacklistOption = "";
 
-            this.options.forEach((option: string) => {
+            for (const option of this.options) {
                 if (expression.text.indexOf(option) !== -1) {
                     blacklistOption = option;
                 }
-            });
+            }
 
             if (blacklistOption === "") { return; }
 
