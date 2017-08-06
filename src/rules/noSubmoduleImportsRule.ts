@@ -82,8 +82,9 @@ class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
 
     private checkForBannedImport(expression: ts.Expression) {
         if (isTextualLiteral(expression)) {
-            if (isAbsoluteOrRelativePath(expression.text)) { return; }
-            if (!isSubmodulePath(expression.text)) { return; }
+            if (isAbsoluteOrRelativePath(expression.text) || !isSubmodulePath(expression.text)) { 
+                return; 
+            }
 
             /**
              * A submodule is being imported.
@@ -96,10 +97,7 @@ class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
                 }
             }
 
-            this.addFailureAtNode(
-                expression,
-                Rule.FAILURE_STRING,
-            );
+            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
         }
     }
 }
@@ -113,17 +111,5 @@ function isScopedPath(path: string): boolean {
 }
 
 function isSubmodulePath(path: string): boolean {
-    const pathDepth: number = path.split("/").length;
-    if (isScopedPath(path)) {
-        if (pathDepth <= 2) {
-            return false;
-        } else {
-            return true;
-        }
-    } else {
-        if (pathDepth > 1) {
-            return true;
-        }
-    }
-    return false;
+    return path.split("/").length > (isScopedPath(path) ? 2 : 1);
 }
