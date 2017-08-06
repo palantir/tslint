@@ -82,8 +82,8 @@ class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
 
     private checkForBannedImport(expression: ts.Expression) {
         if (isTextualLiteral(expression)) {
-            if (isAbsoluteOrRelativePath(expression.text) || !isSubmodulePath(expression.text)) { 
-                return; 
+            if (isAbsoluteOrRelativePath(expression.text) || !isSubmodulePath(expression.text)) {
+                return;
             }
 
             /**
