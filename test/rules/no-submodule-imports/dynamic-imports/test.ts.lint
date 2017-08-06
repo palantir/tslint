@@ -1,3 +1,5 @@
+[typescript]: >=2.4.0
+
 const dynamicImport = import("lodash");
 
 const dynamicImport = import("lodash/sub-module");
