@@ -57,5 +57,7 @@ import { submodule } from "rxjs/a/b/c/sub-module";
 import submodule = require("rxjs");
 import submodule = require("rxjs/a/b/c/sub-module");
 
+import { submodule } from "./../node_modules/package";
+import { submodule } from "../myModule/a/package";
 
 [0]: Submodule import paths from this package are disallowed; import from the root instead
