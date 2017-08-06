@@ -117,7 +117,7 @@ export const rules = {
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
-    // "no-submodule-imports": no sensible default
+    "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
@@ -195,7 +195,6 @@ export const rules = {
     "no-consecutive-blank-lines": true,
     "no-parameter-properties": true,
     "no-reference-import": true,
-    "no-submodule-imports": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
