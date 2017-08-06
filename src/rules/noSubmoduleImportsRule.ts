@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-submodule-imports",
         description: Lint.Utils.dedent`
-            Disallows importing any submodule of the listed modules.`,
+            Disallows importing any submodule.`,
         rationale: Lint.Utils.dedent`
             Submodules of some packages are treated as private APIs and the import
             paths may change without deprecation periods. It's best to stick with
             top-level package exports.`,
-        optionsDescription: "A list of packages whose submodules are blacklisted.",
+        optionsDescription: "A list of packages whose submodules are whitelisted.",
         options: {
             type: "array",
             items: {
                 type: "string",
             },
-            minLength: 1,
+            minLength: 0,
         },
-        optionExamples: [true, [true, "rxjs", "lodash", "@blueprintjs/core"]],
+        optionExamples: [true, [true, "rxjs", "@angular/core"]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -58,13 +58,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
-        const findRequire = (node: ts.Node): void => {
+        const findDynamicImport = (node: ts.Node): void => {
             if (isCallExpression(node) && node.arguments.length === 1 &&
                 (isIdentifier(node.expression) && node.expression.text === "require" ||
                 node.expression.kind === ts.SyntaxKind.ImportKeyword)) {
                 this.checkForBannedImport(node.arguments[0]);
             }
-            return ts.forEachChild(node, findRequire);
+            return ts.forEachChild(node, findDynamicImport);
         };
 
         for (const statement of sourceFile.statements) {
@@ -75,32 +75,55 @@ class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
                     this.checkForBannedImport(statement.moduleReference.expression);
                 }
             } else {
-                ts.forEachChild(statement, findRequire);
+                ts.forEachChild(statement, findDynamicImport);
             }
         }
     }
 
     private checkForBannedImport(expression: ts.Expression) {
         if (isTextualLiteral(expression)) {
-            let blacklistOption = "";
+            if (isAbsoluteOrRelativePath(expression.text)) { return; }
+            if (!isSubmodulePath(expression.text)) { return; }
 
+            /**
+             * A submodule is being imported.
+             * Check if its path contains any
+             * of the whitelist packages.
+             */
             for (const option of this.options) {
-                if (expression.text.indexOf(option) !== -1) {
-                    blacklistOption = option;
+                if (expression.text.startsWith(`${option}/`)) {
+                    return;
                 }
             }
 
-            if (blacklistOption === "") { return; }
-
-            const failText = `${blacklistOption}/`;
-            if (expression.text.indexOf(failText) !== -1) {
-                this.addFailure(
-                    expression.getStart(this.sourceFile) +
-                    (blacklistOption.length + 1),
-                    expression.end - 1,
-                    Rule.FAILURE_STRING,
-                );
-            }
+            this.addFailureAtNode(
+                expression,
+                Rule.FAILURE_STRING,
+            );
         }
     }
+}
+
+function isAbsoluteOrRelativePath(path: string): boolean {
+    return /^(..?(\/|$)|\/)/.test(path);
+}
+
+function isScopedPath(path: string): boolean {
+    return path[0] === "@";
+}
+
+function isSubmodulePath(path: string): boolean {
+    const pathDepth: number = path.split("/").length;
+    if (isScopedPath(path)) {
+        if (pathDepth <= 2) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        if (pathDepth > 1) {
+            return true;
+        }
+    }
+    return false;
 }
