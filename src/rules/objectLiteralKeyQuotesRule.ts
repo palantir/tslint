@@ -162,7 +162,7 @@ function mapPropertyName(property: ts.ObjectLiteralElementLike): ts.StringLitera
     return property.name;
 }
 
-function hasInconsistentQuotes(properties: ts.LiteralLikeNode[]) {
+function hasInconsistentQuotes(properties: ReadonlyArray<ts.LiteralLikeNode>) {
     if (properties.length < 2) {
         return false;
     }

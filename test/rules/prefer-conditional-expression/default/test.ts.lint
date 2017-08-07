@@ -1,13 +1,12 @@
 let x;
 if (true) {
-~~ [X]
+~~ [err % ('x')]
     x = 1;
 } else {
     x = 2;
 }
 
 if (true)
-~~ [X]
     x = "TRUE";
 else if (false)
     x = "FALSE";
@@ -51,5 +50,4 @@ if (true) {
     foo(bar).baz = 1;
 }
 
-[X]: Use a conditional expression instead of assigning to 'x' in multiple places.
 [err]: Use a conditional expression instead of assigning to '%s' in multiple places.

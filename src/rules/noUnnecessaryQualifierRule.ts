@@ -98,7 +98,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         // If the symbol in scope is different, the qualifier is necessary.
         const fromScope = getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
-        return fromScope === undefined || fromScope === accessedSymbol;
+        return fromScope === undefined || Lint.Utils.arraysAreEqual(fromScope.declarations, accessedSymbol.declarations, (a, b) => a === b);
     }
 
     function getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {

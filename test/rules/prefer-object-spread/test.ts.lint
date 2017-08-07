@@ -34,6 +34,8 @@ Object.assign({}, {},);
 // allowed
 result = Object.assign(new Foo(), {});
 result = Object.assign(createFoo(), {});
+result = Object.assign(function() {}, {});
+result = Object.assign(() => {}, {});
 
 [0]: Use the object spread operator instead.
 [1]: 'Object.assign' returns the first argument. Prefer object spread if you want a new object.
