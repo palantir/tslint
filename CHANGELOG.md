@@ -1,6 +1,51 @@
 Change Log
 ===
 
+v5.6.0
+---
+
+## :tada: New rule and options
+
+- [new-rule] [`space-within-parens`](https://palantir.github.io/tslint/rules/space-within-parens/) (#2959)
+- [new-rule] [`no-duplicate-imports`](https://palantir.github.io/tslint/rules/no-duplicate-imports/) (#3075)
+- [new-rule] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) (#3091)
+- [new-rule-option] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/) adds `check-else-if` (#2963)
+- [new-rule-option] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) let's you optionally ignore certain kinds of declarations (#3030)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [enhancement] [`no-switch-case-fall-through`](https://palantir.github.io/tslint/rules/no-switch-case-fall-through/) matches `// falls through` comments case insensitive and allows trailing text (#2983)
+- [enhancement] Improved CLI error message when no filenames are specified (#3066)
+- [new-fixer] [`no-null-keyword`](https://palantir.github.io/tslint/rules/no-null-keyword/): fix `x == null` to `x == undefined` (#2802)
+- [rule-change] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/): ignore `if-else-if` by default. Use the new `"check-else-if"` option to check nested if statements (#2963)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) accepts not only union types but also intersection types with Promise-like types (#2987)
+- [bugfix] Fixed an issue where, at runtime, the module `./test/parse` could not be located due after consumers had run `yarn clean` (#3072)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) Permit functions as first argument to Object.assign (#3098)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Julian Verdurmen
+- Alexandre Alonso
+- Josh Goldberg
+- ksvitkovsky
+- Daisuke Yokomoto
+- Andrii Dieiev
+- Florent Suc
+- Jason Killian
+- Amin Pakseresht
+- reduckted
+- vilicvane
+- Russell Briggs
+- Andy Hanson
+- Leo Liang
+- Dan Homola
+- BehindTheMath
+- David Golightly
+- aervin_
+- Daniel Kucal
+- Ika
+
 v5.5.0
 ---
 
