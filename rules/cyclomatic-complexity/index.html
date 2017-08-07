@@ -3,7 +3,7 @@ ruleName: cyclomatic-complexity
 description: Enforces a threshold of cyclomatic complexity.
 descriptionDetails: |-
 
-  Cyclomatic complexity is assessed for each function of any type. A starting value of 20
+  Cyclomatic complexity is assessed for each function of any type. A starting value of 0
   is assigned and this value is then incremented for every statement which can branch the
   control flow within the function. The following statements and expressions contribute
   to cyclomatic complexity:
@@ -12,6 +12,7 @@ descriptionDetails: |-
   * `||` and `&&` due to short-circuit evaluation
   * `for`, `for in` and `for of` loops
   * `while` and `do while` loops
+  * `case` clauses that contain statements
 rationale: |-
 
   Cyclomatic complexity is a code metric which indicates the level of complexity in a
@@ -20,10 +21,10 @@ rationale: |-
 optionsDescription: |-
 
   An optional upper limit for cyclomatic complexity can be specified. If no limit option
-  is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.
+  is provided a default value of 20 will be used.
 options:
   type: number
-  minimum: $(Rule.MINIMUM_THRESHOLD)
+  minimum: 2
 optionExamples:
   - 'true'
   - '[true, 20]'
@@ -34,6 +35,6 @@ title: 'Rule: cyclomatic-complexity'
 optionsJSON: |-
   {
     "type": "number",
-    "minimum": "$(Rule.MINIMUM_THRESHOLD)"
+    "minimum": 2
   }
 ---

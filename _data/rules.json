@@ -588,12 +588,12 @@
   {
     "ruleName": "cyclomatic-complexity",
     "description": "Enforces a threshold of cyclomatic complexity.",
-    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 20\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops",
+    "descriptionDetails": "\nCyclomatic complexity is assessed for each function of any type. A starting value of 0\nis assigned and this value is then incremented for every statement which can branch the\ncontrol flow within the function. The following statements and expressions contribute\nto cyclomatic complexity:\n* `catch`\n* `if` and `? :`\n* `||` and `&&` due to short-circuit evaluation\n* `for`, `for in` and `for of` loops\n* `while` and `do while` loops\n* `case` clauses that contain statements",
     "rationale": "\nCyclomatic complexity is a code metric which indicates the level of complexity in a\nfunction. High cyclomatic complexity indicates confusing code which may be prone to\nerrors or difficult to modify.",
-    "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.",
+    "optionsDescription": "\nAn optional upper limit for cyclomatic complexity can be specified. If no limit option\nis provided a default value of 20 will be used.",
     "options": {
       "type": "number",
-      "minimum": "$(Rule.MINIMUM_THRESHOLD)"
+      "minimum": 2
     },
     "optionExamples": [
       true,
@@ -946,7 +946,8 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "hasFix": true
   },
   {
     "ruleName": "member-ordering",
@@ -1209,6 +1210,18 @@
     "descriptionDetails": "Use named exports instead.",
     "rationale": "\nNamed imports/exports [promote clarity](https://github.com/palantir/tslint/issues/1182#issue-151780453).\nIn addition, current tooling differs on the correct way to handle default imports/exports.\nAvoiding them all together can help avoid tooling bugs and conflicts.",
     "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-duplicate-imports",
+    "description": "\nDisallows multiple import statements from the same module.",
+    "rationale": "\nUsing a single import statement per module will make the code clearer because you can see everything being imported\nfrom that module on one line.",
+    "optionsDescription": "Not configurable",
     "options": null,
     "optionExamples": [
       true
@@ -1564,7 +1577,8 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   },
   {
     "ruleName": "no-object-literal-type-assertion",
@@ -1592,7 +1606,7 @@
   },
   {
     "ruleName": "no-reference-import",
-    "description": "Don't <reference types=\"foo\" /> if you import \"foo\" anyway.",
+    "description": "Don't `<reference types=\"foo\" />` if you import `foo` anyway.",
     "optionsDescription": "Not configurable.",
     "options": null,
     "type": "style",
@@ -1626,10 +1640,50 @@
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
     "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNot that you cannot disable variables and parameters.\n        ",
+    "options": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "boolean"
+        },
+        "enum": {
+          "type": "boolean"
+        },
+        "function": {
+          "type": "boolean"
+        },
+        "import": {
+          "type": "boolean"
+        },
+        "interface": {
+          "type": "boolean"
+        },
+        "namespace": {
+          "type": "boolean"
+        },
+        "typeAlias": {
+          "type": "boolean"
+        },
+        "typeParameter": {
+          "type": "boolean"
+        }
+      }
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "class": true,
+          "enum": true,
+          "function": true,
+          "interface": false,
+          "namespace": true,
+          "typeAlias": false,
+          "typeParameter": false
+        }
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -1665,6 +1719,29 @@
     "hasFix": true,
     "options": null,
     "optionsDescription": "Not configurable.",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-submodule-imports",
+    "description": "\nDisallows importing any submodule.",
+    "rationale": "\nSubmodules of some packages are treated as private APIs and the import\npaths may change without deprecation periods. It's best to stick with\ntop-level package exports.",
+    "optionsDescription": "A list of packages whose submodules are whitelisted.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 0
+    },
+    "optionExamples": [
+      true,
+      [
+        true,
+        "rxjs",
+        "@angular/core"
+      ]
+    ],
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -1709,7 +1786,7 @@
       "type": "object"
     },
     "optionsDescription": "\nTwo options may be provided on an object:\n\n* `allow-destructuring` allows using destructuring to access members of `this` (e.g. `{ foo, bar } = this;`).\n* `allowed-names` may be specified as a list of regular expressions to match allowed variable names.",
-    "rationale": "Assigning a variable to `this` instead of properly using arrow lambdasmay be a symptom of pre-ES6 practices or not manging scope well.",
+    "rationale": "Assigning a variable to `this` instead of properly using arrow lambdas may be a symptom of pre-ES6 practices or not manging scope well.",
     "ruleName": "no-this-assignment",
     "type": "functionality",
     "typescriptOnly": false
@@ -2167,10 +2244,19 @@
     "ruleName": "prefer-conditional-expression",
     "description": "\nRecommends to use a conditional expression instead of assigning to the same thing in each branch of an if statement.",
     "rationale": "\nThis reduces duplication and can eliminate an unnecessary variable declaration.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "If `check-else-if` is specified, the rule also checks nested if-else-if statements.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "check-else-if"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "check-else-if"
+      ]
     ],
     "type": "functionality",
     "typescriptOnly": false
@@ -2504,6 +2590,18 @@
     },
     "optionsDescription": "\nOne argument which is an object which may contain the keys `anonymous`, `named`, and `asyncArrow`\nThese should be set to either `\"always\"` or `\"never\"`.\n\n* `\"anonymous\"` checks before the opening paren in anonymous functions\n* `\"named\"` checks before the opening paren in named functions\n* `\"asyncArrow\"` checks before the opening paren in async arrow functions\n* `\"method\"` checks before the opening paren in class methods\n* `\"constructor\"` checks before the opening paren in class constructors\n        ",
     "ruleName": "space-before-function-paren",
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "space-within-parens",
+    "description": "Enforces spaces within parentheses or disallow them.",
+    "hasFix": true,
+    "optionsDescription": "\nYou may enforce the amount of whitespace within parentheses.\n        ",
+    "options": {
+      "type": "number",
+      "min": 0
+    },
     "type": "style",
     "typescriptOnly": false
   },

@@ -1,0 +1,32 @@
+---
+ruleName: no-submodule-imports
+description: |-
+
+  Disallows importing any submodule.
+rationale: |-
+
+  Submodules of some packages are treated as private APIs and the import
+  paths may change without deprecation periods. It's best to stick with
+  top-level package exports.
+optionsDescription: A list of packages whose submodules are whitelisted.
+options:
+  type: array
+  items:
+    type: string
+  minLength: 0
+optionExamples:
+  - 'true'
+  - '[true, "rxjs", "@angular/core"]'
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-submodule-imports'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string"
+    },
+    "minLength": 0
+  }
+---
