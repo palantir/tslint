@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isModuleDeclaration, isNamedImports, isStringLiteral } from "tsutils";
+import {
+    isExternalModuleReference,
+    isImportDeclaration,
+    isImportEqualsDeclaration,
+    isModuleDeclaration,
+    isNamedImports,
+    isStringLiteral,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -140,24 +147,9 @@ class Walker extends Lint.AbstractWalker<Options> {
         }
 
         if (isImportDeclaration(statement)) {
-            if (!isStringLiteral(statement.moduleSpecifier)) {
-                // Ignore grammar error
-                return;
-            }
-
-            const source = this.options.importSourcesOrderTransform(removeQuotes(statement.moduleSpecifier.text));
-            const previousSource = this.currentImportsBlock.getLastImportSource();
-            this.currentImportsBlock.addImportDeclaration(this.sourceFile, statement, source);
-
-            if (previousSource !== null && compare(source, previousSource) === -1) {
-                this.lastFix = [];
-                this.addFailureAtNode(statement, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
-            }
-
-            const { importClause } = statement;
-            if (importClause !== undefined && importClause.namedBindings !== undefined && isNamedImports(importClause.namedBindings)) {
-                this.checkNamedImports(importClause.namedBindings);
-            }
+            this.checkImportDeclaration(statement);
+        } else if (isImportEqualsDeclaration(statement)) {
+            this.checkImportEqualsDeclaration(statement);
         } else if (isModuleDeclaration(statement)) {
             const body = moduleDeclarationBody(statement);
             if (body !== undefined) {
@@ -166,6 +158,50 @@ class Walker extends Lint.AbstractWalker<Options> {
                 }
                 this.endBlock();
             }
+        }
+    }
+
+    private checkImportDeclaration(node: ts.ImportDeclaration) {
+        if (!isStringLiteral(node.moduleSpecifier)) {
+            // Ignore grammar error
+            return;
+        }
+
+        const source = this.options.importSourcesOrderTransform(removeQuotes(node.moduleSpecifier.text));
+        this.checkSource(source, node);
+
+        const { importClause } = node;
+        if (importClause !== undefined && importClause.namedBindings !== undefined && isNamedImports(importClause.namedBindings)) {
+            this.checkNamedImports(importClause.namedBindings);
+        }
+    }
+
+    private checkImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
+        // only allowed `import x = require('y');`
+
+        const { moduleReference } = node;
+
+        if (!isExternalModuleReference(moduleReference)) {
+            return;
+        }
+
+        const { expression } = moduleReference;
+
+        if (expression === undefined || !isStringLiteral(expression)) {
+            return;
+        }
+
+        const source = this.options.importSourcesOrderTransform(removeQuotes(expression.text));
+        this.checkSource(source, node);
+    }
+
+    private checkSource(source: string, node: ImportDeclaration["node"]) {
+        const previousSource = this.currentImportsBlock.getLastImportSource();
+        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, source);
+
+        if (previousSource !== null && compare(source, previousSource) === -1) {
+            this.lastFix = [];
+            this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
     }
 
@@ -204,7 +240,7 @@ class Walker extends Lint.AbstractWalker<Options> {
 }
 
 interface ImportDeclaration {
-    node: ts.ImportDeclaration;
+    node: ts.ImportDeclaration | ts.ImportEqualsDeclaration;
     nodeEndOffset: number;      // end position of node within source file
     nodeStartOffset: number;    // start position of node within source file
     text: string;               // initialized with original import text; modified if the named imports are reordered
@@ -214,7 +250,7 @@ interface ImportDeclaration {
 class ImportsBlock {
     private importDeclarations: ImportDeclaration[] = [];
 
-    public addImportDeclaration(sourceFile: ts.SourceFile, node: ts.ImportDeclaration, sourcePath: string) {
+    public addImportDeclaration(sourceFile: ts.SourceFile, node: ImportDeclaration["node"], sourcePath: string) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
         const text = sourceFile.text.substring(start, end);
@@ -271,7 +307,7 @@ class ImportsBlock {
     }
 
     // gets the offset immediately after the end of the previous declaration to include comment above
-    private getStartOffset(node: ts.ImportDeclaration) {
+    private getStartOffset(node: ImportDeclaration["node"]) {
         if (this.importDeclarations.length === 0) {
             return node.getStart();
         }
@@ -279,7 +315,7 @@ class ImportsBlock {
     }
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
-    private getEndOffset(sourceFile: ts.SourceFile, node: ts.ImportDeclaration) {
+    private getEndOffset(sourceFile: ts.SourceFile, node: ImportDeclaration["node"]) {
         return sourceFile.text.indexOf("\n", node.end) + 1;
     }
 
