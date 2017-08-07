@@ -6,13 +6,23 @@ description: |-
 rationale: |-
 
   This reduces duplication and can eliminate an unnecessary variable declaration.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: 'If `check-else-if` is specified, the rule also checks nested if-else-if statements.'
+options:
+  type: string
+  enum:
+    - check-else-if
 optionExamples:
   - 'true'
+  - '[true, "check-else-if"]'
 type: functionality
 typescriptOnly: false
 layout: rule
 title: 'Rule: prefer-conditional-expression'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "check-else-if"
+    ]
+  }
 ---
