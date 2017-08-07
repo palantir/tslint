@@ -1,6 +1,70 @@
 Change Log
 ===
 
+v5.6.0
+---
+
+## :tada: New rules, options, and fixers
+
+- [new-rule] [`no-duplicate-imports`](https://palantir.github.io/tslint/rules/no-duplicate-imports/) (#3075)
+- [new-rule] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) (#3091)
+- [new-rule] [`space-within-parens`](https://palantir.github.io/tslint/rules/space-within-parens/) (#2959)
+- [new-fixer] [`member-access`](https://palantir.github.io/tslint/rules/member-access/) (#2969)
+- [new-fixer] [`no-null-keyword`](https://palantir.github.io/tslint/rules/no-null-keyword/): fix `x == null` to `x == undefined` (#2802)
+- [new-rule-option] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) let's you optionally ignore certain kinds of declarations (#3030)
+- [new-rule-option] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/) adds `check-else-if` (#2963)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`array-type`](https://palantir.github.io/tslint/rules/array-type/): consider `this` to be simple type (#2982)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) accepts not only union types but also intersection types with Promise-like types (#2987)
+- [bugfix] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/): don't remove export modifier of interfaces (#2962)
+- [bugfix] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Only checks variables at the file-level. (#2950)
+- [bugfix] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Uses correct visibility of variables. (#2950)
+- [bugfix] [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/): recognize rejection handler passed as second argument to `promise.then()` (#3048)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) don't warn for shadowed type parameter on static class members (#3030)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) fixed false positive with key name in index signature (#3030)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) fixed false positive with parameter inside function decorator (#3030)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): allow truthyness and falsyness checks (#3008)
+- [bugfix] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) fixed crash when using destructuring (#3058)
+- [bugfix] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) correctly handles multiline type parameters (#3004)
+- [bugfix] [`prefer-for-of`](https://palantir.github.io/tslint/rules/prefer-for-of/) fixed false positives when array is modified, e.g. `arr[i]++` (#3044)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) adds parens when fixing arrow function return (#3026)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) permit functions as first argument to Object.assign (#3098)
+- [bugfix] [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/) Handle default exports of functions without names like anonymous functions (fixes #3040) (#3053)
+- [bugfix] Fixed an issue where, at runtime, the module `./test/parse` could not be located due after consumers had run `yarn clean` (#3072)
+- [enhancement] [`no-null-keyword`](https://palantir.github.io/tslint/rules/no-null-keyword/) allows strict comparison (#2802)
+- [enhancement] [`no-switch-case-fall-through`](https://palantir.github.io/tslint/rules/no-switch-case-fall-through/) matches `// falls through` comments case insensitive and allows trailing text (#2983)
+- [enhancement] [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/): support importEqualsDeclaration (#3102)
+- [enhancement] Added NaN and (+/-)Infinity as numbers to [`no-inferrable-types`](https://palantir.github.io/tslint/rules/no-inferrable-types/) (#2885)
+- [enhancement] Improved CLI error message when no filenames are specified (#3066)
+- [rule-change] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/): ignore `if-else-if` by default. Use the new `"check-else-if"` option to check nested if statements (#2963)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Julian Verdurmen
+- Alexandre Alonso
+- Josh Goldberg
+- ksvitkovsky
+- Daisuke Yokomoto
+- Andrii Dieiev
+- Florent Suc
+- Jason Killian
+- Amin Pakseresht
+- reduckted
+- vilicvane
+- Russell Briggs
+- Andy Hanson
+- Leo Liang
+- Dan Homola
+- BehindTheMath
+- David Golightly
+- aervin_
+- Daniel Kucal
+- Ika
+- Chris Barr
+
 v5.5.0
 ---
 
