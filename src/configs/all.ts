@@ -183,6 +183,7 @@ export const rules = {
     // "file-header": No sensible default
     "deprecation": true,
     "encoding": true,
+    "grouped-imports": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,

@@ -32,6 +32,7 @@
 
     // TODO: Enable these
     "completed-docs": false,
+    "grouped-imports": false,
     "no-any": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,

@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+
+import {bar} from '../bar';let bar2 = false;
+
+const one = 1;
+
+import {foo} from 'foo'; // some comment
+~~~~~~~~~~~~~~~~~~~~~~~~                 [Import sources of different groups must be sorted by: libraries, parent directories, current directory]
+
+const two = 2;
+// another comment
+
+import './baz';
+
+let q = 'a';
