@@ -141,7 +141,7 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkStatement(statement: ts.Statement): void {
-        if (!isImportDeclaration(statement) ||
+        if (!(isImportDeclaration(statement) || isImportEqualsDeclaration(statement)) ||
             /\r?\n\r?\n/.test(this.sourceFile.text.slice(statement.getFullStart(), statement.getStart(this.sourceFile)))) {
             this.endBlock();
         }
