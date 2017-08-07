@@ -29,3 +29,14 @@ import * as a from './a';
 import b from './b';
 import c = require('./c');
 
+import * as a from './a';
+import b from './b';
+import c = require('./c');
+
+import * as a from './a';
+import b from './b';
+import c = require('./c');
+
+import c = require('./c');
+import d = require('./d');
+
