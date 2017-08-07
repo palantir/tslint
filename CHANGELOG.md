@@ -60,7 +60,7 @@ Thanks to our contributors!
 - Dan Homola
 - BehindTheMath
 - David Golightly
-- aervin_
+- aervin
 - Daniel Kucal
 - Ika
 - Chris Barr
