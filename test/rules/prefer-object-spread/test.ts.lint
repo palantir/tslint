@@ -39,6 +39,5 @@ result = Object.assign(() => {}, {});
 
 let fn = () => Object.assign({}, original);
                ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-
 [0]: Use the object spread operator instead.
 [1]: 'Object.assign' returns the first argument. Prefer object spread if you want a new object.
