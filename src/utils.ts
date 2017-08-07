@@ -64,9 +64,8 @@ export function isLowerCase(str: string): boolean {
  * Removes leading indents from a template string without removing all leading whitespace
  */
 export function dedent(strings: TemplateStringsArray, ...values: any[]) {
-    let fullString = strings.reduce((accumulator, str, i) => {
-        return `${accumulator}${values[i - 1]}${str}`;
-    });
+    let fullString = strings.reduce(
+        (accumulator, str, i) => `${accumulator}${values[i - 1]}${str}`);
 
     // match all leading spaces/tabs at the start of each line
     const match = fullString.match(/^[ \t]*(?=\S)/gm);

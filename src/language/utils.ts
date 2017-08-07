@@ -43,9 +43,8 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
         return false;
     }
 
-    return modifiers.some((m) => {
-        return modifierKinds.some((k) => m.kind === k);
-    });
+    return modifiers.some(
+        (m) => modifierKinds.some((k) => m.kind === k));
 }
 
 /**

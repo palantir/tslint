@@ -65,9 +65,10 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
     const args = node.arguments;
+    const objectNeedsParens = node.parent!.kind === ts.SyntaxKind.ArrowFunction;
     const fix = [
-        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), "{"),
-        new Lint.Replacement(node.end - 1, 1, "}"),
+        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), `${objectNeedsParens ? "(" : ""}{`),
+        new Lint.Replacement(node.end - 1, 1, `}${objectNeedsParens ? ")" : ""}`),
     ];
     for (let i = 0; i < args.length; ++i) {
         const arg = args[i];
