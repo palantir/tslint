@@ -331,4 +331,28 @@ function f(this): void {
     function inner(this): void {}
 }
 
+@decorator((param) => param)
+function funxion(param) {}
+
+class Clazz<T> {
+    static method<T>() {}
+    static prop = <T>() => {}
+    method<T>() {}
+           ~ [err % ('T')]
+    prop = <T>() => {}
+            ~ [err % ('T')]
+    constructor() {
+        class Inner<T> {
+                    ~ [err % ('T')]
+            static method<T>() {}
+                          ~ [err % ('T')]
+            static prop = <T>() => {}
+                           ~ [err % ('T')]
+        }
+    }
+}
+
+// allow IndexSignature names
+function baz(param: {[baz: string]: string}) {}
+
 [err]: Shadowed name: '%s'

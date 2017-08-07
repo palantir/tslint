@@ -149,3 +149,11 @@ if (true)
     true;
 else
     false;
+
+class Foo<
+    Bar,
+    Baz,
+    Bas
+> {
+    // works for multiline type parameters
+}

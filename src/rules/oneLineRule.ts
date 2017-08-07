@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getPreviousToken } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -262,16 +263,8 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
-        let lastNodeOfDeclaration: ts.Node | undefined = node.name;
         const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-
-        if (node.heritageClauses != null) {
-            lastNodeOfDeclaration = node.heritageClauses[node.heritageClauses.length - 1];
-        } else if (node.typeParameters != null) {
-            lastNodeOfDeclaration = node.typeParameters[node.typeParameters.length - 1];
-        }
-
-        this.handleOpeningBrace(lastNodeOfDeclaration, openBraceToken);
+        this.handleOpeningBrace(getPreviousToken(openBraceToken), openBraceToken);
     }
 
     private handleIterationStatement(node: ts.IterationStatement) {

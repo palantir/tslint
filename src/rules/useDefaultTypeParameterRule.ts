@@ -42,8 +42,8 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 interface ArgsAndParams {
-    typeArguments: ts.TypeNode[];
-    typeParameters: ts.TypeParameterDeclaration[];
+    typeArguments: ReadonlyArray<ts.TypeNode>;
+    typeParameters: ReadonlyArray<ts.TypeParameterDeclaration>;
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
@@ -99,7 +99,7 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
     }
 }
 
-function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sig = checker.getResolvedSignature(node);
     const sigDecl = sig === undefined ? undefined : sig.getDeclaration();
     if (sigDecl === undefined) {
@@ -109,7 +109,9 @@ function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker
     return sigDecl.typeParameters === undefined ? undefined : sigDecl.typeParameters;
 }
 
-function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromType(
+    type: ts.EntityName | ts.Expression,
+    checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
     if (sym === undefined || sym.declarations === undefined) {
         return undefined;

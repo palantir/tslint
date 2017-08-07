@@ -42,6 +42,10 @@ export const rules = {
         "check-parameters",
     ],
     "no-this-assignment": true,
+    "space-within-parens": [true, 0],
+
+    // added in v5.6
+    "no-duplicate-imports": true,
 };
 // tslint:enable object-literal-sort-keys
 
