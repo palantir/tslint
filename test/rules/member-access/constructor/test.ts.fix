@@ -1,0 +1,10 @@
+class ContructorsNoAccess {
+    public constructor(i: number);
+    public constructor(o: any) {}
+}
+
+class ContructorsAccess {
+    public constructor(i: number);
+    public constructor(o: any) {}
+}
+
