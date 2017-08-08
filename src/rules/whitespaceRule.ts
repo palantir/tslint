@@ -42,12 +42,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
-            * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
+            * \`"check-operator"\` checks for whitespace around operator tokens.
+            * \`"check-pipe"\` checks for whitespace around the bar ("pipe") token.
+            * \`"check-preblock"\` checks for whitespace before the opening brace of a block
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
-            * \`"check-typecast"\` checks for whitespace between a typecast and its target.
-            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
+            * \`"check-typecast"\` checks for whitespace between a typecast and its target.`,
         options: {
             type: "array",
             items: {
@@ -70,7 +71,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock" | "pipe", boolean>;
+type Options = Record<"branch" | "decl" | "module" | "operator" | "pipe" | "preblock" | "separator" | "type" | "typecast", boolean>;
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
