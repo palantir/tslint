@@ -11,23 +11,20 @@
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
     "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
+      "options": [
+        "parameters",
+        "statements",
+        "members",
+        "elements"
+      ]
     },
-    "comment-format": [
-        true,
-        "check-space"
-    ],
+    "comment-format": {
+      "options": ["check-space"]
+    },
     "member-access": true,
-    "only-arrow-functions": [
-        true,
-        "allow-declarations",
-        "allow-named-functions"
-    ],
+    "only-arrow-functions": {
+      "options": ["allow-declarations", "allow-named-functions"]
+    },
 
     // TODO: Enable these
     "completed-docs": false,
@@ -44,34 +41,43 @@
     "strict-type-predicates": false,
     "triple-equals": false,
     "typedef": false,
-
-    "ban": [true,
-      ["describe", "only"],
-      ["it", "only"]
-    ],
+    "ban": {
+      "options": [
+        ["describe", "only"],
+        ["it", "only"]
+      ]
+    },
 
     "interface-name": false,
-    "file-header": [true,
-      "Copyright \\d{4} Palantir Technologies, Inc."
-    ],
+    "file-header": {
+      "options": ["Copyright \\d{4} Palantir Technologies, Inc."]
+    },
     "max-classes-per-file": false,
-    "max-line-length": [true, 140],
-    "member-ordering": [true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
-    ],
+    "max-line-length": {
+      "options": [140]
+    },
+    "member-ordering": {
+      "options": [
+        "public-before-private",
+        "static-before-instance",
+        "variables-before-functions"
+      ]
+    },
     "no-console": {
       "options": ["log"]
     },
     "no-switch-case-fall-through": true,
-    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
+    "strict-boolean-expressions": {
+      "options": ["allow-boolean-or-undefined"]
+    },
     "switch-default": false,
-    "variable-name": [true,
-      "ban-keywords",
-      "check-format",
-      "allow-leading-underscore",
-      "allow-pascal-case"
-    ]
+    "variable-name": {
+      "options": [
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-pascal-case"
+      ]
+    }
   }
 }
