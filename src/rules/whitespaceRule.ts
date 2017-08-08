@@ -99,7 +99,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
 
             case ts.SyntaxKind.BarToken: {
-                if(options.operator) {
+                if (options.operator) {
                     checkForTrailingWhitespace(node.getEnd());
                     checkForTrailingWhitespace(node.getFullStart());
                 }
