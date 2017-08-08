@@ -5,6 +5,7 @@
       "check-decl",
       "check-operator",
       "check-module",
+      "check-pipe",
       "check-preblock",
       "check-separator",
       "check-type",

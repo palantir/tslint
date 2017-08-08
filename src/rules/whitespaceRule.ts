@@ -24,12 +24,13 @@ import * as Lint from "../index";
 
 const OPTION_BRANCH = "check-branch";
 const OPTION_DECL = "check-decl";
-const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
+const OPTION_OPERATOR = "check-operator";
+const OPTION_PIPE = "check-pipe";
+const OPTION_PREBLOCK = "check-preblock";
 const OPTION_SEPARATOR = "check-separator";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
-const OPTION_PREBLOCK = "check-preblock";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -41,18 +42,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
-            * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
+            * \`"check-operator"\` checks for whitespace around operator tokens.
+            * \`"check-pipe"\` checks for whitespace around the bar ("pipe") token.
+            * \`"check-preblock"\` checks for whitespace before the opening brace of a block
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
-            * \`"check-typecast"\` checks for whitespace between a typecast and its target.
-            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
+            * \`"check-typecast"\` checks for whitespace between a typecast and its target.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                enum: ["check-branch", "check-decl", "check-module", "check-operator", "check-pipe",
+                       "check-preblock", "check-separator", "check-type", "check-typecast"],
             },
             minLength: 0,
             maxLength: 7,
@@ -69,13 +71,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock", boolean>;
+type Options = Record<"branch" | "decl" | "module" | "operator" | "pipe" | "preblock" | "separator" | "type" | "typecast", boolean>;
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
         decl: has(OPTION_DECL),
         operator: has(OPTION_OPERATOR),
         module: has(OPTION_MODULE),
+        pipe: has(OPTION_PIPE),
         separator: has(OPTION_SEPARATOR),
         type: has(OPTION_TYPE),
         typecast: has(OPTION_TYPECAST),
@@ -95,6 +98,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.ArrowFunction:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
+
+            case ts.SyntaxKind.BarToken: {
+                if (options.operator) {
+                    checkForTrailingWhitespace(node.getEnd());
+                    checkForTrailingWhitespace(node.getFullStart());
+                }
+                break;
+            }
 
             // check for spaces between the operator symbol (except in the case of comma statements)
             case ts.SyntaxKind.BinaryExpression: {

@@ -1,3 +1,13 @@
+public someMethod(): string | undefined { }
+
+public someMethod(): string | undefined { }
+
+public someMethod(): string | undefined { }
+
+public someMethod(): string  | undefined { }
+
+if (this || that) { }
+
 import ast = AST;
 module M {
     export var ast = AST;
