@@ -24,12 +24,13 @@ import * as Lint from "../index";
 
 const OPTION_BRANCH = "check-branch";
 const OPTION_DECL = "check-decl";
-const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
+const OPTION_OPERATOR = "check-operator";
+const OPTION_PIPE = "check-pipe";
+const OPTION_PREBLOCK = "check-preblock";
 const OPTION_SEPARATOR = "check-separator";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
-const OPTION_PREBLOCK = "check-preblock";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -51,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module",
+                enum: ["check-branch", "check-decl", "check-operator", "check-module", "check-pipe",
                        "check-separator", "check-type", "check-typecast", "check-preblock"],
             },
             minLength: 0,
@@ -69,13 +70,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock", boolean>;
+type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock" | "pipe", boolean>;
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
         decl: has(OPTION_DECL),
         operator: has(OPTION_OPERATOR),
         module: has(OPTION_MODULE),
+        pipe: has(OPTION_PIPE),
         separator: has(OPTION_SEPARATOR),
         type: has(OPTION_TYPE),
         typecast: has(OPTION_TYPECAST),
@@ -95,6 +97,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.ArrowFunction:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
+
+            case ts.SyntaxKind.BarToken: {
+                if(options.operator) {
+                    checkForTrailingWhitespace(node.getEnd());
+                    checkForTrailingWhitespace(node.getFullStart());
+                }
+                break;
+            }
 
             // check for spaces between the operator symbol (except in the case of comma statements)
             case ts.SyntaxKind.BinaryExpression: {

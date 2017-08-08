@@ -1,3 +1,19 @@
+public someMethod(): string |undefined { }
+                             ~      [missing whitespace]
+
+public someMethod(): string| undefined { }
+                           ~        [missing whitespace]
+
+public someMethod(): string|undefined { }
+                           ~        [missing whitespace]
+                            ~       [missing whitespace]
+
+public someMethod(): string  | undefined { }
+
+if (this||that) { }
+        ~       [missing whitespace]
+          ~     [missing whitespace]
+
 import ast=AST;
           ~     [missing whitespace]
            ~    [missing whitespace]
