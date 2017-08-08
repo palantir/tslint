@@ -53,8 +53,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module", "check-pipe",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                enum: ["check-branch", "check-decl", "check-module", "check-operator", "check-pipe",
+                       "check-preblock", "check-separator", "check-type", "check-typecast"],
             },
             minLength: 0,
             maxLength: 7,
