@@ -53,7 +53,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         const index = node.text.search(/\$\{/);
         if (index !== -1) {
             /**
-             * Support for ignoring case: '\${binding}'
+             * Support for ignoring case: '\${template-expression}'
              */
             const unescapedText: string = node.getFullText();
             const preceedingCharacter = unescapedText.substr(unescapedText.search(/\$\{/) - 1, 1);
