@@ -62,10 +62,12 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     public static FAILURE_STRING_ALPHABETICAL(name: string): string {
         return `The key '${name}' is not sorted alphabetically`;
     }
+    /* tslint:disable:no-shadowed-variable */
     public static FAILURE_STRING_USE_DECLARATION_ORDER(propName: string, typeName: string | undefined): string {
         const type = typeName === undefined ? "its type declaration" : `'${typeName}'`;
         return `The key '${propName}' is not in the same order as it is in ${type}.`;
     }
+    /* tslint:enable:no-shadowed-variable */
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments);

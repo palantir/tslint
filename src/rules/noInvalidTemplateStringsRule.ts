@@ -50,14 +50,19 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 
     function check(node: ts.StringLiteral): void {
-        const idx = node.text.search(/\$\{/);
-        if (idx !== -1) {
-            const preceedingCharacter = node.getFullText().substr(node.getFullText().search(/\$\{/) - 1, 1);
+        const index = node.text.search(/\$\{/);
+        if (index !== -1) {
+            /**
+             * Support for ignoring case: '\${binding}'
+             */
+            const unescapedText: string = node.getFullText();
+            const preceedingCharacter = unescapedText.substr(unescapedText.search(/\$\{/) - 1, 1);
             if (preceedingCharacter === "\\") {
                 return;
             }
+
             const textStart = node.getStart() + 1;
-            ctx.addFailureAt(textStart + idx, 2, Rule.FAILURE_STRING);
+            ctx.addFailureAt(textStart + index, 2, Rule.FAILURE_STRING);
         }
     }
 }
