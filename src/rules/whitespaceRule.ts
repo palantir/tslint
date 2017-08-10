@@ -26,10 +26,11 @@ const OPTION_BRANCH = "check-branch";
 const OPTION_DECL = "check-decl";
 const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
+const OPTION_PREBLOCK = "check-preblock";
 const OPTION_SEPARATOR = "check-separator";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
-const OPTION_PREBLOCK = "check-preblock";
+const OPTION_TYPE_LIST = "check-type-list";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -37,27 +38,30 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Eight arguments may be optionally provided:
+            Nine arguments may be optionally provided:
 
-            * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
-            * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
-            * \`"check-operator"\` checks for whitespace around operator tokens.
-            * \`"check-module"\` checks for whitespace in import & export statements.
-            * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
-            * \`"check-type"\` checks for whitespace before a variable type specification.
-            * \`"check-typecast"\` checks for whitespace between a typecast and its target.
-            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
+            * \`"${OPTION_BRANCH}"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
+            * \`"${OPTION_DECL}"\`checks that variable declarations have whitespace around the equals token.
+            * \`"${OPTION_OPERATOR}"\` checks for whitespace around operator tokens.
+            * \`"${OPTION_MODULE}"\` checks for whitespace in import & export statements.
+            * \`"${OPTION_PREBLOCK}"\` checks for whitespace before the opening brace of a block
+            * \`"${OPTION_SEPARATOR}"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
+            * \`"${OPTION_TYPE}"\` checks for whitespace before a variable type specification.
+            * \`"${OPTION_TYPECAST}"\` checks for whitespace between a typecast and its target.
+            * \`"${OPTION_TYPE_LIST}"\` checks for whitespace around the operators in intersection and union types.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                enum: [
+                    OPTION_BRANCH, OPTION_DECL, OPTION_OPERATOR, OPTION_MODULE, OPTION_PREBLOCK,
+                    OPTION_SEPARATOR, OPTION_TYPE, OPTION_TYPECAST, OPTION_TYPE_LIST,
+                ],
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 9,
         },
-        optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
+        optionExamples: [[true, OPTION_BRANCH, OPTION_OPERATOR, OPTION_TYPECAST]],
         type: "style",
         typescriptOnly: false,
     };
@@ -94,6 +98,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
         switch (node.kind) {
             case ts.SyntaxKind.ArrowFunction:
                 checkEqualsGreaterThanTokenInNode(node);
+                break;
+
+            case ts.SyntaxKind.IntersectionType:
+            case ts.SyntaxKind.UnionType:
+                checkTypeJoin(node.getChildren()[0] as ts.SyntaxList);
                 break;
 
             // check for spaces between the operator symbol (except in the case of comma statements)
@@ -264,6 +273,20 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
         checkForTrailingWhitespace(equalsGreaterThanToken.getFullStart());
         checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
+    }
+
+    function checkTypeJoin(node: ts.SyntaxList): void {
+        const children = node.getChildren();
+
+        for (let i = 1; i < children.length - 1; i += 2) {
+            if (children[i - 1].end === children[i].getStart()) {
+                addMissingWhitespaceErrorAt(children[i - 1].end);
+            }
+
+            if (children[i].end === children[i + 1].getStart()) {
+                addMissingWhitespaceErrorAt(children[i].end);
+            }
+        }
     }
 
     function checkForTrailingWhitespace(position: number, whiteSpacePos: number = position): void {

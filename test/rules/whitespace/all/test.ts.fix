@@ -12,6 +12,28 @@ module M {
 
     var a, b;
 
+    var c: number | string;
+
+    var d: number | string;
+
+    var e: number | string;
+
+    var f: boolean | number | string;
+
+    var g: boolean | number | string;
+
+    var h: number & string;
+
+    var i: number & string;
+
+    var j: number & string;
+
+    var k: boolean & number & string;
+
+    var l: boolean & number & string;
+
+    var m: boolean & (number | string);
+
     switch (x) {
         case 1: break;
         default: break;
