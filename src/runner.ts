@@ -32,7 +32,6 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import * as Linter from "./linter";
-import { consoleTestResultsHandler, runTests } from "./test";
 import { arrayify, flatMap } from "./utils";
 
 export interface Options {
@@ -141,8 +140,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     if (options.test) {
-        const results = runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
-        return consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+        const test = await import("./test");
+        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
     }
 
     if (options.config && !fs.existsSync(options.config)) {
