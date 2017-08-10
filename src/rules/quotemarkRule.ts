@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 
 import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
-
-import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 
 const OPTION_SINGLE = "single";
@@ -75,18 +73,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && (this.ruleArguments[0] === OPTION_SINGLE || this.ruleArguments[0] === OPTION_DOUBLE);
+        return super.isEnabled() && hasSingleDoublePreference(this.ruleArguments);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const args = this.ruleArguments;
-        if (args.length > 0) {
-            if (args[0] !== OPTION_SINGLE && args[0] !== OPTION_DOUBLE) {
-                showWarningOnce(`Warning: First argument to 'quotemark' rule should be "${OPTION_SINGLE}" or "${OPTION_DOUBLE}"`);
-                return [];
-            }
-        }
-        const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
+        const quoteMark = getQuotemarkPreference(args) === OPTION_SINGLE ? "'" : '"';
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
             avoidTemplate: hasArg(OPTION_AVOID_TEMPLATE),
@@ -140,4 +132,22 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         ts.forEachChild(node, cb);
     });
+}
+
+function hasSingleDoublePreference(args: any[]): boolean {
+    for (const arg of args) {
+        if (arg === OPTION_SINGLE || arg === OPTION_DOUBLE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getQuotemarkPreference(args: any[]): string | undefined {
+    for (const arg of args) {
+        if (arg === OPTION_SINGLE || arg === OPTION_DOUBLE) {
+            return (arg === OPTION_SINGLE) ? OPTION_SINGLE : OPTION_DOUBLE;
+        }
+    }
+    return undefined;
 }
