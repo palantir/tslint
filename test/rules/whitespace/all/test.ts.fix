@@ -112,3 +112,9 @@ const foo = [ ...bar ];
 function foo (bar, ...baz) {}
 
 const { foo, ...bar } = baz;
+
+type A = number | string;
+
+type B = number | string | {result: string};
+
+type C = {result: string} & {type: "A" | "B"};
