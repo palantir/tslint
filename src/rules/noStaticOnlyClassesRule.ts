@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import * as ts from 'typescript';
-import * as Lint from '../index';
+import * as ts from "typescript";
+import * as Lint from "../index";
 
-import { isClassDeclaration, isFunctionWithBody } from 'tsutils';
-
+import { isClassDeclaration, isFunctionWithBody } from "tsutils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -64,11 +63,11 @@ class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
 }
 
 function hasImplementsClause(statement: ts.ClassDeclaration): boolean | any {
-    return (statement.heritageClauses) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
+    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
 }
 
 function hasExtendsClause(statement: ts.ClassDeclaration): boolean | any {
-    return (statement.heritageClauses) ? statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword : false;
+    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword : false;
 }
 
 function hasStaticModifier(modifiers: ts.NodeArray<ts.Modifier> | undefined): boolean {
@@ -84,11 +83,10 @@ function hasStaticModifier(modifiers: ts.NodeArray<ts.Modifier> | undefined): bo
 }
 
 function isEmptyConstructor(member: ts.ClassElement): boolean {
-    if (member.kind === ts.SyntaxKind.Constructor 
-        && isFunctionWithBody(member) 
+    if (member.kind === ts.SyntaxKind.Constructor
+        && isFunctionWithBody(member)
         && member.body !== undefined) {
         return member.body.getFullText().trim().replace(/\s+/g, "") === "{}";
     }
     return false;
 }
-
