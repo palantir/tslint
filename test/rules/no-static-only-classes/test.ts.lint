@@ -1,0 +1,60 @@
+export class PascalClass {
+             ~~~~~~~~~~~ [0]
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() {}
+}
+
+export class PascalClass {
+             ~~~~~~~~~~~ [0]
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+}
+
+export class ClassA implements IInterfacey {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() {}
+}
+
+export class ClassB extends BaseClass {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() {}
+}
+
+export class PascalClass {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() { this.that = what; }
+}
+
+export class PascalClass {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    public index = 0;
+    constructor() {}
+}
+
+export class PascalClass {
+    public static helper(): void {}
+    private privateHelper(): boolean {
+        return true;
+    }
+    constructor() { this.that = what; }
+}
+
+[0]: Classes containing only static members are disallowed.
+ 
