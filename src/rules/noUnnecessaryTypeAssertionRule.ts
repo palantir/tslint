@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isObjectFlagSet, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -66,9 +67,9 @@ class Walker extends Lint.AbstractWalker<void> {
         }
 
         if (node.kind !== ts.SyntaxKind.NonNullExpression &&
-            ((castType.flags & ts.TypeFlags.Literal) ||
-                (castType.flags & ts.TypeFlags.Object &&
-                (castType as ts.ObjectType).objectFlags & ts.ObjectFlags.Tuple))) {
+            (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
+                isTypeFlagSet(castType, ts.TypeFlags.Object) &&
+                isObjectFlagSet(castType as ts.ObjectType, ts.ObjectFlags.Tuple))) {
             // It's not always safe to remove a cast to a literal type or tuple
             // type, as those types are sometimes widened without the cast.
             return;
