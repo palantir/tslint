@@ -50,7 +50,7 @@ export class PascalClass {
 
 export class PascalClass {
     public static helper(): void {}
-    private privateHelper(): boolean {
+    private Helper(): boolean {
         return true;
     }
     constructor() { this.that = what; }

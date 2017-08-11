@@ -62,11 +62,11 @@ class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     }
 }
 
-function hasImplementsClause(statement: ts.ClassDeclaration): boolean | any {
+function hasImplementsClause(statement: ts.ClassDeclaration): boolean {
     return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
 }
 
-function hasExtendsClause(statement: ts.ClassDeclaration): boolean | any {
+function hasExtendsClause(statement: ts.ClassDeclaration): boolean {
     return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword : false;
 }
 
