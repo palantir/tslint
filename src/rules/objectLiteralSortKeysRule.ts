@@ -62,12 +62,11 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     public static FAILURE_STRING_ALPHABETICAL(name: string): string {
         return `The key '${name}' is not sorted alphabetically`;
     }
-    /* tslint:disable:no-shadowed-variable */
+
     public static FAILURE_STRING_USE_DECLARATION_ORDER(propName: string, typeName: string | undefined): string {
         const type = typeName === undefined ? "its type declaration" : `'${typeName}'`;
         return `The key '${propName}' is not in the same order as it is in ${type}.`;
     }
-    /* tslint:enable:no-shadowed-variable */
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments);
@@ -79,7 +78,10 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction<Options, Options>(
-            sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), parseOptions(this.ruleArguments));
+            sourceFile,
+            (ctx) => walk(ctx, program.getTypeChecker()),
+            parseOptions(this.ruleArguments),
+        );
     }
 }
 
@@ -95,7 +97,11 @@ function parseOptions(ruleArguments: any[]): Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
-    const { sourceFile, options: { ignoreCase, matchDeclarationOrder } } = ctx;
+    const {
+        sourceFile,
+        options: { ignoreCase, matchDeclarationOrder },
+    } = ctx;
+
     ts.forEachChild(sourceFile, function cb(node): void {
         if (isObjectLiteralExpression(node) && node.properties.length > 1) {
             check(node);
@@ -147,7 +153,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     function checkMatchesDeclarationOrder(
         { properties }: ts.ObjectLiteralExpression,
         type: TypeLike,
-        members: ReadonlyArray<{ name: ts.PropertyName }>): void {
+        members: ReadonlyArray<{ name: ts.PropertyName }>,
+    ): void {
 
         let memberIndex = 0;
         outer: for (const prop of properties) {
@@ -169,16 +176,20 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
 
             // This We didn't find the member we were looking for past the previous member,
             // so it must have come before it and is therefore out of order.
-            ctx.addFailureAtNode(prop.name, Rule.FAILURE_STRING_USE_DECLARATION_ORDER(propName, typeName(type)));
+            ctx.addFailureAtNode(prop.name, Rule.FAILURE_STRING_USE_DECLARATION_ORDER(propName, getTypeName(type)));
             // Don't bother with multiple errors.
             break;
         }
     }
 }
 
-function typeName(t: TypeLike): string | undefined {
+function getTypeName(t: TypeLike): string | undefined {
     const parent = t.parent!;
-    return t.kind === ts.SyntaxKind.InterfaceDeclaration ? t.name.text : isTypeAliasDeclaration(parent) ? parent.name.text : undefined;
+    return t.kind === ts.SyntaxKind.InterfaceDeclaration
+        ? t.name.text
+        : isTypeAliasDeclaration(parent)
+            ? parent.name.text
+            : undefined;
 }
 
 type TypeLike = ts.InterfaceDeclaration | ts.TypeLiteralNode;
