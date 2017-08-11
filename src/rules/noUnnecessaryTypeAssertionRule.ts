@@ -65,6 +65,15 @@ class Walker extends Lint.AbstractWalker<void> {
             return;
         }
 
+        if (node.kind !== ts.SyntaxKind.NonNullExpression &&
+            ((castType.flags & ts.TypeFlags.Literal) ||
+                (castType.flags & ts.TypeFlags.Object &&
+                (castType as ts.ObjectType).objectFlags & ts.ObjectFlags.Tuple))) {
+            // It's not always safe to remove a cast to a literal type or tuple
+            // type, as those types are sometimes widened without the cast.
+            return;
+        }
+
         const uncastType = this.checker.getTypeAtLocation(node.expression);
         if (uncastType === castType) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
