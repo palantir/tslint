@@ -117,6 +117,7 @@ export const rules = {
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
+    "no-static-only-classes": true,
     "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
