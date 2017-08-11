@@ -9,7 +9,8 @@
       "check-separator",
       "check-rest-spread",
       "check-type",
-      "check-typecast"
+      "check-typecast",
+      "check-type-operator"
     ]
   }
 }

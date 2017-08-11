@@ -173,3 +173,19 @@ function foo (bar, ... baz) {}
 
 const { foo, ... bar } = baz;
                 ~ [invalid whitespace]
+
+type A = number|string;
+               ~        [missing whitespace]
+                ~       [missing whitespace]
+
+type B = number|string|{result: string};
+               ~                         [missing whitespace]
+                ~                        [missing whitespace]
+                      ~                  [missing whitespace]
+                       ~                 [missing whitespace]
+
+type C = {result: string}&{type: "A"|"B"};
+                         ~                 [missing whitespace]
+                          ~                [missing whitespace]
+                                    ~      [missing whitespace]
+                                     ~     [missing whitespace]
