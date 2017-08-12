@@ -50,14 +50,18 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 
     function check(node: ts.StringLiteral): void {
-        const index = node.text.search(/\$\{/);
+        /**
+         * Finds instances of '${'
+         */
+        const findTemplateString = new RegExp(/\$\{/);
+        const index = node.text.search(findTemplateString);
         if (index !== -1) {
             /**
              * Support for ignoring case: '\${template-expression}'
              */
-            const unescapedText: string = node.getFullText();
-            const preceedingCharacter = unescapedText.substr(unescapedText.search(/\$\{/) - 1, 1);
-            if (preceedingCharacter === "\\") {
+            const unescapedText = node.getFullText();
+            const preceedingCharacter = unescapedText.substr(unescapedText.search(findTemplateString) - 1, 1);
+            if (isBackslash(preceedingCharacter)) {
                 return;
             }
 
@@ -65,4 +69,8 @@ function walk(ctx: Lint.WalkContext<void>) {
             ctx.addFailureAt(textStart + index, 2, Rule.FAILURE_STRING);
         }
     }
+}
+
+function isBackslash(character: string): boolean {
+    return character === "\\";
 }
