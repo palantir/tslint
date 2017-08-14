@@ -54,6 +54,17 @@ function walk(ctx: Lint.WalkContext<void>) {
             // Object.assign(...someArray) cannot be written as object spread
             !node.arguments.some(isSpreadElement)) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
+
+                /**
+                 * @url https://github.com/palantir/tslint/issues/3117
+                 * Per TS2698, "spread types may only be created from
+                 * object types."
+                 */
+                if (node.arguments[1] !== undefined) {
+                    if (node.arguments[1].kind === ts.SyntaxKind.ThisKeyword) {
+                        return;
+                    }
+                }
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node, ctx.sourceFile));
             } else if (isExpressionValueUsed(node) && !hasSideEffects(node.arguments[0], SideEffectOptions.Constructor)) {
                 ctx.addFailureAtNode(node, Rule.ASSIGNMENT_FAILURE_STRING, createFix(node, ctx.sourceFile));
