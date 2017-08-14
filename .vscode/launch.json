@@ -47,7 +47,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/test/ruleTestRunner.ts",
             "stopOnEntry": false,
-            "args": [],
+            "args": ["run", "test"],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
