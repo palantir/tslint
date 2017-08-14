@@ -16,8 +16,14 @@
  */
 
 import {
-    hasSideEffects, isCallExpression, isExpressionValueUsed, isIdentifier, isObjectLiteralExpression,
-    isPropertyAccessExpression, isSpreadElement, SideEffectOptions,
+    hasSideEffects,
+    isCallExpression,
+    isExpressionValueUsed,
+    isIdentifier,
+    isObjectLiteralExpression,
+    isPropertyAccessExpression,
+    isSpreadElement,
+    SideEffectOptions,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -56,14 +62,17 @@ function walk(ctx: Lint.WalkContext<void>) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
 
                 /**
+                 * @TODO
+                 * Remove this when typescript get's support for spread types.
+                 * PR: https://github.com/Microsoft/TypeScript/issues/10727
+                 *
                  * @url https://github.com/palantir/tslint/issues/3117
                  * Per TS2698, "spread types may only be created from
                  * object types."
+                 *
                  */
-                if (node.arguments[1] !== undefined) {
-                    if (node.arguments[1].kind === ts.SyntaxKind.ThisKeyword) {
-                        return;
-                    }
+                if (node.arguments.some((arg) => arg.kind === ts.SyntaxKind.ThisKeyword)) {
+                    return;
                 }
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node, ctx.sourceFile));
             } else if (isExpressionValueUsed(node) && !hasSideEffects(node.arguments[0], SideEffectOptions.Constructor)) {
