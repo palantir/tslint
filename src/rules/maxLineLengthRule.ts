@@ -28,20 +28,39 @@ export class Rule extends Lint.Rules.AbstractRule {
             Limiting the length of a line of code improves code readability.
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
-        optionsDescription: Lint.Utils.dedent`It can take up to 2 arguments, but only first one is required:
+        optionsDescription: Lint.Utils.dedent`
+        It can take up to 2 arguments, but only the first one is required:
 
         * integer indicating the max length of lines.
         * string defining ignore pattern, being parsed by \`new RegExp()\`.
-        For example the \`^import \` pattern will ignore import statements.`,
+        For example:
+         * \`\/\/ \` pattern will ignore all in-line comments.
+         * \`^import \` pattern will ignore all import statements.
+         * \`^export \{(.*?)\}\` pattern will ignore all export statements.
+         * \`class [a-zA-Z] implements \` pattern will ignore all class declarations implementing interfaces.
+         * \`^import |^export \{(.*?)\}|class [a-zA-Z] implements |// \` pattern will ignore all the cases listed above.
+         `,
         options: {
             type: "array",
             items: {
-                type: "any",
+                oneOf: [
+                    {
+                        type: "number",
+                    },
+                    {
+                        type: "object",
+                        properties: {
+                            "limit": {type: "number"},
+                            "ignore-pattern": {type: "string"},
+                        },
+                        additionalProperties: false,
+                    },
+                ],
             },
-            minLength: "1",
-            maxLength: "2",
+            minLength: 1,
+            maxLength: 2,
         },
-        optionExamples: [[true, 120], [true, 120, "^import "]],
+        optionExamples: [[true, 120], [true, 120, "^import |^export \{(.*?)\}"]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -52,18 +71,24 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] as number > 0;
+        return super.isEnabled() && (this.ruleArguments[0] === true || this.ruleArguments[0]);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
+        const argument = this.ruleArguments[1] || this.ruleArguments[0];
+        const options = {
+            ignorePattern: (typeof argument === "object") ? new RegExp(argument["ignore-pattern"]) : undefined,
+            limit: (typeof argument !== "object") ? parseInt(argument, 10)
+                : parseInt(argument.limit, 10),
+        };
+        return this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
-function walk(ctx: Lint.WalkContext<any[]>) {
-    const limit = ctx.options[0];
-    const ignorePattern = ctx.options[1] && new RegExp(ctx.options[1]);
-    const lines = ctx.sourceFile.text.split("\n");
+function walk(ctx: Lint.WalkContext<{limit: number; ignorePattern: RegExp | undefined}>) {
+    const limit = ctx.options.limit;
+    const ignorePattern = ctx.options.ignorePattern;
+    const lines = (ctx.sourceFile && ctx.sourceFile.text.split("\n") || []);
     const lineRanges = getLineRanges(ctx.sourceFile);
     for (let i = 0; i < lines.length; i++) {
         if (ignorePattern && ignorePattern.test(lines[i])) { continue; }
