@@ -19,7 +19,6 @@
             "elements"
         ]
     },
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"

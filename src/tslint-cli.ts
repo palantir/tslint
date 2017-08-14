@@ -232,7 +232,7 @@ if (parsed.unknown.length !== 0) {
 const argv = commander.opts() as any as Argv;
 
 if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
-    console.error("Missing files");
+    console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 

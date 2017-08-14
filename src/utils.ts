@@ -64,9 +64,8 @@ export function isLowerCase(str: string): boolean {
  * Removes leading indents from a template string without removing all leading whitespace
  */
 export function dedent(strings: TemplateStringsArray, ...values: any[]) {
-    let fullString = strings.reduce((accumulator, str, i) => {
-        return `${accumulator}${values[i - 1]}${str}`;
-    });
+    let fullString = strings.reduce(
+        (accumulator, str, i) => `${accumulator}${values[i - 1]}${str}`);
 
     // match all leading spaces/tabs at the start of each line
     const match = fullString.match(/^[ \t]*(?=\S)/gm);
@@ -124,7 +123,7 @@ export function escapeRegExp(re: string): string {
 /** Return true if both parameters are equal. */
 export type Equal<T> = (a: T, b: T) => boolean;
 
-export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
+export function arraysAreEqual<T>(a: ReadonlyArray<T> | undefined, b: ReadonlyArray<T> | undefined, eq: Equal<T>): boolean {
     return a === b || a !== undefined && b !== undefined && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }
 
@@ -140,7 +139,7 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
 }
 
 /** Returns an array that is the concatenation of all output arrays. */
-export function flatMap<T, U>(inputs: T[], getOutputs: (input: T, index: number) => U[]): U[] {
+export function flatMap<T, U>(inputs: ReadonlyArray<T>, getOutputs: (input: T, index: number) => ReadonlyArray<U>): U[] {
     const out = [];
     for (let i = 0; i < inputs.length; i++) {
         out.push(...getOutputs(inputs[i], i));

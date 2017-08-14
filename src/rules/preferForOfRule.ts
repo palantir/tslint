@@ -18,7 +18,7 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isAssignment, unwrapParentheses } from "../language/utils";
+import { unwrapParentheses } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -76,15 +76,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
 function isNonSimpleIncrementorUse(node: ts.Identifier, arrayExpr: ts.Expression, sourceFile: ts.SourceFile): boolean {
     // check if iterator is used for something other than reading data from array
-    const elementAccess = node.parent!;
-    const accessParent = elementAccess.parent!;
-    return !utils.isElementAccessExpression(elementAccess)
-        // `a[i] = ...`
-        || isAssignment(accessParent)
-        // `delete a[i]`
-        || accessParent.kind === ts.SyntaxKind.DeleteExpression
+    const parent = node.parent!;
+    return !utils.isElementAccessExpression(parent)
+        // `a[i] = ...` or similar
+        || utils.isReassignmentTarget(parent)
         // `b[i]`
-        || !nodeEquals(arrayExpr, unwrapParentheses(elementAccess.expression), sourceFile);
+        || !nodeEquals(arrayExpr, unwrapParentheses(parent.expression), sourceFile);
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {

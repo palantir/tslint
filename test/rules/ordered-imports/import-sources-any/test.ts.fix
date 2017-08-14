@@ -24,3 +24,8 @@ import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
 import "something";
 
+// contains ImportEqualsDeclaration
+import c = require('./c');
+import * as a from './a';
+import b from './b';
+

@@ -25,9 +25,9 @@ import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
 import * as Linter from "./linter";
-import { LintError } from "./test/lintError";
-import * as parse from "./test/parse";
 import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
+import { LintError } from "./verify/lintError";
+import * as parse from "./verify/parse";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";

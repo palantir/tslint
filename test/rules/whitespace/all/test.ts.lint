@@ -161,3 +161,31 @@ else
     const foo = 123;
     // code that just wants to be encapsulated in a block scope
 }
+
+const foo = { ... bar };
+                 ~ [invalid whitespace]
+
+const foo = [ ... bar ];
+                 ~ [invalid whitespace]
+
+function foo (bar, ... baz) {}
+                      ~ [invalid whitespace]
+
+const { foo, ... bar } = baz;
+                ~ [invalid whitespace]
+
+type A = number|string;
+               ~        [missing whitespace]
+                ~       [missing whitespace]
+
+type B = number|string|{result: string};
+               ~                         [missing whitespace]
+                ~                        [missing whitespace]
+                      ~                  [missing whitespace]
+                       ~                 [missing whitespace]
+
+type C = {result: string}&{type: "A"|"B"};
+                         ~                 [missing whitespace]
+                          ~                [missing whitespace]
+                                    ~      [missing whitespace]
+                                     ~     [missing whitespace]

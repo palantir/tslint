@@ -117,6 +117,7 @@ export const rules = {
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
+    "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
@@ -145,6 +146,7 @@ export const rules = {
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
     "no-default-export": true,
+    "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
     "no-parameter-reassignment": true,
@@ -234,6 +236,7 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "space-within-parens": [true, 0],
     "switch-final-break": true,
     "type-literal-delimiter": true,
     "variable-name": [

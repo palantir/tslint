@@ -9,6 +9,9 @@
       },
       "interfaces": {
         "visibilities": ["internal"]
+      },
+      "variables": {
+        "visibilities": ["exported"]
       }
     }]
   }

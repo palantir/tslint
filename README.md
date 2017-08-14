@@ -68,7 +68,10 @@ Creating a new release
 
 1. Bump the version number in `package.json` and `src/linter.ts`
 2. Add release notes in `CHANGELOG.md`
-3. `yarn verify` to build the latest sources from a clean state
+    - Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a Github.com personal access token to exist at `~/github_token.txt` with "repo" permissions.
 4. Commit with message `Prepare release <version>`
-5. Run `npm publish`
-6. Create a git tag for the new release and push it ([see existing tags here](https://github.com/palantir/tslint/tags))
+5. Push your branch to GitHub and make a PR
+6. Once your PR is merged, wait for the tests to pass on CircleCI for develop
+7. Create a "Release" on GitHub with the proper tag version and notes from the changelog.
+    - The tag should be identical to the version in `package.json`
+8. Run `yarn run publish:local`
