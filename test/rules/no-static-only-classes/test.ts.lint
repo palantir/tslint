@@ -1,3 +1,7 @@
+class EmptyClass {}
+
+class EmptyClass { constructor() {} }
+
 export class PascalClass {
              ~~~~~~~~~~~ [0]
     public static helper(): void {}
@@ -37,6 +41,11 @@ export class PascalClass {
         return true;
     }
     constructor() { this.that = what; }
+}
+
+export class ShorthandPropsClass {
+    public static helper(): void {}
+    constructor(private a: string) {}
 }
 
 export class PascalClass {

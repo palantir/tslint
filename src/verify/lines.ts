@@ -15,9 +15,7 @@
  */
 
 // Use classes here instead of interfaces because we want runtime type data
-/* tslint:disable:no-static-only-classes */
 export class Line { }
-/* tslint:enable:no-static-only-classes */
 export class CodeLine extends Line { constructor(public contents: string) { super(); } }
 export class MessageSubstitutionLine extends Line { constructor(public key: string, public message: string) { super(); } }
 

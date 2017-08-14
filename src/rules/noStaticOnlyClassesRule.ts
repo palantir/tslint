@@ -48,7 +48,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         for (const statement of sourceFile.statements) {
-            if (isClassDeclaration(statement) && !hasExtendsClause(statement) && !hasImplementsClause(statement)) {
+            if (isClassDeclaration(statement)
+                && !hasExtendsClause(statement)
+                && !hasImplementsClause(statement)
+                && !isEmptyClass(statement)) {
                 for (const member of statement.members) {
                     if (!hasStaticModifier(member.modifiers) && !isEmptyConstructor(member)) {
                         return;
@@ -62,12 +65,12 @@ class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     }
 }
 
-function hasImplementsClause(statement: ts.ClassDeclaration): boolean {
-    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
-}
-
 function hasExtendsClause(statement: ts.ClassDeclaration): boolean {
     return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword : false;
+}
+
+function hasImplementsClause(statement: ts.ClassDeclaration): boolean {
+    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
 }
 
 function hasStaticModifier(modifiers: ts.NodeArray<ts.Modifier> | undefined): boolean {
@@ -80,6 +83,17 @@ function hasStaticModifier(modifiers: ts.NodeArray<ts.Modifier> | undefined): bo
         }
     }
     return false;
+}
+
+function isEmptyClass(statement: ts.ClassDeclaration): boolean {
+    const classMembers = statement.members;
+    if (classMembers.length === 0) {
+        return true;
+    } else if (classMembers.length === 1 && classMembers[0].kind === ts.SyntaxKind.Constructor) {
+        return isEmptyConstructor(classMembers[0]);
+    } else {
+        return false;
+    }
 }
 
 function isEmptyConstructor(member: ts.ClassElement): boolean {
