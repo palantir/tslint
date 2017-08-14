@@ -8,7 +8,7 @@
     "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
-    "no-parameter-reassign": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
     "align": {

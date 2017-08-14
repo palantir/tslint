@@ -22,7 +22,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-parameter-reassign",
+        ruleName: "no-parameter-reassignment",
         description: "Disallows reassigning parameters.",
         optionsDescription: "Not configurable.",
         options: null,
