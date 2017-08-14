@@ -50,24 +50,16 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 
     function check(node: ts.StringLiteral): void {
-        /**
-         * Finds instances of '${'
-         */
-        const findTemplateString = new RegExp(/\$\{/);
-            
-        const index = node.text.search(findTemplateString);
-        if (index !== -1) {
-            /**
-             * Support for ignoring case: '\${template-expression}'
-             */
-            const unescapedText = node.getFullText();
-            const preceedingCharacter = unescapedText.substr(unescapedText.search(findTemplateString) - 1, 1);
-            if (isBackslash(preceedingCharacter)) {
-                return;
+        const text = node.getText(ctx.sourceFile);
+        const findTemplateStrings = /\$\{/g;
+        let instance: RegExpExecArray | null = null;
+        const nextInstance = () => instance = findTemplateStrings.exec(text);
+        while (nextInstance() !== null && instance !== null) {
+            const preceedingCharacters = text.substr((instance as RegExpExecArray).index - 2, 2);
+            if (!isBackslash(preceedingCharacters[0]) && isBackslash(preceedingCharacters[1])) {
+                continue;
             }
-
-            const textStart = node.getStart() + 1;
-            ctx.addFailureAt(textStart + index, 2, Rule.FAILURE_STRING);
+            ctx.addFailureAt(node.getStart() + (instance as RegExpExecArray).index, 2, Rule.FAILURE_STRING);
         }
     }
 }

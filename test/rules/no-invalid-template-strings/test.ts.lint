@@ -2,7 +2,19 @@ new (Tab.mixins.Controlled('MemberComments',Tab.mixins.Templated('<div mbr-comme
 
 new (Tab.mixins.Controlled('MemberComments',Tab.mixins.Templated('<div mbr-comment-tab=\${which}></div>',Tab.mixins.AlwaysHasData('\${which}'))))
 
-new (Tab.mixins.Controlled('MemberComments',Tab.mixins.Templated('<div mbr-comment-tab=\\\\\\${which}></div>',Tab.mixins.AlwaysHasData())))
+Tab.mixins.Templated('<div mbr-comment-tab=\${which}></div>',Tab.mixins.AlwaysHasData('\\${which}'))
+                                                                                         ~~ [0]
+
+Tab.mixins.Templated(`<div mbr-comment-tab=\${which}></div>`,Tab.mixins.AlwaysHasData('${which}'))
+                                                                                       ~~ [0]
+
+Tab.mixins.Templated('<div mbr-comment-tab=${which}></div>',Tab.mixins.AlwaysHasData('${which}'), Tab.mixin.SomeMethod('${which}'))
+                                           ~~ [0]
+                                                                                      ~~ [0]
+                                                                                                                        ~~ [0]
+
+new (Tab.mixins.Controlled('MemberComments',Tab.mixins.Templated('<div mbr-comment-tab=\\${which}></div>',Tab.mixins.AlwaysHasData())))
+                                                                                         ~~ [0]
 
 "One plus one is ${1 + 1}.";
                  ~~ [0]
