@@ -54,6 +54,7 @@ function walk(ctx: Lint.WalkContext<void>) {
          * Finds instances of '${'
          */
         const findTemplateString = new RegExp(/\$\{/);
+            
         const index = node.text.search(findTemplateString);
         if (index !== -1) {
             /**
