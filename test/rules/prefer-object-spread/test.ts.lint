@@ -1,4 +1,5 @@
 const form = Object.assign({}, this);
+const foo = Object.assign(bar, this);
 const foo = Object.assign({}, bar, baz, this);
 const original = {a: 1, b:2};
 Object.assign({}, original, {c: 3});
