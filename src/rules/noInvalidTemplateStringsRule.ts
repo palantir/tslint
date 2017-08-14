@@ -50,10 +50,28 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 
     function check(node: ts.StringLiteral): void {
-        const idx = node.text.search(/\$\{/);
-        if (idx !== -1) {
+        /**
+         * Finds instances of '${'
+         */
+        const findTemplateString = new RegExp(/\$\{/);
+            
+        const index = node.text.search(findTemplateString);
+        if (index !== -1) {
+            /**
+             * Support for ignoring case: '\${template-expression}'
+             */
+            const unescapedText = node.getFullText();
+            const preceedingCharacter = unescapedText.substr(unescapedText.search(findTemplateString) - 1, 1);
+            if (isBackslash(preceedingCharacter)) {
+                return;
+            }
+
             const textStart = node.getStart() + 1;
-            ctx.addFailureAt(textStart + idx, 2, Rule.FAILURE_STRING);
+            ctx.addFailureAt(textStart + index, 2, Rule.FAILURE_STRING);
         }
     }
+}
+
+function isBackslash(character: string): boolean {
+    return character === "\\";
 }
