@@ -150,7 +150,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     const { output, errorCount } = await runLinter(options, logger);
-    logger.log(output);
+    if (output && output.trim()) {
+        logger.log(output);
+    }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
