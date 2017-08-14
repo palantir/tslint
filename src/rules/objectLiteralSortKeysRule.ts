@@ -77,7 +77,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction<Options, Options>(
+        return this.applyWithFunction(
             sourceFile,
             (ctx) => walk(ctx, program.getTypeChecker()),
             parseOptions(this.ruleArguments),
