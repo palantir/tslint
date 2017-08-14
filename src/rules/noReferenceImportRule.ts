@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-reference-import",
-        description: 'Don\'t <reference types="foo" /> if you import "foo" anyway.',
+        description: 'Don\'t `<reference types="foo" />` if you import `foo` anyway.',
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",

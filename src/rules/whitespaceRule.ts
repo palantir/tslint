@@ -27,8 +27,10 @@ const OPTION_DECL = "check-decl";
 const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
 const OPTION_SEPARATOR = "check-separator";
+const OPTION_REST_SPREAD = "check-rest-spread";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
+const OPTION_TYPE_OPERATOR = "check-type-operator";
 const OPTION_PREBLOCK = "check-preblock";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -37,39 +39,47 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Eight arguments may be optionally provided:
+            Nine arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
             * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
+            * \`"check-rest-spread"\` checks that there is no whitespace after rest/spread operator (\`...\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
+            * \`"check-type-operator"\` checks for whitespace between type operators \`|\` and \`&\`.
             * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                enum: [
+                    "check-branch", "check-decl", "check-operator", "check-module", "check-separator",
+                    "check-rest-spread", "check-type", "check-typecast", "check-type-operator", "check-preblock",
+                ],
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 10,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "missing whitespace";
+    public static FAILURE_STRING_MISSING = "missing whitespace";
+    public static FAILURE_STRING_INVALID = "invalid whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-type Options = Record<"branch" | "decl" | "operator" | "module" | "separator" | "type" | "typecast" | "preblock", boolean>;
+type Options = Record<
+    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
+    boolean>;
+
 function parseOptions(ruleArguments: string[]): Options {
     return {
         branch: has(OPTION_BRANCH),
@@ -77,8 +87,10 @@ function parseOptions(ruleArguments: string[]): Options {
         operator: has(OPTION_OPERATOR),
         module: has(OPTION_MODULE),
         separator: has(OPTION_SEPARATOR),
+        restSpread: has(OPTION_REST_SPREAD),
         type: has(OPTION_TYPE),
         typecast: has(OPTION_TYPECAST),
+        typeOperator: has(OPTION_TYPE_OPERATOR),
         preblock: has(OPTION_PREBLOCK),
     };
 
@@ -190,7 +202,38 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.VariableDeclaration:
                 const { name, type, initializer } = node as ts.VariableDeclaration;
                 if (options.decl && initializer !== undefined) {
-                    checkForTrailingWhitespace((type !== undefined ? type :  name).getEnd());
+                    checkForTrailingWhitespace((type !== undefined ? type : name).getEnd());
+                }
+                break;
+
+            case ts.SyntaxKind.BindingElement:
+            case ts.SyntaxKind.Parameter:
+                const { dotDotDotToken } = node as ts.BindingElement | ts.ParameterDeclaration;
+                if (options.restSpread && dotDotDotToken !== undefined) {
+                    checkForExcessiveWhitespace(dotDotDotToken.end);
+                }
+                break;
+
+            case ts.SyntaxKind.SpreadAssignment:
+            case ts.SyntaxKind.SpreadElement:
+                if (options.restSpread) {
+                    const position = (node as ts.SpreadAssignment).expression.getFullStart();
+                    checkForExcessiveWhitespace(position);
+                }
+                break;
+
+            case ts.SyntaxKind.UnionType:
+            case ts.SyntaxKind.IntersectionType:
+                if (options.typeOperator) {
+                    const { types } = node as ts.UnionOrIntersectionTypeNode;
+                    types.forEach((typeNode, index) => {
+                        if (index > 0) {
+                            checkForTrailingWhitespace(typeNode.getFullStart());
+                        }
+                        if (index < types.length - 1) {
+                            checkForTrailingWhitespace(typeNode.getEnd());
+                        }
+                    });
                 }
         }
 
@@ -242,7 +285,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword) {
                     return; // Don't check ImportCall
                 }
-                // falls through
+            // falls through
             case ts.SyntaxKind.ExportKeyword:
             case ts.SyntaxKind.FromKeyword:
                 if (options.typecast) {
@@ -278,6 +321,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
         const fix = Lint.Replacement.appendText(position, " ");
-        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_MISSING, fix);
+    }
+
+    function checkForExcessiveWhitespace(position: number): void {
+        if (position !== sourceFile.end && Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+            addInvalidWhitespaceErrorAt(position);
+        }
+    }
+
+    function addInvalidWhitespaceErrorAt(position: number): void {
+        const fix = Lint.Replacement.deleteText(position, 1);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_INVALID, fix);
     }
 }

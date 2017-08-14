@@ -11,6 +11,7 @@ node_modules/
 !test/rules/**/node_modules
 tscommand*.txt
 npm-debug.log
+package-lock.json
 # created by grunt-ts for faster compiling
 typings/.basedir.ts
 

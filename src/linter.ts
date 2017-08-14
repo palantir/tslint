@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.5.0";
+    public static VERSION = "5.6.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -105,10 +105,9 @@ class Linter {
         }
 
         // add rule severity to failures
-        const ruleSeverityMap = new Map(enabledRules.map((rule) => {
+        const ruleSeverityMap = new Map(enabledRules.map(
             // tslint:disable-next-line no-unnecessary-type-assertion
-            return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
-        }));
+            (rule) => [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity]));
 
         for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());

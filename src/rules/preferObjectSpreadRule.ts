@@ -50,6 +50,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (isCallExpression(node) && node.arguments.length !== 0 &&
             isPropertyAccessExpression(node.expression) && node.expression.name.text === "assign" &&
             isIdentifier(node.expression.expression) && node.expression.expression.text === "Object" &&
+            !ts.isFunctionLike(node.arguments[0]) &&
             // Object.assign(...someArray) cannot be written as object spread
             !node.arguments.some(isSpreadElement)) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
@@ -64,9 +65,10 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
     const args = node.arguments;
+    const objectNeedsParens = node.parent!.kind === ts.SyntaxKind.ArrowFunction;
     const fix = [
-        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), "{"),
-        new Lint.Replacement(node.end - 1, 1, "}"),
+        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), `${objectNeedsParens ? "(" : ""}{`),
+        new Lint.Replacement(node.end - 1, 1, `}${objectNeedsParens ? ")" : ""}`),
     ];
     for (let i = 0; i < args.length; ++i) {
         const arg = args[i];

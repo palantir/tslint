@@ -17,6 +17,7 @@
 
 // with due reference to https://github.com/Microsoft/TypeScript/blob/7813121c4d77e50aad0eed3152ef1f1156c7b574/scripts/tslint/noNullRule.ts
 
+import { isBinaryExpression, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -34,6 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -47,12 +49,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
-        if (node.kind >= ts.SyntaxKind.FirstTypeNode && node.kind <= ts.SyntaxKind.LastTypeNode) {
+        if (isTypeNodeKind(node.kind)) {
             return; // skip type nodes
         }
-        if (node.kind === ts.SyntaxKind.NullKeyword) {
-            return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        if (node.kind !== ts.SyntaxKind.NullKeyword) {
+            return ts.forEachChild(node, cb);
         }
-        return ts.forEachChild(node, cb);
+        const parent = node.parent!;
+        let eq: Lint.EqualsKind | undefined;
+        if (isBinaryExpression(parent)) {
+            eq = Lint.getEqualsKind(parent.operatorToken);
+        }
+        if (eq === undefined) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        } else if (!eq.isStrict) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.replaceNode(node, "undefined", ctx.sourceFile));
+        }
     }
 }
