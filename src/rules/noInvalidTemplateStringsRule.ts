@@ -51,18 +51,16 @@ function walk(ctx: Lint.WalkContext<void>) {
 
     function check(node: ts.StringLiteral): void {
         const text = node.getText(ctx.sourceFile);
-        const findTemplateStrings = /([\\]?)+(\$\{)/g;
+        const findTemplateStrings = /\\*\$\{/g;
         let instance = findTemplateStrings.exec(text);
         while (instance !== null) {
             const matchLength = instance[0].length;
             const backslashCount = matchLength - 2;
-            const instanceIsEscaped = (matchLength > 2) ? (backslashCount % 2) === 1 : false;
-            if (instanceIsEscaped) {
-                instance = findTemplateStrings.exec(text);
-                continue;
+            const instanceIsEscaped = backslashCount % 2 === 1;
+            if (!instanceIsEscaped) {
+                const start = node.getStart() + (instance.index + backslashCount);
+                ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
             }
-            const start = node.getStart() + (instance.index + backslashCount);
-            ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
             instance = findTemplateStrings.exec(text);
         }
     }
