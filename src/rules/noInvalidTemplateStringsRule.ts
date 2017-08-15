@@ -51,21 +51,19 @@ function walk(ctx: Lint.WalkContext<void>) {
 
     function check(node: ts.StringLiteral): void {
         const text = node.getText(ctx.sourceFile);
-        const findTemplateStrings = /\$\{/g;
-        const nextInstance = () => instance = findTemplateStrings.exec(text);
-        let instance: RegExpExecArray | null = nextInstance();
+        const findTemplateStrings = /([\\]?)+(\$\{)/g;
+        let instance = findTemplateStrings.exec(text);
         while (instance !== null) {
-            const preceedingCharacters = text.substr(instance.index - 2, 2);
-            if (!isBackslash(preceedingCharacters[0]) && isBackslash(preceedingCharacters[1])) {
-                nextInstance();
+            const matchLength = instance[0].length;
+            const backslashCount = matchLength - 2;
+            const instanceIsEscaped = (matchLength > 2) ? (backslashCount % 2) === 1 : false;
+            if (instanceIsEscaped) {
+                instance = findTemplateStrings.exec(text);
                 continue;
             }
-            ctx.addFailureAt(node.getStart() + instance.index, 2, Rule.FAILURE_STRING);
-            nextInstance();
+            const start = node.getStart() + (instance.index + backslashCount);
+            ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
+            instance = findTemplateStrings.exec(text);
         }
     }
-}
-
-function isBackslash(character: string): boolean {
-    return character === "\\";
 }
