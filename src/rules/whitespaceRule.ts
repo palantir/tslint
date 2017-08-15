@@ -266,7 +266,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
             case ts.SyntaxKind.CommaToken:
                 if (options.separator) {
-                    prevTokenShouldBeFollowedByWhitespace = true;;
+                    prevTokenShouldBeFollowedByWhitespace = true;
                 }
                 break;
             case ts.SyntaxKind.SemicolonToken:
