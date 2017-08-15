@@ -52,14 +52,16 @@ function walk(ctx: Lint.WalkContext<void>) {
     function check(node: ts.StringLiteral): void {
         const text = node.getText(ctx.sourceFile);
         const findTemplateStrings = /\$\{/g;
-        let instance: RegExpExecArray | null = null;
         const nextInstance = () => instance = findTemplateStrings.exec(text);
-        while (nextInstance() !== null && instance !== null) {
-            const preceedingCharacters = text.substr((instance as RegExpExecArray).index - 2, 2);
+        let instance: RegExpExecArray | null = nextInstance();
+        while (instance !== null) {
+            const preceedingCharacters = text.substr(instance.index - 2, 2);
             if (!isBackslash(preceedingCharacters[0]) && isBackslash(preceedingCharacters[1])) {
+                nextInstance();
                 continue;
             }
-            ctx.addFailureAt(node.getStart() + (instance as RegExpExecArray).index, 2, Rule.FAILURE_STRING);
+            ctx.addFailureAt(node.getStart() + instance.index, 2, Rule.FAILURE_STRING);
+            nextInstance();
         }
     }
 }
