@@ -19,14 +19,6 @@ export class PascalClass {
     }
 }
 
-export class ClassA implements IInterfacey {
-    public static helper(): void {}
-    private static privateHelper(): boolean {
-        return true;
-    }
-    constructor() {}
-}
-
 export class ClassB extends BaseClass {
     public static helper(): void {}
     private static privateHelper(): boolean {

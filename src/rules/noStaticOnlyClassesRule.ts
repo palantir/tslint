@@ -18,7 +18,10 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-import { isClassDeclaration, isFunctionWithBody } from "tsutils";
+import { hasModifier,
+        isClassDeclaration,
+        isConstructorDeclaration,
+        isParameterProperty } from "tsutils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -47,42 +50,27 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
-        for (const statement of sourceFile.statements) {
-            if (isClassDeclaration(statement)
-                && !hasExtendsClause(statement)
-                && !hasImplementsClause(statement)
-                && !isEmptyClass(statement)) {
-                for (const member of statement.members) {
-                    if (!hasStaticModifier(member.modifiers) && !isEmptyConstructor(member)) {
+        const checkIfStaticOnlyClass = (node: ts.Node): void => {
+            if (isClassDeclaration(node)
+                && !hasExtendsClause(node)
+                && !isEmptyClass(node)) {
+                for (const member of node.members) {
+                    if (!hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) && !isEmptyConstructor(member)) {
                         return;
                     }
                 }
-                if (statement.name !== undefined) {
-                    this.addFailure(statement.name.pos + 1, statement.name.end, Rule.FAILURE_STRING);
+                if (node.name !== undefined) {
+                    this.addFailure(node.name.pos + 1, node.name.end, Rule.FAILURE_STRING);
                 }
             }
-        }
+            return ts.forEachChild(node, checkIfStaticOnlyClass);
+        };
+        ts.forEachChild(sourceFile, checkIfStaticOnlyClass);
     }
 }
 
 function hasExtendsClause(statement: ts.ClassDeclaration): boolean {
-    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword : false;
-}
-
-function hasImplementsClause(statement: ts.ClassDeclaration): boolean {
-    return (statement.heritageClauses !== undefined) ? statement.heritageClauses[0].token === ts.SyntaxKind.ImplementsKeyword : false;
-}
-
-function hasStaticModifier(modifiers: ts.NodeArray<ts.Modifier> | undefined): boolean {
-    if (modifiers === undefined) {
-        return false;
-    }
-    for (const modifier of modifiers) {
-        if (modifier.kind === ts.SyntaxKind.StaticKeyword) {
-            return true;
-        }
-    }
-    return false;
+    return (statement.heritageClauses !== undefined) && (statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword);
 }
 
 function isEmptyClass(statement: ts.ClassDeclaration): boolean {
@@ -97,10 +85,10 @@ function isEmptyClass(statement: ts.ClassDeclaration): boolean {
 }
 
 function isEmptyConstructor(member: ts.ClassElement): boolean {
-    if (member.kind === ts.SyntaxKind.Constructor
-        && isFunctionWithBody(member)
-        && member.body !== undefined) {
-        return member.body.getFullText().trim().replace(/\s+/g, "") === "{}";
+    if (isConstructorDeclaration(member)
+        && member.body !== undefined
+        && !member.parameters.some(isParameterProperty)) {
+        return member.body.statements.length === 0;
     }
     return false;
 }
