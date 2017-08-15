@@ -265,8 +265,21 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             case ts.SyntaxKind.CommaToken:
-            case ts.SyntaxKind.SemicolonToken:
                 if (options.separator) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.SemicolonToken:
+                if (!options.separator) {
+                    break;
+                }
+
+                const nextPosition = range.pos + 1;
+                const semicolonInTrivialFor = parent.kind === ts.SyntaxKind.ForStatement &&
+                    nextPosition !== sourceFile.end &&
+                    (sourceFile.text[nextPosition] === ";" || sourceFile.text[nextPosition] === ")");
+
+                if (!semicolonInTrivialFor) {
                     prevTokenShouldBeFollowedByWhitespace = true;
                 }
                 break;

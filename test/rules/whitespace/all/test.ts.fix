@@ -21,6 +21,9 @@ module M {
         goto: console.log("hi");
     }
 
+    for (x = 2; x--;) {}
+    for (;;) {}
+
     while (i < 1) {
         ++i;
     }
