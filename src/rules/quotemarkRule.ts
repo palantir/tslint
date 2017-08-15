@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Palantir Technologies, Inc.
+ * Copyright 2013 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,10 +72,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `${actual} should be ${expected}`;
     }
 
-    public isEnabled(): boolean {
-        return super.isEnabled() && hasSingleDoublePreference(this.ruleArguments);
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const args = this.ruleArguments;
         const quoteMark = getQuotemarkPreference(args) === OPTION_SINGLE ? "'" : '"';
@@ -134,19 +130,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     });
 }
 
-function hasSingleDoublePreference(args: any[]): boolean {
-    for (const arg of args) {
-        if (arg === OPTION_SINGLE || arg === OPTION_DOUBLE) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function getQuotemarkPreference(args: any[]): string | undefined {
     for (const arg of args) {
         if (arg === OPTION_SINGLE || arg === OPTION_DOUBLE) {
-            return (arg === OPTION_SINGLE) ? OPTION_SINGLE : OPTION_DOUBLE;
+            return arg as string;
         }
     }
     return undefined;
