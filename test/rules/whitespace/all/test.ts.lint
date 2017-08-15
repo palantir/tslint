@@ -43,6 +43,9 @@ module M {
              ~                  [missing whitespace]
     }
 
+    for (x = 2; x--;) {}
+    for (;;) {}
+
     while(i < 1){
          ~         [missing whitespace]
                 ~  [missing whitespace]
