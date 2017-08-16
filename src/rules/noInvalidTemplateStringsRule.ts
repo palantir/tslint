@@ -50,28 +50,18 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 
     function check(node: ts.StringLiteral): void {
-        /**
-         * Finds instances of '${'
-         */
-        const findTemplateString = new RegExp(/\$\{/);
-
-        const index = node.text.search(findTemplateString);
-        if (index !== -1) {
-            /**
-             * Support for ignoring case: '\${template-expression}'
-             */
-            const unescapedText = node.getFullText();
-            const preceedingCharacter = unescapedText.substr(unescapedText.search(findTemplateString) - 1, 1);
-            if (isBackslash(preceedingCharacter)) {
-                return;
+        const text = node.getText(ctx.sourceFile);
+        const findTemplateStrings = /\\*\$\{/g;
+        let instance = findTemplateStrings.exec(text);
+        while (instance !== null) {
+            const matchLength = instance[0].length;
+            const backslashCount = matchLength - 2;
+            const instanceIsEscaped = backslashCount % 2 === 1;
+            if (!instanceIsEscaped) {
+                const start = node.getStart() + (instance.index + backslashCount);
+                ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
             }
-
-            const textStart = node.getStart() + 1;
-            ctx.addFailureAt(textStart + index, 2, Rule.FAILURE_STRING);
+            instance = findTemplateStrings.exec(text);
         }
     }
-}
-
-function isBackslash(character: string): boolean {
-    return character === "\\";
 }
