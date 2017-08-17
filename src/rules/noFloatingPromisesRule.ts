@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-floating-promises",
         description: "Promises returned by functions must be handled appropriately.",
-        descriptionDetails: "Use `no-unused-expressions` in addition to this rule to reveal even more floating promises.",
+        descriptionDetails: "Use `no-unused-expression` in addition to this rule to reveal even more floating promises.",
         optionsDescription: Lint.Utils.dedent`
             A list of \'string\' names of any additional classes that should also be handled as Promises.
         `,
@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(
             sourceFile,
-            (ctx: Lint.WalkContext<string[]>) => walk(ctx, program.getTypeChecker()),
+            (ctx) => walk(ctx, program.getTypeChecker()),
             ["Promise", ...this.ruleArguments as string[]],
         );
     }
