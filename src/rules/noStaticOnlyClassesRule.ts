@@ -67,15 +67,6 @@ class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     }
 }
 
-function allMembersAreConstructors(members: ts.NodeArray<ts.ClassElement>): boolean {
-    for (const member of members) {
-        if (!isConstructorDeclaration(member)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
     return (declaration.heritageClauses !== undefined) && (declaration.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword);
 }
@@ -84,7 +75,7 @@ function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
  * An "empty class" for our purposes.
  */
 function isEmptyClass(declaration: ts.ClassDeclaration): boolean {
-    return declaration.members.length === 0 || allMembersAreConstructors(declaration.members);
+    return declaration.members.length === 0 || declaration.members.every(isConstructorDeclaration);
 }
 
 function isConstructorWithShorthandProps(member: ts.ClassElement): boolean {
