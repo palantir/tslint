@@ -90,7 +90,7 @@ class MaxMethodLine extends Lint.AbstractWalker<{limit: number; includesNested: 
         const includesNested = this.options.includesNested;
         let end = node.end;
         if (!includesNested) {
-            const firstNestedFunction = (anode: ts.Node): ts.Node => {
+            const firstNestedFunction = (anode: ts.Node): ts.Node | undefined => {
                 if (isFunctionWithBody(anode)) {
                     return anode;
                 }
