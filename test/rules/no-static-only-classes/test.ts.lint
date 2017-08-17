@@ -1,9 +1,9 @@
-class EmptyClass {}
+class EmptyClassA {}
 
-class EmptyClass { constructor() {} }
+class EmptyClassB { constructor() {} }
 
-export class PascalClass {
-             ~~~~~~~~~~~ [0]
+export class AClass {
+       ~~~~~ [0]
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
@@ -11,28 +11,20 @@ export class PascalClass {
     constructor() {}
 }
 
-export class PascalClass {
-             ~~~~~~~~~~~ [0]
+export class BClass {
+       ~~~~~ [0]
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
     }
 }
 
-export class ClassB extends BaseClass {
+export class CClass extends BaseClass {
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
     }
     constructor() {}
-}
-
-export class PascalClass {
-    public static helper(): void {}
-    private static privateHelper(): boolean {
-        return true;
-    }
-    constructor() { this.that = what; }
 }
 
 export class ShorthandPropsClass {
@@ -40,7 +32,7 @@ export class ShorthandPropsClass {
     constructor(private a: string) {}
 }
 
-export class PascalClass {
+export class DClass {
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
@@ -49,7 +41,7 @@ export class PascalClass {
     constructor() {}
 }
 
-export class PascalClass {
+export class EClass {
     public static helper(): void {}
     private Helper(): boolean {
         return true;

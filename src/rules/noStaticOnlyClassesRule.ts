@@ -18,7 +18,8 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-import { hasModifier,
+import { getChildOfKind,
+        hasModifier,
         isClassDeclaration,
         isConstructorDeclaration,
         isParameterProperty } from "tsutils";
@@ -51,17 +52,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const checkIfStaticOnlyClass = (node: ts.Node): void => {
-            if (isClassDeclaration(node)
-                && !hasExtendsClause(node)
-                && !isEmptyClass(node)) {
+            if (isClassDeclaration(node) && !isEmptyClass(node) && !hasExtendsClause(node)) {
                 for (const member of node.members) {
-                    if (!hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) && !isEmptyConstructor(member)) {
+                    if (isConstructorWithShorthandProps(member) ||
+                       (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
                         return;
                     }
                 }
-                if (node.name !== undefined) {
-                    this.addFailure(node.name.pos + 1, node.name.end, Rule.FAILURE_STRING);
-                }
+                this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STRING);
             }
             return ts.forEachChild(node, checkIfStaticOnlyClass);
         };
@@ -69,26 +67,26 @@ class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
     }
 }
 
-function hasExtendsClause(statement: ts.ClassDeclaration): boolean {
-    return (statement.heritageClauses !== undefined) && (statement.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword);
+function allMembersAreConstructors(members: ts.NodeArray<ts.ClassElement>): boolean {
+    for (const member of members) {
+        if (!isConstructorDeclaration(member)) {
+            return false;
+        }
+    }
+    return true;
 }
 
-function isEmptyClass(statement: ts.ClassDeclaration): boolean {
-    const classMembers = statement.members;
-    if (classMembers.length === 0) {
-        return true;
-    } else if (classMembers.length === 1 && classMembers[0].kind === ts.SyntaxKind.Constructor) {
-        return isEmptyConstructor(classMembers[0]);
-    } else {
-        return false;
-    }
+function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
+    return (declaration.heritageClauses !== undefined) && (declaration.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword);
 }
 
-function isEmptyConstructor(member: ts.ClassElement): boolean {
-    if (isConstructorDeclaration(member)
-        && member.body !== undefined
-        && !member.parameters.some(isParameterProperty)) {
-        return member.body.statements.length === 0;
-    }
-    return false;
+/**
+ * An "empty class" for our purposes.
+ */
+function isEmptyClass(declaration: ts.ClassDeclaration): boolean {
+    return declaration.members.length === 0 || allMembersAreConstructors(declaration.members);
+}
+
+function isConstructorWithShorthandProps(member: ts.ClassElement): boolean {
+    return isConstructorDeclaration(member) && member.parameters.some(isParameterProperty);
 }
