@@ -1,0 +1,171 @@
+namespace App {
+    class GiveMeANumber {
+
+        private num:any = 10;
+
+        //Th  some kind of comment
+        constructor(){
+        ~~~~~~~~~~~~~  [err % ("18")]
+            this.giveNumber();
+
+            // some comment
+            this.giveNumber();
+            // some comment
+            this.giveNumber();
+
+            // some comment
+
+            this.giveNumber();
+            // some comment
+
+            this.giveNumber();
+
+            // some comment
+            this.giveNumber();
+        }
+    }
+
+    // be sure normal function still ok
+    function walk0(ctx: Lint.WalkContext<Option>): void {
+        const { sourceFile, options: option } = ctx;
+        return ts.forEachChild(sourceFile, function cb(node): void {
+            switch (node.kind) {
+                case ts.SyntaxKind.ArrayType:
+                    checkArrayType(node as ts.ArrayTypeNode
+            }
+            return ts.forEachChild(node, cb);
+        });
+    }
+
+    // test nested functions
+    function walk1(ctx: Lint.WalkContext<Option>): void {
+        const { sourceFile, options: option } = ctx;
+        return ts.forEachChild(sourceFile, function cb(node): void {
+            switch (node.kind) {
+                case ts.SyntaxKind.ArrayType:
+                    checkArrayType(node as ts.ArrayTypeNode
+            }
+            return ts.forEachChild(node, cb);
+        });
+
+        function checkArrayType(node: ts.ArrayTypeNode): void {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("17")]
+            const { elementType, parent } = node;
+            if (option === "array" || option === "array-simple" && isSimpleType(elementType)) {
+                return;
+            }
+
+            const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
+            const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
+            // Add a space if the type is preceded by 'as' and the node has no leading whitespace
+            const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+            const fix = [
+                new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
+                // Delete the square brackets and replace with an angle bracket
+                Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
+            ];
+            ctx.addFailureAtNode(node, failureString, fix);
+        }
+
+        function checkTypeReference(node: ts.TypeReferenceNode): void {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("29")]
+            const { typeName, typeArguments } = node;
+
+            if (option === "generic" || !isArrayIdentifier(typeName)) {
+                return;
+            }
+
+            const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
+            if (typeArguments === undefined || typeArguments.length === 0) {
+                // Create an 'any' array
+                const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
+                ctx.addFailureAtNode(node, failureString, fix);
+                return;
+            }
+
+            if (typeArguments.length !== 1 || (option === "array-simple" && !isSimpleType(typeArguments[0]))) {
+                return;
+            }
+
+            const type = typeArguments[0];
+            const parens = typeNeedsParentheses(type);
+            const fix = [
+                // Delete 'Array<'
+                Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
+                // Delete '>' and replace with '[]
+                Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
+            ];
+            ctx.addFailureAtNode(node, failureString, fix);
+        }
+    }
+
+    // test nested functions
+    function walk2(ctx: Lint.WalkContext<Option>): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [err % ("12")]
+        const { sourceFile, options: option } = ctx;
+        return ts.forEachChild(sourceFile, function cb(node): void {
+            switch (node.kind) {
+                case ts.SyntaxKind.ArrayType:
+                    checkArrayType(node as ts.ArrayTypeNode);
+                    break;
+                case ts.SyntaxKind.TypeReference:
+                    checkTypeReference(node as ts.TypeReferenceNode);
+            }
+            return ts.forEachChild(node, cb);
+        });
+
+        function checkArrayType(node: ts.ArrayTypeNode): void {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("17")]
+            const { elementType, parent } = node;
+            if (option === "array" || option === "array-simple" && isSimpleType(elementType)) {
+                return;
+            }
+
+            const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
+            const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
+            // Add a space if the type is preceded by 'as' and the node has no leading whitespace
+            const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+            const fix = [
+                new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
+                // Delete the square brackets and replace with an angle bracket
+                Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
+            ];
+            ctx.addFailureAtNode(node, failureString, fix);
+        }
+
+        function checkTypeReference(node: ts.TypeReferenceNode): void {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("29")]
+            const { typeName, typeArguments } = node;
+
+            if (option === "generic" || !isArrayIdentifier(typeName)) {
+                return;
+            }
+
+            const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
+            if (typeArguments === undefined || typeArguments.length === 0) {
+                // Create an 'any' array
+                const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
+                ctx.addFailureAtNode(node, failureString, fix);
+                return;
+            }
+
+            if (typeArguments.length !== 1 || (option === "array-simple" && !isSimpleType(typeArguments[0]))) {
+                return;
+            }
+
+            const type = typeArguments[0];
+            const parens = typeNeedsParentheses(type);
+            const fix = [
+                // Delete 'Array<'
+                Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
+                // Delete '>' and replace with '[]
+                Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
+            ];
+            ctx.addFailureAtNode(node, failureString, fix);
+        }
+    }
+
+
+}
+
+[err]: This method or function has %s lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts.

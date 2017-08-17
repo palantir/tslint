@@ -27,11 +27,22 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Limiting the number of lines allowed in a block allows blocks to remain small,
             single purpose, and maintainable.`,
-        optionsDescription: "An integer indicating the maximum line count of functions and methods.",
+        optionsDescription: Lint.Utils.dedent`
+            An integer indicating the maximum line count of functions and methods.
+            An optional boolean indicating if nested functions of functions are included in the count (default true).`,
         options: {
-            type: "number",
+            type: "array",
+            items: [
+                {
+                    type: "number",
+                },
+                {
+                    type: "boolean",
+                },
+            ],
+            additionalItems: false,
         },
-        optionExamples: [[true, 200]],
+        optionExamples: [[true, 200, false]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -40,9 +51,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         return super.isEnabled() && this.ruleArguments[0] as number > 0;
     }
 
+    public includesNested(): boolean {
+        if (this.ruleArguments.length > 1) {
+            return this.ruleArguments[1] as boolean;
+        }
+        return true;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new MaxMethodLine(sourceFile, this.ruleName, {
             limit: this.ruleArguments[0] as number,
+            includesNested: this.includesNested(),
         }));
     }
 }
@@ -52,7 +71,7 @@ function FAILURE_STRING(lineCount: number, lineLimit: number) {
         "Consider breaking this up into smaller parts.";
 }
 
-class MaxMethodLine extends Lint.AbstractWalker<{limit: number}> {
+class MaxMethodLine extends Lint.AbstractWalker<{limit: number; includesNested: boolean}> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isFunctionWithBody(node)) {
@@ -63,13 +82,26 @@ class MaxMethodLine extends Lint.AbstractWalker<{limit: number}> {
                 }
             }
             return ts.forEachChild(node, cb);
-
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
     private countLines(node: ts.Node) {
-        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
+        const includesNested = this.options.includesNested;
+        let end = node.end;
+        if (!includesNested) {
+            const firstNestedFunction = (anode: ts.Node): ts.Node => {
+                if (isFunctionWithBody(anode)) {
+                    return anode;
+                }
+                return ts.forEachChild(anode, firstNestedFunction);
+            };
+            const firstNode = ts.forEachChild(node, firstNestedFunction);
+            if (firstNode != null) {
+                end = firstNode.end;
+            }
+        }
+        return ts.getLineAndCharacterOfPosition(this.sourceFile, end).line
             - ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line
             + 1;
     }
