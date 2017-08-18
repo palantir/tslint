@@ -1,3 +1,53 @@
+class Foo {
+    public prop = 1;
+    constructor() {
+        class Bar {
+        ~~~~~ [0]
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
+        ~~~~~ [0]
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
+            constructor() {
+                class FizzBuzz {
+                ~~~~~ [0]
+                    public static a = 'hello mom!';
+                }
+            }
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
+            private a: SomeType;
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
+        ~~~~~ [0]
+            static PROP = 2;
+        }
+    }
+}
+
 class EmptyClassA {}
 
 class EmptyClassB { constructor() {} }
