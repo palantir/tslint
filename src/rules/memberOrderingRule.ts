@@ -221,7 +221,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {

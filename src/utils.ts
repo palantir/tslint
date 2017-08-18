@@ -148,7 +148,7 @@ export function flatMap<T, U>(inputs: ReadonlyArray<T>, getOutputs: (input: T, i
 }
 
 /** Returns an array of all outputs that are not `undefined`. */
-export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
+export function mapDefined<T, U>(inputs: ReadonlyArray<T>, getOutput: (input: T) => U | undefined): U[] {
     const out = [];
     for (const input of inputs) {
         const output = getOutput(input);
