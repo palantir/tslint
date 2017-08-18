@@ -88,7 +88,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), options);
+        return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
     }
 }
 
