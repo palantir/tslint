@@ -190,7 +190,7 @@ export const rules = {
     "jsdoc-format": true,
     "match-default-export-name": true,
     "new-parens": true,
-    "newline-before-return": true,
+    "newline": [true, {return: "always"}],
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
