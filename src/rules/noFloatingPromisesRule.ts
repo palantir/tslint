@@ -49,8 +49,9 @@ export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(
             sourceFile,
-            (ctx) => walk(ctx, program.getTypeChecker()),
+            walk,
             ["Promise", ...this.ruleArguments as string[]],
+            program.getTypeChecker(),
         );
     }
 }
