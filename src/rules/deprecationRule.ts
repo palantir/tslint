@@ -59,6 +59,13 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                 }
             }
         } else {
+            switch (node.kind) {
+                case ts.SyntaxKind.ImportDeclaration:
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                case ts.SyntaxKind.ExportDeclaration:
+                case ts.SyntaxKind.ExportAssignment:
+                    return;
+            }
             return ts.forEachChild(node, cb);
         }
     });
@@ -82,10 +89,6 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.EnumDeclaration:
-        case ts.SyntaxKind.ExportSpecifier:
-        case ts.SyntaxKind.ImportSpecifier:
-        case ts.SyntaxKind.ImportClause:
-        case ts.SyntaxKind.NamespaceImport:
             return true;
         case ts.SyntaxKind.VariableDeclaration:
         case ts.SyntaxKind.TypeAliasDeclaration:

@@ -12,7 +12,9 @@ other2;
 ~~~~~~ [err % ('other2')]
 
 import tmp = namespaceImport.other;
-                             ~~~~~ [errmsg % ('other', 'reason')]
+
+tmp;
+~~~ [errmsg % ('tmp', 'reason')]
 
 declare interface D {
     /** @deprecated */ m: () => void;
@@ -57,6 +59,8 @@ const A = 1, B = 2;
 A + B;
 ~     [err % ('A')]
     ~ [err % ('B')]
+
+export default A;
 
 declarationIsMissing();
 
