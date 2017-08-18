@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Unsafe use of expression of type 'any'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
