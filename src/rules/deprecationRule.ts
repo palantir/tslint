@@ -59,6 +59,13 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                 }
             }
         } else {
+            switch (node.kind) {
+                case ts.SyntaxKind.ImportDeclaration:
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                case ts.SyntaxKind.ExportDeclaration:
+                case ts.SyntaxKind.ExportAssignment:
+                    return;
+            }
             return ts.forEachChild(node, cb);
         }
     });
@@ -90,13 +97,12 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
+        case ts.SyntaxKind.ImportEqualsDeclaration:
             return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.BindingElement:
-        case ts.SyntaxKind.ExportSpecifier:
-        case ts.SyntaxKind.ImportSpecifier:
-            // return true for `b` in `import {a as b} from "foo"`
-            return (parent as ts.ImportOrExportSpecifier | ts.BindingElement).name === identifier &&
-                (parent as ts.ImportOrExportSpecifier | ts.BindingElement).propertyName !== undefined;
+            // return true for `b` in `const {a: b} = obj"`
+            return (parent as ts.BindingElement).name === identifier &&
+                (parent as ts.BindingElement).propertyName !== undefined;
         default:
             return false;
     }
