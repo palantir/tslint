@@ -1,5 +1,5 @@
 {
   "rules": {
-    "no-submodule-imports": [true, "@angular/core", "rxjs"]
+    "no-submodule-imports": [true, "@angular/core", "rxjs", "@angular/platform-browser/animations"]
   }
 }

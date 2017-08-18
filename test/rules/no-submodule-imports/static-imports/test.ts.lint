@@ -27,6 +27,11 @@ import { submodule } from "@angular/core/a/b/c/sub-module";
 import submodule = require("@angular/core");
 import submodule = require("@angular/core/a/b/c/sub-module");
 
+import { submodule } from "@angular/platform-browser";
+import { submodule } from "@angular/platform-browser/animations";
+import { submodule } from "@angular/platform-browser/animations/foo";
+import { submodule } from "@angular/platform-browser/bar";
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 import { submodule } from "lodash";
 
