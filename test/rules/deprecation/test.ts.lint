@@ -54,6 +54,73 @@ A + B;
 
 declarationIsMissing();
 
+function fn<T>(): T;
+/** @deprecated */
+function fn(bar: any): any;
+function fn() { }
+
+fn<number>();
+fn(1);
+~~ [err % ('fn')]
+fn;
+~~ [err % ('fn')]
+
+class TestClass {
+    /** @deprecated */
+    static method(): void;
+    static method(param): void;
+    static method(param?): void {}
+}
+
+TestClass.method();
+          ~~~~~~ [err % ('method')]
+TestClass.method(1);
+
+interface TestInterface {
+    /** @deprecated */
+    method(): void;
+    method(param): void;
+}
+declare let interfaceTest: TestInterface;
+interfaceTest.method();
+              ~~~~~~ [err % ('method')]
+interfaceTest.method(1);
+
+declare let callSignatureTest: {
+    /** @deprecated */
+    (): void;
+    (param): void;
+}
+callSignatureTest();
+~~~~~~~~~~~~~~~~~ [err % ('callSignatureTest')]
+callSignatureTest(1);
+
+/** @deprecated */
+declare let variableWithCallSignature: {
+    (): void;
+}
+variableWithCallSignature();
+~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature')]
+
+/** @deprecated */
+declare let variableWithCallSignature2: () => void;
+variableWithCallSignature2();
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature2')]
+
+function dedent(strings: TemplateStringsArray, ...values: string[]): string;
+function dedent(strings: TemplateStringsArray, ...values: number[]): string;
+/** @deprecated */
+function dedent(strings: TemplateStringsArray, ...values: any[]): string;
+function dedent(strings: TemplateStringsArray, ...values: any[]): string {
+    return "foo";
+}
+
+dedent``;
+dedent`${"foo"}`;
+dedent`${1}`;
+dedent`${[]}`;
+~~~~~~ [err % ('dedent')]
+
 // TODO: those should be an error
 let {f, g, h} = p;
 (function ({f, g}: I) {})
