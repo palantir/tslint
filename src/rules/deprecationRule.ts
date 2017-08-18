@@ -16,7 +16,8 @@
  */
 
 import {
-    getDeclarationOfBindingElement, isBindingElement, isIdentifier, isJsDoc, isVariableDeclaration, isVariableDeclarationList,
+    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc,
+    isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -101,28 +102,63 @@ function isDeclaration(identifier: ts.Identifier): boolean {
     }
 }
 
+function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefined {
+    let parent = node.parent!;
+    if (isPropertyAccessExpression(parent) && parent.name === node) {
+        node = parent;
+        parent = node.parent!;
+    }
+    return isTaggedTemplateExpression(parent) || isCallExpression(parent) && parent.expression === node ? parent : undefined;
+}
+
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {
+    const callExpression = getCallExpresion(node);
+    if (callExpression !== undefined) {
+        const result = getSignatureDeprecation(tc.getResolvedSignature(callExpression));
+        if (result !== undefined) {
+            return result;
+        }
+    }
     let symbol = tc.getSymbolAtLocation(node);
     if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
-    if (symbol !== undefined) {
-        return getDeprecationValue(symbol);
+    if (symbol === undefined ||
+        // if this is a CallExpression and the declaration is a function or method,
+        // stop here to avoid collecting JsDoc of all overload signatures
+        callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
+        return undefined;
+    }
+    return getSymbolDeprecation(symbol);
+}
+
+function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
+    for (const tag of tags) {
+        if (tag.name === "deprecated") {
+            return tag.text;
+        }
     }
     return undefined;
 }
 
-function getDeprecationValue(symbol: ts.Symbol): string | undefined {
+function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
     if (symbol.getJsDocTags !== undefined) {
-        for (const tag of symbol.getJsDocTags()) {
-            if (tag.name === "deprecated") {
-                return tag.text;
-            }
-        }
-        return undefined;
+        return findDeprecationTag(symbol.getJsDocTags());
     }
     // for compatibility with typescript@<2.3.0
     return getDeprecationFromDeclarations(symbol.declarations);
+}
+
+function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
+    if (signature === undefined) {
+        return undefined;
+    }
+    if (signature.getJsDocTags !== undefined) {
+        return findDeprecationTag(signature.getJsDocTags());
+    }
+
+    // for compatibility with typescript@<2.3.0
+    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
 }
 
 function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
@@ -140,19 +176,42 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
         if (isVariableDeclarationList(declaration)) {
             declaration = declaration.parent!;
         }
-        for (const child of declaration.getChildren()) {
-            if (!isJsDoc(child)) {
-                break;
-            }
-            if (child.tags === undefined) {
-                continue;
-            }
-            for (const tag of child.tags) {
-                if (tag.tagName.text === "deprecated") {
-                    return tag.comment === undefined ? "" : tag.comment;
-                }
+        const result = getDeprecationFromDeclaration(declaration);
+        if (result !== undefined) {
+            return result;
+        }
+    }
+    return undefined;
+}
+
+function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
+    for (const child of declaration.getChildren()) {
+        if (!isJsDoc(child)) {
+            break;
+        }
+        if (child.tags === undefined) {
+            continue;
+        }
+        for (const tag of child.tags) {
+            if (tag.tagName.text === "deprecated") {
+                return tag.comment === undefined ? "" : tag.comment;
             }
         }
     }
     return undefined;
+}
+
+function isFunctionOrMethod(declarations?: ts.Declaration[]) {
+    if (declarations === undefined || declarations.length === 0) {
+        return false;
+    }
+    switch (declarations[0].kind) {
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.MethodSignature:
+            return true;
+        default:
+            return false;
+    }
 }
