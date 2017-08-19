@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_CONSTRUCTOR_ONLY = "Every member of this class is a constructor. Use member functions instead.";
+    public static FAILURE_CONSTRUCTOR_ONLY = "Every member of this class is a constructor. Use functions instead.";
     public static FAILURE_STATIC_ONLY = "Every member of this class is static. Use namespaces or plain objects instead.";
     public static FAILURE_EMPTY_CLASS = "This class has no members.";
 

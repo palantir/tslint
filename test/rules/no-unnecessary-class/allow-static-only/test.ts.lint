@@ -123,6 +123,6 @@ export class EClass {
     constructor() {}
 }
 
-[CONSTRUCTOR_ONLY]: Every member of this class is a constructor. Use member functions instead.
+[CONSTRUCTOR_ONLY]: Every member of this class is a constructor. Use functions instead.
 [STATIC_ONLY]: Every member of this class is static. Use namespaces or plain objects instead.
 [EMPTY_CLASS]: This class has no members.
