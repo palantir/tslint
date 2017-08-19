@@ -2,7 +2,7 @@ class Foo {
     public prop = 1;
     constructor() {
         class Bar {
-        ~~~~~ [0]
+        ~~~~~ [STATIC_ONLY]
             static PROP = 2;
         }
     }
@@ -11,7 +11,7 @@ class Foo {
 class Foo {
     constructor() {
         class Bar {
-        ~~~~~ [0]
+        ~~~~~ [STATIC_ONLY]
             static PROP = 2;
         }
     }
@@ -22,7 +22,7 @@ class Foo {
         class Bar {
             constructor() {
                 class FizzBuzz {
-                ~~~~~ [0]
+                ~~~~~ [STATIC_ONLY]
                     public static a = 'hello mom!';
                 }
             }
@@ -70,18 +70,19 @@ class Foo {
 class Foo {
     constructor() {
         class Bar {
-        ~~~~~ [0]
+        ~~~~~ [STATIC_ONLY]
             static PROP = 2;
         }
     }
 }
 
 class EmptyClassA {}
+~~~~~ [EMPTY_CLASS]
 
 class EmptyClassB { constructor() {} }
 
 export class AClass {
-       ~~~~~ [0]
+       ~~~~~ [STATIC_ONLY]
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
@@ -90,7 +91,7 @@ export class AClass {
 }
 
 export class BClass {
-       ~~~~~ [0]
+       ~~~~~ [STATIC_ONLY]
     public static helper(): void {}
     private static privateHelper(): boolean {
         return true;
@@ -127,5 +128,6 @@ export class EClass {
     constructor() {}
 }
 
-[0]: Classes containing only static members are disallowed.
- 
+[CONSTRUCTOR_ONLY]: Every member of this class is a constructor. Use member functions instead.
+[STATIC_ONLY]: Every member of this class is static. Use namespaces or plain objects instead.
+[EMPTY_CLASS]: This class has no members.

@@ -27,7 +27,7 @@ import { getChildOfKind,
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-static-only-classes",
+        ruleName: "no-unnecessary-class",
         description: Lint.Utils.dedent`
             Disallows classes containing only static members. Classes
             with non-empty constructors are ignored.`,
@@ -35,40 +35,79 @@ export class Rule extends Lint.Rules.AbstractRule {
             Users who come from a Java-style OO language may wrap
             their utility functions in an extra class, instead of
             putting them at the top level.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            Three arguments may be optionally provided:
+
+            * \`"allow-empty-class"\` ignores \`class DemoClass {}\`.
+            * \`"allow-constructor-only"\` ignores classes whose members are constructors.
+            * \`"allow-static-only"\` ignores classes whose members are static.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+            },
+            minLength: 0,
+            maxLength: 3,
+        },
+        optionExamples: [true, ["allow-empty-class", "allow-constructor-only"]],
         type: "functionality",
         typescriptOnly: false,
     };
+    /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Classes containing only static members are disallowed.";
+    public static FAILURE_CONSTRUCTOR_ONLY = "Every member of this class is a constructor. Use member functions instead.";
+    public static FAILURE_STATIC_ONLY = "Every member of this class is static. Use namespaces or plain objects instead.";
+    public static FAILURE_EMPTY_CLASS = "This class has no members.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoStaticOnlyClassesWalker(sourceFile, this.ruleName, this.ruleArguments));
+        return this.applyWithWalker(new NoUnnecessaryClassWalker(sourceFile, this.ruleName, this.ruleArguments));
     }
 }
 
-class NoStaticOnlyClassesWalker extends Lint.AbstractWalker<string[]> {
+const OPTION__ALLOW_CONSTRUCTOR_ONLY = "allow-constructor-only";
+const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
+const OPTION__ALLOW_EMPTY_CLASS = "allow-empty-class";
+
+class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const checkIfStaticOnlyClass = (node: ts.Node): void => {
-            if (isClassDeclaration(node) && node.members.length > 0 && !hasExtendsClause(node)) {
+            if (isClassDeclaration(node) && !hasExtendsClause(node)) {
+                if (node.members.length === 0 && !this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
+                    this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
+                    return;
+                } else if (node.members.length == 0) {
+                    return;
+                }
+
                 if (node.members.some(isConstructorWithClassDeclaration)) {
                     return ts.forEachChild(node, checkIfStaticOnlyClass);
                 }
-                if (!allClassMembersAreConstructors(node)) {
+
+                if (allClassMembersAreConstructors(node) && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY)) {
+                    this.addFailureAtNode(
+                        getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
+                    );
+                    return;
+                }
+
+                if (!this.hasOption(OPTION__ALLOW_STATIC_ONLY) && !allClassMembersAreConstructors(node)) {
                     for (const member of node.members) {
                         if (isConstructorWithShorthandProps(member) ||
                         (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
                             return;
                         }
                     }
-                    this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STRING);
+                    this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STATIC_ONLY);
+                    return;
                 }
             }
             return ts.forEachChild(node, checkIfStaticOnlyClass);
         };
         ts.forEachChild(sourceFile, checkIfStaticOnlyClass);
+    }
+
+    private hasOption(option: string): boolean {
+        return this.options.indexOf(option) !== -1;
     }
 }
 
