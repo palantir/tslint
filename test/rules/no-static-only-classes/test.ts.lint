@@ -33,6 +33,34 @@ class Foo {
 class Foo {
     constructor() {
         class Bar {
+            public static helper(): void {}
+            private private Helper(): boolean {
+                return true;
+            }
+            constructor() {}
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
+            constructor() {
+                class FizzBuzz {
+                    public static helper(): void {}
+                    private privateHelper(): boolean {
+                        return true;
+                    }
+                    constructor() {}
+                }
+            }
+        }
+    }
+}
+
+class Foo {
+    constructor() {
+        class Bar {
             private a: SomeType;
             static PROP = 2;
         }
@@ -96,7 +124,7 @@ export class EClass {
     private Helper(): boolean {
         return true;
     }
-    constructor() { this.that = what; }
+    constructor() {}
 }
 
 [0]: Classes containing only static members are disallowed.
