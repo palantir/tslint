@@ -38,8 +38,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Three arguments may be optionally provided:
 
-            * \`"allow-empty-class"\` ignores \`class DemoClass {}\`.
             * \`"allow-constructor-only"\` ignores classes whose members are constructors.
+            * \`"allow-empty-class"\` ignores \`class DemoClass {}\`.
             * \`"allow-static-only"\` ignores classes whose members are static.`,
         options: {
             type: "array",
@@ -65,8 +65,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 const OPTION__ALLOW_CONSTRUCTOR_ONLY = "allow-constructor-only";
-const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
 const OPTION__ALLOW_EMPTY_CLASS = "allow-empty-class";
+const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
 
 class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
@@ -83,14 +83,16 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
                     return ts.forEachChild(node, checkIfStaticOnlyClass);
                 }
 
-                if (allClassMembersAreConstructors(node) && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY)) {
+                const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
+
+                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY)) {
                     this.addFailureAtNode(
                         getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
                     );
                     return;
                 }
 
-                if (!this.hasOption(OPTION__ALLOW_STATIC_ONLY) && !allClassMembersAreConstructors(node)) {
+                if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
                     for (const member of node.members) {
                         if (isConstructorWithShorthandProps(member) ||
                         (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
@@ -117,10 +119,6 @@ function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
 
 function isConstructorWithClassDeclaration(member: ts.ClassElement): boolean {
     return (isConstructorDeclaration(member) && member.body !== undefined) ? member.body.statements.some(isClassDeclaration) : false;
-}
-
-function allClassMembersAreConstructors(declaration: ts.ClassDeclaration): boolean {
-    return isClassDeclaration(declaration) && declaration.members.every(isConstructorDeclaration);
 }
 
 function isConstructorWithShorthandProps(member: ts.ClassElement): boolean {
