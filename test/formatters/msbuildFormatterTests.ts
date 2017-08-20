@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
+import * as path from "path";
 
 describe("MSBuild Formatter", () => {
     const TEST_FILE = "formatters/msbuildFormatter.test.ts";
@@ -55,6 +56,6 @@ describe("MSBuild Formatter", () => {
     });
 
     function getFailureString(file: string, line: number, character: number, reason: string, ruleCamelCase: string, severity: string) {
-        return `${file}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
+        return `${path.normalize(file)}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
     }
 });

@@ -18,6 +18,7 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
+import * as path from "path";
 
 import { camelize, dedent } from "../utils";
 
@@ -36,7 +37,7 @@ export class Formatter extends AbstractFormatter {
 
     public format(failures: RuleFailure[]): string {
         const outputLines = failures.map((failure: RuleFailure) => {
-            const fileName = failure.getFileName();
+            const fileName = path.normalize(failure.getFileName());
             const failureString = failure.getFailure();
             const camelizedRule = camelize(failure.getRuleName());
 
