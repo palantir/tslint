@@ -45,7 +45,7 @@ interface Argv {
 interface Option {
     short?: string;
     // Commander will camelCase option names.
-    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
+    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check" | "color" | "no-color";
     type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
@@ -185,6 +185,24 @@ const options: Option[] = [
         description: dedent`
             Checks for type errors before linting a project. --project must be
             specified in order to enable type checking.`,
+    },
+    {
+        name: "color",
+        type: "boolean",
+        describe: "force enabling of colors",
+        description: dedent`
+            Built-in formatters adjust to the terminal window, and disable
+            ANSI-escape coloring when the stdio streams are not associated
+            with a TTY. This flag allows you to force coloring, which might be
+            useful, when you have to run tslint in a forked process.`,
+    },
+    {
+        name: "no-color",
+        type: "boolean",
+        describe: "force disabling of colors",
+        description: dedent`
+            Some built-in formatters enable ANSI-escape coloring when possible.
+            Pass this flag to disable coloring and output only text.`,
     },
 ];
 

@@ -47,6 +47,8 @@ Options:
 -t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
 --type-check          enable type checking when linting a project
+--color               force enabling of colors
+--no-color            force disabling of colors
 -v, --version         current version
 ```
 
@@ -130,6 +132,16 @@ tslint accepts the following command-line options:
 --type-check
     Enables the type checker when running linting rules. --project must be
     specified in order to enable type checking.
+
+--color:
+    Built-in formatters adjust to the terminal window, and disable
+    ANSI-escape coloring when the stdio streams are not associated
+    with a TTY. This flag allows you to force coloring, which might be
+    useful, when you have to run tslint in a forked process.
+
+--no-color:
+    Some built-in formatters enable ANSI-escape coloring when possible.
+    Pass this flag to disable coloring and output only text.
 
 -v, --version:
     The current version of tslint.
