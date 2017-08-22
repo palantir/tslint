@@ -15,11 +15,11 @@
  */
 
 import { assert } from "chai";
+import * as path from "path";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
-import * as path from "path";
 
 describe("MSBuild Formatter", () => {
     const TEST_FILE = "formatters/msbuildFormatter.test.ts";
