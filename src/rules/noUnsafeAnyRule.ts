@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isInterfaceType, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -79,9 +79,10 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.ImportEqualsDeclaration: // TODO import Foo from Bar.Foo, where Bar is any
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
+            case ts.SyntaxKind.ExportAssignment:
+            case ts.SyntaxKind.SuperKeyword:
                 return false;
             case ts.SyntaxKind.ThisKeyword:
-            case ts.SyntaxKind.SuperKeyword:
             case ts.SyntaxKind.Identifier:
                 return anyOk ? false : this.check(node as ts.Expression);
             // Recurse through these, but ignore the immediate child because it is allowed to be 'any'.
@@ -98,12 +99,22 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                              ts.VoidExpression).expression,
                     /*anyOk*/ true,
                 );
-            case ts.SyntaxKind.PropertyAssignment:
-                // The LHS will be 'any' if the RHS is, so just handle the RHS.
-                // Still need to check the LHS in case it is a computed key.
-                this.visitNode((node as ts.PropertyAssignment).name, /*anyOk*/ true);
-                // TODO verify this
-                return this.checkContextual((node as ts.PropertyAssignment).initializer);
+            case ts.SyntaxKind.PropertyAssignment: {
+                const {name, initializer} = (node as ts.PropertyAssignment);
+                this.visitNode(name, /*anyOk*/ true);
+                if (isReassignmentTarget(node.parent as ts.ObjectLiteralExpression)) {
+                    return this.visitNode(initializer, true);
+                }
+                return this.checkContextual(initializer);
+            }
+            case ts.SyntaxKind.ShorthandPropertyAssignment: {
+                const { name, objectAssignmentInitializer} = node as ts.ShorthandPropertyAssignment;
+                if (objectAssignmentInitializer !== undefined) {
+                    return this.checkContextual(objectAssignmentInitializer);
+                }
+                const type = this.checker.getContextualType(name);
+                return this.visitNode(name, type === undefined || isAny(type));
+            }
             case ts.SyntaxKind.PropertyDeclaration: {
                 const { name, initializer } = node as ts.PropertyDeclaration;
                 this.visitNode(name, true);
@@ -228,9 +239,11 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.BindingElement: {
                 const {name, initializer} = node as ts.BindingElement;
                 if (name.kind !== ts.SyntaxKind.Identifier) {
+                    if (isAny(this.checker.getTypeAtLocation(name))) {
+                        this.addFailureAtNode(name, Rule.FAILURE_STRING);
+                    }
                     this.visitNode(name);
                 }
-                // TODO verify this
                 return initializer !== undefined && this.checkContextual(initializer);
             }
             case ts.SyntaxKind.AwaitExpression:
@@ -244,9 +257,14 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.ClassDeclaration:
                 this.checkClassLikeDeclaration(node as ts.ClassDeclaration);
                 return false;
+            case ts.SyntaxKind.ArrayLiteralExpression: {
+                for (const element of (node as ts.ArrayLiteralExpression).elements) {
+                    this.checkContextual(element);
+                }
+                return false;
+            }
             // TODO JsxExpression
             // TODO JsxElement
-            // TODO failing Tests for declared type on ts<2.4
 
         }
         if (isTypeNodeKind(node.kind) || node.kind >= ts.SyntaxKind.FirstKeyword && node.kind <= ts.SyntaxKind.LastKeyword) {
@@ -269,12 +287,18 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     // Allow `const x = foo;` and `const x: any = foo`, but not `const x: Foo = foo;`.
     private checkVariableDeclaration({ name, type, initializer }: ts.VariableDeclaration) {
-        this.visitNode(name, true);
+        if (name.kind !== ts.SyntaxKind.Identifier) {
+            if (isAny(this.checker.getTypeAtLocation(name))) {
+                this.addFailureAtNode(name, Rule.FAILURE_STRING);
+            }
+            this.visitNode(name);
+        }
         // Always allow the LHS to be `any`. Just don't allow RHS to be `any` when LHS isn't.
         return initializer !== undefined &&
             this.visitNode(
                 initializer,
-                /*anyOk*/ name.kind === ts.SyntaxKind.Identifier && (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword),
+                /*anyOk*/ name.kind === ts.SyntaxKind.Identifier && (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword) ||
+                type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword,
             );
     }
 
@@ -333,23 +357,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
-    const type = checker.getTypeAtLocation(node);
-    if (isAny(type)) {
-        return true;
-    }
-    if (type === undefined) {
-        return false;
-    }
-    // check if type extends any
-    if (isInterfaceType(type) && isAny(checker.getBaseTypes(type)[0])) {
-        return true;
-    }
-    // check if declared type extends any
-    if (type.symbol === undefined) {
-        return false;
-    }
-    const declaredType = checker.getDeclaredTypeOfSymbol(type.symbol);
-    return isInterfaceType(declaredType) && isAny(checker.getBaseTypes(declaredType)[0]);
+    return isAny(checker.getTypeAtLocation(node));
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {

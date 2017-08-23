@@ -11,6 +11,7 @@ const num: namespaceImport.T = 0;
     const { x: { y, z } } = { x: { y: 1, z: 2 } };
     function f(a: any, b: { x: any }) {
         const { g } = a;
+              ~~~~~ [0]
                       ~ [0]
         const { x } = b;
     }
@@ -203,37 +204,53 @@ function *gen1(): any {
      ~~~~~ [0]
 }
 
-declare let x: any;
-class Clazz extends x {}
-                    ~ [0]
-Clazz.foo;
-~~~~~ [0]
-{
-    let obj = new Clazz();
-                  ~~~~~ [0]
-    obj.foo;
-    ~~~ [0]
-}
-
-declare let obj: {[key: string]: any};
-obj.foo;
-
-{
-    let someObj: {} = class extends x {}
-                      ~~~~~~~~~~~~~~~~~~ [0]
-                                    ~ [0]
-    let C = class extends x {}
-                          ~ [0]
-    C.foo;
-    ~ [0]
-    (new C()).foo;
-         ~ [0]
-    let c = new C()
-                ~ [0]
-    c.foo;
-    ~ [0]
-}
-
 void x;
+
+{
+    let { a = x, b = x, c: d = x }: { a: number, b: any, c: string } = { a: 1, b: true, c: '' };
+              ~ [0]
+                               ~ [0]
+}
+{
+    let {a, b} = x;
+        ~~~~~~ [0]
+                 ~ [0]
+    let {c, d}: any = x;
+        ~~~~~~ [0]
+    let {x: {e, f}} = {x};
+            ~~~~~~ [0]
+                       ~ [0]
+    let {x: {g, h}}: {x: any} = {x};
+            ~~~~~~ [0]
+    ({a, b} = x);
+              ~ [0]
+    ({x: {a, b}} = {x});
+                    ~ [0]
+}
+{
+    let obj = {x};
+    let {x: {a, b}} = obj;
+            ~~~~~~ [0]
+    ({x: {a, b}} = obj); // TODO show error on the inner destructuring
+}
+{
+    let { a = x, b = x, c: d = x } = { a: 1, b: true, c: '' };
+              ~ [0]
+                     ~ [0]
+                               ~ [0]
+}
+{
+    let obj: {a: any, b: any} = null!;
+    let {a = x, b = x}: {a: number, b: any} = obj;
+             ~ [0]
+}
+{
+    let a: number;
+    let b: any;
+    let c: string;
+    ({a = x, b: b = x, d: c = x} = {a: 1, b: x, d: ''});
+          ~ [0]
+                              ~ [0]
+}
 
 [0]: Unsafe use of expression of type 'any'.
