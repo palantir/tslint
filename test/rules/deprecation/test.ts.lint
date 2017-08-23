@@ -1,17 +1,25 @@
+// don't show an error on imports, because they don't do any harm if not used
 import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
-       ~~~ [errmsg % ('def', 'deprecated default export')]
-             ~~~~~          [errmsg % ('other', 'reason')]
-                    ~~~~~~  [err % ('other2')]
+import * as namespaceImport from './other.test';
 import * as other2 from './other2.test';
-            ~~~~~~ [err % ('other2')]
+
 other();
 ~~~~~ [errmsg % ('other', 'reason')]
+other(1);
 foobar();
 ~~~~~~ [err % ('foobar')]
+other2;
+~~~~~~ [err % ('other2')]
+
+import tmp = namespaceImport.other;
+
+tmp;
+~~~ [errmsg % ('tmp', 'reason')]
 
 declare interface D {
     /** @deprecated */ m: () => void;
 }
+
 
 declare let d: D;
 d.m();
@@ -51,6 +59,8 @@ const A = 1, B = 2;
 A + B;
 ~     [err % ('A')]
     ~ [err % ('B')]
+
+export default A;
 
 declarationIsMissing();
 
