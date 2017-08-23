@@ -8,6 +8,7 @@
     "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
     "align": {
@@ -18,7 +19,6 @@
             "elements"
         ]
     },
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"

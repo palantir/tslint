@@ -56,9 +56,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         sourceFile.statements.forEach(this.noCheck);
     }
 
-    private noCheck = (node: ts.Node) =>  {
-        return void this.visitNode(node);
-    }
+    private noCheck = (node: ts.Node) => void this.visitNode(node);
 
     private visitNode(node: ts.Node, anyOk?: boolean): boolean | undefined {
         switch (node.kind) {

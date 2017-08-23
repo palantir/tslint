@@ -45,9 +45,14 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), {
-            ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1,
-        });
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            {
+                ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1,
+            },
+            program.getTypeChecker(),
+        );
     }
 }
 

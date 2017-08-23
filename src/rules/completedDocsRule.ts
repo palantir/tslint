@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -286,7 +287,7 @@ abstract class Requirement<TDescriptor extends RequirementDescriptor> {
 class BlockRequirement extends Requirement<IBlockRequirementDescriptor> {
     public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
 
-    public shouldNodeBeDocumented(node: ts.Declaration): boolean {
+    public shouldNodeBeDocumented(node: ts.Node): boolean {
         if (this.visibilities.has(ALL)) {
             return true;
         }
@@ -303,11 +304,11 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
     public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
-    public shouldNodeBeDocumented(node: ts.Declaration) {
+    public shouldNodeBeDocumented(node: ts.Node) {
         return this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node);
     }
 
-    private shouldLocationBeDocumented(node: ts.Declaration) {
+    private shouldLocationBeDocumented(node: ts.Node) {
         if (this.locations.has(ALL)) {
             return true;
         }
@@ -319,7 +320,7 @@ class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
         return this.locations.has(LOCATION_INSTANCE);
     }
 
-    private shouldPrivacyBeDocumented(node: ts.Declaration) {
+    private shouldPrivacyBeDocumented(node: ts.Node) {
         if (this.privacies.has(ALL)) {
             return true;
         }
@@ -395,11 +396,33 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.checkNode(node, ARGUMENT_VARIABLES);
+        this.checkVariable(node);
         super.visitVariableDeclaration(node);
     }
 
-    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Declaration = node): void {
+    private checkVariable(node: ts.VariableDeclaration) {
+        // Only check variables in variable declaration lists
+        // and not variables in catch clauses and for loops.
+        const list = node.parent!;
+        if (!isVariableDeclarationList(list)) {
+            return;
+        }
+
+        const statement = list.parent!;
+        if (!isVariableStatement(statement)) {
+            return;
+        }
+
+        // Only check variables at the namespace/module-level or file-level
+        // and not variables declared inside functions and other things.
+        switch (statement.parent!.kind) {
+            case ts.SyntaxKind.SourceFile:
+            case ts.SyntaxKind.ModuleBlock:
+                this.checkNode(node, ARGUMENT_VARIABLES, statement);
+        }
+    }
+
+    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
         const { name } = node;
         if (name === undefined) {
             return;
@@ -423,13 +446,13 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         return nodeType.replace("-", " ");
     }
 
-    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Declaration) {
+    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
         if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
             this.addDocumentationFailure(node, nodeDescriptor, requirementNode);
         }
     }
 
-    private addDocumentationFailure(node: ts.Declaration, nodeType: string, requirementNode: ts.Declaration): void {
+    private addDocumentationFailure(node: ts.Declaration, nodeType: string, requirementNode: ts.Node): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = this.describeDocumentationFailure(requirementNode, nodeType);
@@ -437,7 +460,7 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         this.addFailureAt(start, width, description);
     }
 
-    private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
+    private describeDocumentationFailure(node: ts.Node, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
         if (node.modifiers !== undefined) {
