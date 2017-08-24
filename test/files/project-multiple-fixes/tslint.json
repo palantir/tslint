@@ -2,17 +2,6 @@
   "rules": {
     "no-consecutive-blank-lines": true,
     "no-trailing-whitespace": true,
-    "whitespace": [
-        true,
-        "check-branch",
-        "check-operator",
-        "check-preblock",
-        "check-separator",
-        "check-decl",
-        "check-module",
-        "check-type",
-        "check-typecast"
-    ],
     "trailing-comma": [
         true, {
             "multiline": "always"

@@ -73,7 +73,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
         }
 
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program);
     }
 }
 
@@ -99,8 +99,8 @@ function parseOptions(options: any[]): Options {
     return { checkParameters, ignorePattern };
 }
 
-function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
-    const { sourceFile } = ctx;
+function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
+    const { sourceFile, options: { checkParameters, ignorePattern } } = ctx;
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
     const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
@@ -151,7 +151,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - If all of the import specifiers in an import are unused, add a combined failure for them all.
  * - Unused imports are fixable.
  */
-function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);
@@ -227,6 +227,12 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         function removeAll(errorNode: ts.Node, failure: string): void {
             const start = importNode.getStart();
             let end = importNode.getEnd();
+            utils.forEachToken(importNode, (token) => {
+                ts.forEachTrailingCommentRange(
+                    ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
+                        end = commentEnd;
+                    });
+            }, ctx.sourceFile);
             if (isEntireLine(start, end)) {
                 end = getNextLineStart(end);
             }

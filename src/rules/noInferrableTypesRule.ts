@@ -89,7 +89,10 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
     }
 }
 
-function shouldCheck(node: ts.Node, { ignoreParameters, ignoreProperties }: Options): node is ts.VariableLikeDeclaration {
+function shouldCheck(
+    node: ts.Node,
+    { ignoreParameters, ignoreProperties }: Options,
+): node is ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration {
     switch (node.kind) {
         case ts.SyntaxKind.Parameter:
             return !ignoreParameters &&

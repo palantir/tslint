@@ -463,7 +463,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     }
 
     if (isFunction(options)) {
-        cb = options as ExecFileCallback;
+        cb = options;
         options = {};
     }
 
@@ -475,7 +475,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): boolean {
+function isFunction(fn: any): fn is (...args: any[]) => any {
     return ({}).toString.call(fn) === "[object Function]";
 }
 
