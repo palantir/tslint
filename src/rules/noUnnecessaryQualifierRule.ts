@@ -125,7 +125,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
             return accessed === inScope;
         }
-        return accessed === inScope || Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
+        return accessed === inScope ||
+            // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
+            Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
     }
 }
 
