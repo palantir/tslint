@@ -120,7 +120,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     }
 
     function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
-        // TODO remove type assertion on update to typescript@2.5.0
+        // TODO remove type assertion on update to typescript@2.6.0
         if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
             inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
         }
