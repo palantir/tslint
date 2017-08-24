@@ -123,8 +123,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         // TODO remove type assertion on update to typescript@2.6.0
         if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
             inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
+            return accessed === inScope;
         }
-        return accessed === inScope;
+        return accessed === inScope || Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
     }
 }
 
