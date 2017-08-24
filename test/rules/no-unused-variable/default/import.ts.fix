@@ -17,6 +17,9 @@ import {a14, a16} from "a";
 a14;
 a16;
 
+// Leading comment will not be deleted
+// Next comment will not be deleted
+
 export import a = require("a");
 
 $(_.xyz());
