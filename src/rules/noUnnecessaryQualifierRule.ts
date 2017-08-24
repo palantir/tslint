@@ -98,7 +98,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         // If the symbol in scope is different, the qualifier is necessary.
         const fromScope = getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
-        return fromScope === undefined || Lint.Utils.arraysAreEqual(fromScope.declarations, accessedSymbol.declarations, (a, b) => a === b);
+        return fromScope === undefined || symbolsAreEqual(accessedSymbol, fromScope);
     }
 
     function getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {
@@ -117,6 +117,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         const alias = tryGetAliasedSymbol(symbol, checker);
         return alias !== undefined && symbolIsNamespaceInScope(alias);
+    }
+
+    function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
+        // TODO remove type assertion on update to typescript@2.6.0
+        if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
+            inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
+            return accessed === inScope;
+        }
+        return accessed === inScope ||
+            // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
+            Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
     }
 }
 
