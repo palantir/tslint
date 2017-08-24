@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, getModifier, getNextToken, isClassLikeDeclaration } from "tsutils";
+import { getChildOfKind, getModifier, getNextToken, getTokenAtPosition, isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -136,10 +136,15 @@ function walk(ctx: Lint.WalkContext<Options>) {
             ctx.addFailureAtNode(
                 nameNode,
                 Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName),
-                Lint.Replacement.appendText(node.getStart(ctx.sourceFile), "public "),
+                Lint.Replacement.appendText(getInsertionPosition(node, ctx.sourceFile), "public "),
             );
         }
     }
+}
+
+function getInsertionPosition(member: ts.ClassElement, sourceFile: ts.SourceFile): number {
+    const node = member.decorators === undefined ? member : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
+    return node.getStart(sourceFile);
 }
 
 function typeToString(node: ts.ClassElement): string {
