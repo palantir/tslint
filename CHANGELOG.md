@@ -1,6 +1,50 @@
 Change Log
 ===
 
+v5.7.0
+---
+
+## :tada: New rules, options, and fixers
+
+- [new-rule] [`no-parameter-reassignment`](https://palantir.github.io/tslint/rules/no-parameter-reassignment/) (#3045)
+- [new-rule-option]: [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): Add `match-declaration-order` option (#2829)
+- [new-rule-option] `check-type-operator` for [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) rule (#3083)
+- [new-rule-option] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): Add `check-rest-spread` option (#3089)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [api] `AbstractRule#applyWithFunction` allows additional parameter that is passed through to `walkFn` (#3140)
+- [api] `AbstractRule#applyWithFunction` has better type checking for its type parameter (#2660)
+- [bugfix] [`member-access`](https://palantir.github.io/tslint/rules/member-access/) autofix now correcly inserts `public` keyword after decorators (#3162)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/) correctly handle `catch` without binding parameter introduced in `typescript@2.5.1` (#3151)
+- [bugfix] [`no-invalid-template-strings`](https://palantir.github.io/tslint/rules/no-invalid-template-strings/) allows backslash-prefixed template expressions  (#3116)
+- [bugfix] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) no longer shows errors on imports and exports (#3141)
+- [bugfix] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/): fix false positive when calling a function or method where another overload is deprecated (#2883)
+- [bugfix] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): fixed `"check-separator"` for trivial `for` cases. (#3132)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) prevent spreading `this` as it is not allowed by the compiler (#3126)
+- [bugfix] `msbuild` formatter uses backslashes in paths on Windows (#3145)
+- [bugfix] [`no-namespace`](https://palantir.github.io/tslint/rules/no-namespace/) ignores global augmentation (#3161)
+- [enhancement] remove superfluous empty lines on tslint output. (#3121)
+- [enhancement] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) allows whitelisting of submodules like `@angular/core/testing` (#3129)
+- [enhancement] custom lint rules will be resolved using node's path resolution to allow for loaders like `ts-node` (#3108)
+- [enhancement] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) no longer requires `"single"` or `"double"` to be the first option. The rule defaults to `"double"` if none is specified. (#3114)
+- [enhancement] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) autofix removes trailing comments of imports (#3156)
+- [enhancement] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) allows certain necessary assertions to prevent type widening (#3120)
+
+Thanks to our contributors!
+
+- Paul Gschwendtner
+- Andy Hanson
+- ksvitkovsky
+- Santi Albo
+- aervin
+- Junle Li
+- Joscha Feth
+- WiseBird
+- Caleb Eggensperger
+- WGroenestein
+- Bowen Ni
+
 v5.6.0
 ---
 
