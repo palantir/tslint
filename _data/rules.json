@@ -1309,7 +1309,7 @@
   {
     "ruleName": "no-floating-promises",
     "description": "Promises returned by functions must be handled appropriately.",
-    "descriptionDetails": "Use `no-unused-expressions` in addition to this rule to reveal even more floating promises.",
+    "descriptionDetails": "Use `no-unused-expression` in addition to this rule to reveal even more floating promises.",
     "optionsDescription": "\nA list of 'string' names of any additional classes that should also be handled as Promises.\n        ",
     "options": {
       "type": "list",
@@ -1605,6 +1605,17 @@
     "typescriptOnly": true
   },
   {
+    "ruleName": "no-parameter-reassignment",
+    "description": "Disallows reassigning parameters.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "typescript",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-reference-import",
     "description": "Don't `<reference types=\"foo\" />` if you import `foo` anyway.",
     "optionsDescription": "Not configurable.",
@@ -1726,20 +1737,20 @@
     "ruleName": "no-submodule-imports",
     "description": "\nDisallows importing any submodule.",
     "rationale": "\nSubmodules of some packages are treated as private APIs and the import\npaths may change without deprecation periods. It's best to stick with\ntop-level package exports.",
-    "optionsDescription": "A list of packages whose submodules are whitelisted.",
+    "optionsDescription": "A list of whitelisted package or submodule names.",
     "options": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "minLength": 0
+      }
     },
     "optionExamples": [
       true,
       [
         true,
         "rxjs",
-        "@angular/core"
+        "@angular/platform-browser",
+        "@angular/core/testing"
       ]
     ],
     "type": "functionality",
@@ -2095,20 +2106,22 @@
   },
   {
     "ruleName": "object-literal-sort-keys",
-    "description": "Requires keys in object literals to be sorted alphabetically",
+    "description": "Checks ordering of keys in object literals.",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "You may optionally pass \"ignore-case\" to compare keys case insensitive.",
+    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will to compare keys in a case insensitive way.\n* \"match-declaration-order will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n",
     "options": {
       "type": "string",
       "enum": [
-        "ignore-case"
+        "ignore-case",
+        "match-declaration-order"
       ]
     },
     "optionExamples": [
       true,
       [
         true,
-        "ignore-case"
+        "ignore-case",
+        "match-declaration-order"
       ]
     ],
     "type": "maintainability",
@@ -2421,7 +2434,8 @@
           "double",
           "jsx-single",
           "jsx-double",
-          "avoid-escape"
+          "avoid-escape",
+          "avoid-template"
         ]
       },
       "minLength": 0,
@@ -3129,7 +3143,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nEight arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
+    "optionsDescription": "\nTen arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-rest-spread\"` checks that there is no whitespace after rest/spread operator (`...`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-type-operator\"` checks for whitespace between type operators `|` and `&`.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
     "options": {
       "type": "array",
       "items": {
@@ -3140,13 +3154,15 @@
           "check-operator",
           "check-module",
           "check-separator",
+          "check-rest-spread",
           "check-type",
           "check-typecast",
+          "check-type-operator",
           "check-preblock"
         ]
       },
       "minLength": 0,
-      "maxLength": 7
+      "maxLength": 10
     },
     "optionExamples": [
       [
