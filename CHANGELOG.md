@@ -23,6 +23,7 @@ v5.7.0
 - [bugfix] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): fixed `"check-separator"` for trivial `for` cases. (#3132)
 - [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) prevent spreading `this` as it is not allowed by the compiler (#3126)
 - [bugfix] `msbuild` formatter uses backslashes in paths on Windows (#3145)
+- [bugfix] [`no-namespace`](https://palantir.github.io/tslint/rules/no-namespace/) ignores global augmentation (#3161)
 - [enhancement] remove superfluous empty lines on tslint output. (#3121)
 - [enhancement] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) allows whitelisting of submodules like `@angular/core/testing` (#3129)
 - [enhancement] custom lint rules will be resolved using node's path resolution to allow for loaders like `ts-node` (#3108)
