@@ -37,17 +37,18 @@ export const rules = {
     "prefer-object-spread": true,
 
     // added in v5.4
-    "no-duplicate-variable": [
-        true,
-        "check-parameters",
-    ],
+    "no-duplicate-variable": {
+        "options": ["check-parameters"],
+    },
 
     // added in v5.5
     "no-this-assignment": true,
 
     // added in v5.6
     "no-duplicate-imports": true,
-    "space-within-parens": [true, 0],
+    "space-within-parens": {
+        "options": [0],
+    },
 };
 // tslint:enable object-literal-sort-keys
 

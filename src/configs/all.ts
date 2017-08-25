@@ -36,16 +36,22 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
-    "member-access": [true, "check-accessor", "check-constructor"],
-    "member-ordering": [true, {
-        "order": "statics-first",
-        "alphabetize": true,
-    }],
+    "member-access": {
+        "options": ["check-accessor", "check-constructor"],
+    },
+    "member-ordering": {
+        "options": [{
+            "order": "statics-first",
+            "alphabetize": true,
+        }],
+    },
     "no-any": true,
     "no-empty-interface": true,
     "no-import-side-effect": true,
     // Technically this is not the strictest setting, but don't want to conflict with "typedef"
-    "no-inferrable-types": [true, "ignore-params"],
+    "no-inferrable-types": {
+        "options": ["ignore-params"],
+    },
     "no-internal-module": true,
     "no-magic-numbers": true,
     "no-namespace": true,
@@ -56,33 +62,35 @@ export const rules = {
     "only-arrow-functions": true,
     "prefer-for-of": true,
     "promise-function-async": true,
-    "typedef": [
-        true,
-        "call-signature",
-        "arrow-call-signature",
-        "parameter",
-        "arrow-parameter",
-        "property-declaration",
-        "variable-declaration",
-        "member-variable-declaration",
-    ],
-    "typedef-whitespace": [
-        true,
-        {
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            "parameter": "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        },
-        {
-            "call-signature": "onespace",
-            "index-signature": "onespace",
-            "parameter": "onespace",
-            "property-declaration": "onespace",
-            "variable-declaration": "onespace",
-        },
-    ],
+    "typedef": {
+        "options": [
+            "call-signature",
+            "arrow-call-signature",
+            "parameter",
+            "arrow-parameter",
+            "property-declaration",
+            "variable-declaration",
+            "member-variable-declaration",
+        ],
+    },
+    "typedef-whitespace": {
+        "options": [
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace",
+            },
+        ],
+    },
     "unified-signatures": true,
 
     // Functionality
@@ -99,10 +107,9 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
-    "no-duplicate-variable": [
-        true,
-        "check-parameters",
-    ],
+    "no-duplicate-variable": {
+        "options": ["check-parameters"],
+    },
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
@@ -140,11 +147,21 @@ export const rules = {
 
     "cyclomatic-complexity": true,
     "eofline": true,
-    "indent": [true, "spaces"],
-    "linebreak-style": [true, "LF"],
-    "max-classes-per-file": [true, 1],
-    "max-file-line-count": [true, 1000],
-    "max-line-length": [true, 120],
+    "indent": {
+        "options": ["spaces"],
+    },
+    "linebreak-style": {
+        "options": ["LF"],
+    },
+    "max-classes-per-file": {
+        "options": [1],
+    },
+    "max-file-line-count": {
+        "options": [1000],
+    },
+    "max-line-length": {
+        "options": [120],
+    },
     "no-default-export": true,
     "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
@@ -154,32 +171,40 @@ export const rules = {
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,
     "prefer-const": true,
-    "trailing-comma": [true, {
-        "multiline": "always",
-        "singleline": "never",
-    }],
+    "trailing-comma": {
+        "options": [{
+            "multiline": "always",
+            "singleline": "never",
+        }],
+    },
 
     // Style
 
-    "align": [
-        true,
-        "parameters",
-        "arguments",
-        "statements",
-        "elements",
-        "members",
-    ],
-    "array-type": [true, "array-simple"],
+    "align": {
+        "options": [
+            "parameters",
+            "arguments",
+            "statements",
+            "elements",
+            "members",
+        ],
+    },
+    "array-type": {
+        "options": ["array-simple"],
+    },
     "arrow-parens": true,
-    "arrow-return-shorthand": [true, "multiline"],
+    "arrow-return-shorthand": {
+        "options": ["multiline"],
+    },
     "binary-expression-operand-order": true,
     "callable-types": true,
     "class-name": true,
-    "comment-format": [
-        true,
-        "check-space",
-        "check-uppercase",
-    ],
+    "comment-format": {
+        "options": [
+            "check-space",
+            "check-uppercase",
+        ],
+    },
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
@@ -201,60 +226,74 @@ export const rules = {
     "no-unnecessary-qualifier": true,
     "no-unnecessary-type-assertion": true,
     "number-literal-format": true,
-    "object-literal-key-quotes": [true, "consistent-as-needed"],
+    "object-literal-key-quotes": {
+        "options": ["consistent-as-needed"],
+    },
     "object-literal-shorthand": true,
-    "one-line": [
-        true,
-        "check-catch",
-        "check-else",
-        "check-finally",
-        "check-open-brace",
-        "check-whitespace",
-    ],
+    "one-line": {
+        "options": [
+            "check-catch",
+            "check-else",
+            "check-finally",
+            "check-open-brace",
+            "check-whitespace",
+        ],
+    },
     "one-variable-per-declaration": true,
-    "ordered-imports": [true, {
-        "import-sources-order": "case-insensitive",
-        "named-imports-order": "case-insensitive",
-    }],
+    "ordered-imports": {
+        "options": [{
+            "import-sources-order": "case-insensitive",
+            "named-imports-order": "case-insensitive",
+        }],
+    },
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
-    "quotemark": [
-        true,
-        "double",
-        "avoid-escape",
-        "avoid-template",
-    ],
+    "quotemark": {
+        "options": [
+            "double",
+            "avoid-escape",
+            "avoid-template",
+        ],
+    },
     "return-undefined": true,
-    "semicolon": [true, "always"],
-    "space-before-function-paren": [true, {
-        "anonymous": "never",
-        "asyncArrow": "always",
-        "constructor": "never",
-        "method": "never",
-        "named": "never",
-    }],
-    "space-within-parens": [true, 0],
+    "semicolon": {
+        "options": ["always"],
+    },
+    "space-before-function-paren": {
+        "options": [{
+            "anonymous": "never",
+            "asyncArrow": "always",
+            "constructor": "never",
+            "method": "never",
+            "named": "never",
+        }],
+    },
+    "space-within-parens": {
+        "options": [0],
+    },
     "switch-final-break": true,
     "type-literal-delimiter": true,
-    "variable-name": [
-        true,
-        "ban-keywords",
-        "check-format",
-    ],
-    "whitespace": [
-        true,
-        "check-branch",
-        "check-decl",
-        "check-operator",
-        "check-module",
-        "check-separator",
-        "check-type",
-        "check-typecast",
-        "check-preblock",
-    ],
+    "variable-name": {
+        "options": [
+            "ban-keywords",
+            "check-format",
+        ],
+    },
+    "whitespace": {
+        "options": [
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-module",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-preblock",
+        ],
+    },
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
