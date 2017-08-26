@@ -15,34 +15,29 @@
 * limitations under the License.
 */
  
-import { getPreviousStatement, isBlock, isClassDeclaration, isFunctionWithBody, getChildOfKind } from "tsutils";
+import { getPreviousStatement, isBlock, isClassDeclaration, isFunctionWithBody } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
- 
-enum OptionState {
-    always = "always",
-    ignore = "ignore",
-    never = "never",
+
+export enum ViolationType {
+    needed = "needed",
+    needless = "needless",
 }
- 
+
 const ALWAYS_IGNORE_OR_NEVER = {
-    enum: OptionState,
+    enum: ["always", "never", "ignore"],
     type: "string",
 };
  
-type OptionName = "return" | "class" | "functionBlock" | "block";
-const optionNames: OptionName[] = ["return", "class", "functionBlock", "block"];
-type Option = "always" | "ignore" | "never";
-type Options = Partial<Record<OptionName, Option>>;
- 
-function parseOptions(json: Option | Options | undefined): Options {
-    const options: Options = { };
-    for (const optionName of optionNames) {
-        options[optionName] = typeof json === "object" ? json[optionName] : json === undefined ? "always" : json;
-    }
-    return options;
+export type OptionName = "return" | "class" | "functionBlock" | "block";
+export type Option = "always" | "ignore" | "never";
+export type Options = Record<OptionName, Option>;
+
+export function parseOptions(json: Partial<Options> | undefined) {
+    const defaultValues: Options = {return: "ignore", class: "ignore", functionBlock: "ignore", block: "ignore"};
+    return {...defaultValues, ...json};
 }
- 
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -52,9 +47,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Following arguments may be optionally provided:
  
-            * \`"return"\` checks for empty line before return when not the only line in the block.
-            * \`"class"\` checks for empty line after class declaration.
-            * \`"functionBlock"\` checks for empty line after function block declaration.
+            * \`"return"\` checks for empty listane before return when not the only statement in the block.
+            * \`"class"\` checks for empty line at the start of a class body.
+            * \`"functionBlock"\` checks for empty line at the start of a function block.
             * \`"block"\` checks for empty line after block declaration.`,
         options: {
             properties: {
@@ -71,20 +66,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
  
-    public static FAILURE_STRING_FACTORY(kind: boolean, nodeType: string) {
-        const kindMsg = kind ? 'Missing' : 'Unneeded';
+    public static FAILURE_STRING_FACTORY(kind: ViolationType, nodeType: string) {
+        const kindMsg = kind === ViolationType.needed ? 'Missing' : 'Unneeded';
         return `${kindMsg} blank line before ${nodeType}`;
     }
  
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0] as Option | Options | undefined)));
+        return this.applyWithWalker(new NewlineWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0] as Partial<Options>)));
     }
 }
  
-class NewlineWalker extends Lint.AbstractWalker<Options> {
+export class NewlineWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.ReturnStatement && this.options.return != OptionState.ignore) {
+            if (node.kind === ts.SyntaxKind.ReturnStatement && this.options.return !== "ignore") {
                 const prev = getPreviousStatement(node as ts.Statement);
                 if (prev === undefined) {
                     // return is not within a block (e.g. the only child of an IfStatement) or the first statement of the block
@@ -92,32 +87,31 @@ class NewlineWalker extends Lint.AbstractWalker<Options> {
                     return;
                 }
  
-                this.checkForEmptyLine(prev, node, this.options.return == OptionState.always, 'return');
-            }
- 
-            if (isClassDeclaration(node) && this.options.class != OptionState.ignore) {
+                this.checkForEmptyLine(prev.end, node, this.options.return === "always", 'return');
+            } else if (isClassDeclaration(node) && this.options.class !== "ignore" && node.members.length > 0) {
                 this.checkForEmptyLine(
-                    getChildOfKind(node, ts.SyntaxKind.OpenBraceToken, this.sourceFile)!, node.members[0],
-                    this.options.class == OptionState.always, 'first member',
+                    node.members[0].pos, node.members[0],
+                    this.options.class === "always", 'first member',
                 );
-            }
- 
-            if (isBlock(node) &&
-                    (isFunctionWithBody(node.parent!) && this.options.functionBlock != OptionState.ignore
-                        || this.options.block != OptionState.ignore)) {
-                this.checkForEmptyLine(
-                    node.getChildAt(0), node.statements[0], this.options.functionBlock == OptionState.always, 'first statement',
-                );
+            } else if (isBlock(node) && node.statements.length > 0) {
+                if (isFunctionWithBody(node.parent!) && this.options.functionBlock !== "ignore") {
+                    this.checkForEmptyLine(
+                        node.statements[0].pos, node.statements[0], this.options.functionBlock === "always", 'first statement',
+                    );
+                } else if (this.options.block !== "ignore") {
+                    this.checkForEmptyLine(
+                        node.statements[0].pos, node.statements[0], this.options.block === "always", 'first statement',
+                    );
+                }
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
  
-    private checkForEmptyLine(node: ts.Node, firstNode: ts.Node, lineRequired: boolean, nodeType: string) {
-        let start = node.end;
+    private checkForEmptyLine(start: number, firstNode: ts.Node, lineRequired: boolean, nodeType: string) {
         let line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
-        let firstNodeStart = firstNode.getStart();
+        let firstNodeStart = firstNode.getStart(this.sourceFile);
         let firstLine = ts.getLineAndCharacterOfPosition(this.sourceFile, firstNodeStart).line;
         const comments = ts.getLeadingCommentRanges(this.sourceFile.text, firstNode.pos);
  
@@ -140,11 +134,11 @@ class NewlineWalker extends Lint.AbstractWalker<Options> {
         if (!lineRequired && line + 1 < firstLine) {
             this.addFailure(
                 start + 1, ts.getPositionOfLineAndCharacter(this.sourceFile, firstLine, 0) - 1,
-                Rule.FAILURE_STRING_FACTORY(lineRequired, nodeType)
+                Rule.FAILURE_STRING_FACTORY(ViolationType.needless, nodeType)
             );
-        } else if (lineRequired && line + 1 == firstLine) {
+        } else if (lineRequired && line + 1 === firstLine) {
             const pos = ts.getPositionOfLineAndCharacter(this.sourceFile, firstLine, 0);
-            this.addFailure(pos, pos, Rule.FAILURE_STRING_FACTORY(lineRequired, nodeType));
+            this.addFailure(pos, pos, Rule.FAILURE_STRING_FACTORY(ViolationType.needed, nodeType));
         }
     }
 }
