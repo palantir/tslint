@@ -576,3 +576,28 @@ export {
 
 // don't crash
 new Foo
+
+let {
+    x,
+    ...y,
+        ~ [Unnecessary trailing comma]
+} = {};
+let [
+    x,
+    ...y,
+        ~ [Unnecessary trailing comma]
+] = [];
+
+[
+    ...y,
+        ~ [Unnecessary trailing comma]
+] = [];
+({
+    ...y,
+        ~ [Unnecessary trailing comma]
+} = {})
+funciton foo(
+    x,
+    ...y,
+        ~ [Unnecessary trailing comma]
+) {}
