@@ -25,7 +25,7 @@ const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
 
-// tslint:disable object-literal-sort-keys switch-default
+// tslint:disable object-literal-sort-keys
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {

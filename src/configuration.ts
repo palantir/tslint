@@ -160,7 +160,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
  */
 function findup(filename: string, directory: string): string | undefined {
-    while (true) { // tslint:disable-line strict-boolean-expressions
+    while (true) {
         const res = findFile(directory);
         if (res !== undefined) {
             return path.join(directory, res);
