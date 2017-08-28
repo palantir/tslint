@@ -77,6 +77,8 @@ Final notes:
 ts-node node_modules/.bin/tslint <your options>
 # or
 node -r ts-node/register node_modules/.bin/tslint <your options>
+# or
+NODE_OPTIONS="-r ts-node/register" tslint <your options>
 ```
 
 [0]: {{site.baseurl | append: "/usage/tslint-json/"}}
