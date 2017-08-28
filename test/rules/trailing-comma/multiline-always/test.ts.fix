@@ -563,7 +563,7 @@ let [
 ({
     ...y
 } = {})
-funciton foo(
+function foo(
     x,
     ...y
 ) {}

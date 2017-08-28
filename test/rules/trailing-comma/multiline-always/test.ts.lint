@@ -580,24 +580,24 @@ new Foo
 let {
     x,
     ...y,
-        ~ [Unnecessary trailing comma]
+        ~ [Forbidden trailing comma]
 } = {};
 let [
     x,
     ...y,
-        ~ [Unnecessary trailing comma]
+        ~ [Forbidden trailing comma]
 ] = [];
 
 [
     ...y,
-        ~ [Unnecessary trailing comma]
+        ~ [Forbidden trailing comma]
 ] = [];
 ({
     ...y,
-        ~ [Unnecessary trailing comma]
+        ~ [Forbidden trailing comma]
 } = {})
-funciton foo(
+function foo(
     x,
     ...y,
-        ~ [Unnecessary trailing comma]
+        ~ [Forbidden trailing comma]
 ) {}
