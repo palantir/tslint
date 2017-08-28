@@ -64,6 +64,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
             * \`"any"\`: Allow any order.
 
+            You may set the \`"module-source-path"\` option to control the ordering of imports based full path
+            or just the module name
+
+            Possible values for \`"module-source-path"\` are:
+
+            * \`"full-path'\`: Correct order is  \`"./a/Foo"\`, \`"./b/baz"\`, \`"./c/Bar"\`. (This is the default.)
+            * \`"module-name"\`: Correct order is \`"./c/Bar"\`, \`"./b/baz"\`, \`"./a/Foo"\`.
+
         `,
         options: {
             type: "object",
@@ -75,6 +83,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                 "named-imports-order": {
                     type: "string",
                     enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                },
+                "module-source-path": {
+                    type: "string",
+                    enum: ["full-path", "module-name"],
                 },
             },
             additionalProperties: false,
@@ -104,16 +116,26 @@ const TRANSFORMS = new Map<string, Transform>([
     ["case-insensitive", (x) => x.toLowerCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", (x) => x],
+    ["full-path", () => ""],
+    ["module-name", (x) => {
+        const splitIndex = x.lastIndexOf('/');
+        if (splitIndex === -1) {
+            return x;
+        }
+        return x.substr(splitIndex + 1);
+    }]
 ]);
 
 interface Options {
     importSourcesOrderTransform: Transform;
     namedImportsOrderTransform: Transform;
+    moduleSourcePath: Transform
 }
 
 interface JsonOptions {
     "import-sources-order"?: string;
     "named-imports-order"?: string;
+    "module-source-path"?: string;
 }
 
 function parseOptions(ruleArguments: any[]): Options {
@@ -121,10 +143,12 @@ function parseOptions(ruleArguments: any[]): Options {
     const {
         "import-sources-order": sources = "case-insensitive",
         "named-imports-order": named = "case-insensitive",
+        "module-source-path": path = "full-path",
     } = optionSet === undefined ? {} : optionSet;
     return {
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
         namedImportsOrderTransform: TRANSFORMS.get(named)!,
+        moduleSourcePath: TRANSFORMS.get(path)!,
     };
 }
 
@@ -196,10 +220,11 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkSource(source: string, node: ImportDeclaration["node"]) {
+        const currentSource = this.options.moduleSourcePath(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, source);
+        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource);
 
-        if (previousSource !== null && compare(source, previousSource) === -1) {
+        if (previousSource !== null && compare(currentSource, previousSource) === -1) {
             this.lastFix = [];
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
