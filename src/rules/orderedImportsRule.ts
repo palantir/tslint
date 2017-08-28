@@ -347,7 +347,6 @@ function findUnsortedPair(xs: ReadonlyArray<ts.Node>, transform: (x: string) => 
     return undefined;
 }
 
-// tslint:disable-next-line no-unsafe-any (fixed in 5.3)
 function compare(a: string, b: string): 0 | 1 | -1 {
     function isLow(value: string) {
         return value[0] === "." || value[0] === "/";
