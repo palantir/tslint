@@ -1,0 +1,76 @@
+let {
+    ...x,
+        ~ [Forbidden trailing comma]
+} = {};
+let [
+    ...y,
+        ~ [Forbidden trailing comma]
+] = [];
+
+[
+    ...y,
+        ~ [Forbidden trailing comma]
+] = [];
+({
+    ...y,
+        ~ [Forbidden trailing comma]
+} = {})
+function foo(
+    ...z,
+        ~ [Forbidden trailing comma]
+) {}
+
+
+let {...x,} = {};
+         ~ [Forbidden trailing comma]
+let [...y,] = [];
+         ~ [Forbidden trailing comma]
+[...y,] = [];
+     ~ [Forbidden trailing comma]
+({...y,} = {})
+      ~ [Forbidden trailing comma]
+function foo(...z,) {}
+                 ~ [Forbidden trailing comma]
+
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
+
+
+[...y] = [...y];
+              ~nil [Missing trailing comma]
+({
+    ...x
+} = {
+    ...x
+        ~nil [Missing trailing comma]
+});
+({
+    ...x
+} = {
+    ...x,
+    y
+     ~nil [Missing trailing comma]
+})
+foo(...y);
+        ~nil [Missing trailing comma]

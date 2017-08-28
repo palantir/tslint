@@ -578,26 +578,54 @@ export {
 new Foo
 
 let {
-    x,
-    ...y,
-        ~ [Forbidden trailing comma]
+    ...x,
 } = {};
 let [
-    x,
     ...y,
-        ~ [Forbidden trailing comma]
 ] = [];
 
 [
     ...y,
-        ~ [Forbidden trailing comma]
 ] = [];
 ({
     ...y,
-        ~ [Forbidden trailing comma]
 } = {})
 function foo(
-    x,
-    ...y,
-        ~ [Forbidden trailing comma]
+    ...z,
 ) {}
+
+
+let {...x,} = {};
+let [...y,] = [];
+[...y,] = [];
+({...y,} = {})
+function foo(...z,) {}
+
+let {
+    ...x
+        ~nil [Missing trailing comma]
+} = {};
+let [
+    ...y
+        ~nil [Missing trailing comma]
+] = [];
+
+[
+    ...y
+        ~nil [Missing trailing comma]
+] = [];
+({
+    ...y
+        ~nil [Missing trailing comma]
+} = {})
+function foo(
+    ...z
+        ~nil [Missing trailing comma]
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
