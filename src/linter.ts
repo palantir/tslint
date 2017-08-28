@@ -106,8 +106,7 @@ class Linter {
 
         // add rule severity to failures
         const ruleSeverityMap = new Map(enabledRules.map(
-            // tslint:disable-next-line no-unnecessary-type-assertion
-            (rule) => [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity]));
+            (rule): [string, RuleSeverity] => [rule.getOptions().ruleName, rule.getOptions().ruleSeverity]));
 
         for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
