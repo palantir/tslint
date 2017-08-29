@@ -116,7 +116,7 @@ const TRANSFORMS = new Map<string, Transform>([
     ["case-insensitive", (x) => x.toLowerCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", (x) => x],
-    ["full-path", () => ""],
+    ["full-path", (x) => x],
     ["module-name", (x) => {
         const splitIndex = x.lastIndexOf('/');
         if (splitIndex === -1) {
