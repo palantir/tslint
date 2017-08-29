@@ -118,18 +118,18 @@ const TRANSFORMS = new Map<string, Transform>([
     ["lowercase-last", (x) => x],
     ["full-path", (x) => x],
     ["module-name", (x) => {
-        const splitIndex = x.lastIndexOf('/');
+        const splitIndex = x.lastIndexOf("/");
         if (splitIndex === -1) {
             return x;
         }
         return x.substr(splitIndex + 1);
-    }]
+    }],
 ]);
 
 interface Options {
     importSourcesOrderTransform: Transform;
+    moduleSourcePath: Transform;
     namedImportsOrderTransform: Transform;
-    moduleSourcePath: Transform
 }
 
 interface JsonOptions {
