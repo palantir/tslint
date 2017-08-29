@@ -42,8 +42,8 @@ const files = Linter.getFileNames(program);
 const results = files.map(file => {
     const fileContents = program.getSourceFile(file).getFullText();
     const configuration = Configuration.findConfiguration(configurationFilename, file).results;
-    const linter = new Linter(lintOptions, program);
-    linter.lint(fileName, fileContents, configuration);
+    const linter = new Linter(options, program);
+    linter.lint(file, fileContents, configuration);
     return linter.getResult();
 });
 ```
