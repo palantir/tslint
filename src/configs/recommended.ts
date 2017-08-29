@@ -128,8 +128,8 @@ export const rules = {
     "ordered-imports": {
         options: {
             "import-sources-order": "case-insensitive",
-            "named-imports-order": "case-insensitive",
             "module-source-path": "full-path",
+            "named-imports-order": "case-insensitive",
         },
     },
     "prefer-const": true,
