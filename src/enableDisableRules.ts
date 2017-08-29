@@ -43,7 +43,7 @@ export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: Rule
         return disabledIntervals === undefined || !disabledIntervals.some(({ pos, end }) => {
             const failPos = failure.getStartPosition().getPosition();
             const failEnd = failure.getEndPosition().getPosition();
-            return failEnd >= pos && (end === -1 || failPos <= end);
+            return failEnd >= pos && (end === -1 || failPos < end);
         });
     });
 }
