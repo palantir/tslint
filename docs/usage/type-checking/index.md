@@ -26,11 +26,24 @@ Use the `--type-check` flag to make sure your program has no type errors. TSLint
 To enable rules that work with the type checker, a TypeScript program object must be passed to the linter when using the programmatic API. Helper functions are provided to create a program from a `tsconfig.json` file. A project directory can be specified if project files do not lie in the same directory as the `tsconfig.json` file.
 
 ```js
+import { Linter, Configuration } from "tslint";
+
+const configurationFilename = "Specify configuration file name";
+const options = {
+    fix: false,
+    formatter: "json",
+    rulesDirectory: "customRules/",
+    formattersDirectory: "customFormatters/"
+};
+
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
+
 const files = Linter.getFileNames(program);
 const results = files.map(file => {
     const fileContents = program.getSourceFile(file).getFullText();
-    const linter = new Linter(file, fileContents, options, program);
-    return linter.lint();
+    const configuration = Configuration.findConfiguration(configurationFilename, file).results;
+    const linter = new Linter(options, program);
+    linter.lint(file, fileContents, configuration);
+    return linter.getResult();
 });
 ```
