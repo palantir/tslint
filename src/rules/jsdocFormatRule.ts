@@ -65,6 +65,10 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
 
         const alignColumn = getAlignColumn(ctx.sourceFile, pos + 1);
+        if (/\S/.test(firstLine)) {
+            // first line of multiline JSDoc should be empty, i.e. only contain whitespace
+            ctx.addFailureAt(pos, firstLine.length + 3, Rule.FORMAT_FAILURE_STRING);
+        }
         let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
         for (let i = 1; i < endIndex; ++i) {
