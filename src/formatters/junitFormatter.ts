@@ -41,7 +41,7 @@ export class Formatter extends AbstractFormatter {
         consumer: "machine",
     };
     /* tslint:enable:object-literal-sort-keys */
-    
+
     public format(failures: RuleFailure[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
@@ -51,7 +51,7 @@ export class Formatter extends AbstractFormatter {
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-                const message = this.escapeXml(failure.getFailure());   
+                const message = this.escapeXml(failure.getFailure());
                 const rule = this.escapeXml(failure.getRuleName());
                 const severity = failure.getRuleSeverity();
 
@@ -63,10 +63,10 @@ export class Formatter extends AbstractFormatter {
                     output += `<testsuite name="${this.escapeXml(failure.getFileName())}">`;
                 }
 
-                output += `<testcase name="Line ${lineAndCharacter.line + 1}, `
-                output += `Column ${lineAndCharacter.character + 1}: ${rule}">`;
+                output += `<testcase name='Line ${lineAndCharacter.line + 1}, `;
+                output += `Column ${lineAndCharacter.character + 1}: ${rule}'>`;
                 output += `<failure type="${severity}">${message}</failure>`;
-                output += `</testcase>`;
+                output += "</testcase>";
             }
             if (previousFilename !== null) {
                 output += "</testsuite>";
