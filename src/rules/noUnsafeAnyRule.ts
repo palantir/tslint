@@ -74,11 +74,10 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.TypeAliasDeclaration:
             case ts.SyntaxKind.TypeParameter:
             // Ignore imports
-            case ts.SyntaxKind.ImportEqualsDeclaration: // TODO import Foo from Bar.Foo, where Bar is any
+            case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ExportDeclaration:
             case ts.SyntaxKind.ExportAssignment:
-            case ts.SyntaxKind.SuperKeyword:
                 return false;
             case ts.SyntaxKind.ThisKeyword:
             case ts.SyntaxKind.Identifier:
@@ -103,31 +102,21 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 if (isReassignmentTarget(node.parent as ts.ObjectLiteralExpression)) {
                     return this.visitNode(initializer, true);
                 }
-                return this.checkContextual(initializer);
+                return this.checkContextual(initializer, true);
             }
             case ts.SyntaxKind.ShorthandPropertyAssignment: {
                 const { name, objectAssignmentInitializer} = node as ts.ShorthandPropertyAssignment;
                 if (objectAssignmentInitializer !== undefined) {
                     return this.checkContextual(objectAssignmentInitializer);
                 }
-                const type = this.checker.getContextualType(name);
-                return this.visitNode(name, type === undefined || isAny(type));
+                return this.checkContextual(name, true);
             }
             case ts.SyntaxKind.PropertyDeclaration: {
                 const { name, initializer } = node as ts.PropertyDeclaration;
                 this.visitNode(name, true);
                 if (initializer !== undefined) {
                     // TODO verify this
-                    return this.visitNode(initializer, /*anyOk*/ isNodeAny(name, this.checker));
-                }
-                return false;
-            }
-            case ts.SyntaxKind.Parameter: {
-                const { name, type, initializer } = node as ts.ParameterDeclaration;
-                this.visitNode(name, true);
-                if (initializer !== undefined) {
-                    // TODO verify this
-                    return this.visitNode(initializer, /*anyOk*/ type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword);
+                    return this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
                 }
                 return false;
             }
@@ -176,11 +165,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             }
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                return expression !== undefined  && this.checkContextual(expression);
-            }
-            case ts.SyntaxKind.ReturnStatement: {
-                const { expression } = node as ts.ReturnStatement;
-                return expression !== undefined  && this.checkContextual(expression);
+                return expression !== undefined  && this.checkContextual(expression, true);
             }
             case ts.SyntaxKind.SwitchStatement: {
                 const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
@@ -231,19 +216,10 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return this.visitNode(whenFalse, anyOk) || left;
             }
             case ts.SyntaxKind.VariableDeclaration:
-                return this.checkVariableDeclaration(node as ts.VariableDeclaration);
+            case ts.SyntaxKind.Parameter:
+                return this.checkVariableOrParameterDeclaration(node as ts.VariableDeclaration | ts.ParameterDeclaration);
             case ts.SyntaxKind.BinaryExpression:
                 return this.checkBinaryExpression(node as ts.BinaryExpression, anyOk);
-            case ts.SyntaxKind.BindingElement: {
-                const {name, initializer} = node as ts.BindingElement;
-                if (name.kind !== ts.SyntaxKind.Identifier) {
-                    if (isAny(this.checker.getTypeAtLocation(name))) {
-                        this.addFailureAtNode(name, Rule.FAILURE_STRING);
-                    }
-                    this.visitNode(name);
-                }
-                return initializer !== undefined && this.checkContextual(initializer);
-            }
             case ts.SyntaxKind.AwaitExpression:
                 this.visitNode((node as ts.AwaitExpression).expression);
                 return anyOk ? false : this.check(node as ts.Expression);
@@ -257,7 +233,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return false;
             case ts.SyntaxKind.ArrayLiteralExpression: {
                 for (const element of (node as ts.ArrayLiteralExpression).elements) {
-                    this.checkContextual(element);
+                    this.checkContextual(element, true);
                 }
                 return false;
             }
@@ -279,18 +255,14 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         return true;
     }
 
-    private checkContextual(node: ts.Expression) {
-        return this.visitNode(node, isAny(this.checker.getContextualType(node)));
+    private checkContextual(node: ts.Expression, allowIfNoContextualType?: boolean) {
+        const type = this.checker.getContextualType(node);
+        return this.visitNode(node, type === undefined && allowIfNoContextualType || isAny(type));
     }
 
     // Allow `const x = foo;` and `const x: any = foo`, but not `const x: Foo = foo;`.
-    private checkVariableDeclaration({ name, type, initializer }: ts.VariableDeclaration) {
-        if (name.kind !== ts.SyntaxKind.Identifier) {
-            if (isAny(this.checker.getTypeAtLocation(name))) {
-                this.addFailureAtNode(name, Rule.FAILURE_STRING);
-            }
-            this.visitNode(name);
-        }
+    private checkVariableOrParameterDeclaration({ name, type, initializer }: ts.VariableDeclaration | ts.ParameterDeclaration) {
+        this.checkBindingName(name);
         // Always allow the LHS to be `any`. Just don't allow RHS to be `any` when LHS isn't.
         return initializer !== undefined &&
             this.visitNode(
@@ -318,7 +290,6 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 break;
             case ts.SyntaxKind.EqualsToken:
                 // Allow assignment if the lhs is also *any*.
-                // TODO: handle destructuring
                 allowAnyLeft = true;
                 allowAnyRight = isNodeAny(node.left, this.checker);
                 break;
@@ -334,7 +305,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     private checkYieldExpression(node: ts.YieldExpression, anyOk: boolean | undefined) {
         if (node.expression !== undefined) {
-            this.visitNode(node.expression, true); // TODO get return type
+            this.checkContextual(node.expression, true); // TODO get return type
         }
         if (anyOk) {
             return false;
@@ -352,6 +323,39 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         }
         return node.members.forEach(this.noCheck);
     }
+
+    private checkBindingName(node: ts.BindingName) {
+        if (node.kind !== ts.SyntaxKind.Identifier) {
+            if (isNodeAny(node, this.checker)) {
+                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
+            for (const element of node.elements) {
+                if (element.kind !== ts.SyntaxKind.OmittedExpression) {
+                    if (element.propertyName !== undefined && element.propertyName.kind === ts.SyntaxKind.ComputedPropertyName) {
+                        this.visitNode(element.propertyName.expression);
+                    }
+                    this.checkBindingName(element.name);
+                    if (element.initializer !== undefined) {
+                        this.checkContextual(element.initializer);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Check if property has no type annotation in this class and the base class */
+function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
+    if (!isNodeAny(node.name, checker) || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
+        return false;
+    }
+    for (const base of checker.getBaseTypes(checker.getTypeAtLocation(node.parent!) as ts.InterfaceType)) {
+        const prop = base.getProperty(node.name.text);
+        if (prop !== undefined && prop.declarations !== undefined) {
+            return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]));
+        }
+    }
+    return true;
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
