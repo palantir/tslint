@@ -286,4 +286,13 @@ void x;
 for (const {prop} of [x]) {}
            ~~~~~~ [0]
 
+function predicate(x: any): x is number {
+    return typeof x === 'number';
+}
+
+function hasThisParameter(this: any) {
+    const v: number = this;
+                      ~~~~ [0]
+}
+
 [0]: Unsafe use of expression of type 'any'.

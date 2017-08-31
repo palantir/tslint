@@ -73,6 +73,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.TypeAliasDeclaration:
             case ts.SyntaxKind.TypeParameter:
+            case ts.SyntaxKind.IndexSignature:
             // Ignore imports
             case ts.SyntaxKind.ImportEqualsDeclaration:
             case ts.SyntaxKind.ImportDeclaration:
@@ -114,11 +115,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.PropertyDeclaration: {
                 const { name, initializer } = node as ts.PropertyDeclaration;
                 this.visitNode(name, true);
-                if (initializer !== undefined) {
-                    // TODO verify this
-                    return this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
-                }
-                return false;
+                return initializer !== undefined &&
+                    this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
             case ts.SyntaxKind.TaggedTemplateExpression: {
                 const { tag, template } = node as ts.TaggedTemplateExpression;
@@ -237,9 +235,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 }
                 return false;
             }
-            // TODO JsxExpression
-            // TODO JsxElement
-
+            case ts.SyntaxKind.JsxExpression:
+                return (node as ts.JsxExpression).expression !== undefined && this.checkContextual((node as ts.JsxExpression).expression!);
         }
         if (isTypeNodeKind(node.kind) || node.kind >= ts.SyntaxKind.FirstKeyword && node.kind <= ts.SyntaxKind.LastKeyword) {
             return false;
@@ -305,7 +302,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     private checkYieldExpression(node: ts.YieldExpression, anyOk: boolean | undefined) {
         if (node.expression !== undefined) {
-            this.checkContextual(node.expression, true); // TODO get return type
+            this.checkContextual(node.expression, true);
         }
         if (anyOk) {
             return false;
