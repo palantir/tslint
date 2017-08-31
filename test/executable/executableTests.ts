@@ -143,6 +143,24 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("are compiled just in time when using ts-node", (done) => {
+            execCli(
+                ["-c", "./test/config/tslint-custom-rules-uncompiled.json", "src/test.ts"],
+                {
+                    env: {
+                        ...process.env, // tslint:disable-line:no-unsafe-any
+                        NODE_OPTIONS: "-r ts-node/register",
+                        TS_NODE_CACHE: "0",
+                        TS_NODE_FAST: "1",
+                    },
+                },
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                },
+            );
+        });
     });
 
     describe("--fix flag", () => {
@@ -463,7 +481,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     }
 
     if (isFunction(options)) {
-        cb = options as ExecFileCallback;
+        cb = options;
         options = {};
     }
 
@@ -475,7 +493,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): boolean {
+function isFunction(fn: any): fn is (...args: any[]) => any {
     return ({}).toString.call(fn) === "[object Function]";
 }
 

@@ -168,10 +168,12 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
             if (node.kind === ts.SyntaxKind.VariableDeclarationList) {
                 this.handleVariableDeclaration(node as ts.VariableDeclarationList);
             } else if (node.kind === ts.SyntaxKind.CatchClause) {
-                this.handleBindingName((node as ts.CatchClause).variableDeclaration.name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if ((node as ts.CatchClause).variableDeclaration !== undefined) {
+                    this.handleBindingName((node as ts.CatchClause).variableDeclaration!.name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
                 this.handleBindingName((node as ts.ParameterDeclaration).name, {
                     canBeConst: false,

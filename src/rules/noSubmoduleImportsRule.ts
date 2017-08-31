@@ -81,7 +81,8 @@ class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
 
     private checkForBannedImport(expression: ts.Expression) {
         if (isTextualLiteral(expression) &&
-            ts.moduleHasNonRelativeName(expression.text) &&
+            // TODO remove assertion on upgrade to typescript@2.5.2
+            !(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(expression.text) &&
             isSubmodulePath(expression.text)) {
             /*
              * A submodule is being imported.

@@ -254,6 +254,8 @@ export const rules = {
         "check-type",
         "check-typecast",
         "check-preblock",
+        "check-type-operator",
+        "check-rest-spread",
     ],
 };
 

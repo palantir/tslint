@@ -171,7 +171,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
             for (; memberIndex !== members.length; memberIndex++) {
                 const { name: memberName } = members[memberIndex];
                 if (memberName.kind !== ts.SyntaxKind.ComputedPropertyName && propName === memberName.text) {
-                    continue outer; // tslint:disable-line no-unsafe-any (fixed in tslint 5.4)
+                    continue outer;
                 }
             }
 

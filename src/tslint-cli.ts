@@ -252,7 +252,6 @@ if (argv.out != null) {
     log = console.log;
 }
 
-// tslint:disable-next-line no-floating-promises
 run({
     config: argv.config,
     exclude: argv.exclude,

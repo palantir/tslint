@@ -48,6 +48,21 @@ export const rules = {
     // added in v5.6
     "no-duplicate-imports": true,
     "space-within-parens": [true, 0],
+    "no-submodule-imports": true,
+
+    // added in v5.7
+    "whitespace": {
+        options: [
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-type-operator",
+            "check-rest-spread",
+        ],
+    },
 };
 // tslint:enable object-literal-sort-keys
 
