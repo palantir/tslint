@@ -118,6 +118,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return initializer !== undefined &&
                     this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
+            case ts.SyntaxKind.ComputedPropertyName:
+                return this.visitNode((node as ts.ComputedPropertyName).expression, true);
             case ts.SyntaxKind.TaggedTemplateExpression: {
                 const { tag, template } = node as ts.TaggedTemplateExpression;
                 if (template.kind === ts.SyntaxKind.TemplateExpression) {
