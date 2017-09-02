@@ -46,7 +46,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
         return this.checkStatements(sourceFile.statements);
     }
 
-    private checkStatements(statements: ts.Statement[]) {
+    private checkStatements(statements: ReadonlyArray<ts.Statement>) {
         for (const statement of statements) {
             if (statement.kind === ts.SyntaxKind.ModuleDeclaration) {
                 this.checkModuleDeclaration(statement as ts.ModuleDeclaration);

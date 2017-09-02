@@ -1,17 +1,25 @@
+// don't show an error on imports, because they don't do any harm if not used
 import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
-       ~~~ [errmsg % ('def', 'deprecated default export')]
-             ~~~~~          [errmsg % ('other', 'reason')]
-                    ~~~~~~  [err % ('other2')]
+import * as namespaceImport from './other.test';
 import * as other2 from './other2.test';
-            ~~~~~~ [err % ('other2')]
+
 other();
 ~~~~~ [errmsg % ('other', 'reason')]
+other(1);
 foobar();
 ~~~~~~ [err % ('foobar')]
+other2;
+~~~~~~ [err % ('other2')]
+
+import tmp = namespaceImport.other;
+
+tmp;
+~~~ [errmsg % ('tmp', 'reason')]
 
 declare interface D {
     /** @deprecated */ m: () => void;
 }
+
 
 declare let d: D;
 d.m();
@@ -52,7 +60,76 @@ A + B;
 ~     [err % ('A')]
     ~ [err % ('B')]
 
+export default A;
+
 declarationIsMissing();
+
+function fn<T>(): T;
+/** @deprecated */
+function fn(bar: any): any;
+function fn() { }
+
+fn<number>();
+fn(1);
+~~ [err % ('fn')]
+fn;
+~~ [err % ('fn')]
+
+class TestClass {
+    /** @deprecated */
+    static method(): void;
+    static method(param): void;
+    static method(param?): void {}
+}
+
+TestClass.method();
+          ~~~~~~ [err % ('method')]
+TestClass.method(1);
+
+interface TestInterface {
+    /** @deprecated */
+    method(): void;
+    method(param): void;
+}
+declare let interfaceTest: TestInterface;
+interfaceTest.method();
+              ~~~~~~ [err % ('method')]
+interfaceTest.method(1);
+
+declare let callSignatureTest: {
+    /** @deprecated */
+    (): void;
+    (param): void;
+}
+callSignatureTest();
+~~~~~~~~~~~~~~~~~ [err % ('callSignatureTest')]
+callSignatureTest(1);
+
+/** @deprecated */
+declare let variableWithCallSignature: {
+    (): void;
+}
+variableWithCallSignature();
+~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature')]
+
+/** @deprecated */
+declare let variableWithCallSignature2: () => void;
+variableWithCallSignature2();
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature2')]
+
+function dedent(strings: TemplateStringsArray, ...values: string[]): string;
+function dedent(strings: TemplateStringsArray, ...values: number[]): string;
+/** @deprecated */
+function dedent(strings: TemplateStringsArray, ...values: any[]): string;
+function dedent(strings: TemplateStringsArray, ...values: any[]): string {
+    return "foo";
+}
+
+dedent``;
+dedent`${"foo"}`;
+dedent`${1}`;
+dedent`${[]}`;
+~~~~~~ [err % ('dedent')]
 
 // TODO: those should be an error
 let {f, g, h} = p;

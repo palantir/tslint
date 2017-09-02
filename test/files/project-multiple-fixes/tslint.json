@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "no-consecutive-blank-lines": true,
+    "no-trailing-whitespace": true,
+    "trailing-comma": [
+        true, {
+            "multiline": "always"
+        }
+    ],
+    "eofline": true
+  }
+}

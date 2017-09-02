@@ -21,6 +21,9 @@ module M {
         goto: console.log("hi");
     }
 
+    for (x = 2; x--;) {}
+    for (;;) {}
+
     while (i < 1) {
         ++i;
     }
@@ -104,3 +107,17 @@ else
     const foo = 123;
     // code that just wants to be encapsulated in a block scope
 }
+
+const foo = { ...bar };
+
+const foo = [ ...bar ];
+
+function foo (bar, ...baz) {}
+
+const { foo, ...bar } = baz;
+
+type A = number | string;
+
+type B = number | string | {result: string};
+
+type C = {result: string} & {type: "A" | "B"};

@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+import * as path from "path";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
@@ -55,6 +56,6 @@ describe("MSBuild Formatter", () => {
     });
 
     function getFailureString(file: string, line: number, character: number, reason: string, ruleCamelCase: string, severity: string) {
-        return `${file}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
+        return `${path.normalize(file)}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
     }
 });

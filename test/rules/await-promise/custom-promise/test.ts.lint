@@ -44,6 +44,10 @@ async function fStandardPromise() {
     await (Math.random() > 0.5 ? numberPromise : 0);
     await (Math.random() > 0.5 ? foo : 0);
     await (Math.random() > 0.5 ? bar : 0);
+
+    // intersection type
+    const intersectionPromise: Promise<number> & number;
+    await intersectionPromise;
 }
 
 async function fCustomPromise() {
@@ -65,6 +69,10 @@ async function fCustomPromise() {
     await (Math.random() > 0.5 ? numberPromise : 0);
     await (Math.random() > 0.5 ? foo : 0);
     await (Math.random() > 0.5 ? bar : 0);
+
+    // intersection type
+    const intersectionPromise: CustomPromise<number> & number;
+    await intersectionPromise;
 }
 
 [0]: 'await' of non-Promise.
