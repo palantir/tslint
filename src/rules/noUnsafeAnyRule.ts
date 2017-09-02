@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isTokenKind, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -240,7 +240,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.JsxExpression:
                 return (node as ts.JsxExpression).expression !== undefined && this.checkContextual((node as ts.JsxExpression).expression!);
         }
-        if (isTypeNodeKind(node.kind) || node.kind >= ts.SyntaxKind.FirstKeyword && node.kind <= ts.SyntaxKind.LastKeyword) {
+        if (isTypeNodeKind(node.kind) || isTokenKind(node.kind)) {
             return false;
         }
         return ts.forEachChild(node, this.noCheck);
