@@ -226,10 +226,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.YieldExpression:
                 return this.checkYieldExpression(node as ts.YieldExpression, anyOk);
             case ts.SyntaxKind.ClassExpression:
-                this.checkClassLikeDeclaration(node as ts.ClassExpression);
-                return anyOk ? false : this.check(node as ts.Expression);
             case ts.SyntaxKind.ClassDeclaration:
-                this.checkClassLikeDeclaration(node as ts.ClassDeclaration);
+                this.checkClassLikeDeclaration(node as ts.ClassLikeDeclaration);
                 return false;
             case ts.SyntaxKind.ArrayLiteralExpression: {
                 for (const element of (node as ts.ArrayLiteralExpression).elements) {
