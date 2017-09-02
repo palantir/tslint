@@ -90,8 +90,10 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
-    const configPath = findConfigurationPath(configFile, inputFilePath);
+export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult;
+export function findConfiguration(configFile: string, inputFilePath?: string): IConfigurationLoadResult;
+export function findConfiguration(configFile: string | null, inputFilePath?: string): IConfigurationLoadResult {
+    const configPath = findConfigurationPath(configFile, inputFilePath!);
     const loadResult: IConfigurationLoadResult = { path: configPath };
 
     try {
@@ -112,7 +114,9 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
  * @returns An absolute path to a tslint.json file
  * or undefined if neither can be found.
  */
-export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string): string | undefined;
+export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath?: string): string | undefined;
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath?: string): string | undefined {
     if (suppliedConfigFilePath != null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
@@ -123,7 +127,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         // convert to dir if it's a file or doesn't exist
         let useDirName = false;
         try {
-            const stats = fs.statSync(inputFilePath);
+            const stats = fs.statSync(inputFilePath!);
             if (stats.isFile()) {
                 useDirName = true;
             }
@@ -132,11 +136,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
             useDirName = true;
         }
         if (useDirName) {
-            inputFilePath = path.dirname(inputFilePath);
+            inputFilePath = path.dirname(inputFilePath!);
         }
 
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
+        let configFilePath = findup(CONFIG_FILENAME, inputFilePath!);
         if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
@@ -149,7 +153,6 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
                 return path.resolve(configFilePath);
             }
         }
-
         // no path could be found
         return undefined;
     }
