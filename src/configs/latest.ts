@@ -41,6 +41,9 @@ export const rules = {
         true,
         "check-parameters",
     ],
+
+    // added in v5.8.0
+    "no-duplicate-switch-case": true,
 };
 // tslint:enable object-literal-sort-keys
 
