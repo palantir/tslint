@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getPreviousToken } from "tsutils";
+import { getChildOfKind, isBlockLike, isObjectLiteralExpression, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -25,6 +25,14 @@ const OPTION_CATCH = "check-catch";
 const OPTION_ELSE = "check-else";
 const OPTION_FINALLY = "check-finally";
 const OPTION_WHITESPACE = "check-whitespace";
+
+interface Options {
+    brace: boolean;
+    catch: boolean;
+    else: boolean;
+    finally: boolean;
+    whitespace: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -61,239 +69,101 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const oneLineWalker = new OneLineWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(oneLineWalker);
+        return this.applyWithWalker(new OneLineWalker(sourceFile, this.ruleName, {
+            brace: this.ruleArguments.indexOf(OPTION_BRACE) !== -1,
+            catch: this.ruleArguments.indexOf(OPTION_CATCH) !== -1,
+            else: this.ruleArguments.indexOf(OPTION_ELSE) !== -1,
+            finally: this.ruleArguments.indexOf(OPTION_FINALLY) !== -1,
+            whitespace: this.ruleArguments.indexOf(OPTION_WHITESPACE) !== -1,
+        }));
     }
 }
 
-class OneLineWalker extends Lint.RuleWalker {
-    public visitIfStatement(node: ts.IfStatement) {
-        const thenStatement = node.thenStatement;
-        const thenIsBlock = thenStatement.kind === ts.SyntaxKind.Block;
-        if (thenIsBlock) {
-            const expressionCloseParen = node.getChildAt(3);
-            const thenOpeningBrace = thenStatement.getChildAt(0);
-            this.handleOpeningBrace(expressionCloseParen, thenOpeningBrace);
-        }
-
-        const elseStatement = node.elseStatement;
-        if (elseStatement != null) {
-            // find the else keyword
-            const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-            if (elseStatement.kind === ts.SyntaxKind.Block) {
-                const elseOpeningBrace = elseStatement.getChildAt(0);
-                this.handleOpeningBrace(elseKeyword, elseOpeningBrace);
-            }
-            if (thenIsBlock && this.hasOption(OPTION_ELSE)) {
-                const thenStatementEndLine = this.getLineAndCharacterOfPosition(thenStatement.getEnd()).line;
-                const elseKeywordLine = this.getLineAndCharacterOfPosition(elseKeyword.getStart()).line;
-                if (thenStatementEndLine !== elseKeywordLine) {
-                    this.addFailureAtNode(elseKeyword, Rule.ELSE_FAILURE_STRING);
+class OneLineWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.Block:
+                    if (!isBlockLike(node.parent!)) {
+                        this.check(node.pos, (node as ts.Block).statements.pos);
+                    }
+                    break;
+                case ts.SyntaxKind.CaseBlock:
+                    this.check(node.pos, (node as ts.CaseBlock).clauses.pos);
+                    break;
+                case ts.SyntaxKind.ModuleBlock:
+                    this.check(node.pos, (node as ts.ModuleBlock).statements.pos);
+                    break;
+                case ts.SyntaxKind.EnumDeclaration:
+                    this.check((node as ts.EnumDeclaration).name.end, (node as ts.EnumDeclaration).members.pos);
+                    break;
+                case ts.SyntaxKind.InterfaceDeclaration:
+                case ts.SyntaxKind.ClassDeclaration:
+                case ts.SyntaxKind.ClassExpression: {
+                    const openBraceToken = getChildOfKind(node, ts.SyntaxKind.OpenBraceToken, sourceFile)!;
+                    this.check(openBraceToken.pos, openBraceToken.end);
+                    break;
                 }
-            }
-        }
-
-        super.visitIfStatement(node);
-    }
-
-    public visitCatchClause(node: ts.CatchClause) {
-        const catchClosingParen = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
-        const catchOpeningBrace = node.block.getChildAt(0);
-        this.handleOpeningBrace(catchClosingParen, catchOpeningBrace);
-        super.visitCatchClause(node);
-    }
-
-    public visitTryStatement(node: ts.TryStatement) {
-        const catchClause = node.catchClause;
-        const finallyBlock = node.finallyBlock;
-        const finallyKeyword = Lint.childOfKind(node, ts.SyntaxKind.FinallyKeyword);
-
-        // "visit" try block
-        const tryKeyword = node.getChildAt(0);
-        const tryBlock = node.tryBlock;
-        const tryOpeningBrace = tryBlock.getChildAt(0);
-        this.handleOpeningBrace(tryKeyword, tryOpeningBrace);
-
-        if (this.hasOption(OPTION_CATCH) && catchClause != null) {
-            const tryClosingBrace = node.tryBlock.getChildAt(node.tryBlock.getChildCount() - 1);
-            const catchKeyword = catchClause.getChildAt(0);
-            const tryClosingBraceLine = this.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
-            const catchKeywordLine = this.getLineAndCharacterOfPosition(catchKeyword.getStart()).line;
-            if (tryClosingBraceLine !== catchKeywordLine) {
-                this.addFailureAtNode(catchKeyword, Rule.CATCH_FAILURE_STRING);
-            }
-        }
-
-        if (finallyBlock != null && finallyKeyword != null) {
-            const finallyOpeningBrace = finallyBlock.getChildAt(0);
-            this.handleOpeningBrace(finallyKeyword, finallyOpeningBrace);
-
-            if (this.hasOption(OPTION_FINALLY)) {
-                const previousBlock = catchClause != null ? catchClause.block : node.tryBlock;
-                const closingBrace = previousBlock.getChildAt(previousBlock.getChildCount() - 1);
-                const closingBraceLine = this.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
-                const finallyKeywordLine = this.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
-                if (closingBraceLine !== finallyKeywordLine) {
-                    this.addFailureAtNode(finallyKeyword, Rule.FINALLY_FAILURE_STRING);
+                case ts.SyntaxKind.IfStatement:
+                    if (this.options.else) {
+                        const { thenStatement, elseStatement } = node as ts.IfStatement;
+                        if (elseStatement !== undefined && thenStatement.kind === ts.SyntaxKind.Block) {
+                            this.check(thenStatement.end, elseStatement.pos, "else");
+                        }
+                    }
+                    break;
+                case ts.SyntaxKind.TryStatement: {
+                    const { finallyBlock, catchClause, tryBlock } = node as ts.TryStatement;
+                    if (this.options.catch && catchClause !== undefined) {
+                        this.check(catchClause.pos, catchClause.getStart(this.sourceFile) + "catch".length, "catch");
+                    }
+                    if (this.options.finally && finallyBlock !== undefined) {
+                        this.check((catchClause === undefined ? tryBlock : catchClause).end, finallyBlock.pos, "finally");
+                    }
+                    break;
                 }
+                case ts.SyntaxKind.BinaryExpression:
+                    this.checkBinaryExpression(node as ts.BinaryExpression);
+                    break;
+                case ts.SyntaxKind.VariableDeclaration:
+                    this.checkVariableDeclaration(node as ts.VariableDeclaration);
+                    break;
+                case ts.SyntaxKind.TypeAliasDeclaration:
+                    this.checkTypeAliasDeclaration(node as ts.TypeAliasDeclaration);
             }
-        }
-
-        super.visitTryStatement(node);
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    public visitForStatement(node: ts.ForStatement) {
-        this.handleIterationStatement(node);
-        super.visitForStatement(node);
-    }
-
-    public visitForInStatement(node: ts.ForInStatement) {
-        this.handleIterationStatement(node);
-        super.visitForInStatement(node);
-    }
-
-    public visitWhileStatement(node: ts.WhileStatement) {
-        this.handleIterationStatement(node);
-        super.visitWhileStatement(node);
-    }
-
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        const rightkind = node.right.kind;
-        const opkind = node.operatorToken.kind;
-
-        if (opkind === ts.SyntaxKind.EqualsToken && rightkind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const equalsToken = node.getChildAt(1);
-            const openBraceToken = node.right.getChildAt(0);
-            this.handleOpeningBrace(equalsToken, openBraceToken);
-        }
-
-        super.visitBinaryExpression(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        const initializer = node.initializer;
-        if (initializer != null && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-            const equalsToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken);
-            const openBraceToken = initializer.getChildAt(0);
-            this.handleOpeningBrace(equalsToken, openBraceToken);
-        }
-        super.visitVariableDeclaration(node);
-    }
-
-    public visitDoStatement(node: ts.DoStatement) {
-        const doKeyword = node.getChildAt(0);
-        const statement = node.statement;
-        if (statement.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = statement.getChildAt(0);
-            this.handleOpeningBrace(doKeyword, openBraceToken);
-        }
-        super.visitDoStatement(node);
-    }
-
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        const nameNode = node.name;
-        const body = node.body;
-        if (body != null && body.kind === ts.SyntaxKind.ModuleBlock) {
-            const openBraceToken = body.getChildAt(0);
-            this.handleOpeningBrace(nameNode, openBraceToken);
-        }
-        super.visitModuleDeclaration(node);
-    }
-
-    public visitEnumDeclaration(node: ts.EnumDeclaration) {
-        const nameNode = node.name;
-        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-        this.handleOpeningBrace(nameNode, openBraceToken);
-        super.visitEnumDeclaration(node);
-    }
-
-    public visitSwitchStatement(node: ts.SwitchStatement) {
-        const closeParenToken = node.getChildAt(3);
-        const openBraceToken = node.caseBlock.getChildAt(0);
-        this.handleOpeningBrace(closeParenToken, openBraceToken);
-        super.visitSwitchStatement(node);
-    }
-
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.handleClassLikeDeclaration(node);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.handleClassLikeDeclaration(node);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.handleFunctionLikeDeclaration(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.handleFunctionLikeDeclaration(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.handleFunctionLikeDeclaration(node);
-        super.visitConstructorDeclaration(node);
-    }
-
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        const body = node.body;
-        if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
-            const openBraceToken = body.getChildAt(0);
-            this.handleOpeningBrace(arrowToken, openBraceToken);
-        }
-        super.visitArrowFunction(node);
-    }
-
-    private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
-        const body = node.body;
-        if (body != null && body.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = body.getChildAt(0);
-            if (node.type != null) {
-                this.handleOpeningBrace(node.type, openBraceToken);
-            } else {
-                const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
-                this.handleOpeningBrace(closeParenToken, openBraceToken);
-            }
+    private checkBinaryExpression(node: ts.BinaryExpression) {
+        if (node.operatorToken.kind === ts.SyntaxKind.EqualsToken && isObjectLiteralExpression(node.right)) {
+            this.check(node.right.pos, node.right.properties.pos);
         }
     }
 
-    private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
-        const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-        this.handleOpeningBrace(getPreviousToken(openBraceToken), openBraceToken);
-    }
-
-    private handleIterationStatement(node: ts.IterationStatement) {
-        // last child is the statement, second to last child is the close paren
-        const closeParenToken = node.getChildAt(node.getChildCount() - 2);
-        const statement = node.statement;
-        if (statement.kind === ts.SyntaxKind.Block) {
-            const openBraceToken = statement.getChildAt(0);
-            this.handleOpeningBrace(closeParenToken, openBraceToken);
+    private checkVariableDeclaration(node: ts.VariableDeclaration) {
+        if (node.initializer !== undefined && isObjectLiteralExpression(node.initializer)) {
+            this.check(node.initializer.pos, node.initializer.properties.pos);
         }
     }
 
-    private handleOpeningBrace(previousNode: ts.Node | undefined, openBraceToken: ts.Node) {
-        if (previousNode == null || openBraceToken == null) {
+    private checkTypeAliasDeclaration(node: ts.TypeAliasDeclaration) {
+        if (node.type.kind === ts.SyntaxKind.MappedType || node.type.kind === ts.SyntaxKind.TypeLiteral) {
+            this.check(node.type.pos, node.type.getStart(this.sourceFile) + 1);
+        }
+    }
+
+    private check(preceding: number, current: number, kind?: "catch" | "else" | "finally") {
+        if (kind === undefined && !this.options.brace) {
             return;
         }
-
-        const previousNodeLine = this.getLineAndCharacterOfPosition(previousNode.getEnd()).line;
-        const openBraceLine = this.getLineAndCharacterOfPosition(openBraceToken.getStart()).line;
-        let failure: string | undefined;
-
-        if (this.hasOption(OPTION_BRACE) && previousNodeLine !== openBraceLine) {
-            failure = Rule.BRACE_FAILURE_STRING;
-        } else if (this.hasOption(OPTION_WHITESPACE) && previousNode.getEnd() === openBraceToken.getStart()) {
-            failure = Rule.WHITESPACE_FAILURE_STRING;
-        }
-
-        if (failure !== undefined) {
-            this.addFailureAtNode(openBraceToken, failure);
+        const length = kind === undefined ? 1 : kind.length;
+        current -= length;
+        if (!isSameLine(this.sourceFile, preceding, current)) {
+            this.addFailureAt(current, length, `misplaced ${kind === undefined ? "opening brace" : `'${kind}'`}`);
+        } else if (preceding === current && this.options.whitespace) {
+            this.addFailureAt(current, length, Rule.WHITESPACE_FAILURE_STRING);
         }
     }
 }
