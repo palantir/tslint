@@ -22,10 +22,10 @@ import * as Lint from "../index";
 
 type OptionValue = "always" | "never" | "ignore";
 type OptionName = "arrays" | "exports" | "functions" | "imports" | "objects" | "typeLiterals";
-type CustomOptionValue = Record<OptionName, OptionValue>;
+type CustomOptionValue = Partial<Record<OptionName, OptionValue>>;
 type Options = Record<"multiline" | "singleline", CustomOptionValue>;
 
-const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore"); // tslint:disable-line no-unnecessary-type-assertion
+const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore");
 
 function fillOptions<T>(value: T): Record<OptionName, T> {
     return {

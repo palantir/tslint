@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isAwaitExpression } from "tsutils";
+import { isAwaitExpression, isUnionOrIntersectionType } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -45,12 +45,12 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
-        const tc = program.getTypeChecker();
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, tc, promiseTypes));
+        return this.applyWithFunction(sourceFile, walk, promiseTypes, program.getTypeChecker());
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set<string>) {
+function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
+    const promiseTypes = ctx.options;
     return ts.forEachChild(ctx.sourceFile, cb);
 
     function cb(node: ts.Node): void {
@@ -65,7 +65,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set
             return true;
         }
 
-        if (isUnionType(type)) {
+        if (isUnionOrIntersectionType(type)) {
             return type.types.some(couldBePromise);
         }
 
@@ -77,8 +77,4 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set
         const { target } = type as ts.TypeReference;
         return target !== undefined && target.symbol !== undefined && promiseTypes.has(target.symbol.name);
     }
-}
-
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
 }

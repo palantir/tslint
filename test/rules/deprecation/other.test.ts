@@ -1,5 +1,8 @@
 /** @deprecated reason */
-export function other() {}
+export function other(): void;
+/** not deprecated */
+export function other(num: number);
+export function other(_num?: number) {}
 
 /** @deprecated */
 export let other2: Function;

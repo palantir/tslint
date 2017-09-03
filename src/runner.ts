@@ -32,7 +32,6 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import * as Linter from "./linter";
-import { consoleTestResultsHandler, runTests } from "./test";
 import { arrayify, flatMap } from "./utils";
 
 export interface Options {
@@ -141,8 +140,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     if (options.test) {
-        const results = runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
-        return consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+        const test = await import("./test");
+        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
     }
 
     if (options.config && !fs.existsSync(options.config)) {
@@ -150,7 +150,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     const { output, errorCount } = await runLinter(options, logger);
-    logger.log(output);
+    if (output && output.trim()) {
+        logger.log(output);
+    }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
@@ -266,7 +268,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
 
 function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
     let message = ts.DiagnosticCategory[category];
-    if (file) {
+    if (file !== undefined && start !== undefined) {
         const {line, character} = file.getLineAndCharacterOfPosition(start);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths

@@ -1,0 +1,13 @@
+import {diff} from "diff";
+import clear from "storage-helper";
+
+diff(original, current).forEach((diff) => {
+    console.log(diff);
+});
+
+{
+    (function clear() {
+        let clear = true;
+            ~~~~~ [Shadowed name: 'clear']
+    })();
+}

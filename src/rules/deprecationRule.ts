@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-import { getDeclarationOfBindingElement, isBindingElement, isIdentifier, isVariableDeclaration, isVariableDeclarationList } from "tsutils";
+import {
+    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc,
+    isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -42,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<void>) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -56,6 +59,13 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                 }
             }
         } else {
+            switch (node.kind) {
+                case ts.SyntaxKind.ImportDeclaration:
+                case ts.SyntaxKind.ImportEqualsDeclaration:
+                case ts.SyntaxKind.ExportDeclaration:
+                case ts.SyntaxKind.ExportAssignment:
+                    return;
+            }
             return ts.forEachChild(node, cb);
         }
     });
@@ -79,48 +89,81 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.EnumDeclaration:
+        case ts.SyntaxKind.ModuleDeclaration:
             return true;
         case ts.SyntaxKind.VariableDeclaration:
-        case ts.SyntaxKind.TypeAliasDeclaration:
         case ts.SyntaxKind.Parameter:
-        case ts.SyntaxKind.ModuleDeclaration:
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
-            return (parent as ts.Declaration).name === identifier;
+        case ts.SyntaxKind.ImportEqualsDeclaration:
+            return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.BindingElement:
-        case ts.SyntaxKind.ExportSpecifier:
-        case ts.SyntaxKind.ImportSpecifier:
-            // return true for `b` in `import {a as b} from "foo"`
-            return (parent as ts.ImportOrExportSpecifier | ts.BindingElement).name === identifier &&
-                (parent as ts.ImportOrExportSpecifier | ts.BindingElement).propertyName !== undefined;
+            // return true for `b` in `const {a: b} = obj"`
+            return (parent as ts.BindingElement).name === identifier &&
+                (parent as ts.BindingElement).propertyName !== undefined;
         default:
             return false;
     }
 }
 
+function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefined {
+    let parent = node.parent!;
+    if (isPropertyAccessExpression(parent) && parent.name === node) {
+        node = parent;
+        parent = node.parent!;
+    }
+    return isTaggedTemplateExpression(parent) || isCallExpression(parent) && parent.expression === node ? parent : undefined;
+}
+
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {
+    const callExpression = getCallExpresion(node);
+    if (callExpression !== undefined) {
+        const result = getSignatureDeprecation(tc.getResolvedSignature(callExpression));
+        if (result !== undefined) {
+            return result;
+        }
+    }
     let symbol = tc.getSymbolAtLocation(node);
     if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
-    if (symbol !== undefined) {
-        return getDeprecationValue(symbol);
+    if (symbol === undefined ||
+        // if this is a CallExpression and the declaration is a function or method,
+        // stop here to avoid collecting JsDoc of all overload signatures
+        callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
+        return undefined;
+    }
+    return getSymbolDeprecation(symbol);
+}
+
+function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
+    for (const tag of tags) {
+        if (tag.name === "deprecated") {
+            return tag.text;
+        }
     }
     return undefined;
 }
 
-function getDeprecationValue(symbol: ts.Symbol): string | undefined {
+function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
     if (symbol.getJsDocTags !== undefined) {
-        for (const tag of symbol.getJsDocTags()) {
-            if (tag.name === "deprecated") {
-                return tag.text;
-            }
-        }
-        return undefined;
+        return findDeprecationTag(symbol.getJsDocTags());
     }
     // for compatibility with typescript@<2.3.0
     return getDeprecationFromDeclarations(symbol.declarations);
+}
+
+function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
+    if (signature === undefined) {
+        return undefined;
+    }
+    if (signature.getJsDocTags !== undefined) {
+        return findDeprecationTag(signature.getJsDocTags());
+    }
+
+    // for compatibility with typescript@<2.3.0
+    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
 }
 
 function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
@@ -138,19 +181,42 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
         if (isVariableDeclarationList(declaration)) {
             declaration = declaration.parent!;
         }
-        for (const child of declaration.getChildren()) {
-            if (child.kind !== ts.SyntaxKind.JSDocComment) {
-                break;
-            }
-            if ((child as ts.JSDoc).tags === undefined) {
-                continue;
-            }
-            for (const tag of (child as ts.JSDoc).tags!) {
-                if (tag.tagName.text === "deprecated") {
-                    return tag.comment === undefined ? "" : tag.comment;
-                }
+        const result = getDeprecationFromDeclaration(declaration);
+        if (result !== undefined) {
+            return result;
+        }
+    }
+    return undefined;
+}
+
+function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
+    for (const child of declaration.getChildren()) {
+        if (!isJsDoc(child)) {
+            break;
+        }
+        if (child.tags === undefined) {
+            continue;
+        }
+        for (const tag of child.tags) {
+            if (tag.tagName.text === "deprecated") {
+                return tag.comment === undefined ? "" : tag.comment;
             }
         }
     }
     return undefined;
+}
+
+function isFunctionOrMethod(declarations?: ts.Declaration[]) {
+    if (declarations === undefined || declarations.length === 0) {
+        return false;
+    }
+    switch (declarations[0].kind) {
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.MethodSignature:
+            return true;
+        default:
+            return false;
+    }
 }

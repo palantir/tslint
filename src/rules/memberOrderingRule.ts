@@ -221,7 +221,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -264,7 +264,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the lowest name higher than 'targetName'. */
-    private findLowerName(members: Member[], targetRank: Rank, targetName: string): string {
+    private findLowerName(members: ReadonlyArray<Member>, targetRank: Rank, targetName: string): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
@@ -278,7 +278,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the highest existing rank lower than `targetRank`. */
-    private findLowerRank(members: Member[], targetRank: Rank): Rank | -1 {
+    private findLowerRank(members: ReadonlyArray<Member>, targetRank: Rank): Rank | -1 {
         let max: Rank | -1 = -1;
         for (const member of members) {
             const rank = this.memberRank(member);

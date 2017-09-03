@@ -28,10 +28,8 @@ const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
-    // tslint:disable:no-invalid-this
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(4000);
-    // tslint:enable:no-invalid-this
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", (done) => {
@@ -39,7 +37,9 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr, "Missing files", "stderr should contain notification about missing files");
+                assert.include(stderr,
+                    "No files specified. Use --project to lint a project folder.",
+                    "stderr should contain notification about missing files");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });
@@ -143,6 +143,24 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("are compiled just in time when using ts-node", (done) => {
+            execCli(
+                ["-c", "./test/config/tslint-custom-rules-uncompiled.json", "src/test.ts"],
+                {
+                    env: {
+                        ...process.env, // tslint:disable-line:no-unsafe-any
+                        NODE_OPTIONS: "-r ts-node/register",
+                        TS_NODE_CACHE: "0",
+                        TS_NODE_FAST: "1",
+                    },
+                },
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                },
+            );
+        });
     });
 
     describe("Config with excluded files", () => {
@@ -178,19 +196,22 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));
-            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts").pipe(fs.createWriteStream(tempFile));
-            execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
-                (err, stdout) => {
-                    const content = fs.readFileSync(tempFile, "utf8");
-                    // compare against file name which will be returned by formatter (used in TypeScript)
-                    const denormalizedFileName = denormalizeWinPath(tempFile);
-                    fs.unlinkSync(tempFile);
-                    assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
-                    assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
-                    done();
+            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
+                .pipe(fs.createWriteStream(tempFile))
+                .on("finish", () => {
+                    execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
+                        (err, stdout) => {
+                            const content = fs.readFileSync(tempFile, "utf8");
+                            // compare against file name which will be returned by formatter (used in TypeScript)
+                            const denormalizedFileName = denormalizeWinPath(tempFile);
+                            fs.unlinkSync(tempFile);
+                            assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
+                            assert.isNull(err, "process should exit without an error");
+                            assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
+                            done();
+                        });
                 });
-        });
+        }).timeout(8000);
     });
 
     describe("--force flag", () => {
@@ -379,18 +400,22 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can handle multiple '--exclude' globs", (done) => {
+        it("can apply fixes from multiple rules", (done) => {
+            fs.writeFileSync("test/files/project-multiple-fixes/testfile.test.ts",
+                             fs.readFileSync("test/files/project-multiple-fixes/before.test.ts", "utf-8"));
             execCli(
-                [
-                    "-c", "test/files/multiple-excludes/tslint.json",
-                    "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
-                    "--exclude", "'test/files/multiple-excludes/invalid2*'",
-                    "'test/files/multiple-excludes/**.ts'",
-                ], (err) => {
+                [ "-p", "test/files/project-multiple-fixes/", "--fix"],
+                (err) => {
+                    const actual = fs.readFileSync("test/files/project-multiple-fixes/testfile.test.ts", "utf-8");
+                    fs.unlinkSync("test/files/project-multiple-fixes/testfile.test.ts");
                     assert.isNull(err, "process should exit without an error");
+                    assert.strictEqual(
+                        actual,
+                        fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
+                    );
                     done();
                 });
-        });
+        }).timeout(8000);
     });
 
     describe("--type-check", () => {
@@ -458,6 +483,18 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
+        it("can handle multiple '--exclude' globs", (done) => {
+            execCli(
+                [
+                    "-c", "test/files/multiple-excludes/tslint.json",
+                    "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
+                    "--exclude", "'test/files/multiple-excludes/invalid2*'",
+                    "'test/files/multiple-excludes/**.ts'",
+                ], (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
     });
 });
 
@@ -474,7 +511,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     }
 
     if (isFunction(options)) {
-        cb = options as ExecFileCallback;
+        cb = options;
         options = {};
     }
 
@@ -486,7 +523,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): boolean {
+function isFunction(fn: any): fn is (...args: any[]) => any {
     return ({}).toString.call(fn) === "[object Function]";
 }
 

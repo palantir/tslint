@@ -17,8 +17,6 @@
 
 import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
-
-import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 
 const OPTION_SINGLE = "single";
@@ -56,7 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_SINGLE, OPTION_DOUBLE, OPTION_JSX_SINGLE, OPTION_JSX_DOUBLE, OPTION_AVOID_ESCAPE],
+                enum: [OPTION_SINGLE, OPTION_DOUBLE, OPTION_JSX_SINGLE, OPTION_JSX_DOUBLE, OPTION_AVOID_ESCAPE, OPTION_AVOID_TEMPLATE],
             },
             minLength: 0,
             maxLength: 5,
@@ -74,19 +72,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `${actual} should be ${expected}`;
     }
 
-    public isEnabled(): boolean {
-        return super.isEnabled() && (this.ruleArguments[0] === OPTION_SINGLE || this.ruleArguments[0] === OPTION_DOUBLE);
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const args = this.ruleArguments;
-        if (args.length > 0) {
-            if (args[0] !== OPTION_SINGLE && args[0] !== OPTION_DOUBLE) {
-                showWarningOnce(`Warning: First argument to 'quotemark' rule should be "${OPTION_SINGLE}" or "${OPTION_DOUBLE}"`);
-                return [];
-            }
-        }
-        const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
+        const quoteMark = getQuotemarkPreference(args) === OPTION_SINGLE ? "'" : '"';
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
             avoidTemplate: hasArg(OPTION_AVOID_TEMPLATE),
@@ -140,4 +128,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         ts.forEachChild(node, cb);
     });
+}
+
+function getQuotemarkPreference(args: any[]): string | undefined {
+    for (const arg of args) {
+        if (arg === OPTION_SINGLE || arg === OPTION_DOUBLE) {
+            return arg as string;
+        }
+    }
+    return undefined;
 }

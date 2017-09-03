@@ -25,9 +25,9 @@ import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
 import * as Linter from "./linter";
-import { LintError } from "./test/lintError";
-import * as parse from "./test/parse";
 import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
+import { LintError } from "./verify/lintError";
+import * as parse from "./verify/parse";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -117,7 +117,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename) => filename,
                 getCurrentDirectory: () => process.cwd(),
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: (path) => fs.readdirSync(path),
+                getDirectories: (dir) => fs.readdirSync(dir),
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet) {
                     const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
@@ -223,8 +223,8 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
-            const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
+            const didMarkupTestPass = !markupDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
+            const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
                 console.log(colors.green(" Passed"));

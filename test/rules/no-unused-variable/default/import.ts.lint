@@ -30,6 +30,11 @@ import {a14, a15, a16} from "a";
 a14;
 a16;
 
+// Leading comment will not be deleted
+import {unusedFunction} from "legacyDependency"; // Import unusedFunction because ....
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                       [All imports are unused.]
+// Next comment will not be deleted
+
 export import a = require("a");
 
 $(_.xyz());
@@ -53,6 +58,13 @@ import d1, { d2 } from "a";
 import d3, { d4 } from "a";
            ~~~~~~                                  [All named bindings are unused.]
 d3;
+
+d3;import d5 from "a";
+   ~~~~~~~~~~~~~~~~~~~                          [All imports are unused.]
+import d6 from "a";d3;
+~~~~~~~~~~~~~~~~~~~                             [All imports are unused.]
+d3;import d7 from "a";d3;
+   ~~~~~~~~~~~~~~~~~~~                          [All imports are unused.]
 
 bar.someFunc();
 baz();

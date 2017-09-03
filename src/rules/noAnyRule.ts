@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
         description: "Disallows usages of `any` as a type declaration.",
-        hasFix: true,
+        hasFix: false,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
