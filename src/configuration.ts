@@ -43,10 +43,10 @@ export interface IConfigurationFile {
     /**
      * Other linter options, currently for testing. Not publicly supported.
      */
-    linterOptions?: {
-        typeCheck?: boolean;
-        exclude?: string | string[];
-    };
+    linterOptions?: Partial<{
+        typeCheck: boolean;
+        exclude: string[];
+    }>;
 
     /**
      * Directories containing custom rules. Resolved using node module semantics.

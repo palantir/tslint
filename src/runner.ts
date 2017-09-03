@@ -149,15 +149,6 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
         throw new FatalError(`Invalid option for configuration: ${options.config}`);
     }
 
-    const configuration = findConfiguration(options.config !== undefined ? options.config : null, __filename).results;
-    const linterOptions = (configuration !== undefined && configuration.linterOptions !== undefined) ? configuration.linterOptions : {};
-
-    if (typeof linterOptions.exclude === "string") {
-        options.exclude.push(linterOptions.exclude);
-    } else if (Array.isArray(linterOptions.exclude)) {
-        options.exclude = options.exclude.concat(linterOptions.exclude);
-    }
-
     const { output, errorCount } = await runLinter(options, logger);
     logger.log(output);
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
@@ -225,6 +216,7 @@ async function doLinting(
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
+    let shouldLint = (_file: string) => true;
     for (const file of files) {
         if (!fs.existsSync(file)) {
             throw new FatalError(`Unable to open file: ${file}`);
@@ -235,9 +227,17 @@ async function doLinting(
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+
+                const exclude = (configFile && configFile.linterOptions && configFile.linterOptions.exclude) || [];
+                const matchers = exclude.map((pattern) => new Minimatch(pattern));
+                shouldLint = (f) => !matchers.some((m) => m.match(path.resolve(f)));
+
                 lastFolder = folder;
             }
-            linter.lint(file, contents, configFile);
+
+            if (shouldLint(file)) {
+                linter.lint(file, contents, configFile);
+            }
         }
     }
 

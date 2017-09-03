@@ -197,7 +197,7 @@ describe("Configuration", () => {
         it("replaces exclude option", () => {
             const baseConfig = getEmptyConfig();
             baseConfig.linterOptions = {
-                exclude: "src",
+                exclude: ["src"],
             };
 
             const extendingConfig = getEmptyConfig();
