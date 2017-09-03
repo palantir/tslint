@@ -89,11 +89,10 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.EnumDeclaration:
+        case ts.SyntaxKind.ModuleDeclaration:
             return true;
         case ts.SyntaxKind.VariableDeclaration:
-        case ts.SyntaxKind.TypeAliasDeclaration:
         case ts.SyntaxKind.Parameter:
-        case ts.SyntaxKind.ModuleDeclaration:
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
