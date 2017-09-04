@@ -40,10 +40,11 @@ const program = Linter.createProgram("tsconfig.json", "projectDir/");
 const linter = new Linter(options, program);
 
 const files = Linter.getFileNames(program);
-const results = files.map(file => {
+files.forEach(file => {
     const fileContents = program.getSourceFile(file).getFullText();
     const configuration = Configuration.findConfiguration(configurationFilename, file).results;
     linter.lint(file, fileContents, configuration);
-    return linter.getResult();
 });
+
+const results = linter.getResult();
 ```
