@@ -1,53 +1,35 @@
-module Module
-{
-~ [misplaced opening brace]
-    export enum Enumeration
-    {
-    ~ [misplaced opening brace]
+module Module {
+    export enum Enumeration {
         A,
         B,
         C,
         D
     }
 
-    export function Call()
-    {
-    ~ [misplaced opening brace]
-        if (x == 3)
-        {
-        ~ [misplaced opening brace]
+    export function Call() {
+        if (x == 3) {
             x = 4;
-        }
-        else {
-        ~~~~   [misplaced 'else']
+        } else {
             x = 5;
         }
         return "called";
     }
 }
 
-interface Class
-{
-~ [misplaced opening brace]
+interface Class {
     variable: string;
 }
 
-var object =
-{
-~ [misplaced opening brace]
+var object = {
     a: 1,
     b: 2
 };
 
-for(var x= 0; x < 1; ++x)
-{
-~ [misplaced opening brace]
+for(var x= 0; x < 1; ++x) {
     ++i;
 }
 
-switch(y)
-{
-~ [misplaced opening brace]
+switch(y) {
     case 0:
         x--;
         break;
@@ -56,47 +38,29 @@ switch(y)
         break;
 }
 
-try
-{
-~ [misplaced opening brace]
+try {
     throw new Error("hi");
-}
-catch (e)
-~~~~~     [misplaced 'catch']
-{
-~ [misplaced opening brace]
+} catch (e) {
     throw(e);
-}
-finally
-~~~~~~~ [misplaced 'finally']
-{
-~ [misplaced opening brace]
+} finally {
     // do something
 }
 
 try {
     foo();
-}
-finally
-~~~~~~~ [misplaced 'finally']
-{
-~ [misplaced opening brace]
+} finally {
     bar();
 }
 
-try{
-   ~ [missing whitespace]
+try {
     foo();
-} catch(e){
-          ~ [missing whitespace]
+} catch(e) {
     bar();
-} finally{
-         ~ [missing whitespace]
+} finally {
     baz();
 }
 
-while(x < 10){
-             ~ [missing whitespace]
+while(x < 10) {
     x++;
 }
 
@@ -106,9 +70,7 @@ function f():
     return 5;
 }
 
-class BarBooBaz
-{
-~ [misplaced opening brace]
+class BarBooBaz {
 
 }
 
@@ -161,12 +123,8 @@ class Foo<
 type Foo = {
     bar,
 };
-type Bar =
-{ bar };
-~ [misplaced opening brace]
-type Baz<T> =
-{ [K in T]: T };
-~ [misplaced opening brace]
+type Bar = { bar };
+type Baz<T> = { [K in T]: T };
 type Bas = "a";
 
 {
