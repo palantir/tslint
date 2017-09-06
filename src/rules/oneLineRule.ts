@@ -63,10 +63,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static BRACE_FAILURE_STRING = "misplaced opening brace";
-    public static CATCH_FAILURE_STRING = "misplaced 'catch'";
-    public static ELSE_FAILURE_STRING = "misplaced 'else'";
-    public static FINALLY_FAILURE_STRING = "misplaced 'finally'";
     public static WHITESPACE_FAILURE_STRING = "missing whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
