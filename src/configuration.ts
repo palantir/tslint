@@ -41,7 +41,7 @@ export interface IConfigurationFile {
     jsRules: Map<string, Partial<IOptions>>;
 
     /**
-     * Other linter options, currently for testing. Not publicly supported.
+     * A subset of the CLI options.
      */
     linterOptions?: Partial<{
         typeCheck: boolean;
