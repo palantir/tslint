@@ -218,7 +218,14 @@ async function doLinting(
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
-    let shouldLint = (_file: string) => true;
+    const isFileExcluded = (filepath: string) => {
+        if (configFile === undefined || configFile.linterOptions == null || configFile.linterOptions.exclude == null) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    };
+
     for (const file of files) {
         if (!fs.existsSync(file)) {
             throw new FatalError(`Unable to open file: ${file}`);
@@ -229,15 +236,9 @@ async function doLinting(
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-
-                const exclude = (configFile && configFile.linterOptions && configFile.linterOptions.exclude) || [];
-                const matchers = exclude.map((pattern) => new Minimatch(pattern));
-                shouldLint = (f) => !matchers.some((m) => m.match(path.resolve(f)));
-
                 lastFolder = folder;
             }
-
-            if (shouldLint(file)) {
+            if (!isFileExcluded(file)) {
                 linter.lint(file, contents, configFile);
             }
         }
