@@ -118,6 +118,10 @@ const TRANSFORMS = new Map<string, Transform>([
     ["lowercase-last", (x) => x],
     ["full-path", (x) => x],
     ["module-name", (x) => {
+        if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(x)) {
+            return x;
+        }
+
         const splitIndex = x.lastIndexOf("/");
         if (splitIndex === -1) {
             return x;
@@ -147,8 +151,8 @@ function parseOptions(ruleArguments: any[]): Options {
     } = optionSet === undefined ? {} : optionSet;
     return {
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
-        namedImportsOrderTransform: TRANSFORMS.get(named)!,
         moduleSourcePath: TRANSFORMS.get(path)!,
+        namedImportsOrderTransform: TRANSFORMS.get(named)!,
     };
 }
 

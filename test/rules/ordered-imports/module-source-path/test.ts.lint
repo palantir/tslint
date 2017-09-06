@@ -15,3 +15,9 @@ import c = require('./baz/c');
 import a from '../../foo/a';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 import b from './bar/b';
+
+// contains scoped import
+import b = require('foo/b');
+import a from 'foo/a';
+~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+import c from 'foo/c';

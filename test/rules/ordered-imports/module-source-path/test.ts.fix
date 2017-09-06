@@ -12,3 +12,8 @@ import c = require('./baz/c');
 import a from '../../foo/a';
 import b from './bar/b';
 import c = require('./baz/c');
+
+// contains scoped import
+import a from 'foo/a';
+import b = require('foo/b');
+import c from 'foo/c';
