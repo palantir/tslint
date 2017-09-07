@@ -219,6 +219,24 @@ describe("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
+
+        it("empty linter options does not replace exclude", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {};
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
     });
 
     describe("findConfigurationPath", () => {
