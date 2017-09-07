@@ -16,7 +16,7 @@
  */
 
 import {
-    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc,
+    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc, isNewExpression,
     isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
@@ -113,7 +113,8 @@ function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefine
         node = parent;
         parent = node.parent!;
     }
-    return isTaggedTemplateExpression(parent) || isCallExpression(parent) && parent.expression === node ? parent : undefined;
+    return isTaggedTemplateExpression(parent) ||
+        (isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node ? parent : undefined;
 }
 
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {

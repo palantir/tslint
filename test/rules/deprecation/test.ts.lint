@@ -131,6 +131,18 @@ dedent`${1}`;
 dedent`${[]}`;
 ~~~~~~ [err % ('dedent')]
 
+import {DeprecatedClass, DeprecatedConstructorClass, PartiallyDeprecatedClass} from "./other.test"
+{
+    const a: DeprecatedClass = new DeprecatedClass();
+             ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+                                   ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+    const b: DeprecatedConstructorClass = new DeprecatedConstructorClass();
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('DeprecatedConstructorClass')]
+    const c: PartiallyDeprecatedClass = new PartiallyDeprecatedClass();
+    const d: PartiallyDeprecatedClass = new PartiallyDeprecatedClass(1);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('PartiallyDeprecatedClass')]
+}
+
 // TODO: those should be an error
 let {f, g, h} = p;
 (function ({f, g}: I) {})
