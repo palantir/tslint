@@ -105,6 +105,20 @@ describe("Configuration", () => {
                 ruleSeverity: "error",
             });
         });
+
+        it("resolves exclude pattern relative to the configuration file", () => {
+            const config: RawConfigFile = {
+                linterOptions: {
+                    exclude: ["foo.ts", "**/*.d.ts"],
+                },
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").linterOptions,
+                {
+                    exclude: ["/path/foo.ts", "/path/**/*.d.ts"],
+                },
+            );
+        });
     });
 
     describe("defaultSeverity", () => {
