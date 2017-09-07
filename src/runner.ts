@@ -43,7 +43,7 @@ export interface Options {
     /**
      * Exclude globs from path expansion.
      */
-    exclude?: string | string[];
+    exclude: string[];
 
     /**
      * File paths to lint.
@@ -218,6 +218,14 @@ async function doLinting(
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
+    const isFileExcluded = (filepath: string) => {
+        if (configFile === undefined || configFile.linterOptions == null || configFile.linterOptions.exclude == null) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    };
+
     for (const file of files) {
         if (!fs.existsSync(file)) {
             throw new FatalError(`Unable to open file: ${file}`);
@@ -230,7 +238,9 @@ async function doLinting(
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
                 lastFolder = folder;
             }
-            linter.lint(file, contents, configFile);
+            if (!isFileExcluded(file)) {
+                linter.lint(file, contents, configFile);
+            }
         }
     }
 

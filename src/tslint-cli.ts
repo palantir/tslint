@@ -26,7 +26,7 @@ import { dedent } from "./utils";
 
 interface Argv {
     config?: string;
-    exclude?: string;
+    exclude: string[];
     fix?: boolean;
     force?: boolean;
     help?: boolean;

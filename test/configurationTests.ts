@@ -140,7 +140,7 @@ describe("Configuration", () => {
             config.jsRules.set("row", { ruleArguments: ["oar", "column"], ruleSeverity: "error" });
             config.rules.set("foo", { ruleArguments: ["bar"], ruleSeverity: "off" });
             config.rulesDirectory = ["foo"];
-            config.linterOptions = { typeCheck: true };
+            config.linterOptions = { exclude: ["foo"] };
             assertConfigEquals(extendConfigurationFile(EMPTY_CONFIG, config), config);
         });
 
@@ -189,6 +189,50 @@ describe("Configuration", () => {
             expectedConfig.rules.set("foo", { ruleArguments: ["bar"], ruleSeverity: "warning" });
             expectedConfig.jsRules.set("row", { ruleArguments: ["skid"] });
             expectedConfig.rulesDirectory = ["foo"];
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
+
+        it("replaces exclude option", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
+
+        it("empty linter options does not replace exclude", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {};
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: ["src"],
+            };
 
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
