@@ -41,11 +41,11 @@ export interface IConfigurationFile {
     jsRules: Map<string, Partial<IOptions>>;
 
     /**
-     * Other linter options, currently for testing. Not publicly supported.
+     * A subset of the CLI options.
      */
-    linterOptions?: {
-        typeCheck?: boolean;
-    };
+    linterOptions?: Partial<{
+        exclude: string[];
+    }>;
 
     /**
      * Directories containing custom rules. Resolved using node module semantics.
