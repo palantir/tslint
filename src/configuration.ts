@@ -44,7 +44,6 @@ export interface IConfigurationFile {
      * A subset of the CLI options.
      */
     linterOptions?: Partial<{
-        typeCheck: boolean;
         exclude: string[];
     }>;
 
