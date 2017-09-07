@@ -115,7 +115,7 @@ describe("Configuration", () => {
             assert.deepEqual(
                 parseConfigFile(config, "/path").linterOptions,
                 {
-                    exclude: ["/path/foo.ts", "/path/**/*.d.ts"],
+                    exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
                 },
             );
         });
