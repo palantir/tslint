@@ -63,8 +63,8 @@ export class Formatter extends AbstractFormatter {
                     output += `<testsuite name="${this.escapeXml(failure.getFileName())}">`;
                 }
 
-                output += `<testcase name='Line ${lineAndCharacter.line + 1}, `;
-                output += `Column ${lineAndCharacter.character + 1}: ${rule}'>`;
+                output += `<testcase name="Line ${lineAndCharacter.line + 1}, `;
+                output += `Column ${lineAndCharacter.character + 1}: ${rule}">`;
                 output += `<failure type="${severity}">${message}</failure>`;
                 output += "</testcase>";
             }
