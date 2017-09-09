@@ -283,7 +283,7 @@ class Walker extends Lint.AbstractWalker<Options> {
         return false;
     }
 
-    private getOddImportDeclaration(importsBlock: ImportsBlock): ImportDeclaration|undefined {
+    private getOddImportDeclaration(importsBlock: ImportsBlock): ImportDeclaration | undefined {
         const importDeclarations = importsBlock.getImportDeclarations();
         if (importDeclarations.length === 0) {
             return undefined;
