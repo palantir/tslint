@@ -7,7 +7,7 @@
     },
     "linterOptions": {
         "exclude": [
-            "**/*excluded.ts"
+            "excluded.ts"
         ]
     }
 }

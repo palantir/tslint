@@ -164,32 +164,55 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Config with excluded files", () => {
-        it("exits with code 1 if linter options doesn't exclude file with lint errors", (done) => {
-            const tempFile = createTempFile("included.ts");
-            fs.writeFileSync(tempFile, "console.log(\"missing semi-colon at end of line\")", { encoding: "utf8" });
-            execCli(["-c", "./test/config/tslint-exclude.json", tempFile], (err) => {
+        it("exits with code 2 if linter options doesn't exclude file with lint errors", (done) => {
+            execCli(["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/files/config-exclude/included.ts"], (err) => {
                 assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
+                assert.strictEqual(err.code, 2, "error code should be 2");
                 done();
             });
         });
 
         it("exits with code 0 if linter options exclude one file with lint errors", (done) => {
-            const tempFile = createTempFile("excluded.ts");
-            fs.writeFileSync(tempFile, "console.log(\"missing semi-colon at end of line\")", { encoding: "utf8" });
-            execCli(["-c", "./test/config/tslint-exclude-one.json", tempFile], (err) => {
+            execCli(["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/rules/config-exclude/excluded.ts"], (err) => {
                 assert.isNull(err, "process should exit without an error");
                 done();
             });
         });
 
         it("exits with code 0 if linter options excludes many files with lint errors", (done) => {
-            const tempFiles = [1, 2].map((x) => createTempFile(`excluded${x}.ts`));
-            tempFiles.forEach((f) => fs.writeFileSync(f, "console.log(\"missing semi-colon at end of line\")", { encoding: "utf8" }));
-            execCli(["-c", "./test/config/tslint-exclude-many.json", ...tempFiles], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+            execCli(
+                [
+                    "-c",
+                    "./test/files/config-exclude/tslint-exclude-many.json",
+                    "./test/rules/config-exclude/excluded1.ts",
+                    "./test/rules/config-exclude/subdir/excluded2.ts"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                },
+            );
+        });
+
+        it("excludes files relative to tslint.json", (done) => {
+            execCli(
+                ["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/files/config-exclude/subdir/excluded.ts"],
+                (err) => {
+                    assert.isNotNull(err, "process should exit an error");
+                    assert.equal(err.code, 2, "exit code should be 2");
+                    done();
+                },
+            );
+        });
+
+        it("excludes files relative to tslint.json they were declared in", (done) => {
+            execCli(
+                ["-c", "./test/files/config-exclude/subdir/tslint-extending.json", "./test/files/config-exclude/subdir/excluded.ts"],
+                (err) => {
+                    assert.isNotNull(err, "process should exit an error");
+                    assert.equal(err.code, 2, "exit code should be 2");
+                    done();
+                },
+            );
         });
     });
 
