@@ -128,7 +128,7 @@ export const rules = {
     "ordered-imports": {
         options: {
             "import-sources-order": "case-insensitive",
-            "module-source-path": "full-path",
+            "module-source-path": "full",
             "named-imports-order": "case-insensitive",
         },
     },

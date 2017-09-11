@@ -69,8 +69,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             Possible values for \`"module-source-path"\` are:
 
-            * \`"full-path'\`: Correct order is  \`"./a/Foo"\`, \`"./b/baz"\`, \`"./c/Bar"\`. (This is the default.)
-            * \`"module-name"\`: Correct order is \`"./c/Bar"\`, \`"./b/baz"\`, \`"./a/Foo"\`.
+            * \`"full'\`: Correct order is  \`"./a/Foo"\`, \`"./b/baz"\`, \`"./c/Bar"\`. (This is the default.)
+            * \`"basename"\`: Correct order is \`"./c/Bar"\`, \`"./b/baz"\`, \`"./a/Foo"\`.
 
         `,
         options: {
@@ -86,7 +86,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
                 "module-source-path": {
                     type: "string",
-                    enum: ["full-path", "module-name"],
+                    enum: ["full", "basename"],
                 },
             },
             additionalProperties: false,
@@ -116,8 +116,8 @@ const TRANSFORMS = new Map<string, Transform>([
     ["case-insensitive", (x) => x.toLowerCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", (x) => x],
-    ["full-path", (x) => x],
-    ["module-name", (x) => {
+    ["full", (x) => x],
+    ["basename", (x) => {
         if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(x)) {
             return x;
         }
@@ -147,7 +147,7 @@ function parseOptions(ruleArguments: any[]): Options {
     const {
         "import-sources-order": sources = "case-insensitive",
         "named-imports-order": named = "case-insensitive",
-        "module-source-path": path = "full-path",
+        "module-source-path": path = "full",
     } = optionSet === undefined ? {} : optionSet;
     return {
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
