@@ -121,8 +121,8 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
     try {
         return await runWorker(options, logger);
     } catch (error) {
-        if ((error as FatalError).name === FatalError.NAME) {
-            logger.error((error as FatalError).message);
+        if (error instanceof FatalError) {
+            logger.error(error.message);
             return Status.FatalError;
         }
         throw error;
