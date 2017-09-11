@@ -37,7 +37,9 @@ export class FatalError extends Error {
     constructor(public message: string, public innerError?: Error) {
         super(message);
         this.name = FatalError.NAME;
-        this.stack = new Error().stack;
+
+        // Fix prototype chain for target ES5
+        Object.setPrototypeOf(this, FatalError.prototype);
     }
 }
 
