@@ -79,7 +79,7 @@ class Linter {
         return program.getSourceFiles().map((s) => s.fileName).filter((l) => l.substr(-5) !== ".d.ts");
     }
 
-    constructor(private readonly options: ILinterOptions, private readonly program?: ts.Program) {
+    constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
             throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
