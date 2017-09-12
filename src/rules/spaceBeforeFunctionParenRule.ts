@@ -95,7 +95,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         // openParen may be missing for an async arrow function `async x => ...`.
         if (openParen === undefined) { return; }
 
-        const hasSpace = ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(openParen.end - 2));
+        const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
 
         if (hasSpace && option === "never") {
             const pos = openParen.getStart() - 1;
@@ -116,8 +116,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
-            return options.named;
-
+            // name is optional for function declaration which is default export (TS will emit error in other cases).
+            // Can be handled in the same way as function expression.
         case ts.SyntaxKind.FunctionExpression:
             return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
 

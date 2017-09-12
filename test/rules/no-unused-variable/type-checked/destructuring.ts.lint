@@ -1,0 +1,6 @@
+import { SomeClass, someVar } from "./some.test";
+const person = { name: "alice" };
+const { name } = person;
+        ~~~~ ['name' is declared but never used.]
+
+export const {prop} = someVar;

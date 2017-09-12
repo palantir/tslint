@@ -4,16 +4,13 @@
   },
   "extends": "tslint:all",
   "rules": {
-    // TODO: remove this when tslint 5.3 released
-    "prefer-switch": [true, { "min-cases": 3 }],
-
     // Don't want these
     "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"

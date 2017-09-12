@@ -41,11 +41,11 @@ export interface IConfigurationFile {
     jsRules: Map<string, Partial<IOptions>>;
 
     /**
-     * Other linter options, currently for testing. Not publicly supported.
+     * A subset of the CLI options.
      */
-    linterOptions?: {
-        typeCheck?: boolean;
-    };
+    linterOptions?: Partial<{
+        exclude: string[];
+    }>;
 
     /**
      * Directories containing custom rules. Resolved using node module semantics.
@@ -160,7 +160,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
  */
 function findup(filename: string, directory: string): string | undefined {
-    while (true) { // tslint:disable-line strict-boolean-expressions
+    while (true) {
         const res = findFile(directory);
         if (res !== undefined) {
             return path.join(directory, res);
@@ -475,7 +475,7 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
     return {
         extends: arrayify(configFile.extends),
         jsRules: parseRules(configFile.jsRules),
-        linterOptions: configFile.linterOptions !== undefined ? configFile.linterOptions : {},
+        linterOptions: parseLinterOptions(configFile.linterOptions),
         rules: parseRules(configFile.rules),
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
     };
@@ -490,6 +490,17 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
             }
         }
         return map;
+    }
+
+    function parseLinterOptions(raw: RawConfigFile["linterOptions"]): IConfigurationFile["linterOptions"] {
+        if (raw === undefined || raw.exclude === undefined) {
+            return {};
+        }
+        return {
+            exclude: arrayify(raw.exclude).map(
+                (pattern) => configFileDir === undefined ? path.resolve(pattern) : path.resolve(configFileDir, pattern),
+            ),
+        };
     }
 }
 
