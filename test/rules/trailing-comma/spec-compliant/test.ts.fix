@@ -60,3 +60,7 @@ function foo(...z) {}
     y,
 })
 foo(...y,);
+
+function combined([a, ...arr], {b, ...obj}, regular,) {}
+
+function combined([a, ...arr], {b, ...obj}, regular,) {}

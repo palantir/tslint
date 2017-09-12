@@ -74,3 +74,10 @@ function foo(...z) {}
 })
 foo(...y);
         ~nil [Missing trailing comma]
+
+function combined([a, ...arr], {b, ...obj}, regular) {}
+                                                   ~nil [Missing trailing comma]
+
+function combined([a, ...arr,], {b, ...obj,}, regular,) {}
+                            ~ [Forbidden trailing comma]
+                                          ~ [Forbidden trailing comma]
