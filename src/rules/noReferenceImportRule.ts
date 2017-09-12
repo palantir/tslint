@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-reference-import",
-        description: 'Don\'t <reference types="foo" /> if you import "foo" anyway.',
+        description: 'Don\'t `<reference types="foo" />` if you import `foo` anyway.',
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",
@@ -55,7 +55,7 @@ class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private findImports(statements: ts.Statement[]) {
+    private findImports(statements: ReadonlyArray<ts.Statement>) {
         for (const statement of statements) {
             if (isImportDeclaration(statement)) {
                 this.addImport(statement.moduleSpecifier);

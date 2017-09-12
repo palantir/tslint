@@ -1,0 +1,7 @@
+class {
+    x() {}
+    constructor() {}
+    get y() {}
+    public() {}
+}
+

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, isClassLikeDeclaration } from "tsutils";
+import { getChildOfKind, getModifier, getNextToken, getTokenAtPosition, isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -55,6 +55,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_NO_PUBLIC], [true, OPTION_CHECK_ACCESSOR]],
         type: "typescript",
         typescriptOnly: true,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -117,24 +118,36 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
-
-        const isPublic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
-
-        if (noPublic && isPublic) {
-            const publicKeyword = node.modifiers!.find((m) => m.kind === ts.SyntaxKind.PublicKeyword)!;
-            ctx.addFailureAtNode(publicKeyword, Rule.FAILURE_STRING_NO_PUBLIC);
+        const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
+        if (noPublic && publicKeyword !== undefined) {
+            const start = publicKeyword.end - "public".length;
+            ctx.addFailure(
+                start,
+                publicKeyword.end,
+                Rule.FAILURE_STRING_NO_PUBLIC,
+                Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
+            );
         }
-        if (!noPublic && !isPublic) {
+        if (!noPublic && publicKeyword === undefined) {
             const nameNode = node.kind === ts.SyntaxKind.Constructor
                 ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
                 : node.name !== undefined ? node.name : node;
             const memberName = node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier ? node.name.text : undefined;
-            ctx.addFailureAtNode(nameNode, Rule.FAILURE_STRING_FACTORY(memberType(node), memberName));
+            ctx.addFailureAtNode(
+                nameNode,
+                Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName),
+                Lint.Replacement.appendText(getInsertionPosition(node, ctx.sourceFile), "public "),
+            );
         }
     }
 }
 
-function memberType(node: ts.ClassElement): string {
+function getInsertionPosition(member: ts.ClassElement, sourceFile: ts.SourceFile): number {
+    const node = member.decorators === undefined ? member : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
+    return node.getStart(sourceFile);
+}
+
+function typeToString(node: ts.ClassElement): string {
     switch (node.kind) {
         case ts.SyntaxKind.MethodDeclaration:
             return "class method";

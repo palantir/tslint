@@ -25,7 +25,7 @@ const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
 
-// tslint:disable object-literal-sort-keys switch-default
+// tslint:disable object-literal-sort-keys
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -88,7 +88,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
+        return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
     }
 }
 
@@ -423,12 +423,12 @@ function showLocation(n: Location): string {
     }
 }
 
-function showFailure(location: Location, ty: TypeFailure, isUnionType: boolean, options: Options): string {
+function showFailure(location: Location, ty: TypeFailure, unionType: boolean, options: Options): string {
     const expectedTypes = showExpectedTypes(options);
     const expected = expectedTypes.length === 1
         ? `Only ${expectedTypes[0]}s are allowed`
         : `Allowed types are ${stringOr(expectedTypes)}`;
-    const tyFail = showTypeFailure(ty, isUnionType, options.strictNullChecks);
+    const tyFail = showTypeFailure(ty, unionType, options.strictNullChecks);
     return `This type is not allowed in the ${showLocation(location)} because it ${tyFail}. ${expected}.`;
 }
 
@@ -442,8 +442,8 @@ function showExpectedTypes(options: Options): string[] {
     return parts;
 }
 
-function showTypeFailure(ty: TypeFailure, isUnionType: boolean, strictNullChecks: boolean) {
-    const is = isUnionType ? "could be" : "is";
+function showTypeFailure(ty: TypeFailure, unionType: boolean, strictNullChecks: boolean) {
+    const is = unionType ? "could be" : "is";
     switch (ty) {
         case TypeFailure.AlwaysTruthy:
             return strictNullChecks
