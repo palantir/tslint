@@ -42,9 +42,9 @@ function fillOptions<T>(value: T): Record<OptionName, T> {
     };
 }
 
-type OptionsJson = Partial<Record<"multiline" | "singleline", Partial<CustomOptionValue> | OptionValue> & {specCompliant: boolean}>;
+type OptionsJson = Partial<Record<"multiline" | "singleline", Partial<CustomOptionValue> | OptionValue> & {esSpecCompliant: boolean}>;
 function normalizeOptions(options: OptionsJson): Options {
-    return { multiline: normalize(options.multiline), singleline: normalize(options.singleline), specCompliant: !!options.specCompliant};
+    return { multiline: normalize(options.multiline), singleline: normalize(options.singleline), specCompliant: !!options.esSpecCompliant};
 
 }
 function normalize(value: OptionsJson["multiline"]): CustomOptionValue {
@@ -94,7 +94,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             and function parameters.
 
             To align this rule with the ECMAScript specification that is implemented in modern JavaScript VMs,
-            there is a third option \`specCompliant\`. Set this option to \`true\` to disallow trailing comma on
+            there is a third option \`esSpecCompliant\`. Set this option to \`true\` to disallow trailing comma on
             object and array rest and rest parameters.
         `,
         options: {
@@ -102,7 +102,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             properties: {
                 multiline: metadataOptionShape,
                 singleline: metadataOptionShape,
-                specCompliant: {type: "boolean"},
+                esSpecCompliant: {type: "boolean"},
             },
             additionalProperties: false,
         },
@@ -117,7 +117,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                         functions: "never",
                         typeLiterals: "ignore",
                     },
-                    specCompliant: true,
+                    esSpecCompliant: true,
                 },
             ],
         ],
