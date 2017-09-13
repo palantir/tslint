@@ -242,7 +242,7 @@ if (argv.typeCheck && argv.project === undefined) {
 }
 
 let log: (message: string) => void;
-if (argv.out != null) {
+if (argv.out != undefined) {
     const outputStream = fs.createWriteStream(argv.out, {
         flags: "w+",
         mode: 420,

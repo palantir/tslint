@@ -63,13 +63,13 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
     const variableDeclaration = getBindingElementVariableDeclaration(node);
     // if no variable declaration, it must be a function param, which is block scoped
-    return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
+    return (variableDeclaration === null) || isBlockScopedVariable(variableDeclaration);
 }
 
 export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
     let currentParent = node.parent! as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
-        if (currentParent.parent == null) {
+        if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
         } else {
             currentParent = currentParent.parent;
@@ -90,7 +90,7 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
  * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+    return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate));
 }
 
 export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {

@@ -219,7 +219,7 @@ async function doLinting(
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
     const isFileExcluded = (filepath: string) => {
-        if (configFile === undefined || configFile.linterOptions == null || configFile.linterOptions.exclude == null) {
+        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
             return false;
         }
         const fullPath = path.resolve(filepath);

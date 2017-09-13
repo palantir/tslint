@@ -44,7 +44,7 @@ export class FatalError extends Error {
 }
 
 export function isError(possibleError: any): possibleError is Error {
-    return possibleError != null && (possibleError as Error).message !== undefined;
+    return possibleError != undefined && (possibleError as Error).message !== undefined;
 }
 
 export function showWarningOnce(message: string) {
