@@ -293,7 +293,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             return importDeclarations[0];
         } else {
             this.nextType = type;
-            return importDeclarations.find((importDeclaration) => importDeclaration.type != type);
+            return importDeclarations.find((importDeclaration) => importDeclaration.type !== type);
         }
     }
 
@@ -343,7 +343,7 @@ class Walker extends Lint.AbstractWalker<Options> {
                 newLine = "\n";
             }
         }
-        return newLine == null ? ts.sys.newLine : newLine;
+        return newLine === undefined ? ts.sys.newLine : newLine;
     }
 }
 
@@ -388,7 +388,7 @@ class ImportsBlock {
     // replaces the named imports on the most recent import declaration
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
-        if (importDeclaration == null) {
+        if (importDeclaration === undefined) {
             // nothing to replace. This can happen if the block is skipped
             return;
         }
@@ -406,7 +406,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return null;
         }
-        return this.getLastImportDeclaration().sourcePath;
+        return this.getLastImportDeclaration()!.sourcePath;
     }
 
     // creates a Lint.Replacement object with ordering fixes for the entire block
@@ -416,7 +416,7 @@ class ImportsBlock {
         }
         const fixedText = getSortedImportDeclarationsAsText(this.importDeclarations);
         const start = this.importDeclarations[0].nodeStartOffset;
-        const end = this.getLastImportDeclaration().nodeEndOffset;
+        const end = this.getLastImportDeclaration()!.nodeEndOffset;
         return new Lint.Replacement(start, end - start, fixedText);
     }
 
@@ -425,7 +425,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return node.getStart();
         }
-        return this.getLastImportDeclaration().nodeEndOffset;
+        return this.getLastImportDeclaration()!.nodeEndOffset;
     }
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
@@ -433,7 +433,7 @@ class ImportsBlock {
         return sourceFile.text.indexOf("\n", node.end) + 1;
     }
 
-    private getLastImportDeclaration() {
+    private getLastImportDeclaration(): ImportDeclaration | undefined {
         return this.importDeclarations[this.importDeclarations.length - 1];
     }
 
