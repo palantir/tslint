@@ -41,11 +41,11 @@ export interface IConfigurationFile {
     jsRules: Map<string, Partial<IOptions>>;
 
     /**
-     * Other linter options, currently for testing. Not publicly supported.
+     * A subset of the CLI options.
      */
-    linterOptions?: {
-        typeCheck?: boolean;
-    };
+    linterOptions?: Partial<{
+        exclude: string[];
+    }>;
 
     /**
      * Directories containing custom rules. Resolved using node module semantics.
@@ -90,8 +90,10 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult {
-    const configPath = findConfigurationPath(configFile, inputFilePath);
+export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult;
+export function findConfiguration(configFile: string, inputFilePath?: string): IConfigurationLoadResult;
+export function findConfiguration(configFile: string | null, inputFilePath?: string): IConfigurationLoadResult {
+    const configPath = findConfigurationPath(configFile, inputFilePath!);
     const loadResult: IConfigurationLoadResult = { path: configPath };
 
     try {
@@ -112,7 +114,9 @@ export function findConfiguration(configFile: string | null, inputFilePath: stri
  * @returns An absolute path to a tslint.json file
  * or undefined if neither can be found.
  */
-export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string) {
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string): string | undefined;
+export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath?: string): string | undefined;
+export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath?: string): string | undefined {
     if (suppliedConfigFilePath != undefined) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
@@ -123,7 +127,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         // convert to dir if it's a file or doesn't exist
         let useDirName = false;
         try {
-            const stats = fs.statSync(inputFilePath);
+            const stats = fs.statSync(inputFilePath!);
             if (stats.isFile()) {
                 useDirName = true;
             }
@@ -132,24 +136,23 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
             useDirName = true;
         }
         if (useDirName) {
-            inputFilePath = path.dirname(inputFilePath);
+            inputFilePath = path.dirname(inputFilePath!);
         }
 
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, inputFilePath);
+        let configFilePath = findup(CONFIG_FILENAME, inputFilePath!);
         if (configFilePath !== undefined) {
             return path.resolve(configFilePath);
         }
 
         // search for tslint.json in home directory
         const homeDir = getHomeDir();
-        if (homeDir !== undefined) {
+        if (homeDir != undefined) {
             configFilePath = path.join(homeDir, CONFIG_FILENAME);
             if (fs.existsSync(configFilePath)) {
                 return path.resolve(configFilePath);
             }
         }
-
         // no path could be found
         return undefined;
     }
@@ -160,7 +163,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
  * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
  */
 function findup(filename: string, directory: string): string | undefined {
-    while (true) { // tslint:disable-line strict-boolean-expressions
+    while (true) {
         const res = findFile(directory);
         if (res !== undefined) {
             return path.join(directory, res);
@@ -475,7 +478,7 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
     return {
         extends: arrayify(configFile.extends),
         jsRules: parseRules(configFile.jsRules),
-        linterOptions: configFile.linterOptions !== undefined ? configFile.linterOptions : {},
+        linterOptions: parseLinterOptions(configFile.linterOptions),
         rules: parseRules(configFile.rules),
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
     };
@@ -490,6 +493,17 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
             }
         }
         return map;
+    }
+
+    function parseLinterOptions(raw: RawConfigFile["linterOptions"]): IConfigurationFile["linterOptions"] {
+        if (raw === undefined || raw.exclude === undefined) {
+            return {};
+        }
+        return {
+            exclude: arrayify(raw.exclude).map(
+                (pattern) => configFileDir === undefined ? path.resolve(pattern) : path.resolve(configFileDir, pattern),
+            ),
+        };
     }
 }
 

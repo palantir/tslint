@@ -1,0 +1,10 @@
+interface I { m?(): void; }
+function f(i: I) {
+    i.m!();
+    (i.m as any)(1);
+    (<any> i.m)(1);
+    return i.m!;
+           ~~~ [0]
+}
+
+[0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.

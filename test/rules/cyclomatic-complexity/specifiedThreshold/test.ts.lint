@@ -136,9 +136,11 @@ function invalidBinaryExpression() {
 function validSwitch() {
     switch(5) {
         case 0:
-            return 0;
+        case 2:
+            return "even";
         case 1:
-            return 1;
+        case 3:
+            return "odd";
         default:
             return -1;
     }

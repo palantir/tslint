@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getPreviousToken } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -113,7 +114,7 @@ class OneLineWalker extends Lint.RuleWalker {
         const tryOpeningBrace = tryBlock.getChildAt(0);
         this.handleOpeningBrace(tryKeyword, tryOpeningBrace);
 
-        if (this.hasOption(OPTION_CATCH) && catchClause != undefined) {
+        if (this.hasOption(OPTION_CATCH) && catchClause !== undefined) {
             const tryClosingBrace = node.tryBlock.getChildAt(node.tryBlock.getChildCount() - 1);
             const catchKeyword = catchClause.getChildAt(0);
             const tryClosingBraceLine = this.getLineAndCharacterOfPosition(tryClosingBrace.getEnd()).line;
@@ -123,12 +124,12 @@ class OneLineWalker extends Lint.RuleWalker {
             }
         }
 
-        if (finallyBlock != undefined && finallyKeyword != undefined) {
+        if (finallyBlock !== undefined && finallyKeyword !== undefined) {
             const finallyOpeningBrace = finallyBlock.getChildAt(0);
             this.handleOpeningBrace(finallyKeyword, finallyOpeningBrace);
 
             if (this.hasOption(OPTION_FINALLY)) {
-                const previousBlock = catchClause != undefined ? catchClause.block : node.tryBlock;
+                const previousBlock = catchClause !== undefined ? catchClause.block : node.tryBlock;
                 const closingBrace = previousBlock.getChildAt(previousBlock.getChildCount() - 1);
                 const closingBraceLine = this.getLineAndCharacterOfPosition(closingBrace.getEnd()).line;
                 const finallyKeywordLine = this.getLineAndCharacterOfPosition(finallyKeyword.getStart()).line;
@@ -171,7 +172,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitVariableDeclaration(node: ts.VariableDeclaration) {
         const initializer = node.initializer;
-        if (initializer != undefined && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+        if (initializer !== undefined && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
             const equalsToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken);
             const openBraceToken = initializer.getChildAt(0);
             this.handleOpeningBrace(equalsToken, openBraceToken);
@@ -192,7 +193,7 @@ class OneLineWalker extends Lint.RuleWalker {
     public visitModuleDeclaration(node: ts.ModuleDeclaration) {
         const nameNode = node.name;
         const body = node.body;
-        if (body != undefined && body.kind === ts.SyntaxKind.ModuleBlock) {
+        if (body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock) {
             const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(nameNode, openBraceToken);
         }
@@ -240,7 +241,7 @@ class OneLineWalker extends Lint.RuleWalker {
 
     public visitArrowFunction(node: ts.ArrowFunction) {
         const body = node.body;
-        if (body != undefined && body.kind === ts.SyntaxKind.Block) {
+        if (body !== undefined && body.kind === ts.SyntaxKind.Block) {
             const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
             const openBraceToken = body.getChildAt(0);
             this.handleOpeningBrace(arrowToken, openBraceToken);
@@ -250,9 +251,9 @@ class OneLineWalker extends Lint.RuleWalker {
 
     private handleFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration) {
         const body = node.body;
-        if (body != undefined && body.kind === ts.SyntaxKind.Block) {
+        if (body !== undefined && body.kind === ts.SyntaxKind.Block) {
             const openBraceToken = body.getChildAt(0);
-            if (node.type != undefined) {
+            if (node.type !== undefined) {
                 this.handleOpeningBrace(node.type, openBraceToken);
             } else {
                 const closeParenToken = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken);
@@ -262,16 +263,8 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     private handleClassLikeDeclaration(node: ts.ClassDeclaration | ts.InterfaceDeclaration) {
-        let lastNodeOfDeclaration: ts.Node | undefined = node.name;
         const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-
-        if (node.heritageClauses != undefined) {
-            lastNodeOfDeclaration = node.heritageClauses[node.heritageClauses.length - 1];
-        } else if (node.typeParameters != undefined) {
-            lastNodeOfDeclaration = node.typeParameters[node.typeParameters.length - 1];
-        }
-
-        this.handleOpeningBrace(lastNodeOfDeclaration, openBraceToken);
+        this.handleOpeningBrace(getPreviousToken(openBraceToken), openBraceToken);
     }
 
     private handleIterationStatement(node: ts.IterationStatement) {
@@ -285,7 +278,7 @@ class OneLineWalker extends Lint.RuleWalker {
     }
 
     private handleOpeningBrace(previousNode: ts.Node | undefined, openBraceToken: ts.Node) {
-        if (previousNode == undefined || openBraceToken == undefined) {
+        if (previousNode === undefined || openBraceToken === undefined) {
             return;
         }
 

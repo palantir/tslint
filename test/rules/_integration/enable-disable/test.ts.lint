@@ -126,3 +126,21 @@ var AAAaA = 'test'; //tslint:enable-line quotemark all
     ~~~~~          [variable name must be in lowerCamelCase or UPPER_CASE]
             ~~~~~~ [' should be "]
                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [comment must start with a space]
+
+// ensure line switches only switch the next line
+//tslint:enable-next-line:quotemark
+'foo';
+~~~~~ [' should be "]
+'bar';
+'baz'; // tslint:enable-line:quotemark
+~~~~~ [' should be "]
+'bas';
+
+//tslint:enable:quotemark
+//tslint:disable-next-line:quotemark
+'foo';
+'bar';
+~~~~~ [' should be "]
+'baz'; // tslint:disable-line:quotemark
+'bas';
+~~~~~ [' should be "]

@@ -16,8 +16,14 @@
  */
 
 import {
-    isBinaryExpression, isCallExpression, isIdentifier, isObjectLiteralExpression,
-    isPropertyAccessExpression, isSpreadElement,
+    hasSideEffects,
+    isCallExpression,
+    isExpressionValueUsed,
+    isIdentifier,
+    isObjectLiteralExpression,
+    isPropertyAccessExpression,
+    isSpreadElement,
+    SideEffectOptions,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -50,17 +56,22 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (isCallExpression(node) && node.arguments.length !== 0 &&
             isPropertyAccessExpression(node.expression) && node.expression.name.text === "assign" &&
             isIdentifier(node.expression.expression) && node.expression.expression.text === "Object" &&
+            !ts.isFunctionLike(node.arguments[0]) &&
             // Object.assign(...someArray) cannot be written as object spread
-            !node.arguments.some(isSpreadElement)) {
+            !node.arguments.some(isSpreadElement) &&
+            /**
+             * @TODO
+             * Remove !node.arguments.some(isThisKeyword) when typescript get's
+             * support for spread types.
+             * PR: https://github.com/Microsoft/TypeScript/issues/10727
+             */
+            !node.arguments.some(isThisKeyword)) {
             if (node.arguments[0].kind === ts.SyntaxKind.ObjectLiteralExpression) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node, ctx.sourceFile));
-            } else {
-                const parent = node.parent!;
-                if (parent.kind === ts.SyntaxKind.VariableDeclaration ||
-                    isBinaryExpression(parent) && parent.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-                    ctx.addFailureAtNode(node, Rule.ASSIGNMENT_FAILURE_STRING, createFix(node, ctx.sourceFile));
-                }
+            } else if (isExpressionValueUsed(node) && !hasSideEffects(node.arguments[0], SideEffectOptions.Constructor)) {
+                ctx.addFailureAtNode(node, Rule.ASSIGNMENT_FAILURE_STRING, createFix(node, ctx.sourceFile));
             }
+
         }
         return ts.forEachChild(node, cb);
     });
@@ -68,9 +79,10 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
     const args = node.arguments;
+    const objectNeedsParens = node.parent!.kind === ts.SyntaxKind.ArrowFunction;
     const fix = [
-        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), "{"),
-        new Lint.Replacement(node.end - 1, 1, "}"),
+        Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), `${objectNeedsParens ? "(" : ""}{`),
+        new Lint.Replacement(node.end - 1, 1, `}${objectNeedsParens ? ")" : ""}`),
     ];
     for (let i = 0; i < args.length; ++i) {
         const arg = args[i];
@@ -79,7 +91,7 @@ function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix
                 let end = arg.end;
                 if (i !== args.length - 1) {
                     end = args[i + 1].getStart(sourceFile);
-                } else if (args.hasTrailingComma === true) {
+                } else if (args.hasTrailingComma) {
                     end = args.end;
                 }
                 // remove empty object iteral and the following comma if exists
@@ -102,6 +114,10 @@ function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix
     }
 
     return fix;
+}
+
+function isThisKeyword(node: ts.Expression): boolean {
+    return node.kind === ts.SyntaxKind.ThisKeyword;
 }
 
 function needsParens(node: ts.Node): boolean {

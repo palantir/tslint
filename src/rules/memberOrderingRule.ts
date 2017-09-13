@@ -17,8 +17,9 @@
 
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import {flatMap, mapDefined} from "../utils";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -194,7 +195,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        let options: Options;
+        try {
+            options = parseOptions(this.ruleArguments);
+        } catch (e) {
+            showWarningOnce(`Warning: ${this.ruleName} - ${(e as Error).message}`);
+            return [];
+        }
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, options));
     }
 }
 
@@ -213,7 +221,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -256,7 +264,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the lowest name higher than 'targetName'. */
-    private findLowerName(members: Member[], targetRank: Rank, targetName: string): string {
+    private findLowerName(members: ReadonlyArray<Member>, targetRank: Rank, targetName: string): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
@@ -270,7 +278,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the highest existing rank lower than `targetRank`. */
-    private findLowerRank(members: Member[], targetRank: Rank): Rank | -1 {
+    private findLowerRank(members: ReadonlyArray<Member>, targetRank: Rank): Rank | -1 {
         let max: Rank | -1 = -1;
         for (const member of members) {
             const rank = this.memberRank(member);
@@ -394,7 +402,7 @@ function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberC
         return orderOption;
     }
 
-    const preset = PRESETS.get(orderOption as string);
+    const preset = PRESETS.get(orderOption);
     if (preset === undefined) {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }

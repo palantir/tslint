@@ -18,15 +18,27 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
+import { ENABLE_DISABLE_REGEX } from "../enableDisableRules";
 import * as Lint from "../index";
-import { escapeRegExp } from "../utils";
+import { escapeRegExp, isLowerCase, isUpperCase } from "../utils";
 
 interface IExceptionsObject {
     "ignore-words"?: string[];
     "ignore-pattern"?: string;
 }
 
-type ExceptionsRegExp = RegExp | null;
+interface Options {
+    space: boolean;
+    case: Case;
+    exceptions?: RegExp;
+    failureSuffix: string;
+}
+
+const enum Case {
+    None,
+    Lower,
+    Upper,
+}
 
 const OPTION_SPACE = "check-space";
 const OPTION_LOWERCASE = "check-lowercase";
@@ -42,7 +54,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             Three arguments may be optionally provided:
 
             * \`"check-space"\` requires that all single-line comments must begin with a space, as in \`// comment\`
-                * note that comments starting with \`///\` are also allowed, for things such as \`///<reference>\`
+                * note that for comments starting with multiple slashes, e.g. \`///\`, leading slashes are ignored
+                * TypeScript reference comments are ignored completely
             * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
             * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
 
@@ -103,136 +116,89 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string => ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CommentWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-class CommentWalker extends Lint.RuleWalker {
-    private exceptionsRegExp: ExceptionsRegExp;
-    private failureIgnorePart = "";
+function parseOptions(options: Array<string | IExceptionsObject>): Options {
+    return {
+        case: options.indexOf(OPTION_LOWERCASE) !== -1
+                ? Case.Lower
+                : options.indexOf(OPTION_UPPERCASE) !== -1
+                    ? Case.Upper
+                    : Case.None,
+        failureSuffix: "",
+        space: options.indexOf(OPTION_SPACE) !== -1,
+        ...composeExceptions(options[options.length - 1]),
+    };
+}
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-
-        this.exceptionsRegExp = this.composeExceptionsRegExp();
+function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
+    if (typeof option !== "object") {
+        return undefined;
+    }
+    const ignorePattern = option["ignore-pattern"];
+    if (ignorePattern !== undefined) {
+        return {
+            exceptions: new RegExp(`^\\s*(${ignorePattern})`),
+            failureSuffix: Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern),
+        };
     }
 
-    public visitSourceFile(node: ts.SourceFile) {
-        utils.forEachComment(node, (fullText, comment) => {
-            if (comment.kind === ts.SyntaxKind.SingleLineCommentTrivia) {
-                const commentText = fullText.substring(comment.pos, comment.end);
-                const startPosition = comment.pos + 2;
-                const width = commentText.length - 2;
-                if (this.hasOption(OPTION_SPACE)) {
-                    if (!startsWithSpace(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LEADING_SPACE_FAILURE);
-                    }
-                }
-                if (this.hasOption(OPTION_LOWERCASE)) {
-                    if (!startsWithLowercase(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.LOWERCASE_FAILURE + this.failureIgnorePart);
-                    }
-                }
-                if (this.hasOption(OPTION_UPPERCASE)) {
-                    if (!startsWithUppercase(commentText) && !isEnableDisableFlag(commentText) && !this.startsWithException(commentText)) {
-                        this.addFailureAt(startPosition, width, Rule.UPPERCASE_FAILURE + this.failureIgnorePart);
-                    }
-                }
+    const ignoreWords = option["ignore-words"];
+    if (ignoreWords !== undefined && ignoreWords.length !== 0) {
+        return {
+            exceptions: new RegExp(`^\\s*(?:${ignoreWords.map((word) => escapeRegExp(word.trim())).join("|")})\\b`),
+            failureSuffix: Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords),
+        };
+    }
+    return undefined;
+}
+
+function walk(ctx: Lint.WalkContext<Options>) {
+    utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
+        let start = pos + 2;
+        if (kind !== ts.SyntaxKind.SingleLineCommentTrivia ||
+            // exclude empty comments
+            start === end ||
+            // exclude /// <reference path="...">
+            fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end)) {
+            return;
+        }
+        // skip all leading slashes
+        while (fullText[start] === "/") {
+            ++start;
+        }
+        if (start === end) {
+            return;
+        }
+        const commentText = fullText.slice(start, end);
+        // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
+        if (/^(?:#(?:end)?region|noinspection\s)/.test(commentText)) {
+            return;
+        }
+
+        if (ctx.options.space && commentText[0] !== " ") {
+            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE);
+        }
+
+        if (ctx.options.case === Case.None ||
+            ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText) ||
+            ENABLE_DISABLE_REGEX.test(commentText)) {
+            return;
+        }
+
+        // search for first non-space character to check if lower or upper
+        const charPos = commentText.search(/\S/);
+        if (charPos === -1) {
+            return;
+        }
+        if (ctx.options.case === Case.Lower) {
+            if (!isLowerCase(commentText[charPos])) {
+                ctx.addFailure(start, end, Rule.LOWERCASE_FAILURE + ctx.options.failureSuffix);
             }
-        });
-    }
-
-    private startsWithException(commentText: string): boolean {
-        if (this.exceptionsRegExp === null) {
-            return false;
+        } else if (!isUpperCase(commentText[charPos])) {
+            ctx.addFailure(start, end, Rule.UPPERCASE_FAILURE + ctx.options.failureSuffix);
         }
-
-        return this.exceptionsRegExp.test(commentText);
-    }
-
-    private composeExceptionsRegExp(): ExceptionsRegExp {
-        const optionsList = this.getOptions() as Array<string | IExceptionsObject>;
-        const exceptionsObject = optionsList[optionsList.length - 1];
-
-        // early return if last element is string instead of exceptions object
-        if (typeof exceptionsObject === "string" || exceptionsObject === undefined) {
-            return null;
-        }
-
-        if (exceptionsObject["ignore-pattern"] !== undefined) {
-            const ignorePattern = exceptionsObject["ignore-pattern"] as string;
-            this.failureIgnorePart = Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern);
-            // regex is "start of string"//"any amount of whitespace" followed by user provided ignore pattern
-            return new RegExp(`^//\\s*(${ignorePattern})`);
-        }
-
-        if (exceptionsObject["ignore-words"] !== undefined) {
-            const ignoreWords = exceptionsObject["ignore-words"] as string[];
-            this.failureIgnorePart = Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords);
-            // Converts all exceptions values to strings, trim whitespace, escapes RegExp special characters and combines into alternation
-            const wordsPattern = ignoreWords
-                .map(String)
-                .map((str) => str.trim())
-                .map(escapeRegExp)
-                .join("|");
-
-            // regex is "start of string"//"any amount of whitespace"("any word from ignore list") followed by non alphanumeric character
-            return new RegExp(`^//\\s*(${wordsPattern})\\b`);
-        }
-
-        return null;
-    }
-}
-
-function startsWith(commentText: string, changeCase: (str: string) => string) {
-    if (commentText.length <= 2) {
-        return true; // comment is "//"? Technically not a violation.
-    }
-
-    // regex is "start of string"//"any amount of whitespace"("word character")
-    const firstCharacterMatch = commentText.match(/^\/\/\s*(\w)/);
-    if (firstCharacterMatch !== null) {
-        // the first group matched, i.e. the thing in the parens, is the first non-space character, if it's alphanumeric
-        const firstCharacter = firstCharacterMatch[1];
-        return firstCharacter === changeCase(firstCharacter);
-    } else {
-        // first character isn't alphanumeric/doesn't exist? Technically not a violation
-        return true;
-    }
-}
-
-function startsWithLowercase(commentText: string) {
-    return startsWith(commentText, (c) => c.toLowerCase());
-}
-
-function startsWithUppercase(commentText: string) {
-    return startsWith(commentText, (c) => c.toUpperCase());
-}
-
-function startsWithSpace(commentText: string) {
-    if (commentText.length <= 2) {
-        return true; // comment is "//"? Technically not a violation.
-    }
-
-    const commentBody = commentText.substring(2);
-
-    // whitelist //#region and //#endregion
-    if ((/^#(end)?region/).test(commentBody)) {
-        return true;
-    }
-    // whitelist JetBrains IDEs' "//noinspection ..."
-    if ((/^noinspection\s/).test(commentBody)) {
-        return true;
-    }
-
-    const firstCharacter = commentBody.charAt(0);
-    // three slashes (///) also works, to allow for ///<reference>
-    return firstCharacter === " " || firstCharacter === "/";
-}
-
-function isEnableDisableFlag(commentText: string): boolean {
-    // regex is: start of string followed by "/*" or "//"
-    // followed by any amount of whitespace followed by "tslint:"
-    // followed by either "enable" or "disable"
-    return /^(\/\*|\/\/)\s*tslint:(enable|disable)/.test(commentText);
+    });
 }

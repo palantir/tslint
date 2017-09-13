@@ -1,18 +1,247 @@
 Change Log
 ===
 
-<!-- TODO: for 5.4, add
-[new-rule] [`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/) (#2374)
-5.3 will be published without it since it's still discussed
--->
+v5.7.0
+---
+
+## :tada: New rules, options, and fixers
+
+- [new-rule] [`no-parameter-reassignment`](https://palantir.github.io/tslint/rules/no-parameter-reassignment/) (#3045)
+- [new-rule-option]: [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): Add `match-declaration-order` option (#2829)
+- [new-rule-option] `check-type-operator` for [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) rule (#3083)
+- [new-rule-option] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): Add `check-rest-spread` option (#3089)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [api] `AbstractRule#applyWithFunction` allows additional parameter that is passed through to `walkFn` (#3140)
+- [api] `AbstractRule#applyWithFunction` has better type checking for its type parameter (#2660)
+- [bugfix] [`member-access`](https://palantir.github.io/tslint/rules/member-access/) autofix now correcly inserts `public` keyword after decorators (#3162)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/) correctly handle `catch` without binding parameter introduced in `typescript@2.5.1` (#3151)
+- [bugfix] [`no-invalid-template-strings`](https://palantir.github.io/tslint/rules/no-invalid-template-strings/) allows backslash-prefixed template expressions  (#3116)
+- [bugfix] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) no longer shows errors on imports and exports (#3141)
+- [bugfix] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/): fix false positive when calling a function or method where another overload is deprecated (#2883)
+- [bugfix] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): fixed `"check-separator"` for trivial `for` cases. (#3132)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) prevent spreading `this` as it is not allowed by the compiler (#3126)
+- [bugfix] `msbuild` formatter uses backslashes in paths on Windows (#3145)
+- [bugfix] [`no-namespace`](https://palantir.github.io/tslint/rules/no-namespace/) ignores global augmentation (#3161)
+- [enhancement] remove superfluous empty lines on tslint output. (#3121)
+- [enhancement] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) allows whitelisting of submodules like `@angular/core/testing` (#3129)
+- [enhancement] custom lint rules will be resolved using node's path resolution to allow for loaders like `ts-node` (#3108)
+- [enhancement] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) no longer requires `"single"` or `"double"` to be the first option. The rule defaults to `"double"` if none is specified. (#3114)
+- [enhancement] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) autofix removes trailing comments of imports (#3156)
+- [enhancement] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) allows certain necessary assertions to prevent type widening (#3120)
+
+Thanks to our contributors!
+
+- Paul Gschwendtner
+- Andy Hanson
+- ksvitkovsky
+- Santi Albo
+- aervin
+- Junle Li
+- Joscha Feth
+- WiseBird
+- Caleb Eggensperger
+- WGroenestein
+- Bowen Ni
+
+v5.6.0
+---
+
+## :tada: New rules, options, and fixers
+
+- [new-rule] [`no-duplicate-imports`](https://palantir.github.io/tslint/rules/no-duplicate-imports/) (#3075)
+- [new-rule] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) (#3091)
+- [new-rule] [`space-within-parens`](https://palantir.github.io/tslint/rules/space-within-parens/) (#2959)
+- [new-fixer] [`member-access`](https://palantir.github.io/tslint/rules/member-access/) (#2969)
+- [new-fixer] [`no-null-keyword`](https://palantir.github.io/tslint/rules/no-null-keyword/): fix `x == null` to `x == undefined` (#2802)
+- [new-rule-option] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) let's you optionally ignore certain kinds of declarations (#3030)
+- [new-rule-option] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/) adds `check-else-if` (#2963)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`array-type`](https://palantir.github.io/tslint/rules/array-type/): consider `this` to be simple type (#2982)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) accepts not only union types but also intersection types with Promise-like types (#2987)
+- [bugfix] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/): don't remove export modifier of interfaces (#2962)
+- [bugfix] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Only checks variables at the file-level. (#2950)
+- [bugfix] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Uses correct visibility of variables. (#2950)
+- [bugfix] [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/): recognize rejection handler passed as second argument to `promise.then()` (#3048)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) don't warn for shadowed type parameter on static class members (#3030)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) fixed false positive with key name in index signature (#3030)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) fixed false positive with parameter inside function decorator (#3030)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): allow truthyness and falsyness checks (#3008)
+- [bugfix] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) fixed crash when using destructuring (#3058)
+- [bugfix] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) correctly handles multiline type parameters (#3004)
+- [bugfix] [`prefer-for-of`](https://palantir.github.io/tslint/rules/prefer-for-of/) fixed false positives when array is modified, e.g. `arr[i]++` (#3044)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) adds parens when fixing arrow function return (#3026)
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) permit functions as first argument to Object.assign (#3098)
+- [bugfix] [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/) Handle default exports of functions without names like anonymous functions (fixes #3040) (#3053)
+- [bugfix] Fixed an issue where, at runtime, the module `./test/parse` could not be located due after consumers had run `yarn clean` (#3072)
+- [enhancement] [`no-null-keyword`](https://palantir.github.io/tslint/rules/no-null-keyword/) allows strict comparison (#2802)
+- [enhancement] [`no-switch-case-fall-through`](https://palantir.github.io/tslint/rules/no-switch-case-fall-through/) matches `// falls through` comments case insensitive and allows trailing text (#2983)
+- [enhancement] [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/): support importEqualsDeclaration (#3102)
+- [enhancement] Added NaN and (+/-)Infinity as numbers to [`no-inferrable-types`](https://palantir.github.io/tslint/rules/no-inferrable-types/) (#2885)
+- [enhancement] Improved CLI error message when no filenames are specified (#3066)
+- [rule-change] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/): ignore `if-else-if` by default. Use the new `"check-else-if"` option to check nested if statements (#2963)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Julian Verdurmen
+- Alexandre Alonso
+- Josh Goldberg
+- ksvitkovsky
+- Daisuke Yokomoto
+- Andrii Dieiev
+- Florent Suc
+- Jason Killian
+- Amin Pakseresht
+- reduckted
+- vilicvane
+- Russell Briggs
+- Andy Hanson
+- Leo Liang
+- Dan Homola
+- BehindTheMath
+- David Golightly
+- aervin
+- Daniel Kucal
+- Ika
+- Chris Barr
+
+v5.5.0
+---
+
+__Editor's note__: This release features an important bugfix for overlapping fixes when using `--project` and `--fix` (#2864).
+
+## :tada: New rules and options
+
+- [new-rule-option] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): Add `enum-members` option (#2911)
+- [new-rule] [`no-this-assignment`](https://palantir.github.io/tslint/rules/no-this-assignment/) (#2931)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`encoding`](https://palantir.github.io/tslint/rules/encoding/) closes files correctly (#2958)
+- [bugfix] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) fix whitespace `"check-module"` to properly lint and fix errors  (#2401) (#2825)
+- [bugfix]: [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/): now correctly handles dynamic imports introduced in typescript@2.4.0 (#2924)
+- [bugfix] [`switch-final-break`](https://palantir.github.io/tslint/rules/switch-final-break/): don't fail if break jumps to a label outside of the switch (#2914)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/): exempt `this` parameter (#2598)
+- [bugfix] [`prefer-for-of`](https://palantir.github.io/tslint/rules/prefer-for-of/) correctly handles variable scopes and other unrelated identifiers (#2984)
+- [bugfix] Don't leave blank lines when [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) autofix removes whole import (#2901)
+- [cli] restore `-v` option (#2926)
+- [enhancement] Print stack trace of exceptions (#2890)
+- [enhancement] Added allow-empty-catch option to [`no-empty`](https://palantir.github.io/tslint/rules/no-empty/) (#2886)
+- [enhancement] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/): handle destructuring in for-of loop initializer as if `{"destructuring": "all"}` was specified (#2904)
+- [enhancement] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/): added checks for other shadowing declarations, e.g. interfaces, classes, type parameters, imports, etc. (#2598)
+- [rule-change] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) no longer fails for declarations in the same scope, e.g. `var foo; var foo;`. Use the rule [`no-duplicate-variable`](https://palantir.github.io/tslint/rules/no-duplicate-variable/) to find such errors. (#2598)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Josh Goldberg
+- Petr Kosikhin
+- Pablo Núñez
+- Benny Neugebauer
+- Radon Rosborough
+- reduckted
+- Chris Barr
+- Julian Verdurmen
+
+v5.4.3
+---
+
+## :hammer_and_wrench: Bugfixes
+
+- [bugfix] Fixed regression with empty `--out` file (#2867)
+- [bugfix] [`unified-signatures`](https://palantir.github.io/tslint/rules/unified-signatures/): Don't suggest to unify rest parameters. (#2874)
+- [bugfix] [`binary-expression-operand-order`](https://palantir.github.io/tslint/rules/binary-expression-operand-order/): Allow if both sides of the binary expression are literals. (#2873)
+- [bugfix] Restore compatibility with typescript@2.1 and 2.2 for [`whitespace`](https://palantir.github.io/tslint/rules/whitespace/), [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/) and [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) (#2893)
+- [docs] [`no-string-literal`](https://palantir.github.io/tslint/rules/no-string-literal/): Fix documentation (#2875)
+
+v5.4.2
+---
+
+## :hammer_and_wrench: Bugfixes
+
+- [bugfix] Restored support for multiple `--exclude` options in the CLI (#2855)
+- [bugfix] Restored support for `--version` CLI option (#2857)
+
+v5.4.1
+---
+
+## :hammer_and_wrench: Bugfixes
+
+- [bugfix] Fixed regression in `--exclude` CLI option when using `--project` (#2852)
+
+v5.4.0
+---
+
+## :star: Non-breaking API changes
+
+- `--type-check` only checks for errors before linting is no longer required to enable rules that use the type checker. You only need to supply `--project` now.
+
+## :tada: New rules, options, and fixers
+
+- [new-rule] [`switch-final-break`](https://palantir.github.io/tslint/rules/switch-final-break/) (#2804)
+- [new-rule] [`use-default-type-parameter`](https://palantir.github.io/tslint/rules/use-default-type-parameter/) (#2253)
+- [new-rule] [`binary-expression-operand-order`](https://palantir.github.io/tslint/rules/binary-expression-operand-order/) (#2805)
+- [new-rule-option] [`ban`](https://palantir.github.io/tslint/rules/ban/) new options format: allows to specify an optional explanation message for function bans, banning nested methods and using a wildcard for object of a method ban (#2547)
+- [new-rule-option] [`no-duplicate-variable`](https://palantir.github.io/tslint/rules/no-duplicate-variable/) adds `check-parameters` option to check if variable has the same name as a parameter (#2597)
+- [new-rule-option] [`curly`](https://palantir.github.io/tslint/rules/curly/): "as-needed" option (#2842)
+- [new-rule-option] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/) add option `"ignore-static"` (#2751)
+- [new-rule-option] [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) adds `allow-boolean-or-undefined` (#2820)
+- [new-fixer] [`object-literal-shorthand`](https://palantir.github.io/tslint/rules/object-literal-shorthand/) can fix longhand methods (#2558)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) allows constructor, function and method calls and more as first argument to `Object.assign` (#2828)
+- [bugfix] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/) walker skips past the parent if it is a cast or parenthesized expression (#2838)
+- [bugfix] [`object-literal-shorthand`](https://palantir.github.io/tslint/rules/object-literal-shorthand/): fixed suggestion for generator functions (#2558)
+- [bugfix] Fixed issue with case sensitivity of [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) rule on Windows (#2819)
+- [bugfix] don't crash `tslint --project` if `allowJs` is set in tsconfig.json (#2823)
+- [bugfix] [`align`](https://palantir.github.io/tslint/rules/align/) with option `"members"`: check members of class expressions; don't check semicolons in classes (#2668)
+- [bugfix] [`no-inferred-empty-object-type`](https://palantir.github.io/tslint/rules/no-inferred-empty-object-type/): fix stack overflow (#2762)
+- [bugfix] [`semicolon`](https://palantir.github.io/tslint/rules/semicolon/): don't warn about unnecesary semicolon when it is actually needed, e.g. when followed by type assertion or template string (#2655)
+- [bugfix] [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/): Ignore async arrow function with no parentheses (#2833)
+- [bugfix]: [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): Don't fail on `continue label;` (#2830)
+- [bugfix] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/): Allow unbound method to be used as a condition (#2834)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): Allow to switch on a value of type `any` (#2836)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): Don't mark `declare global {}` as an unsafe any. (#2839)
+- [bugfix] [`indent`](https://palantir.github.io/tslint/rules/indent/) now checks indentation of expressions inside template strings (#2826)
+- [enhancement] `--project` (or `-p`) enables rules that require the type checker. `--type-check` only checks for errors before linting is no longer required (#2773)
+- [enhancement] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/): error message includes deprecation text if available (#2748)
+- [enhancement] [`cyclomatic-complexity`](https://palantir.github.io/tslint/rules/cyclomatic-complexity/): Don't count empty switch case(#2743)
+- [enhancement] [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/): Allow `any`, and `true` and `false` literal types (#2758)
+- [enhancement] [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/): Allow 'promise.catch()' (#2774)
+- [enhancement] [`comment-format`](https://palantir.github.io/tslint/rules/comment-format/) no longer excludes comments with triple slash from linting except `/// <reference path="..."/>` (#2616)
+- [enhancement] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/): lint more locations where return value is used. (#2828)
+- [enhancement] [`semicolon`](https://palantir.github.io/tslint/rules/semicolon/): option `"never"` is now spec compliant (#2655)
+- [enhancement] [`object-literal-shorthand`](https://palantir.github.io/tslint/rules/object-literal-shorthand/) handles async functions correctly (#2558)
+- [enhancement] `--test` CLI option: allow passing path to tslint.json (#2784)
+- [enhancement] Use commander instead of optimist for CLI arguments (#2689)
+- [enhancement] [`strict-type-predicates`](https://palantir.github.io/tslint/rules/strict-type-predicates/): warn if strictNullChecks is not enabled (#2786)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Manuel Lopez
+- Andy Hanson
+- Piotr Tomiak
+
+v5.3.2
+---
+
+- [bugfix] Fixes `not a directory` error (#2813)
 
 v5.3.0
 ---
 
 ## This change may require a change to tslint.json
+
 - [enhancement] [`prefer-switch`](https://palantir.github.io/tslint/rules/prefer-switch/): Change default `min-cases` to 3. (#2669)
 
-## :tada: Notable features & enhancements
+## :tada: Features & enhancements
+
 - [new-cli-option] cli: Add `outputAbsolutePaths` option (#2667)
 - [new-rule] [`prefer-object-spread`](https://palantir.github.io/tslint/rules/prefer-object-spread/) (#2624)
 - [new-rule] [`encoding`](https://palantir.github.io/tslint/rules/encoding/) (#2368)

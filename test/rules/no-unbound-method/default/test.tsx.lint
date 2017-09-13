@@ -26,6 +26,18 @@ i.foo;
 i.bar;
 
 c.method === i.foo;
+
+// OK in condition
+c.method ? 1 : 2;
+1 ? c.method : c.method;
+    ~~~~~~~~ [0]
+               ~~~~~~~~ [0]
+if (c.method) {}
+while (c.method) {}
+do {} while (c.method);
+for (c.method; c.method; c.method) {}
+
+
 [0].forEach(c.method || i.foo);
             ~~~~~~~~ [0]
                         ~~~~~ [0]

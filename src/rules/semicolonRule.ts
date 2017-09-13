@@ -105,7 +105,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    protected reportUnnecessary(pos: number, noFix = false) {
+    protected reportUnnecessary(pos: number, noFix?: boolean) {
         this.addFailure(pos - 1, pos, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos - 1, 1));
     }
 
@@ -129,7 +129,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (this.sourceFile.text[node.end - 1] !== ";") {
             return;
         }
-        const lastToken = utils.getPreviousToken(node.getLastToken(this.sourceFile)!, this.sourceFile)!;
+        const lastToken = utils.getPreviousToken(node.getLastToken(this.sourceFile), this.sourceFile)!;
         // yield does not continue on the next line if there is no yielded expression
         if (lastToken.kind === ts.SyntaxKind.YieldKeyword && lastToken.parent!.kind === ts.SyntaxKind.YieldExpression ||
             // arrow functions with block as body don't continue on the next line

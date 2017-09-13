@@ -19,6 +19,7 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
+import { Minimatch } from "minimatch";
 import * as path from "path";
 import * as ts from "typescript";
 
@@ -31,7 +32,6 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import * as Linter from "./linter";
-import { consoleTestResultsHandler, runTests } from "./test";
 import { arrayify, flatMap } from "./utils";
 
 export interface Options {
@@ -43,7 +43,7 @@ export interface Options {
     /**
      * Exclude globs from path expansion.
      */
-    exclude?: string | string[];
+    exclude: string[];
 
     /**
      * File paths to lint.
@@ -121,8 +121,8 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
     try {
         return await runWorker(options, logger);
     } catch (error) {
-        if ((error as FatalError).name === FatalError.NAME) {
-            logger.error((error as FatalError).message);
+        if (error instanceof FatalError) {
+            logger.error(error.message);
             return Status.FatalError;
         }
         throw error;
@@ -140,8 +140,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     if (options.test) {
-        const results = runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
-        return consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+        const test = await import("./test");
+        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
     }
 
     if (options.config && !fs.existsSync(options.config)) {
@@ -149,7 +150,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     const { output, errorCount } = await runLinter(options, logger);
-    logger.log(output);
+    if (output && output.trim()) {
+        logger.log(output);
+    }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
@@ -159,7 +162,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths === true)).join("\n");
+            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
             if (options.force) {
                 logger.error(message);
             } else {
@@ -171,9 +174,11 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
 }
 
 function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
-    // if both files and tsconfig are present, use files
+    // remove single quotes which break matching on Windows when glob is passed in single quotes
+    const ignore = arrayify(exclude).map(trimSingleQuotes);
+
     if (project === undefined) {
-        return { files: resolveFiles() };
+        return { files: resolveGlobs(files, ignore, outputAbsolutePaths) };
     }
 
     const projectPath = findTsconfig(project);
@@ -182,17 +187,21 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
     }
 
     const program = Linter.createProgram(projectPath);
-    return { files: files === undefined || files.length === 0 ? Linter.getFileNames(program) : resolveFiles(), program };
-
-    function resolveFiles(): string[] {
-        return resolveGlobs(files, exclude, outputAbsolutePaths === true);
+    let filesFound: string[];
+    if (files === undefined || files.length === 0) {
+        filesFound = Linter.getFileNames(program);
+        if (ignore.length !== 0) {
+            const mm = ignore.map((pattern) => new Minimatch(path.resolve(pattern)));
+            filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
+        }
+    } else {
+        filesFound = resolveGlobs(files, ignore, outputAbsolutePaths);
     }
+    return { files: filesFound, program };
 }
 
-function resolveGlobs(files: string[] | undefined, exclude: Options["exclude"], outputAbsolutePaths: boolean): string[] {
-    const ignore = arrayify(exclude).map(trimSingleQuotes);
+function resolveGlobs(files: string[] | undefined, ignore: string[], outputAbsolutePaths?: boolean): string[] {
     return flatMap(arrayify(files), (file) =>
-        // remove single quotes which break matching on Windows when glob is passed in single quotes
         glob.sync(trimSingleQuotes(file), { ignore, nodir: true }))
         .map((file) => outputAbsolutePaths ? path.resolve(file) : path.relative(process.cwd(), file));
 }
@@ -209,6 +218,14 @@ async function doLinting(
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
+    const isFileExcluded = (filepath: string) => {
+        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    };
+
     for (const file of files) {
         if (!fs.existsSync(file)) {
             throw new FatalError(`Unable to open file: ${file}`);
@@ -221,7 +238,9 @@ async function doLinting(
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
                 lastFolder = folder;
             }
-            linter.lint(file, contents, configFile);
+            if (!isFileExcluded(file)) {
+                linter.lint(file, contents, configFile);
+            }
         }
     }
 
@@ -248,10 +267,10 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     return fs.readFileSync(filename, "utf8");
 }
 
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths: boolean): string {
+function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
     let message = ts.DiagnosticCategory[category];
-    if (file) {
-        const {line, character} = file.getLineAndCharacterOfPosition(start!);
+    if (file !== undefined && start !== undefined) {
+        const {line, character} = file.getLineAndCharacterOfPosition(start);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths
             ? path.resolve(currentDirectory, file.fileName)

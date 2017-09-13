@@ -94,15 +94,15 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
 /** Generator functions and functions using `this` are allowed. */
 function functionIsExempt(node: ts.FunctionLikeDeclaration): boolean {
-    return node.asteriskToken !== undefined || hasThisParameter(node) || node.body !== undefined && usesThisInBody(node.body);
+    return node.asteriskToken !== undefined || hasThisParameter(node) || node.body !== undefined && usesThisInBody(node.body) === true;
 }
 
 function hasThisParameter(node: ts.FunctionLikeDeclaration): boolean {
     const first = node.parameters[0];
     return first !== undefined && first.name.kind === ts.SyntaxKind.Identifier &&
-        (first.name as ts.Identifier).originalKeywordKind === ts.SyntaxKind.ThisKeyword;
+        first.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword;
 }
 
-function usesThisInBody(node: ts.Node): boolean {
+function usesThisInBody(node: ts.Node): boolean | undefined {
     return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody);
 }

@@ -107,9 +107,9 @@ function transformName(name: string): string {
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
 function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
-    const fullPath = path.join(directory, ruleName);
-    if (fs.existsSync(`${fullPath}.js`)) {
-        const ruleModule = require(fullPath) as { Rule: RuleConstructor } | undefined;
+    const ruleFullPath = getRuleFullPath(directory, ruleName);
+    if (ruleFullPath !== undefined) {
+        const ruleModule = require(ruleFullPath) as { Rule: RuleConstructor } | undefined;
         if (ruleModule !== undefined) {
             return ruleModule.Rule;
         }
@@ -117,7 +117,21 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | "not-f
     return "not-found";
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath = false): RuleConstructor | undefined {
+/**
+ * Returns the full path to a rule file. Path to rules are resolved using nodes path resolution.
+ * This allows developers to write custom rules in TypeScript, which then can be loaded by TS-Node.
+ * @param directory - An absolute path to a directory of rules
+ * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
+ */
+function getRuleFullPath(directory: string, ruleName: string): string | undefined {
+    try {
+        return require.resolve(path.join(directory, ruleName));
+    } catch (e) {
+        return undefined;
+    }
+}
+
+function loadCachedRule(directory: string, ruleName: string, isCustomPath?: boolean): RuleConstructor | undefined {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);

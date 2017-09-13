@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as number);
     }
 }
 
