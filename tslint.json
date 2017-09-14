@@ -11,14 +11,6 @@
     "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
-    },
     "comment-format": [
         true,
         "check-space"
