@@ -29,7 +29,7 @@ interface Options {
     specCompliant: boolean;
 }
 
-const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore"); // tslint:disable-line no-unnecessary-type-assertion
+const defaultOptions: CustomOptionValue = fillOptions("ignore" as "ignore");
 
 function fillOptions<T>(value: T): Record<OptionName, T> {
     return {
