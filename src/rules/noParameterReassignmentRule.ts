@@ -24,9 +24,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-parameter-reassignment",
         description: "Disallows reassigning parameters.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+          If "props" is set to true, this rule warns against the modification of parameter properties.
+        `,
+        options: {
+            type: "object",
+            properties: {
+                props: {
+                    type: "boolean",
+                },
+            },
+            additionalProperties: false,
+        },
+        optionExamples: [
+            true,
+            [true, {props: true}],
+        ],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -36,12 +49,34 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Reassigning parameter '${name}' is forbidden.`;
     }
 
+    public static PROP_FAILURE_STRING(name: string) {
+        return `Reassigning property of '${name}' is forbidden.`;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+interface Options {
+    props: boolean;
+}
+
+interface JsonOptions {
+    "props"?: boolean;
+}
+
+function parseOptions(ruleArguments: any[]): Options {
+    const optionSet = (ruleArguments as JsonOptions[])[0];
+    const {
+        "props": props = false,
+    } = optionSet === undefined ? {} : optionSet;
+    return {
+        props,
+    };
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
     collectVariableUsage(ctx.sourceFile).forEach((variable, identifier) => {
         if (!isParameter(identifier.parent!)) {
             return;
@@ -49,6 +84,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
         for (const use of variable.uses) {
             if (isReassignmentTarget(use.location)) {
                 ctx.addFailureAtNode(use.location, Rule.FAILURE_STRING(identifier.text));
+            } else if (ctx.options.props && isPropertyModifier(use.location)) {
+                ctx.addFailureAtNode(use.location, Rule.PROP_FAILURE_STRING(identifier.text));
             }
         }
     });
@@ -60,6 +97,16 @@ function isParameter(node: ts.Node): boolean {
             return true;
         case ts.SyntaxKind.BindingElement:
             return getDeclarationOfBindingElement(node as ts.BindingElement).kind === ts.SyntaxKind.Parameter;
+        default:
+            return false;
+    }
+}
+
+function isPropertyModifier(node: ts.Expression): boolean {
+    const parent = node.parent!;
+    switch (parent.kind) {
+        case ts.SyntaxKind.PropertyAccessExpression:
+            return isReassignmentTarget(parent as ts.Expression);
         default:
             return false;
     }
