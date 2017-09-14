@@ -30,6 +30,10 @@ export class Rule extends Lint.Rules.TypedRule {
         description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
             private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
             options, but does not interrupt code compilation.`,
+        descriptionDetails: Lint.Utils.dedent`
+            In addition to avoiding compilation errors, this rule may still be useful if you
+            wish to have \`tslint\` automatically remove unused imports, variables, functions,
+            and private class members, when using TSLint's \`--fix\` option.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -67,12 +71,6 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const x = program.getCompilerOptions();
-        if (x.noUnusedLocals && x.noUnusedParameters) {
-            console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
-                "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
-        }
-
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program);
     }
 }
