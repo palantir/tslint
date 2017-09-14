@@ -1,0 +1,29 @@
+interface Foo {
+    bar: number;
+}
+
+function f1(foo: Foo) {
+    foo.bar = 1;
+    ~~~ [err % ('foo')]
+}
+
+function f2(foo: Foo) {
+    delete foo.bar;
+           ~~~ [err % ('foo')]
+}
+
+function f3(foo: Foo) {
+    foo.bar++;
+    ~~~ [err % ('foo')]
+}
+
+function f4(foo: Foo) {
+    const bar = foo.bar;
+}
+
+function f5(foo: Foo) {
+    return foo.bar - 1;
+}
+
+
+[err]: Reassigning property of '%s' is forbidden.

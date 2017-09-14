@@ -31,4 +31,13 @@ function f4(foo: number, {bar}: {bar: number}, baz: string) {
          ~~~ [err % ('baz')]
 }
 
+interface Foo {
+    bar: number;
+}
+
+function f5(foo: Foo) {
+    foo.bar = 1; // ok
+}
+
+
 [err]: Reassigning parameter '%s' is forbidden.
