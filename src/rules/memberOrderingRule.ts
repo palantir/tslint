@@ -250,7 +250,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                     const curName = nameString(member.name);
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(member.name,
+                        this.addFailureAtNode(
+                            member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
                         prevName = curName;

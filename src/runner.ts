@@ -209,12 +209,14 @@ function resolveGlobs(files: string[] | undefined, ignore: string[], outputAbsol
 async function doLinting(
         options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
-    const linter = new Linter({
-        fix: !!options.fix,
-        formatter: options.format,
-        formattersDirectory: options.formattersDirectory,
-        rulesDirectory: options.rulesDirectory,
-    }, program);
+    const linter = new Linter(
+        {
+            fix: !!options.fix,
+            formatter: options.format,
+            formattersDirectory: options.formattersDirectory,
+            rulesDirectory: options.rulesDirectory,
+        },
+        program);
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;

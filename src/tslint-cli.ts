@@ -252,30 +252,33 @@ if (argv.out != undefined) {
     log = console.log;
 }
 
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: commander.args,
-    fix: argv.fix,
-    force: argv.force,
-    format: argv.format === undefined ? "prose" : argv.format,
-    formattersDirectory: argv.formattersDir,
-    init: argv.init,
-    out: argv.out,
-    outputAbsolutePaths: argv.outputAbsolutePaths,
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-    test: argv.test,
-    typeCheck: argv.typeCheck,
-}, {
-    log,
-    error: (m) => console.error(m),
-}).then((rc) => {
-    process.exitCode = rc;
-}).catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-});
+run(
+    {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: commander.args,
+        fix: argv.fix,
+        force: argv.force,
+        format: argv.format === undefined ? "prose" : argv.format,
+        formattersDirectory: argv.formattersDir,
+        init: argv.init,
+        out: argv.out,
+        outputAbsolutePaths: argv.outputAbsolutePaths,
+        project: argv.project,
+        rulesDirectory: argv.rulesDir,
+        test: argv.test,
+        typeCheck: argv.typeCheck,
+    },
+    {
+        log,
+        error: (m) => console.error(m),
+    })
+    .then((rc) => {
+        process.exitCode = rc;
+    }).catch((e) => {
+        console.error(e);
+        process.exitCode = 1;
+    });
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

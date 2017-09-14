@@ -170,8 +170,11 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ConstructorType:
                 case ts.SyntaxKind.FunctionType:
                 case ts.SyntaxKind.CallSignature:
-                    this.checkListWithEndToken(node, (node as ts.SignatureDeclaration).parameters,
-                                                ts.SyntaxKind.CloseParenToken, "functions");
+                    this.checkListWithEndToken(
+                        node,
+                        (node as ts.SignatureDeclaration).parameters,
+                        ts.SyntaxKind.CloseParenToken,
+                        "functions");
                     break;
                 case ts.SyntaxKind.TypeLiteral:
                     this.checkTypeLiteral(node as ts.TypeLiteralNode);
