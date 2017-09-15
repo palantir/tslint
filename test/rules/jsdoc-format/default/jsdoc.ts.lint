@@ -71,7 +71,6 @@ one  *
     /**/ // no jsdoc
 
     /** First line of multiline jsdoc
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
      * should be empty.
      */
 }
