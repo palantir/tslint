@@ -63,6 +63,11 @@ export const rules = {
             "check-rest-spread",
         ],
     },
+
+    // added in v5.8
+    "jsdoc-format": {
+        options: "check-multiline-start",
+    },
 };
 // tslint:enable object-literal-sort-keys
 
