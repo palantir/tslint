@@ -25,7 +25,7 @@ const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
 
-// tslint:disable object-literal-sort-keys switch-default
+// tslint:disable object-literal-sort-keys
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -88,7 +88,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
+        return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
     }
 }
 
@@ -183,7 +183,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 return;
             }
 
-            ctx.addFailureAtNode(node,
+            ctx.addFailureAtNode(
+                node,
                 showFailure(location, failure, isUnionType(type), options));
         }
     }

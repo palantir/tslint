@@ -1,5 +1,5 @@
 {
   "rules": {
-    "quotemark": [true, "single", "jsx-double"]
+    "quotemark": [true,"jsx-double",  "single"]
   }
 }

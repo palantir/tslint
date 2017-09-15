@@ -26,5 +26,10 @@ import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
 import "something";
 
+// contains ImportEqualsDeclaration
+import c = require('./c');
+import * as a from './a';
+import b from './b';
+
 [ordered-imports]: Named imports must be alphabetized.
 [ordered-sources]: Import sources within a group must be alphabetized.

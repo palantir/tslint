@@ -45,12 +45,12 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
-        const tc = program.getTypeChecker();
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, tc, promiseTypes));
+        return this.applyWithFunction(sourceFile, walk, promiseTypes, program.getTypeChecker());
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker, promiseTypes: Set<string>) {
+function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
+    const promiseTypes = ctx.options;
     return ts.forEachChild(ctx.sourceFile, cb);
 
     function cb(node: ts.Node): void {

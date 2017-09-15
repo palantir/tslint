@@ -99,6 +99,7 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
+    "no-duplicate-switch-case": true,
     "no-duplicate-variable": [
         true,
         "check-parameters",
@@ -117,6 +118,7 @@ export const rules = {
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
+    "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
@@ -148,6 +150,7 @@ export const rules = {
     "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
+    "no-parameter-reassignment": true,
     "no-require-imports": true,
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,
@@ -252,6 +255,8 @@ export const rules = {
         "check-type",
         "check-typecast",
         "check-preblock",
+        "check-type-operator",
+        "check-rest-spread",
     ],
 };
 
