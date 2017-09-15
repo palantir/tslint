@@ -99,6 +99,7 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
+    "no-duplicate-switch-case": true,
     "no-duplicate-variable": [
         true,
         "check-parameters",

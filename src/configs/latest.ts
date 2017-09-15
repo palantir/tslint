@@ -65,6 +65,7 @@ export const rules = {
     },
 
     // added in v5.8
+    "no-duplicate-switch-case": true,
     "jsdoc-format": {
         options: "check-multiline-start",
     },

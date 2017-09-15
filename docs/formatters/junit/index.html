@@ -1,0 +1,20 @@
+---
+formatterName: junit
+description: Formats errors as through they were JUnit output.
+descriptionDetails: |-
+
+  Imitates the JUnit XML Output
+sample: |
+
+  <?xml version="1.0" encoding="utf-8"?>
+  <testsuites package="tslint">
+    <testsuite name="myFile.ts">
+      <testcase name="Line 1, Column 14: semicolon">
+        <failure type="warning">Missing semicolon</failure>
+      </testcase>
+    </testsuite>
+  </testsuites>
+consumer: machine
+layout: formatter
+title: 'TSLint formatter: junit'
+---

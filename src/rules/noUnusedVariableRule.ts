@@ -89,7 +89,7 @@ function parseOptions(options: any[]): Options {
         if (typeof o === "object") {
             // tslint:disable-next-line no-unsafe-any
             const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
-            if (ignore != null) {
+            if (ignore != undefined) {
                 ignorePattern = new RegExp(ignore);
                 break;
             }
@@ -227,12 +227,15 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
         function removeAll(errorNode: ts.Node, failure: string): void {
             const start = importNode.getStart();
             let end = importNode.getEnd();
-            utils.forEachToken(importNode, (token) => {
-                ts.forEachTrailingCommentRange(
-                    ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
-                        end = commentEnd;
-                    });
-            }, ctx.sourceFile);
+            utils.forEachToken(
+                importNode,
+                (token) => {
+                    ts.forEachTrailingCommentRange(
+                        ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
+                            end = commentEnd;
+                        });
+                },
+                ctx.sourceFile);
             if (isEntireLine(start, end)) {
                 end = getNextLineStart(end);
             }
