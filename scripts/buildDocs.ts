@@ -33,18 +33,19 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
-import stringify = require("json-stringify-pretty-compact");
 import * as yaml from "js-yaml";
+import stringify = require("json-stringify-pretty-compact");
 import * as path from "path";
+import * as rimraf from "rimraf";
 
-import {IFormatterMetadata} from "../lib/language/formatter/formatter";
-import {IRuleMetadata} from "../lib/language/rule/rule";
+import { IFormatterMetadata } from "../lib/language/formatter/formatter";
+import { IRuleMetadata } from "../lib/language/rule/rule";
 
 type Metadata = IRuleMetadata | IFormatterMetadata;
 
 interface Documented {
     metadata: Metadata;
-};
+}
 
 interface IDocumentation {
     /**
@@ -70,7 +71,7 @@ interface IDocumentation {
     /**
      * Function to generate individual documentation pages.
      */
-    pageGenerator: (metadata: any) => string;
+    pageGenerator(metadata: any): string;
 
     /**
      * Documentation subdirectory to output to.
@@ -112,12 +113,31 @@ const formatterDocumentation: IDocumentation = {
 function buildDocumentation(documentation: IDocumentation) {
     // Create each module's documentation file.
     const paths = glob.sync(documentation.globPattern);
-    const metadataJson = paths.map((path: string) => {
-        return buildSingleModuleDocumentation(documentation, path);
-    });
+    const metadataJson = paths.map((path: string) =>
+        buildSingleModuleDocumentation(documentation, path));
+
+    // Delete outdated directories
+    const newRulesDirs = metadataJson.map((metadata: any) => metadata[documentation.nameMetadataKey]);
+    deleteOutdatedDocumentation(documentation.subDirectory, newRulesDirs);
 
     // Create a data file with details of every module.
     buildDocumentationDataFile(documentation, metadataJson);
+}
+
+/**
+ * Deletes directories which are outdated
+ * @param subDirectory
+ * @param listOfFolders
+ */
+function deleteOutdatedDocumentation(subDirectory: string, newRulesDirs: string[]) {
+    // find if the thing at particular location is a directory
+    const isDirectory = (source: string) => fs.lstatSync(source).isDirectory();
+    // get all subdirectories in source directory
+    const getDirectories = (source: string) => fs.readdirSync(source).filter((name) => isDirectory(path.join(source, name)));
+
+    const subDirs = getDirectories(subDirectory);
+    const outDatedDirs = subDirs.filter((i) => newRulesDirs.indexOf(i) < 0);
+    outDatedDirs.forEach((outDatedDir) => rimraf(path.join(subDirectory, outDatedDir), () => {})); // tslint:disable-line:no-empty
 }
 
 /**
@@ -128,7 +148,7 @@ function buildSingleModuleDocumentation(documentation: IDocumentation, modulePat
     // tslint:disable-next-line:no-var-requires
     const module = require(modulePath);
     const DocumentedItem = module[documentation.exportName] as Documented;
-    if (DocumentedItem != null && DocumentedItem.metadata != null) {
+    if (DocumentedItem !== null && DocumentedItem.metadata !== null) {
         // Build the module's page.
         const { metadata } = DocumentedItem;
         const fileData = documentation.pageGenerator(metadata);
