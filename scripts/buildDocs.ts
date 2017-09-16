@@ -112,13 +112,13 @@ const formatterDocumentation: IDocumentation = {
  */
 function buildDocumentation(documentation: IDocumentation) {
     // Create each module's documentation file.
-    const paths = glob.sync(documentation.globPattern);
-    const metadataJson = paths.map((path: string) =>
-        buildSingleModuleDocumentation(documentation, path));
+    const modulePaths = glob.sync(documentation.globPattern);
+    const metadataJson = modulePaths.map((modulePath: string) =>
+        buildSingleModuleDocumentation(documentation, modulePath));
 
     // Delete outdated directories
-    const newRulesDirs = metadataJson.map((metadata: any) => metadata[documentation.nameMetadataKey]);
-    deleteOutdatedDocumentation(documentation.subDirectory, newRulesDirs);
+    const rulesDirs = metadataJson.map((metadata: any) => metadata[documentation.nameMetadataKey]);
+    deleteOutdatedDocumentation(documentation.subDirectory, rulesDirs);
 
     // Create a data file with details of every module.
     buildDocumentationDataFile(documentation, metadataJson);
@@ -126,18 +126,18 @@ function buildDocumentation(documentation: IDocumentation) {
 
 /**
  * Deletes directories which are outdated
- * @param subDirectory
- * @param listOfFolders
+ * @param directory Path from which outdated subdirectories have to be checked and removed
+ * @param rulesDirs The names of the current and new rules documentation directories
  */
-function deleteOutdatedDocumentation(subDirectory: string, newRulesDirs: string[]) {
+function deleteOutdatedDocumentation(directory: string, rulesDirs: string[]) {
     // find if the thing at particular location is a directory
     const isDirectory = (source: string) => fs.lstatSync(source).isDirectory();
     // get all subdirectories in source directory
     const getDirectories = (source: string) => fs.readdirSync(source).filter((name) => isDirectory(path.join(source, name)));
 
-    const subDirs = getDirectories(subDirectory);
-    const outDatedDirs = subDirs.filter((i) => newRulesDirs.indexOf(i) < 0);
-    outDatedDirs.forEach((outDatedDir) => rimraf(path.join(subDirectory, outDatedDir), () => {})); // tslint:disable-line:no-empty
+    const subDirs = getDirectories(directory);
+    const outdatedDirs = subDirs.filter((dir) => rulesDirs.indexOf(dir) < 0);
+    outdatedDirs.forEach((outdatedDir) => rimraf(path.join(directory, outdatedDir), () => {})); // tslint:disable-line:no-empty
 }
 
 /**
