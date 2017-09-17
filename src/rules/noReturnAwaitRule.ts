@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-// with due reference to https://github.com/Microsoft/TypeScript/blob/7813121c4d77e50aad0eed3152ef1f1156c7b574/scripts/tslint/noNullRule.ts
-
 import { isFunctionScopeBoundary, isTryStatement } from "tsutils";
 import * as ts from "typescript";
 
