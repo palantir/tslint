@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Nine arguments may be optionally provided:
+            Ten arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -265,8 +265,21 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             case ts.SyntaxKind.CommaToken:
-            case ts.SyntaxKind.SemicolonToken:
                 if (options.separator) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.SemicolonToken:
+                if (!options.separator) {
+                    break;
+                }
+
+                const nextPosition = range.pos + 1;
+                const semicolonInTrivialFor = parent.kind === ts.SyntaxKind.ForStatement &&
+                    nextPosition !== sourceFile.end &&
+                    (sourceFile.text[nextPosition] === ";" || sourceFile.text[nextPosition] === ")");
+
+                if (!semicolonInTrivialFor) {
                     prevTokenShouldBeFollowedByWhitespace = true;
                 }
                 break;

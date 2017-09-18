@@ -121,7 +121,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 case "single-parameter-difference": {
                     const { p0, p1 } = unify;
                     const lineOfOtherOverload = only2 ? undefined : getLine(p0.getStart());
-                    ctx.addFailureAtNode(p1,
+                    ctx.addFailureAtNode(
+                        p1,
                         Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
                     break;
                 }

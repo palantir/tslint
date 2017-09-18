@@ -35,20 +35,24 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static INVALID_TYPES_ERROR = "Operands of '+' operation must either be both strings or both numbers";
+    public static SUGGEST_TEMPLATE_LITERALS = ", consider using template literals";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, program: ts.Program) {
+function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-            const tc = program.getTypeChecker();
             const leftType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.left));
             const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));
             if (leftType === "invalid" || rightType === "invalid" || leftType !== rightType) {
-                return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
+                if (leftType === "string" || rightType === "string") {
+                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS);
+                } else {
+                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
+                }
             }
         }
         return ts.forEachChild(node, cb);

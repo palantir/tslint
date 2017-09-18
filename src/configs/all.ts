@@ -99,6 +99,7 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
+    "no-duplicate-switch-case": true,
     "no-duplicate-variable": [
         true,
         "check-parameters",
@@ -149,6 +150,7 @@ export const rules = {
     "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
+    "no-parameter-reassignment": true,
     "no-require-imports": true,
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,
@@ -186,7 +188,7 @@ export const rules = {
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
-    "jsdoc-format": true,
+    "jsdoc-format": [true, "check-multiline-start"],
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
@@ -253,6 +255,8 @@ export const rules = {
         "check-type",
         "check-typecast",
         "check-preblock",
+        "check-type-operator",
+        "check-rest-spread",
     ],
 };
 

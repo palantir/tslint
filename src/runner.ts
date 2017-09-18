@@ -43,7 +43,7 @@ export interface Options {
     /**
      * Exclude globs from path expansion.
      */
-    exclude?: string | string[];
+    exclude: string[];
 
     /**
      * File paths to lint.
@@ -121,8 +121,8 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
     try {
         return await runWorker(options, logger);
     } catch (error) {
-        if ((error as FatalError).name === FatalError.NAME) {
-            logger.error((error as FatalError).message);
+        if (error instanceof FatalError) {
+            logger.error(error.message);
             return Status.FatalError;
         }
         throw error;
@@ -150,7 +150,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     const { output, errorCount } = await runLinter(options, logger);
-    logger.log(output);
+    if (output && output.trim()) {
+        logger.log(output);
+    }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
@@ -207,15 +209,25 @@ function resolveGlobs(files: string[] | undefined, ignore: string[], outputAbsol
 async function doLinting(
         options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
-    const linter = new Linter({
-        fix: !!options.fix,
-        formatter: options.format,
-        formattersDirectory: options.formattersDirectory,
-        rulesDirectory: options.rulesDirectory,
-    }, program);
+    const linter = new Linter(
+        {
+            fix: !!options.fix,
+            formatter: options.format,
+            formattersDirectory: options.formattersDirectory,
+            rulesDirectory: options.rulesDirectory,
+        },
+        program);
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
+    const isFileExcluded = (filepath: string) => {
+        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    };
+
     for (const file of files) {
         if (!fs.existsSync(file)) {
             throw new FatalError(`Unable to open file: ${file}`);
@@ -228,7 +240,9 @@ async function doLinting(
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
                 lastFolder = folder;
             }
-            linter.lint(file, contents, configFile);
+            if (!isFileExcluded(file)) {
+                linter.lint(file, contents, configFile);
+            }
         }
     }
 

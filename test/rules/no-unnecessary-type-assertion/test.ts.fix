@@ -69,3 +69,13 @@ function func(aOrB: TypeA|TypeB) {
         let z = aOrB;
     }
 }
+
+// Expecting no warning for these assertions as they are not unnecessary.
+
+type Bar = 'bar';
+const data = {
+    x: 'foo' as 'foo',
+    y: 'bar' as Bar,
+}
+
+[1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);

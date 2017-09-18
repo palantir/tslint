@@ -1,3 +1,6 @@
+const form = Object.assign({}, this);
+const foo = Object.assign(bar, this);
+const foo = Object.assign({}, bar, baz, this);
 const original = {a: 1, b:2};
 {...original, c: 3};
 {a: 1, b: 2, c: 3};

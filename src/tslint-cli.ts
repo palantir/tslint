@@ -26,7 +26,7 @@ import { dedent } from "./utils";
 
 interface Argv {
     config?: string;
-    exclude?: string;
+    exclude: string[];
     fix?: boolean;
     force?: boolean;
     help?: boolean;
@@ -242,7 +242,7 @@ if (argv.typeCheck && argv.project === undefined) {
 }
 
 let log: (message: string) => void;
-if (argv.out != null) {
+if (argv.out != undefined) {
     const outputStream = fs.createWriteStream(argv.out, {
         flags: "w+",
         mode: 420,
@@ -252,31 +252,33 @@ if (argv.out != null) {
     log = console.log;
 }
 
-// tslint:disable-next-line no-floating-promises
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: commander.args,
-    fix: argv.fix,
-    force: argv.force,
-    format: argv.format === undefined ? "prose" : argv.format,
-    formattersDirectory: argv.formattersDir,
-    init: argv.init,
-    out: argv.out,
-    outputAbsolutePaths: argv.outputAbsolutePaths,
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-    test: argv.test,
-    typeCheck: argv.typeCheck,
-}, {
-    log,
-    error: (m) => console.error(m),
-}).then((rc) => {
-    process.exitCode = rc;
-}).catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-});
+run(
+    {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: commander.args,
+        fix: argv.fix,
+        force: argv.force,
+        format: argv.format === undefined ? "prose" : argv.format,
+        formattersDirectory: argv.formattersDir,
+        init: argv.init,
+        out: argv.out,
+        outputAbsolutePaths: argv.outputAbsolutePaths,
+        project: argv.project,
+        rulesDirectory: argv.rulesDir,
+        test: argv.test,
+        typeCheck: argv.typeCheck,
+    },
+    {
+        log,
+        error: (m) => console.error(m),
+    })
+    .then((rc) => {
+        process.exitCode = rc;
+    }).catch((e) => {
+        console.error(e);
+        process.exitCode = 1;
+    });
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
