@@ -20,6 +20,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_CHECK_MULTILINE_START = "check-multiline-start";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -31,11 +33,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             * each line contains an asterisk and asterisks must be aligned
             * each asterisk must be followed by either a space or a newline (except for the first and the last)
             * the only characters before the asterisk on each line must be whitespace characters
-            * one line comments must start with \`/** \` and end with \`*/\``,
+            * one line comments must start with \`/** \` and end with \`*/\`
+            * multiline comments don't allow text after \`/** \` in the first line (with option \`"${OPTION_CHECK_MULTILINE_START}"\`)
+        `,
         rationale: "Helps maintain a consistent, readable style for JSDoc comments.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            You can optionally specify the option \`"${OPTION_CHECK_MULTILINE_START}"\` to enforce the first line of a
+            multiline JSDoc comment to be empty.
+        `,
+        options: {
+            type: "array",
+            minItems: 0,
+            maxItems: 1,
+            items: {
+                type: "string",
+                enum: [OPTION_CHECK_MULTILINE_START],
+            },
+        },
+        optionExamples: [true, [true, OPTION_CHECK_MULTILINE_START]],
         type: "style",
         typescriptOnly: false,
     };
@@ -45,11 +60,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            firstLineOfMultiline: this.ruleArguments.indexOf(OPTION_CHECK_MULTILINE_START) !== -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+interface Options {
+    firstLineOfMultiline: boolean;
+}
+
+function walk(ctx: Lint.WalkContext<Options>) {
     return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
         if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
             fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
@@ -65,6 +86,10 @@ function walk(ctx: Lint.WalkContext<void>) {
         }
 
         const alignColumn = getAlignColumn(ctx.sourceFile, pos + 1);
+        if (ctx.options.firstLineOfMultiline && /\S/.test(firstLine)) {
+            // first line of multiline JSDoc should be empty, i.e. only contain whitespace
+            ctx.addFailureAt(pos, firstLine.length + 3, Rule.FORMAT_FAILURE_STRING);
+        }
         let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
         for (let i = 1; i < endIndex; ++i) {
