@@ -68,7 +68,7 @@ export function preprocessDirectives(text: string): string {
                 throw lintSyntaxError("#if directives cannot be nested");
             }
             state = State.If;
-            collecting = semver.satisfies(tsVersion, line.slice(14).trim());
+            collecting = semver.satisfies(tsVersion, line.slice("#if typescript".length).trim());
         } else if (/^#else\s*$/.test(line)) {
             if (state !== State.If) {
                 throw lintSyntaxError("unexpected #else");
