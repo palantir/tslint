@@ -137,7 +137,7 @@ function deleteOutdatedDocumentation(directory: string, rulesDirs: string[]) {
 
     const subDirs = getDirectories(directory);
     const outdatedDirs = subDirs.filter((dir) => rulesDirs.indexOf(dir) < 0);
-    outdatedDirs.forEach((outdatedDir) => rimraf(path.join(directory, outdatedDir), () => {})); // tslint:disable-line:no-empty
+    outdatedDirs.forEach((outdatedDir) => rimraf.sync(path.join(directory, outdatedDir)));
 }
 
 /**
