@@ -49,7 +49,7 @@ export function parseLine(text: string): Line {
     if (endErrorMatch !== null) {
         const [, squiggles, message] = endErrorMatch;
         const startErrorCol = text.indexOf("~");
-        const zeroLengthError = (squiggles === ZERO_LENGTH_ERROR);
+        const zeroLengthError = squiggles === ZERO_LENGTH_ERROR;
         const endErrorCol = zeroLengthError ? startErrorCol : text.lastIndexOf("~") + 1;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
     }
@@ -75,7 +75,7 @@ export function parseLine(text: string): Line {
 export function printLine(line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
         if (code === undefined) {
-           throw new Error("Must supply argument for code parameter when line is an ErrorLine");
+            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
         }
 
         const leadingSpaces = " ".repeat(line.startCol);

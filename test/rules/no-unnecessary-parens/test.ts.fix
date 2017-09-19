@@ -1,0 +1,17 @@
+let x = 3;
+let y = x;
+function foo() {
+    return 1;
+}
+     x    ;
+
+let x = 1 + 1;
+foo(1 + 1, 2 + 2);
+console.log((1 + 1) * 2);
+let x: string = 'b';
+let x = false;
+
+// No issues with
+let z = (x) => x + 1;
+let x = (1 + 1) * 2;
+(f());
