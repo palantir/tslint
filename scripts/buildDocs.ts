@@ -33,19 +33,19 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
-import * as yaml from "js-yaml";
 import stringify = require("json-stringify-pretty-compact");
+import * as yaml from "js-yaml";
 import * as path from "path";
 import * as rimraf from "rimraf";
 
-import { IFormatterMetadata } from "../lib/language/formatter/formatter";
-import { IRuleMetadata } from "../lib/language/rule/rule";
+import {IFormatterMetadata} from "../lib/language/formatter/formatter";
+import {IRuleMetadata} from "../lib/language/rule/rule";
 
 type Metadata = IRuleMetadata | IFormatterMetadata;
 
 interface Documented {
     metadata: Metadata;
-}
+};
 
 interface IDocumentation {
     /**
@@ -71,7 +71,7 @@ interface IDocumentation {
     /**
      * Function to generate individual documentation pages.
      */
-    pageGenerator(metadata: any): string;
+    pageGenerator: (metadata: any) => string;
 
     /**
      * Documentation subdirectory to output to.
