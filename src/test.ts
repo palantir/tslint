@@ -94,9 +94,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement !== undefined) {
-            const tsVersion = new semver.SemVer(ts.version);
             // remove prerelease suffix when matching to allow testing with nightly builds
-            if (!semver.satisfies(`${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`, tsVersionRequirement)) {
+            if (!semver.satisfies(parse.getNormalizedTypescriptVersion(), tsVersionRequirement)) {
                 results.results[fileToLint] = {
                     requirement: tsVersionRequirement,
                     skipped: true,
@@ -107,6 +106,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const lineBreak = fileText.search(/\n/);
             fileText = lineBreak === -1 ? "" : fileText.substr(lineBreak + 1);
         }
+        fileText = parse.preprocessDirectives(fileText);
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
