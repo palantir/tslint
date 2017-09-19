@@ -148,7 +148,7 @@ function buildSingleModuleDocumentation(documentation: IDocumentation, modulePat
     // tslint:disable-next-line:no-var-requires
     const module = require(modulePath);
     const DocumentedItem = module[documentation.exportName] as Documented;
-    if (DocumentedItem !== null && DocumentedItem.metadata !== null) {
+    if (DocumentedItem != null && DocumentedItem.metadata != null) {
         // Build the module's page.
         const { metadata } = DocumentedItem;
         const fileData = documentation.pageGenerator(metadata);
