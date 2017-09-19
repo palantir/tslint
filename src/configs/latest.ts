@@ -64,8 +64,11 @@ export const rules = {
         ],
     },
 
-    // added in v5.8.0
+    // added in v5.8
     "no-duplicate-switch-case": true,
+    "jsdoc-format": {
+        options: "check-multiline-start",
+    },
     "no-return-await": true,
 };
 // tslint:enable object-literal-sort-keys
