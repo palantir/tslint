@@ -10,6 +10,7 @@ foo(1 + 1, 2 + 2);
 console.log((1 + 1) * 2);
 let x: string = 'b';
 let x = false;
+let x: number|string = 1;
 
 // No issues with
 let z = (x) => x + 1;

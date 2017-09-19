@@ -20,6 +20,8 @@ let x: (string) = 'b';
        ~~~~~~~~        [Don't include unnecessary parentheses around an expression of type Keyword]
 let x = (false);
         ~~~~~~~  [Don't include unnecessary parentheses around an expression of type Keyword]
+let x: (number|string) = 1;
+       ~~~~~~~~~~~~~~~      [Don't include unnecessary parentheses around the type child of an expression of type VariableDeclaration]
 
 // No issues with
 let z = (x) => x + 1;

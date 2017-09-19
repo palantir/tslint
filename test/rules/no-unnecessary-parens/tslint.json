@@ -10,7 +10,8 @@
                 "asChildOf": [
                     "VariableDeclaration.initializer",
                     "ParenthesizedExpression.expression",
-                    "CallExpression.arguments"
+                    "CallExpression.arguments",
+                    "VariableDeclaration.type"
                 ]
             }
         ]

@@ -127,6 +127,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
         "Keyword",
         // ex: (new Foo())
         "NewExpression",
+        // ex (options[0]).foo
+        "ElementAccessExpression",
+        // ex (x.a).b
+        "PropertyAccessExpression",
+        // ex (f());
+        "CallExpression",
     ] : ctx.options.withChild;
     const asChildOf = ctx.options.default ? [
         // ex: let x = (1 + foo());
@@ -143,6 +149,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
         "ExpressionStatement.expression",
         // ex: function foo((a: string), b: number) {}
         "SignatureDeclaration.parameters",
+        // ex: let x: (string|number) = 3;
+        "VariableDeclaration.type",
+        // ex: function(foo: (number|string)) {}
+        "Parameter.type",
         ...ctx.options.asChildOf,
     ] : ctx.options.asChildOf;
 
