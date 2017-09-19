@@ -167,10 +167,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return {
                 message: `the ${whichChild} child of an expression of type ${parentKind}`,
                 test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
-                    if (node.parent == undefined) {
-                        return false;
-                    }
-                    if (!isNodeOfKind(node.parent, parentKind)) {
+                    if (!isNodeOfKind(node.parent!, parentKind)) {
                         return false;
                     }
                     const parentMapping = node.parent as {} as { [k: string]: ts.Node | ts.Node[] };
