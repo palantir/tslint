@@ -202,7 +202,7 @@ function findup(filename: string, directory: string): string | undefined {
  * @param originalFilePath The entry point configuration file
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
+export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath, parentConfig?: RawConfigFile) {
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
     } else {
@@ -223,6 +223,9 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
+        
+        // assign defaultSeverity of parent if no underlying default is set:
+        rawConfigFile.defaultSeverity = rawConfigFile.defaultSeverity | parentConfig.defaultSeverity;
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
         const configFile = parseConfigFile(rawConfigFile, configFileDir);
@@ -231,7 +234,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         // apply the current configuration last by placing it last in this array
         const configs: IConfigurationFile[] = configFile.extends.map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
+            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath, rawConfigFile);
         }).concat([configFile]);
 
         return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
