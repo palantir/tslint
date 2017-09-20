@@ -224,8 +224,8 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
         
-        // assign defaultSeverity of parent if no underlying default is set:
-        rawConfigFile.defaultSeverity = rawConfigFile.defaultSeverity | parentConfig.defaultSeverity;
+        // assign defaultSeverity of parent if child configuration has no defaultSeverity set:
+        rawConfigFile.defaultSeverity = rawConfigFile.defaultSeverity || (parentConfig ? parentConfig.defaultSeverity : undefined);
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
         const configFile = parseConfigFile(rawConfigFile, configFileDir);
