@@ -71,7 +71,9 @@ class Walker extends Lint.AbstractWalker<void> {
                 isObjectType(castType) &&
                 isObjectFlagSet(castType, ts.ObjectFlags.Tuple)) ||
             // Sometimes tuple types don't have ObjectFlags.Tuple set, like when
-            // they're being matched against an inferred type
+            // they're being matched against an inferred type. So, in addition,
+            // check if any properties are numbers, which implies that this is
+            // likely a tuple type.
             (castType.getProperties().some((symbol) => !isNaN(Number(symbol.name))))) {
 
             // It's not always safe to remove a cast to a literal type or tuple
