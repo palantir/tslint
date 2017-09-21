@@ -96,3 +96,4 @@ const data = {
 }
 
 [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
