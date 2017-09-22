@@ -1,6 +1,10 @@
 import { SomeClass, someVar } from "./some.test";
 const person = { name: "alice" };
 const { name } = person;
+#if typescript >= 2.6.0
+        ~~~~ ['name' is declared but its value is never read.]
+#else
         ~~~~ ['name' is declared but never used.]
+#endif
 
 export const {prop} = someVar;
