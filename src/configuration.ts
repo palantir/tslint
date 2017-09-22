@@ -223,9 +223,10 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
-        
+
         // assign defaultSeverity of parent if child configuration has no defaultSeverity set:
-        rawConfigFile.defaultSeverity = rawConfigFile.defaultSeverity || (parentConfig ? parentConfig.defaultSeverity : undefined);
+        rawConfigFile.defaultSeverity =
+            rawConfigFile.defaultSeverity !== undefined ? rawConfigFile.defaultSeverity : (parentConfig ? parentConfig.defaultSeverity : undefined);
 
         const configFileDir = path.dirname(resolvedConfigFilePath);
         const configFile = parseConfigFile(rawConfigFile, configFileDir);
