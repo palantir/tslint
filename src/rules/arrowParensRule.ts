@@ -74,7 +74,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 const closeParen = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!;
                 ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, [
                     Lint.Replacement.deleteText(openParen.end - 1, 1),
-                    Lint.Replacement.deleteText(closeParen.end - 1, 1),
+                    Lint.Replacement.deleteFromTo(node.parameters[0].end, closeParen.end),
                 ]);
             }
         }

@@ -31,4 +31,16 @@ const invalidAsync = async (param) => {};
 // parens required when return type annotation is present
 const fn = (param): void => {};
 
+let foo = (bar,) => bar;
+           ~~~ [0]
+let foo = (
+    bar
+    ~~~ [0]
+) => bar;
+
+let foo = (
+    bar,
+    ~~~ [0]
+) => bar;
+
 [0]: Parentheses are prohibited around the parameter in this single parameter arrow function

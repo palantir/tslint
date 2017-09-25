@@ -28,3 +28,11 @@ const invalidAsync = async param => {};
 
 // parens required when return type annotation is present
 const fn = (param): void => {};
+
+let foo = bar => bar;
+let foo = 
+    bar => bar;
+
+let foo = 
+    bar => bar;
+
