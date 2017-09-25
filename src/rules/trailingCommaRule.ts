@@ -174,6 +174,16 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                     this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end, "functions", noRest);
                     break;
                 case ts.SyntaxKind.ArrowFunction:
+                    // don't check arrow functions without parens around the parameter
+                    if (node.getChildAt(0, this.sourceFile).kind === ts.SyntaxKind.OpenParenToken) {
+                        this.checkList(
+                            (node as ts.ArrowFunction).parameters,
+                            (node as ts.ArrowFunction).equalsGreaterThanToken.pos,
+                            "functions",
+                            isRestParameter,
+                        );
+                    }
+                    break;
                 case ts.SyntaxKind.Constructor:
                 case ts.SyntaxKind.FunctionDeclaration:
                 case ts.SyntaxKind.FunctionExpression:

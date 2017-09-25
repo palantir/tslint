@@ -615,3 +615,6 @@ let [...y] = [];
       ~nil [Missing trailing comma]
 function foo(...z) {}
                  ~nil [Missing trailing comma]
+
+let foo = bar => bar;
+let foo = (bar => bar);
