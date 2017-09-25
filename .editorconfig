@@ -10,6 +10,3 @@ insert_final_newline = true
 
 [tslint.json]
 indent_size = 2
-
-[*.{fix,lint}]
-trim_trailing_whitespace = false

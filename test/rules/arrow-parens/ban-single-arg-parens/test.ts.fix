@@ -25,14 +25,16 @@ var f = ab => {};
 // invalid case
 var a = a => {};
 const invalidAsync = async param => {};
+const invalidAsync = async param => {};
 
 // parens required when return type annotation is present
 const fn = (param): void => {};
 
 let foo = bar => bar;
-let foo = 
-    bar => bar;
 
-let foo = 
-    bar => bar;
+let foo = bar => bar;
+
+let foo = bar => bar;
+
+let foo = async bar => bar;
 
