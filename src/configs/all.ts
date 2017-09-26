@@ -217,6 +217,7 @@ export const rules = {
     "ordered-imports": [true, {
         "import-sources-order": "case-insensitive",
         "named-imports-order": "case-insensitive",
+        "module-source-path": "full",
     }],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,

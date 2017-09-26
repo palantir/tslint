@@ -63,6 +63,7 @@
     "@types/mocha": "^2.2.35",
     "@types/node": "^7.0.29",
     "@types/resolve": "^0.0.4",
+    "@types/rimraf": "^2.0.2",
     "@types/semver": "^5.3.30",
     "chai": "^3.5.0",
     "github": "^8.2.1",
