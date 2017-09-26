@@ -74,7 +74,7 @@ class Walker extends Lint.AbstractWalker<void> {
             // they're being matched against an inferred type. So, in addition,
             // check if any properties are numbers, which implies that this is
             // likely a tuple type.
-            (castType.getProperties().some((symbol) => !isNaN(Number(symbol.name))))) {
+            castType.getProperties().some((symbol) => !isNaN(Number(symbol.name)))) {
 
             // It's not always safe to remove a cast to a literal type or tuple
             // type, as those types are sometimes widened without the cast.
