@@ -30,9 +30,11 @@ describe("Utils", () => {
     });
 
     it("dedent", () => {
-        assert.equal(dedent`
-        foo
-        bar`, "\nfoo\nbar");
+        assert.equal(
+            dedent`
+            foo
+            bar`,
+            "\nfoo\nbar");
 
         assert.equal(dedent`   one-line`, "one-line");
 
