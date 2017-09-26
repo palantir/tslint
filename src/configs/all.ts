@@ -89,6 +89,7 @@ export const rules = {
     "await-promise": true,
     // "ban": no sensible default
     "curly": true,
+    "dead-type-branch": true,
     "forin": true,
     // "import-blacklist": no sensible default
     "label-position": true,

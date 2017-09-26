@@ -1,0 +1,35 @@
+class A {private a(){}};
+class B {private b(){}};
+class C {private c(){}};
+
+const ab: A|B = Math.random() > .5 ? new A() : new B();
+
+
+if (ab instanceof A) { ab; }
+
+
+if (ab instanceof A || ab instanceof B) { ab; }
+
+
+if (ab instanceof C) { ab; } // A & C | B & C
+
+
+if (ab instanceof A || ab instanceof B) { ab; }
+else { ab; }
+     ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+
+
+// Interesting case: the first condition leaves B & !A, which gets rounded
+// up into B for the next condition since TS doesn't subtract. We lost the !A
+// along the way, which then gets turned into B & !A, and so on.
+if (ab instanceof A) { ab; }
+else if (ab instanceof A) { ab; }
+
+
+if (ab instanceof A) { ab; }
+else if (ab instanceof B) { ab; }
+else if (ab instanceof C) { ab; }
+                          ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+else { ab; }
+     ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+

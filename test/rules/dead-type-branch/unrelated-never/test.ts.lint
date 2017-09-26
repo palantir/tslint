@@ -1,0 +1,28 @@
+const x:never;
+const s:string = 'a';
+
+if (s) {
+    x;
+    s; // Don't flag, since there's no type testing intention that we can find
+}
+
+if (typeof s === 'string') {
+    x;
+    s; // same, x isn't tested
+}
+
+if (typeof s === 'string' && x) {
+    x; s;
+}
+
+// x should be flagged in that if, but not after
+if (typeof x === 'foo') {
+  if (typeof s === 'string') { x; s; }
+                             ~~~~~~~~~ [This block is unreachable: TypeScript infers the type of 'x' as 'never' at this location, which means the previous type guard is always false.]
+} else { x; }
+       ~~~~~~ [This block is unreachable: TypeScript infers the type of 'x' as 'never' at this location, which means the previous type guard is always false.]
+
+
+if (typeof s === 'string') {
+    x; s;
+}
