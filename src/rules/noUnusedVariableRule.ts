@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 * NOTE: this option is experimental and does not work with classes
                 that use abstract method declarations, among other things.
             * \`{"ignore-pattern": "pattern"}\` where pattern is a case-sensitive regexp.
-            Variable names that match the pattern will be ignored.`,
+            Variable names and imports that match the pattern will be ignored.`,
         options: {
             type: "array",
             items: {
@@ -114,6 +114,13 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
+        if (ignorePattern !== undefined) {
+            const varName = /'(.*)'/.exec(failure)![1];
+            if (ignorePattern.test(varName)) {
+                continue;
+            }
+        }
+
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
             const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
@@ -125,13 +132,6 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
                     throw new Error("Should not get 2 errors for the same import.");
                 }
                 importSpecifierFailures.set(importName, failure);
-                continue;
-            }
-        }
-
-        if (ignorePattern !== undefined) {
-            const varName = /'(.*)'/.exec(failure)![1];
-            if (ignorePattern.test(varName)) {
                 continue;
             }
         }
