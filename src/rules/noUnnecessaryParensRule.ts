@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isLiteralExpression, isParenthesizedExpression } from "tsutils";
+import { isBinaryExpression, isLiteralExpression, isParenthesizedExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -156,7 +156,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         // ex: let x: (string|number) = 3;
         "VariableDeclaration.type",
         // ex: function(foo: (number|string)) {}
-        "Parameter.type",
+        "*.type",
         // foo[(bar + "baz")]
         "ElementAccessExpression.argumentExpression",
         // `${(foo)}`
@@ -191,6 +191,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (isParenthesizedExpression(node) || isParenthesizedType(node)) {
             const restriction = restrictions.find((r) => r.test(node));
             if (restriction != undefined) {
+                // Don't suggest a fix for a (hopefully rare) pattern where
+                // removing the parentheses would almost always be bad, e.g.
+                // let x = (y = 1, z = 2);
+                if (isParenthesizedExpression(node) &&
+                    isBinaryExpression(node.expression) &&
+                    node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+                    ctx.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING_FACTORY(restriction.message));
+                    return;
+                }
                 ctx.addFailureAtNode(
                     node,
                     Rule.FAILURE_STRING_FACTORY(restriction.message),

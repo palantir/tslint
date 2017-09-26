@@ -13,6 +13,7 @@ let x = false;
 let x: number|string = 1;
 let x: Foo<string|number>;
 let x = foo<string|number>();
+let x = (y = 1, z = 2);
 
 // No issues with
 let z = (x) => x + 1;
