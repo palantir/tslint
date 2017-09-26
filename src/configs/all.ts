@@ -88,6 +88,7 @@ export const rules = {
     // Functionality
     "await-promise": true,
     // "ban": no sensible default
+    "ban-parens": [true, { "default": true }],
     "curly": true,
     "forin": true,
     // "import-blacklist": no sensible default
@@ -201,7 +202,6 @@ export const rules = {
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
     "no-unnecessary-type-assertion": true,
-    "no-unnecessary-parens": [true, { "default": true }],
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,

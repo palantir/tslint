@@ -1,6 +1,6 @@
 {
     "rules": {
-        "no-unnecessary-parens": [true,
+        "ban-parens": [true,
             {
                 "withChild": [
                     "Identifier",

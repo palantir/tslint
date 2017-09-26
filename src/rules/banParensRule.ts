@@ -31,11 +31,12 @@ const syntaxKindMapping = ts.SyntaxKind as {} as { [k: string]: ts.SyntaxKind };
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-unnecessary-parens",
+        ruleName: "ban-parens",
         description: Lint.Utils.dedent`
-            Warns when parentheses are used that are unnecessary. Tip: Use
-            astexplorer.net with the TypeScript parser to determine the token
-            types you want to avoid parentheses around.`,
+            Warns when parentheses are used around or as a child of certain
+            expression types. Tip: Use astexplorer.net with the TypeScript
+            parser to determine the token types you want to ban parentheses
+            around.`,
         options: {
             type: "object",
             properties: {
@@ -52,15 +53,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             additionalProperties: false,
         },
         optionsDescription: Lint.Utils.dedent`
-            withChild: A list of token kinds around which to flag parentheses.
-                For example, \`{"withChild": ["Identifier"]}\` would flag
-                \`(foo)\` as having unnecessary parentheses around it.
+            withChild: A list of token kinds around which to ban parentheses.
+                For example, \`{"withChild": ["Identifier"]}\` would ban
+                \`(foo)\`.
 
             asChildOf: A list of token kinds and properties on those tokens
                 such that if the parenthesized expression is the appropriate
-                child of a token of that kind, it will be flagged. For example,
+                child of a token of that kind, it will be banned. For example,
                 \`{"asChildOf": ["VariableDeclaration.initializer"]}\` would
-                flag the parentheses in \`let x = (1 + 2)\`, regardless of the
+                ban the parentheses in \`let x = (1 + 2)\`, regardless of the
                 kind of the parenthesized expression.
 
             default: Whether to default the set of bans to a set of hopefully
@@ -88,7 +89,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(expressionTypeName: string) {
-        return `Don't include unnecessary parentheses around ${expressionTypeName}`;
+        return `Don't include parentheses around ${expressionTypeName}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
