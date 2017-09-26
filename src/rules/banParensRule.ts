@@ -201,15 +201,15 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     ctx.addFailureAtNode(
                         node,
                         Rule.FAILURE_STRING_FACTORY(restriction.message));
-                    return;
+                } else {
+                    ctx.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING_FACTORY(restriction.message),
+                        [
+                            Lint.Replacement.deleteFromTo(node.getStart(), node.getStart() + 1),
+                            Lint.Replacement.deleteFromTo(node.getEnd() - 1, node.getEnd()),
+                        ]);
                 }
-                ctx.addFailureAtNode(
-                    node,
-                    Rule.FAILURE_STRING_FACTORY(restriction.message),
-                    [
-                        Lint.Replacement.deleteFromTo(node.getStart(), node.getStart() + 1),
-                        Lint.Replacement.deleteFromTo(node.getEnd() - 1, node.getEnd()),
-                    ]);
             }
         }
         return ts.forEachChild(node, cb);
