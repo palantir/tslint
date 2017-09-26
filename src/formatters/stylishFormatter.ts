@@ -19,7 +19,7 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import * as colors from "colors";
+import * as chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -70,12 +70,12 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString     = colors.yellow(failureString);
+            failureString     = chalk.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
             ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = colors.grey(ruleName);
+            ruleName     = chalk.grey(ruleName);
 
             // Lines
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
@@ -84,8 +84,8 @@ export class Formatter extends AbstractFormatter {
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             positionTuple = failure.getRuleSeverity() === "warning"
-                ? colors.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
-                : colors.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
+                ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
+                : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
