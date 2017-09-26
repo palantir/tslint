@@ -33,7 +33,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-parens",
         description: Lint.Utils.dedent`
-            Warns when parentheses are used that are unnecessary`,
+            Warns when parentheses are used that are unnecessary. Tip: Use
+            astexplorer.net with the TypeScript parser to determine the token
+            types you want to avoid parentheses around.`,
         options: {
             type: "object",
             properties: {
@@ -75,6 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     "ParenthesizedExpression.expression",
                     "CallExpression.arguments",
                     "ExpressionStatement.expression",
+                    "*.type",
                 ],
             }],
             [{ default: true }],
@@ -99,6 +102,8 @@ function isNodeOfKind(node: ts.Node, kindName: string) {
             return isLiteralExpression(node);
         case "Keyword":
             return node.kind > ts.SyntaxKind.FirstKeyword && node.kind < ts.SyntaxKind.LastKeyword;
+        case "*":
+            return true;
         default:
             return node.kind === syntaxKindMapping[kindName];
     }
@@ -141,18 +146,21 @@ function walk(ctx: Lint.WalkContext<Options>) {
         "TypeAliasDeclaration.type",
         // ex: ((1 + 1)) + 2
         "ParenthesizedExpression.expression",
-        // ex: foo((a), b)
+        // ex: foo((a), b); new Foo((a));
         "CallExpression.arguments",
-        // ex: Foo<(string|number), string>
-        "TypeReference.typeArguments",
+        "NewExpression.arguments",
+        // ex: Foo<(a|b), c>; foo<(a)>();
+        "*.typeArguments",
         // ex: (foo.bar());
         "ExpressionStatement.expression",
-        // ex: function foo((a: string), b: number) {}
-        "SignatureDeclaration.parameters",
         // ex: let x: (string|number) = 3;
         "VariableDeclaration.type",
         // ex: function(foo: (number|string)) {}
         "Parameter.type",
+        // foo[(bar + "baz")]
+        "ElementAccessExpression.argumentExpression",
+        // `${(foo)}`
+        "TemplateSpan.expression",
         ...ctx.options.asChildOf,
     ] : ctx.options.asChildOf;
 
@@ -165,7 +173,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         asChildOf.map((name: string) => {
             const [parentKind, whichChild] = name.split(".");
             return {
-                message: `the ${whichChild} child of an expression of type ${parentKind}`,
+                message: `the ${whichChild} child of an expression${parentKind === "*" ? "" : ` of type ${parentKind}`}`,
                 test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
                     if (!isNodeOfKind(node.parent!, parentKind)) {
                         return false;

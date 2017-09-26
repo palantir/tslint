@@ -11,6 +11,8 @@ console.log((1 + 1) * 2);
 let x: string = 'b';
 let x = false;
 let x: number|string = 1;
+let x: Foo<string|number>;
+let x = foo<string|number>();
 
 // No issues with
 let z = (x) => x + 1;

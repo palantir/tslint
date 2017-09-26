@@ -11,7 +11,8 @@
                     "VariableDeclaration.initializer",
                     "ParenthesizedExpression.expression",
                     "CallExpression.arguments",
-                    "VariableDeclaration.type"
+                    "VariableDeclaration.type",
+                    "*.typeArguments"
                 ]
             }
         ]
