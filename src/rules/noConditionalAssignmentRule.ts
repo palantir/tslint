@@ -90,14 +90,11 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.NonNullExpression:
                 case ts.SyntaxKind.AsExpression:
                 case ts.SyntaxKind.TypeAssertionExpression:
-                    cb((node as ts.AssertionExpression | ts.NonNullExpression | ts.ParenthesizedExpression).expression);
-                    return;
+                    return cb((node as ts.AssertionExpression | ts.NonNullExpression | ts.ParenthesizedExpression).expression);
                 case ts.SyntaxKind.PrefixUnaryExpression:
-                    cb((node as ts.PrefixUnaryExpression).operand);
-                    return;
+                    return cb((node as ts.PrefixUnaryExpression).operand);
                 default:
-                    noCheck(node);
-                    return;
+                    return noCheck(node);
             }
         }
         return ts.forEachChild(node, cb);
@@ -119,6 +116,5 @@ function walk(ctx: Lint.WalkContext<void>) {
 function maybeCallback(cb: (node: ts.Node) => void, node?: ts.Node) {
     if (node !== undefined) {
         cb(node);
-        return;
     }
 }
