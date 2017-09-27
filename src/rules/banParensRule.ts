@@ -192,24 +192,27 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (isParenthesizedExpression(node) || isParenthesizedType(node)) {
             const restriction = restrictions.find((r) => r.test(node));
             if (restriction != undefined) {
+                let replacement = [
+                    Lint.Replacement.deleteFromTo(node.getStart(), node.getStart() + 1),
+                    Lint.Replacement.deleteFromTo(node.getEnd() - 1, node.getEnd()),
+                ];
+                const charBeforeParens = ctx.sourceFile.text[node.getStart() - 1];
+                // Prevent correcting typeof(x) to typeofx, throw(err) to throwerr
+                if (charBeforeParens.match(/\w/) !== null) {
+                    replacement.push(Lint.Replacement.appendText(node.getStart(), " "));
+                }
                 // Don't suggest a fix for a (hopefully rare) pattern where
                 // removing the parentheses would almost always be bad, e.g.
                 // let x = (y = 1, z = 2);
                 if (isParenthesizedExpression(node) &&
                     isBinaryExpression(node.expression) &&
                     node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) {
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING_FACTORY(restriction.message));
-                } else {
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING_FACTORY(restriction.message),
-                        [
-                            Lint.Replacement.deleteFromTo(node.getStart(), node.getStart() + 1),
-                            Lint.Replacement.deleteFromTo(node.getEnd() - 1, node.getEnd()),
-                        ]);
+                    replacement = [];
                 }
+                ctx.addFailureAtNode(
+                    node,
+                    Rule.FAILURE_STRING_FACTORY(restriction.message),
+                    replacement);
             }
         }
         return ts.forEachChild(node, cb);
