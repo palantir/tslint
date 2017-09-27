@@ -19,7 +19,7 @@ tslint -p tsconfig.json --exclude '**/*.d.ts' # lint all files in the project ex
 tslint -p tsconfig.json **/*.ts # ignores files in tsconfig.json and uses the provided glob instead
 ```
 
-Use the `--type-check` flag to make sure your program has no type errors. TSLint will check for any errors before before linting. This flag requires `--project` to be specified.
+Use the `--type-check` flag to make sure your program has no type errors. TSLint will check for any errors before linting. This flag requires `--project` to be specified.
 
 ##### Library
 
@@ -37,13 +37,14 @@ const options = {
 };
 
 const program = Linter.createProgram("tsconfig.json", "projectDir/");
+const linter = new Linter(options, program);
 
 const files = Linter.getFileNames(program);
-const results = files.map(file => {
+files.forEach(file => {
     const fileContents = program.getSourceFile(file).getFullText();
     const configuration = Configuration.findConfiguration(configurationFilename, file).results;
-    const linter = new Linter(options, program);
     linter.lint(file, fileContents, configuration);
-    return linter.getResult();
 });
+
+const results = linter.getResult();
 ```

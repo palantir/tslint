@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "always",
+        "esSpecCompliant": true
+      }
+    ]
+  }
+}

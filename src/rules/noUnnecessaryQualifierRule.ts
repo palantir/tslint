@@ -109,7 +109,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
     function symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
         const symbolDeclarations = symbol.getDeclarations();
-        if (symbolDeclarations == null) {
+        if (symbolDeclarations === undefined) {
             return false;
         } else if (symbolDeclarations.some((decl) => namespacesInScope.some((ns) => ns === decl))) {
             return true;

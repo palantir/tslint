@@ -15,3 +15,20 @@ export let notDeprecated2: any;
 /** @deprecated deprecated default export */
 let def = "";
 export default def;
+
+/** @deprecated */
+export class DeprecatedClass {
+    constructor() {}
+}
+
+export class DeprecatedConstructorClass {
+    /** @deprecated */
+    constructor() {}
+}
+
+export class PartiallyDeprecatedClass {
+    constructor();
+    /** @deprecated */
+    constructor(foo: number);
+    constructor(_foo?: number) {}
+}

@@ -16,8 +16,16 @@
  */
 
 import {
-    getDeclarationOfBindingElement, isBindingElement, isCallExpression, isIdentifier, isJsDoc,
-    isPropertyAccessExpression, isTaggedTemplateExpression, isVariableDeclaration, isVariableDeclarationList,
+    getDeclarationOfBindingElement,
+    isBindingElement,
+    isCallExpression,
+    isIdentifier,
+    isJsDoc,
+    isNewExpression,
+    isPropertyAccessExpression,
+    isTaggedTemplateExpression,
+    isVariableDeclaration,
+    isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -89,11 +97,10 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.EnumDeclaration:
+        case ts.SyntaxKind.ModuleDeclaration:
             return true;
         case ts.SyntaxKind.VariableDeclaration:
-        case ts.SyntaxKind.TypeAliasDeclaration:
         case ts.SyntaxKind.Parameter:
-        case ts.SyntaxKind.ModuleDeclaration:
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
@@ -114,7 +121,9 @@ function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefine
         node = parent;
         parent = node.parent!;
     }
-    return isTaggedTemplateExpression(parent) || isCallExpression(parent) && parent.expression === node ? parent : undefined;
+    return isTaggedTemplateExpression(parent) || (isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node
+        ? parent
+        : undefined;
 }
 
 function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undefined {

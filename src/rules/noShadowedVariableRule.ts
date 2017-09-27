@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
             and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
             All checks default to \`true\`, i.e. are enabled by default.
-            Not that you cannot disable variables and parameters.
+            Note that you cannot disable variables and parameters.
         `,
         options: {
             type: "object",

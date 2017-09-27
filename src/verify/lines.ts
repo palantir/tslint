@@ -40,13 +40,13 @@ export const ZERO_LENGTH_ERROR = "~nil";
  */
 export function parseLine(text: string): Line {
     const multilineErrorMatch = text.match(multilineErrorRegex);
-    if (multilineErrorMatch != null) {
+    if (multilineErrorMatch !== null) {
         const startErrorCol = text.indexOf("~");
         return new MultilineErrorLine(startErrorCol);
     }
 
     const endErrorMatch = text.match(endErrorRegex);
-    if (endErrorMatch != null) {
+    if (endErrorMatch !== null) {
         const [, squiggles, message] = endErrorMatch;
         const startErrorCol = text.indexOf("~");
         const zeroLengthError = (squiggles === ZERO_LENGTH_ERROR);
@@ -55,7 +55,7 @@ export function parseLine(text: string): Line {
     }
 
     const messageSubstitutionMatch = text.match(messageSubstitutionRegex);
-    if (messageSubstitutionMatch != null) {
+    if (messageSubstitutionMatch !== null) {
         const [, key, message] = messageSubstitutionMatch;
         return new MessageSubstitutionLine(key, message);
     }
@@ -74,7 +74,7 @@ export function parseLine(text: string): Line {
  */
 export function printLine(line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
-        if (code == null) {
+        if (code === undefined) {
            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
         }
 
