@@ -12,6 +12,7 @@
                     "ParenthesizedExpression.expression",
                     "CallExpression.arguments",
                     "VariableDeclaration.type",
+                    "ExpressionStatement.expression",
                     "*.typeArguments"
                 ]
             }

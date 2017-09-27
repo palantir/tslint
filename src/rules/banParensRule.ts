@@ -17,8 +17,10 @@
 
 import {
     isBinaryExpression,
+    isExpressionStatement,
     isLiteralExpression,
     isNumericLiteral,
+    isObjectLiteralExpression,
     isParenthesizedExpression,
     isPropertyAccessExpression,
     isReturnStatement,
@@ -227,7 +229,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     (isParenthesizedExpression(node) &&
                         node.parent != undefined &&
                         isReturnStatement(node.parent) &&
-                        ctx.sourceFile.text[node.getStart() + 1] === "\n")
+                        ctx.sourceFile.text[node.getStart() + 1] === "\n") ||
+                    // Don't flag parens around destructuring assignment
+                    (isParenthesizedExpression(node) &&
+                        isBinaryExpression(node.expression) &&
+                        node.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+                        isObjectLiteralExpression(node.expression.left) &&
+                        node.parent != undefined &&
+                        isExpressionStatement(node.parent))
                 )) {
                     ctx.addFailureAtNode(
                         node,

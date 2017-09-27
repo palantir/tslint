@@ -18,8 +18,10 @@ typeof x;
 (0).toLocaleString('en-US', {style: 'percent'});
 return (
     0);
+({a, b} = obj);
+obj = {a, b};
 
 // No issues with
 let z = (x) => x + 1;
 let x = (1 + 1) * 2;
-(f());
+(f()) + 1;
