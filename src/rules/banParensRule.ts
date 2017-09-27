@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isLiteralExpression, isParenthesizedExpression } from "tsutils";
+import { isBinaryExpression, isLiteralExpression, isNumericLiteral, isParenthesizedExpression, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -209,10 +209,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) {
                     replacement = [];
                 }
-                ctx.addFailureAtNode(
-                    node,
-                    Rule.FAILURE_STRING_FACTORY(restriction.message),
-                    replacement);
+                // Don't replace (0).foo() with 0.foo()
+                if (!(isParenthesizedExpression(node) &&
+                    isNumericLiteral(node.expression) &&
+                    node.parent != undefined &&
+                    isPropertyAccessExpression(node.parent))) {
+                    ctx.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING_FACTORY(restriction.message),
+                        replacement);
+                }
             }
         }
         return ts.forEachChild(node, cb);

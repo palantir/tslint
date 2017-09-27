@@ -30,6 +30,7 @@ let x = (y = 1, z = 2);
         ~~~~~~~~~~~~~~  [Don't include parentheses around the initializer child of an expression of type VariableDeclaration]
 typeof(x);
       ~~~  [Don't include parentheses around an expression of type Identifier]
+(0).toLocaleString('en-US', {style: 'percent'});
 
 // No issues with
 let z = (x) => x + 1;
