@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isLiteralExpression, isNumericLiteral, isParenthesizedExpression, isPropertyAccessExpression } from "tsutils";
+import {
+    isBinaryExpression,
+    isLiteralExpression,
+    isNumericLiteral,
+    isParenthesizedExpression,
+    isPropertyAccessExpression,
+    isReturnStatement,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -209,11 +216,19 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) {
                     replacement = [];
                 }
-                // Don't replace (0).foo() with 0.foo()
-                if (!(isParenthesizedExpression(node) &&
-                    isNumericLiteral(node.expression) &&
-                    node.parent != undefined &&
-                    isPropertyAccessExpression(node.parent))) {
+
+                if (!(
+                    // Don't flag `(0).foo()`, because `0.foo()` doesn't work.
+                    (isParenthesizedExpression(node) &&
+                        isNumericLiteral(node.expression) &&
+                        node.parent != undefined &&
+                        isPropertyAccessExpression(node.parent)) ||
+                    // Don't flag `return (\nfoo)`, since the parens are necessary.
+                    (isParenthesizedExpression(node) &&
+                        node.parent != undefined &&
+                        isReturnStatement(node.parent) &&
+                        ctx.sourceFile.text[node.getStart() + 1] === "\n")
+                )) {
                     ctx.addFailureAtNode(
                         node,
                         Rule.FAILURE_STRING_FACTORY(restriction.message),

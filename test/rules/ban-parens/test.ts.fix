@@ -16,6 +16,8 @@ let x = foo<string|number>();
 let x = (y = 1, z = 2);
 typeof x;
 (0).toLocaleString('en-US', {style: 'percent'});
+return (
+    0);
 
 // No issues with
 let z = (x) => x + 1;

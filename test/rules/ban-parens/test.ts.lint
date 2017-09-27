@@ -31,6 +31,8 @@ let x = (y = 1, z = 2);
 typeof(x);
       ~~~  [Don't include parentheses around an expression of type Identifier]
 (0).toLocaleString('en-US', {style: 'percent'});
+return (
+    0);
 
 // No issues with
 let z = (x) => x + 1;
