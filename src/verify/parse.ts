@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as semver from "semver";
 import * as ts from "typescript";
 import { format } from "util";
 
@@ -39,6 +40,57 @@ export function getTypescriptVersionRequirement(text: string): string | undefine
         return firstLine.message;
     }
     return undefined;
+}
+
+export function getNormalizedTypescriptVersion(): string {
+    const tsVersion = new semver.SemVer(ts.version);
+    // remove prerelease suffix when matching to allow testing with nightly builds
+    return `${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`;
+}
+
+export function preprocessDirectives(text: string): string {
+    if (!/^#(?:if|else|endif)\b/m.test(text)) {
+        return text; // If there are no directives, just return the input unchanged
+    }
+    const tsVersion = getNormalizedTypescriptVersion();
+    const enum State {
+        Initial,
+        If,
+        Else,
+    }
+    const lines = text.split(/\n/);
+    const result = [];
+    let collecting = true;
+    let state = State.Initial;
+    for (const line of lines) {
+        if (line.startsWith("#if typescript")) {
+            if (state !== State.Initial) {
+                throw lintSyntaxError("#if directives cannot be nested");
+            }
+            state = State.If;
+            collecting = semver.satisfies(tsVersion, line.slice("#if typescript".length).trim());
+        } else if (/^#else\s*$/.test(line)) {
+            if (state !== State.If) {
+                throw lintSyntaxError("unexpected #else");
+            }
+            state = State.Else;
+            collecting = !collecting;
+        } else if (/^#endif\s*$/.test(line)) {
+            if (state === State.Initial) {
+                throw lintSyntaxError("unexpected #endif");
+            }
+            state = State.Initial;
+            collecting = true;
+        } else if (collecting) {
+            result.push(line);
+        }
+    }
+
+    if (state !== State.Initial) {
+        throw lintSyntaxError("expected #endif");
+    }
+
+    return result.join("\n");
 }
 
 /**
