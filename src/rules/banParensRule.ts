@@ -16,6 +16,7 @@
  */
 
 import {
+    isArrowFunction,
     isBinaryExpression,
     isExpressionStatement,
     isLiteralExpression,
@@ -236,7 +237,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
                         node.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
                         isObjectLiteralExpression(node.expression.left) &&
                         node.parent != undefined &&
-                        isExpressionStatement(node.parent))
+                        isExpressionStatement(node.parent)) ||
+                    // Don't flag parentheses in an arrow function's body
+                    (isParenthesizedExpression(node) &&
+                        node.parent != undefined &&
+                        isArrowFunction(node.parent) &&
+                        node.parent.body === node)
                 )) {
                     ctx.addFailureAtNode(
                         node,

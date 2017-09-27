@@ -30,12 +30,15 @@ let x = (y = 1, z = 2);
         ~~~~~~~~~~~~~~  [Don't include parentheses around the initializer child of an expression of type VariableDeclaration]
 typeof(x);
       ~~~  [Don't include parentheses around an expression of type Identifier]
+(obj = {a, b});
+~~~~~~~~~~~~~~  [Don't include parentheses around the expression child of an expression of type ExpressionStatement]
+
+// Exceptions
 (0).toLocaleString('en-US', {style: 'percent'});
 return (
     0);
 ({a, b} = obj);
-(obj = {a, b});
-~~~~~~~~~~~~~~  [Don't include parentheses around the expression child of an expression of type ExpressionStatement]
+let foo = () => ({a: 1}.a);
 
 // No issues with
 let z = (x) => x + 1;
