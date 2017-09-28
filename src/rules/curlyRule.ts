@@ -15,7 +15,17 @@
  * limitations under the License.
  */
 
-import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutils";
+import {
+    isBlock,
+    isDoStatement,
+    isForInStatement,
+    isForOfStatement,
+    isForStatement,
+    isIfStatement,
+    isIterationStatement,
+    isSameLine,
+    isWhileStatement,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -66,6 +76,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "functionality",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -129,12 +140,64 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkStatement(statement: ts.Statement, node: ts.Node, childIndex: number, end = statement.end) {
+    private checkStatement(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, childIndex: number, end = statement.end) {
+        const sameLine = isSameLine(this.sourceFile, statement.pos, statement.end);
         if (statement.kind !== ts.SyntaxKind.Block &&
-            !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
+            !(this.options.ignoreSameLine && sameLine)) {
             const token = node.getChildAt(childIndex, this.sourceFile);
             const tokenText = ts.tokenToString(token.kind)!;
-            this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
+            this.addFailure(
+                token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText),
+                this.addBraceReplacement(statement, node, sameLine));
+        }
+    }
+
+    /** Generate the necessary replacement to add braces to a statement that needs them. */
+    private addBraceReplacement(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
+        if (sameLine) {
+            return [
+                Lint.Replacement.appendText(statement.getStart(), "{ "),
+                Lint.Replacement.appendText(statement.getEnd(), " }"),
+            ];
+        } else {
+            let positionToAddOpenBrace;
+            let positionToAddCloseBrace = statement.getEnd();
+
+            // This is a bit messy. In order to be sure we add the curly brace
+            // in the right place, we have to find the close paren token after
+            // the condition (or just the 'do' keyword token for do statements).
+            // That token's position depends on the type of statement.
+            if (isIfStatement(node) || isWhileStatement(node)) {
+                // Child 3: close paren on if or while statement
+                positionToAddOpenBrace = node.getChildAt(3).getEnd();
+            } else if (isForStatement(node)) {
+                // Child 7: close paren on for statement
+                positionToAddOpenBrace = node.getChildAt(7).getEnd();
+            } else if (isForInStatement(node) || isForOfStatement(node)) {
+                // Child 5: close paren on for/in or for/of statement
+                positionToAddOpenBrace = node.getChildAt(5).getEnd();
+            } else if (isDoStatement(node)) {
+                // First token: 'do' keyword
+                positionToAddOpenBrace = node.getFirstToken().getEnd();
+                // Child 2: 'while' keyword
+                positionToAddCloseBrace = node.getChildAt(2).pos;
+            } else {
+                throw new Error("Unexpected kind of statement");
+            }
+
+            let indentation = "";
+            // match[1] will be the whitespace at the start of the first
+            // line that isn't all whitespace.
+            const match = /\s*\n([\t ]*)\S/.exec(node.getFullText());
+            if (match != undefined) {
+                indentation = match[1];
+            }
+
+            return [
+                Lint.Replacement.appendText(
+                    this.sourceFile.getLineEndOfPosition(positionToAddOpenBrace), " {"),
+                Lint.Replacement.appendText(statement.getEnd(), `\n${indentation}}`),
+            ];
         }
     }
 }
