@@ -17,10 +17,10 @@
 
 import {
     getDeclarationOfBindingElement,
+    getJsDoc,
     isBindingElement,
     isCallExpression,
     isIdentifier,
-    isJsDoc,
     isNewExpression,
     isPropertyAccessExpression,
     isTaggedTemplateExpression,
@@ -200,14 +200,11 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
 }
 
 function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
-    for (const child of declaration.getChildren()) {
-        if (!isJsDoc(child)) {
-            break;
-        }
-        if (child.tags === undefined) {
+    for (const comment of getJsDoc(declaration)) {
+        if (comment.tags === undefined) {
             continue;
         }
-        for (const tag of child.tags) {
+        for (const tag of comment.tags) {
             if (tag.tagName.text === "deprecated") {
                 return tag.comment === undefined ? "" : tag.comment;
             }
