@@ -25,6 +25,7 @@ import {
     isParenthesizedExpression,
     isPropertyAccessExpression,
     isReturnStatement,
+    isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -199,7 +200,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }));
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isParenthesizedExpression(node) || isParenthesizedType(node)) {
+        if ((isParenthesizedExpression(node) && !parensAreNecessary(node, ctx.sourceFile)) || isParenthesizedType(node)) {
             const restriction = restrictions.find((r) => r.test(node));
             if (restriction != undefined) {
                 let replacement = [
@@ -219,38 +220,33 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     node.expression.operatorToken.kind === ts.SyntaxKind.CommaToken) {
                     replacement = [];
                 }
-
-                if (!(
-                    // Don't flag `(0).foo()`, because `0.foo()` doesn't work.
-                    (isParenthesizedExpression(node) &&
-                        isNumericLiteral(node.expression) &&
-                        node.parent != undefined &&
-                        isPropertyAccessExpression(node.parent)) ||
-                    // Don't flag `return (\nfoo)`, since the parens are necessary.
-                    (isParenthesizedExpression(node) &&
-                        node.parent != undefined &&
-                        isReturnStatement(node.parent) &&
-                        ctx.sourceFile.text[node.getStart() + 1] === "\n") ||
-                    // Don't flag parens around destructuring assignment
-                    (isParenthesizedExpression(node) &&
-                        isBinaryExpression(node.expression) &&
-                        node.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
-                        isObjectLiteralExpression(node.expression.left) &&
-                        node.parent != undefined &&
-                        isExpressionStatement(node.parent)) ||
-                    // Don't flag parentheses in an arrow function's body
-                    (isParenthesizedExpression(node) &&
-                        node.parent != undefined &&
-                        isArrowFunction(node.parent) &&
-                        node.parent.body === node)
-                )) {
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING_FACTORY(restriction.message),
-                        replacement);
-                }
+                ctx.addFailureAtNode(
+                    node,
+                    Rule.FAILURE_STRING_FACTORY(restriction.message),
+                    replacement);
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+/**
+ * Checks some exceptional cases where the parentheses likely are still required.
+ */
+function parensAreNecessary(node: ts.ParenthesizedExpression, sourceFile: ts.SourceFile) {
+    return (
+        // Don't flag `(0).foo()`, because `0.foo()` doesn't work.
+        (isNumericLiteral(node.expression) &&
+            isPropertyAccessExpression(node.parent!)) ||
+        // Don't flag `return (\nfoo)`, since the parens are necessary.
+        (isReturnStatement(node.parent!) &&
+            !isSameLine(sourceFile, node.getStart(), node.expression.getStart())) ||
+        // Don't flag parens around destructuring assignment
+        (isBinaryExpression(node.expression) &&
+            node.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+            isObjectLiteralExpression(node.expression.left) &&
+            isExpressionStatement(node.parent!)) ||
+        // Don't flag parentheses in an arrow function's body
+        (isArrowFunction(node.parent!) &&
+            (node.parent as ts.ArrowFunction).body === node));
 }
