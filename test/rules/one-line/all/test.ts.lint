@@ -172,3 +172,10 @@ type Bas = "a";
 {
     {}{}{} // just some random blocks
 }
+
+if (true) {
+    true;
+}else {
+ ~~~~   [missing whitespace]
+    false;
+}
