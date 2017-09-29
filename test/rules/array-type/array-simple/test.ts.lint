@@ -27,6 +27,7 @@ interface ArrayClass<T> {
          ~~~~~~~~  [0]
     bar: T[];
     baz: Arr<T>;
+    xyz: this[];
 }
 
 function fooFunction(foo: Array<ArrayClass<string>>) {

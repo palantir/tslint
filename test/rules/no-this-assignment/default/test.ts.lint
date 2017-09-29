@@ -1,0 +1,46 @@
+var unscoped = this;
+    ~~~~~~~~~~~~~~~       [identifier % ('unscoped')]
+
+function testFunction() {
+    let inFunction = this;
+        ~~~~~~~~~~~~~~~~~       [identifier % ('inFunction')]
+}
+
+const testLambda = () => {
+    const inLambda = this;
+          ~~~~~~~~~~~~~~~       [identifier % ('inLambda')]
+};
+
+class TestClass {
+    constructor() {
+        const inConstructor = this;
+              ~~~~~~~~~~~~~~~~~~~~       [identifier % ('inConstructor')]
+
+        const asThis: this = this;
+              ~~~~~~~~~~~~~~~~~~~       [identifier % ('asThis')]
+
+        const asString = "this";
+        const asArray = [this];
+        const asArrayString = ["this"];
+    }
+
+    public act(scope: this = this) {
+        const inMemberFunction = this;
+              ~~~~~~~~~~~~~~~~~~~~~~~       [identifier % ('inMemberFunction')]
+
+        const { act } = this;
+              ~~~~~~~~~~~~~~       [binding]
+
+        const { act, constructor } = this;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [binding]
+
+        const [foo] = this;
+              ~~~~~~~~~~~~       [binding]
+
+        const [foo, bar] = this;
+              ~~~~~~~~~~~~~~~~~       [binding]
+    }
+}
+
+[binding]: Don't assign members of `this` to local variables.
+[identifier]: Assigning `this` reference to local variable not allowed: %s.

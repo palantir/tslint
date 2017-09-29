@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "functions that return promises must be async";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<void>) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -60,7 +60,6 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                 if (!hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) && returnsPromise(node as ts.FunctionLikeDeclaration, tc)) {
                     ctx.addFailure(node.getStart(ctx.sourceFile), (node as ts.FunctionLikeDeclaration).body!.pos, Rule.FAILURE_STRING);
                 }
-
         }
         return ts.forEachChild(node, cb);
     });

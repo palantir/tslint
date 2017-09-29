@@ -33,7 +33,42 @@ export const rules = {
     "no-object-literal-type-assertion": true,
 
     // added in v5.3
+    "prefer-conditional-expression": true,
     "prefer-object-spread": true,
+
+    // added in v5.4
+    "no-duplicate-variable": [
+        true,
+        "check-parameters",
+    ],
+
+    // added in v5.5
+    "no-this-assignment": true,
+
+    // added in v5.6
+    "no-duplicate-imports": true,
+    "space-within-parens": [true, 0],
+    "no-submodule-imports": true,
+
+    // added in v5.7
+    "whitespace": {
+        options: [
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-type-operator",
+            "check-rest-spread",
+        ],
+    },
+
+    // added in v5.8
+    "no-duplicate-switch-case": true,
+    "jsdoc-format": {
+        options: "check-multiline-start",
+    },
 };
 // tslint:enable object-literal-sort-keys
 

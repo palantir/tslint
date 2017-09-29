@@ -21,7 +21,7 @@
 export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
-    } else if (arg != null) {
+    } else if (arg != undefined) {
         return [arg];
     } else {
         return [];
@@ -33,7 +33,7 @@ export function arrayify<T>(arg?: T | T[]): T[] {
  * Enforces the invariant that the input is an object.
  */
 export function objectify(arg: any): any {
-    if (typeof arg === "object" && arg != null) {
+    if (typeof arg === "object" && arg != undefined) {
         return arg;
     } else {
         return {};
@@ -64,9 +64,8 @@ export function isLowerCase(str: string): boolean {
  * Removes leading indents from a template string without removing all leading whitespace
  */
 export function dedent(strings: TemplateStringsArray, ...values: any[]) {
-    let fullString = strings.reduce((accumulator, str, i) => {
-        return `${accumulator}${values[i - 1]}${str}`;
-    });
+    let fullString = strings.reduce(
+        (accumulator, str, i) => `${accumulator}${values[i - 1]}${str}`);
 
     // match all leading spaces/tabs at the start of each line
     const match = fullString.match(/^[ \t]*(?=\S)/gm);
@@ -124,7 +123,7 @@ export function escapeRegExp(re: string): string {
 /** Return true if both parameters are equal. */
 export type Equal<T> = (a: T, b: T) => boolean;
 
-export function arraysAreEqual<T>(a: T[] | undefined, b: T[] | undefined, eq: Equal<T>): boolean {
+export function arraysAreEqual<T>(a: ReadonlyArray<T> | undefined, b: ReadonlyArray<T> | undefined, eq: Equal<T>): boolean {
     return a === b || a !== undefined && b !== undefined && a.length === b.length && a.every((x, idx) => eq(x, b[idx]));
 }
 
@@ -140,16 +139,16 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
 }
 
 /** Returns an array that is the concatenation of all output arrays. */
-export function flatMap<T, U>(inputs: T[], getOutputs: (input: T) => U[]): U[] {
+export function flatMap<T, U>(inputs: ReadonlyArray<T>, getOutputs: (input: T, index: number) => ReadonlyArray<U>): U[] {
     const out = [];
-    for (const input of inputs) {
-        out.push(...getOutputs(input));
+    for (let i = 0; i < inputs.length; i++) {
+        out.push(...getOutputs(inputs[i], i));
     }
     return out;
 }
 
 /** Returns an array of all outputs that are not `undefined`. */
-export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
+export function mapDefined<T, U>(inputs: ReadonlyArray<T>, getOutput: (input: T) => U | undefined): U[] {
     const out = [];
     for (const input of inputs) {
         const output = getOutput(input);
@@ -208,4 +207,9 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
     }
 
     return "utf8";
+}
+
+// converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
+export function denormalizeWinPath(path: string): string {
+    return path.replace(/\\/g, "/");
 }

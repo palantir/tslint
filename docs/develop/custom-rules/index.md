@@ -8,11 +8,11 @@ TSLint ships with a set of core rules that can be configured. However, users are
 
 Let us take the example of how to write a new rule to forbid all import statements (you know, *for science*). Let us name the rule file `noImportsRule.ts`. Rules are referenced in `tslint.json` with their kebab-cased identifer, so `"no-imports": true` would configure the rule.
 
-__Important conventions__: 
+__Important conventions__:
 
 - Rule identifiers are always kebab-cased.
 - Rule files are always camel-cased (`camelCasedRule.ts`).
-- Rule files *must* contain the suffix `Rule`. 
+- Rule files *must* contain the suffix `Rule`.
 - The exported class must always be named `Rule` and extend from `Lint.Rules.AbstractRule`.
 
 Now, let us first write the rule in TypeScript:
@@ -55,7 +55,7 @@ Finally, add a line to your [`tslint.json` config file][0] for each of your cust
 
 ---
 
-Now that you're written a rule to detect problems, let's modify it to *fix* them. 
+Now that you're written a rule to detect problems, let's modify it to *fix* them.
 
 Instantiate a `Fix` object and pass it in as an argument to `addFailure`. This snippet replaces the offending import statement with an empty string:
 
@@ -71,5 +71,14 @@ Final notes:
 
 - Core rules cannot be overwritten with a custom implementation.
 - Custom rules can also take in options just like core rules (retrieved via `this.getOptions()`).
+- As of TSLint v5.7.0 you no longer need to compile your custom rules before using them. You need to tell node.js how to load `.ts` files for example by using `ts-node`:
+
+```sh
+ts-node node_modules/.bin/tslint <your options>
+# or
+node -r ts-node/register node_modules/.bin/tslint <your options>
+# or
+NODE_OPTIONS="-r ts-node/register" tslint <your options>
+```
 
 [0]: {{site.baseurl | append: "/usage/tslint-json/"}}

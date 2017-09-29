@@ -1,15 +1,17 @@
 class Class1 {
     // one error
     constructor(private foo: string) {
-                ~~~~~~~                [Property 'foo' cannot be declared in the constructor]
+                ~~~~~~~                [err % ('foo')]
     }
 }
 
 class Class2 {
-    // two errors, last one is correct
-    constructor(private foo: string, public bar: string, qux: any) {
-                ~~~~~~~                                              [Property 'foo' cannot be declared in the constructor]
-                                     ~~~~~~                          [Property 'bar' cannot be declared in the constructor]
+    // three errors, last one is correct
+    // don't crash if name is not an identifier
+    constructor(private foo: string, public bar: string, qux: any, readonly {baz}: any) {
+                ~~~~~~~                                              [err % ('foo')]
+                                     ~~~~~~                          [err % ('bar')]
+                                                                   ~~~~~~~~ [err % ('{baz}')]
     }
 }
 
@@ -18,3 +20,5 @@ class Class3 {
     constructor() {
     }
 }
+
+[err]: Property '%s' cannot be declared in the constructor

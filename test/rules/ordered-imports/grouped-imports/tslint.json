@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "ordered-imports": [true, {"import-sources-order": "case-insensitive", "named-imports-order": "case-insensitive", "grouped-imports": true}]
+  }
+}

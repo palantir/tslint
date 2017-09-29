@@ -563,3 +563,55 @@ const enum Foo {
     Baz = 2,
 }
 
+let {
+    ...x,
+} = {};
+let [
+    ...y,
+] = [];
+
+[
+    ...y,
+] = [];
+({
+    ...y,
+} = {})
+function foo(
+    ...z,
+) {}
+
+
+let {...x,} = {};
+let [...y,] = [];
+[...y,] = [];
+({...y,} = {})
+function foo(...z,) {}
+
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+         ~nil [Missing trailing comma]
+let [...y] = [];
+         ~nil [Missing trailing comma]
+[...y] = [];
+     ~nil [Missing trailing comma]
+({...y} = {})
+      ~nil [Missing trailing comma]
+function foo(...z) {}
+                 ~nil [Missing trailing comma]

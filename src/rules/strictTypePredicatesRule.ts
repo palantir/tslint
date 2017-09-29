@@ -18,6 +18,7 @@
 import { isBinaryExpression, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 
 // tslint:disable:no-bitwise
@@ -31,7 +32,9 @@ export class Rule extends Lint.Rules.TypedRule {
             Works for 'typeof' comparisons to constants (e.g. 'typeof foo === "string"'), and equality comparison to 'null'/'undefined'.
             (TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)
             Does not yet work for 'instanceof'.
-            Does *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.`,
+            Does *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.
+
+            This rule requires \`strictNullChecks\` to work properly.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -52,7 +55,11 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        if (!Lint.isStrictNullChecksEnabled(program.getCompilerOptions())) {
+            showWarningOnce("strict-type-predicates does not work without --strictNullChecks");
+            return [];
+        }
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -102,7 +109,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                         ? Rule.FAILURE_STRING(result === isPositive)
                         : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive));
                 }
-                break;
             }
         }
 

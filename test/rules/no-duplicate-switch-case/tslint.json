@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-duplicate-switch-case": [true]
+  }
+}

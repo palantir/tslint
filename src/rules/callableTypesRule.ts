@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallSignatureDeclaration, isIdentifier, isInterfaceDeclaration, isTypeLiteralNode } from "tsutils";
+import { getChildOfKind, isCallSignatureDeclaration, isIdentifier, isInterfaceDeclaration, isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -53,10 +53,13 @@ function walk(ctx: Lint.WalkContext<void>) {
                 // avoid bad parse
                 member.type !== undefined) {
                 const suggestion = renderSuggestion(member, node, ctx.sourceFile);
+                const fixStart = node.kind === ts.SyntaxKind.TypeLiteral
+                    ? node.getStart(ctx.sourceFile)
+                    : getChildOfKind(node, ts.SyntaxKind.InterfaceKeyword)!.getStart(ctx.sourceFile);
                 ctx.addFailureAtNode(
                     member,
                     Rule.FAILURE_STRING_FACTORY(node.kind === ts.SyntaxKind.TypeLiteral ? "Type literal" : "Interface", suggestion),
-                    Lint.Replacement.replaceNode(node, suggestion),
+                    Lint.Replacement.replaceFromTo(fixStart, node.end, suggestion),
                 );
             }
         }
@@ -72,7 +75,7 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
     if (node.heritageClauses.length !== 1) {
         return false;
     }
-    const expr = node.heritageClauses[0].types![0].expression;
+    const expr = node.heritageClauses[0].types[0].expression;
     return isIdentifier(expr) && expr.text === "Function";
 }
 

@@ -46,7 +46,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
         return this.checkStatements(sourceFile.statements);
     }
 
-    private checkStatements(statements: ts.Statement[]) {
+    private checkStatements(statements: ReadonlyArray<ts.Statement>) {
         for (const statement of statements) {
             if (statement.kind === ts.SyntaxKind.ModuleDeclaration) {
                 this.checkModuleDeclaration(statement as ts.ModuleDeclaration);
@@ -55,7 +55,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
     }
 
     private checkModuleDeclaration(node: ts.ModuleDeclaration, nested?: boolean): void {
-        if (nested !== true &&
+        if (!nested &&
             node.name.kind === ts.SyntaxKind.Identifier &&
             !Lint.isNodeFlagSet(node, ts.NodeFlags.Namespace) &&
             // augmenting global uses a special syntax that is allowed

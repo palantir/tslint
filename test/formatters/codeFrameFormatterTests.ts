@@ -15,11 +15,11 @@
  */
 
 import { assert } from "chai";
-import * as colors from "colors";
+import * as chalk from "chalk";
 
 import * as ts from "typescript";
 
-import {IFormatter, TestUtils} from "../lint";
+import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
 describe("CodeFrame Formatter", () => {
@@ -28,7 +28,7 @@ describe("CodeFrame Formatter", () => {
     let formatter: IFormatter;
 
     before(() => {
-        (colors as any).enabled = true;
+        (chalk as any).enabled = true;
         const Formatter = TestUtils.getFormatter("codeFrame");
         sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
@@ -109,7 +109,7 @@ describe("CodeFrame Formatter", () => {
             return lines.split("\n").map((line) => line.trim());
         }
 
-        const expectedResult = toTrimmedLines(colors.enabled ? expectedResultColored : expectedResultPlain);
+        const expectedResult = toTrimmedLines(chalk.enabled ? expectedResultColored : expectedResultPlain);
         const result = toTrimmedLines(formatter.format(failures));
 
         assert.deepEqual(result, expectedResult);

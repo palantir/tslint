@@ -127,7 +127,6 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
                 }
                 case ts.SyntaxKind.VariableDeclaration:
                     this.checkVariableDeclaration(node as ts.VariableDeclaration);
-                    break;
             }
 
             return ts.forEachChild(node, cb);
@@ -201,7 +200,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
             name?: ts.Node): void {
         if (this.options[option] === true && typeAnnotation === undefined) {
             const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
-            if (Array.isArray(location)) {
+            if (isNodeArray(location)) {
                 this.addFailure(location.pos - 1, location.end + 1, failure);
             } else {
                 this.addFailureAtNode(location, failure);
@@ -212,4 +211,8 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {
     return utils.isPropertyDeclaration(node) && node.type !== undefined;
+}
+
+export function isNodeArray(nodeOrArray: ts.Node | ts.NodeArray<ts.Node>): nodeOrArray is ts.NodeArray<ts.Node> {
+    return Array.isArray(nodeOrArray);
 }
