@@ -68,6 +68,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 For example, \`{"withChild": ["Identifier"]}\` would ban
                 \`(foo)\`.
 
+                Some token types shouldn't be used here, since the fixer (which)
+                just removes the parens) would break the code. For example,
+                BinaryExpression and ConditionalExpression both have many cases
+                where removing the parens can break code.
+
             asChildOf: A list of token kinds and properties on those tokens
                 such that if the parenthesized expression is the appropriate
                 child of a token of that kind, it will be banned. For example,
@@ -240,13 +245,12 @@ function parensAreNecessary(node: ts.ParenthesizedExpression, sourceFile: ts.Sou
             isPropertyAccessExpression(node.parent!)) ||
         // Don't flag `return (\nfoo)`, since the parens are necessary.
         (isReturnStatement(node.parent!) &&
-            !isSameLine(sourceFile, node.getStart(), node.expression.getStart())) ||
+            !isSameLine(sourceFile, node.expression.pos, node.expression.getStart(sourceFile))) ||
         // Don't flag parens around destructuring assignment
         (isBinaryExpression(node.expression) &&
             node.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
             isObjectLiteralExpression(node.expression.left) &&
             isExpressionStatement(node.parent!)) ||
         // Don't flag parentheses in an arrow function's body
-        (isArrowFunction(node.parent!) &&
-            (node.parent as ts.ArrowFunction).body === node));
+        isArrowFunction(node.parent!));
 }
