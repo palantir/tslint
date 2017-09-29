@@ -69,6 +69,7 @@ export const rules = {
     "jsdoc-format": {
         options: "check-multiline-start",
     },
+    "ban-comma-operator": true,
 };
 // tslint:enable object-literal-sort-keys
 
