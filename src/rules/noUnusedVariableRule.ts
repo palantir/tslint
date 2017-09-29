@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as path from "path";
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
@@ -390,7 +391,7 @@ function getUnusedCheckedProgram(program: ts.Program, sourceFile: ts.SourceFile,
         noUnusedLocals: true,
         noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
     };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(
+    const sourceFilesByName = new Map(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
 
     // tslint:disable object-literal-sort-keys
@@ -398,7 +399,11 @@ function getUnusedCheckedProgram(program: ts.Program, sourceFile: ts.SourceFile,
         fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
         readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
         getSourceFile(f) {
-            const exisiting = sourceFilesByName.get(getCanonicalFileName(f))!;
+            let exisiting = sourceFilesByName.get(getCanonicalFileName(f));
+            if (exisiting === undefined) {
+                // if file is not found, it must be one of lib.XXX.d.ts -> need to resolve the path first
+                exisiting = sourceFilesByName.get(getCanonicalFileName(path.join(path.dirname(ts.getDefaultLibFilePath(options)), f)))!;
+            }
             return ts.createSourceFile(f, exisiting.text, exisiting.languageVersion);
         },
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
