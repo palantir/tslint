@@ -70,26 +70,36 @@ const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
 
 class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
-        const checkIfStaticOnlyClass = (node: ts.Node): void => {
+        const checkIfUnnecessaryClass = (node: ts.Node): void => {
             if (isClassDeclaration(node) && !hasExtendsClause(node)) {
-                if (node.members.length === 0 && !this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
-                    this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
-                    return;
-                } else if (node.members.length == 0) {
-                    return;
-                }
-
-                if (node.members.some(isConstructorWithClassDeclaration)) {
-                    return ts.forEachChild(node, checkIfStaticOnlyClass);
-                }
-
                 const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
+                let classHasShortHandProps = false;
 
-                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY)) {
+                if (node.members.length === 0) {
+                    if (!this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
+                        this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
+                    }
+                    return;
+                }
+
+                /* Check if any members are constructors w/ shorthand props */
+                for (const member of node.members) {
+                    if (isConstructorWithShorthandProps(member)) {
+                        classHasShortHandProps = true;
+                    }
+                }
+
+                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShortHandProps) {
                     this.addFailureAtNode(
                         getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
                     );
                     return;
+                }
+
+                for (const member of node.members) {
+                    if (isConstructorWithClassDeclaration(member)) {
+                        return ts.forEachChild(member, checkIfUnnecessaryClass);
+                    }
                 }
 
                 if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
@@ -103,9 +113,9 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
                     return;
                 }
             }
-            return ts.forEachChild(node, checkIfStaticOnlyClass);
+            return ts.forEachChild(node, checkIfUnnecessaryClass);
         };
-        ts.forEachChild(sourceFile, checkIfStaticOnlyClass);
+        ts.forEachChild(sourceFile, checkIfUnnecessaryClass);
     }
 
     private hasOption(option: string): boolean {

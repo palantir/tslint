@@ -8,6 +8,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             static PROP = 2;
@@ -16,6 +17,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             constructor() {
@@ -28,6 +30,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             public static helper(): void {}
@@ -40,6 +43,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             constructor() {
@@ -56,6 +60,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             private a: SomeType;
@@ -65,6 +70,7 @@ class Foo {
 }
 
 class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
             static PROP = 2;

@@ -3,7 +3,7 @@ class Foo {
     constructor() {
         class Bar {
         ~~~~~ [STATIC_ONLY]
-            static PROP = 2;
+            static int PROP = 2;
         }
     }
 }
