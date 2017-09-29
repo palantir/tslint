@@ -221,7 +221,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -250,7 +250,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                     const curName = nameString(member.name);
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(member.name,
+                        this.addFailureAtNode(
+                            member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
                         prevName = curName;
@@ -385,7 +386,7 @@ function parseOptions(options: any[]): Options {
     return { order, alphabetize };
 }
 function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
-    if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
+    if (allOptions == undefined || allOptions.length === 0 || allOptions[0] == undefined) {
         throw new Error("Got empty options");
     }
 

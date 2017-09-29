@@ -21,7 +21,7 @@
 export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
-    } else if (arg != null) {
+    } else if (arg != undefined) {
         return [arg];
     } else {
         return [];
@@ -33,7 +33,7 @@ export function arrayify<T>(arg?: T | T[]): T[] {
  * Enforces the invariant that the input is an object.
  */
 export function objectify(arg: any): any {
-    if (typeof arg === "object" && arg != null) {
+    if (typeof arg === "object" && arg != undefined) {
         return arg;
     } else {
         return {};
@@ -148,7 +148,7 @@ export function flatMap<T, U>(inputs: ReadonlyArray<T>, getOutputs: (input: T, i
 }
 
 /** Returns an array of all outputs that are not `undefined`. */
-export function mapDefined<T, U>(inputs: T[], getOutput: (input: T) => U | undefined): U[] {
+export function mapDefined<T, U>(inputs: ReadonlyArray<T>, getOutput: (input: T) => U | undefined): U[] {
     const out = [];
     for (const input of inputs) {
         const output = getOutput(input);

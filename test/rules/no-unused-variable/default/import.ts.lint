@@ -3,14 +3,14 @@
  * This text will not be deleted.
  */
 import xyz = require("a");
-       ~~~                   ['xyz' is declared but never used.]
+       ~~~                   [err % ('xyz')]
 import  $ = require("a");
 import  _ = require("a");
 import {a1 as aa1, a2 as aa2} from "a";
-              ~~~             ['aa1' is declared but never used.]
+              ~~~             [err % ('aa1')]
 aa2;
 import {a3 as aa3, a4 as aa4} from "a";
-                         ~~~  ['aa4' is declared but never used.]
+                         ~~~  [err % ('aa4')]
 aa3;
 // This import statement is unused and will be deleted along with this comment.
 import {a5, a6} from "a";
@@ -18,17 +18,22 @@ import {a5, a6} from "a";
 import {a7} from "a";
 ~~~~~~~~~~~~~~~~~~~~~      [All imports are unused.]
 import {a8, a9, a10} from "a";
-            ~~                ['a9' is declared but never used.]
-                ~~~           ['a10' is declared but never used.]
+            ~~                [err % ('a9')]
+                ~~~           [err % ('a10')]
 a8;
 import {a11, a12, a13} from "a";
-        ~~~                   ['a11' is declared but never used.]
-             ~~~              ['a12' is declared but never used.]
+        ~~~                   [err % ('a11')]
+             ~~~              [err % ('a12')]
 a13;
 import {a14, a15, a16} from "a";
-             ~~~              ['a15' is declared but never used.]
+             ~~~              [err % ('a15')]
 a14;
 a16;
+
+// Leading comment will not be deleted
+import {unusedFunction} from "legacyDependency"; // Import unusedFunction because ....
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                       [All imports are unused.]
+// Next comment will not be deleted
 
 export import a = require("a");
 
@@ -37,17 +42,17 @@ $(_.xyz());
 /// <reference path="../externalFormatter.test.ts" />
 
 module S {
-       ~ ['S' is declared but never used.]
+       ~ [err % ('S')]
   var template = "";
-      ~~~~~~~~       ['template' is declared but never used.]
+      ~~~~~~~~       [err % ('template')]
 }
 
 import * as foo from "a";
-            ~~~              ['foo' is declared but never used.]
+            ~~~              [err % ('foo')]
 import * as bar from "a";
 import baz from "a";
 import defaultExport, { namedExport } from "a";
-       ~~~~~~~~~~~~~                               ['defaultExport' is declared but never used.]
+       ~~~~~~~~~~~~~                               [err % ('defaultExport')]
 import d1, { d2 } from "a";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports are unused.]
 import d3, { d4 } from "a";
@@ -70,3 +75,9 @@ import "a";
 import abc = require('a');
 import def = abc.someVar;
 console.log(def);
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+#endif

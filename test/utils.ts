@@ -34,16 +34,11 @@ export function getFormatter(formatterName: string): Lint.FormatterConstructor {
 }
 
 export function createTempFile(extension: string) {
-    let tmpfile: string | null = null;
     for (let i = 0; i < 5; i++) {
         const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`);
-        if (tmpfile === null || !fs.existsSync(tmpfile)) {
-            tmpfile = attempt;
-            break;
+        if (!fs.existsSync(attempt)) {
+            return attempt;
         }
     }
-    if (tmpfile == null) {
-        throw new Error("Couldn't create temp file");
-    }
-    return tmpfile;
+    throw new Error("Couldn't create temp file");
 }

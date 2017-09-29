@@ -46,3 +46,9 @@ function main() {
         public n: number;
     }
 }
+
+abstract class Decorated {
+    @decorator public prop;
+    @decorator public abstract method() {}
+    @decorator @moreDecorator({}) public readonly static PROP = 'FOO';
+}

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier } from "tsutils";
+import { hasModifier, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -72,6 +72,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     for (const node of ctx.sourceFile.statements) {
         if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
             if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
+                !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation) &&
                 (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

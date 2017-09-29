@@ -11,14 +11,6 @@
     "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
-    },
     "comment-format": [
         true,
         "check-space"
@@ -43,7 +35,7 @@
     "no-void-expression": false,
     "prefer-function-over-method": false,
     "strict-type-predicates": false,
-    "triple-equals": false,
+    "triple-equals": [true, "allow-undefined-check"],
     "typedef": false,
 
     "ban": [true,

@@ -52,11 +52,13 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
             if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
+                // for compatibility with typescript@<2.5.0 to avoid fixing expr['__foo'] to expr.___foo
+                const propertyName = ts.unescapeIdentifier(argument.text); // tslint:disable-line:deprecation
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
                     // expr['foo'] -> expr.foo
-                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${argument.text}`),
+                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${propertyName}`),
                 );
             }
         }
