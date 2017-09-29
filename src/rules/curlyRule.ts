@@ -17,14 +17,9 @@
 
 import {
     isBlock,
-    isDoStatement,
-    isForInStatement,
-    isForOfStatement,
-    isForStatement,
     isIfStatement,
     isIterationStatement,
     isSameLine,
-    isWhileStatement,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -148,55 +143,30 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
             const tokenText = ts.tokenToString(token.kind)!;
             this.addFailure(
                 token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText),
-                this.addBraceReplacement(statement, node, sameLine));
+                this.createMissingBraceFix(statement, node, sameLine));
         }
     }
 
     /** Generate the necessary replacement to add braces to a statement that needs them. */
-    private addBraceReplacement(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
+    private createMissingBraceFix(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
         if (sameLine) {
             return [
                 Lint.Replacement.appendText(statement.getStart(), "{ "),
                 Lint.Replacement.appendText(statement.getEnd(), " }"),
             ];
         } else {
-            let positionToAddOpenBrace;
-            let positionToAddCloseBrace = statement.getEnd();
+            const match = /\n([\t ])/.exec(node.getFullText(this.sourceFile)); // determine which character to use (tab or space)
+            const indentation = match === null ?
+                "" :
+                // indentation should match start of statement
+                match[1].repeat(ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).character);
 
-            // This is a bit messy. In order to be sure we add the curly brace
-            // in the right place, we have to find the close paren token after
-            // the condition (or just the 'do' keyword token for do statements).
-            // That token's position depends on the type of statement.
-            if (isIfStatement(node) || isWhileStatement(node)) {
-                // Child 3: close paren on if or while statement
-                positionToAddOpenBrace = node.getChildAt(3).getEnd();
-            } else if (isForStatement(node)) {
-                // Child 7: close paren on for statement
-                positionToAddOpenBrace = node.getChildAt(7).getEnd();
-            } else if (isForInStatement(node) || isForOfStatement(node)) {
-                // Child 5: close paren on for/in or for/of statement
-                positionToAddOpenBrace = node.getChildAt(5).getEnd();
-            } else if (isDoStatement(node)) {
-                // First token: 'do' keyword
-                positionToAddOpenBrace = node.getFirstToken().getEnd();
-                // Child 2: 'while' keyword
-                positionToAddCloseBrace = node.getChildAt(2).pos;
-            } else {
-                throw new Error("Unexpected kind of statement");
-            }
-
-            let indentation = "";
-            // match[1] will be the whitespace at the start of the first
-            // line that isn't all whitespace.
-            const match = /\s*\n([\t ]*)\S/.exec(node.getFullText());
-            if (match != undefined) {
-                indentation = match[1];
-            }
+            const maybeCarriageReturn = this.sourceFile.text[this.sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r" ? "\r" : "";
 
             return [
                 Lint.Replacement.appendText(
-                    this.sourceFile.getLineEndOfPosition(positionToAddOpenBrace), " {"),
-                Lint.Replacement.appendText(statement.getEnd(), `\n${indentation}}`),
+                    this.sourceFile.getLineEndOfPosition(statement.pos), " {"),
+                Lint.Replacement.appendText(statement.getEnd(), `${maybeCarriageReturn}\n${indentation}}`),
             ];
         }
     }
