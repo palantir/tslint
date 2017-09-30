@@ -72,9 +72,6 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const checkIfUnnecessaryClass = (node: ts.Node): void => {
             if (isClassDeclaration(node) && !hasExtendsClause(node)) {
-                const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
-                let classHasShortHandProps = false;
-
                 if (node.members.length === 0) {
                     if (!this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
                         this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
@@ -82,14 +79,9 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
                     return;
                 }
 
-                /* Check if any members are constructors w/ shorthand props */
-                for (const member of node.members) {
-                    if (isConstructorWithShorthandProps(member)) {
-                        classHasShortHandProps = true;
-                    }
-                }
-
-                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShortHandProps) {
+                const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
+                const classHasShorthandProps = node.members.some(isConstructorWithShorthandProps);
+                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShorthandProps) {
                     this.addFailureAtNode(
                         getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
                     );
