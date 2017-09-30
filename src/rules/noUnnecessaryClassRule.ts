@@ -101,24 +101,18 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
             );
         }
 
-        if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
-            let clear = false;
-            for (const member of node.members) {
-                if (
-                    isConstructorWithShorthandProps(member) ||
-                    (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
-                ) {
-                    clear = true;
-                }
-            }
-            if (!clear) {
-                this.addFailureAtNode(
-                    getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
-                    Rule.FAILURE_STATIC_ONLY,
-                );
-            }
+        if (
+            !allMembersAreConstructors &&
+            !this.hasOption(OPTION__ALLOW_STATIC_ONLY) &&
+            !node.members.some(isNonStaticMember)
+        ) {
+            this.addFailureAtNode(
+                getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
+                Rule.FAILURE_STATIC_ONLY,
+            );
         }
 
+        /* Check for classes nested in constructors */
         for (const member of node.members) {
             if (isConstructorWithClassDeclaration(member)) {
                 return ts.forEachChild(member, checkIfUnnecessaryClass);
@@ -128,6 +122,13 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     private hasOption(option: string): boolean {
         return this.options.indexOf(option) !== -1;
     }
+}
+
+function isNonStaticMember(member: ts.ClassElement): boolean {
+    return (
+        isConstructorWithShorthandProps(member) ||
+        (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
+    );
 }
 
 function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
