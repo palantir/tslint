@@ -18,6 +18,16 @@ class Foo {
 }
 
 class Foo {
+    private number hello = 0;
+    constructor() {
+        class Bar {
+        ~~~~~ [STATIC_ONLY]
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {

@@ -16,7 +16,13 @@
  */
 
 import {
-    isCallExpression, isExternalModuleReference, isIdentifier, isImportDeclaration, isImportEqualsDeclaration, isTextualLiteral,
+    isCallExpression,
+    isExportDeclaration,
+    isExternalModuleReference,
+    isIdentifier,
+    isImportDeclaration,
+    isImportEqualsDeclaration,
+    isTextualLiteral,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
