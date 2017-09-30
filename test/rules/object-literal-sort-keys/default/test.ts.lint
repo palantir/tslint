@@ -191,4 +191,129 @@ const b = {
   ~~~~~~~ [err % ('objList')]
 }
 
+var blankLineGroupingPassA = {
+    a: 1,
+    b: 2,
+    d: 4,
+
+    c: 3,
+    e: 5,
+};
+
+var blankLineGroupingFailA = {
+    a: 1,
+    b: 2,
+    d: 4,
+    // non-empty line not counted as a new line
+    c: 3,
+    ~     [err % ('c')]
+    e: 5,
+};
+
+var blankLineGroupingPassB = {
+    a: 1,
+    b: 2,
+    d: 4,
+    // a comment
+
+    c: 3,
+    e: 5,
+};
+
+var blankLineGroupingFailB = {
+    a: 1,
+    b: 2,
+    c: 3,
+
+    f: 6,
+    e: 5,
+    ~     [err % ('e')]
+    d: 4
+};
+
+var blankLineGroupingPassC = {
+    b: 1,
+
+    // a single line comment before the group
+    a: 2,
+    c: 3,
+};
+
+var blankLineGroupingFailC = {
+    b: 1,
+    /* a multiline comment with
+
+    an extra new line in the middle */
+    a: 2,
+    ~     [err % ('a')]
+    c: 3,
+};
+
+var blankLineGroupingPassD = {
+    b: 1,
+
+    /* a multiline comment with a new line before and
+
+    an extra new line in the middle, before a group */
+    a: 2,
+    c: 3,
+};
+
+var blankLineGroupingFailD = {
+    b: 1,
+    // a single-line comments
+    /* a multiline comment with
+
+    an extra new line in the middle */
+    a: 2,
+    ~     [err % ('a')]
+    c: 3,
+};
+
+var blankLineGroupingPassE = {
+    b: 1,
+    /* a multiline comment with a new line after and
+
+    an extra new line in the middle */
+
+    a: 2,
+    c: 3,
+};
+
+var blankLineGroupingFailE = {
+    a: 1,
+    c: `3 is a
+
+    multiline string`,
+    b: 2,
+    ~     [err % ('b')]
+    d: 4
+}
+
+var blankLineGroupingPassF = {
+    b: 1,
+    /* double multiline comments
+
+    and a space between */
+
+    /* more talking
+
+    here */
+    a: 2,
+    c: 3,
+};
+
+var blankLineGroupingFailF = {
+    b: 1,
+    /* double multiline comments
+
+    with no space between */
+    /* more talking
+
+    here */
+    a: 2,
+    ~     [err % ('a')]
+    c: 3,
+};
+
 [err]: The key '%s' is not sorted alphabetically

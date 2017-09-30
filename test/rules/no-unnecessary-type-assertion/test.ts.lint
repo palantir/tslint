@@ -86,3 +86,14 @@ function func(aOrB: TypeA|TypeB) {
                 ~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
     }
 }
+
+// Expecting no warning for these assertions as they are not unnecessary.
+
+type Bar = 'bar';
+const data = {
+    x: 'foo' as 'foo',
+    y: 'bar' as Bar,
+}
+
+[1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);

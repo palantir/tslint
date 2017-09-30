@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isObjectFlagSet, isObjectType, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -22,7 +23,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-type-assertion",
-        description: `Warns if a type assertion does not change the type of an expression.`,
+        description: "Warns if a type assertion does not change the type of an expression.",
         options: null,
         optionsDescription: "Not configurable",
         type: "typescript",
@@ -62,6 +63,21 @@ class Walker extends Lint.AbstractWalker<void> {
     private verifyCast(node: ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression) {
         const castType = this.checker.getTypeAtLocation(node);
         if (castType === undefined) {
+            return;
+        }
+
+        if (node.kind !== ts.SyntaxKind.NonNullExpression &&
+            (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
+                isObjectType(castType) &&
+                isObjectFlagSet(castType, ts.ObjectFlags.Tuple)) ||
+            // Sometimes tuple types don't have ObjectFlags.Tuple set, like when
+            // they're being matched against an inferred type. So, in addition,
+            // check if any properties are numbers, which implies that this is
+            // likely a tuple type.
+            (castType.getProperties().some((symbol) => !isNaN(Number(symbol.name))))) {
+
+            // It's not always safe to remove a cast to a literal type or tuple
+            // type, as those types are sometimes widened without the cast.
             return;
         }
 

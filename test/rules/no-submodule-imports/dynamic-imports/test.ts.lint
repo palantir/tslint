@@ -1,0 +1,28 @@
+[typescript]: >=2.4.0
+
+const dynamicImport = import("lodash");
+
+const dynamicImport = import("lodash/sub-module");
+                             ~~~~~~~~~~~~~~~~~~~ [0]
+
+const dynamicImport = import("lodash/a/b/c/sub-module");
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+
+const dynamicImport = import("@blueprintjs/core");
+
+const dynamicImport = import("@blueprintjs/core/sub-module");
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const dynamicImport = import("@blueprintjs/core/a/b/c/sub-module");
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const dynamicImport = import("rxjs");
+const dynamicImport = import("rxjs/sub-module");
+const dynamicImport = import("@angular/core");
+const dynamicImport = import("@angular/core/forms/directives");
+
+const dynamicImport = import("./myModule");
+const dynamicImport = import("./myModule/a/b/c/sub-module");
+
+[0]: Submodule import paths from this package are disallowed; import from the root instead

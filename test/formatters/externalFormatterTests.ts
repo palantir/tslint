@@ -17,6 +17,7 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
+import { dedent } from "../../src/utils";
 import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
@@ -40,17 +41,17 @@ describe("External Formatter", () => {
             createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
         ];
 
-        const expectedResult =
-            getPositionString(1, 1) + TEST_FILE + "\n" +
-            getPositionString(2, 11) + TEST_FILE + "\n" +
-            getPositionString(9, 2) + TEST_FILE + "\n";
+        const expectedResult = dedent`
+            ${getPositionString(1, 1)}${TEST_FILE}
+            ${getPositionString(2, 11)}${TEST_FILE}
+            ${getPositionString(9, 2)}${TEST_FILE}\n`.slice(1); // remove leading newline
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
     });
 
     it("returns undefined for unresolvable module", () => {
-        assert.isUndefined(TestUtils.getFormatter(TEST_FILE + "/__non-existent__"));
+        assert.isUndefined(TestUtils.getFormatter(`${TEST_FILE}/__non-existent__`));
     });
 
     it("handles no failures", () => {
@@ -59,6 +60,6 @@ describe("External Formatter", () => {
     });
 
     function getPositionString(line: number, character: number) {
-        return "[" + line + ", " + character + "]";
+        return `[${line}, ${character}]`;
     }
 });

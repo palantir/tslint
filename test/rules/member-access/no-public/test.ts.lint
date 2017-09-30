@@ -3,8 +3,9 @@ class {
     ~~~~~~ [0]
     public constructor() {}
     ~~~~~~ [0]
-    public get y() {}
+    public/*some comment*/ get y() {}
     ~~~~~~ [0]
+    public() {}
 }
 
 [0]: 'public' is implicit.

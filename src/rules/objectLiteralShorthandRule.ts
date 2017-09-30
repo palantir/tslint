@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, hasModifier, isFunctionExpression, isIdentifier, isPropertyAssignment } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -36,35 +37,44 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const objectLiteralShorthandWalker = new ObjectLiteralShorthandWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(objectLiteralShorthandWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class ObjectLiteralShorthandWalker extends Lint.RuleWalker {
-
-    public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        const name = node.name;
-        const value = node.initializer;
-
-        if (name.kind === ts.SyntaxKind.Identifier &&
-            value.kind === ts.SyntaxKind.Identifier &&
-            name.getText() === value.getText()) {
-                // Delete from name start up to value to include the ':'.
-                const lengthToValueStart = value.getStart() - name.getStart();
-                const fix = this.deleteText(name.getStart(), lengthToValueStart);
-                this.addFailureAtNode(node, Rule.LONGHAND_PROPERTY + `('{${name.getText()}}').`, fix);
-        }
-
-        if (value.kind === ts.SyntaxKind.FunctionExpression) {
-            const fnNode = value as ts.FunctionExpression;
-            if (fnNode.name !== undefined) {
-                return;  // named function expressions are OK.
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isPropertyAssignment(node)) {
+            if (node.name.kind === ts.SyntaxKind.Identifier &&
+                isIdentifier(node.initializer) &&
+                node.name.text === node.initializer.text) {
+                ctx.addFailureAtNode(
+                    node,
+                    `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
+                    Lint.Replacement.deleteFromTo(node.name.end, node.end),
+                );
+            } else if (isFunctionExpression(node.initializer) &&
+                       // allow named function expressions
+                       node.initializer.name === undefined) {
+                const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
+                ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
             }
-            const star = fnNode.asteriskToken !== undefined ? fnNode.asteriskToken.getText() : "";
-            this.addFailureAtNode(node, Rule.LONGHAND_METHOD + `('{${name.getText()}${star}() {...}}').`);
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        super.visitPropertyAssignment(node);
+function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
+    const nameStart = name.getStart(sourceFile);
+    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
+    let prefix = "";
+    if (initializer.asteriskToken !== undefined) {
+        prefix = "*";
     }
+    if (hasModifier(initializer.modifiers, ts.SyntaxKind.AsyncKeyword)) {
+        prefix = `async ${prefix}`;
+    }
+    if (prefix !== "") {
+        fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
+    }
+    return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
 }

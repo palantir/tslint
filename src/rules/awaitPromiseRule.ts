@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isAwaitExpression, isUnionOrIntersectionType } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -23,9 +24,17 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "await-promise",
         description: "Warns for an awaited value that is not a Promise.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            A list of 'string' names of any additional classes that should also be handled as Promises.
+        `,
+        options: {
+            type: "list",
+            listType: {
+                type: "array",
+                items: {type: "string"},
+            },
+        },
+        optionExamples: [true, [true, "Thenable"]],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -34,40 +43,38 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING = "'await' of non-Promise.";
 
-    public applyWithProgram(srcFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(srcFile, this.getOptions(), program));
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
+        return this.applyWithFunction(sourceFile, walk, promiseTypes, program.getTypeChecker());
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.AwaitExpression &&
-            !couldBePromise(this.getTypeChecker().getTypeAtLocation((node as ts.AwaitExpression).expression))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
+    const promiseTypes = ctx.options;
+    return ts.forEachChild(ctx.sourceFile, cb);
+
+    function cb(node: ts.Node): void {
+        if (isAwaitExpression(node) && !couldBePromise(tc.getTypeAtLocation(node.expression))) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    }
+
+    function couldBePromise(type: ts.Type): boolean {
+        if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any) || isPromiseType(type)) {
+            return true;
         }
 
-        super.visitNode(node);
-    }
-}
+        if (isUnionOrIntersectionType(type)) {
+            return type.types.some(couldBePromise);
+        }
 
-function couldBePromise(type: ts.Type): boolean {
-    if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any) || isPromiseType(type)) {
-        return true;
-    }
-
-    if (isUnionType(type)) {
-        return type.types.some(isPromiseType);
+        const bases = type.getBaseTypes();
+        return bases !== undefined && bases.some(couldBePromise);
     }
 
-    const bases = type.getBaseTypes();
-    return bases !== undefined && bases.some(couldBePromise);
-}
-
-function isPromiseType(type: ts.Type): boolean {
-    const { target } = type as ts.TypeReference;
-    return target !== undefined && target.symbol !== undefined && target.symbol.name === "Promise";
-}
-
-function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union);
+    function isPromiseType(type: ts.Type): boolean {
+        const { target } = type as ts.TypeReference;
+        return target !== undefined && target.symbol !== undefined && promiseTypes.has(target.symbol.name);
+    }
 }

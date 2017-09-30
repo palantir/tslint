@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { isImportDeclaration, isImportEqualsDeclaration, isModuleDeclaration, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-reference-import",
-        description: 'Don\'t <reference types="foo" /> if you import "foo" anyway.',
+        description: 'Don\'t `<reference types="foo" />` if you import `foo` anyway.',
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",
@@ -37,67 +37,51 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithWalker(new NoReferenceImportWalker(sourceFile, this.ruleName, undefined));
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    const { sourceFile } = ctx;
-    if (sourceFile.typeReferenceDirectives.length === 0) {
-        return;
-    }
-
-    const imports = allImports(sourceFile);
-    for (const ref of sourceFile.typeReferenceDirectives) {
-        if (imports.has(ref.fileName)) {
-            ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
+class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
+    private imports = new Set<string>();
+    public walk(sourceFile: ts.SourceFile) {
+        if (sourceFile.typeReferenceDirectives.length === 0) {
+            return;
+        }
+        this.findImports(sourceFile.statements);
+        for (const ref of sourceFile.typeReferenceDirectives) {
+            if (this.imports.has(ref.fileName)) {
+                this.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
+            }
         }
     }
-}
 
-function allImports(sourceFile: ts.SourceFile): Set<string> {
-    const imports = new Set<string>();
-    for (const statement of sourceFile.statements) {
-        recur(statement);
-    }
-    return imports;
-
-    function recur(node: ts.Statement): void {
-        if (utils.isImportEqualsDeclaration(node)) {
-            const ref = node.moduleReference;
-            if (ref.kind === ts.SyntaxKind.ExternalModuleReference) {
-                if (ref.expression !== undefined) {
-                    addImport(ref.expression);
+    private findImports(statements: ReadonlyArray<ts.Statement>) {
+        for (const statement of statements) {
+            if (isImportDeclaration(statement)) {
+                this.addImport(statement.moduleSpecifier);
+            } else if (isImportEqualsDeclaration(statement)) {
+                if (statement.moduleReference.kind === ts.SyntaxKind.ExternalModuleReference &&
+                    statement.moduleReference.expression !== undefined) {
+                    this.addImport(statement.moduleReference.expression);
                 }
-            }
-        } else if (utils.isImportDeclaration(node)) {
-            addImport(node.moduleSpecifier);
-        } else if (utils.isModuleDeclaration(node)) {
-            if (!sourceFile.isDeclarationFile) {
-                // Can't be any imports in a module augmentation.
-                return;
-            }
-
-            const body = moduleDeclarationBody(node);
-            if (body !== undefined) {
-                for (const statement of body.statements) {
-                    recur(statement);
-                }
+            } else if (isModuleDeclaration(statement) && statement.body !== undefined && this.sourceFile.isDeclarationFile) {
+                // There can't be any imports in a module augmentation or namespace
+                this.findImportsInModule(statement.body);
             }
         }
     }
 
-    function addImport(moduleReference: ts.Expression): void {
-        if (utils.isStringLiteral(moduleReference)) {
-            imports.add(moduleReference.text);
+    private findImportsInModule(body: ts.ModuleBody): void {
+        if (body.kind === ts.SyntaxKind.ModuleBlock) {
+            return this.findImports(body.statements);
+        } else if (body.kind === ts.SyntaxKind.ModuleDeclaration && body.body !== undefined) {
+            return this.findImportsInModule(body.body);
         }
     }
-}
 
-function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
-    let body = node.body;
-    while (body !== undefined && body.kind === ts.SyntaxKind.ModuleDeclaration) {
-        body = body.body;
+    private addImport(specifier: ts.Expression) {
+        if (isStringLiteral(specifier)) {
+            this.imports.add(specifier.text);
+        }
     }
-    return body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

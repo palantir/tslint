@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -98,7 +98,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         // If the symbol in scope is different, the qualifier is necessary.
         const fromScope = getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
-        return fromScope === undefined || fromScope === accessedSymbol;
+        return fromScope === undefined || symbolsAreEqual(accessedSymbol, fromScope);
     }
 
     function getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {
@@ -109,7 +109,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
     function symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
         const symbolDeclarations = symbol.getDeclarations();
-        if (symbolDeclarations == null) {
+        if (symbolDeclarations === undefined) {
             return false;
         } else if (symbolDeclarations.some((decl) => namespacesInScope.some((ns) => ns === decl))) {
             return true;
@@ -117,6 +117,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         const alias = tryGetAliasedSymbol(symbol, checker);
         return alias !== undefined && symbolIsNamespaceInScope(alias);
+    }
+
+    function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
+        // TODO remove type assertion on update to typescript@2.6.0
+        if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
+            inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
+            return accessed === inScope;
+        }
+        return accessed === inScope ||
+            // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
+            Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
     }
 }
 

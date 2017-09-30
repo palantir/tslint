@@ -4,22 +4,13 @@
   },
   "extends": "tslint:all",
   "rules": {
-    // TODO: remove this when tslint 5.3 released
-    "prefer-switch": [true, { "min-cases": 3 }],
-
     // Don't want these
+    "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members"
-        ]
-    },
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"
@@ -30,44 +21,26 @@
         "allow-declarations",
         "allow-named-functions"
     ],
-    "whitespace": {
-        "options": [
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-            "check-typecast"
-        ]
-    },
 
     // TODO: Enable these
     "completed-docs": false,
-    "cyclomatic-complexity": false,
     "no-any": false,
-    "no-inferred-empty-object-type": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
     "no-require-imports": false,
     "no-unbound-method": false,
-    "no-unnecessary-callback-wrapper": false,
-    "no-unnecessary-type-assertion": false,
     "no-unnecessary-qualifier": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,
-    "prefer-template": false,
-    "restrict-plus-operands": false,
-    "return-undefined": false,
     "strict-type-predicates": false,
-    "triple-equals": false,
+    "triple-equals": [true, "allow-undefined-check"],
     "typedef": false,
 
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"],
-      ["Object", "assign"]
+      ["it", "only"]
     ],
 
     "interface-name": false,
@@ -85,6 +58,7 @@
       "options": ["log"]
     },
     "no-switch-case-fall-through": true,
+    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",

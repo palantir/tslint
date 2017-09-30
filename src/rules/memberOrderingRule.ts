@@ -17,8 +17,9 @@
 
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import {flatMap, mapDefined} from "../utils";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -92,11 +93,11 @@ const PRESET_NAMES = Array.from(PRESETS.keys());
 
 const allMemberKindNames = mapDefined(Object.keys(MemberKind), (key) => {
     const mk = (MemberKind as any)[key];
-    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => "-" + cap.toLowerCase()) : undefined;
+    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => `-${cap.toLowerCase()}`) : undefined;
 });
 
 function namesMarkdown(names: string[]): string {
-    return names.map((name) => "* `" + name + "`").join("\n    ");
+    return names.map((name) => `* \`${name}\``).join("\n    ");
 }
 
 const optionsDescription = Lint.Utils.dedent`
@@ -136,17 +137,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 order: {
-                    oneOf: [{
-                        type: "string",
-                        enum: PRESET_NAMES,
-                    }, {
-                        type: "array",
-                        items: {
+                    oneOf: [
+                        {
                             type: "string",
-                            enum: allMemberKindNames,
+                            enum: PRESET_NAMES,
                         },
-                        maxLength: 13,
-                    }],
+                        {
+                            type: "array",
+                            items: {
+                                type: "string",
+                                enum: allMemberKindNames,
+                            },
+                            maxLength: 13,
+                        },
+                    ],
                 },
             },
             additionalProperties: false,
@@ -191,7 +195,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        let options: Options;
+        try {
+            options = parseOptions(this.ruleArguments);
+        } catch (e) {
+            showWarningOnce(`Warning: ${this.ruleName} - ${(e as Error).message}`);
+            return [];
+        }
+        return this.applyWithWalker(new MemberOrderingWalker(sourceFile, this.ruleName, options));
     }
 }
 
@@ -210,7 +221,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -239,7 +250,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                     const curName = nameString(member.name);
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(member.name,
+                        this.addFailureAtNode(
+                            member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
                         prevName = curName;
@@ -253,7 +265,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the lowest name higher than 'targetName'. */
-    private findLowerName(members: Member[], targetRank: Rank, targetName: string): string {
+    private findLowerName(members: ReadonlyArray<Member>, targetRank: Rank, targetName: string): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
@@ -267,7 +279,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the highest existing rank lower than `targetRank`. */
-    private findLowerRank(members: Member[], targetRank: Rank): Rank | -1 {
+    private findLowerRank(members: ReadonlyArray<Member>, targetRank: Rank): Rank | -1 {
         let max: Rank | -1 = -1;
         for (const member of members) {
             const rank = this.memberRank(member);
@@ -296,7 +308,7 @@ function caseInsensitiveLess(a: string, b: string) {
 }
 
 function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[access + "Constructor"] as MemberKind;
+    return (MemberKind as any)[`${access}Constructor`] as MemberKind;
 }
 
 function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
@@ -310,7 +322,7 @@ function memberKindFromName(name: string): MemberKind[] {
     return typeof kind === "number" ? [kind as MemberKind] : allAccess.map(addModifier);
 
     function addModifier(modifier: string) {
-        const modifiedKind = (MemberKind as any)[Lint.Utils.camelize(modifier + "-" + name)];
+        const modifiedKind = (MemberKind as any)[Lint.Utils.camelize(`${modifier}-${name}`)];
         if (typeof modifiedKind !== "number") {
             throw new Error(`Bad member kind: ${name}`);
         }
@@ -350,7 +362,7 @@ function getMemberKind(member: Member): MemberKind | undefined {
     }
 }
 
-type MemberCategoryJson = { name: string, kinds: string[] } | string;
+type MemberCategoryJson = { name: string; kinds: string[] } | string;
 class MemberCategory {
     constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
     public has(kind: MemberKind) { return this.kinds.has(kind); }
@@ -373,12 +385,12 @@ function parseOptions(options: any[]): Options {
         : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))));
     return { order, alphabetize };
 }
-function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[], alphabetize: boolean } {
-    if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
+function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
+    if (allOptions == undefined || allOptions.length === 0 || allOptions[0] == undefined) {
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string, alphabetize?: boolean } | string;
+    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string; alphabetize?: boolean } | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
@@ -391,7 +403,7 @@ function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberC
         return orderOption;
     }
 
-    const preset = PRESETS.get(orderOption as string);
+    const preset = PRESETS.get(orderOption);
     if (preset === undefined) {
         throw new Error(`Bad order: ${JSON.stringify(orderOption)}`);
     }

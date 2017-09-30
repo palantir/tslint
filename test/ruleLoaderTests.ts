@@ -103,10 +103,10 @@ describe("Rule Loader", () => {
         const diffResults = diffLists(everyRule(), tests);
         let testFailed = false;
         for (const { added, removed, value } of diffResults) {
-            if (added === true) {
+            if (added) {
                 console.warn(`Test has no matching rule: ${value}`);
                 testFailed = true;
-            } else if (removed === true) {
+            } else if (removed) {
                 console.warn(`Missing test: ${value}`);
                 testFailed = true;
             }
@@ -123,9 +123,9 @@ describe("Rule Loader", () => {
 
         const failures: string[] = [];
         for (const { added, removed, value } of diffResults) {
-            if (added === true) {
+            if (added) {
                 failures.push(`Rule in 'tslint:all' does not exist: ${value}`);
-            } else if (removed === true) {
+            } else if (removed) {
                 failures.push(`Rule not in 'tslint:all': ${value}`);
             }
         }

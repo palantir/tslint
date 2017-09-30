@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     private static FAILURE_STRING_START(otherLine?: number): string {
         // For only 2 overloads we don't need to specify which is the other one.
         const overloads = otherLine === undefined ? "These overloads" : `This overload and the one on line ${otherLine}`;
-        return overloads + " can be combined into one signature";
+        return `${overloads} can be combined into one signature`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -72,13 +72,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
             }
             case ts.SyntaxKind.TypeLiteral:
                 checkMembers((node as ts.TypeLiteralNode).members);
-                break;
         }
 
         return ts.forEachChild(node, cb);
     });
 
-    function checkStatements(statements: ts.Statement[]): void {
+    function checkStatements(statements: ReadonlyArray<ts.Statement>): void {
         addFailures(checkOverloads(statements, undefined, (statement) => {
             if (utils.isFunctionDeclaration(statement)) {
                 const { body, name } = statement;
@@ -89,7 +88,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
         }));
     }
 
-    function checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]): void {
+    function checkMembers(
+        members: ReadonlyArray<ts.TypeElement | ts.ClassElement>,
+        typeParameters?: ReadonlyArray<ts.TypeParameterDeclaration>): void {
         addFailures(checkOverloads(members, typeParameters, (member) => {
             switch (member.kind) {
                 case ts.SyntaxKind.CallSignature:
@@ -120,7 +121,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 case "single-parameter-difference": {
                     const { p0, p1 } = unify;
                     const lineOfOtherOverload = only2 ? undefined : getLine(p0.getStart());
-                    ctx.addFailureAtNode(p1,
+                    ctx.addFailureAtNode(
+                        p1,
                         Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
                     break;
                 }
@@ -130,7 +132,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
                         ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
                         : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
-                    break;
                 }
             }
         }
@@ -147,12 +148,12 @@ interface Failure {
     only2: boolean;
 }
 type Unify =
-    | { kind: "single-parameter-difference", p0: ts.ParameterDeclaration, p1: ts.ParameterDeclaration }
-    | { kind: "extra-parameter", extraParameter: ts.ParameterDeclaration, otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
+    | { kind: "single-parameter-difference"; p0: ts.ParameterDeclaration; p1: ts.ParameterDeclaration }
+    | { kind: "extra-parameter"; extraParameter: ts.ParameterDeclaration; otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
 
 function checkOverloads<T>(
-        signatures: T[],
-        typeParameters: ts.TypeParameterDeclaration[] | undefined,
+        signatures: ReadonlyArray<T>,
+        typeParameters: ReadonlyArray<ts.TypeParameterDeclaration> | undefined,
         getOverload: GetOverload<T>): Failure[] {
     const result: Failure[] = [];
     const isTypeParameter = getIsTypeParameter(typeParameters);
@@ -194,7 +195,7 @@ function signaturesCanBeUnified(a: ts.SignatureDeclaration, b: ts.SignatureDecla
 }
 
 /** Detect `a(x: number, y: number, z: number)` and `a(x: number, y: string, z: number)`. */
-function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
+function signaturesDifferBySingleParameter(types1: ReadonlyArray<ts.ParameterDeclaration>, types2: ReadonlyArray<ts.ParameterDeclaration>,
     ): Unify | undefined {
     const index = getIndexOfFirstDifference(types1, types2, parametersAreEqual);
     if (index === undefined) {
@@ -208,7 +209,11 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
     const a = types1[index];
     const b = types2[index];
-    return parametersHaveEqualSigils(a, b) ? { kind: "single-parameter-difference", p0: a, p1: b } : undefined;
+    // Can unify `a?: string` and `b?: number`. Can't unify `...args: string[]` and `...args: number[]`.
+    // See https://github.com/Microsoft/TypeScript/issues/5077
+    return parametersHaveEqualSigils(a, b) && a.dotDotDotToken === undefined
+        ? { kind: "single-parameter-difference", p0: a, p1: b }
+        : undefined;
 }
 
 /**
@@ -247,7 +252,7 @@ function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.Paramet
  * Given a node, if it could potentially be an overload, return its signature and key.
  * All signatures which are overloads should have equal keys.
  */
-type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string } | undefined;
+type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration; key: string } | undefined;
 
 /**
  * Returns true if typeName is the name of an *outer* type parameter.
@@ -256,7 +261,7 @@ type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: st
 type IsTypeParameter = (typeName: string) => boolean;
 
 /** Given type parameters, returns a function to test whether a type is one of those parameters. */
-function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsTypeParameter {
+function getIsTypeParameter(typeParameters?: ReadonlyArray<ts.TypeParameterDeclaration>): IsTypeParameter {
     if (typeParameters === undefined) {
         return () => false;
     }
@@ -270,16 +275,16 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
 
 /** True if any of the outer type parameters are used in a signature. */
 function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
-    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type));
+    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type) === true);
 
-    function typeContainsTypeParameter(type: ts.Node): boolean {
+    function typeContainsTypeParameter(type: ts.Node): boolean | undefined {
         if (utils.isTypeReferenceNode(type)) {
             const { typeName } = type;
             if (typeName.kind === ts.SyntaxKind.Identifier && isTypeParameter(typeName.text)) {
                 return true;
             }
         }
-        return !!ts.forEachChild(type, typeContainsTypeParameter);
+        return ts.forEachChild(type, typeContainsTypeParameter);
     }
 }
 
@@ -287,7 +292,7 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
  * Given all signatures, collects an array of arrays of signatures which are all overloads.
  * Does not rely on overloads being adjacent. This is similar to code in adjacentOverloadSignaturesRule.ts, but not the same.
  */
-function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
+function collectOverloads<T>(nodes: ReadonlyArray<T>, getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
     const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
@@ -331,7 +336,7 @@ function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): 
 }
 
 /** Returns the first index where `a` and `b` differ. */
-function getIndexOfFirstDifference<T>(a: T[], b: T[], equal: Equal<T>): number | undefined {
+function getIndexOfFirstDifference<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>, equal: Equal<T>): number | undefined {
     for (let i = 0; i < a.length && i < b.length; i++) {
         if (!equal(a[i], b[i])) {
             return i;
@@ -341,7 +346,7 @@ function getIndexOfFirstDifference<T>(a: T[], b: T[], equal: Equal<T>): number |
 }
 
 /** Calls `action` for every pair of values in `values`. */
-function forEachPair<T, Out>(values: T[], action: (a: T, b: T) => Out | undefined): Out | undefined {
+function forEachPair<T, Out>(values: ReadonlyArray<T>, action: (a: T, b: T) => Out | undefined): Out | undefined {
     for (let i = 0; i < values.length; i++) {
         for (let j = i + 1; j < values.length; j++) {
             const result = action(values[i], values[j]);

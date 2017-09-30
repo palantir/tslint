@@ -119,7 +119,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                         fallthroughSingle = clauseSuper.node;
                     }
                     foundSingle = clauseSuper.node;
-                    break;
             }
         }
 
@@ -136,7 +135,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
             const childSuper = getSuperForNode(child);
             switch (childSuper) {
                 case Kind.NoSuper:
-                    return;
+                    return undefined;
 
                 case Kind.Break:
                     if (seenSingle !== undefined) {
@@ -152,7 +151,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                         addDuplicateFailure(seenSingle.node, childSuper.node);
                     }
                     seenSingle = childSuper;
-                    return;
+                    return undefined;
             }
         });
         return res !== undefined ? res : seenSingle !== undefined ? seenSingle : Kind.NoSuper;

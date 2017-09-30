@@ -74,7 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
+    public static INCONSISTENT_PROPERTY = "All property names in this object literal must be consistently quoted or unquoted.";
     public static UNNEEDED_QUOTES(name: string) {
         return `Unnecessarily quoted property '${name}' found.`;
     }
@@ -162,7 +162,7 @@ function mapPropertyName(property: ts.ObjectLiteralElementLike): ts.StringLitera
     return property.name;
 }
 
-function hasInconsistentQuotes(properties: ts.LiteralLikeNode[]) {
+function hasInconsistentQuotes(properties: ReadonlyArray<ts.LiteralLikeNode>) {
     if (properties.length < 2) {
         return false;
     }

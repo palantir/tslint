@@ -24,8 +24,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-literal",
-        description: "Disallows object access via string literals.",
-        rationale: "Encourages using strongly-typed property access.",
+        description: Lint.Utils.dedent`
+            Forbids unnecessary string literal property access.
+            Allows \`obj["prop-erty"]\` (can't be a regular property access).
+            Disallows \`obj["property"]\` (should be \`obj.property\`).`,
+        rationale: Lint.Utils.dedent`
+            If \`--noImplicitAny\` is turned off,
+            property access via a string literal will be 'any' if the property does not exist.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -47,11 +52,13 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
             if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
+                // for compatibility with typescript@<2.5.0 to avoid fixing expr['__foo'] to expr.___foo
+                const propertyName = ts.unescapeIdentifier(argument.text); // tslint:disable-line:deprecation
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
                     // expr['foo'] -> expr.foo
-                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, "." + argument.text),
+                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${propertyName}`),
                 );
             }
         }

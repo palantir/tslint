@@ -17,8 +17,8 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {FormatterConstructor} from "./index";
-import {camelize} from "./utils";
+import { FormatterConstructor } from "./index";
+import { camelize } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
@@ -32,7 +32,7 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
 
         // first check for core formatters
         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
-        if (Formatter != null) {
+        if (Formatter !== undefined) {
             return Formatter;
         }
 

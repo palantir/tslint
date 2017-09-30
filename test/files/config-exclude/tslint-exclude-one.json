@@ -1,0 +1,13 @@
+{
+    "rules": {
+        "semicolon": [
+            true,
+            "always"
+        ]
+    },
+    "linterOptions": {
+        "exclude": [
+            "excluded.ts"
+        ]
+    }
+}
