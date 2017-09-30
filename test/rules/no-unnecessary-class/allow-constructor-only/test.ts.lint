@@ -96,6 +96,29 @@ export class BClass {
     private static privateHelper(): boolean {
         return true;
     }
+
+    constructor() {
+        class nestedClass {}
+        ~~~~~ [EMPTY_CLASS]
+    }
+}
+
+export class DoubleClass {
+       ~~~~~ [STATIC_ONLY]
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+
+    constructor() {
+        class NestedClass {}
+        ~~~~~ [EMPTY_CLASS]
+
+        class SecondNestedClass {
+        ~~~~~ [STATIC_ONLY]
+            static number myNum = 0;
+        }
+    }
 }
 
 export class CClass extends BaseClass {

@@ -18,11 +18,13 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-import { getChildOfKind,
-        hasModifier,
-        isClassDeclaration,
-        isConstructorDeclaration,
-        isParameterProperty } from "tsutils";
+import {
+    getChildOfKind,
+    hasModifier,
+    isClassDeclaration,
+    isConstructorDeclaration,
+    isParameterProperty,
+} from "tsutils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -88,12 +90,33 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
         }
 
         const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
-        const classHasShorthandProps = node.members.some(isConstructorWithShorthandProps);
-        if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShorthandProps) {
+        if (
+            allMembersAreConstructors &&
+            !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) &&
+            !node.members.some(isConstructorWithShorthandProps)
+        ) {
             this.addFailureAtNode(
-                getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
+                getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
+                Rule.FAILURE_CONSTRUCTOR_ONLY,
             );
-            return;
+        }
+
+        if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
+            let clear = false;
+            for (const member of node.members) {
+                if (
+                    isConstructorWithShorthandProps(member) ||
+                    (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
+                ) {
+                    clear = true;
+                }
+            }
+            if (!clear) {
+                this.addFailureAtNode(
+                    getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
+                    Rule.FAILURE_STATIC_ONLY,
+                );
+            }
         }
 
         for (const member of node.members) {
@@ -101,30 +124,23 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
                 return ts.forEachChild(member, checkIfUnnecessaryClass);
             }
         }
-
-        if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
-            for (const member of node.members) {
-                if (isConstructorWithShorthandProps(member) ||
-                (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
-                    return;
-                }
-            }
-            this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STATIC_ONLY);
-            return;
-        }
     }
-
     private hasOption(option: string): boolean {
         return this.options.indexOf(option) !== -1;
     }
 }
 
 function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
-    return (declaration.heritageClauses !== undefined) && (declaration.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword);
+    return (
+        declaration.heritageClauses !== undefined &&
+        declaration.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword
+    );
 }
 
 function isConstructorWithClassDeclaration(member: ts.ClassElement): boolean {
-    return (isConstructorDeclaration(member) && member.body !== undefined) ? member.body.statements.some(isClassDeclaration) : false;
+    return isConstructorDeclaration(member) && member.body !== undefined
+        ? member.body.statements.some(isClassDeclaration)
+        : false;
 }
 
 function isConstructorWithShorthandProps(member: ts.ClassElement): boolean {

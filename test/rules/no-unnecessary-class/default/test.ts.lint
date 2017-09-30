@@ -12,6 +12,7 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [STATIC_ONLY]
             static PROP = 2;
         }
     }
@@ -21,8 +22,10 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
             constructor() {
                 class FizzBuzz {
+                ~~~~~ [STATIC_ONLY]
                     public static a = 'hello mom!';
                 }
             }
@@ -47,6 +50,7 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
             constructor() {
                 class FizzBuzz {
                     public static helper(): void {}
@@ -74,6 +78,7 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [STATIC_ONLY]
             static PROP = 2;
         }
     }
@@ -91,7 +96,11 @@ export class AClass {
     private static privateHelper(): boolean {
         return true;
     }
-    constructor() {}
+    constructor() {
+        class nestedClass {
+        ~~~~~ [EMPTY_CLASS]
+        }
+    }
 }
 
 export class BClass {

@@ -20,6 +20,7 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
             constructor() {
                 class FizzBuzz {
                     public static a = 'hello mom!';
@@ -46,6 +47,7 @@ class Foo {
 ~~~~~ [CONSTRUCTOR_ONLY]
     constructor() {
         class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
             constructor() {
                 class FizzBuzz {
                     public static helper(): void {}
