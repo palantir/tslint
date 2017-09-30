@@ -17,7 +17,6 @@
 
 import {
     isCallExpression,
-    isExportDeclaration,
     isExternalModuleReference,
     isIdentifier,
     isImportDeclaration,

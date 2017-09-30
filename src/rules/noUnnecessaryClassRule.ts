@@ -72,42 +72,46 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const checkIfUnnecessaryClass = (node: ts.Node): void => {
             if (isClassDeclaration(node) && !hasExtendsClause(node)) {
-                if (node.members.length === 0) {
-                    if (!this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
-                        this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
-                    }
-                    return;
-                }
-
-                const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
-                const classHasShorthandProps = node.members.some(isConstructorWithShorthandProps);
-                if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShorthandProps) {
-                    this.addFailureAtNode(
-                        getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
-                    );
-                    return;
-                }
-
-                for (const member of node.members) {
-                    if (isConstructorWithClassDeclaration(member)) {
-                        return ts.forEachChild(member, checkIfUnnecessaryClass);
-                    }
-                }
-
-                if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
-                    for (const member of node.members) {
-                        if (isConstructorWithShorthandProps(member) ||
-                        (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
-                            return;
-                        }
-                    }
-                    this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STATIC_ONLY);
-                    return;
-                }
+                return this.checkMembers(node, checkIfUnnecessaryClass);
             }
             return ts.forEachChild(node, checkIfUnnecessaryClass);
         };
         ts.forEachChild(sourceFile, checkIfUnnecessaryClass);
+    }
+
+    private checkMembers(node: ts.ClassDeclaration, checkIfUnnecessaryClass: (node: ts.Node) => void) {
+        if (node.members.length === 0) {
+            if (!this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
+                this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
+            }
+            return;
+        }
+
+        const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
+        const classHasShorthandProps = node.members.some(isConstructorWithShorthandProps);
+        if (allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) && !classHasShorthandProps) {
+            this.addFailureAtNode(
+                getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_CONSTRUCTOR_ONLY,
+            );
+            return;
+        }
+
+        for (const member of node.members) {
+            if (isConstructorWithClassDeclaration(member)) {
+                return ts.forEachChild(member, checkIfUnnecessaryClass);
+            }
+        }
+
+        if (!allMembersAreConstructors && !this.hasOption(OPTION__ALLOW_STATIC_ONLY)) {
+            for (const member of node.members) {
+                if (isConstructorWithShorthandProps(member) ||
+                (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))) {
+                    return;
+                }
+            }
+            this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!, Rule.FAILURE_STATIC_ONLY);
+            return;
+        }
     }
 
     private hasOption(option: string): boolean {
