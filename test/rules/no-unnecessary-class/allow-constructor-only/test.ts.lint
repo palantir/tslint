@@ -34,7 +34,7 @@ class Foo {
     constructor() {
         class Bar {
             public static helper(): void {}
-            private private Helper(): boolean {
+            private Helper(): boolean {
                 return true;
             }
             constructor() {}

@@ -26,6 +26,24 @@ import {
     isParameterProperty,
 } from "tsutils";
 
+interface Options {
+    allowConstructorOnly: boolean;
+    allowEmptyClass: boolean;
+    allowStaticOnly: boolean;
+}
+
+const OPTION__ALLOW_CONSTRUCTOR_ONLY = "allow-constructor-only";
+const OPTION__ALLOW_EMPTY_CLASS = "allow-empty-class";
+const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
+
+function parseOptions(options: string[]): Options {
+    return {
+        allowConstructorOnly: options.indexOf(OPTION__ALLOW_CONSTRUCTOR_ONLY) !== -1,
+        allowEmptyClass: options.indexOf(OPTION__ALLOW_EMPTY_CLASS) !== -1,
+        allowStaticOnly: options.indexOf(OPTION__ALLOW_STATIC_ONLY) !== -1,
+    };
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -62,28 +80,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_EMPTY_CLASS = "This class has no members.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUnnecessaryClassWalker(sourceFile, this.ruleName, this.ruleArguments));
+        return this.applyWithWalker(
+            new NoUnnecessaryClassWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
+        );
     }
 }
 
-const OPTION__ALLOW_CONSTRUCTOR_ONLY = "allow-constructor-only";
-const OPTION__ALLOW_EMPTY_CLASS = "allow-empty-class";
-const OPTION__ALLOW_STATIC_ONLY = "allow-static-only";
-
-class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
+class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const checkIfUnnecessaryClass = (node: ts.Node): void => {
             if (isClassDeclaration(node) && !hasExtendsClause(node)) {
-                return this.checkMembers(node, checkIfUnnecessaryClass);
+                this.checkMembers(node);
             }
             return ts.forEachChild(node, checkIfUnnecessaryClass);
         };
         ts.forEachChild(sourceFile, checkIfUnnecessaryClass);
     }
 
-    private checkMembers(node: ts.ClassDeclaration, checkIfUnnecessaryClass: (node: ts.Node) => void) {
+    private checkMembers(node: ts.ClassDeclaration) {
         if (node.members.length === 0) {
-            if (!this.hasOption(OPTION__ALLOW_EMPTY_CLASS)) {
+            if (!this.options.allowEmptyClass) {
                 this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
             }
             return;
@@ -92,7 +108,7 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
         const allMembersAreConstructors = node.members.every(isConstructorDeclaration);
         if (
             allMembersAreConstructors &&
-            !this.hasOption(OPTION__ALLOW_CONSTRUCTOR_ONLY) &&
+            !this.options.allowConstructorOnly &&
             !node.members.some(isConstructorWithShorthandProps)
         ) {
             this.addFailureAtNode(
@@ -103,7 +119,7 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
 
         if (
             !allMembersAreConstructors &&
-            !this.hasOption(OPTION__ALLOW_STATIC_ONLY) &&
+            !this.options.allowStaticOnly &&
             !node.members.some(isNonStaticMember)
         ) {
             this.addFailureAtNode(
@@ -111,16 +127,6 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<string[]> {
                 Rule.FAILURE_STATIC_ONLY,
             );
         }
-
-        /* Check for classes nested in constructors */
-        for (const member of node.members) {
-            if (isConstructorWithClassDeclaration(member)) {
-                return ts.forEachChild(member, checkIfUnnecessaryClass);
-            }
-        }
-    }
-    private hasOption(option: string): boolean {
-        return this.options.indexOf(option) !== -1;
     }
 }
 
@@ -136,12 +142,6 @@ function hasExtendsClause(declaration: ts.ClassDeclaration): boolean {
         declaration.heritageClauses !== undefined &&
         declaration.heritageClauses[0].token === ts.SyntaxKind.ExtendsKeyword
     );
-}
-
-function isConstructorWithClassDeclaration(member: ts.ClassElement): boolean {
-    return isConstructorDeclaration(member) && member.body !== undefined
-        ? member.body.statements.some(isClassDeclaration)
-        : false;
 }
 
 function isConstructorWithShorthandProps(member: ts.ClassElement): boolean {
