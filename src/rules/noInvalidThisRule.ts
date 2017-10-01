@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { isThisParameter } from "tsutils";
+
 const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
 const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
 
@@ -78,7 +80,7 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
 
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
-                if (hasContextualThis(node as ts.FunctionDeclaration)) {
+                if ((node as ts.FunctionLikeDeclaration).parameters.some(isThisParameter)) {
                     return;
                 }
                 if (inClass) {
@@ -100,8 +102,4 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
 
         ts.forEachChild(node, cb);
     });
-}
-
-function hasContextualThis(node: ts.FunctionDeclaration): boolean {
-    return node.parameters.some((param) => param.name.getText() === "this");
 }

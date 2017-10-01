@@ -1,5 +1,5 @@
 export function f<T>(this: Observable<T>): Observable<T> {
-    const nestedFunction = (this) => {
+    const nestedFunction = function(this) => {
         console.log(this)
     }
     return this.map(i=>i);
