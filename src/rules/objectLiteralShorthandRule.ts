@@ -15,19 +15,37 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, hasModifier, isFunctionExpression, isIdentifier, isPropertyAssignment } from "tsutils";
+import {
+    getChildOfKind,
+    hasModifier,
+    isFunctionExpression,
+    isIdentifier,
+    isMethodDeclaration,
+    isPropertyAssignment,
+    isShorthandPropertyAssignment,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+
+const OPTION_NEVER = "never";
+
+interface Options {
+    allowShorthandAssignments: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
-        description: "Enforces use of ES6 object literal shorthand when possible.",
+        description: "Enforces/disallows use of ES6 object literal shorthand.",
         hasFix: true,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+        If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.`,
+        options: {
+            type: "string",
+            enum: [OPTION_NEVER],
+        },
+        optionExamples: [true, [true, OPTION_NEVER]],
         type: "style",
         typescriptOnly: false,
     };
@@ -35,26 +53,38 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static LONGHAND_PROPERTY = "Expected property shorthand in object literal ";
     public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
+    public static SHORTHAND_ASSIGNMENT = "Shorthand property assignments have been disallowed.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowShorthandAssignments: this.ruleArguments.indexOf("never") === -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext<Options>) {
+    const { options: { allowShorthandAssignments } } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isPropertyAssignment(node)) {
-            if (node.name.kind === ts.SyntaxKind.Identifier &&
+        if (isShorthandAssignment(node) && !allowShorthandAssignments) {
+            ctx.addFailureAtNode(node, Rule.SHORTHAND_ASSIGNMENT);
+            return;
+        }
+        if (isPropertyAssignment(node) && allowShorthandAssignments) {
+            if (
+                node.name.kind === ts.SyntaxKind.Identifier &&
                 isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text) {
+                node.name.text === node.initializer.text
+            ) {
                 ctx.addFailureAtNode(
                     node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
-            } else if (isFunctionExpression(node.initializer) &&
-                       // allow named function expressions
-                       node.initializer.name === undefined) {
+            } else if (
+                isFunctionExpression(node.initializer) &&
+                // allow named function expressions
+                node.initializer.name === undefined
+            ) {
                 const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
                 ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
             }
@@ -63,9 +93,16 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
+function handleLonghandMethod(
+    name: ts.PropertyName,
+    initializer: ts.FunctionExpression,
+    sourceFile: ts.SourceFile,
+): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
-    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
+    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
+        name.end,
+        getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos,
+    );
     let prefix = "";
     if (initializer.asteriskToken !== undefined) {
         prefix = "*";
@@ -77,4 +114,13 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
         fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
     }
     return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
+}
+
+function isShorthandAssignment(node: ts.Node): boolean {
+    return (
+        isShorthandPropertyAssignment(node) ||
+        (isMethodDeclaration(node) && node.parent !== undefined
+            ? node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
+            : false)
+    );
 }
