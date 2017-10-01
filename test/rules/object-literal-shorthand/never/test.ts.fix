@@ -1,15 +1,10 @@
 const bad = {
-  w() {},
-  ~~~~~~ [OBJECT_LITERAL_DISALLOWED]
-  *x() {},
-  ~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
-  [y]() {},
-  ~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
-  z,
-  ~ [OBJECT_LITERAL_DISALLOWED]
+  w: function() {},
+  x: function*() {},
+  [y]: function() {},
+  z: z,
   nest: {
-    nestBad() {},
-    ~~~~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+    nestBad: function() {},
     nextGood: function(prop: string): void {}
   }
 };
@@ -30,13 +25,11 @@ const namedFunctions = {
 
 const quotes = {
   "foo-bar": function() {},
-  "foo-bar"() {}
-  ~~~~~~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+  "foo-bar": function() {}
 };
 
 const extraCases = {
-  x,
-  ~ [OBJECT_LITERAL_DISALLOWED]
+  x: x,
   a: 123,
   b: "hello",
   c: 'c',
@@ -49,4 +42,3 @@ const asyncFn = {
   foo: async function() {},
   bar: async function*() {}
 }
-[OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.

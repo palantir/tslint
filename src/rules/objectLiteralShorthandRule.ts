@@ -70,7 +70,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
 function disallowShorthand(ctx: Lint.WalkContext<Options>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isShorthandAssignment(node)) {
-            ctx.addFailureAtNode(node, Rule.SHORTHAND_ASSIGNMENT);
+            ctx.addFailureAtNode(
+                node,
+                Rule.SHORTHAND_ASSIGNMENT,
+                fixShorthandToLonghand(node as ts.ShorthandPropertyAssignment | ts.MethodDeclaration),
+            );
             return;
         }
         return ts.forEachChild(node, cb);
@@ -103,6 +107,23 @@ function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
     });
 }
 
+function fixShorthandToLonghand(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): Lint.Fix {
+    let replacementText =   isMethodDeclaration(node)
+                                ? ": function"
+                                : `: ${node.name.getText()}`;
+
+    replacementText =       isGeneratorFunction(node)
+                                ? `${replacementText}*`
+                                : replacementText;
+
+    const fixes: Lint.Fix = [Lint.Replacement.appendText(node.name.end, replacementText)];
+    if (isGeneratorFunction(node)) {
+        const asteriskPosition = (node as ts.MethodDeclaration).asteriskToken!.getStart();
+        fixes.push(Lint.Replacement.replaceFromTo(asteriskPosition, asteriskPosition + 1, ""));
+    }
+    return fixes;
+}
+
 function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
     let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
@@ -120,6 +141,10 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
         fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
     }
     return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
+}
+
+function isGeneratorFunction(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): boolean {
+    return isMethodDeclaration(node) && node.asteriskToken !== undefined;
 }
 
 function isShorthandAssignment(node: ts.Node): boolean {
