@@ -7,12 +7,12 @@ export function f<T>(this: Observable<T>): Observable<T> {
 
 class ContextualThisClass {
     private someMethod(): void {
-        function f<T>(this: Observable<T>): Observable<T> {
-            const nestedFunction = (this) => {
+        let nestedFunction: (this: number[]) => number[] = function(this) {
+            [3,4].forEach(function(nr){
                 console.log(this);
-            }
+            });
             return this.map(i=>i);
-        }
+        };
     }
 }
 
