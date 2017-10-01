@@ -64,12 +64,22 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<Options>) {
     const { options: { allowShorthandAssignments } } = ctx;
+    allowShorthandAssignments ? enforceShorthand(ctx) : disallowShorthand(ctx);
+}
+
+function disallowShorthand(ctx: Lint.WalkContext<Options>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isShorthandAssignment(node) && !allowShorthandAssignments) {
+        if (isShorthandAssignment(node)) {
             ctx.addFailureAtNode(node, Rule.SHORTHAND_ASSIGNMENT);
             return;
         }
-        if (isPropertyAssignment(node) && allowShorthandAssignments) {
+        return ts.forEachChild(node, cb);
+    });
+}
+
+function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isPropertyAssignment(node)) {
             if (
                 node.name.kind === ts.SyntaxKind.Identifier &&
                 isIdentifier(node.initializer) &&
@@ -93,11 +103,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     });
 }
 
-function handleLonghandMethod(
-    name: ts.PropertyName,
-    initializer: ts.FunctionExpression,
-    sourceFile: ts.SourceFile,
-): [string, Lint.Fix] {
+function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
     let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
         name.end,
