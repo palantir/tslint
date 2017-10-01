@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getJsDoc } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -47,13 +48,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>): void {
-    ts.forEachChild(ctx.sourceFile, function cb(node) {
-        if (node.jsDoc !== undefined) {
-            for (const { tags } of node.jsDoc) {
-                if (tags !== undefined) {
-                    for (const tag of tags) {
-                        checkTag(tag);
-                    }
+    const { sourceFile } = ctx;
+    ts.forEachChild(sourceFile, function cb(node) {
+        for (const { tags } of getJsDoc(node, sourceFile)) {
+            if (tags !== undefined) {
+                for (const tag of tags) {
+                    checkTag(tag);
                 }
             }
         }
@@ -63,7 +63,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     function checkTag(tag: ts.JSDocTag): void {
         switch (tag.kind) {
             case ts.SyntaxKind.JSDocTag:
-                if (isRedundantTag(tag.tagName.text)) {
+                if (redundantTags.has(tag.tagName.text)) {
                     ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
                 }
                 break;
@@ -99,45 +99,34 @@ function walk(ctx: Lint.WalkContext<void>): void {
     }
 }
 
-function isRedundantTag(tagName: string): boolean {
-    switch (tagName) {
-        case "abstract":
-        case "access":
-        case "class":
-        case "constant":
-        case "constructs":
-        case "default":
-        case "enum":
-        case "exports":
-        case "function":
-        case "global":
-        case "implements":
-        case "interface":
-        case "instance":
-        case "member":
-        case "memberof":
-        case "mixes":
-        case "mixin":
-        case "module":
-        case "name":
-        case "namespace":
-        case "override":
-        case "private":
-        case "property":
-        case "protected":
-        case "public":
-        case "readonly":
-        case "requires":
-        case "static":
-        case "this":
-            return true;
-        default:
-            return false;
-    }
-}
-
-declare module "typescript" {
-    interface Node {
-        jsDoc?: ts.JSDoc[];
-    }
-}
+const redundantTags = new Set([
+    "abstract",
+    "access",
+    "class",
+    "constant",
+    "constructs",
+    "default",
+    "enum",
+    "exports",
+    "function",
+    "global",
+    "implements",
+    "interface",
+    "instance",
+    "member",
+    "memberof",
+    "mixes",
+    "mixin",
+    "module",
+    "name",
+    "namespace",
+    "override",
+    "private",
+    "property",
+    "protected",
+    "public",
+    "readonly",
+    "requires",
+    "static",
+    "this",
+]);
