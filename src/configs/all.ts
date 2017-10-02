@@ -204,7 +204,7 @@ export const rules = {
     "no-unnecessary-type-assertion": true,
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
-    "object-literal-shorthand": [true, "always"],
+    "object-literal-shorthand": true,
     "one-line": [
         true,
         "check-catch",

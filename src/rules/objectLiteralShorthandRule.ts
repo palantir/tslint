@@ -17,6 +17,7 @@
 
 import {
     getChildOfKind,
+    getModifier,
     hasModifier,
     isFunctionExpression,
     isIdentifier,
@@ -28,10 +29,6 @@ import * as ts from "typescript";
 import * as Lint from "..";
 
 const OPTION_NEVER = "never";
-
-interface Options {
-    allowShorthandAssignments: boolean;
-}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -56,18 +53,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static SHORTHAND_ASSIGNMENT = "Shorthand property assignments have been disallowed.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
-            allowShorthandAssignments: this.ruleArguments.indexOf("never") === -1,
-        });
+        return this.applyWithFunction(
+            sourceFile,
+            this.ruleArguments.indexOf(OPTION_NEVER) === -1
+                ? enforceShorthandWalker
+                : disallowShorthandWalker,
+        );
     }
 }
 
-function walk(ctx: Lint.WalkContext<Options>) {
-    const { options: { allowShorthandAssignments } } = ctx;
-    allowShorthandAssignments ? enforceShorthand(ctx) : disallowShorthand(ctx);
-}
-
-function disallowShorthand(ctx: Lint.WalkContext<Options>): void {
+function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isShorthandAssignment(node)) {
             ctx.addFailureAtNode(
@@ -81,7 +76,7 @@ function disallowShorthand(ctx: Lint.WalkContext<Options>): void {
     });
 }
 
-function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
+function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
             if (node.name.kind === ts.SyntaxKind.Identifier &&
@@ -104,14 +99,27 @@ function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
 }
 
 function fixShorthandToLonghand(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): Lint.Fix {
-    let replacementText = isMethodDeclaration(node) ? ": function" : `: ${node.name.getText()}`;
+    const isGenerator = (node as ts.MethodDeclaration).asteriskToken !== undefined;
+    const isAsync = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
+    let
+    replacementStart = (isAsync && node.modifiers !== undefined) ? getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart() : -1;
+    replacementStart = (isGenerator && !isAsync) ? (node as ts.MethodDeclaration).asteriskToken!.getStart() : -1;
+    replacementStart = replacementStart === -1 ? node.name.getStart() : replacementStart;
 
-    replacementText = isGeneratorFunction(node) ? `${replacementText}*` : replacementText;
+    const fixes: Lint.Fix = [
+        isMethodDeclaration(node)
+            ? Lint.Replacement.replaceFromTo(
+                    replacementStart,
+                    node.name.end,
+                    `${node.name.getText()}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+                )
+            /* tslint:disable:trailing-comma */
+            : Lint.Replacement.appendText(node.name.getStart(), `${node.name.text}: `)
+            /* tslint:enable:trailing-comma */
+    ];
 
-    const fixes: Lint.Fix = [Lint.Replacement.appendText(node.name.end, replacementText)];
-    if (isGeneratorFunction(node)) {
-        const asteriskPosition = (node as ts.MethodDeclaration).asteriskToken!.getStart();
-        fixes.push(Lint.Replacement.replaceFromTo(asteriskPosition, asteriskPosition + 1, ""));
+    if (isAsync) {
+        fixes.unshift(Lint.Replacement.deleteFromTo(getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart(), node.name.getStart()));
     }
     return fixes;
 }
@@ -130,10 +138,6 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
         fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
     }
     return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
-}
-
-function isGeneratorFunction(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): boolean {
-    return isMethodDeclaration(node) && node.asteriskToken !== undefined;
 }
 
 function isShorthandAssignment(node: ts.Node): boolean {

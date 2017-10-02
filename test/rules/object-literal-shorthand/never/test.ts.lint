@@ -1,3 +1,18 @@
+const asyncFn = {
+  async f() {
+  ~~~~~~~~~~~
+    await some_promise;
+~~~~~~~~~~~~~~~~~~~~~~~
+  },
+~~~ [OBJECT_LITERAL_DISALLOWED]
+  async* fa() {
+  ~~~~~~~~~~~~~
+    await some_promise;
+~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [OBJECT_LITERAL_DISALLOWED]
+};
+
 const bad = {
   w() {},
   ~~~~~~ [OBJECT_LITERAL_DISALLOWED]
@@ -44,9 +59,4 @@ const extraCases = {
     x: x
   }
 };
-
-const asyncFn = {
-  foo: async function() {},
-  bar: async function*() {}
-}
 [OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.

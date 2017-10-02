@@ -1,3 +1,12 @@
+const asyncFn = {
+  f: async function() {
+    await some_promise;
+  },
+  fa: async function*() {
+    await some_promise;
+  }
+};
+
 const bad = {
   w: function() {},
   x: function*() {},
@@ -37,8 +46,3 @@ const extraCases = {
     x: x
   }
 };
-
-const asyncFn = {
-  foo: async function() {},
-  bar: async function*() {}
-}
