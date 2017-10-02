@@ -25,7 +25,7 @@ import {
     isShorthandPropertyAssignment,
 } from "tsutils";
 import * as ts from "typescript";
-import * as Lint from "../index";
+import * as Lint from "..";
 
 const OPTION_NEVER = "never";
 
@@ -84,21 +84,17 @@ function disallowShorthand(ctx: Lint.WalkContext<Options>): void {
 function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
-            if (
-                node.name.kind === ts.SyntaxKind.Identifier &&
+            if (node.name.kind === ts.SyntaxKind.Identifier &&
                 isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text
-            ) {
+                node.name.text === node.initializer.text) {
                 ctx.addFailureAtNode(
                     node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
-            } else if (
-                isFunctionExpression(node.initializer) &&
-                // allow named function expressions
-                node.initializer.name === undefined
-            ) {
+            } else if (isFunctionExpression(node.initializer) &&
+                       // allow named function expressions
+                       node.initializer.name === undefined) {
                 const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
                 ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
             }
@@ -108,13 +104,9 @@ function enforceShorthand(ctx: Lint.WalkContext<Options>): void {
 }
 
 function fixShorthandToLonghand(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): Lint.Fix {
-    let replacementText =   isMethodDeclaration(node)
-                                ? ": function"
-                                : `: ${node.name.getText()}`;
+    let replacementText = isMethodDeclaration(node) ? ": function" : `: ${node.name.getText()}`;
 
-    replacementText =       isGeneratorFunction(node)
-                                ? `${replacementText}*`
-                                : replacementText;
+    replacementText = isGeneratorFunction(node) ? `${replacementText}*` : replacementText;
 
     const fixes: Lint.Fix = [Lint.Replacement.appendText(node.name.end, replacementText)];
     if (isGeneratorFunction(node)) {
@@ -126,10 +118,7 @@ function fixShorthandToLonghand(node: ts.ShorthandPropertyAssignment | ts.Method
 
 function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
-    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
-        name.end,
-        getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos,
-    );
+    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
     let prefix = "";
     if (initializer.asteriskToken !== undefined) {
         prefix = "*";
@@ -150,8 +139,6 @@ function isGeneratorFunction(node: ts.ShorthandPropertyAssignment | ts.MethodDec
 function isShorthandAssignment(node: ts.Node): boolean {
     return (
         isShorthandPropertyAssignment(node) ||
-        (isMethodDeclaration(node) && node.parent !== undefined
-            ? node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
-            : false)
+        (isMethodDeclaration(node) && node.parent !== undefined ? node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression : false)
     );
 }
