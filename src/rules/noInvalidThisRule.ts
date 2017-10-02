@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
-
-import * as Lint from "../index";
-
 import { isThisParameter } from "tsutils";
+import * as ts from "typescript";
+import * as Lint from "..";
 
 const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
 const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
@@ -29,8 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-invalid-this",
         description: "Disallows using the `this` keyword outside of classes.",
-        rationale:
-            "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
+        rationale: "See [the rule's author's rationale here.](https://github.com/palantir/tslint/pull/1105#issue-147549402)",
         optionsDescription: Lint.Utils.dedent`
             One argument may be optionally provided:
 
@@ -50,13 +47,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_OUTSIDE = 'the "this" keyword is disallowed outside of a class body';
-    public static FAILURE_STRING_INSIDE = 'the "this" keyword is disallowed in function bodies inside class methods, ' +
+    public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body";
+    public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
         "use arrow functions instead";
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const hasOption = (name: string) => this.ruleArguments.indexOf(name) !== -1;
-        const checkFuncInMethod =
-            hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || hasOption(OPTION_FUNCTION_IN_METHOD);
+        const checkFuncInMethod = hasOption(DEPRECATED_OPTION_FUNCTION_IN_METHOD) || hasOption(OPTION_FUNCTION_IN_METHOD);
         return this.applyWithFunction(sourceFile, walk, checkFuncInMethod);
     }
 }
@@ -66,7 +62,7 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
     let inClass = false;
     let inFunctionInClass = false;
 
-    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    ts.forEachChild(sourceFile, function cb(node: ts.Node) {
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
