@@ -66,7 +66,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isShorthandAssignment(node)) {
             ctx.addFailureAtNode(
-                node,
+                (node as ts.ShorthandPropertyAssignment).name,
                 Rule.SHORTHAND_ASSIGNMENT,
                 isMethodDeclaration(node)
                     ? fixShorthandMethodDeclaration(node)
@@ -85,7 +85,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                 isIdentifier(node.initializer) &&
                 node.name.text === node.initializer.text) {
                 ctx.addFailureAtNode(
-                    node,
+                    node.name,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
@@ -93,7 +93,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                        // allow named function expressions
                        node.initializer.name === undefined) {
                 const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
-                ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
+                ctx.addFailureAtNode(node.name, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
             }
         }
         return ts.forEachChild(node, cb);

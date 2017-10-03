@@ -1,30 +1,26 @@
 const asyncFn = {
   async f() {
-  ~~~~~~~~~~~
+        ~ [OBJECT_LITERAL_DISALLOWED]
     await some_promise;
-~~~~~~~~~~~~~~~~~~~~~~~
   },
-~~~ [OBJECT_LITERAL_DISALLOWED]
   async* fa() {
-  ~~~~~~~~~~~~~
+         ~~ [OBJECT_LITERAL_DISALLOWED]
     await some_promise;
-~~~~~~~~~~~~~~~~~~~~~~~
   }
-~~~ [OBJECT_LITERAL_DISALLOWED]
 };
 
 const bad = {
   w() {},
-  ~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~ [OBJECT_LITERAL_DISALLOWED]
   *x() {},
-  ~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+   ~ [OBJECT_LITERAL_DISALLOWED]
   [y]() {},
-  ~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~~~ [OBJECT_LITERAL_DISALLOWED]
   z,
   ~ [OBJECT_LITERAL_DISALLOWED]
   nest: {
     nestBad() {},
-    ~~~~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+    ~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
     nextGood: function(prop: string): void {}
   }
 };
@@ -46,7 +42,7 @@ const namedFunctions = {
 const quotes = {
   "foo-bar": function() {},
   "foo-bar"() {}
-  ~~~~~~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
 };
 
 const extraCases = {
