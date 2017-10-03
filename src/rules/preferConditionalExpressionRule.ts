@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isSameLine } from "tsutils";
+import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isReturnStatement, isSameLine  } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -45,6 +45,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    public static FAILURE_STRING_RETURN = "Use a conditionial expression instead of returning in multiple places.";
+
     public static FAILURE_STRING(assigned: string): string {
         return `Use a conditional expression instead of assigning to '${assigned}' in multiple places.`;
     }
@@ -60,20 +62,28 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { checkElseIf } } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isIfStatement(node)) {
-            const assigned = detect(node, sourceFile, checkElseIf);
-            if (assigned !== undefined) {
-                ctx.addFailureAtNode(
-                    node.getChildAt(0, sourceFile),
-                    Rule.FAILURE_STRING(assigned.getText(sourceFile)));
-            }
-            if (assigned !== undefined || !checkElseIf) {
-                // Be careful not to fail again for the "else if"
-                ts.forEachChild(node.expression, cb);
-                ts.forEachChild(node.thenStatement, cb);
-                if (node.elseStatement !== undefined) {
-                    ts.forEachChild(node.elseStatement, cb);
+            if (hasReturn(node)) {
+                if (detectReturn(node)) {
+                    ctx.addFailureAtNode(
+                        node.getChildAt(0, sourceFile),
+                        Rule.FAILURE_STRING_RETURN);
                 }
-                return;
+            } else {
+                const assigned = detect(node, sourceFile, checkElseIf);
+                if (assigned !== undefined) {
+                    ctx.addFailureAtNode(
+                        node.getChildAt(0, sourceFile),
+                        Rule.FAILURE_STRING(assigned.getText(sourceFile)));
+                }
+                if (assigned !== undefined || !checkElseIf) {
+                    // Be careful not to fail again for the "else if"
+                    ts.forEachChild(node.expression, cb);
+                    ts.forEachChild(node.thenStatement, cb);
+                    if (node.elseStatement !== undefined) {
+                        ts.forEachChild(node.elseStatement, cb);
+                    }
+                    return;
+                }
             }
         }
         return ts.forEachChild(node, cb);
@@ -106,4 +116,21 @@ function getAssigned(node: ts.Statement, sourceFile: ts.SourceFile): ts.Expressi
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {
     return a.getText(sourceFile) === b.getText(sourceFile);
+}
+
+function detectReturn(ifStatement: ts.IfStatement): boolean {
+    const elseStatement = ifStatement.elseStatement;
+    if (elseStatement === undefined || elseStatement.kind === ts.SyntaxKind.IfStatement) {
+        return false;
+    }
+    return hasReturn(elseStatement);
+}
+
+function hasReturn(node: ts.Statement): boolean {
+    if (isIfStatement(node)) {
+        return hasReturn(node.thenStatement);
+    } else if (isBlock(node)) {
+        return node.statements.length === 1 ? hasReturn(node.statements[0]) : false;
+    }
+    return isReturnStatement(node);
 }

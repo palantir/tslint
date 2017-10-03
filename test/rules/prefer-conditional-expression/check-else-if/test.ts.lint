@@ -51,4 +51,33 @@ if (true) {
     foo(bar).baz = 1;
 }
 
+// checks return statements
+if (true) {
+~~ [err2]
+    return 1;
+} else {
+    return 2;
+}
+
+if (true) {
+    return 1;
+} else if (true) {
+       ~~ [err2]
+    return 2;
+} else {
+    return 3;
+}
+
+if (true) {
+    x = 1;
+    return 1;
+} else {
+    return 2;
+}
+
+if (true) {
+    return 1;
+}
+
 [err]: Use a conditional expression instead of assigning to '%s' in multiple places.
+[err2]: Use a conditionial expression instead of returning in multiple places.
