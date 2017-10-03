@@ -68,7 +68,9 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
             ctx.addFailureAtNode(
                 node,
                 Rule.SHORTHAND_ASSIGNMENT,
-                fixShorthandToLonghand(node as ts.ShorthandPropertyAssignment | ts.MethodDeclaration),
+                isMethodDeclaration(node)
+                    ? fixShorthandMethodDeclaration(node)
+                    : fixShorthandPropertyAssignment(node as ts.ShorthandPropertyAssignment),
             );
             return;
         }
@@ -98,30 +100,40 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function fixShorthandToLonghand(node: ts.ShorthandPropertyAssignment | ts.MethodDeclaration): Lint.Fix {
-    const isGenerator = (node as ts.MethodDeclaration).asteriskToken !== undefined;
+function fixShorthandMethodDeclaration(node: ts.MethodDeclaration): Lint.Fix {
+    const isGenerator = node.asteriskToken !== undefined;
     const isAsync = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
     let
-    replacementStart = (isAsync && node.modifiers !== undefined) ? getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart() : -1;
-    replacementStart = (isGenerator && !isAsync) ? (node as ts.MethodDeclaration).asteriskToken!.getStart() : -1;
-    replacementStart = replacementStart === -1 ? node.name.getStart() : replacementStart;
+    replacementStart =
+        (isAsync && node.modifiers !== undefined)
+            ? getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart()
+            : node.name.getStart();
+    replacementStart =
+        (isGenerator && !isAsync)
+            ? node.asteriskToken!.getStart()
+            : node.name.getStart();
 
     const fixes: Lint.Fix = [
-        isMethodDeclaration(node)
-            ? Lint.Replacement.replaceFromTo(
-                    replacementStart,
-                    node.name.end,
-                    `${node.name.getText()}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
-                )
-            /* tslint:disable:trailing-comma */
-            : Lint.Replacement.appendText(node.name.getStart(), `${node.name.text}: `)
-            /* tslint:enable:trailing-comma */
+        Lint.Replacement.replaceFromTo(
+            replacementStart,
+            node.name.end,
+            `${node.name.getText()}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+        ),
     ];
 
     if (isAsync) {
-        fixes.unshift(Lint.Replacement.deleteFromTo(getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart(), node.name.getStart()));
+        fixes.unshift(
+            Lint.Replacement.deleteFromTo(
+                getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart(),
+                node.name.getStart(),
+            ),
+        );
     }
     return fixes;
+}
+
+function fixShorthandPropertyAssignment(node: ts.ShorthandPropertyAssignment): Lint.Fix {
+    return Lint.Replacement.appendText(node.name.getStart(), `${node.name.text}: `);
 }
 
 function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
@@ -143,6 +155,6 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
 function isShorthandAssignment(node: ts.Node): boolean {
     return (
         isShorthandPropertyAssignment(node) ||
-        (isMethodDeclaration(node) && node.parent !== undefined ? node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression : false)
+        (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression)
     );
 }

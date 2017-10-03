@@ -59,4 +59,8 @@ const extraCases = {
     x: x
   }
 };
+
+export class ClassA extends ClassZ {
+  testMethod() {}
+}
 [OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.

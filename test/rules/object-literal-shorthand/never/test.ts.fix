@@ -46,3 +46,7 @@ const extraCases = {
     x: x
   }
 };
+
+export class ClassA extends ClassZ {
+  testMethod() {}
+}
