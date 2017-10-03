@@ -85,7 +85,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                 isIdentifier(node.initializer) &&
                 node.name.text === node.initializer.text) {
                 ctx.addFailureAtNode(
-                    node.name,
+                    node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
@@ -93,7 +93,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                        // allow named function expressions
                        node.initializer.name === undefined) {
                 const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
-                ctx.addFailureAtNode(node.name, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
+                ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
             }
         }
         return ts.forEachChild(node, cb);
