@@ -15,19 +15,34 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, hasModifier, isFunctionExpression, isIdentifier, isPropertyAssignment } from "tsutils";
+import {
+    getChildOfKind,
+    getModifier,
+    hasModifier,
+    isFunctionExpression,
+    isIdentifier,
+    isMethodDeclaration,
+    isPropertyAssignment,
+    isShorthandPropertyAssignment,
+} from "tsutils";
 import * as ts from "typescript";
-import * as Lint from "../index";
+import * as Lint from "..";
+
+const OPTION_NEVER = "never";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-shorthand",
-        description: "Enforces use of ES6 object literal shorthand when possible.",
+        description: "Enforces/disallows use of ES6 object literal shorthand.",
         hasFix: true,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+        If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.`,
+        options: {
+            type: "string",
+            enum: [OPTION_NEVER],
+        },
+        optionExamples: [true, [true, OPTION_NEVER]],
         type: "style",
         typescriptOnly: false,
     };
@@ -35,13 +50,35 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static LONGHAND_PROPERTY = "Expected property shorthand in object literal ";
     public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
+    public static SHORTHAND_ASSIGNMENT = "Shorthand property assignments have been disallowed.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(
+            sourceFile,
+            this.ruleArguments.indexOf(OPTION_NEVER) === -1
+                ? enforceShorthandWalker
+                : disallowShorthandWalker,
+        );
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isShorthandAssignment(node)) {
+            ctx.addFailureAtNode(
+                (node as ts.ShorthandPropertyAssignment).name,
+                Rule.SHORTHAND_ASSIGNMENT,
+                isMethodDeclaration(node)
+                    ? fixShorthandMethodDeclaration(node)
+                    : fixShorthandPropertyAssignment(node as ts.ShorthandPropertyAssignment),
+            );
+            return;
+        }
+        return ts.forEachChild(node, cb);
+    });
+}
+
+function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
             if (node.name.kind === ts.SyntaxKind.Identifier &&
@@ -63,6 +100,42 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 }
 
+function fixShorthandMethodDeclaration(node: ts.MethodDeclaration): Lint.Fix {
+    const isGenerator = node.asteriskToken !== undefined;
+    const isAsync = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
+    let
+    replacementStart =
+        (isAsync && node.modifiers !== undefined)
+            ? getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart()
+            : node.name.getStart();
+    replacementStart =
+        (isGenerator && !isAsync)
+            ? node.asteriskToken!.getStart()
+            : node.name.getStart();
+
+    const fixes: Lint.Fix = [
+        Lint.Replacement.replaceFromTo(
+            replacementStart,
+            node.name.end,
+            `${node.name.getText()}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+        ),
+    ];
+
+    if (isAsync) {
+        fixes.unshift(
+            Lint.Replacement.deleteFromTo(
+                getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart(),
+                node.name.getStart(),
+            ),
+        );
+    }
+    return fixes;
+}
+
+function fixShorthandPropertyAssignment(node: ts.ShorthandPropertyAssignment): Lint.Fix {
+    return Lint.Replacement.appendText(node.name.getStart(), `${node.name.text}: `);
+}
+
 function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
     let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
@@ -77,4 +150,11 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
         fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
     }
     return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
+}
+
+function isShorthandAssignment(node: ts.Node): boolean {
+    return (
+        isShorthandPropertyAssignment(node) ||
+        (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression)
+    );
 }
