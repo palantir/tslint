@@ -49,8 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-class",
         description: Lint.Utils.dedent`
-            Disallows classes containing only static members. Classes
-            with non-empty constructors are ignored.`,
+            Disallows classes that are not strictly necessary.`,
         rationale: Lint.Utils.dedent`
             Users who come from a Java-style OO language may wrap
             their utility functions in an extra class, instead of
