@@ -1,47 +1,29 @@
-const b = SomeClass
-            .propA;
-
-const b = SomeClass.propA;
-          ~~~~~~~~~~~~~~~ [ERROR]
-
 const c = ExpStmtClass.propA.propB.propC;
           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+const b = SomeClass.propA;
+
 SomeClass.propA.propB
-~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
 SomeClass.propA.helloMom((a: number) => {
-~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
     return a + 1;
 });
 
-this.some(); // Should not count 'this' as part of the chain.
+this.some.nested(); // Should not count 'this' as part of the chain.
 
 this.some.deeply.nested();
-~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
 const y: string[] = _observable
                         .map(function(item) { return item.helloMom! })
-                                                     ~~~~~~~~~~~~~ [ERROR]
                         .operator()
-                        .another(function(result) { return result.helloMom! });
-                                                           ~~~~~~~~~~~~~~~ [ERROR]
-
-const y: string[] = _observable
-                        .map(function(item) {
-                            return item
-                                    .helloMom! 
-                        })
-                        .operator()
-                        .another(function(result) { return result.helloMom! });
-                                                           ~~~~~~~~~~~~~~~ [ERROR]
+                        .another(function(result) { return result.hello.mom! });
 
 const y: string[] = _observable.map(item => item.helloMom).operator().another(function(result) { return result.helloMom! });
                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-                                                                                                        ~~~~~~~~~~~~~~~ [ERROR]
+
+const y: string[] = _observable.map(item => item.hello.mom).operator().another(function(result) { return result.helloMom! });
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
 const x: string[] = _observable.map(item => item.helloMom);
-                    ~~~~~~~~~~~~~~~ [ERROR]
-                                            ~~~~~~~~~~~~~ [ERROR]
 
 SomeClass.propA.propB.helloMom();
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
@@ -59,7 +41,7 @@ SomeClass
     });
 
 SomeClass.propA.propB.methodB(() => {
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     return "hello mom!";
 ~~~~~~~~~~~~~~~~~~~~~~~~
 }).helloMom((a: number) => {

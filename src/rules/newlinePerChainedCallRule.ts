@@ -64,17 +64,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const checkForUnbrokenChain = (node: ts.Node): void => {
-            if (isPropertyAccessExpression(node)) {
-                if (this.hasUnbrokenChain(node)) {
-                    return this.addFailureAtNode(node, Rule.FAILURE_STRING);
-                }
+            if (this.hasUnbrokenChain(node)) {
+                return this.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
             return ts.forEachChild(node, checkForUnbrokenChain);
         };
         return ts.forEachChild(sourceFile, checkForUnbrokenChain);
     }
 
-    private hasUnbrokenChain(node: ts.PropertyAccessExpression): boolean {
+    private hasUnbrokenChain(node: ts.Node): boolean {
+        if (!isPropertyAccessExpression(node)) {
+            return false;
+        }
         const chainLength = getChainLength(node);
         return (
             chainLength > this.options.maxChainLength &&
