@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isReturnStatement, isSameLine  } from "tsutils";
+import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isReturnStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -58,79 +58,81 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+enum ConditionExpressionType {
+    Assignment,
+    Return
+}
+
+interface ConditionalExpressionWrapper {
+    type: ConditionExpressionType;
+    expression: ts.Expression | undefined;
+}
+
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { checkElseIf } } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isIfStatement(node)) {
-            if (hasReturn(node)) {
-                if (detectReturn(node)) {
+            const wrapper = detect(node, sourceFile, checkElseIf);
+            if (wrapper !== undefined) {
+                if (wrapper.type === ConditionExpressionType.Assignment && wrapper.expression !== undefined) {
+                    ctx.addFailureAtNode(
+                        node.getChildAt(0, sourceFile),
+                        Rule.FAILURE_STRING(wrapper.expression.getText(sourceFile)));
+                } else if (wrapper.type === ConditionExpressionType.Return) {
                     ctx.addFailureAtNode(
                         node.getChildAt(0, sourceFile),
                         Rule.FAILURE_STRING_RETURN);
                 }
-            } else {
-                const assigned = detect(node, sourceFile, checkElseIf);
-                if (assigned !== undefined) {
-                    ctx.addFailureAtNode(
-                        node.getChildAt(0, sourceFile),
-                        Rule.FAILURE_STRING(assigned.getText(sourceFile)));
+            }
+            if (wrapper !== undefined || !checkElseIf) {
+                // Be careful not to fail again for the "else if"
+                ts.forEachChild(node.expression, cb);
+                ts.forEachChild(node.thenStatement, cb);
+                if (node.elseStatement !== undefined) {
+                    ts.forEachChild(node.elseStatement, cb);
                 }
-                if (assigned !== undefined || !checkElseIf) {
-                    // Be careful not to fail again for the "else if"
-                    ts.forEachChild(node.expression, cb);
-                    ts.forEachChild(node.thenStatement, cb);
-                    if (node.elseStatement !== undefined) {
-                        ts.forEachChild(node.elseStatement, cb);
-                    }
-                    return;
-                }
+                return;
             }
         }
         return ts.forEachChild(node, cb);
     });
 }
 
-function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean): ts.Expression | undefined {
+function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean): ConditionalExpressionWrapper | undefined {
     if (elseStatement === undefined || !elseIf && elseStatement.kind === ts.SyntaxKind.IfStatement) {
         return undefined;
     }
-    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf) : getAssigned(elseStatement, sourceFile);
+    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf) : getWrapper(elseStatement, sourceFile);
     if (elze === undefined) {
         return undefined;
     }
-    const then = getAssigned(thenStatement, sourceFile);
+    const then = getWrapper(thenStatement, sourceFile);
     return then !== undefined && nodeEquals(elze, then, sourceFile) ? then : undefined;
 }
 
-/** Returns the left side of an assignment. */
-function getAssigned(node: ts.Statement, sourceFile: ts.SourceFile): ts.Expression | undefined {
+function getWrapper(node: ts.Statement, sourceFile: ts.SourceFile): ConditionalExpressionWrapper | undefined {
     if (isBlock(node)) {
-        return node.statements.length === 1 ? getAssigned(node.statements[0], sourceFile) : undefined;
+        return node.statements.length === 1 ? getWrapper(node.statements[0], sourceFile) : undefined;
     } else if (isExpressionStatement(node) && isBinaryExpression(node.expression)) {
         const { operatorToken: { kind }, left, right } = node.expression;
-        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end) ? left : undefined;
+        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end) 
+            ? {type: ConditionExpressionType.Assignment, expression: left} 
+            : undefined;
+    } else if (isReturnStatement(node)) {
+        return {type: ConditionExpressionType.Return, expression: undefined};
     } else {
         return undefined;
     }
 }
 
-function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {
-    return a.getText(sourceFile) === b.getText(sourceFile);
-}
-
-function detectReturn(ifStatement: ts.IfStatement): boolean {
-    const elseStatement = ifStatement.elseStatement;
-    if (elseStatement === undefined || elseStatement.kind === ts.SyntaxKind.IfStatement) {
+function nodeEquals(a: ConditionalExpressionWrapper, b: ConditionalExpressionWrapper, sourceFile: ts.SourceFile): boolean {
+    if(a.type !== b.type) {
         return false;
+    } else if(a.type === ConditionExpressionType.Assignment) {
+        return a.expression !== undefined && b.expression !== undefined 
+            ? a.expression.getText(sourceFile) === b.expression.getText(sourceFile)
+            : false;
+    } else {
+        return true;
     }
-    return hasReturn(elseStatement);
-}
-
-function hasReturn(node: ts.Statement): boolean {
-    if (isIfStatement(node)) {
-        return hasReturn(node.thenStatement);
-    } else if (isBlock(node)) {
-        return node.statements.length === 1 ? hasReturn(node.statements[0]) : false;
-    }
-    return isReturnStatement(node);
 }
