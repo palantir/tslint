@@ -1,0 +1,62 @@
+const c = SomeClass.propA.propB.propC;
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+const b = SomeClass.propA;
+
+SomeClass.propA.propB
+~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+
+SomeClass.propA.helloMom((a: number) => {
+~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+    return a + 1;
+});
+
+this.some.nested(); // Should not count 'this' as part of the chain.
+
+this.some.deeply.nested();
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+
+const y: string[] = _observable
+                        .map(function(item) { return item.helloMom! })
+                        .operator()
+                        .another(function(result) { return result.helloMom! });
+
+const y: string[] = _observable.map(item => item.helloMom).operator().another(function(result) { return result.helloMom! });
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+
+const x: string[] = _observable.map(item => item.helloMom);
+
+SomeClass.propA.propB.helloMom();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+
+SomeClass
+    .propA
+    .propB
+    .helloMom();
+
+SomeClass
+    .propA
+    .propB
+    .helloMom(function() {
+        return 1;
+    });
+
+SomeClass.propA.propB.methodB(() => {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    return "hello mom!";
+~~~~~~~~~~~~~~~~~~~~~~~~
+}).helloMom((a: number) => {
+~~~~~~~~~~~ [ERROR]
+    return a + 1;
+});
+
+SomeClass
+    .propA
+    .propB
+    .methodC(() => {
+        return "hello mom!";
+    })
+    .helloMom(() => {
+        return 1;
+    });
+
+[ERROR]: Chained accessors should span multiple lines.

@@ -193,6 +193,7 @@ export const rules = {
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
+    // "newline-per-chained-call": Errors
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
@@ -263,7 +264,7 @@ export const rules = {
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
-    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
+    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare", "newlinePerChainedCall"];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
