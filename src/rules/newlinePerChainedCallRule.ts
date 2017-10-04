@@ -16,12 +16,10 @@
  */
 
 import {
-    getChildOfKind,
     isCallExpression,
     isExpressionStatement,
     isIdentifier,
     isPropertyAccessExpression,
-    isVariableDeclaration,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
@@ -58,7 +56,7 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
                 isExpressionStatement(node)
             ) {
                 if (hasUnbrokenChain(node)) {
-                    return this.addFailureAtNode(node.expression, Rule.FAILURE_STRING);
+                    return this.addFailureAtNode(node, Rule.FAILURE_STRING);
                 }
             }
             return ts.forEachChild(node, checkForUnbrokenChain);
@@ -67,33 +65,25 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
     }
 }
 
-function getChainLength(
-    node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement,
-): number {
-    let chainLength =
-        isVariableDeclaration(node) && isPropertyAccessExpression(node.initializer!) ? 1 : 0;
+function getChainLength(node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement): number {
+    let chainLength = 0;
     const nextAccessorOrCallExpression = (nextNode: ts.Expression): void => {
-        if (isIdentifier(nextNode)) {
-            chainLength++;
-            return;
-        } else if (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode)) {
-            chainLength++;
-            return nextAccessorOrCallExpression(nextNode.expression);
-        } else if (isCallExpression(nextNode)) {
-            return nextAccessorOrCallExpression(nextNode.expression);
-        }
+        if (
+            isIdentifier(nextNode) ||
+            (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
+        ) { chainLength++; }
+
+        if (
+            isCallExpression(nextNode) ||
+            (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
+        ) { return nextAccessorOrCallExpression(nextNode.expression); }
+        return;
     };
-    nextAccessorOrCallExpression(
-        getChildOfKind(node, ts.SyntaxKind.PropertyAccessExpression) !== undefined
-                ? getChildOfKind(node, ts.SyntaxKind.PropertyAccessExpression) as ts.PropertyAccessExpression
-                : node.expression
-    );
+    nextAccessorOrCallExpression(node.expression);
     return chainLength;
 }
 
-function hasUnbrokenChain(
-    node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement,
-): boolean {
+function hasUnbrokenChain(node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement): boolean {
     return (
         getChainLength(node) > 2 &&
         node.expression.getText().split("\n").length < getChainLength(node)
