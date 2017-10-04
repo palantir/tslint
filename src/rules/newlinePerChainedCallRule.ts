@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import {
-    isCallExpression,
-    isExpressionStatement,
-    isIdentifier,
-    isPropertyAccessExpression,
-} from "tsutils";
+import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
+
+interface Options {
+    maxChainLength: number;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -42,20 +41,31 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NewlinePerChainedCallWalker(sourceFile, this.ruleName, undefined),
+            new NewlinePerChainedCallWalker(
+                sourceFile,
+                this.ruleName,
+                this.parseOptions(this.ruleArguments),
+            ),
         );
+    }
+
+    private parseOptions(args: any[]): Options {
+        let maxChainLength = 2;
+        for (const arg of args) {
+            if (typeof arg === "number") {
+                maxChainLength = arg;
+                break;
+            }
+        }
+        return { maxChainLength };
     }
 }
 
-class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
+class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const checkForUnbrokenChain = (node: ts.Node): void => {
-            if (
-                isCallExpression(node) ||
-                isPropertyAccessExpression(node) ||
-                isExpressionStatement(node)
-            ) {
-                if (hasUnbrokenChain(node)) {
+            if (isPropertyAccessExpression(node)) {
+                if (this.hasUnbrokenChain(node)) {
                     return this.addFailureAtNode(node, Rule.FAILURE_STRING);
                 }
             }
@@ -63,33 +73,37 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
         };
         return ts.forEachChild(sourceFile, checkForUnbrokenChain);
     }
+
+    private hasUnbrokenChain(node: ts.PropertyAccessExpression): boolean {
+        return (
+            getChainLength(node) > this.options.maxChainLength &&
+            node.getText().split("\n").length < getChainLength(node)
+        );
+    }
 }
 
-function getChainLength(node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement): number {
-    let chainLength = 0;
+function getChainLength(node: ts.PropertyAccessExpression): number {
+    let chainLength = 1;
     const nextAccessorOrCallExpression = (nextNode: ts.Expression): void => {
         if (
             isIdentifier(nextNode) ||
             (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
-        ) { chainLength++; }
+        ) {
+            chainLength++;
+        }
 
         if (
             isCallExpression(nextNode) ||
             (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
-        ) { return nextAccessorOrCallExpression(nextNode.expression); }
+        ) {
+            return nextAccessorOrCallExpression(nextNode.expression);
+        }
         return;
     };
     nextAccessorOrCallExpression(node.expression);
     return chainLength;
 }
 
-function hasUnbrokenChain(node: ts.CallExpression | ts.PropertyAccessExpression | ts.ExpressionStatement): boolean {
-    return (
-        getChainLength(node) > 2 &&
-        node.expression.getText().split("\n").length < getChainLength(node)
-    );
-}
-
-function isThisKeyword(node: ts.Expression): boolean {
+function isThisKeyword(node: ts.Node): boolean {
     return node.kind === ts.SyntaxKind.ThisKeyword;
 }
