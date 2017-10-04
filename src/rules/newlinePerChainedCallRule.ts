@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "newline-per-chained-call",
         description: Lint.Utils.dedent`
-            Requires that call expressions with three or more chained calls be broken apart onto new lines.`,
+            Requires that chained property accessors be broken apart onto separate lines.`,
         rationale: Lint.Utils.dedent`
             This style helps to keep code 'vertical', avoiding the need for side-scrolling in IDEs or text editors.`,
         optionsDescription: "Not configurable",
@@ -75,9 +75,10 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
     }
 
     private hasUnbrokenChain(node: ts.PropertyAccessExpression): boolean {
+        const chainLength = getChainLength(node);
         return (
-            getChainLength(node) > this.options.maxChainLength &&
-            node.getText().split("\n").length < getChainLength(node)
+            chainLength > this.options.maxChainLength &&
+            node.getText().split("\n").length < chainLength
         );
     }
 }

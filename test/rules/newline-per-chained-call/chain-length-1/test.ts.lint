@@ -11,8 +11,7 @@ SomeClass.propA.helloMom((a: number) => {
     return a + 1;
 });
 
-this.some.nested(); // Should not count 'this' as part of the chain.
-~~~~~~~~~~~~~~~~ [ERROR]
+this.some(); // Should not count 'this' as part of the chain.
 
 this.some.deeply.nested();
 ~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
