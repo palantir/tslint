@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isClassLikeDeclaration } from "tsutils";
+import { hasModifier, isClassLikeDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -68,7 +68,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { maxClasses } } = ctx;
     let classes = 0;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (isClassLikeDeclaration(node)) {
+        if (isClassLikeDeclaration(node) && !hasDeclareLikeModifier(node)) {
             classes++;
             if (classes > maxClasses) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING(maxClasses));
@@ -76,4 +76,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function hasDeclareLikeModifier(node: ts.Node): boolean {
+    return (
+        hasModifier(node.modifiers, ts.SyntaxKind.AbstractKeyword) ||
+        hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+    );
 }

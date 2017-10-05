@@ -18,4 +18,25 @@ let three = class {
 }
 ~ [0]
 
+export abstract class UnsupportedVisitor extends NodeVisitor {
+    public static withDescriptor(descriptor: string): typeof UnsupportedVisitor {
+        return class extends UnsupportedVisitor {
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            protected descriptor = descriptor;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        };
+~~~~~~~~~ [0]
+    }
+
+    protected abstract descriptor: string;
+
+    public visit(node: Node): undefined {
+        return `${this.descriptor} is not supported.`;
+    }
+}
+
+declare class HelloClass {
+    private helloMom: string = "hello mom!";
+}
+
 [0]: A maximum of 1 class per file is allowed.
