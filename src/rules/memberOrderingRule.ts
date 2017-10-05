@@ -159,9 +159,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, { order: "fields-first" }],
             [true, {
                 order: [
-                    "static-field",
-                    "instance-field",
-                    "constructor",
+                    "public-static-field",
+                    "public-instance-field",
+                    "public-constructor",
+                    "private-static-field",
+                    "private-instance-field",
+                    "private-constructor",
                     "public-instance-method",
                     "protected-instance-method",
                     "private-instance-method",
