@@ -467,12 +467,10 @@ class ImportsBlock {
     }
 
     private getImportType(sourcePath: string): ImportType {
-        if (sourcePath.charAt(0) === ".") {
-            if (sourcePath.charAt(1) === ".") {
-                return ImportType.PARENT_DIRECTORY_IMPORT;
-            } else {
-                return ImportType.CURRENT_DIRECTORY_IMPORT;
-            }
+        if (sourcePath.startsWith("..")) {
+            return ImportType.PARENT_DIRECTORY_IMPORT;
+        } else if (sourcePath.charAt(0) === ".") {
+            return ImportType.CURRENT_DIRECTORY_IMPORT;
         } else {
             return ImportType.LIBRARY_IMPORT;
         }

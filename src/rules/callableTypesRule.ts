@@ -88,11 +88,9 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     const suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
 
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
-        if (parent.typeParameters !== undefined) {
-            return `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${suggestion}`;
-        } else {
-            return `type ${parent.name.text} = ${suggestion}`;
-        }
+        return parent.typeParameters !== undefined
+            ? `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${suggestion}`
+            : `type ${parent.name.text} = ${suggestion}`;
     }
     return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
 }

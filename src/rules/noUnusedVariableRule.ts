@@ -250,11 +250,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
         function getNextLineStart(position: number): number {
             const nextLine = ctx.sourceFile.getLineAndCharacterOfPosition(position).line + 1;
             const lineStarts = ctx.sourceFile.getLineStarts();
-            if (nextLine < lineStarts.length) {
-                return lineStarts[nextLine];
-            } else {
-                return position;
-            }
+            return nextLine < lineStarts.length ? lineStarts[nextLine] : position;
         }
     });
 

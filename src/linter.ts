@@ -200,11 +200,9 @@ class Linter {
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
         try {
-            if (this.program !== undefined && isTypedRule(rule)) {
-                return rule.applyWithProgram(sourceFile, this.program);
-            } else {
-                return rule.apply(sourceFile);
-            }
+            return this.program !== undefined && isTypedRule(rule)
+                ? rule.applyWithProgram(sourceFile, this.program)
+                : rule.apply(sourceFile);
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
                 showWarningOnce(error.stack);
