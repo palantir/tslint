@@ -63,10 +63,7 @@ enum ConditionExpressionType {
     Return
 }
 
-interface ConditionalExpressionWrapper {
-    type: ConditionExpressionType;
-    expression: ts.Expression | undefined;
-}
+type ConditionalExpressionWrapper = { type: ConditionExpressionType.Return} | { type:ConditionExpressionType.Assignment, expression: ts.Expression };
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { checkElseIf } } = ctx;
@@ -74,7 +71,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         if (isIfStatement(node)) {
             const wrapper = detect(node, sourceFile, checkElseIf);
             if (wrapper !== undefined) {
-                if (wrapper.type === ConditionExpressionType.Assignment && wrapper.expression !== undefined) {
+                if (wrapper.type === ConditionExpressionType.Assignment) {
                     ctx.addFailureAtNode(
                         node.getChildAt(0, sourceFile),
                         Rule.FAILURE_STRING(wrapper.expression.getText(sourceFile)));
@@ -119,7 +116,7 @@ function getWrapper(node: ts.Statement, sourceFile: ts.SourceFile): ConditionalE
             ? {type: ConditionExpressionType.Assignment, expression: left} 
             : undefined;
     } else if (isReturnStatement(node)) {
-        return {type: ConditionExpressionType.Return, expression: undefined};
+        return {type: ConditionExpressionType.Return};
     } else {
         return undefined;
     }
@@ -128,10 +125,8 @@ function getWrapper(node: ts.Statement, sourceFile: ts.SourceFile): ConditionalE
 function nodeEquals(a: ConditionalExpressionWrapper, b: ConditionalExpressionWrapper, sourceFile: ts.SourceFile): boolean {
     if(a.type !== b.type) {
         return false;
-    } else if(a.type === ConditionExpressionType.Assignment) {
-        return a.expression !== undefined && b.expression !== undefined 
-            ? a.expression.getText(sourceFile) === b.expression.getText(sourceFile)
-            : false;
+    } else if(a.type === ConditionExpressionType.Assignment && b.type === ConditionExpressionType.Assignment) {
+        return a.expression.getText(sourceFile) === b.expression.getText(sourceFile);
     } else {
         return true;
     }
