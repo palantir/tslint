@@ -60,10 +60,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 enum ConditionExpressionType {
     Assignment,
-    Return
+    Return,
 }
 
-type ConditionalExpressionWrapper = { type: ConditionExpressionType.Return} | { type:ConditionExpressionType.Assignment, expression: ts.Expression };
+type ConditionalExpressionWrapper = { type: ConditionExpressionType.Return} |
+    { type: ConditionExpressionType.Assignment; expression: ts.Expression };
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { checkElseIf } } = ctx;
@@ -84,10 +85,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             if (wrapper !== undefined || !checkElseIf) {
                 // Be careful not to fail again for the "else if"
                 ts.forEachChild(node.expression, cb);
-                ts.forEachChild(node.thenStatement, cb);
-                if (node.elseStatement !== undefined) {
-                    ts.forEachChild(node.elseStatement, cb);
-                }
+                applyToAllStatements(node, cb);
                 return;
             }
         }
@@ -95,11 +93,23 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 }
 
-function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean): ConditionalExpressionWrapper | undefined {
+function applyToAllStatements({ thenStatement, elseStatement }: ts.IfStatement, cb: (node: ts.Node) => void): void {
+    if (elseStatement !== undefined) {
+        if (isIfStatement(elseStatement)) {
+            applyToAllStatements(elseStatement, cb);
+        } else {
+            ts.forEachChild(elseStatement, cb);
+        }
+    }
+    ts.forEachChild(thenStatement, cb);
+}
+
+function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean, count: number = 1)
+    : ConditionalExpressionWrapper | undefined {
     if (elseStatement === undefined || !elseIf && elseStatement.kind === ts.SyntaxKind.IfStatement) {
         return undefined;
     }
-    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf) : getWrapper(elseStatement, sourceFile);
+    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf, ++count) : getWrapper(elseStatement, sourceFile);
     if (elze === undefined) {
         return undefined;
     }
@@ -112,8 +122,8 @@ function getWrapper(node: ts.Statement, sourceFile: ts.SourceFile): ConditionalE
         return node.statements.length === 1 ? getWrapper(node.statements[0], sourceFile) : undefined;
     } else if (isExpressionStatement(node) && isBinaryExpression(node.expression)) {
         const { operatorToken: { kind }, left, right } = node.expression;
-        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end) 
-            ? {type: ConditionExpressionType.Assignment, expression: left} 
+        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end)
+            ? {type: ConditionExpressionType.Assignment, expression: left}
             : undefined;
     } else if (isReturnStatement(node)) {
         return {type: ConditionExpressionType.Return};
@@ -123,9 +133,9 @@ function getWrapper(node: ts.Statement, sourceFile: ts.SourceFile): ConditionalE
 }
 
 function nodeEquals(a: ConditionalExpressionWrapper, b: ConditionalExpressionWrapper, sourceFile: ts.SourceFile): boolean {
-    if(a.type !== b.type) {
+    if (a.type !== b.type) {
         return false;
-    } else if(a.type === ConditionExpressionType.Assignment && b.type === ConditionExpressionType.Assignment) {
+    } else if (a.type === ConditionExpressionType.Assignment && b.type === ConditionExpressionType.Assignment) {
         return a.expression.getText(sourceFile) === b.expression.getText(sourceFile);
     } else {
         return true;
