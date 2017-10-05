@@ -1,6 +1,6 @@
 export abstract class UnsupportedVisitor extends NodeVisitor {
     public static withDescriptor(descriptor: string): typeof UnsupportedVisitor {
-        return class extends UnsupportedVisitor {   // ignores this class b/c it's an expression
+        return class extends UnsupportedVisitor {
             protected descriptor = descriptor;
         };
     }

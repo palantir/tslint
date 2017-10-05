@@ -20,11 +20,11 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 interface Options {
-    includeClassExpressions: boolean;
+    excludeClassExpressions: boolean;
     maxClasses: number;
 }
 
-const OPTION_INCLUDE_CLASS_EXPRESSIONS = "include-class-expressions";
+const OPTION_INCLUDE_CLASS_EXPRESSIONS = "exclude-class-expressions";
 
 export class Rule extends Lint.Rules.AbstractRule {
 
@@ -48,13 +48,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
                 {
                     type: "string",
+                    enum: OPTION_INCLUDE_CLASS_EXPRESSIONS,
                 },
             ],
             additionalItems: false,
-            minLength: 2,
-            maxLength: 3,
+            minLength: 1,
+            maxLength: 2,
         },
-        optionExamples: [[true, 1], [true, 5, "include-class-expressions"]],
+        optionExamples: [[true, 1], [true, 5, "exclude-class-expressions"]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -69,21 +70,21 @@ export class Rule extends Lint.Rules.AbstractRule {
         const argument = this.ruleArguments[0] as number;
         const maxClasses = isNaN(argument) || argument > 0 ? argument : 1;
         return this.applyWithFunction(sourceFile, walk, {
-            includeClassExpressions: this.ruleArguments.indexOf(OPTION_INCLUDE_CLASS_EXPRESSIONS) !== -1,
+            excludeClassExpressions: this.ruleArguments.indexOf(OPTION_INCLUDE_CLASS_EXPRESSIONS) !== -1,
             maxClasses,
         });
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { maxClasses, includeClassExpressions } } = ctx;
+    const { sourceFile, options: { maxClasses, excludeClassExpressions } } = ctx;
     let classes = 0;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (
             isClassLikeDeclaration(node) &&
-            (includeClassExpressions
-                ? true
-                : !isClassExpression(node))
+            (excludeClassExpressions
+                ? !isClassExpression(node)
+                : true)
         ) {
             classes++;
             if (classes > maxClasses) {
