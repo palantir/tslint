@@ -221,6 +221,7 @@ export class Rule extends Lint.Rules.TypedRule {
         ],
         type: "style",
         typescriptOnly: false,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
