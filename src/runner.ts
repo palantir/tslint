@@ -173,15 +173,15 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
+function resolveFilesAndProgram({ files, typeCheck, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     const ignore = arrayify(exclude).map(trimSingleQuotes);
 
-    if (project === undefined) {
+    if (!typeCheck && project === undefined) {
         return { files: resolveGlobs(files, ignore, outputAbsolutePaths) };
     }
 
-    const projectPath = findTsconfig(project);
+    const projectPath = findTsconfig(project || ".");
     if (projectPath === undefined) {
         throw new FatalError(`Invalid option for project: ${project}`);
     }
