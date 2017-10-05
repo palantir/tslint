@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { findImports, ImportOptions } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<string[]>) {
-    for (const name of findImports(ctx.sourceFile, ImportOptions.All)) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         // TODO remove assertion on upgrade to typescript@2.5.2
         if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(name.text) &&
             isSubmodulePath(name.text) &&

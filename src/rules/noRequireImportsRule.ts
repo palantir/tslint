@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { findImports, ImportOptions } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>) {
-    for (const name of findImports(ctx.sourceFile, ImportOptions.AllRequireLike)) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.AllRequireLike)) {
         ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
     }
 }

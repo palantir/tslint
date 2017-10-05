@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { findImports, ImportOptions } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -45,7 +45,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     if (ctx.sourceFile.typeReferenceDirectives.length === 0) {
         return;
     }
-    const imports = new Set(findImports(ctx.sourceFile, ImportOptions.AllStaticImports).map((name) => name.text));
+    const imports = new Set(findImports(ctx.sourceFile, ImportKind.AllStaticImports).map((name) => name.text));
     for (const ref of ctx.sourceFile.typeReferenceDirectives) {
         if (imports.has(ref.fileName)) {
             ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
