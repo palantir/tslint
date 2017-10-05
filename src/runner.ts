@@ -175,7 +175,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
 
 function resolveFilesAndProgram(
         { files, typeCheck, project, exclude, outputAbsolutePaths }: Options
-    ): { files: string[]; program?: ts.Program } {
+    ): { files: string[], program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     const ignore = arrayify(exclude).map(trimSingleQuotes);
 
