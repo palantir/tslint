@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isModuleDeclaration, isTextualLiteral } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -40,35 +40,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateImportsWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDuplicateImportsWalker extends Lint.AbstractWalker<void> {
-    private seenImports = new Set<string>();
-
-    public walk(sourceFile: ts.SourceFile) {
-        this.checkStatements(sourceFile.statements);
-    }
-
-    private checkStatements(statements: ts.NodeArray<ts.Statement>) {
-        for (const statement of statements) {
-            if (isImportDeclaration(statement)) {
-                this.checkImport(statement);
-            } else if (this.sourceFile.isDeclarationFile && isModuleDeclaration(statement) &&
-                statement.body !== undefined && statement.name.kind === ts.SyntaxKind.StringLiteral) {
-                // module augmentations in declaration files can contain imports
-                this.checkStatements((statement.body as ts.ModuleBlock).statements);
-            }
-        }
-    }
-
-    private checkImport(statement: ts.ImportDeclaration) {
-        if (isTextualLiteral(statement.moduleSpecifier)) {
-            if (this.seenImports.has(statement.moduleSpecifier.text)) {
-                return this.addFailureAtNode(statement, Rule.FAILURE_STRING(statement.moduleSpecifier.text));
-            }
-            this.seenImports.add(statement.moduleSpecifier.text);
+function walk(ctx: Lint.WalkContext<void>) {
+    const seen = new Set<string>();
+    for (const {text, parent} of findImports(ctx.sourceFile, ImportKind.ImportDeclaration)) {
+        if (seen.has(text)) {
+            ctx.addFailureAtNode(parent!, Rule.FAILURE_STRING(text));
+        } else {
+            seen.add(text);
         }
     }
 }
