@@ -15,14 +15,7 @@
  * limitations under the License.
  */
 
-import {
-    isCallExpression,
-    isExternalModuleReference,
-    isIdentifier,
-    isImportDeclaration,
-    isImportEqualsDeclaration,
-    isTextualLiteral,
-} from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -56,36 +49,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ImportBlacklistWalker(sourceFile, this.ruleName, this.ruleArguments));
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
     }
 }
 
-class ImportBlacklistWalker extends Lint.AbstractWalker<string[]> {
-    public walk(sourceFile: ts.SourceFile) {
-        const findRequire = (node: ts.Node): void => {
-            if (isCallExpression(node) && node.arguments.length === 1 &&
-                isIdentifier(node.expression) && node.expression.text === "require") {
-                this.checkForBannedImport(node.arguments[0]);
-            }
-            return ts.forEachChild(node, findRequire);
-        };
-
-        for (const statement of sourceFile.statements) {
-            if (isImportDeclaration(statement)) {
-                this.checkForBannedImport(statement.moduleSpecifier);
-            } else if (isImportEqualsDeclaration(statement)) {
-                if (isExternalModuleReference(statement.moduleReference) && statement.moduleReference.expression !== undefined) {
-                    this.checkForBannedImport(statement.moduleReference.expression);
-                }
-            } else {
-                ts.forEachChild(statement, findRequire);
-            }
-        }
-    }
-
-    private checkForBannedImport(expression: ts.Expression) {
-        if (isTextualLiteral(expression) && this.options.indexOf(expression.text) !== -1) {
-            this.addFailure(expression.getStart(this.sourceFile) + 1, expression.end - 1, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<string[]>) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
+        if (ctx.options.indexOf(name.text) !== -1) {
+            ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING);
         }
     }
 }
