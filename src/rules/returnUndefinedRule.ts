@@ -108,10 +108,12 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Value;
     }
 
-    const contextual = isFunctionExpressionLike(node) ? tryGetReturnType(checker.getContextualType(node), checker) : undefined;
+    const contextual = isFunctionExpressionLike(node) && node.type === undefined
+        ? tryGetReturnType(checker.getContextualType(node), checker)
+        : undefined;
     const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node), checker);
 
-    if (returnType === undefined) {
+    if (returnType === undefined || Lint.isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
         return undefined;
     } else if (isEffectivelyVoid(returnType)) {
         return ReturnKind.Void;
@@ -143,8 +145,7 @@ function tryGetReturnType(fnType: ts.Type | undefined, checker: ts.TypeChecker):
         return undefined;
     }
 
-    const ret = checker.getReturnTypeOfSignature(sigs[0]);
-    return Lint.isTypeFlagSet(ret, ts.TypeFlags.Any) ? undefined : ret;
+    return checker.getReturnTypeOfSignature(sigs[0]);
 }
 
 function isFunctionLike(node: ts.Node): node is FunctionLike {
