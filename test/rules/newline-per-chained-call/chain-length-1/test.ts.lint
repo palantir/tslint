@@ -1,13 +1,6 @@
-const b = SomeClass
-            .propA;
-
-const b = SomeClass.propA;
-          ~~~~~~~~~~~~~~~ [ERROR]
-
-const c = ExpStmtClass.propA.propB.propC;
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-SomeClass.propA.propB
-~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+some().prop
+    .method()
+    .call();
 
 SomeClass.propA.helloMom((a: number) => {
 ~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
@@ -17,14 +10,11 @@ SomeClass.propA.helloMom((a: number) => {
 this.some(); // Should not count 'this' as part of the chain.
 
 this.some.deeply.nested();
-~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
 const y: string[] = _observable
                         .map(function(item) { return item.helloMom! })
-                                                     ~~~~~~~~~~~~~ [ERROR]
                         .operator()
                         .another(function(result) { return result.helloMom! });
-                                                           ~~~~~~~~~~~~~~~ [ERROR]
 
 const y: string[] = _observable
                         .map(function(item) {
@@ -33,18 +23,13 @@ const y: string[] = _observable
                         })
                         .operator()
                         .another(function(result) { return result.helloMom! });
-                                                           ~~~~~~~~~~~~~~~ [ERROR]
 
 const y: string[] = _observable.map(item => item.helloMom).operator().another(function(result) { return result.helloMom! });
-                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-                                                                                                        ~~~~~~~~~~~~~~~ [ERROR]
 
 const x: string[] = _observable.map(item => item.helloMom);
                     ~~~~~~~~~~~~~~~ [ERROR]
-                                            ~~~~~~~~~~~~~ [ERROR]
 
 SomeClass.propA.propB.helloMom();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
 SomeClass
     .propA

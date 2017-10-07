@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
+import { isCallExpression, /*isIdentifier, isPropertyAccessExpression*/ } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
 
@@ -72,11 +72,23 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, checkForUnbrokenChain);
     }
 
+    private getChildOfKindCount(node: ts.Node, kind: ts.SyntaxKind): number {
+        let childCount = 0;
+        const checkChild = (node: ts.Node): void => {
+            if (node.kind === kind) {
+                childCount++;
+            }
+            return ts.forEachChild(node, checkChild);
+        };
+        ts.forEachChild(node, checkChild);
+        return childCount;
+    }
+
     private hasUnbrokenChain(node: ts.Node): boolean {
-        if (!isPropertyAccessExpression(node)) {
+        if (!isCallExpression(node)) {
             return false;
         }
-        const chainLength = getChainLength(node);
+        const chainLength = 1 + this.getChildOfKindCount(node, ts.SyntaxKind.CallExpression);
         return (
             chainLength > this.options.maxChainLength &&
             node.getText().split("\n").length < chainLength
@@ -84,28 +96,18 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
     }
 }
 
-function getChainLength(node: ts.PropertyAccessExpression): number {
-    let chainLength = 1;
-    const nextAccessorOrCallExpression = (nextNode: ts.Expression): void => {
-        if (
-            isIdentifier(nextNode) ||
-            (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
-        ) {
-            chainLength++;
-        }
+// function getChainLength(node: ts.PropertyAccessExpression): number {
+//     let chainLength = 1;
+//     const nextAccessorOrCallExpression = (nextNode: ts.Expression): void => {
+//         if (isIdentifier(nextNode) || isPropertyAccessExpression(nextNode)) {
+//             chainLength++;
+//         }
 
-        if (
-            isCallExpression(nextNode) ||
-            (isPropertyAccessExpression(nextNode) && !isThisKeyword(nextNode))
-        ) {
-            return nextAccessorOrCallExpression(nextNode.expression);
-        }
-        return;
-    };
-    nextAccessorOrCallExpression(node.expression);
-    return chainLength;
-}
-
-function isThisKeyword(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.ThisKeyword;
-}
+//         if (isCallExpression(nextNode) || isPropertyAccessExpression(nextNode)) {
+//             return nextAccessorOrCallExpression(nextNode.expression);
+//         }
+//         return;
+//     };
+//     nextAccessorOrCallExpression(node.expression);
+//     return chainLength;
+// }
