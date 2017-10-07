@@ -70,5 +70,13 @@ declare function f<T>(action: () => T | undefined): void;
 f(() => { return undefined; });
           ~~~~~~~~~~~~~~~~~ [VOID]
 
+declare function test(cb: () => Promise<void> | void): void;
+
+test(async () => {
+    if (1 === 2) return;
+    else return undefined;
+         ~~~~~~~~~~~~~~~~~ [VOID]
+});
+
 [VOID]: `void` function should use `return;`, not `return undefined;`.
 [UNDEFINED]: Value-returning function should use `return undefined;`, not just `return;`.
