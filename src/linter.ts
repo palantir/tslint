@@ -37,7 +37,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent, flatMap } from "./utils";
+import { arrayify, dedent, flatMap, readFileAsync, writeFileAsync } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
@@ -89,7 +89,7 @@ class Linter {
         }
     }
 
-    public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+    public async lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): Promise<void> {
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
@@ -101,7 +101,7 @@ class Linter {
         }
 
         if (this.options.fix && fileFailures.some((f) => f.hasFix())) {
-            fileFailures = this.applyAllFixes(enabledRules, fileFailures, sourceFile, fileName);
+            fileFailures = await this.applyAllFixes(enabledRules, fileFailures, sourceFile, fileName);
         }
 
         // add rule severity to failures
@@ -149,8 +149,8 @@ class Linter {
         return removeDisabledFailures(sourceFile, failures);
     }
 
-    private applyAllFixes(
-            enabledRules: IRule[], fileFailures: RuleFailure[], sourceFile: ts.SourceFile, sourceFileName: string): RuleFailure[] {
+    private async applyAllFixes(
+            enabledRules: IRule[], fileFailures: RuleFailure[], sourceFile: ts.SourceFile, sourceFileName: string): Promise<RuleFailure[]> {
         // When fixing, we need to be careful as a fix in one rule may affect other rules.
         // So fix each rule separately.
         let source: string = sourceFile.text;
@@ -162,7 +162,7 @@ class Linter {
                 const updatedFailures = removeDisabledFailures(sourceFile, this.applyRule(rule, sourceFile));
                 const fixableFailures = updatedFailures.filter((f) => f.hasFix());
                 this.fixes = this.fixes.concat(fixableFailures);
-                source = this.applyFixes(sourceFileName, source, fixableFailures);
+                source = await this.applyFixes(sourceFileName, source, fixableFailures);
                 sourceFile = this.getSourceFile(sourceFileName, source);
             }
         }
@@ -173,22 +173,33 @@ class Linter {
 
     // Only "protected" because a test directly accesses it.
     // tslint:disable-next-line member-ordering
-    protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
+    protected async applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): Promise<string> {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
-        fixesByFile.forEach((fileFixes, filePath) => {
-            let fileNewSource: string;
-            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
-                source = Replacement.applyFixes(source, fileFixes);
-                fileNewSource = source;
-            } else {
-                const oldSource = fs.readFileSync(filePath, "utf-8");
-                fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
-            }
-            fs.writeFileSync(filePath, fileNewSource);
-            this.updateProgram(filePath);
+        const pendingFixes: Array<Promise<void>> = [];
+
+        fixesByFile.forEach((fileFixes, fixingFilePath) => {
+            pendingFixes.push(this.applyFixesToFile(sourceFilePath, fixingFilePath, fileFixes, source));
         });
 
+        await Promise.all(pendingFixes);
+
         return source;
+    }
+
+    private async applyFixesToFile(
+        sourceFilePath: string, fixingFilePath: string, fileFixes: Array<Replacement | Replacement[]>, source: string) {
+        let fileNewSource: string;
+        if (path.resolve(fixingFilePath) === path.resolve(sourceFilePath)) {
+            source = Replacement.applyFixes(source, fileFixes);
+            fileNewSource = source;
+        } else {
+            const oldSource = await readFileAsync(fixingFilePath, "utf-8");
+            fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
+        }
+
+        await writeFileAsync(fixingFilePath, fileNewSource);
+
+        this.updateProgram(fixingFilePath);
     }
 
     private updateProgram(sourceFilePath: string) {

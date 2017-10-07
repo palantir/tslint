@@ -141,7 +141,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 
     if (options.test) {
         const test = await import("./test");
-        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        const results = await test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
         return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
     }
 
@@ -239,7 +239,7 @@ async function doLinting(
                 lastFolder = folder;
             }
             if (!isFileExcluded(file)) {
-                linter.lint(file, contents, configFile);
+                await linter.lint(file, contents, configFile);
             }
         }
     }
