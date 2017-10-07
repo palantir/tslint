@@ -119,13 +119,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
                 getDirectories: (dir) => fs.readdirSync(dir),
                 getNewLine: () => "\n",
-                getSourceFile(filenameToGet) {
-                    const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
-                    if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
-                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
-                        return ts.createSourceFile(filenameToGet, fileContent, target);
-                    } else if (denormalizeWinPath(filenameToGet) === fileCompileName) {
+                getSourceFile(filenameToGet, target) {
+                    if (denormalizeWinPath(filenameToGet) === fileCompileName) {
                         return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
+                    }
+                    if (path.basename(filenameToGet) === filenameToGet) {
+                        // resolve path of lib.xxx.d.ts
+                        filenameToGet = path.join(path.dirname(ts.getDefaultLibFilePath(compilerOptions)), filenameToGet);
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");
                     return ts.createSourceFile(filenameToGet, text, target, true);
