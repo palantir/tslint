@@ -128,7 +128,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         let correctIndent;
-        if (expectedSize !== undefined) {
+        if (hasWrongChar && (expectedSize !== undefined)) {
             correctIndent = indentDelta > 0
                 ? previousLineIndent + expectedSize
                 : Math.ceil(currentLineIndent / expectedSize) * expectedSize;

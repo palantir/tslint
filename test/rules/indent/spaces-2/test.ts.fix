@@ -137,7 +137,14 @@ var arr2 = [
   }
 ];
 
+// this code cannot be fixed automatically
 var arr3 = [
-  1
+    {
+        foo,
+    }
 ];
+
+// this code cannot be fixed automatically
+var foo =
+          bar;
 

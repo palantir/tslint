@@ -159,9 +159,19 @@ var arr2 = [
   }
 ];
 
+// this code cannot be fixed automatically
 var arr3 = [
-    1
+    {
+~~~~ [0]
+        foo,
+~~~~~~~~ [0]
+    }
 ~~~~ [0]
 ];
+
+// this code cannot be fixed automatically
+var foo =
+          bar;
+~~~~~~~~~~ [0]
 
 [0]: 2 space indentation expected

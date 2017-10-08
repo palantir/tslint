@@ -137,3 +137,7 @@ var arr2 = [
     }
 ];
 
+// this code cannot be fixed automatically
+var foo =
+          bar;
+

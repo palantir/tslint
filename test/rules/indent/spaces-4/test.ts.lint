@@ -159,4 +159,9 @@ var arr2 = [
     }
 ];
 
+// this code cannot be fixed automatically
+var foo =
+          bar;
+~~~~~~~~~~ [0]
+
 [0]: 4 space indentation expected
