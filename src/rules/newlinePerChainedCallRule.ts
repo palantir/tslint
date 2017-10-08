@@ -61,8 +61,6 @@ function needsNewline(node: ts.CallExpression): boolean {
     const rawExpressionText = node
         .getFullText()
         .substr((node.expression as ts.CallExpression).expression.getFullText().length);
-    return (
-        rawExpressionText.indexOf("\n") < 0 ||
-        rawExpressionText.indexOf(".") <= rawExpressionText.indexOf("\n")
-    );
+    const newlineIndex = rawExpressionText.indexOf("\n");
+    return newlineIndex < 0 || rawExpressionText.indexOf(".") <= newlineIndex;
 }
