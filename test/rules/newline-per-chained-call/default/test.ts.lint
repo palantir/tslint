@@ -1,55 +1,67 @@
-const c = ExpStmtClass.propA.propB.propC;
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-const b = SomeClass.propA;
+const y: string[] = _observable
+                        .map(function(item) { return item.helloYay().another() }
+                                                                     ~~~~~~~ [ERROR]
+                                                          ~~~~~~~~ [ERROR]
+                        .operator()    
+                        .another(function(result) { return result.hello.Yay! }).wrong();
+                                                                                ~~~~~ [ERROR]
 
-SomeClass.propA.propB
-~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-
-SomeClass.propA.helloMom((a: number) => {
-~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+SomeClass.propA.helloYay((a: number) => {
+                ~~~~~~~~ [ERROR]
     return a + 1;
 });
 
-this.some.nested(); // Should not count 'this' as part of the chain.
-
-this.some.deeply.nested();
-~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+this.some.nested();
+          ~~~~~~ [ERROR]
 
 const y: string[] = _observable
-                        .map(function(item) { return item.helloMom! })
-                        .operator()
-                        .another(function(result) { return result.hello.mom! });
-                                                           ~~~~~~~~~~~~~~~~ [ERROR]
+                        .map(function(item) { return item.helloYay! })
+                        .operator()    
+                        .another(function(result) { return result.hello.Yay! });
 
-const y: string[] = _observable.map(item => item.helloMom).operator().another(function(result) { return result.helloMom! });
-                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
 
-const y: string[] = _observable.map(item => item.hello.mom).operator().another(function(result) { return result.helloMom! });
-                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+const y: string[] = _observable.map(item => item.helloYay).operator().another(function(result) { return result.helloYay! });
+                                                                      ~~~~~~~ [ERROR]
+                                                           ~~~~~~~~ [ERROR]
+                                ~~~ [ERROR]
 
-const x: string[] = _observable.map(item => item.helloMom);
+const x: string[] = _observable.map(item => item.helloYay);
+                                ~~~ [ERROR]
 
-SomeClass.propA.propB.helloMom();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [ERROR]
-
-SomeClass
-    .propA
-    .propB
-    .helloMom();
+SomeClass.propA.propB.helloYay();
+                      ~~~~~~~~ [ERROR]
 
 SomeClass
     .propA
     .propB
-    .helloMom(function() {
+    .helloYay();
+
+SomeClass
+    .propA
+    .propB.helloYay();
+           ~~~~~~~~ [ERROR]
+
+SomeClass
+    .propA
+    .propB
+    .helloYay(function() {
         return 1;
-    });
+    }).test();
+       ~~~~ [ERROR]
 
 SomeClass.propA.propB.methodB(() => {
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    return "hello mom!";
-~~~~~~~~~~~~~~~~~~~~~~~~
-}).helloMom((a: number) => {
-~~~~~~~~~~~ [ERROR]
+                      ~~~~~~~ [ERROR]
+    return "hello Yay!";
+}).helloYay((a: number) => {
+   ~~~~~~~~ [ERROR]
+    return a + 1;
+});
+
+SomeClass.propA.propB.methodB(() => {
+                      ~~~~~~~ [ERROR]
+    return "hello Yay!";
+})
+.helloYay((a: number) => {
     return a + 1;
 });
 
@@ -57,10 +69,10 @@ SomeClass
     .propA
     .propB
     .methodC(() => {
-        return "hello mom!";
+        return "hello Yay!";
     })
-    .helloMom(() => {
+    .helloYay(() => {
         return 1;
     });
 
-[ERROR]: Chained accessors should span multiple lines.
+[ERROR]: When chaining calls, put method calls on new lines.

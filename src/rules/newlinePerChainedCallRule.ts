@@ -15,20 +15,16 @@
  * limitations under the License.
  */
 
-import { isCallExpression, /*isIdentifier, isPropertyAccessExpression*/ } from "tsutils";
+import { isCallExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
-
-interface Options {
-    maxChainLength: number;
-}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "newline-per-chained-call",
         description: Lint.Utils.dedent`
-            Requires that chained property accessors be broken apart onto separate lines.`,
+            Requires that chained method calls be broken apart onto separate lines.`,
         rationale: Lint.Utils.dedent`
             This style helps to keep code 'vertical', avoiding the need for side-scrolling in IDEs or text editors.`,
         optionsDescription: "Not configurable",
@@ -37,77 +33,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
-    public static FAILURE_STRING = "Chained accessors should span multiple lines.";
+    public static FAILURE_STRING = "When chaining calls, put method calls on new lines.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NewlinePerChainedCallWalker(
-                sourceFile,
-                this.ruleName,
-                this.parseOptions(this.ruleArguments),
-            ),
+            new NewlinePerChainedCallWalker(sourceFile, this.ruleName, undefined),
         );
-    }
-
-    private parseOptions(args: any[]): Options {
-        let maxChainLength = 2;
-        for (const arg of args) {
-            if (typeof arg === "number") {
-                maxChainLength = arg;
-                break;
-            }
-        }
-        return { maxChainLength };
     }
 }
 
-class NewlinePerChainedCallWalker extends Lint.AbstractWalker<Options> {
+class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
     public walk(sourceFile: ts.SourceFile) {
         const checkForUnbrokenChain = (node: ts.Node): void => {
-            if (this.hasUnbrokenChain(node)) {
-                return this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (isCallExpression(node) && needsNewline(node)) {
+                this.addFailureAtNode(
+                    (node.expression as ts.PropertyAccessExpression).name,
+                    Rule.FAILURE_STRING,
+                );
             }
             return ts.forEachChild(node, checkForUnbrokenChain);
         };
         return ts.forEachChild(sourceFile, checkForUnbrokenChain);
     }
-
-    private getChildOfKindCount(node: ts.Node, kind: ts.SyntaxKind): number {
-        let childCount = 0;
-        const checkChild = (node: ts.Node): void => {
-            if (node.kind === kind) {
-                childCount++;
-            }
-            return ts.forEachChild(node, checkChild);
-        };
-        ts.forEachChild(node, checkChild);
-        return childCount;
-    }
-
-    private hasUnbrokenChain(node: ts.Node): boolean {
-        if (!isCallExpression(node)) {
-            return false;
-        }
-        const chainLength = 1 + this.getChildOfKindCount(node, ts.SyntaxKind.CallExpression);
-        return (
-            chainLength > this.options.maxChainLength &&
-            node.getText().split("\n").length < chainLength
-        );
-    }
 }
 
-// function getChainLength(node: ts.PropertyAccessExpression): number {
-//     let chainLength = 1;
-//     const nextAccessorOrCallExpression = (nextNode: ts.Expression): void => {
-//         if (isIdentifier(nextNode) || isPropertyAccessExpression(nextNode)) {
-//             chainLength++;
-//         }
-
-//         if (isCallExpression(nextNode) || isPropertyAccessExpression(nextNode)) {
-//             return nextAccessorOrCallExpression(nextNode.expression);
-//         }
-//         return;
-//     };
-//     nextAccessorOrCallExpression(node.expression);
-//     return chainLength;
-// }
+function needsNewline(node: ts.CallExpression): boolean {
+    const rawExpressionText = node
+        .getFullText()
+        .substr((node.expression as ts.CallExpression).expression.getFullText().length);
+    return (
+        rawExpressionText.indexOf("\n") < 0 ||
+        rawExpressionText.indexOf(".") <= rawExpressionText.indexOf("\n")
+    );
+}
