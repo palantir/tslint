@@ -100,7 +100,7 @@ interface Options {
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { tabs, size } } = ctx;
     const reWrongChar = tabs ? / / : /\t/;
-    const indentEstimator = size && createIndentEstimator(size, tabs);
+    const indentEstimator = size === undefined ? undefined : createIndentEstimator(size, tabs);
     const expectedSize = tabs ? 1 : size;
     const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
 
@@ -112,7 +112,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
         let currentLineIndent = whitespace.length;
         const hasWrongChar = reWrongChar.test(whitespace);
-        if (hasWrongChar && indentEstimator) {
+        if (hasWrongChar && (indentEstimator !== undefined)) {
             currentLineIndent = indentEstimator(whitespace);
         }
 
@@ -121,14 +121,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             if ((expectedSize === undefined)
                 || (indentDelta === 0)
                 || (indentDelta === expectedSize)
-                || ((indentDelta < 0) && !(indentDelta % expectedSize))) {
+                || ((indentDelta < 0) && ((indentDelta % expectedSize) === 0))) {
                 previousLineIndent = currentLineIndent;
                 continue;
             }
         }
 
         let correctIndent;
-        if (expectedSize) {
+        if (expectedSize !== undefined) {
             correctIndent = indentDelta > 0
                 ? previousLineIndent + expectedSize
                 : Math.ceil(currentLineIndent / expectedSize) * expectedSize;
