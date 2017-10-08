@@ -159,4 +159,9 @@ var arr2 = [
   }
 ];
 
+var arr3 = [
+    1
+~~~~ [0]
+];
+
 [0]: 2 space indentation expected

@@ -71,7 +71,7 @@ module TestModule {
 }
 
 function() {
-    var test = 123;
+  var test = 123;
 }
 
 class TestClass {
@@ -135,5 +135,9 @@ var arr2 = [
     a: 3,
     b: 4
   }
+];
+
+var arr3 = [
+  1
 ];
 

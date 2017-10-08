@@ -99,35 +99,60 @@ interface Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { tabs, size } } = ctx;
-    const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
+    const reWrongChar = tabs ? / / : /\t/;
+    const indentEstimator = size && createIndentEstimator(size, tabs);
+    const expectedSize = tabs ? 1 : size;
     const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
 
+    let previousLineIndent = 0;
     for (const {pos, contentLength} of getLineRanges(sourceFile)) {
         if (contentLength === 0) { continue; }
         const line = sourceFile.text.substr(pos, contentLength);
-        let indentEnd = line.search(/\S/);
-        if (indentEnd === 0) { continue; }
-        if (indentEnd === -1) {
-            indentEnd = contentLength;
+        const whitespace = line.match(/^[ \t]*/)![0];
+
+        let currentLineIndent = whitespace.length;
+        const hasWrongChar = reWrongChar.test(whitespace);
+        if (hasWrongChar && indentEstimator) {
+            currentLineIndent = indentEstimator(whitespace);
         }
-        const whitespace = line.slice(0, indentEnd);
-        if (!regExp.test(whitespace)) { continue; }
+
+        const indentDelta = currentLineIndent - previousLineIndent;
+        if (!hasWrongChar) {
+            if ((expectedSize === undefined)
+                || (indentDelta === 0)
+                || (indentDelta === expectedSize)
+                || ((indentDelta < 0) && !(indentDelta % expectedSize))) {
+                previousLineIndent = currentLineIndent;
+                continue;
+            }
+        }
+
+        let correctIndent;
+        if (expectedSize) {
+            correctIndent = indentDelta > 0
+                ? previousLineIndent + expectedSize
+                : Math.ceil(currentLineIndent / expectedSize) * expectedSize;
+            previousLineIndent = correctIndent;
+        }
+
         const token = getTokenAtPosition(sourceFile, pos)!;
         if (token.kind !== ts.SyntaxKind.JsxText &&
             (pos >= token.getStart(sourceFile) || isPositionInComment(sourceFile, pos, token))) {
             continue;
         }
-        ctx.addFailureAt(pos, indentEnd, failure, createFix(pos, whitespace, tabs, size));
+
+        ctx.addFailureAt(pos, whitespace.length, failure, createFix(pos, whitespace, tabs, correctIndent));
     }
 }
 
-function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {
-    if (size === undefined) { return undefined; }
-    const replaceRegExp = tabs
-        // we want to find every group of `size` spaces, plus up to one 'incomplete' group
-        ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
-        : /\t/g;
-    const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
-        (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)));
+function createIndentEstimator(size: number, tabs: boolean) {
+    const reNormalize = new RegExp(` {1,${size}}`, "g");
+    const expectedSize = tabs ? 1 : size;
+    return (whitespace: string) => whitespace.replace(reNormalize, "\t").length * expectedSize;
+}
+
+function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, correctIndent?: number): Lint.Fix | undefined {
+    if (correctIndent === undefined) { return undefined; }
+    const replacement = (tabs ? "\t" : " ").repeat(correctIndent);
     return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
 }

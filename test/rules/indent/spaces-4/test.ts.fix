@@ -71,7 +71,7 @@ module TestModule {
 }
 
 function() {
-        var test = 123;
+    var test = 123;
 }
 
 class TestClass {
