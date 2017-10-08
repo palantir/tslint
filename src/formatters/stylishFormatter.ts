@@ -29,8 +29,8 @@ export class Formatter extends AbstractFormatter {
         formatterName: "stylish",
         description: "Human-readable formatter which creates stylish messages.",
         descriptionDetails: Utils.dedent`
-            The output matches that produced by eslint's stylish formatter. Its readability
-            enhanced through spacing and colouring`,
+            The output matches what is produced by ESLint's stylish formatter.
+            Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
         1:14  semicolon  Missing semicolon`,
