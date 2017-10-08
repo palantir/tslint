@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isTypeAssertion } from "tsutils";
+import { isBinaryExpression, isTypeAssertion } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -48,12 +48,26 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAssertion(node)) {
+            let {expression} = node;
             const start = node.getStart(ctx.sourceFile);
+            const addParens = needsParens(node);
+            let replaceText = ` as ${node.type.getText(ctx.sourceFile)}${addParens ? ")" : ""}`;
+            while (isTypeAssertion(expression)) {
+                replaceText = ` as ${expression.type.getText(ctx.sourceFile)}${replaceText}`;
+                expression = expression.expression;
+            }
             ctx.addFailure(start, node.end, Rule.FAILURE_STRING, [
-                Lint.Replacement.appendText(node.end, ` as ${ node.type.getText(ctx.sourceFile) }`),
-                Lint.Replacement.deleteFromTo(start, node.expression.getStart(ctx.sourceFile)),
+                Lint.Replacement.appendText(node.end, replaceText),
+                Lint.Replacement.replaceFromTo(start, expression.getStart(ctx.sourceFile), addParens ? "(" : ""),
             ]);
+            return cb(expression);
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function needsParens(node: ts.TypeAssertion): boolean {
+    const parent = node.parent!;
+    return isBinaryExpression(parent) &&
+        (parent.operatorToken.kind === ts.SyntaxKind.AmpersandToken || parent.operatorToken.kind === ts.SyntaxKind.BarToken);
 }
