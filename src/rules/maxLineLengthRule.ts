@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
-import { getLineRanges } from "tsutils";
+import { getLineRanges, LineRange } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+interface Options {
+    limit: number;
+    ignoreUrls: boolean;
+}
+
+const OPTION_IGNORE_URL = "ignore-urls";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,12 +36,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             Limiting the length of a line of code improves code readability.
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
-        optionsDescription: "An integer indicating the max length of lines.",
+        optionsDescription: Lint.Utils.dedent`
+            An integer indicating the max length of lines. Additionally, the \`\"ignore-urls\"\` option
+            can be passed to ignore lines with long URLs.
+            `,
         options: {
-            type: "number",
-            minimum: "1",
+            type: "array",
+            items: [
+                {
+                    type: "number",
+                    minimum: "1",
+                },
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_URL],
+                },
+            ],
         },
-        optionExamples: [[true, 120]],
+        optionExamples: [[true, 120], [true, 140, "ignore-urls"]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -49,15 +68,28 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as number);
+        return this.applyWithFunction(sourceFile, walk, {
+            ignoreUrls: this.ruleArguments.indexOf(OPTION_IGNORE_URL) > -1,
+            limit: this.ruleArguments[0] as number,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<number>) {
-    const limit = ctx.options;
+function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength > limit) {
-            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
+        if (line.contentLength > ctx.options.limit) {
+            if (ctx.options.ignoreUrls) {               //
+                if (hasUrl(line, ctx.sourceFile)) {     // To minimize regex searches
+                    continue;
+                }
+            }
+            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(ctx.options.limit));
         }
     }
+}
+
+function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
+    const lineText = sourceFile.text.substr(line.pos, line.contentLength);
+    const forUrl = /[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
+    return lineText.search(forUrl) > -1;
 }
