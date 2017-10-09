@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "'await' of non-Promise.";
-    public static FAILURE_FOR_AWAIT_OF = "'for-await-of' expects AsyncIterableIterator.";
+    public static FAILURE_FOR_AWAIT_OF = "'for-await-of' of non-AsyncIterable.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
@@ -58,7 +58,7 @@ function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
         if (isAwaitExpression(node) && !containsType(tc.getTypeAtLocation(node.expression), isPromiseType)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else if (isForOfStatement(node) && node.awaitModifier !== undefined &&
-                   !containsType(tc.getTypeAtLocation(node.expression), isAsyncIterableIterator)) {
+                   !containsType(tc.getTypeAtLocation(node.expression), isAsyncIterable)) {
             ctx.addFailureAtNode(node.expression, Rule.FAILURE_FOR_AWAIT_OF);
         }
         return ts.forEachChild(node, cb);
@@ -82,6 +82,6 @@ function containsType(type: ts.Type, predicate: (name: string) => boolean): bool
     return bases !== undefined && bases.some((t) => containsType(t, predicate));
 }
 
-function isAsyncIterableIterator(name: string) {
-    return name === "AsyncIterableIterator";
+function isAsyncIterable(name: string) {
+    return name === "AsyncIterable" || name === "AsyncIterableIterator";
 }
