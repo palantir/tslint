@@ -104,12 +104,12 @@ function applyToAllStatements({ thenStatement, elseStatement }: ts.IfStatement, 
     ts.forEachChild(thenStatement, cb);
 }
 
-function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean, count: number = 1)
+function detect({ thenStatement, elseStatement }: ts.IfStatement, sourceFile: ts.SourceFile, elseIf: boolean)
     : ConditionalExpressionWrapper | undefined {
     if (elseStatement === undefined || !elseIf && elseStatement.kind === ts.SyntaxKind.IfStatement) {
         return undefined;
     }
-    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf, ++count) : getWrapper(elseStatement, sourceFile);
+    const elze = isIfStatement(elseStatement) ? detect(elseStatement, sourceFile, elseIf) : getWrapper(elseStatement, sourceFile);
     if (elze === undefined) {
         return undefined;
     }
