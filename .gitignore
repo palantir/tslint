@@ -4,6 +4,7 @@
 /build/
 /docs/site/
 /scripts/*.js
+!/scripts/assertMinCircleNodes.js
 /scripts/*.js.map
 /lib/
 /test/executable/tslint.json
