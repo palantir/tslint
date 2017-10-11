@@ -32,7 +32,7 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import * as Linter from "./linter";
-import { arrayify, flatMap } from "./utils";
+import { flatMap } from "./utils";
 
 export interface Options {
     /**
@@ -48,7 +48,7 @@ export interface Options {
     /**
      * File paths to lint.
      */
-    files?: string[];
+    files: string[];
 
     /**
      * Whether to return status code 0 even if there are lint errors.
@@ -175,7 +175,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
 
 function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
-    const ignore = arrayify(exclude).map(trimSingleQuotes);
+    const ignore = exclude.map(trimSingleQuotes);
 
     if (project === undefined) {
         return { files: resolveGlobs(files, ignore, outputAbsolutePaths) };
@@ -188,22 +188,36 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
 
     const program = Linter.createProgram(projectPath);
     let filesFound: string[];
-    if (files === undefined || files.length === 0) {
+    if (files.length === 0) {
         filesFound = Linter.getFileNames(program);
         if (ignore.length !== 0) {
             const mm = ignore.map((pattern) => new Minimatch(path.resolve(pattern)));
             filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
         }
     } else {
-        filesFound = resolveGlobs(files, ignore, outputAbsolutePaths);
+        files = files.map((p) => path.resolve(p));
+        const pattern = files.map((p) => new Minimatch(p));
+        filesFound = Linter.getFileNames(program).filter((file) => pattern.some((matcher) => matcher.match(file)));
+        for (const file of files) {
+            if (!glob.hasMagic(file)) {
+                if (!filesFound.some((f) => new Minimatch(file).match(f))) {
+                    throw new FatalError(`'${file}' is not included in project`);
+                }
+            }
+        }
+        if (ignore.length !== 0) {
+            const mm = ignore.map((p) => new Minimatch(path.resolve(p)));
+            filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
+        }
     }
     return { files: filesFound, program };
 }
 
-function resolveGlobs(files: string[] | undefined, ignore: string[], outputAbsolutePaths?: boolean): string[] {
-    return flatMap(arrayify(files), (file) =>
+function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths?: boolean): string[] {
+    const cwd = process.cwd();
+    return flatMap(files, (file) =>
         glob.sync(trimSingleQuotes(file), { ignore, nodir: true }))
-        .map((file) => outputAbsolutePaths ? path.resolve(file) : path.relative(process.cwd(), file));
+        .map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
 }
 
 async function doLinting(
@@ -229,20 +243,18 @@ async function doLinting(
     };
 
     for (const file of files) {
-        if (!fs.existsSync(file)) {
-            throw new FatalError(`Unable to open file: ${file}`);
+        if (isFileExcluded(file)) {
+            continue;
         }
 
-        const contents = await tryReadFile(file, logger);
+        const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
         if (contents !== undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
                 lastFolder = folder;
             }
-            if (!isFileExcluded(file)) {
-                linter.lint(file, contents, configFile);
-            }
+            linter.lint(file, contents, configFile);
         }
     }
 
@@ -251,6 +263,9 @@ async function doLinting(
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
 async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
+    if (!fs.existsSync(filename)) {
+        throw new FatalError(`Unable to open file: ${filename}`);
+    }
     const buffer = new Buffer(256);
     const fd = fs.openSync(filename, "r");
     try {

@@ -22,7 +22,7 @@ import * as fs from "fs";
 
 import { VERSION } from "./linter";
 import { run } from "./runner";
-import { dedent } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 interface Argv {
     config?: string;
@@ -256,7 +256,7 @@ run(
     {
         config: argv.config,
         exclude: argv.exclude,
-        files: commander.args,
+        files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
         format: argv.format === undefined ? "prose" : argv.format,
