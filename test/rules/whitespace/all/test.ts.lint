@@ -192,3 +192,60 @@ type C = {result: string}&{type: "A"|"B"};
                           ~                [missing whitespace]
                                     ~      [missing whitespace]
                                      ~     [missing whitespace]
+
+if () {
+  console.info()
+} else {
+  console.info()
+}
+
+try {
+
+} catch (e) {
+
+} finally {
+
+}
+
+if(){
+  ~     [missing whitespace]
+    ~     [missing whitespace]
+
+}else{
+ ~     [missing whitespace]
+     ~     [missing whitespace]
+
+}
+
+if(){
+  ~     [missing whitespace]
+    ~     [missing whitespace]
+
+}//xxx
+
+if(){
+  ~     [missing whitespace]
+    ~     [missing whitespace]
+
+}/*xxx*/
+
+try{
+   ~     [missing whitespace]
+
+}catch(e){
+ ~     [missing whitespace]
+      ~     [missing whitespace]
+         ~     [missing whitespace]
+
+}finally{
+ ~     [missing whitespace]
+        ~     [missing whitespace]
+
+}
+
+do{
+  ~     [missing whitespace]
+
+}while()
+ ~     [missing whitespace]
+      ~     [missing whitespace]
