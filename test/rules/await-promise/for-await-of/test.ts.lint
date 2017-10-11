@@ -4,7 +4,7 @@ async function correct(foo: AsyncIterableIterator<string>) {
 }
 
 async function correct2() {
-    for await (const element of generator()) {}
+    for await (const element of asyncGenerator()) {}
 }
 
 async function correct(foo: AsyncIterable<string>) {
@@ -26,11 +26,25 @@ async function incorrect2(foo: IterableIterator<Promise<string>>) {
 }
 
 async function incorrect3() {
-    for await (const element of generator) {}
-                                ~~~~~~~~~ [0]
+    for await (const element of asyncGenerator) {}
+                                ~~~~~~~~~~~~~~ [0]
 }
 
-async function* generator() {
+async function incorrect4() {
+    for await (const element of generator()) {}
+                                ~~~~~~~~~~~ [0]
+}
+
+async function incorrect5(foo: Iterable<string>) {
+    for await (const element of foo) {}
+                                ~~~ [0]
+}
+
+async function* asyncGenerator() {
+    yield 1;
+}
+
+function* generator() {
     yield 1;
 }
 
