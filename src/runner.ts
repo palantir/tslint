@@ -192,7 +192,7 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
     if (files.length === 0) {
         filesFound = filterFiles(Linter.getFileNames(program), exclude, false);
     } else {
-        files = files.map((p) => path.resolve(p));
+        files = files.map((f) => path.resolve(f));
         filesFound = filterFiles(Linter.getFileNames(program), files, true);
         for (const file of files) {
             if (!glob.hasMagic(file)) {
