@@ -175,10 +175,10 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
 
 function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
-    const ignore = exclude.map(trimSingleQuotes);
+    exclude = exclude.map(trimSingleQuotes);
 
     if (project === undefined) {
-        return { files: resolveGlobs(files, ignore, outputAbsolutePaths) };
+        return { files: resolveGlobs(files, exclude, outputAbsolutePaths) };
     }
 
     const projectPath = findTsconfig(project);
@@ -186,18 +186,14 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
         throw new FatalError(`Invalid option for project: ${project}`);
     }
 
+    exclude = exclude.map((pattern) => path.resolve(pattern));
     const program = Linter.createProgram(projectPath);
     let filesFound: string[];
     if (files.length === 0) {
-        filesFound = Linter.getFileNames(program);
-        if (ignore.length !== 0) {
-            const mm = ignore.map((pattern) => new Minimatch(path.resolve(pattern)));
-            filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
-        }
+        filesFound = filterFiles(Linter.getFileNames(program), exclude, false);
     } else {
         files = files.map((p) => path.resolve(p));
-        const pattern = files.map((p) => new Minimatch(p));
-        filesFound = Linter.getFileNames(program).filter((file) => pattern.some((matcher) => matcher.match(file)));
+        filesFound = filterFiles(Linter.getFileNames(program), files, true);
         for (const file of files) {
             if (!glob.hasMagic(file)) {
                 if (!filesFound.some((f) => new Minimatch(file).match(f))) {
@@ -205,12 +201,17 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
                 }
             }
         }
-        if (ignore.length !== 0) {
-            const mm = ignore.map((p) => new Minimatch(path.resolve(p)));
-            filesFound = filesFound.filter((file) => !mm.some((matcher) => matcher.match(file)));
-        }
+        filesFound = filterFiles(filesFound, exclude, false);
     }
     return { files: filesFound, program };
+}
+
+function filterFiles(files: string[], patterns: string[], include: boolean): string[] {
+    if (patterns.length === 0) {
+        return include ? [] : files;
+    }
+    const matcher = patterns.map((pattern) => new Minimatch(pattern));
+    return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
 }
 
 function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths?: boolean): string[] {
@@ -234,13 +235,6 @@ async function doLinting(
 
     let lastFolder: string | undefined;
     let configFile: IConfigurationFile | undefined;
-    const isFileExcluded = (filepath: string) => {
-        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
-            return false;
-        }
-        const fullPath = path.resolve(filepath);
-        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
-    };
 
     for (const file of files) {
         if (isFileExcluded(file)) {
@@ -259,6 +253,14 @@ async function doLinting(
     }
 
     return linter.getResult();
+
+    function isFileExcluded(filepath: string) {
+        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    }
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
