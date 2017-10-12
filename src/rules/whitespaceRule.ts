@@ -123,25 +123,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             }
-
+            // check for catch block.
+            case ts.SyntaxKind.CatchClause:
+                if (options.postblockPrekeyword && matchPostblockPreKeyword(node)) {
+                    checkForTrailingWhitespace(node.end);
+                }
+                break;
             case ts.SyntaxKind.Block:
                 if (options.preblock) {
                     checkForTrailingWhitespace(node.getFullStart());
                 }
-                if (options.postblockPrekeyword) {
-                    const nextToken = utils.getNextToken(node as ts.Block)!;
-                    if (!utils.isSameLine(sourceFile, node.end, nextToken.getStart())) {
-                        break;
-                    }
-                    switch (nextToken.kind) {
-                        case ts.SyntaxKind.WhileKeyword:
-                        case ts.SyntaxKind.ElseKeyword:
-                        case ts.SyntaxKind.CatchKeyword:
-                        case ts.SyntaxKind.FinallyKeyword:
-                            if (node.end === nextToken.getStart()) {
-                                addMissingWhitespaceErrorAt(node.end);
-                            }
-                    }
+                if (options.postblockPrekeyword && matchPostblockPreKeyword(node)) {
+                    checkForTrailingWhitespace(node.end);
                 }
                 break;
 
@@ -327,7 +320,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
         }
     });
-
+    function matchPostblockPreKeyword(node: ts.Node): boolean {
+        const parent = node.parent!;
+        const isDoWhile = utils.isDoStatement(parent);
+        const isIfElse = utils.isIfStatement(parent)
+            && parent.elseStatement !== undefined
+            && parent.elseStatement !== node;
+        const isTryCatchFinally = utils.isTryStatement(parent)
+            && (parent.tryBlock === node || parent.catchClause === node);
+        return isDoWhile || isIfElse || isTryCatchFinally;
+    }
     function checkEqualsGreaterThanTokenInNode(node: ts.Node): void {
         if (!options.operator) {
             return;

@@ -200,11 +200,11 @@ if () {
 }
 
 try {
-
+// try111
 } catch (e) {
-
+// 111
 } finally {
-
+// finally111
 }
 
 if(){
@@ -236,7 +236,7 @@ try{
  ~     [missing whitespace]
       ~     [missing whitespace]
          ~     [missing whitespace]
-
+// 222
 }finally{
  ~     [missing whitespace]
         ~     [missing whitespace]
@@ -249,3 +249,11 @@ do{
 }while()
  ~     [missing whitespace]
       ~     [missing whitespace]
+
+try {
+
+}finally{
+ ~     [missing whitespace]
+        ~     [missing whitespace]
+
+}

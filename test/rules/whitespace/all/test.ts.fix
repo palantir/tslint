@@ -129,11 +129,11 @@ if () {
 }
 
 try {
-
+// try111
 } catch (e) {
-
+// 111
 } finally {
-
+// finally111
 }
 
 if () {
@@ -153,7 +153,7 @@ if () {
 try {
 
 } catch (e) {
-
+// 222
 } finally {
 
 }
@@ -161,3 +161,9 @@ try {
 do {
 
 } while ()
+
+try {
+
+} finally {
+
+}
