@@ -74,7 +74,7 @@ function parseOptions(ruleArguments: string[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { allowDeclarations, allowNamedFunctions } } = ctx;
-    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node): void {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration:
                 if (allowDeclarations) {
