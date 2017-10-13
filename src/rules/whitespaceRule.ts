@@ -123,12 +123,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             }
-            // check for catch block.
-            case ts.SyntaxKind.CatchClause:
-                if (options.postblockPrekeyword && matchPostblockPreKeyword(node)) {
-                    checkForTrailingWhitespace(node.end);
-                }
-                break;
+
             case ts.SyntaxKind.Block:
                 if (options.preblock) {
                     checkForTrailingWhitespace(node.getFullStart());
@@ -320,16 +315,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
         }
     });
-    function matchPostblockPreKeyword(node: ts.Node): boolean {
-        const parent = node.parent!;
-        const isDoWhile = utils.isDoStatement(parent);
-        const isIfElse = utils.isIfStatement(parent)
-            && parent.elseStatement !== undefined
-            && parent.elseStatement !== node;
-        const isTryCatchFinally = utils.isTryStatement(parent)
-            && (parent.tryBlock === node || parent.catchClause === node);
-        return isDoWhile || isIfElse || isTryCatchFinally;
-    }
     function checkEqualsGreaterThanTokenInNode(node: ts.Node): void {
         if (!options.operator) {
             return;
@@ -370,4 +355,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
         const fix = Lint.Replacement.deleteText(position, 1);
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_INVALID, fix);
     }
+}
+
+function matchPostblockPreKeyword(node: ts.Node): boolean {
+    const parent: ts.Node = node.parent!;
+    const isDoWhile = utils.isDoStatement(parent);
+    const isIfElse = utils.isIfStatement(parent)
+        && parent.elseStatement !== undefined
+        && parent.elseStatement !== node;
+    const hasTry = utils.isTryStatement(parent)
+        && parent.tryBlock === node;
+    const hasFinally = utils.isCatchClause(parent)
+        && parent.parent!.finallyBlock !== undefined;
+    const isTryCatchFinally = hasTry || hasFinally;
+    return isDoWhile || isIfElse || isTryCatchFinally;
 }
