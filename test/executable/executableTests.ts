@@ -409,12 +409,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can handles 'allowJs' correctly", (done) => {
+        it("handles 'allowJs' correctly", (done) => {
             execCli(
                 [ "-p", "test/files/tsconfig-allow-js/tsconfig.json"],
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
+
+        it("doesn't lint external dependencies with 'allowJs'", (done) => {
+            execCli(
+                [ "-p", "test/files/allow-js-exclude-node-modules/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without error");
                     done();
                 });
         });
