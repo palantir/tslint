@@ -552,7 +552,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): fn is (...args: any[]) => any {
+function isFunction(fn: any): fn is Function { // tslint:disable-line:ban-types
     return ({}).toString.call(fn) === "[object Function]";
 }
 
