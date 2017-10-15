@@ -17,8 +17,8 @@
 
 import { getLineRanges, LineRange } from "tsutils";
 import * as ts from "typescript";
-
-import * as Lint from "../index";
+import { urlRegex } from "url-regex";
+import * as Lint from "..";
 
 interface Options {
     limit: number;
@@ -78,10 +78,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(ctx.sourceFile)) {
         if (line.contentLength > ctx.options.limit) {
-            if (ctx.options.ignoreUrls) {               //
-                if (hasUrl(line, ctx.sourceFile)) {     // To minimize regex searches
-                    continue;
-                }
+            if (ctx.options.ignoreUrls && hasUrl(line, ctx.sourceFile)) {
+                continue;
             }
             ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(ctx.options.limit));
         }
@@ -90,6 +88,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
 function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
     const lineText = sourceFile.text.substr(line.pos, line.contentLength);
-    const forUrl = /[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
-    return lineText.search(forUrl) > -1;
+    const reg = urlRegex();
+    const containsUrl = reg.test(lineText);
+    return containsUrl;
 }
