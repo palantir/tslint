@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, getModifier, getNextToken, getTokenAtPosition, isClassLikeDeclaration } from "tsutils";
+import { getChildOfKind, getModifier, getNextToken, getTokenAtPosition, isClassLikeDeclaration, isConstructorDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -87,12 +87,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    const {noPublic, checkAccessor, checkConstructor} = ctx.options;
+    const { noPublic, checkAccessor, checkConstructor } = ctx.options;
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         if (isClassLikeDeclaration(node)) {
             for (const child of node.members) {
                 if (shouldCheck(child)) {
                     check(child);
+                }
+            }
+        }
+        if (isConstructorDeclaration(node)) {
+            for (const param of node.parameters) {
+                if (ts.isParameterPropertyDeclaration(param)) {
+                    check(param);
                 }
             }
         }
@@ -114,7 +121,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
     }
 
-    function check(node: ts.ClassElement): void {
+    function check(node: ts.ClassElement | ts.ParameterDeclaration): void {
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
@@ -142,12 +149,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 }
 
-function getInsertionPosition(member: ts.ClassElement, sourceFile: ts.SourceFile): number {
+function getInsertionPosition(member: ts.ClassElement | ts.ParameterDeclaration, sourceFile: ts.SourceFile): number {
     const node = member.decorators === undefined ? member : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
     return node.getStart(sourceFile);
 }
 
-function typeToString(node: ts.ClassElement): string {
+function typeToString(node: ts.ClassElement | ts.ParameterDeclaration): string {
     switch (node.kind) {
         case ts.SyntaxKind.MethodDeclaration:
             return "class method";
@@ -159,6 +166,8 @@ function typeToString(node: ts.ClassElement): string {
             return "get property accessor";
         case ts.SyntaxKind.SetAccessor:
             return "set property accessor";
+        case ts.SyntaxKind.Parameter:
+            return "class parameter property";
         default:
             throw new Error(`unhandled node type ${ts.SyntaxKind[node.kind]}`);
     }

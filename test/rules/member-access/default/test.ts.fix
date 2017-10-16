@@ -22,6 +22,18 @@ class Members {
     protected static nsProtected: number;
     private static nsPrivate: number;
 
+    constructor(
+        public readonly parameterPropertyR : number,
+        public parameterPropertyPublic : number,
+        protected parameterPropertyProtected : number,
+        private parameterPropertyPrivate : number,
+        public readonly parameterPropertyPublicR : number,
+        protected readonly parameterPropertyProtectedR : number,
+        private readonly parameterPropertyPrivateR : number
+    ){
+
+    }
+
     public noAccess(x: number): number;
     public noAccess(o: any): any {}
 
