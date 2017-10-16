@@ -127,13 +127,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
         if (noPublic && publicKeyword !== undefined) {
-            const start = publicKeyword.end - "public".length;
-            ctx.addFailure(
-                start,
-                publicKeyword.end,
-                Rule.FAILURE_STRING_NO_PUBLIC,
-                Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
-            );
+            const readonlyKeyword = getModifier(node, ts.SyntaxKind.ReadonlyKeyword);
+            // public is not optional for parameter property without the readonly modifier
+            const isPublicOptional = !ts.isParameterPropertyDeclaration(node) || readonlyKeyword !== undefined;
+            if (isPublicOptional) {
+                const start = publicKeyword.end - "public".length;
+                ctx.addFailure(
+                    start,
+                    publicKeyword.end,
+                    Rule.FAILURE_STRING_NO_PUBLIC,
+                    Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
+                );
+            }
         }
         if (!noPublic && publicKeyword === undefined) {
             const nameNode = node.kind === ts.SyntaxKind.Constructor

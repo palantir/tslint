@@ -6,6 +6,9 @@ class {
     public/*some comment*/ get y() {}
     ~~~~~~ [0]
     public() {}
+    constructor(public readonly param : number) {}
+                ~~~~~~ [0]
+    constructor(public param : number) {}
 }
 
 [0]: 'public' is implicit.

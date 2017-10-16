@@ -3,5 +3,7 @@ class {
     constructor() {}
     get y() {}
     public() {}
+    constructor(readonly param : number) {}
+    constructor(public param : number) {}
 }
 
