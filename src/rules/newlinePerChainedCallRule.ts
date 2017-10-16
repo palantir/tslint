@@ -83,15 +83,3 @@ function hasChildCall(node: ts.CallExpression): boolean {
     ts.forEachChild(node, checkForCall);
     return callExists;
 }
-
-function getDescendentsOfKind<T extends ts.SyntaxKind>(node: ts.Node, kind: T) {
-    const nodeCollection: ts.Node[] = [];
-    const checkChildren = (child: ts.Node): void => {
-        if (child.kind === kind) {
-            nodeCollection.push(child);
-        }
-        return ts.forEachChild(child, checkChildren);
-    }
-    ts.forEachChild(node, checkChildren);
-    return nodeCollection.length === 0 ? undefined : nodeCollection;
-}
