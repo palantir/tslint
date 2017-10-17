@@ -47,7 +47,8 @@ runRuleTests()
         console.error(chalk.underline("Error Testing Lint Rules:"));
         console.error(error);
         /* tslint:enable:no-console */
-        process.exitCode = Status.FatalError;
+
+        return Status.FatalError;
     })
     .then((exitCode: Status) => {
         process.exitCode = exitCode;
