@@ -1,0 +1,14 @@
+class Members {
+    constructor(
+        readonly parameterPropertyR : number,
+                 ~~~~~~~~~~~~~~~~~~ [The parameter property 'parameterPropertyR' must be marked either 'private', 'public', or 'protected']
+        public parameterPropertyPublic : number,
+        protected parameterPropertyProtected : number,
+        private parameterPropertyPrivate : number,
+        public readonly parameterPropertyPublicR : number,
+        protected readonly parameterPropertyProtectedR : number,
+        private readonly parameterPropertyPrivateR : number
+    ){
+
+    }
+}
