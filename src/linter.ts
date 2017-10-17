@@ -175,31 +175,22 @@ class Linter {
     // tslint:disable-next-line member-ordering
     protected async applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): Promise<string> {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
-        const pendingFixes: Array<Promise<void>> = [];
 
-        fixesByFile.forEach((fileFixes, fixingFilePath) => {
-            pendingFixes.push(this.applyFixesToFile(sourceFilePath, fixingFilePath, fileFixes, source));
-        });
+        for (const [filePath, fileFixes] of Array.from(fixesByFile)) {
+            let fileNewSource: string;
+            if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
+                source = Replacement.applyFixes(source, fileFixes);
+                fileNewSource = source;
+            } else {
+                const oldSource = await readFileAsync(filePath, "utf-8");
+                fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
+            }
 
-        await Promise.all(pendingFixes);
-
-        return source;
-    }
-
-    private async applyFixesToFile(
-        sourceFilePath: string, fixingFilePath: string, fileFixes: Array<Replacement | Replacement[]>, source: string) {
-        let fileNewSource: string;
-        if (path.resolve(fixingFilePath) === path.resolve(sourceFilePath)) {
-            source = Replacement.applyFixes(source, fileFixes);
-            fileNewSource = source;
-        } else {
-            const oldSource = await readFileAsync(fixingFilePath, "utf-8");
-            fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
+            await writeFileAsync(filePath, fileNewSource);
+            this.updateProgram(filePath);
         }
 
-        await writeFileAsync(fixingFilePath, fileNewSource);
-
-        this.updateProgram(fixingFilePath);
+        return source;
     }
 
     private updateProgram(sourceFilePath: string) {
