@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import * as fs from "fs";
+
 /**
  * Enforces the invariant that the input is an array.
  */
@@ -212,4 +214,16 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
 // converts Windows normalized paths (with backwards slash `\`) to paths used by TypeScript (with forward slash `/`)
 export function denormalizeWinPath(path: string): string {
     return path.replace(/\\/g, "/");
+}
+
+export async function writeFileAsync(fileName: string, data: string) {
+    await new Promise((resolve, reject) => {
+        fs.writeFile(fileName, data, (error?: Error) => {
+            if (error != null) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
 }
