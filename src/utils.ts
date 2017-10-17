@@ -23,7 +23,7 @@ import * as fs from "fs";
 export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
-    } else if (arg != null) {
+    } else if (arg != undefined) {
         return [arg];
     } else {
         return [];
@@ -35,7 +35,7 @@ export function arrayify<T>(arg?: T | T[]): T[] {
  * Enforces the invariant that the input is an object.
  */
 export function objectify(arg: any): any {
-    if (typeof arg === "object" && arg != null) {
+    if (typeof arg === "object" && arg != undefined) {
         return arg;
     } else {
         return {};

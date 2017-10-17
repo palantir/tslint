@@ -19,7 +19,7 @@ tslint -p tsconfig.json --exclude '**/*.d.ts' # lint all files in the project ex
 tslint -p tsconfig.json **/*.ts # ignores files in tsconfig.json and uses the provided glob instead
 ```
 
-Use the `--type-check` flag to make sure your program has no type errors. TSLint will check for any errors before before linting. This flag requires `--project` to be specified.
+Use the `--type-check` flag to make sure your program has no type errors. TSLint will check for any errors before linting. This flag requires `--project` to be specified.
 
 ##### Library
 

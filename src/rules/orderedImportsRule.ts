@@ -73,6 +73,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
             * \`"any"\`: Allow any order.
 
+            You may set the \`"module-source-path"\` option to control the ordering of imports based full path
+            or just the module name
+
+            Possible values for \`"module-source-path"\` are:
+
+            * \`"full'\`: Correct order is  \`"./a/Foo"\`, \`"./b/baz"\`, \`"./c/Bar"\`. (This is the default.)
+            * \`"basename"\`: Correct order is \`"./c/Bar"\`, \`"./b/baz"\`, \`"./a/Foo"\`.
+
         `,
         options: {
             type: "object",
@@ -87,6 +95,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                 "named-imports-order": {
                     type: "string",
                     enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                },
+                "module-source-path": {
+                    type: "string",
+                    enum: ["full", "basename"],
                 },
             },
             additionalProperties: false,
@@ -118,6 +130,18 @@ const TRANSFORMS = new Map<string, Transform>([
     ["case-insensitive", (x) => x.toLowerCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", (x) => x],
+    ["full", (x) => x],
+    ["basename", (x) => {
+        if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(x)) {
+            return x;
+        }
+
+        const splitIndex = x.lastIndexOf("/");
+        if (splitIndex === -1) {
+            return x;
+        }
+        return x.substr(splitIndex + 1);
+    }],
 ]);
 
 enum ImportType {
@@ -129,6 +153,7 @@ enum ImportType {
 interface Options {
     groupedImports: boolean;
     importSourcesOrderTransform: Transform;
+    moduleSourcePath: Transform;
     namedImportsOrderTransform: Transform;
 }
 
@@ -136,6 +161,7 @@ interface JsonOptions {
     "grouped-imports"?: boolean;
     "import-sources-order"?: string;
     "named-imports-order"?: string;
+    "module-source-path"?: string;
 }
 
 function parseOptions(ruleArguments: any[]): Options {
@@ -144,10 +170,12 @@ function parseOptions(ruleArguments: any[]): Options {
         "grouped-imports": isGrouped = false,
         "import-sources-order": sources = "case-insensitive",
         "named-imports-order": named = "case-insensitive",
+        "module-source-path": path = "full",
     } = optionSet === undefined ? {} : optionSet;
     return {
         groupedImports: isGrouped,
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
+        moduleSourcePath: TRANSFORMS.get(path)!,
         namedImportsOrderTransform: TRANSFORMS.get(named)!,
     };
 }
@@ -228,10 +256,11 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkSource(source: string, node: ImportDeclaration["node"]) {
+        const currentSource = this.options.moduleSourcePath(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, source);
+        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource);
 
-        if (previousSource !== null && compare(source, previousSource) === -1) {
+        if (previousSource !== null && compare(currentSource, previousSource) === -1) {
             this.lastFix = [];
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
@@ -293,7 +322,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             return importDeclarations[0];
         } else {
             this.nextType = type;
-            return importDeclarations.find((importDeclaration) => importDeclaration.type != type);
+            return importDeclarations.find((importDeclaration) => importDeclaration.type !== type);
         }
     }
 
@@ -343,7 +372,7 @@ class Walker extends Lint.AbstractWalker<Options> {
                 newLine = "\n";
             }
         }
-        return newLine == null ? ts.sys.newLine : newLine;
+        return newLine === undefined ? ts.sys.newLine : newLine;
     }
 }
 
@@ -388,7 +417,7 @@ class ImportsBlock {
     // replaces the named imports on the most recent import declaration
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
-        if (importDeclaration == null) {
+        if (importDeclaration === undefined) {
             // nothing to replace. This can happen if the block is skipped
             return;
         }
@@ -406,7 +435,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return null;
         }
-        return this.getLastImportDeclaration().sourcePath;
+        return this.getLastImportDeclaration()!.sourcePath;
     }
 
     // creates a Lint.Replacement object with ordering fixes for the entire block
@@ -416,7 +445,7 @@ class ImportsBlock {
         }
         const fixedText = getSortedImportDeclarationsAsText(this.importDeclarations);
         const start = this.importDeclarations[0].nodeStartOffset;
-        const end = this.getLastImportDeclaration().nodeEndOffset;
+        const end = this.getLastImportDeclaration()!.nodeEndOffset;
         return new Lint.Replacement(start, end - start, fixedText);
     }
 
@@ -425,7 +454,7 @@ class ImportsBlock {
         if (this.importDeclarations.length === 0) {
             return node.getStart();
         }
-        return this.getLastImportDeclaration().nodeEndOffset;
+        return this.getLastImportDeclaration()!.nodeEndOffset;
     }
 
     // gets the offset of the end of the import's line, including newline, to include comment to the right
@@ -433,7 +462,7 @@ class ImportsBlock {
         return sourceFile.text.indexOf("\n", node.end) + 1;
     }
 
-    private getLastImportDeclaration() {
+    private getLastImportDeclaration(): ImportDeclaration | undefined {
         return this.importDeclarations[this.importDeclarations.length - 1];
     }
 

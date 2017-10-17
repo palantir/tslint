@@ -3,12 +3,12 @@ function func1(x: number, y: number) {
 }
 
 var func2 = () => {
-    ~~~~~           ['func2' is declared but never used.]
+    ~~~~~           [err % ('func2')]
     //
 };
 
 function func3() {
-         ~~~~~     ['func3' is declared but never used.]
+         ~~~~~     [err % ('func3')]
     return func1(1, 2);
 }
 
@@ -17,8 +17,14 @@ export function func4() {
 }
 
 declare function func5(): any;
-                 ~~~~~ ['func5' is declared but never used.]
+                 ~~~~~ [err % ('func5')]
 
 export default function () {
     return 0;
 }
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+#endif

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import * as colors from "colors";
+import * as chalk from "chalk";
 import * as glob from "glob";
 import * as path from "path";
 
 import { Status } from "../src/runner";
 import { consoleTestResultHandler, runTest } from "../src/test";
 
-const logger = console;
-
-logger.log();
-logger.log(colors.underline("Testing Lint Rules:"));
+/* tslint:disable:no-console */
+console.log();
+console.log(chalk.underline("Testing Lint Rules:"));
+/* tslint:enable:no-console */
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
@@ -43,8 +43,10 @@ async function runRuleTests(): Promise<Status> {
 // tslint:disable-next-line:no-floating-promises
 runRuleTests()
     .catch((error: Error) => {
-        logger.error(colors.underline("Error Testing Lint Rules:"));
-        logger.error(error);
+        /* tslint:disable:no-console */
+        console.error(chalk.underline("Error Testing Lint Rules:"));
+        console.error(error);
+        /* tslint:enable:no-console */
         process.exitCode = Status.FatalError;
     })
     .then((exitCode: Status) => {

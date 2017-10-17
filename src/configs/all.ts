@@ -88,6 +88,7 @@ export const rules = {
     // Functionality
     "await-promise": true,
     // "ban": no sensible default
+    "ban-comma-operator": true,
     "curly": true,
     "forin": true,
     // "import-blacklist": no sensible default
@@ -188,7 +189,7 @@ export const rules = {
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
-    "jsdoc-format": true,
+    "jsdoc-format": [true, "check-multiline-start"],
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
@@ -216,6 +217,7 @@ export const rules = {
     "ordered-imports": [true, {
         "import-sources-order": "case-insensitive",
         "named-imports-order": "case-insensitive",
+        "module-source-path": "full",
     }],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
