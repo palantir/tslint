@@ -216,10 +216,10 @@ export function denormalizeWinPath(path: string): string {
     return path.replace(/\\/g, "/");
 }
 
-export async function writeFileAsync(fileName: string, data: string) {
-    await new Promise((resolve, reject) => {
+export async function writeFileAsync(fileName: string, data: string): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
         fs.writeFile(fileName, data, (error?: Error) => {
-            if (error != null) {
+            if (error !== null) {
                 reject(error);
             } else {
                 resolve();
