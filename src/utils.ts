@@ -218,11 +218,11 @@ export function denormalizeWinPath(path: string): string {
 
 export async function readFileAsync(fileName: string, encoding: string) {
     return await new Promise<string>((resolve, reject) => {
-        fs.readFile(fileName, encoding, (error?: Error) => {
+        fs.readFile(fileName, encoding, (error: Error | null, contents: string) => {
             if (error !== null) {
                 reject(error);
             } else {
-                resolve();
+                resolve(contents);
             }
         });
     });
@@ -230,7 +230,7 @@ export async function readFileAsync(fileName: string, encoding: string) {
 
 export async function writeFileAsync(fileName: string, data: string) {
     await new Promise<void>((resolve, reject) => {
-        fs.writeFile(fileName, data, (error?: Error) => {
+        fs.writeFile(fileName, data, (error: Error | null) => {
             if (error !== null) {
                 reject(error);
             } else {

@@ -62,7 +62,7 @@ export async function runTests(patterns: string[], rulesDirectory?: string | str
         }
         files.push(...glob.sync(pattern));
     }
-    return Promise.all(
+    return await Promise.all(
         files.map(async (directory: string): Promise<TestResult> => await runTest(path.dirname(directory), rulesDirectory)));
 }
 
