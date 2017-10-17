@@ -26,7 +26,7 @@ import { dedent } from "./utils";
 
 interface Argv {
     config?: string;
-    exclude?: string;
+    exclude: string[];
     fix?: boolean;
     force?: boolean;
     help?: boolean;
@@ -188,7 +188,24 @@ const options: Option[] = [
     },
 ];
 
-commander.version(VERSION);
+const builtinOptions: Option[] = [
+    {
+        short: "v",
+        name: "version",
+        type: "boolean",
+        describe: "current version",
+        description: "The current version of tslint.",
+    },
+    {
+        short: "h",
+        name: "help",
+        type: "boolean",
+        describe: "display detailed help",
+        description: "Prints this help message.",
+    },
+];
+
+commander.version(VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);
@@ -201,7 +218,7 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.map((o) =>
+    const optionDetails = options.concat(builtinOptions).map((o) =>
         `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
     console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
 });
@@ -215,7 +232,7 @@ if (parsed.unknown.length !== 0) {
 const argv = commander.opts() as any as Argv;
 
 if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
-    console.error("Missing files");
+    console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 
@@ -225,7 +242,7 @@ if (argv.typeCheck && argv.project === undefined) {
 }
 
 let log: (message: string) => void;
-if (argv.out != null) {
+if (argv.out != undefined) {
     const outputStream = fs.createWriteStream(argv.out, {
         flags: "w+",
         mode: 420,
@@ -235,31 +252,33 @@ if (argv.out != null) {
     log = console.log;
 }
 
-// tslint:disable-next-line no-floating-promises
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: commander.args,
-    fix: argv.fix,
-    force: argv.force,
-    format: argv.format === undefined ? "prose" : argv.format,
-    formattersDirectory: argv.formattersDir,
-    init: argv.init,
-    out: argv.out,
-    outputAbsolutePaths: argv.outputAbsolutePaths,
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-    test: argv.test,
-    typeCheck: argv.typeCheck,
-}, {
-    log,
-    error: (m) => console.error(m),
-}).then((rc) => {
-    process.exitCode = rc;
-}).catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-});
+run(
+    {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: commander.args,
+        fix: argv.fix,
+        force: argv.force,
+        format: argv.format === undefined ? "prose" : argv.format,
+        formattersDirectory: argv.formattersDir,
+        init: argv.init,
+        out: argv.out,
+        outputAbsolutePaths: argv.outputAbsolutePaths,
+        project: argv.project,
+        rulesDirectory: argv.rulesDir,
+        test: argv.test,
+        typeCheck: argv.typeCheck,
+    },
+    {
+        log,
+        error: (m) => console.error(m),
+    })
+    .then((rc) => {
+        process.exitCode = rc;
+    }).catch((e) => {
+        console.error(e);
+        process.exitCode = 1;
+    });
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

@@ -15,17 +15,19 @@
  * limitations under the License.
  */
 
+import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { Exclusion } from "./completed-docs/exclusion";
-import { IExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
+import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
 import { ExclusionFactory } from "./completed-docs/exclusionFactory";
 
 export const ALL = "all";
 
 export const ARGUMENT_CLASSES = "classes";
 export const ARGUMENT_ENUMS = "enums";
+export const ARGUMENT_ENUM_MEMBERS = "enum-members";
 export const ARGUMENT_FUNCTIONS = "functions";
 export const ARGUMENT_INTERFACES = "interfaces";
 export const ARGUMENT_METHODS = "methods";
@@ -57,6 +59,7 @@ export type All = typeof ALL;
 export type DocType = All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
+    | typeof ARGUMENT_ENUM_MEMBERS
     | typeof ARGUMENT_FUNCTIONS
     | typeof ARGUMENT_INTERFACES
     | typeof ARGUMENT_METHODS
@@ -81,7 +84,7 @@ export type Visibility = All
 export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
 
-    public static defaultArguments = {
+    public static defaultArguments: IInputExclusionDescriptors = {
         [ARGUMENT_CLASSES]: true,
         [ARGUMENT_FUNCTIONS]: true,
         [ARGUMENT_METHODS]: {
@@ -182,7 +185,7 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "completed-docs",
         description: "Enforces documentation for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
+            \`true\` to enable for [${Object.keys(Rule.defaultArguments).join(", ")}]],
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
@@ -210,6 +213,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * \`"${ARGUMENT_CLASSES}"\`
             * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_ENUM_MEMBERS}"\`
             * \`"${ARGUMENT_FUNCTIONS}"\`
             * \`"${ARGUMENT_INTERFACES}"\`
             * \`"${ARGUMENT_METHODS}"\`
@@ -240,6 +244,7 @@ export class Rule extends Lint.Rules.TypedRule {
                         properties: {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_INTERFACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
@@ -292,7 +297,7 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithWalker(completedDocsWalker);
     }
 
-    private getExclusionsMap(ruleArguments: Array<DocType | IExclusionDescriptors>): Map<DocType, Array<Exclusion<any>>> {
+    private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): Map<DocType, Array<Exclusion<any>>> {
         if (ruleArguments.length === 0) {
             ruleArguments = [Rule.defaultArguments];
         }
@@ -320,6 +325,13 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     public visitEnumDeclaration(node: ts.EnumDeclaration): void {
         this.checkNode(node, ARGUMENT_ENUMS);
         super.visitEnumDeclaration(node);
+    }
+
+    public visitEnumMember(node: ts.EnumMember): void {
+        // Enum members don't have modifiers, so use the parent
+        // enum declaration when checking the requirements.
+        this.checkNode(node, ARGUMENT_ENUM_MEMBERS, node.parent);
+        super.visitEnumMember(node);
     }
 
     public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
@@ -353,11 +365,11 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
     }
 
     public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.checkNode(node, ARGUMENT_VARIABLES);
+        this.checkVariable(node);
         super.visitVariableDeclaration(node);
     }
 
-    private checkNode(node: ts.Declaration, nodeType: DocType): void {
+    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
         const { name } = node;
         if (name === undefined) {
             return;
@@ -369,42 +381,57 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         }
 
         for (const exclusion of exclusions) {
-            if (exclusion.excludes(node)) {
+            if (exclusion.excludes(requirementNode)) {
                 return;
             }
         }
 
-        if (this.declarationHasNoComments(node, this.getTypeChecker())) {
-            this.addDocumentationFailure(node, nodeType);
-        }
-    }
-
-    private getCommentLines(node: ts.Declaration, typeChecker: ts.TypeChecker) {
-        if (node.name === undefined) {
-            return [];
-        }
-
-        const symbol = typeChecker.getSymbolAtLocation(node.name);
+        const symbol = this.getTypeChecker().getSymbolAtLocation(name);
         if (symbol === undefined) {
-            return [];
+            return;
         }
 
-        return symbol.getDocumentationComment();
+        const comments = symbol.getDocumentationComment();
+        this.checkComments(node, this.describeNode(nodeType), comments, requirementNode);
     }
 
-    private declarationHasNoComments(node: ts.Declaration, typeChecker: ts.TypeChecker) {
-        return this.getCommentLines(node, typeChecker).map((line) => line.text).join("").trim() === "";
+    private checkVariable(node: ts.VariableDeclaration) {
+        // Only check variables in variable declaration lists
+        // and not variables in catch clauses and for loops.
+        const list = node.parent!;
+        if (!isVariableDeclarationList(list)) {
+            return;
+        }
+
+        const statement = list.parent!;
+        if (!isVariableStatement(statement)) {
+            return;
+        }
+
+        // Only check variables at the namespace/module-level or file-level
+        // and not variables declared inside functions and other things.
+        switch (statement.parent!.kind) {
+            case ts.SyntaxKind.SourceFile:
+            case ts.SyntaxKind.ModuleBlock:
+                this.checkNode(node, ARGUMENT_VARIABLES, statement);
+        }
     }
 
-    private addDocumentationFailure(node: ts.Declaration, nodeType: string): void {
+    private checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
+        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
+            this.addDocumentationFailure(node, nodeDescriptor, requirementNode);
+        }
+    }
+
+    private addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = this.describeDocumentationFailure(node, nodeType);
+        const description = this.describeDocumentationFailure(requirementNode, nodeType);
 
         this.addFailureAt(start, width, description);
     }
 
-    private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
+    private describeDocumentationFailure(node: ts.Node, nodeType: string): string {
         let description = Rule.FAILURE_STRING_EXIST;
 
         if (node.modifiers !== undefined) {
@@ -418,5 +445,9 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
         const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
         const alias = CompletedDocsWalker.modifierAliases[description];
         return alias !== undefined ? alias : description;
+    }
+
+    private describeNode(nodeType: DocType): string {
+        return nodeType.replace("-", " ");
     }
 }

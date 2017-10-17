@@ -37,13 +37,13 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "This is the default value for this type parameter, so it can be omitted.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
 interface ArgsAndParams {
-    typeArguments: ts.TypeNode[];
-    typeParameters: ts.TypeParameterDeclaration[];
+    typeArguments: ReadonlyArray<ts.TypeNode>;
+    typeParameters: ReadonlyArray<ts.TypeParameterDeclaration>;
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
@@ -99,7 +99,7 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
     }
 }
 
-function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sig = checker.getResolvedSignature(node);
     const sigDecl = sig === undefined ? undefined : sig.getDeclaration();
     if (sigDecl === undefined) {
@@ -109,7 +109,9 @@ function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker
     return sigDecl.typeParameters === undefined ? undefined : sigDecl.typeParameters;
 }
 
-function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromType(
+    type: ts.EntityName | ts.Expression,
+    checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
     if (sym === undefined || sym.declarations === undefined) {
         return undefined;
@@ -119,6 +121,9 @@ function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.Typ
         isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl) ? decl.typeParameters : undefined);
 }
 
-function getAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol {
+function getAliasedSymbol(symbol: ts.Symbol | undefined, checker: ts.TypeChecker): ts.Symbol | undefined {
+    if (symbol === undefined) {
+        return undefined;
+    }
     return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
 }

@@ -1,0 +1,66 @@
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
+
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
+
+
+[...y] = [...y,];
+({
+    ...x
+} = {
+    ...x,
+});
+({
+    ...x
+} = {
+    ...x,
+    y,
+})
+foo(...y,);
+
+function combined([a, ...arr], {b, ...obj}, regular,) {}
+
+function combined([a, ...arr], {b, ...obj}, regular,) {}

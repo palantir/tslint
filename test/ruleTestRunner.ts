@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import * as colors from "colors";
+import * as chalk from "chalk";
 import * as glob from "glob";
 import * as path from "path";
 
-import {consoleTestResultHandler, runTest} from "../src/test";
+import { consoleTestResultHandler, runTest } from "../src/test";
 
 /* tslint:disable:no-console */
 console.log();
-console.log(colors.underline("Testing Lint Rules:"));
+console.log(chalk.underline("Testing Lint Rules:"));
 /* tslint:enable:no-console */
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);

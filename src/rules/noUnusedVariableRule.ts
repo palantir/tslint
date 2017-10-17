@@ -30,6 +30,10 @@ export class Rule extends Lint.Rules.TypedRule {
         description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
             private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
             options, but does not interrupt code compilation.`,
+        descriptionDetails: Lint.Utils.dedent`
+            In addition to avoiding compilation errors, this rule may still be useful if you
+            wish to have \`tslint\` automatically remove unused imports, variables, functions,
+            and private class members, when using TSLint's \`--fix\` option.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Three optional arguments may be optionally provided:
@@ -38,7 +42,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 * NOTE: this option is experimental and does not work with classes
                 that use abstract method declarations, among other things.
             * \`{"ignore-pattern": "pattern"}\` where pattern is a case-sensitive regexp.
-            Variable names that match the pattern will be ignored.`,
+            Variable names and imports that match the pattern will be ignored.`,
         options: {
             type: "array",
             items: {
@@ -67,13 +71,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const x = program.getCompilerOptions();
-        if (x.noUnusedLocals && x.noUnusedParameters) {
-            console.warn("WARNING: 'no-unused-variable' lint rule does not need to be set if " +
-                "the 'no-unused-locals' and 'no-unused-parameters' compiler options are enabled.");
-        }
-
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program, parseOptions(this.ruleArguments)));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program);
     }
 }
 
@@ -89,7 +87,7 @@ function parseOptions(options: any[]): Options {
         if (typeof o === "object") {
             // tslint:disable-next-line no-unsafe-any
             const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
-            if (ignore != null) {
+            if (ignore != undefined) {
                 ignorePattern = new RegExp(ignore);
                 break;
             }
@@ -99,27 +97,34 @@ function parseOptions(options: any[]): Options {
     return { checkParameters, ignorePattern };
 }
 
-function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameters, ignorePattern }: Options): void {
-    const { sourceFile } = ctx;
+function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
+    const { sourceFile, options: { checkParameters, ignorePattern } } = ctx;
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
     const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
+    const declaration = program.getCompilerOptions().declaration;
 
     // If all specifiers in an import are unused, we elide the entire import.
     const importSpecifierFailures = new Map<ts.Identifier, string>();
 
     for (const diag of diagnostics) {
+        if (diag.start === undefined) { continue; }
         const kind = getUnusedDiagnostic(diag);
-        if (kind === undefined) {
-            continue;
-        }
+        if (kind === undefined) { continue; }
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
+
+        if (ignorePattern !== undefined) {
+            const varName = /'(.*)'/.exec(failure)![1];
+            if (ignorePattern.test(varName)) {
+                continue;
+            }
+        }
 
         if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
             const importName = findImport(diag.start, sourceFile);
             if (importName !== undefined) {
-                if (isImportUsed(importName, sourceFile, checker)) {
+                if (declaration && isImportUsed(importName, sourceFile, checker)) {
                     continue;
                 }
 
@@ -131,14 +136,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
             }
         }
 
-        if (ignorePattern !== undefined) {
-            const varName = /'(.*)'/.exec(failure)![1];
-            if (ignorePattern.test(varName)) {
-                continue;
-            }
-        }
-
-        ctx.addFailureAt(diag.start, diag.length, failure);
+        ctx.addFailureAt(diag.start, diag.length!, failure);
     }
 
     if (importSpecifierFailures.size !== 0) {
@@ -151,7 +149,7 @@ function walk(ctx: Lint.WalkContext<void>, program: ts.Program, { checkParameter
  * - If all of the import specifiers in an import are unused, add a combined failure for them all.
  * - Unused imports are fixable.
  */
-function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
+function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
     forEachImport(sourceFile, (importNode) => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);
@@ -225,8 +223,38 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<void>, failures: Map<t
         }
 
         function removeAll(errorNode: ts.Node, failure: string): void {
-            const fix = Lint.Replacement.deleteFromTo(importNode.getStart(), importNode.getEnd());
+            const start = importNode.getStart();
+            let end = importNode.getEnd();
+            utils.forEachToken(
+                importNode,
+                (token) => {
+                    ts.forEachTrailingCommentRange(
+                        ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
+                            end = commentEnd;
+                        });
+                },
+                ctx.sourceFile);
+            if (isEntireLine(start, end)) {
+                end = getNextLineStart(end);
+            }
+
+            const fix = Lint.Replacement.deleteFromTo(start, end);
             ctx.addFailureAtNode(errorNode, failure, fix);
+        }
+
+        function isEntireLine(start: number, end: number): boolean {
+            return ctx.sourceFile.getLineAndCharacterOfPosition(start).character === 0 &&
+                ctx.sourceFile.getLineEndOfPosition(end) === end;
+        }
+
+        function getNextLineStart(position: number): number {
+            const nextLine = ctx.sourceFile.getLineAndCharacterOfPosition(position).line + 1;
+            const lineStarts = ctx.sourceFile.getLineStarts();
+            if (nextLine < lineStarts.length) {
+                return lineStarts[nextLine];
+            } else {
+                return position;
+            }
         }
     });
 
@@ -259,7 +287,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         return false;
     }
 
-    return ts.forEachChild(sourceFile, function cb(child): boolean {
+    return ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
         if (isImportLike(child)) {
             return false;
         }
@@ -271,11 +299,13 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         }
 
         return ts.forEachChild(child, cb);
-    });
+    }) === true;
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
-    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) && node.type === undefined) {
+    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) &&
+        node.type === undefined && node.name.kind === ts.SyntaxKind.Identifier ||
+        utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier) {
         return checker.getTypeAtLocation(node);
     } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
         const sig = checker.getSignatureFromDeclaration(node);
@@ -367,11 +397,12 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 }
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+    const originalOptions = program.getCompilerOptions();
     const options = {
-        ...program.getCompilerOptions(),
+        ...originalOptions,
         noEmit: true,
         noUnusedLocals: true,
-        ...(checkParameters ? { noUnusedParameters: true } : null),
+        noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
     };
     const sourceFilesByName = new Map<string, ts.SourceFile>(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));

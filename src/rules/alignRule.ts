@@ -151,7 +151,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
         return cb(sourceFile);
     }
 
-    private checkAlignment(nodes: ts.Node[], kind: string) {
+    private checkAlignment(nodes: ReadonlyArray<ts.Node>, kind: string) {
         if (nodes.length <= 1) {
             return;
         }

@@ -4,14 +4,29 @@ export enum BadExportedEnum { }
 /**
  * ...
  */
-export enum GoodExportedEnum { }
-
-enum BadInternalEnum { }
+export enum ExportedEnum {
+    BadExportedMember
+    ~~~~~~~~~~~~~~~~~      [Documentation must exist for exported enum members.]
+ }
 
 /**
  * ...
  */
-enum GoodInternalEnum { }
+export enum GoodExportedEnum { }
+
+enum BadInternalEnum {
+    InternalMember
+ }
+
+/**
+ * ...
+ */
+enum GoodInternalEnum {
+    /**
+     * ...
+     */
+    GoodInternalMember
+}
 
 export interface BadExportedInterface { }
 
@@ -24,3 +39,8 @@ interface BadInternalInterface { }
  * ...
  */
 interface GoodInternalInterface { }
+
+const internalVariable = 1;
+
+export const exportedVariable = 2;
+             ~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for exported variables.]

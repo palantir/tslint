@@ -25,7 +25,7 @@ const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
 
-// tslint:disable object-literal-sort-keys switch-default
+// tslint:disable object-literal-sort-keys
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -88,7 +88,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
+        return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
     }
 }
 
@@ -183,7 +183,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 return;
             }
 
-            ctx.addFailureAtNode(node,
+            ctx.addFailureAtNode(
+                node,
                 showFailure(location, failure, isUnionType(type), options));
         }
     }
@@ -348,9 +349,9 @@ function getKind(type: ts.Type): TypeKind {
         : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void) ? TypeKind.Undefined // tslint:disable-line:no-bitwise
         : is(ts.TypeFlags.EnumLike) ? TypeKind.Enum
         : is(ts.TypeFlags.NumberLiteral) ?
-            (numberLiteralIsZero(type as ts.LiteralType) ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
+            (numberLiteralIsZero(type as ts.NumberLiteralType) ? TypeKind.FalseNumberLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.StringLiteral) ?
-            (stringLiteralIsEmpty(type as ts.LiteralType) ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
+            (stringLiteralIsEmpty(type as ts.StringLiteralType) ? TypeKind.FalseStringLiteral : TypeKind.AlwaysTruthy)
         : is(ts.TypeFlags.BooleanLiteral) ?
             ((type as ts.IntrinsicType).intrinsicName === "true" ? TypeKind.AlwaysTruthy : TypeKind.FalseBooleanLiteral)
         : TypeKind.AlwaysTruthy;
@@ -360,12 +361,13 @@ function getKind(type: ts.Type): TypeKind {
     }
 }
 
-function numberLiteralIsZero(type: ts.LiteralType): boolean {
-    // Uses 'value' in TypeScript>=2.4.
-    return (type as any).value !== undefined ? (type as any).value === 0 : type.text === "0";
+function numberLiteralIsZero(type: ts.NumberLiteralType): boolean {
+    // for compatibility with typescript@<2.4.0
+    return type.value !== undefined ? type.value === 0 : (type as any).text === "0";
 }
-function stringLiteralIsEmpty(type: ts.LiteralType): boolean {
-    return ((type as any).value !== undefined ? (type as any).value : type.text) === "";
+function stringLiteralIsEmpty(type: ts.StringLiteralType): boolean {
+    // for compatibility with typescript@<2.4.0
+    return (type.value !== undefined ? type.value : (type as any).text) === "";
 }
 
 /** Matches `&&` and `||` operators. */
@@ -422,12 +424,12 @@ function showLocation(n: Location): string {
     }
 }
 
-function showFailure(location: Location, ty: TypeFailure, isUnionType: boolean, options: Options): string {
+function showFailure(location: Location, ty: TypeFailure, unionType: boolean, options: Options): string {
     const expectedTypes = showExpectedTypes(options);
     const expected = expectedTypes.length === 1
         ? `Only ${expectedTypes[0]}s are allowed`
         : `Allowed types are ${stringOr(expectedTypes)}`;
-    const tyFail = showTypeFailure(ty, isUnionType, options.strictNullChecks);
+    const tyFail = showTypeFailure(ty, unionType, options.strictNullChecks);
     return `This type is not allowed in the ${showLocation(location)} because it ${tyFail}. ${expected}.`;
 }
 
@@ -441,8 +443,8 @@ function showExpectedTypes(options: Options): string[] {
     return parts;
 }
 
-function showTypeFailure(ty: TypeFailure, isUnionType: boolean, strictNullChecks: boolean) {
-    const is = isUnionType ? "could be" : "is";
+function showTypeFailure(ty: TypeFailure, unionType: boolean, strictNullChecks: boolean) {
+    const is = unionType ? "could be" : "is";
     switch (ty) {
         case TypeFailure.AlwaysTruthy:
             return strictNullChecks

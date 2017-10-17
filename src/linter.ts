@@ -43,7 +43,7 @@ import { arrayify, dedent, flatMap } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 class Linter {
-    public static VERSION = "5.4.2";
+    public static VERSION = "5.7.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -83,7 +83,7 @@ class Linter {
         if (typeof options !== "object") {
             throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
-        if ((options as any).configuration != null) {
+        if ((options as any).configuration != undefined) {
             throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
                 "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
         }
@@ -105,10 +105,8 @@ class Linter {
         }
 
         // add rule severity to failures
-        const ruleSeverityMap = new Map(enabledRules.map((rule) => {
-            // tslint:disable-next-line no-unnecessary-type-assertion
-            return [rule.getOptions().ruleName, rule.getOptions().ruleSeverity] as [string, RuleSeverity];
-        }));
+        const ruleSeverityMap = new Map(enabledRules.map(
+            (rule): [string, RuleSeverity] => [rule.getOptions().ruleName, rule.getOptions().ruleSeverity]));
 
         for (const failure of fileFailures) {
             const severity = ruleSeverityMap.get(failure.getRuleName());
@@ -186,10 +184,18 @@ class Linter {
                 const oldSource = fs.readFileSync(filePath, "utf-8");
                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
             }
-            fs.writeFileSync(filePath, fileNewSource, "utf-8");
+            fs.writeFileSync(filePath, fileNewSource);
+            this.updateProgram(filePath);
         });
 
         return source;
+    }
+
+    private updateProgram(sourceFilePath: string) {
+        if (this.program !== undefined && this.program.getSourceFile(sourceFilePath) !== undefined) {
+            const options = this.program.getCompilerOptions();
+            this.program = ts.createProgram(this.program.getRootFileNames(), options, ts.createCompilerHost(options, true), this.program);
+        }
     }
 
     private applyRule(rule: IRule, sourceFile: ts.SourceFile): RuleFailure[] {
@@ -200,10 +206,10 @@ class Linter {
                 return rule.apply(sourceFile);
             }
         } catch (error) {
-            if (isError(error)) {
-                showWarningOnce(`Warning: ${error.message}`);
+            if (isError(error) && error.stack !== undefined) {
+                showWarningOnce(error.stack);
             } else {
-                console.warn(`Warning: ${error}`);
+                showWarningOnce(String(error));
             }
             return [];
         }

@@ -23,7 +23,7 @@ import { ExclusionDescriptor } from "./exclusionDescriptors";
 export abstract class Exclusion<TDescriptor extends ExclusionDescriptor> {
     public constructor(protected readonly descriptor: Partial<TDescriptor> = {}) { }
 
-    public abstract excludes(node: ts.Declaration): boolean;
+    public abstract excludes(node: ts.Node): boolean;
 
     protected createSet<T extends All | string>(values?: T[]): Set<T> {
         if (values === undefined || values.length === 0) {

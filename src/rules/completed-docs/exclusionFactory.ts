@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
+import { hasOwnProperty } from "../../utils";
 import { DocType } from "../completedDocsRule";
-import { BlockExclusion } from "./blockExclusion";
-import { ClassExclusion } from "./classExclusion";
+import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
+import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
 import { Exclusion } from "./exclusion";
-import { ExclusionDescriptor, IExclusionDescriptors } from "./exclusionDescriptors";
+import { IInputExclusionDescriptors, InputExclusionDescriptor } from "./exclusionDescriptors";
 import { ITagExclusionDescriptor, TagExclusion } from "./tagExclusion";
 
 export class ExclusionFactory {
-    public constructExclusionsMap(ruleArguments: Array<DocType | IExclusionDescriptors>): Map<DocType, Array<Exclusion<any>>> {
+    public constructExclusionsMap(ruleArguments: IInputExclusionDescriptors[]): Map<DocType, Array<Exclusion<any>>> {
         const exclusionsMap: Map<DocType, Array<Exclusion<any>>> = new Map();
 
         for (const ruleArgument of ruleArguments) {
@@ -33,29 +34,30 @@ export class ExclusionFactory {
         return exclusionsMap;
     }
 
-    private addRequirements(requirementsMap: Map<DocType, Array<Exclusion<any>>>, descriptors: DocType | IExclusionDescriptors) {
+    private addRequirements(exclusionsMap: Map<DocType, Array<Exclusion<any>>>, descriptors: IInputExclusionDescriptors) {
         if (typeof descriptors === "string") {
-            requirementsMap.set(descriptors, this.createRequirementsForDocType(descriptors, {}));
-        } else {
-            for (const docType in descriptors) {
-                if (descriptors.hasOwnProperty(docType)) {
-                    requirementsMap.set(docType as DocType, this.createRequirementsForDocType(docType as DocType, descriptors[docType]));
-                }
+            exclusionsMap.set(descriptors, this.createRequirementsForDocType(descriptors, {}));
+            return;
+        }
+
+        for (const docType in descriptors) {
+            if (hasOwnProperty(descriptors, docType)) {
+                exclusionsMap.set(docType as DocType, this.createRequirementsForDocType(docType as DocType, descriptors[docType]));
             }
         }
     }
 
-    private createRequirementsForDocType(docType: DocType, descriptor: ExclusionDescriptor) {
+    private createRequirementsForDocType(docType: DocType, descriptor: InputExclusionDescriptor) {
         const requirements = [];
 
         if (docType === "methods" || docType === "properties") {
-            requirements.push(new ClassExclusion(descriptor));
+            requirements.push(new ClassExclusion(descriptor as IClassExclusionDescriptor));
         } else {
-            requirements.push(new BlockExclusion(descriptor));
+            requirements.push(new BlockExclusion(descriptor as IBlockExclusionDescriptor));
         }
 
         if ((descriptor as ITagExclusionDescriptor).tags !== undefined) {
-            requirements.push(new TagExclusion(descriptor));
+            requirements.push(new TagExclusion(descriptor as ITagExclusionDescriptor));
         }
 
         return requirements;

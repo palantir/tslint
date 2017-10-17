@@ -1,5 +1,8 @@
 /** @deprecated reason */
-export function other() {}
+export function other(): void;
+/** not deprecated */
+export function other(num: number);
+export function other(_num?: number) {}
 
 /** @deprecated */
 export let other2: Function;
@@ -12,3 +15,20 @@ export let notDeprecated2: any;
 /** @deprecated deprecated default export */
 let def = "";
 export default def;
+
+/** @deprecated */
+export class DeprecatedClass {
+    constructor() {}
+}
+
+export class DeprecatedConstructorClass {
+    /** @deprecated */
+    constructor() {}
+}
+
+export class PartiallyDeprecatedClass {
+    constructor();
+    /** @deprecated */
+    constructor(foo: number);
+    constructor(_foo?: number) {}
+}

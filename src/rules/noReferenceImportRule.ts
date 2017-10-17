@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isImportEqualsDeclaration, isModuleDeclaration, isStringLiteral } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-reference-import",
-        description: 'Don\'t <reference types="foo" /> if you import "foo" anyway.',
+        description: 'Don\'t `<reference types="foo" />` if you import `foo` anyway.',
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",
@@ -37,51 +37,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoReferenceImportWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoReferenceImportWalker extends Lint.AbstractWalker<void> {
-    private imports = new Set<string>();
-    public walk(sourceFile: ts.SourceFile) {
-        if (sourceFile.typeReferenceDirectives.length === 0) {
-            return;
-        }
-        this.findImports(sourceFile.statements);
-        for (const ref of sourceFile.typeReferenceDirectives) {
-            if (this.imports.has(ref.fileName)) {
-                this.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
-            }
-        }
+function walk(ctx: Lint.WalkContext<void>) {
+    if (ctx.sourceFile.typeReferenceDirectives.length === 0) {
+        return;
     }
-
-    private findImports(statements: ts.Statement[]) {
-        for (const statement of statements) {
-            if (isImportDeclaration(statement)) {
-                this.addImport(statement.moduleSpecifier);
-            } else if (isImportEqualsDeclaration(statement)) {
-                if (statement.moduleReference.kind === ts.SyntaxKind.ExternalModuleReference &&
-                    statement.moduleReference.expression !== undefined) {
-                    this.addImport(statement.moduleReference.expression);
-                }
-            } else if (isModuleDeclaration(statement) && statement.body !== undefined && this.sourceFile.isDeclarationFile) {
-                // There can't be any imports in a module augmentation or namespace
-                this.findImportsInModule(statement.body);
-            }
-        }
-    }
-
-    private findImportsInModule(body: ts.ModuleBody): void {
-        if (body.kind === ts.SyntaxKind.ModuleBlock) {
-            return this.findImports(body.statements);
-        } else if (body.kind === ts.SyntaxKind.ModuleDeclaration && body.body !== undefined) {
-            return this.findImportsInModule(body.body);
-        }
-    }
-
-    private addImport(specifier: ts.Expression) {
-        if (isStringLiteral(specifier)) {
-            this.imports.add(specifier.text);
+    const imports = new Set(findImports(ctx.sourceFile, ImportKind.AllStaticImports).map((name) => name.text));
+    for (const ref of ctx.sourceFile.typeReferenceDirectives) {
+        if (imports.has(ref.fileName)) {
+            ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
         }
     }
 }

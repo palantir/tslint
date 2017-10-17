@@ -28,7 +28,7 @@ export interface IBlockExclusionDescriptor {
 export class BlockExclusion extends Exclusion<IBlockExclusionDescriptor> {
     public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
 
-    public excludes(node: ts.Declaration) {
+    public excludes(node: ts.Node) {
         if (this.visibilities.has(ALL)) {
             return false;
         }

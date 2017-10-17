@@ -1,0 +1,16 @@
+class C {
+    constructor() {
+        var C;
+        var D;
+            ~ [Shadowed name: 'D']
+        {
+            class C {
+                constructor() {
+                    var C;
+                        ~ [Shadowed name: 'C']
+                }
+            }
+        }
+    }
+}
+interface D {}

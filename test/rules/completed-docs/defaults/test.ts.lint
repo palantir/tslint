@@ -9,7 +9,6 @@ export class Aaa {
     // TODO: TypeScript API doesn't give us a symbol for this, so we must ignore it.
     // https://github.com/Microsoft/TypeScript/issues/14257
     [Symbol.iterator]() {}
-    ~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for methods.]
 }
 
 export enum Ddd { }

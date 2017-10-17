@@ -32,13 +32,13 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
     public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
-    public excludes(node: ts.Declaration) {
+    public excludes(node: ts.Node) {
         return !(
             this.shouldLocationBeDocumented(node)
             && this.shouldPrivacyBeDocumented(node));
     }
 
-    private shouldLocationBeDocumented(node: ts.Declaration) {
+    private shouldLocationBeDocumented(node: ts.Node) {
         if (this.locations.has(ALL)) {
             return true;
         }
@@ -50,7 +50,7 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
         return this.locations.has(LOCATION_INSTANCE);
     }
 
-    private shouldPrivacyBeDocumented(node: ts.Declaration) {
+    private shouldPrivacyBeDocumented(node: ts.Node) {
         if (this.privacies.has(ALL)) {
             return true;
         }

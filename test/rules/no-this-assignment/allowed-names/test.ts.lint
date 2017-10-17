@@ -1,0 +1,8 @@
+const start = this;
+
+const startEnd = this;
+
+const endStart = this;
+      ~~~~~~~~~~~~~~~       [name % ('endStart')]
+
+[name]: Assigning `this` reference to local variable not allowed: %s.

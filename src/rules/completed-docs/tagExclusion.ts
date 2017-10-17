@@ -40,7 +40,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
             ? this.descriptor.tags.existence
             : undefined);
 
-    public excludes(node: ts.Declaration) {
+    public excludes(node: ts.Node) {
         const documentationNode = this.getDocumentationNode(node);
         const tagsWithContents = this.parseTagsWithContents(documentationNode.getFullText());
 
@@ -62,7 +62,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
         return false;
     }
 
-    private getDocumentationNode(node: ts.Declaration) {
+    private getDocumentationNode(node: ts.Node) {
         if (node.kind === ts.SyntaxKind.VariableDeclaration) {
             return node.parent!;
         }
