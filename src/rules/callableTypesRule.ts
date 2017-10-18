@@ -88,11 +88,8 @@ function renderSuggestion(
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
 
-    const shouldWrapSuggestion = parent.parent &&
-        (parent.parent.kind === ts.SyntaxKind.UnionType || parent.parent.kind === ts.SyntaxKind.IntersectionType);
-
     let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
-    if (shouldWrapSuggestion) {
+    if (parent.parent && shouldWrapSuggestion(parent.parent)) {
         suggestion = `(${suggestion})`;
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
@@ -103,4 +100,13 @@ function renderSuggestion(
         }
     }
     return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
+}
+
+function shouldWrapSuggestion(parent: ts.Node) {
+    switch (parent.kind) {
+        case ts.SyntaxKind.UnionType:
+        case ts.SyntaxKind.IntersectionType:
+            return true;
+        default: return false;
+    }
 }
