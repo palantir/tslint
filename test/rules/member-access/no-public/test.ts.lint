@@ -8,7 +8,12 @@ class {
     public() {}
     constructor(public readonly param : number) {}
                 ~~~~~~ [0]
-    constructor(public param : number) {}
+    public constructor(public readonly param : number) {}
+    ~~~~~~ [0]         
+                       ~~~~~~ [0]
+    constructor(private readonly paramPrivate : number, protected readonly paramProtected : number, readonly paramReadonly : number) {}
+
+    constructor(public necessaryPublic : number) {}
 }
 
 [0]: 'public' is implicit.

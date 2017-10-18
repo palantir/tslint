@@ -1,13 +1,17 @@
 class Members {
     constructor(
-        public readonly parameterPropertyR : number,
-        public parameterPropertyPublic : number,
-        protected parameterPropertyProtected : number,
-        private parameterPropertyPrivate : number,
-        public readonly parameterPropertyPublicR : number,
-        protected readonly parameterPropertyProtectedR : number,
-        private readonly parameterPropertyPrivateR : number
+        public readonly paramReadonly : number,
+        public paramPublic : number,
+        protected paramProtected : number,
+        private paramPrivate : number,
+        public readonly paramPublicReadonly : number,
+        protected readonly paramProtectedReadonly : number,
+        private readonly paramPrivateReadonly : number
     ){
+
+    }
+
+    constructor(public readonly a : number, @decorated public readonly b : number) {
 
     }
 }
