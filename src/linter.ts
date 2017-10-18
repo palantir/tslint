@@ -131,10 +131,11 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        if (this.program) {
+        if (this.program !== undefined) {
             const rootDir = this.program.getCompilerOptions().rootDir;
-            if (rootDir) {
+            if (rootDir !== undefined) {
                 for (const f of this.failures) {
+                    // tslint:disable-next-line:no-string-literal fileName is private
                     f["fileName"] = path.relative(rootDir, f.getFileName());
                 }
             }
