@@ -12,6 +12,7 @@ type U = <T>(t: T) => T
 
 var fn: () => void;
 function f(x: () => void): void;
+function f(x: string | (() => void)): void;
 
 // Overloads OK
 interface K {

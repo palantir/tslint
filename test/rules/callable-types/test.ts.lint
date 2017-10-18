@@ -32,6 +32,8 @@ var fn: {(): void;};
          ~~~~~~~~~ [type % ('() => void')]
 function f(x: { (): void }): void;
                 ~~~~~~~~ [type % ('() => void')]
+function f(x: string | { (): void }): void;
+                         ~~~~~~~~ [type % ('(() => void)')]
 
 // Overloads OK
 interface K {
