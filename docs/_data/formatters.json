@@ -55,7 +55,7 @@
   {
     "formatterName": "stylish",
     "description": "Human-readable formatter which creates stylish messages.",
-    "descriptionDetails": "\nThe output matches that produced by eslint's stylish formatter. Its readability\nenhanced through spacing and colouring",
+    "descriptionDetails": "\nThe output matches what is produced by ESLint's stylish formatter.\nIts readability is enhanced through spacing and colouring.",
     "sample": "\nmyFile.ts\n1:14  semicolon  Missing semicolon",
     "consumer": "human"
   },
