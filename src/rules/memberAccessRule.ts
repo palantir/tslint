@@ -15,7 +15,15 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import {
+    getChildOfKind,
+    getModifier,
+    getNextToken,
+    getTokenAtPosition,
+    isClassLikeDeclaration,
+    isConstructorDeclaration,
+    isParameterProperty,
+} from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -94,14 +102,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<Options>) {
     const { noPublic, checkAccessor, checkConstructor, checkParameterProperty } = ctx.options;
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
-        if (utils.isClassLikeDeclaration(node)) {
+        if (isClassLikeDeclaration(node)) {
             for (const child of node.members) {
                 if (shouldCheck(child)) {
                     check(child);
                 }
-                if (checkParameterProperty && utils.isConstructorDeclaration(child) && child.body !== undefined) {
+                if (checkParameterProperty && isConstructorDeclaration(child) && child.body !== undefined) {
                     for (const param of child.parameters) {
-                        if (utils.isParameterProperty(param)) {
+                        if (isParameterProperty(param)) {
                             check(param);
                         }
                     }
@@ -130,9 +138,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
-        const publicKeyword = utils.getModifier(node, ts.SyntaxKind.PublicKeyword);
+        const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
         if (noPublic && publicKeyword !== undefined) {
-            const readonlyKeyword = utils.getModifier(node, ts.SyntaxKind.ReadonlyKeyword);
+            const readonlyKeyword = getModifier(node, ts.SyntaxKind.ReadonlyKeyword);
             // public is not optional for parameter property without the readonly modifier
             const isPublicOptional = node.kind !== ts.SyntaxKind.Parameter || readonlyKeyword !== undefined;
             if (isPublicOptional) {
@@ -141,13 +149,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     start,
                     publicKeyword.end,
                     Rule.FAILURE_STRING_NO_PUBLIC,
-                    Lint.Replacement.deleteFromTo(start, utils.getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
+                    Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
                 );
             }
         }
         if (!noPublic && publicKeyword === undefined) {
             const nameNode = node.kind === ts.SyntaxKind.Constructor
-                ? utils.getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
+                ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
                 : node.name !== undefined ? node.name : node;
             const memberName = node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier ? node.name.text : undefined;
             ctx.addFailureAtNode(
@@ -160,7 +168,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 }
 
 function getInsertionPosition(member: ts.ClassElement | ts.ParameterDeclaration, sourceFile: ts.SourceFile): number {
-    const node = member.decorators === undefined ? member : utils.getTokenAtPosition(member, member.decorators.end, sourceFile)!;
+    const node = member.decorators === undefined ? member : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
     return node.getStart(sourceFile);
 }
 
