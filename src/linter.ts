@@ -131,6 +131,15 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
+        if (this.program) {
+            const rootDir = this.program.getCompilerOptions().rootDir;
+            if (rootDir) {
+                for (const f of this.failures) {
+                    f["fileName"] = path.relative(rootDir, f.getFileName());
+                }
+            }
+        }
+
         const output = formatter.format(this.failures, this.fixes);
 
         const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
