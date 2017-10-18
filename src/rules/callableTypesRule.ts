@@ -45,8 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if ((isInterfaceDeclaration(node) && noSupertype(node)
-            || isTypeLiteralNode(node))
+        if ((isInterfaceDeclaration(node) && noSupertype(node) || isTypeLiteralNode(node))
             && node.members.length === 1) {
             const member = node.members[0];
             if (isCallSignatureDeclaration(member) &&
@@ -88,7 +87,7 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     const text = sourceFile.text.substring(start, call.end);
 
     let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
-    if (parent.parent !== undefined && shouldWrapSuggestion(parent.parent)) {
+    if (shouldWrapSuggestion(parent.parent!)) {
         suggestion = `(${suggestion})`;
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
