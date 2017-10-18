@@ -79,17 +79,16 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
     return isIdentifier(expr) && expr.text === "Function";
 }
 
-function renderSuggestion(
-    call: ts.CallSignatureDeclaration,
-    parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
-    sourceFile: ts.SourceFile): string {
+function renderSuggestion(call: ts.CallSignatureDeclaration,
+                          parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
+                          sourceFile: ts.SourceFile): string {
 
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
 
     let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
-    if (parent.parent && shouldWrapSuggestion(parent.parent)) {
+    if (parent.parent !== undefined && shouldWrapSuggestion(parent.parent)) {
         suggestion = `(${suggestion})`;
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
@@ -107,6 +106,7 @@ function shouldWrapSuggestion(parent: ts.Node) {
         case ts.SyntaxKind.UnionType:
         case ts.SyntaxKind.IntersectionType:
             return true;
-        default: return false;
+        default:
+            return false;
     }
 }
