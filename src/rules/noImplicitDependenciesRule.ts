@@ -25,47 +25,67 @@ import * as Lint from "../index";
 
 interface Options {
     dev: boolean;
+    optional: boolean;
 }
+
+const OPTION_DEV = "dev";
+const OPTION_OPTIONAL = "optional";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-implicit-dependencies",
-        description: "Disallows importing dependencies that are not specified in package.json",
-        rationale: "bla bla",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        description: "Disallows importing modules that are not listed as dependency in the project's package.json",
+        descriptionDetails: Lint.Utils.dedent`
+            Disallows importing transient dependencies and modules installed above your package's root directory.
+        `,
+        optionsDescription: Lint.Utils.dedent`
+            By default the rule looks at \`"dependencies"\` and \`"peerDependencies"\`.
+            By adding the \`"${OPTION_DEV}"\` option the rule looks at \`"devDependencies"\` instead of \`"peerDependencies"\`.
+            By adding the \`"${OPTION_OPTIONAL}"\` option the rule also looks at \`"optionalDependencies"\`.
+        `,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_DEV, OPTION_OPTIONAL],
+            },
+            minItems: 0,
+            maxItems: 2,
+        },
+        optionExamples: [true, [true, OPTION_DEV], [true, OPTION_OPTIONAL]],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(module: string) {
-        return `Add ${module} to your package.json`;
+        return `Module '${module}' is not listed as dependency in package.json`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
-            dev: this.ruleArguments[0] === "dev",
+            dev: this.ruleArguments.indexOf(OPTION_DEV) !== - 1,
+            optional: this.ruleArguments.indexOf(OPTION_OPTIONAL) !== -1,
         });
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
+    const {options} = ctx;
     let dependencies: Set<string> | undefined;
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
             if (builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(name.text));
+                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
             }
         }
     }
 
     function hasDependency(module: string): boolean {
         if (dependencies === undefined) {
-            dependencies = getDependencies(ctx.sourceFile.fileName, ctx.options.dev);
+            dependencies = getDependencies(ctx.sourceFile.fileName, options);
         }
         return dependencies.has(module);
     }
@@ -87,21 +107,26 @@ interface PackageJson {
     dependencies?: Dependencies;
     devDependencies?: Dependencies;
     peerDependencies?: Dependencies;
+    optionalDependencies?: Dependencies;
 }
 
-function getDependencies(fileName: string, dev: boolean): Set<string> {
+function getDependencies(fileName: string, options: Options): Set<string> {
     const result = new Set<string>();
     const packageJsonPath = findPackageJson(path.resolve(path.dirname(fileName)));
     if (packageJsonPath !== undefined) {
+        // don't use require here to avoid caching
         const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as PackageJson;
         if (content.dependencies !== undefined) {
             addDependencies(result, content.dependencies);
         }
-        if (!dev && content.peerDependencies !== undefined) {
+        if (!options.dev && content.peerDependencies !== undefined) {
             addDependencies(result, content.peerDependencies);
         }
-        if (dev && content.devDependencies !== undefined) {
+        if (options.dev && content.devDependencies !== undefined) {
             addDependencies(result, content.devDependencies);
+        }
+        if (options.optional && content.optionalDependencies !== undefined) {
+            addDependencies(result, content.optionalDependencies);
         }
     }
 
