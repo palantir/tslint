@@ -39,7 +39,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        failures = this.sortFailures(failures)
+        failures = this.sortFailures(failures);
         const outputLines = this.mapToMessages(failures);
 
         // Removes initial blank line
