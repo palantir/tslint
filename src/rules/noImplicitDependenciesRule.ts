@@ -75,7 +75,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const {options} = ctx;
     let dependencies: Set<string> | undefined;
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
-        if (!ts.isExternalModuleNameRelative(name.text)) {
+        if (!(ts as {} as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
             if (builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
