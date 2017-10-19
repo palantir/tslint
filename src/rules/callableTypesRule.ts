@@ -45,8 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if ((isInterfaceDeclaration(node) && noSupertype(node)
-             || isTypeLiteralNode(node))
+        if ((isInterfaceDeclaration(node) && noSupertype(node) || isTypeLiteralNode(node))
             && node.members.length === 1) {
             const member = node.members[0];
             if (isCallSignatureDeclaration(member) &&
@@ -82,11 +81,15 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
 function renderSuggestion(call: ts.CallSignatureDeclaration,
                           parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
                           sourceFile: ts.SourceFile): string {
+
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
-    const suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
 
+    let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
+    if (shouldWrapSuggestion(parent.parent!)) {
+        suggestion = `(${suggestion})`;
+    }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {
             return `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${suggestion}`;
@@ -95,4 +98,14 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
         }
     }
     return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
+}
+
+function shouldWrapSuggestion(parent: ts.Node) {
+    switch (parent.kind) {
+        case ts.SyntaxKind.UnionType:
+        case ts.SyntaxKind.IntersectionType:
+            return true;
+        default:
+            return false;
+    }
 }

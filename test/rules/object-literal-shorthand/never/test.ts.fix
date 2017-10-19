@@ -8,7 +8,11 @@ const asyncFn = {
 };
 
 const bad = {
-  w: function() {},
+  w: function() {
+    const alsoBad = {
+        bad: bad,
+    };
+  },
   x: function*() {},
   [y]: function() {},
   z: z,
@@ -50,3 +54,6 @@ const extraCases = {
 export class ClassA extends ClassZ {
   testMethod() {}
 }
+
+({foo: foo} = {foo: foo});
+

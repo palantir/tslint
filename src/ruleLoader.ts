@@ -52,7 +52,7 @@ export function loadRules(ruleOptionsList: IOptions[],
                 rules.push(rule);
             }
 
-            if (Rule.metadata !== undefined && Rule.metadata.deprecationMessage !== undefined) {
+            if (Rule.metadata !== undefined && Boolean(Rule.metadata.deprecationMessage)) {
                 showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
             }
         }
