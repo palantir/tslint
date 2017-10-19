@@ -35,10 +35,6 @@ export class Formatter extends AbstractFormatter {
         return `${this.mapToMessages(failures).join("\n")}\n`;
     }
 
-    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
-        return failures.slice().sort(RuleFailure.compare);
-    }
-
     private mapToMessages(failures: RuleFailure[]): string[] {
         return failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();

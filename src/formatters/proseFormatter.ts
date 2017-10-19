@@ -61,8 +61,4 @@ export class Formatter extends AbstractFormatter {
 
         return `${fixLines.concat(errorLines).join("\n")}\n`;
     }
-
-    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
-        return failures.slice().sort(RuleFailure.compare);
-    }
 }

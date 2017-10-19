@@ -50,10 +50,6 @@ export class Formatter extends AbstractFormatter {
         return `${outputLines.join("\n")}\n`;
     }
 
-    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
-        return failures.slice().sort(RuleFailure.compare);
-    }
-
     private mapToMessages(failures: RuleFailure[]): string[] {
         if (failures.length === 0) {
             return [];
