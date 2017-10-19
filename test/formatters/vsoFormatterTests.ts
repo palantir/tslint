@@ -45,7 +45,7 @@ describe("VSO Formatter", () => {
             getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
             getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
 
-        const actualResult = formatter.format(failures);
+        const actualResult = formatter.format(failures, failures);
         assert.equal(actualResult, expectedResult);
     });
 
