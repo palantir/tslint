@@ -31,7 +31,12 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
+        failures = this.sortFailures(failures);
         return `${this.mapToMessages(failures).join("\n")}\n`;
+    }
+
+    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
+        return failures.slice().sort(RuleFailure.compare);
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {

@@ -50,6 +50,7 @@ export class Formatter extends AbstractFormatter {
         if (typeof failures[0] === "undefined") {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const outputLines: string[] = [];
 
@@ -96,5 +97,9 @@ export class Formatter extends AbstractFormatter {
         }
 
         return `${outputLines.join("\n")}\n`;
+    }
+
+    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
+        return failures.slice().sort(RuleFailure.compare);
     }
 }

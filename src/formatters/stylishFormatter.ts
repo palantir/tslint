@@ -39,6 +39,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
+        failures = this.sortFailures(failures)
         const outputLines = this.mapToMessages(failures);
 
         // Removes initial blank line
@@ -47,6 +48,10 @@ export class Formatter extends AbstractFormatter {
         }
 
         return `${outputLines.join("\n")}\n`;
+    }
+
+    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
+        return failures.slice().sort(RuleFailure.compare);
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
