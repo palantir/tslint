@@ -24,11 +24,13 @@ import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
 const OPTION_IGNORE_JSDOC = "ignore-jsdoc";
 const OPTION_IGNORE_TEMPLATE_STRINGS = "ignore-template-strings";
+const OPTION_SKIP_BLANK_LINES = "skip-blank-lines";
 
 interface Options {
     ignoreTemplates: boolean;
     ignoreComments: boolean;
     ignoreJsDoc: boolean;
+    skipBlankLines: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -42,13 +44,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"${OPTION_IGNORE_TEMPLATE_STRINGS}"\`: Allows trailing whitespace in template strings.
             * \`"${OPTION_IGNORE_COMMENTS}"\`: Allows trailing whitespace in comments.
-            * \`"${OPTION_IGNORE_JSDOC}"\`: Allows trailing whitespace only in JSDoc comments.`,
+            * \`"${OPTION_IGNORE_JSDOC}"\`: Allows trailing whitespace only in JSDoc comments.
+            * \`"${OPTION_SKIP_BLANK_LINES}"\`: Allows trailing whitespace on empty lines.`,
         hasFix: true,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS],
+                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS, OPTION_SKIP_BLANK_LINES],
             },
         },
         optionExamples: [
@@ -69,6 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ignoreComments,
             ignoreJsDoc: ignoreComments || this.ruleArguments.indexOf(OPTION_IGNORE_JSDOC) !== -1,
             ignoreTemplates: this.ruleArguments.indexOf(OPTION_IGNORE_TEMPLATE_STRINGS) !== -1,
+            skipBlankLines: this.ruleArguments.indexOf(OPTION_SKIP_BLANK_LINES) !== -1,
         });
     }
 }
@@ -78,12 +82,15 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const sourceFile = ctx.sourceFile;
     const text = sourceFile.text;
     for (const line of getLineRanges(sourceFile)) {
-        const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
-        if (match !== null) {
-            possibleFailures.push({
-                end: line.pos + line.contentLength,
-                pos: line.pos + match.index!,
-            });
+        const lineContent = text.substr(line.pos, line.contentLength);
+        if (!ctx.options.skipBlankLines || !isBlankLine(lineContent)) {
+            const match = lineContent.match(/\s+$/);
+            if (match !== null) {
+                possibleFailures.push({
+                    end: line.pos + line.contentLength,
+                    pos: line.pos + match.index!,
+                });
+            }
         }
     }
 
@@ -134,4 +141,9 @@ function getExcludedComments(sourceFile: ts.SourceFile, options: Options): ts.Te
 
 function isJsDoc(sourceText: string, kind: ts.SyntaxKind, range: ts.TextRange) {
     return kind === ts.SyntaxKind.MultiLineCommentTrivia && sourceText[range.pos + 2] === "*" && sourceText[range.pos + 3] !== "*";
+}
+
+function isBlankLine(line: string) {
+    // \s matches any whitespace character (equal to [\r\n\t\f\v ])
+    return line.match(/^\s+$/) !== null;
 }
