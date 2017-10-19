@@ -131,17 +131,38 @@ class Linter {
             throw new Error(`formatter '${formatterName}' not found`);
         }
 
-        const output = formatter.format(this.failures, this.fixes);
+        // Sort failures by failure's line and character.
+        const failures = this.sortFailures(this.failures);
+        const fixes = this.sortFailures(this.fixes);
+        const output = formatter.format(failures, fixes);
 
         const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
         return {
             errorCount,
-            failures: this.failures,
-            fixes: this.fixes,
+            failures,
+            fixes,
             format: formatterName,
             output,
             warningCount: this.failures.length - errorCount,
         };
+    }
+
+    public sortFailures(failures: RuleFailure[]): RuleFailure[] {
+        let sortedFailures: RuleFailure[] = [];
+
+        const fileFailuresMap = createMultiMap(failures, (failure) => [failure.getFileName(), failure]);
+        fileFailuresMap.forEach((fileFailures) => {
+            sortedFailures = sortedFailures.concat(fileFailures.sort((failureA, failureB) => {
+                const failureALineAndCharacter = failureA.getStartPosition().getLineAndCharacter();
+                const failureBLineAndCharacter = failureB.getStartPosition().getLineAndCharacter();
+                if (failureALineAndCharacter.line === failureBLineAndCharacter.line) {
+                    return failureALineAndCharacter.character - failureBLineAndCharacter.character;
+                }
+                return failureALineAndCharacter.line - failureBLineAndCharacter.line;
+            }));
+        });
+
+        return sortedFailures;
     }
 
     private getAllFailures(sourceFile: ts.SourceFile, enabledRules: IRule[]): RuleFailure[] {
