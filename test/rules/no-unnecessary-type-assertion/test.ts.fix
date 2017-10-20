@@ -1,6 +1,8 @@
 const nonNullStringLiteral: 'test';
 const nonNullString: string;
 const nullableString: string|undefined;
+let anyType: any;
+type AnyDuringMigration = any;
 
 // non-null
 let a = nonNullStringLiteral;
@@ -41,6 +43,7 @@ let q = value1;
 let r = <Iface2>value1;
 let s = value2;
 let t = value2 as Iface1;
+let aa = anyType as AnyDuringMigration;
 
 interface TypeA {
     kind: 'a';

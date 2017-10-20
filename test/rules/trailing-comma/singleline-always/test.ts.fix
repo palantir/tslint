@@ -585,3 +585,13 @@ let [...y,] = [];
 [...y,] = [];
 ({...y,} = {})
 function foo(...z,) {}
+
+let foo = bar => bar;
+let foo = (bar => bar);
+let foo = async (bar,) => bar;
+let foo = (async bar => bar);
+
+let foo = (bar,):
+    | 1
+    | 2
+    | 3 => 1;

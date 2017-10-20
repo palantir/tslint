@@ -1,0 +1,6 @@
+let x = (y = 1, z = 2);
+         ~~~~~~~~~~~~   [Don't use the comma operator.]
+
+// Error prone: forgot to add parens around arguments.
+(x, y => x + y)(a, b);
+ ~~~~~~~~~~~~~   [Don't use the comma operator.]

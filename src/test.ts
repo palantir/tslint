@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as colors from "colors";
+import * as chalk from "chalk";
 import * as diff from "diff";
 import * as fs from "fs";
 import * as glob from "glob";
@@ -119,13 +119,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
                 getDirectories: (dir) => fs.readdirSync(dir),
                 getNewLine: () => "\n",
-                getSourceFile(filenameToGet) {
-                    const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
-                    if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
-                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
-                        return ts.createSourceFile(filenameToGet, fileContent, target);
-                    } else if (denormalizeWinPath(filenameToGet) === fileCompileName) {
+                getSourceFile(filenameToGet, target) {
+                    if (denormalizeWinPath(filenameToGet) === fileCompileName) {
                         return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
+                    }
+                    if (path.basename(filenameToGet) === filenameToGet) {
+                        // resolve path of lib.xxx.d.ts
+                        filenameToGet = path.join(path.dirname(ts.getDefaultLibFilePath(compilerOptions)), filenameToGet);
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");
                     return ts.createSourceFile(filenameToGet, text, target, true);
@@ -209,7 +209,7 @@ export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
 
 export function consoleTestResultHandler(testResult: TestResult): boolean {
     // needed to get colors to show up when passing through Grunt
-    (colors as any).enabled = true;
+    (chalk as any).enabled = true;
 
     let didAllTestsPass = true;
 
@@ -219,7 +219,7 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
 
         /* tslint:disable:no-console */
         if (results.skipped) {
-            console.log(colors.yellow(` Skipped, requires typescript ${results.requirement}`));
+            console.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}`));
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
@@ -227,9 +227,9 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
-                console.log(colors.green(" Passed"));
+                console.log(chalk.green(" Passed"));
             } else {
-                console.log(colors.red(" Failed!"));
+                console.log(chalk.red(" Failed!"));
                 didAllTestsPass = false;
                 if (!didMarkupTestPass) {
                     displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
@@ -247,15 +247,15 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
 
 function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) {
     /* tslint:disable:no-console */
-    console.log(colors.green(`Expected (from ${extension} file)`));
-    console.log(colors.red("Actual (from TSLint)"));
+    console.log(chalk.green(`Expected (from ${extension} file)`));
+    console.log(chalk.red("Actual (from TSLint)"));
 
     for (const diffResult of diffResults) {
-        let color = colors.grey;
+        let color = chalk.grey;
         if (diffResult.added) {
-            color = colors.green.underline;
+            color = chalk.green.underline;
         } else if (diffResult.removed) {
-            color = colors.red.underline;
+            color = chalk.red.underline;
         }
         process.stdout.write(color(diffResult.value));
     }

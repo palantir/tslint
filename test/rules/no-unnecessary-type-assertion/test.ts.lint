@@ -1,6 +1,8 @@
 const nonNullStringLiteral: 'test';
 const nonNullString: string;
 const nullableString: string|undefined;
+let anyType: any;
+type AnyDuringMigration = any;
 
 // non-null
 let a = nonNullStringLiteral!;
@@ -54,6 +56,7 @@ let r = <Iface2>value1;
 let s = value2 as Iface2;
         ~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
 let t = value2 as Iface1;
+let aa = anyType as AnyDuringMigration;
 
 interface TypeA {
     kind: 'a';

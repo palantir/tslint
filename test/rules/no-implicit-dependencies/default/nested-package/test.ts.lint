@@ -1,0 +1,24 @@
+import {assert} from 'chai';
+                     ~~~~~~ [err % ('chai')]
+import foo from 'foo';
+                ~~~~~ [err % ('foo')]
+
+if (foo) {
+    const common = require('common');
+                           ~~~~~~~~ [err % ('common')]
+}
+
+export * from "@angular/core";
+              ~~~~~~~~~~~~~~~ [err % ('@angular/core')]
+
+export * from "@angular/common/http";
+              ~~~~~~~~~~~~~~~~~~~~~~ [err % ('@angular/common')]
+
+import * as ts from "typescript";
+                    ~~~~~~~~~~~~ [err % ('typescript')]
+
+import "baz";
+
+const http = require('http');
+
+[err]: Module '%s' is not listed as dependency in package.json

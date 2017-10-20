@@ -36,7 +36,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
-    "member-access": [true, "check-accessor", "check-constructor"],
+    "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [true, {
         "order": "statics-first",
         "alphabetize": true,
@@ -88,6 +88,7 @@ export const rules = {
     // Functionality
     "await-promise": true,
     // "ban": no sensible default
+    "ban-comma-operator": true,
     "curly": true,
     "forin": true,
     // "import-blacklist": no sensible default
@@ -108,6 +109,7 @@ export const rules = {
     "no-eval": true,
     "no-floating-promises": true,
     "no-for-in-array": true,
+    "no-implicit-dependencies": true,
     "no-inferred-empty-object-type": true,
     "no-invalid-template-strings": true,
     // "no-invalid-this": Won't this be deprecated?
@@ -197,6 +199,7 @@ export const rules = {
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
     "no-parameter-properties": true,
+    "no-redundant-jsdoc": true,
     "no-reference-import": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
