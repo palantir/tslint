@@ -70,6 +70,7 @@ export const rules = {
         options: "check-multiline-start",
     },
     "no-duplicate-switch-case": true,
+    "no-implicit-dependencies": true,
     "no-return-await": true,
 };
 // tslint:enable object-literal-sort-keys
