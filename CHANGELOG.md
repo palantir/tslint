@@ -4,7 +4,7 @@ Change Log
 v5.8.0
 ---
 
-## :warning_sign: Deprecations
+## :warning: Deprecations
 
 - [deprecation] [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare/) is deprecated because typescript already does that check (#3286)
 - [deprecation] CLI argument `--type-check` is no longer necessary and will be removed in the next major version (#3322)
