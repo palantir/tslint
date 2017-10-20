@@ -9,6 +9,18 @@ v5.8.0
 - [deprecation] [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare/) is deprecated because typescript already does that check (#3286)
 - [deprecation] CLI argument `--type-check` is no longer necessary and will be removed in the next major version (#3322)
 
+## Updates to `tslint:latest` configuration
+
+```diff
++    "ban-comma-operator": true,
++    "jsdoc-format": {
++        options: "check-multiline-start",
++    },
++    "no-duplicate-switch-case": true,
++    "no-implicit-dependencies": true,
++    "no-return-await": true,
+```
+
 ## :tada: Features
 
 - [feature] Added `linterOptions` configuration field to `tslint.json`, which supports a list of `exclude` globs to disable linting for a subset of files (#2409)
@@ -62,16 +74,15 @@ v5.8.0
 - [enhancement] [`import-blacklist`](https://palantir.github.io/tslint/rules/import-blacklist/) also checks exports and dynamic imports (#3258)
 - [enhancement] [`no-conditional-assignment`](https://palantir.github.io/tslint/rules/no-conditional-assignment/) added check for conditional (ternary) expressions (#2629)
 - [enhancement] Allow [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) to list doc tags that mark a node as not requiring a documentation body. Tags can also provide a regexp matcher to validate that their contents are docs-valid. (#2415)
-- [enhancement] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) enforces that `for-await-of` is only used with `AsyncIterableIterator` (#3297)
+- [enhancement] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) enforces that `for-await-of` is only used with `AsyncIterable` (#3297)
 - [enhancement] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) checks type alias declarations (#3200)
 - [enhancement] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) checks object destructuring (#3318)
 - [enhancement] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) also checks exports (#3258)
 - [enhancement] [`restrict-plus-operands`](https://palantir.github.io/tslint/rules/restrict-plus-operands/): More specific error message when arguments include strings (#3220)
 - [enhancement] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) checks more expressions, for example destructuring, `yield`, property initializer (#3196)
-- [enhancement] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): allow grouping of object properties via additional blank lines when using alphabetical ord
-ering. (#3191)
+- [enhancement] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): allow grouping of object properties via additional blank lines when using alphabetical ordering. (#3191)
 - [enhancement] Migrated CLI from using `colors` module to `chalk` module (#3171)
-- [enhancement] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) apples the ignorePattern to imports (#3187)
+- [enhancement] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) applies the ignorePattern to imports (#3187)
 
 Thanks to our contributors!
 
