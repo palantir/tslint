@@ -17,8 +17,14 @@ if( a.b()  ==  a.b()  ) {
     ~~~~~~~~~~~~~~~~ [0]
 }
 
-// can't catch this one yet?
-if( (a - b)  ==  (a  - b)  ) {
+// Not implemented yet
+
+// Extra space
+if((a + b) == (a  + b)) {
+}
+
+// Commutativity
+if(a + b == b + a) {
 }
 
 [0]: Both sides of a binary expression can't be the same
