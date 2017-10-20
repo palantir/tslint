@@ -41,7 +41,7 @@ class NoImportsWalker extends Lint.RuleWalker {
 }
 ```
 
-Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.ts](https://github.com/palantir/tslint/blob/master/src/language/walker/syntaxWalker.ts).
+Given a walker, TypeScript's parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in [syntaxWalker.ts](https://github.com/palantir/tslint/blob/master/src/language/walker/syntaxWalker.ts). To see what your Typescript file or snippet looks like as an AST, visit [astexplorer.net](http://astexplorer.net/) (__note__: current version of TypeScript may not be supported, yet).
 
 We still need to hook up this new rule to TSLint. First make sure to compile `noImportsRule.ts`:
 
@@ -77,6 +77,8 @@ Final notes:
 ts-node node_modules/.bin/tslint <your options>
 # or
 node -r ts-node/register node_modules/.bin/tslint <your options>
+# or
+NODE_OPTIONS="-r ts-node/register" tslint <your options>
 ```
 
 [0]: {{site.baseurl | append: "/usage/tslint-json/"}}

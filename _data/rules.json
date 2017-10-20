@@ -140,6 +140,17 @@
     "requiresTypeInfo": true
   },
   {
+    "ruleName": "ban-comma-operator",
+    "description": "Bans the comma operator.",
+    "options": null,
+    "optionsDescription": "",
+    "optionExamples": [
+      true
+    ],
+    "type": "typescript",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "ban",
     "description": "Bans the use of specific functions or global methods.",
     "optionsDescription": "\nA list of banned functions or methods in the following format:\n\n* banning functions:\n  * just the name of the function: `\"functionName\"`\n  * the name of the function in an array with one element: `[\"functionName\"]`\n  * an object in the following format: `{\"name\": \"functionName\", \"message\": \"optional explanation message\"}`\n* banning methods:\n  * an array with the object name, method name and optional message: `[\"functionName\", \"methodName\", \"optional message\"]`\n  * an object in the following format: `{\"name\": [\"objectName\", \"methodName\"], \"message\": \"optional message\"}`\n    * you can also ban deeply nested methods: `{\"name\": [\"foo\", \"bar\", \"baz\"]}` bans `foo.bar.baz()`\n    * the first element can contain a wildcard (`*`) that matches everything. `{\"name\": [\"*\", \"forEach\"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.\n",
@@ -356,17 +367,22 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for [\"classes\", \"functions\", \"methods\", \"properties\"],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * All other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [classes, functions, methods, properties]],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"exists\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
         "anyOf": [
           {
-            "enum": [
+            "options": [
               "classes",
+              "enums",
               "functions",
+              "interfaces",
               "methods",
-              "properties"
+              "namespaces",
+              "properties",
+              "types",
+              "variables"
             ],
             "type": "string"
           },
@@ -375,6 +391,22 @@
             "properties": {
               "classes": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -388,6 +420,22 @@
               },
               "enums": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -401,6 +449,22 @@
               },
               "enum-members": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -414,6 +478,22 @@
               },
               "functions": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -427,6 +507,22 @@
               },
               "interfaces": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -440,6 +536,22 @@
               },
               "methods": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "locations": {
                     "enum": [
                       "all",
@@ -462,6 +574,22 @@
               },
               "namespaces": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -475,6 +603,22 @@
               },
               "properties": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "locations": {
                     "enum": [
                       "all",
@@ -497,6 +641,22 @@
               },
               "types": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -510,6 +670,22 @@
               },
               "variables": {
                 "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "exists": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
                   "visibilities": {
                     "enum": [
                       "all",
@@ -549,12 +725,23 @@
               "public",
               "protected"
             ]
+          },
+          "tags": {
+            "content": {
+              "see": [
+                "#.*"
+              ]
+            },
+            "exists": [
+              "inheritdoc"
+            ]
           }
         }
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "curly",
@@ -583,7 +770,8 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   },
   {
     "ruleName": "cyclomatic-complexity",
@@ -790,12 +978,26 @@
   {
     "ruleName": "jsdoc-format",
     "description": "Enforces basic format rules for JSDoc comments.",
-    "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n\n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`",
+    "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n\n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`\n* multiline comments don't allow text after `/** ` in the first line (with option `\"check-multiline-start\"`)\n        ",
     "rationale": "Helps maintain a consistent, readable style for JSDoc comments.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nYou can optionally specify the option `\"check-multiline-start\"` to enforce the first line of a\nmultiline JSDoc comment to be empty.\n        ",
+    "options": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "check-multiline-start"
+        ]
+      }
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "check-multiline-start"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
@@ -854,13 +1056,19 @@
     "ruleName": "max-classes-per-file",
     "description": "\nA file may not contain more than the specified number of classes",
     "rationale": "\nEnsures that files have a single responsibility so that that classes each exist in their own files",
-    "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a file.",
+    "optionsDescription": "\nThe one required argument is an integer indicating the maximum number of classes that can appear in a\nfile. An optional argument `\"exclude-class-expressions\"` can be provided to exclude class expressions\nfrom the overall class count.",
     "options": {
       "type": "array",
       "items": [
         {
           "type": "number",
           "minimum": 1
+        },
+        {
+          "type": "string",
+          "enum": [
+            "exclude-class-expressions"
+          ]
         }
       ],
       "additionalItems": false,
@@ -874,7 +1082,8 @@
       ],
       [
         true,
-        5
+        5,
+        "exclude-class-expressions"
       ]
     ],
     "type": "maintainability",
@@ -920,7 +1129,7 @@
     "ruleName": "member-access",
     "description": "Requires explicit visibility declarations for class members.",
     "rationale": "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
-    "optionsDescription": "\nThese arguments may be optionally provided:\n\n* `\"no-public\"` forbids public accessibility to be specified, because this is the default.\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors\n* `\"check-constructor\"`  enforces explicit visibility on constructors",
+    "optionsDescription": "\nThese arguments may be optionally provided:\n\n* `\"no-public\"` forbids public accessibility to be specified, because this is the default.\n* `\"check-accessor\"` enforces explicit visibility on get/set accessors\n* `\"check-constructor\"`  enforces explicit visibility on constructors\n* `\"check-parameter-property\"`  enforces explicit visibility on parameter properties",
     "options": {
       "type": "array",
       "items": {
@@ -928,11 +1137,12 @@
         "enum": [
           "no-public",
           "check-accessor",
-          "check-constructor"
+          "check-constructor",
+          "check-parameter-property"
         ]
       },
       "minLength": 0,
-      "maxLength": 3
+      "maxLength": 4
     },
     "optionExamples": [
       true,
@@ -1007,9 +1217,12 @@
         true,
         {
           "order": [
-            "static-field",
-            "instance-field",
-            "constructor",
+            "public-static-field",
+            "public-instance-field",
+            "public-constructor",
+            "private-static-field",
+            "private-instance-field",
+            "private-constructor",
             "public-instance-method",
             "protected-instance-method",
             "private-instance-method"
@@ -1128,7 +1341,7 @@
   {
     "ruleName": "no-conditional-assignment",
     "description": "Disallows any type of assignment in conditionals.",
-    "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements.",
+    "descriptionDetails": "This applies to `do-while`, `for`, `if`, and `while` statements and conditional (ternary) expressions.",
     "rationale": "\nAssignments in conditionals are often typos:\nfor example `if (var1 = var2)` instead of `if (var1 == var2)`.\nThey also can be an indicator of overly clever code which decreases maintainability.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -1242,6 +1455,17 @@
     "typescriptOnly": false
   },
   {
+    "description": "Prevents duplicate cases in switch statements.",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "",
+    "ruleName": "no-duplicate-switch-case",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-duplicate-variable",
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
@@ -1342,6 +1566,37 @@
       true
     ],
     "requiresTypeInfo": true,
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-implicit-dependencies",
+    "description": "Disallows importing modules that are not listed as dependency in the project's package.json",
+    "descriptionDetails": "\nDisallows importing transient dependencies and modules installed above your package's root directory.\n        ",
+    "optionsDescription": "\nBy default the rule looks at `\"dependencies\"` and `\"peerDependencies\"`.\nBy adding the `\"dev\"` option the rule looks at `\"devDependencies\"` instead of `\"peerDependencies\"`.\nBy adding the `\"optional\"` option the rule also looks at `\"optionalDependencies\"`.\n        ",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "dev",
+          "optional"
+        ]
+      },
+      "minItems": 0,
+      "maxItems": 2
+    },
+    "optionExamples": [
+      true,
+      [
+        true,
+        "dev"
+      ],
+      [
+        true,
+        "optional"
+      ]
+    ],
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -1557,7 +1812,7 @@
   },
   {
     "ruleName": "no-non-null-assertion",
-    "description": "Disallows non-null assertions.",
+    "description": "Disallows non-null assertions using the `!` postfix operator.",
     "rationale": "Using non-null assertion cancels the benefits of the strict null checking mode.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -1616,6 +1871,17 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-redundant-jsdoc",
+    "description": "Forbids JSDoc which duplicates TypeScript functionality.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "style",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "no-reference-import",
     "description": "Don't `<reference types=\"foo\" />` if you import `foo` anyway.",
     "optionsDescription": "Not configurable.",
@@ -1648,10 +1914,23 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-return-await",
+    "description": "Disallows unnecessary `return await`.",
+    "rationale": "\nAn async function always wraps the return value in a Promise.\nUsing `return await` just adds extra time before the overreaching promise is resolved without changing the semantics.\n        ",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "functionality",
+    "typescriptOnly": false,
+    "hasFix": true
+  },
+  {
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
     "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
-    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNot that you cannot disable variables and parameters.\n        ",
+    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -1806,7 +2085,7 @@
     "ruleName": "no-trailing-whitespace",
     "description": "Disallows trailing whitespace at the end of a line.",
     "rationale": "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
-    "optionsDescription": "\nPossible settings are:\n\n* `\"ignore-template-strings\"`: Allows trailing whitespace in template strings.\n* `\"ignore-comments\"`: Allows trailing whitespace in comments.\n* `\"ignore-jsdoc\"`: Allows trailing whitespace only in JSDoc comments.",
+    "optionsDescription": "\nPossible settings are:\n\n* `\"ignore-template-strings\"`: Allows trailing whitespace in template strings.\n* `\"ignore-comments\"`: Allows trailing whitespace in comments.\n* `\"ignore-jsdoc\"`: Allows trailing whitespace only in JSDoc comments.\n* `\"ignore-blank-lines\"`: Allows trailing whitespace on empty lines.",
     "hasFix": true,
     "options": {
       "type": "array",
@@ -1815,7 +2094,8 @@
         "enum": [
           "ignore-comments",
           "ignore-jsdoc",
-          "ignore-template-strings"
+          "ignore-template-strings",
+          "ignore-blank-lines"
         ]
       }
     },
@@ -1866,6 +2146,29 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-unnecessary-class",
+    "description": "\nDisallows classes that are not strictly necessary.",
+    "rationale": "\nUsers who come from a Java-style OO language may wrap\ntheir utility functions in an extra class, instead of\nputting them at the top level.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"allow-constructor-only\"` ignores classes whose members are constructors.\n* `\"allow-empty-class\"` ignores `class DemoClass {}`.\n* `\"allow-static-only\"` ignores classes whose members are static.",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 0,
+      "maxLength": 3
+    },
+    "optionExamples": [
+      true,
+      [
+        "allow-empty-class",
+        "allow-constructor-only"
+      ]
+    ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-unnecessary-initializer",
     "description": "Forbids a 'var'/'let' statement or destructuring initializer to be initialized to 'undefined'.",
     "hasFix": true,
@@ -1893,8 +2196,16 @@
   {
     "ruleName": "no-unnecessary-type-assertion",
     "description": "Warns if a type assertion does not change the type of an expression.",
-    "options": null,
-    "optionsDescription": "Not configurable",
+    "options": {
+      "type": "list",
+      "listType": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "optionsDescription": "A list of whitelisted assertion types to ignore",
     "type": "typescript",
     "hasFix": true,
     "typescriptOnly": true,
@@ -1957,8 +2268,9 @@
   {
     "ruleName": "no-unused-variable",
     "description": "Disallows unused imports, variables, functions and\n            private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals\n            options, but does not interrupt code compilation.",
+    "descriptionDetails": "\nIn addition to avoiding compilation errors, this rule may still be useful if you\nwish to have `tslint` automatically remove unused imports, variables, functions,\nand private class members, when using TSLint's `--fix` option.",
     "hasFix": true,
-    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names that match the pattern will be ignored.",
+    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names and imports that match the pattern will be ignored.",
     "options": {
       "type": "array",
       "items": {
@@ -2094,21 +2406,30 @@
   },
   {
     "ruleName": "object-literal-shorthand",
-    "description": "Enforces use of ES6 object literal shorthand when possible.",
+    "description": "Enforces/disallows use of ES6 object literal shorthand.",
     "hasFix": true,
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf the 'never' option is provided, any shorthand object literal syntax will cause a failure.",
+    "options": {
+      "type": "string",
+      "enum": [
+        "never"
+      ]
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        "never"
+      ]
     ],
     "type": "style",
     "typescriptOnly": false
   },
   {
     "ruleName": "object-literal-sort-keys",
-    "description": "Checks ordering of keys in object literals.",
+    "description": "\nChecks ordering of keys in object literals.\n\nWhen using the default alphabetical ordering, additional blank lines may be used to group\nobject properties together while keeping the elements within each group in alphabetical order.\n        ",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will to compare keys in a case insensitive way.\n* \"match-declaration-order will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n",
+    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will to compare keys in a case insensitive way.\n* \"match-declaration-order\" will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n",
     "options": {
       "type": "string",
       "enum": [
@@ -2155,7 +2476,8 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   },
   {
     "ruleName": "one-variable-per-declaration",
@@ -2212,13 +2534,16 @@
   },
   {
     "ruleName": "ordered-imports",
-    "description": "Requires that import statements be alphabetized.",
-    "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically.",
+    "description": "Requires that import statements be alphabetized and grouped.",
+    "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use these to group imports\n    however you like, e.g. by first- vs. third-party or thematically or can you can\n    enforce a grouping of third-party, parent directories and the current directory.",
     "hasFix": true,
-    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"grouped-imports\"` option to control the grouping of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"grouped-imports\"` are:\n\n* `false`: Do not enforce grouping. (This is the default.)\n* `true`: Group source imports by `\"bar\"`, `\"../baz\"`, `\"./foo\"`.\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"module-source-path\"` option to control the ordering of imports based full path\nor just the module name\n\nPossible values for `\"module-source-path\"` are:\n\n* `\"full'`: Correct order is  `\"./a/Foo\"`, `\"./b/baz\"`, `\"./c/Bar\"`. (This is the default.)\n* `\"basename\"`: Correct order is `\"./c/Bar\"`, `\"./b/baz\"`, `\"./a/Foo\"`.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
+        "grouped-imports": {
+          "type": "boolean"
+        },
         "import-sources-order": {
           "type": "string",
           "enum": [
@@ -2235,6 +2560,13 @@
             "lowercase-first",
             "lowercase-last",
             "any"
+          ]
+        },
+        "module-source-path": {
+          "type": "string",
+          "enum": [
+            "full",
+            "basename"
           ]
         }
       },
@@ -2497,7 +2829,7 @@
     "ruleName": "semicolon",
     "description": "Enforces consistent semicolon usage at the end of every statement.",
     "hasFix": true,
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionally provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `\"always\"` enforces semicolons at the end of every statement.\n* `\"never\"` disallows semicolons at the end of every statement except for when they are necessary.\n\nThe following arguments may be optionally provided:\n\n* `\"ignore-interfaces\"` skips checking semicolons at the end of interface members.\n* `\"ignore-bound-class-methods\"` skips checking semicolons at the end of bound class methods.\n* `\"strict-bound-class-methods\"` disables any special handling of bound class methods and treats them as any\nother assignment. This option overrides `\"ignore-bound-class-methods\"`.\n        ",
     "options": {
       "type": "array",
       "items": [
@@ -2703,7 +3035,7 @@
     "ruleName": "trailing-comma",
     "description": "\nRequires or disallows trailing commas in array and object literals, destructuring assignments, function typings,\nnamed imports and exports and function parameters.",
     "hasFix": true,
-    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth can be set to a string (`\"always\"` or `\"never\"`) or an object.\n\nThe object can contain any of the following keys: `\"arrays\"`, `\"objects\"`, `\"functions\"`,\n`\"imports\"`, `\"exports\"`, and `\"typeLiterals\"`; each key can have one of the following\nvalues: `\"always\"`, `\"never\"`, and `\"ignore\"`. Any missing keys will default to `\"ignore\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nAn array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function typings, named import statements\nand function parameters.",
+    "optionsDescription": "\nOne argument which is an object with the keys `multiline` and `singleline`.\nBoth can be set to a string (`\"always\"` or `\"never\"`) or an object.\n\nThe object can contain any of the following keys: `\"arrays\"`, `\"objects\"`, `\"functions\"`,\n`\"imports\"`, `\"exports\"`, and `\"typeLiterals\"`; each key can have one of the following\nvalues: `\"always\"`, `\"never\"`, and `\"ignore\"`. Any missing keys will default to `\"ignore\"`.\n\n* `\"multiline\"` checks multi-line object literals.\n* `\"singleline\"` checks single-line object literals.\n\nAn array is considered \"multiline\" if its closing bracket is on a line\nafter the last array element. The same general logic is followed for\nobject literals, function typings, named import statements\nand function parameters.\n\nTo align this rule with the ECMAScript specification that is implemented in modern JavaScript VMs,\nthere is a third option `esSpecCompliant`. Set this option to `true` to disallow trailing comma on\nobject and array rest and rest parameters.\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -2834,6 +3166,9 @@
               }
             }
           ]
+        },
+        "esSpecCompliant": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -2854,7 +3189,8 @@
             "arrays": "always",
             "functions": "never",
             "typeLiterals": "ignore"
-          }
+          },
+          "esSpecCompliant": true
         }
       ]
     ],
@@ -3071,7 +3407,8 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "deprecationMessage": ""
   },
   {
     "ruleName": "unified-signatures",
@@ -3173,6 +3510,7 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "hasFix": true
   }
 ]

@@ -9,6 +9,7 @@ optionsDescription: |-
   * `"no-public"` forbids public accessibility to be specified, because this is the default.
   * `"check-accessor"` enforces explicit visibility on get/set accessors
   * `"check-constructor"`  enforces explicit visibility on constructors
+  * `"check-parameter-property"`  enforces explicit visibility on parameter properties
 options:
   type: array
   items:
@@ -17,8 +18,9 @@ options:
       - no-public
       - check-accessor
       - check-constructor
+      - check-parameter-property
   minLength: 0
-  maxLength: 3
+  maxLength: 4
 optionExamples:
   - 'true'
   - '[true, "no-public"]'
@@ -36,10 +38,11 @@ optionsJSON: |-
       "enum": [
         "no-public",
         "check-accessor",
-        "check-constructor"
+        "check-constructor",
+        "check-parameter-property"
       ]
     },
     "minLength": 0,
-    "maxLength": 3
+    "maxLength": 4
   }
 ---

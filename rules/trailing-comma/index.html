@@ -21,6 +21,11 @@ optionsDescription: |-
   after the last array element. The same general logic is followed for
   object literals, function typings, named import statements
   and function parameters.
+
+  To align this rule with the ECMAScript specification that is implemented in modern JavaScript VMs,
+  there is a third option `esSpecCompliant`. Set this option to `true` to disallow trailing comma on
+  object and array rest and rest parameters.
+          
 options:
   type: object
   properties:
@@ -44,6 +49,8 @@ options:
             objects: *ref_0
             typeLiterals: *ref_0
     singleline: *ref_1
+    esSpecCompliant:
+      type: boolean
   additionalProperties: false
 optionExamples:
   - '[true, {"multiline": "always", "singleline": "never"}]'
@@ -56,7 +63,8 @@ optionExamples:
           "arrays": "always",
           "functions": "never",
           "typeLiterals": "ignore"
-        }
+        },
+        "esSpecCompliant": true
       }
     ]
 type: maintainability
@@ -194,6 +202,9 @@ optionsJSON: |-
             }
           }
         ]
+      },
+      "esSpecCompliant": {
+        "type": "boolean"
       }
     },
     "additionalProperties": false

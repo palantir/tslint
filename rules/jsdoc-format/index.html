@@ -9,14 +9,39 @@ descriptionDetails: |-
   * each asterisk must be followed by either a space or a newline (except for the first and the last)
   * the only characters before the asterisk on each line must be whitespace characters
   * one line comments must start with `/** ` and end with `*/`
+  * multiline comments don't allow text after `/** ` in the first line (with option `"check-multiline-start"`)
+          
 rationale: 'Helps maintain a consistent, readable style for JSDoc comments.'
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  You can optionally specify the option `"check-multiline-start"` to enforce the first line of a
+  multiline JSDoc comment to be empty.
+          
+options:
+  type: array
+  minItems: 0
+  maxItems: 1
+  items:
+    type: string
+    enum:
+      - check-multiline-start
 optionExamples:
   - 'true'
+  - '[true, "check-multiline-start"]'
 type: style
 typescriptOnly: false
 layout: rule
 title: 'Rule: jsdoc-format'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "minItems": 0,
+    "maxItems": 1,
+    "items": {
+      "type": "string",
+      "enum": [
+        "check-multiline-start"
+      ]
+    }
+  }
 ---

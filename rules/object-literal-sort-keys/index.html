@@ -1,6 +1,12 @@
 ---
 ruleName: object-literal-sort-keys
-description: Checks ordering of keys in object literals.
+description: |-
+
+  Checks ordering of keys in object literals.
+
+  When using the default alphabetical ordering, additional blank lines may be used to group
+  object properties together while keeping the elements within each group in alphabetical order.
+          
 rationale: Useful in preventing merge conflicts
 optionsDescription: |
 
@@ -8,7 +14,7 @@ optionsDescription: |
   The following may optionally be passed:
 
   * "ignore-case" will to compare keys in a case insensitive way.
-  * "match-declaration-order will prefer to use the key ordering of the contextual type of the object literal, as in:
+  * "match-declaration-order" will prefer to use the key ordering of the contextual type of the object literal, as in:
 
       interface I { foo: number; bar: number; }
       const obj: I = { foo: 1, bar: 2 };

@@ -1,13 +1,27 @@
 ---
 ruleName: no-unnecessary-type-assertion
 description: Warns if a type assertion does not change the type of an expression.
-options: null
-optionsDescription: Not configurable
+options:
+  type: list
+  listType:
+    type: array
+    items:
+      type: string
+optionsDescription: A list of whitelisted assertion types to ignore
 type: typescript
 hasFix: true
 typescriptOnly: true
 requiresTypeInfo: true
 layout: rule
 title: 'Rule: no-unnecessary-type-assertion'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "list",
+    "listType": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
 ---
