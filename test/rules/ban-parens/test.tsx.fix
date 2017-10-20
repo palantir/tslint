@@ -1,0 +1,5 @@
+const foo = 
+    <div>text</div>
+;
+
+<button foo={'a'} />

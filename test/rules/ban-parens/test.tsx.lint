@@ -1,0 +1,9 @@
+const foo = (
+            ~
+    <div>text</div>
+~~~~~~~~~~~~~~~~~~~
+);
+~  [Don't include parentheses around the initializer child of an expression of type VariableDeclaration]
+
+<button foo={('a')} />
+             ~~~~~     [Don't include parentheses around an expression of type LiteralExpression]
