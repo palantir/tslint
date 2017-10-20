@@ -48,4 +48,4 @@ function* generator() {
     yield 1;
 }
 
-[0]: 'for-await-of' of non-AsyncIterable.
+[0]: Invalid 'for-await-of' of a non-AsyncIterable value.
