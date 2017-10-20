@@ -116,6 +116,7 @@ export const rules = {
     "no-misused-new": true,
     "no-null-keyword": true,
     "no-object-literal-type-assertion": true,
+    "no-return-await": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
