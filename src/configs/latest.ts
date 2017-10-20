@@ -65,11 +65,12 @@ export const rules = {
     },
 
     // added in v5.8
-    "no-duplicate-switch-case": true,
+    "ban-comma-operator": true,
     "jsdoc-format": {
         options: "check-multiline-start",
     },
-    "ban-comma-operator": true,
+    "no-duplicate-switch-case": true,
+    "no-return-await": true,
 };
 // tslint:enable object-literal-sort-keys
 
