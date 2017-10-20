@@ -159,9 +159,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, { order: "fields-first" }],
             [true, {
                 order: [
-                    "static-field",
-                    "instance-field",
-                    "constructor",
+                    "public-static-field",
+                    "public-instance-field",
+                    "public-constructor",
+                    "private-static-field",
+                    "private-instance-field",
+                    "private-constructor",
                     "public-instance-method",
                     "protected-instance-method",
                     "private-instance-method",
@@ -250,7 +253,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                     const curName = nameString(member.name);
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(member.name,
+                        this.addFailureAtNode(
+                            member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
                         prevName = curName;
@@ -385,7 +389,7 @@ function parseOptions(options: any[]): Options {
     return { order, alphabetize };
 }
 function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
-    if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
+    if (allOptions == undefined || allOptions.length === 0 || allOptions[0] == undefined) {
         throw new Error("Got empty options");
     }
 

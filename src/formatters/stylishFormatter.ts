@@ -19,7 +19,7 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import * as colors from "colors";
+import * as chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -29,8 +29,8 @@ export class Formatter extends AbstractFormatter {
         formatterName: "stylish",
         description: "Human-readable formatter which creates stylish messages.",
         descriptionDetails: Utils.dedent`
-            The output matches that produced by eslint's stylish formatter. Its readability
-            enhanced through spacing and colouring`,
+            The output matches what is produced by ESLint's stylish formatter.
+            Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
         1:14  semicolon  Missing semicolon`,
@@ -70,12 +70,12 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString     = colors.yellow(failureString);
+            failureString     = chalk.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
             ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = colors.grey(ruleName);
+            ruleName     = chalk.grey(ruleName);
 
             // Lines
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
@@ -84,8 +84,8 @@ export class Formatter extends AbstractFormatter {
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             positionTuple = failure.getRuleSeverity() === "warning"
-                ? colors.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
-                : colors.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
+                ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
+                : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;

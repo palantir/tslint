@@ -131,9 +131,42 @@ dedent`${1}`;
 dedent`${[]}`;
 ~~~~~~ [err % ('dedent')]
 
-// TODO: those should be an error
+import {DeprecatedClass, DeprecatedConstructorClass, PartiallyDeprecatedClass} from "./other.test"
+{
+    const a: DeprecatedClass = new DeprecatedClass();
+             ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+                                   ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+    const b: DeprecatedConstructorClass = new DeprecatedConstructorClass();
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('DeprecatedConstructorClass')]
+    const c: PartiallyDeprecatedClass = new PartiallyDeprecatedClass();
+    const d: PartiallyDeprecatedClass = new PartiallyDeprecatedClass(1);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('PartiallyDeprecatedClass')]
+}
+
 let {f, g, h} = p;
-(function ({f, g}: I) {})
+     ~ [err % ('f')]
+           ~ [errmsg % ('h', 'Use g instead.')]
+({f, g, h} = p);
+  ~ [err % ('f')]
+        ~ [errmsg % ('h', 'Use g instead.')]
+
+({f: g, g: h, h: f} = p);
+  ~ [err % ('f')]
+              ~ [errmsg % ('h', 'Use g instead.')]
+
+{
+    /** @deprecated Just don't use. */
+    let tmp;
+    ({f: tmp} = p);
+      ~ [err % ('f')]
+         ~~~ [errmsg % ('tmp', "Just don't use.")]
+}
+
+(function ({f, g, h: tmp}: I) {})
+            ~ [err % ('f')]
+                  ~ [errmsg % ('h', 'Use g instead.')]
+(function ({foo: {f, g}}: {foo: I}) {})
+                  ~ [err % ('f')]
 
 [err]: %s is deprecated.
 [errmsg]: %s is deprecated: %s

@@ -32,14 +32,19 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "object-literal-sort-keys",
-        description: "Checks ordering of keys in object literals.",
+        description: Lint.Utils.dedent`
+            Checks ordering of keys in object literals.
+
+            When using the default alphabetical ordering, additional blank lines may be used to group
+            object properties together while keeping the elements within each group in alphabetical order.
+        `,
         rationale: "Useful in preventing merge conflicts",
         optionsDescription: Lint.Utils.dedent`
             By default, this rule checks that keys are in alphabetical order.
             The following may optionally be passed:
 
             * "${OPTION_IGNORE_CASE}" will to compare keys in a case insensitive way.
-            * "${OPTION_MATCH_DECLARATION_ORDER} will prefer to use the key ordering of the contextual type of the object literal, as in:
+            * "${OPTION_MATCH_DECLARATION_ORDER}" will prefer to use the key ordering of the contextual type of the object literal, as in:
 
                 interface I { foo: number; bar: number; }
                 const obj: I = { foo: 1, bar: 2 };
@@ -141,7 +146,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                         property.name.kind === ts.SyntaxKind.StringLiteral) {
                         const key = ignoreCase ? property.name.text.toLowerCase() : property.name.text;
                         // comparison with undefined is expected
-                        if (lastKey! > key) {
+                        if (lastKey! > key && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(property.name, Rule.FAILURE_STRING_ALPHABETICAL(property.name.text));
                             return; // only show warning on first out-of-order property
                         }
@@ -182,6 +187,28 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
             break;
         }
     }
+}
+
+function hasBlankLineBefore(sourceFile: ts.SourceFile, element: ts.ObjectLiteralElement) {
+    let comments = ts.getLeadingCommentRanges(sourceFile.text, element.pos);
+
+    if (comments === undefined) {
+        comments = [];  // it will be easier to work with an empty array down below...
+    }
+
+    const elementStart = comments.length > 0 ? comments[comments.length - 1].end : element.getFullStart();
+
+    // either the element itself, or one of its leading comments must have an extra new line before them
+    return hasDoubleNewLine(sourceFile, elementStart) || comments.some((comment) => {
+        const commentLine = ts.getLineAndCharacterOfPosition(sourceFile, comment.pos).line;
+        const commentLineStartPosition = ts.getPositionOfLineAndCharacter(sourceFile, commentLine, 0);
+
+        return hasDoubleNewLine(sourceFile, commentLineStartPosition - 4);
+    });
+}
+
+function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
+    return /(\r\n|\r|\n){2}/.test(sourceFile.text.slice(position, position + 4));
 }
 
 function getTypeName(t: TypeLike): string | undefined {

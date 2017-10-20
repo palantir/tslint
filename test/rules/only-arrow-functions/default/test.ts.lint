@@ -27,6 +27,7 @@ function hasThisParameter(this) {}
 let hasThisParameter = function(this) {}
 
 let usesThis = function() { this; }
+let usesThis2 = function(foo = this) {}
 
 let notUsesThis = function() {
                   ~~~~~~~~ [0]

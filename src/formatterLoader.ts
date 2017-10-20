@@ -32,7 +32,7 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
 
         // first check for core formatters
         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
-        if (Formatter != null) {
+        if (Formatter !== undefined) {
             return Formatter;
         }
 

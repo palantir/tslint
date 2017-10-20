@@ -37,12 +37,14 @@ export class FatalError extends Error {
     constructor(public message: string, public innerError?: Error) {
         super(message);
         this.name = FatalError.NAME;
-        this.stack = new Error().stack;
+
+        // Fix prototype chain for target ES5
+        Object.setPrototypeOf(this, FatalError.prototype);
     }
 }
 
 export function isError(possibleError: any): possibleError is Error {
-    return possibleError != null && (possibleError as Error).message !== undefined;
+    return possibleError != undefined && (possibleError as Error).message !== undefined;
 }
 
 export function showWarningOnce(message: string) {
