@@ -85,18 +85,14 @@ finally
 }
 
 try{
-   ~ [missing whitespace]
     foo();
 } catch(e){
-          ~ [missing whitespace]
     bar();
 } finally{
-         ~ [missing whitespace]
     baz();
 }
 
 while(x < 10){
-             ~ [missing whitespace]
     x++;
 }
 
@@ -171,11 +167,4 @@ type Bas = "a";
 
 {
     {}{}{} // just some random blocks
-}
-
-if (true) {
-    true;
-}else {
- ~~~~   [missing whitespace]
-    false;
 }
