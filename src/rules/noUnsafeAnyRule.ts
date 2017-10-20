@@ -53,10 +53,11 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         if (sourceFile.isDeclarationFile) {
             return; // Not possible in a declaration file.
         }
-        sourceFile.statements.forEach(this.noCheck);
+        sourceFile.statements.forEach(this.visitNodeCallback);
     }
 
-    private noCheck = (node: ts.Node) => void this.visitNode(node);
+    /** Wraps `visitNode` with the correct `this` binding and discards the return value to prevent `forEachChild` from returning early */
+    private visitNodeCallback = (node: ts.Node) => void this.visitNode(node);
 
     private visitNode(node: ts.Node, anyOk?: boolean): boolean | undefined {
         switch (node.kind) {
@@ -95,7 +96,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return this.visitNode(
                     (node as ts.ExpressionStatement | ts.AssertionExpression | ts.TemplateSpan | ts.ThrowStatement | ts.TypeOfExpression |
                              ts.VoidExpression).expression,
-                    /*anyOk*/ true,
+                    true,
                 );
             case ts.SyntaxKind.PropertyAssignment: {
                 const {name, initializer} = (node as ts.PropertyAssignment);
@@ -103,14 +104,14 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 if (isReassignmentTarget(node.parent as ts.ObjectLiteralExpression)) {
                     return this.visitNode(initializer, true);
                 }
-                return this.checkContextual(initializer, true);
+                return this.checkContextualType(initializer, true);
             }
             case ts.SyntaxKind.ShorthandPropertyAssignment: {
                 const { name, objectAssignmentInitializer} = node as ts.ShorthandPropertyAssignment;
                 if (objectAssignmentInitializer !== undefined) {
-                    return this.checkContextual(objectAssignmentInitializer);
+                    return this.checkContextualType(objectAssignmentInitializer);
                 }
-                return this.checkContextual(name, true);
+                return this.checkContextualType(name, true);
             }
             case ts.SyntaxKind.PropertyDeclaration: {
                 const { name, initializer } = node as ts.PropertyDeclaration;
@@ -124,7 +125,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 const { tag, template } = node as ts.TaggedTemplateExpression;
                 if (template.kind === ts.SyntaxKind.TemplateExpression) {
                     for (const { expression } of template.templateSpans) {
-                        this.checkContextual(expression);
+                        this.checkContextualType(expression);
                     }
                 }
                 // Also check the template expression itself
@@ -138,7 +139,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 const { expression, arguments: args } = node as ts.CallExpression | ts.NewExpression;
                 if (args !== undefined) {
                     for (const arg of args) {
-                        this.checkContextual(arg);
+                        this.checkContextualType(arg);
                     }
                 }
                 if (this.visitNode(expression)) {
@@ -165,7 +166,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             }
             case ts.SyntaxKind.ReturnStatement: {
                 const { expression } = node as ts.ReturnStatement;
-                return expression !== undefined  && this.checkContextual(expression, true);
+                return expression !== undefined  && this.checkContextualType(expression, true);
             }
             case ts.SyntaxKind.SwitchStatement: {
                 const { expression, caseBlock: { clauses } } = node as ts.SwitchStatement;
@@ -231,17 +232,18 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return false;
             case ts.SyntaxKind.ArrayLiteralExpression: {
                 for (const element of (node as ts.ArrayLiteralExpression).elements) {
-                    this.checkContextual(element, true);
+                    this.checkContextualType(element, true);
                 }
                 return false;
             }
             case ts.SyntaxKind.JsxExpression:
-                return (node as ts.JsxExpression).expression !== undefined && this.checkContextual((node as ts.JsxExpression).expression!);
+                return (node as ts.JsxExpression).expression !== undefined &&
+                    this.checkContextualType((node as ts.JsxExpression).expression!);
         }
         if (isTypeNodeKind(node.kind) || isTokenKind(node.kind)) {
             return false;
         }
-        return ts.forEachChild(node, this.noCheck);
+        return ts.forEachChild(node, this.visitNodeCallback);
     }
 
     private check(node: ts.Expression): boolean {
@@ -252,7 +254,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         return true;
     }
 
-    private checkContextual(node: ts.Expression, allowIfNoContextualType?: boolean) {
+    private checkContextualType(node: ts.Expression, allowIfNoContextualType?: boolean) {
         const type = this.checker.getContextualType(node);
         return this.visitNode(node, type === undefined && allowIfNoContextualType || isAny(type));
     }
@@ -264,7 +266,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         return initializer !== undefined &&
             this.visitNode(
                 initializer,
-                /*anyOk*/ name.kind === ts.SyntaxKind.Identifier && (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword) ||
+                /*anyOk*/
+                name.kind === ts.SyntaxKind.Identifier && (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword) ||
                 type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword,
             );
     }
@@ -302,7 +305,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     private checkYieldExpression(node: ts.YieldExpression, anyOk: boolean | undefined) {
         if (node.expression !== undefined) {
-            this.checkContextual(node.expression, true);
+            this.checkContextualType(node.expression, true);
         }
         if (anyOk) {
             return false;
@@ -313,12 +316,12 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     private checkClassLikeDeclaration(node: ts.ClassLikeDeclaration) {
         if (node.decorators !== undefined) {
-            node.decorators.forEach(this.noCheck);
+            node.decorators.forEach(this.visitNodeCallback);
         }
         if (node.heritageClauses !== undefined) {
-            node.heritageClauses.forEach(this.noCheck);
+            node.heritageClauses.forEach(this.visitNodeCallback);
         }
-        return node.members.forEach(this.noCheck);
+        return node.members.forEach(this.visitNodeCallback);
     }
 
     private checkBindingName(node: ts.BindingName) {
@@ -333,7 +336,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                     }
                     this.checkBindingName(element.name);
                     if (element.initializer !== undefined) {
-                        this.checkContextual(element.initializer);
+                        this.checkContextualType(element.initializer);
                     }
                 }
             }
