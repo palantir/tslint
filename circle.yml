@@ -12,16 +12,3 @@ test:
   override:
     - case $CIRCLE_NODE_INDEX in 0) npm run clean && yarn compile && yarn add typescript@2.1 && yarn test ;; 1) npm run clean && yarn compile && yarn add typescript@2.2 && yarn test ;; 2) yarn verify ;; 3) npm run clean && yarn compile && yarn add typescript@next && yarn test ;; esac:
         parallel: true
-deployment:
-  npm-latest:
-    # match semver tag (e.g. 3.12.7)
-    tag: /^\d\d?\.\d\d?\.\d\d?$/
-    owner: palantir
-    commands:
-      - ./scripts/npmPublish.sh latest
-  npm-next:
-    # match semver tag with dev prerelease tag (e.g. 3.12.7-dev.2)
-    tag: /^\d\d?\.\d\d?\.\d\d?-dev\.\d\d?$/
-    owner: palantir
-    commands:
-      - ./scripts/npmPublish.sh next
