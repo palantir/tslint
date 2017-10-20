@@ -1,6 +1,6 @@
 ---
 ruleName: ordered-imports
-description: Requires that import statements be alphabetized.
+description: Requires that import statements be alphabetized and grouped.
 descriptionDetails: |-
 
   Enforce a consistent ordering for ES6 imports:
@@ -11,7 +11,8 @@ descriptionDetails: |-
           import * as foo from "a";
           import * as bar from "b";
   - Groups of imports are delineated by blank lines. You can use these to group imports
-      however you like, e.g. by first- vs. third-party or thematically.
+      however you like, e.g. by first- vs. third-party or thematically or can you can
+      enforce a grouping of third-party, parent directories and the current directory.
 hasFix: true
 optionsDescription: |-
 
@@ -25,6 +26,14 @@ optionsDescription: |-
   * `"lowercase-last"`: Correct order is `"Bar"`, `"Foo"`, `"baz"`.
   * `"any"`: Allow any order.
 
+  You may set the `"grouped-imports"` option to control the grouping of source
+  imports (the `"foo"` in `import {A, B, C} from "foo"`).
+
+  Possible values for `"grouped-imports"` are:
+
+  * `false`: Do not enforce grouping. (This is the default.)
+  * `true`: Group source imports by `"bar"`, `"../baz"`, `"./foo"`.
+
   You may set the `"named-imports-order"` option to control the ordering of named
   imports (the `{A, B, C}` in `import {A, B, C} from "foo"`).
 
@@ -35,10 +44,20 @@ optionsDescription: |-
   * `"lowercase-last"`: Correct order is `{A, C, b}`.
   * `"any"`: Allow any order.
 
+  You may set the `"module-source-path"` option to control the ordering of imports based full path
+  or just the module name
+
+  Possible values for `"module-source-path"` are:
+
+  * `"full'`: Correct order is  `"./a/Foo"`, `"./b/baz"`, `"./c/Bar"`. (This is the default.)
+  * `"basename"`: Correct order is `"./c/Bar"`, `"./b/baz"`, `"./a/Foo"`.
+
           
 options:
   type: object
   properties:
+    grouped-imports:
+      type: boolean
     import-sources-order:
       type: string
       enum:
@@ -53,6 +72,11 @@ options:
         - lowercase-first
         - lowercase-last
         - any
+    module-source-path:
+      type: string
+      enum:
+        - full
+        - basename
   additionalProperties: false
 optionExamples:
   - 'true'
@@ -72,6 +96,9 @@ optionsJSON: |-
   {
     "type": "object",
     "properties": {
+      "grouped-imports": {
+        "type": "boolean"
+      },
       "import-sources-order": {
         "type": "string",
         "enum": [
@@ -88,6 +115,13 @@ optionsJSON: |-
           "lowercase-first",
           "lowercase-last",
           "any"
+        ]
+      },
+      "module-source-path": {
+        "type": "string",
+        "enum": [
+          "full",
+          "basename"
         ]
       }
     },

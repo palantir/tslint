@@ -31,6 +31,8 @@ A path to a directory or an array of paths to directories of [custom rules][2]. 
   - [Check out the full rules list here][3].
 * `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files.
 * `defaultSeverity?: "error" | "warning" | "off"`: The severity level used when a rule specifies a default warning level. If undefined, "error" is used. This value is not inherited and is only applied to rules in this file.
+* `linterOptions?: { exclude?: string[] }`:
+  - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
 
 `tslint.json` configuration files may have JavaScript-style `// single-line` and `/* multi-line */` comments in them (even though this is technically invalid JSON). If this confuses your syntax highlighter, you may want to switch it to JavaScript format.
 
@@ -50,6 +52,7 @@ An example `tslint.json` file might look like this:
         "no-conditional-assignment": true,
         "no-consecutive-blank-lines": false,
         "no-console": {
+            "severity": "warning",
             "options": [
                 "debug",
                 "info",

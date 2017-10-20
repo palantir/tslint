@@ -4,6 +4,11 @@ description: |-
   Disallows unused imports, variables, functions and
               private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
               options, but does not interrupt code compilation.
+descriptionDetails: |-
+
+  In addition to avoiding compilation errors, this rule may still be useful if you
+  wish to have `tslint` automatically remove unused imports, variables, functions,
+  and private class members, when using TSLint's `--fix` option.
 hasFix: true
 optionsDescription: |-
 
@@ -13,7 +18,7 @@ optionsDescription: |-
       * NOTE: this option is experimental and does not work with classes
       that use abstract method declarations, among other things.
   * `{"ignore-pattern": "pattern"}` where pattern is a case-sensitive regexp.
-  Variable names that match the pattern will be ignored.
+  Variable names and imports that match the pattern will be ignored.
 options:
   type: array
   items:

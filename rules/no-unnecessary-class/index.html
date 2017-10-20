@@ -1,0 +1,40 @@
+---
+ruleName: no-unnecessary-class
+description: |-
+
+  Disallows classes that are not strictly necessary.
+rationale: |-
+
+  Users who come from a Java-style OO language may wrap
+  their utility functions in an extra class, instead of
+  putting them at the top level.
+optionsDescription: |-
+
+  Three arguments may be optionally provided:
+
+  * `"allow-constructor-only"` ignores classes whose members are constructors.
+  * `"allow-empty-class"` ignores `class DemoClass {}`.
+  * `"allow-static-only"` ignores classes whose members are static.
+options:
+  type: array
+  items:
+    type: string
+  minLength: 0
+  maxLength: 3
+optionExamples:
+  - 'true'
+  - '["allow-empty-class", "allow-constructor-only"]'
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-unnecessary-class'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string"
+    },
+    "minLength": 0,
+    "maxLength": 3
+  }
+---

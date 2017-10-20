@@ -1,0 +1,44 @@
+---
+ruleName: no-implicit-dependencies
+description: Disallows importing modules that are not listed as dependency in the project's package.json
+descriptionDetails: |-
+
+  Disallows importing transient dependencies and modules installed above your package's root directory.
+          
+optionsDescription: |-
+
+  By default the rule looks at `"dependencies"` and `"peerDependencies"`.
+  By adding the `"dev"` option the rule looks at `"devDependencies"` instead of `"peerDependencies"`.
+  By adding the `"optional"` option the rule also looks at `"optionalDependencies"`.
+          
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - dev
+      - optional
+  minItems: 0
+  maxItems: 2
+optionExamples:
+  - 'true'
+  - '[true, "dev"]'
+  - '[true, "optional"]'
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-implicit-dependencies'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "dev",
+        "optional"
+      ]
+    },
+    "minItems": 0,
+    "maxItems": 2
+  }
+---

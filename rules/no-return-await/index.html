@@ -1,0 +1,19 @@
+---
+ruleName: no-return-await
+description: Disallows unnecessary `return await`.
+rationale: |-
+
+  An async function always wraps the return value in a Promise.
+  Using `return await` just adds extra time before the overreaching promise is resolved without changing the semantics.
+          
+optionsDescription: Not configurable.
+options: null
+optionExamples:
+  - 'true'
+type: functionality
+typescriptOnly: false
+hasFix: true
+layout: rule
+title: 'Rule: no-return-await'
+optionsJSON: 'null'
+---

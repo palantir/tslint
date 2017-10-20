@@ -3,7 +3,7 @@ ruleName: completed-docs
 description: Enforces documentation for important items be filled out.
 optionsDescription: |-
 
-  `true` to enable for ["classes", "functions", "methods", "properties"],
+  `true` to enable for [classes, functions, methods, properties]],
   or an array with each item in one of two formats:
 
   * `string` to enable for that type
@@ -18,10 +18,14 @@ optionsDescription: |-
               * `"all"`
               * `"instance"`
               * `"static"`
-      * All other types may specify `"visibilities"`:
+      * Other types may specify `"visibilities"`:
           * `"all"`
           * `"exported"`
           * `"internal"`
+      * All types may also provide `"tags"`
+        with members specifying tags that allow the docs to not have a body.
+          * `"content"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.
+          * `"exists"`: Array of tags that must only exist to count as complete docs.
 
   Types that may be enabled are:
 
@@ -39,16 +43,31 @@ options:
   type: array
   items:
     anyOf:
-      - enum:
+      - options:
           - classes
+          - enums
           - functions
+          - interfaces
           - methods
+          - namespaces
           - properties
+          - types
+          - variables
         type: string
       - type: object
         properties:
           classes: &ref_0
             properties:
+              tags:
+                properties:
+                  content:
+                    items:
+                      type: string
+                    type: object
+                  exists:
+                    items:
+                      type: string
+                    type: array
               visibilities:
                 enum:
                   - all
@@ -62,6 +81,16 @@ options:
           interfaces: *ref_0
           methods: &ref_1
             properties:
+              tags:
+                properties:
+                  content:
+                    items:
+                      type: string
+                    type: object
+                  exists:
+                    items:
+                      type: string
+                    type: array
               locations:
                 enum:
                   - all
@@ -89,11 +118,13 @@ optionExamples:
       {
         "enums": true,
         "functions": {"visibilities": ["exported"]},
-        "methods": {"locations": "instance", "privacies": ["public", "protected"]}
+        "methods": {"locations": "instance", "privacies": ["public", "protected"]},
+        "tags": {"content": {"see": ["#.*"]}, "exists": ["inheritdoc"]}
       }
     ]
 type: style
 typescriptOnly: false
+requiresTypeInfo: true
 layout: rule
 title: 'Rule: completed-docs'
 optionsJSON: |-
@@ -102,11 +133,16 @@ optionsJSON: |-
     "items": {
       "anyOf": [
         {
-          "enum": [
+          "options": [
             "classes",
+            "enums",
             "functions",
+            "interfaces",
             "methods",
-            "properties"
+            "namespaces",
+            "properties",
+            "types",
+            "variables"
           ],
           "type": "string"
         },
@@ -115,6 +151,22 @@ optionsJSON: |-
           "properties": {
             "classes": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -128,6 +180,22 @@ optionsJSON: |-
             },
             "enums": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -141,6 +209,22 @@ optionsJSON: |-
             },
             "enum-members": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -154,6 +238,22 @@ optionsJSON: |-
             },
             "functions": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -167,6 +267,22 @@ optionsJSON: |-
             },
             "interfaces": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -180,6 +296,22 @@ optionsJSON: |-
             },
             "methods": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "locations": {
                   "enum": [
                     "all",
@@ -202,6 +334,22 @@ optionsJSON: |-
             },
             "namespaces": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -215,6 +363,22 @@ optionsJSON: |-
             },
             "properties": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "locations": {
                   "enum": [
                     "all",
@@ -237,6 +401,22 @@ optionsJSON: |-
             },
             "types": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
@@ -250,6 +430,22 @@ optionsJSON: |-
             },
             "variables": {
               "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "exists": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
                 "visibilities": {
                   "enum": [
                     "all",
