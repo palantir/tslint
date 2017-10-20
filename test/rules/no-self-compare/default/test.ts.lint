@@ -1,0 +1,47 @@
+// Operators that trigger the rule
+var x = (y == y) ? 1 : 2;
+         ~~~~~~[0]
+var x = (y === y) ? 1 : 2;
+         ~~~~~~~[0]
+var x = (y != y) ? 1 : 2;
+         ~~~~~~ [0]
+var x = (y !== y) ? 1 : 2;
+         ~~~~~~~ [0]
+var x = (y < y) ? 1 : 2;
+         ~~~~~ [0]
+var x = (y <= y) ? 1 : 2;
+         ~~~~~~ [0]
+var x = (y > y) ? 1 : 2;
+         ~~~~~ [0]
+var x = (y >= y) ? 1 : 2;
+         ~~~~~~ [0]
+
+// Operators that do not trigger the rule
+var x = y + y;
+var x = y - y;
+var x = y += y;
+var x = y * y;
+var x = y / y;
+var x = y >> y;
+var x = y << y;
+var x = y | y;
+var x = y || y;
+x = x;
+
+// function call
+
+if( a.b()  ==  a.b()  ) {
+    ~~~~~~~~~~~~~~~~ [0]
+}
+
+// Not implemented yet
+
+// Extra space
+if((a + b) == (a  + b)) {
+}
+
+// Commutativity
+if(a + b == b + a) {
+}
+
+[0]: Sides of a comparison operator cannot be the same
