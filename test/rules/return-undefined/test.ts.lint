@@ -36,17 +36,19 @@ badContextualType(() => {
          ~~~~~~~ [UNDEFINED]
 });
 
-// 'any' doesn't provide a contextual type, so assumes meant to return 'void'.
+// Allow anything in callback taking 'any'.
 function takesAnyCb(cb: () => any): void;
 takesAnyCb(() => { return; });
 takesAnyCb(() => { return undefined; });
-                   ~~~~~~~~~~~~~~~~~ [VOID]
 takesAnyCb(() => {
     if (1 === 2) return;
-                 ~~~~~~~ [UNDEFINED]
     else return 1;
 });
 takesAnyCb(() => {
+    if (1 === 2) return;
+    else return undefined;
+});
+takesAnyCb((): void => {
     if (1 === 2) return;
     else return undefined;
          ~~~~~~~~~~~~~~~~~ [VOID]
@@ -67,6 +69,14 @@ async function promiseValue(): Promise<number | undefined> {
 declare function f<T>(action: () => T | undefined): void;
 f(() => { return undefined; });
           ~~~~~~~~~~~~~~~~~ [VOID]
+
+declare function test(cb: () => Promise<void> | void): void;
+
+test(async () => {
+    if (1 === 2) return;
+    else return undefined;
+         ~~~~~~~~~~~~~~~~~ [VOID]
+});
 
 [VOID]: `void` function should use `return;`, not `return undefined;`.
 [UNDEFINED]: Value-returning function should use `return undefined;`, not just `return;`.

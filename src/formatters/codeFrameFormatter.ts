@@ -50,6 +50,7 @@ export class Formatter extends AbstractFormatter {
         if (typeof failures[0] === "undefined") {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const outputLines: string[] = [];
 

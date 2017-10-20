@@ -16,7 +16,6 @@
  */
 
 import { assert } from "chai";
-import * as diff from "diff";
 import * as fs from "fs";
 import * as path from "path";
 import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
@@ -99,44 +98,19 @@ describe("Rule Loader", () => {
     it("tests every rule", () => {
         const tests = fs.readdirSync(testRulesDir)
             .filter((file) => !file.startsWith("_") && fs.statSync(path.join(testRulesDir, file)).isDirectory())
-            .map(camelize);
-        const diffResults = diffLists(everyRule(), tests);
-        let testFailed = false;
-        for (const { added, removed, value } of diffResults) {
-            if (added) {
-                console.warn(`Test has no matching rule: ${value}`);
-                testFailed = true;
-            } else if (removed) {
-                console.warn(`Missing test: ${value}`);
-                testFailed = true;
-            }
-        }
-
-        assert.isFalse(testFailed, "List of rules doesn't match list of tests");
+            .map(camelize)
+            .sort();
+        assert.deepEqual(everyRule(), tests, "List of rules doesn't match list of tests");
     });
 
     it("includes every rule in 'tslint:all'", () => {
         const expectedAllRules = everyRule().filter((ruleName) =>
             RULES_EXCLUDED_FROM_ALL_CONFIG.indexOf(ruleName) === -1);
         const tslintAllRules = Object.keys(allRules).map(camelize).sort();
-        const diffResults = diffLists(expectedAllRules, tslintAllRules);
 
-        const failures: string[] = [];
-        for (const { added, removed, value } of diffResults) {
-            if (added) {
-                failures.push(`Rule in 'tslint:all' does not exist: ${value}`);
-            } else if (removed) {
-                failures.push(`Rule not in 'tslint:all': ${value}`);
-            }
-        }
-
-        assert(failures.length === 0, failures.join("\n"));
+        assert.deepEqual(expectedAllRules, tslintAllRules, "rule is missing in tslint:all");
     });
 });
-
-function diffLists(actual: string[], expected: string[]): diff.IDiffResult[] {
-    return diff.diffLines(actual.join("\n"), expected.join("\n"));
-}
 
 function everyRule(): string[] {
     return fs.readdirSync(srcRulesDir)
