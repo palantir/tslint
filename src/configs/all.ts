@@ -198,6 +198,7 @@ export const rules = {
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
     "no-parameter-properties": true,
+    "no-redundant-jsdoc": true,
     "no-reference-import": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
