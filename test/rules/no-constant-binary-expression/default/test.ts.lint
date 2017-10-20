@@ -1,0 +1,24 @@
+var x = (y == y) ? 1 : 2;
+         ~~~~~~[0]
+
+var x = (y === y) ? 1 : 2;
+         ~~~~~~~[0]
+
+var x = (y != y) ? 1 : 2;
+         ~~~~~~ [0]
+
+var x = (y !== y) ? 1 : 2;
+         ~~~~~~~ [0]
+
+
+// function call
+
+if( a.b()  ==  a.b()  ) {
+    ~~~~~~~~~~~~~~~~ [0]
+}
+
+// can't catch this one yet?
+if( (a - b)  ==  (a  - b)  ) {
+}
+
+[0]: Both sides of a binary expression can't be the same
