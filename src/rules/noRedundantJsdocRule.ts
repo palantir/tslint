@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getJsDoc } from "tsutils";
+import { canHaveJsDoc, getJsDoc } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -49,15 +49,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
-    ts.forEachChild(sourceFile, function cb(node) {
-        for (const { tags } of getJsDoc(node, sourceFile)) {
-            if (tags !== undefined) {
-                for (const tag of tags) {
-                    checkTag(tag);
+    // Intentionally exclude EndOfFileToken: it can have JSDoc, but it is only relevant in JavaScript files
+    return sourceFile.statements.forEach(function cb(node: ts.Node): void {
+        if (canHaveJsDoc(node)) {
+            for (const { tags } of getJsDoc(node, sourceFile)) {
+                if (tags !== undefined) {
+                    for (const tag of tags) {
+                        checkTag(tag);
+                    }
                 }
             }
         }
-        ts.forEachChild(node, cb);
+        return ts.forEachChild(node, cb);
     });
 
     function checkTag(tag: ts.JSDocTag): void {
