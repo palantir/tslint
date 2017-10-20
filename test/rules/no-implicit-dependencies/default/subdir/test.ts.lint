@@ -2,6 +2,9 @@ import {assert} from 'chai';
                      ~~~~~~ [err % ('chai')]
 import foo from 'foo';
 
+import Foo from 'Foo';
+                ~~~~~ [err % ('Foo')]
+
 if (foo) {
     const common = require('common');
                            ~~~~~~~~ [err % ('common')]
