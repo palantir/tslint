@@ -1,3 +1,8 @@
+this.foo()["bar"]();
+          ~~~~~~~ [ERROR]
+foo().bar();
+     ~~~~ [ERROR]
+
 const y: string[] = _observable
                         .map(function(item) { return item.helloYay().another() }
                                                                     ~~~~~~~~ [ERROR]
@@ -41,6 +46,14 @@ SomeClass
         return 1;
     }).test();
       ~~~~~ [ERROR]
+
+SomeClass
+    .propA
+    .propB
+    .helloYay(function() {
+        return 1;
+    }).  test();
+      ~~~~~~~ [ERROR]
 
 SomeClass
     .propA

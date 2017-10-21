@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isPropertyAccessExpression, isSameLine } from "tsutils";
+import {
+    isCallExpression,
+    isElementAccessExpression,
+    isPropertyAccessExpression,
+    isSameLine,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
 
@@ -53,7 +58,7 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
                     node.expression.expression.end,
                     node.expression.name.pos,
                 ) &&
-                hasChildCall(node)
+                hasChildCall(node.expression)
             ) {
                 this.addFailure(
                     node.expression.name.pos - 1,
@@ -67,19 +72,13 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
     }
 }
 
-function hasChildCall(node: ts.CallExpression): boolean {
-    let callExists = false;
-    const checkForCall = (child: ts.CallExpression | ts.PropertyAccessExpression): void => {
-        if (isCallExpression(child) || isPropertyAccessExpression(child)) {
-            if (isCallExpression(child)) {
-                callExists = true;
-                return;
-            }
-            return checkForCall(child.expression as
-                | ts.CallExpression
-                | ts.PropertyAccessExpression);
-        }
-    };
-    ts.forEachChild(node, checkForCall);
-    return callExists;
+function hasChildCall(node: ts.PropertyAccessExpression): boolean {
+    let { expression } = node;
+    while (
+        isPropertyAccessExpression(expression) ||
+        isElementAccessExpression(expression)
+    ) {
+        ({ expression } = expression);
+    }
+    return expression.kind === ts.SyntaxKind.CallExpression;
 }
