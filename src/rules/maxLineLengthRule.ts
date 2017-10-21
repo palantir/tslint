@@ -76,13 +76,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength > ctx.options.limit) {
-            if (
+        if (
+            line.contentLength > ctx.options.limit &&
+            !(
                 ctx.options.ignoreUrls &&
                 hasUrl(line, ctx.sourceFile) &&
-                lineLengthMinusUrl(line, ctx.sourceFile) < ctx.options.limit) {
-                continue;
-            }
+                lineLengthMinusUrl(line, ctx.sourceFile) < ctx.options.limit
+            )
+        ) {
             ctx.addFailureAt(
                 line.pos,
                 line.contentLength,
@@ -97,6 +98,10 @@ function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
                             .text.substr(line.pos, line.contentLength));
 }
 
+function isOptions(arg: number | Options): arg is Options {
+    return (arg as Options).limit !== undefined;
+}
+
 function lineLengthMinusUrl(line: LineRange, sourceFile: ts.SourceFile): number {
     return sourceFile
             .text
@@ -106,10 +111,10 @@ function lineLengthMinusUrl(line: LineRange, sourceFile: ts.SourceFile): number 
 }
 
 function parseOptions(args: number[] | Options[]): Options {
-    if (typeof args[0] === "number") {
-        return { ignoreUrls: false, limit: args[0] as number };
-    } else if (typeof args[0] === "object") {
-        return args[0] as Options;
-    }
-    return { ignoreUrls: false, limit: DEFAULT_LIMIT };
+    return isOptions(args[0])
+        ? args[0] as Options
+        : {
+              ignoreUrls: false,
+              limit: args[0] !== undefined ? args[0] as number : DEFAULT_LIMIT,
+          };
 }
