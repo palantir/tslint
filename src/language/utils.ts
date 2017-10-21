@@ -16,10 +16,10 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import {IDisabledInterval, RuleFailure} from "./rule/rule"; // tslint:disable-line deprecation
+import { IDisabledInterval, RuleFailure } from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -43,9 +43,8 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
         return false;
     }
 
-    return modifiers.some((m) => {
-        return modifierKinds.some((k) => m.kind === k);
-    });
+    return modifiers.some(
+        (m) => modifierKinds.some((k) => m.kind === k));
 }
 
 /**
@@ -64,13 +63,13 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
     const variableDeclaration = getBindingElementVariableDeclaration(node);
     // if no variable declaration, it must be a function param, which is block scoped
-    return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
+    return (variableDeclaration === null) || isBlockScopedVariable(variableDeclaration);
 }
 
 export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
     let currentParent = node.parent! as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
-        if (currentParent.parent == null) {
+        if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
         } else {
             currentParent = currentParent.parent;
@@ -91,14 +90,16 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
  * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+    return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate));
 }
 
-export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => n is T): T | undefined;
+export function ancestorWhere(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined;
+export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => n is T): T | undefined {
     let cur: ts.Node | undefined = node;
     do {
         if (predicate(cur)) {
-            return cur as T;
+            return cur;
         }
         cur = cur.parent;
     } while (cur !== undefined);
@@ -216,6 +217,19 @@ export function isLoop(node: ts.Node): node is ts.IterationStatement {
         || node.kind === ts.SyntaxKind.ForStatement
         || node.kind === ts.SyntaxKind.ForInStatement
         || node.kind === ts.SyntaxKind.ForOfStatement;
+}
+
+/**
+ * @returns Whether node is a numeric expression.
+ */
+export function isNumeric(node: ts.Expression) {
+    while (isPrefixUnaryExpression(node) &&
+           (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+        node = node.operand;
+    }
+
+    return node.kind === ts.SyntaxKind.NumericLiteral ||
+        isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity");
 }
 
 export interface TokenPosition {
@@ -424,4 +438,21 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
         default:
             return undefined;
     }
+}
+
+export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
+    return options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false);
+}
+
+export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
+    return isPrefixUnaryExpression(node) &&
+        node.operator === ts.SyntaxKind.MinusToken &&
+        node.operand.kind === ts.SyntaxKind.NumericLiteral;
+}
+
+/** Wrapper for compatibility with typescript@<2.3.1 */
+export function isWhiteSpace(ch: number): boolean {
+    // tslint:disable-next-line
+    return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }

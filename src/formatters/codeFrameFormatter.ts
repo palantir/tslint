@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import codeFrame = require("babel-code-frame");
-import * as colors from "colors";
+import * as chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -50,6 +50,7 @@ export class Formatter extends AbstractFormatter {
         if (typeof failures[0] === "undefined") {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const outputLines: string[] = [];
 
@@ -66,11 +67,11 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString = colors.red(failureString);
+            failureString = chalk.red(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
-            ruleName = colors.gray(`(${ruleName})`);
+            ruleName = chalk.gray(`(${ruleName})`);
 
             // Frame
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
@@ -79,7 +80,7 @@ export class Formatter extends AbstractFormatter {
                 lineAndCharacter.line + 1, // babel-code-frame is 1 index
                 lineAndCharacter.character,
                 {
-                    forceColor: colors.enabled,
+                    forceColor: chalk.enabled,
                     highlightCode: true,
                 },
             );

@@ -40,9 +40,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
         // returns the text of the first comment or undefined
-        const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) => {
-            return text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2);
-        });
+        const commentText = ts.forEachLeadingCommentRange(
+            text,
+            offset,
+            (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
         if (commentText === undefined || !new RegExp(this.ruleArguments[0] as string).test(commentText)) {
             if (offset !== 0) {
                 ++offset; // show warning in next line after shebang

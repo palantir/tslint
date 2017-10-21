@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as Option);
     }
 }
 
@@ -65,7 +65,6 @@ function walk(ctx: Lint.WalkContext<Option>): void {
                 break;
             case ts.SyntaxKind.TypeReference:
                 checkTypeReference(node as ts.TypeReferenceNode);
-                break;
         }
         return ts.forEachChild(node, cb);
     });
@@ -98,8 +97,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
         if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
-            const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
-            ctx.addFailureAtNode(node, failureString, fix);
+            ctx.addFailureAtNode(node, failureString, Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"));
             return;
         }
 
@@ -109,13 +107,12 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
         const type = typeArguments[0];
         const parens = typeNeedsParentheses(type);
-        const fix = [
+        ctx.addFailureAtNode(node, failureString, [
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
             Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
-        ];
-        ctx.addFailureAtNode(node, failureString, fix);
+        ]);
     }
 }
 
@@ -148,6 +145,7 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.SymbolKeyword:
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
+        case ts.SyntaxKind.ThisType:
             return true;
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type

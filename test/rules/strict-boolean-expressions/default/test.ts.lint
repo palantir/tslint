@@ -95,12 +95,10 @@ boolType ? strType : undefined;
 !enumType;
  ~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is an enum. Only booleans are allowed.]
 !!classType;
- ~~~~~~~~~~ [This type is not allowed in the operand for the '!' operator because it is always falsy. Only booleans are allowed.]
   ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
 !bwrapType;
  ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
 !!undefined;
- ~~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
   ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always falsy. Only booleans are allowed.]
 
 /*** Valid ***/
@@ -180,3 +178,15 @@ for (let j = 0; j; j++) { break; }
                 ~                  [This type is not allowed in the 'for' condition because it is a number. Only booleans are allowed.]
 /*** Valid ***/
 for (let j = 0; j > numType; j++) { break; }
+
+// Allow always-truthy or always-falsy in the case of 'true' and 'false'
+while (true) {}
+if (false) {}
+// Do *not* allow 'true' in a union
+declare var trueOrDate: true | Date;
+if (trueOrDate) {}
+    ~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
+
+declare var a: any;
+// Allow 'any'
+if (a) {}

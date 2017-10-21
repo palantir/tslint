@@ -1,0 +1,6 @@
+{
+    "rules": {
+      "object-literal-shorthand": [true, "never"]
+    }
+  }
+  

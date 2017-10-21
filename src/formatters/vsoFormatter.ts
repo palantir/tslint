@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
 
@@ -34,10 +34,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], warnings: RuleFailure[] = []): string {
-        const all = failures.concat(warnings);
-
-        const outputLines = all.map((failure: RuleFailure) => {
+    public format(failures: RuleFailure[]): string {
+        const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

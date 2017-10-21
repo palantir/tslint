@@ -149,3 +149,33 @@ if (true)
     true;
 else
     false;
+
+class Foo<
+    Bar,
+    Baz,
+    Bas
+> {
+    // works for multiline type parameters
+}
+
+type Foo = {
+    bar,
+};
+type Bar =
+{ bar };
+~ [misplaced opening brace]
+type Baz<T> =
+{ [K in T]: T };
+~ [misplaced opening brace]
+type Bas = "a";
+
+{
+    {}{}{} // just some random blocks
+}
+
+if (true) {
+    true;
+}else {
+ ~~~~   [missing whitespace]
+    false;
+}

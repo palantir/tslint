@@ -11,7 +11,7 @@ __Local__ (in your project's working directory):
 ```sh
 npm install tslint typescript --save-dev
 # or
-yarn add tslint typescript
+yarn add tslint typescript --dev
 ```
 
 __Global__:
@@ -46,7 +46,7 @@ Options:
 -s, --formatters-dir  formatters directory
 -t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
 --test                test that tslint produces the correct output for the specified directory
---type-check          enable type checking when linting a project
+--type-check          (deprecated) enable type checking when linting a project
 -v, --version         current version
 ```
 
@@ -128,8 +128,8 @@ tslint accepts the following command-line options:
     files will be linted.
 
 --type-check
-    Enables the type checker when running linting rules. --project must be
-    specified in order to enable type checking.
+    (deprecated) Enables the type checker when running linting rules.
+    --project must be specified in order to enable type checking.
 
 -v, --version:
     The current version of tslint.

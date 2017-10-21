@@ -71,7 +71,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
                         }
                     }
                 });
-                break;
             }
         }
         ts.forEachChild(node, cb);
@@ -91,7 +90,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     }
 }
 
-function parametersAllOptionalAfter(parameters: ts.ParameterDeclaration[], idx: number): boolean {
+function parametersAllOptionalAfter(parameters: ReadonlyArray<ts.ParameterDeclaration>, idx: number): boolean {
     for (let i = idx + 1; i < parameters.length; i++) {
         if (parameters[i].questionToken !== undefined) {
             return true;

@@ -1,0 +1,18 @@
+
+function f<T = number>() {}
+f();
+f<string>();
+
+function g<T = number, U = string>() {}
+g<string>();
+g<number, number>(); // Must specify 1st type parameter if 2nd is different than default.
+
+
+class C<T = number> {}
+function h(c: C) {}
+new C();
+class D extends C {}
+
+interface I<T = number> {}
+class Impl implements I {}
+

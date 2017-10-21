@@ -1,0 +1,10 @@
+    /** First line of multiline jsdoc
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [jsdoc is not formatted correctly on this line]
+     * should be empty.
+     */
+
+    /**
+     * Good multiline.
+     */
+
+    /** Good singleline */

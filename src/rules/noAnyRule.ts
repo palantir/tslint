@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
         description: "Disallows usages of `any` as a type declaration.",
-        hasFix: true,
+        hasFix: false,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -34,7 +34,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    // tslint:disable-next-line prefer-template (fixed in 5.3)
     public static FAILURE_STRING = "Type declaration of 'any' loses type-safety. " +
         "Consider replacing it with a more precise type, the empty type ('{}'), " +
         "or suppress this occurrence.";

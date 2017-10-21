@@ -1,3 +1,21 @@
+export function f<T>(this: Observable<T>): Observable<T> {
+    const nestedFunction = function(this) => {
+        console.log(this)
+    }
+    return this.map(i=>i);
+}
+
+class ContextualThisClass {
+    private someMethod(): void {
+        let nestedFunction: (this: number[]) => number[] = function(this) {
+            [3,4].forEach(function(nr){
+                console.log(this);
+            });
+            return this.map(i=>i);
+        };
+    }
+}
+
 function foo(x: number) {
     console.log(this.x);
                 ~~~~                      [the "this" keyword is disallowed outside of a class body]

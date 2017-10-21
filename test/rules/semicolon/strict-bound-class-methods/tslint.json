@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "semicolon": [true, "always", "strict-bound-class-methods"]
+  }
+}

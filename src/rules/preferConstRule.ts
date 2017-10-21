@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
             destructuringAll: this.ruleArguments.length !== 0 &&
-                (this.ruleArguments[0] as any).destructuring === OPTION_DESTRUCTURING_ALL,
+                (this.ruleArguments[0] as {destructuring?: string}).destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -168,10 +168,12 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
             if (node.kind === ts.SyntaxKind.VariableDeclarationList) {
                 this.handleVariableDeclaration(node as ts.VariableDeclarationList);
             } else if (node.kind === ts.SyntaxKind.CatchClause) {
-                this.handleBindingName((node as ts.CatchClause).variableDeclaration.name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if ((node as ts.CatchClause).variableDeclaration !== undefined) {
+                    this.handleBindingName((node as ts.CatchClause).variableDeclaration!.name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
                 this.handleBindingName((node as ts.ParameterDeclaration).name, {
                     canBeConst: false,
@@ -232,14 +234,13 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                                 this.scope.reassigned.add((property.name as ts.Identifier).text);
                             } else {
                                 // handle `...(variable)`
-                                this.handleExpression(property.expression!);
+                                this.handleExpression(property.expression);
                             }
                             break;
                         default:
                             this.handleExpression((property as ts.PropertyAssignment).initializer);
                     }
                 }
-                break;
         }
     }
 
@@ -275,7 +276,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 canBeConst: true,
                 declarationList,
                 isBlockScoped: kind === utils.VariableDeclarationKind.Let,
-                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement,
+                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement ||
+                           declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement,
                 reassignedSiblings: false,
             };
         }
@@ -325,7 +327,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
                     !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = new Lint.Replacement(info.declarationInfo.declarationList!.getStart(this.sourceFile), 3, "const");
+                    fix = new Lint.Replacement(info.declarationInfo.declarationList.getStart(this.sourceFile), 3, "const");
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }

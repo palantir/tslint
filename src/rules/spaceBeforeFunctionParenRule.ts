@@ -85,35 +85,47 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         const option = getOption(node, options);
         if (option !== undefined) {
-            const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken)!;
-            const hasSpace = ts.isWhiteSpaceLike(sourceFile.text.charCodeAt(openParen.end - 2));
-
-            if (hasSpace && option === "never") {
-                const pos = openParen.getStart() - 1;
-                ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
-            } else if (!hasSpace && option === "always") {
-                const pos = openParen.getStart();
-                ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
-            }
+            check(node, option);
         }
 
         ts.forEachChild(node, cb);
     });
+
+    function check(node: ts.Node, option: "always" | "never"): void {
+        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        // openParen may be missing for an async arrow function `async x => ...`.
+        if (openParen === undefined) { return; }
+
+        const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
+
+        if (hasSpace && option === "never") {
+            const pos = openParen.getStart() - 1;
+            ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
+        } else if (!hasSpace && option === "always") {
+            const pos = openParen.getStart();
+            ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
+        }
+    }
 }
 
 function getOption(node: ts.Node, options: Options): Option | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
-            return Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? options.asyncArrow : undefined;
+            return !hasTypeParameters(node) && Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+                ? options.asyncArrow : undefined;
 
         case ts.SyntaxKind.Constructor:
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
-            return options.named;
+            // name is optional for function declaration which is default export (TS will emit error in other cases).
+            // Can be handled in the same way as function expression.
+        case ts.SyntaxKind.FunctionExpression: {
+            const functionName = (node as ts.FunctionExpression).name;
+            const hasName = functionName !== undefined && functionName.text !== "";
 
-        case ts.SyntaxKind.FunctionExpression:
-            return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
+            return hasName ? options.named : !hasTypeParameters(node) ? options.anonymous : undefined;
+        }
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
@@ -124,4 +136,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
         default:
             return undefined;
     }
+}
+
+function hasTypeParameters(node: ts.Node): boolean {
+    return (node as ts.SignatureDeclaration).typeParameters !== undefined;
 }

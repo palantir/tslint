@@ -15,17 +15,27 @@
  * limitations under the License.
  */
 
+import { hasModifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+
+const OPTION_IGNORE_STATIC = "ignore-static";
+
+interface Options {
+    ignoreStatic: boolean;
+}
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unbound-method",
         description: "Warns when a method is used as outside of a method call.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: `You may optionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods.`,
+        options: {
+            type: "string",
+            enum: [OPTION_IGNORE_STATIC],
+        },
+        optionExamples: [true, [true, OPTION_IGNORE_STATIC]],
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -35,28 +45,35 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            {
+                ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1,
+            },
+            program.getTypeChecker(),
+        );
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitPropertyAccessExpression(node: ts.PropertyAccessExpression) {
-        if (!isSafeUse(node)) {
-            const symbol = this.getTypeChecker().getSymbolAtLocation(node);
+function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isPropertyAccessExpression(node) && !isSafeUse(node)) {
+            const symbol = tc.getSymbolAtLocation(node);
             const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
-            if (declaration !== undefined && isMethod(declaration)) {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
-        super.visitPropertyAccessExpression(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }
 
-function isMethod(node: ts.Node): boolean {
+function isMethod(node: ts.Node, ignoreStatic: boolean): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
-            return true;
+            return !(ignoreStatic && hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword));
         default:
             return false;
     }
@@ -75,6 +92,20 @@ function isSafeUse(node: ts.Node): boolean {
         // Allow most binary operators, but don't allow e.g. `myArray.forEach(obj.method || otherObj.otherMethod)`.
         case ts.SyntaxKind.BinaryExpression:
             return (parent as ts.BinaryExpression).operatorToken.kind !== ts.SyntaxKind.BarBarToken;
+        case ts.SyntaxKind.NonNullExpression:
+        case ts.SyntaxKind.AsExpression:
+        case ts.SyntaxKind.TypeAssertionExpression:
+        case ts.SyntaxKind.ParenthesizedExpression:
+            return isSafeUse(parent);
+        // Allow use in conditions
+        case ts.SyntaxKind.ConditionalExpression:
+            return (parent as ts.ConditionalExpression).condition === node;
+        case ts.SyntaxKind.IfStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.DoStatement:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.PrefixUnaryExpression:
+            return true;
         default:
             return false;
     }

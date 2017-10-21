@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isExpressionStatement } from "tsutils";
+import { isCallExpression, isExpressionStatement, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -25,7 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-floating-promises",
         description: "Promises returned by functions must be handled appropriately.",
-        descriptionDetails: "Use `no-unused-expressions` in addition to this rule to reveal even more floating promises.",
+        descriptionDetails: "Use `no-unused-expression` in addition to this rule to reveal even more floating promises.",
         optionsDescription: Lint.Utils.dedent`
             A list of \'string\' names of any additional classes that should also be handled as Promises.
         `,
@@ -49,20 +49,36 @@ export class Rule extends Lint.Rules.TypedRule {
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(
             sourceFile,
-            (ctx: Lint.WalkContext<string[]>) => walk(ctx, program.getTypeChecker()),
+            walk,
             ["Promise", ...this.ruleArguments as string[]],
+            program.getTypeChecker(),
         );
     }
 }
 
 function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isExpressionStatement(node) && node.expression.kind === ts.SyntaxKind.CallExpression) {
-            const {symbol} = tc.getTypeAtLocation(node.expression);
-            if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
-                ctx.addFailureAtNode(node.expression, Rule.FAILURE_STRING);
+        if (isExpressionStatement(node)) {
+            const { expression } = node;
+            if (isCallExpression(expression) &&
+                !isPromiseCatchCall(expression) &&
+                !isPromiseThenCallWithRejectionHandler(expression)) {
+                const { symbol } = tc.getTypeAtLocation(expression);
+                if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
+                    ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
+                }
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isPromiseCatchCall(expression: ts.CallExpression): boolean {
+    return isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch";
+}
+
+function isPromiseThenCallWithRejectionHandler(expression: ts.CallExpression): boolean {
+    return isPropertyAccessExpression(expression.expression) &&
+        expression.expression.name.text === "then" &&
+        expression.arguments.length >= 2;
 }

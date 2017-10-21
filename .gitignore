@@ -4,6 +4,7 @@
 /build/
 /docs/site/
 /scripts/*.js
+!/scripts/assertMinCircleNodes.js
 /scripts/*.js.map
 /lib/
 /test/executable/tslint.json
@@ -11,6 +12,7 @@ node_modules/
 !test/rules/**/node_modules
 tscommand*.txt
 npm-debug.log
+package-lock.json
 # created by grunt-ts for faster compiling
 typings/.basedir.ts
 
@@ -19,7 +21,9 @@ typings/.basedir.ts
 *.swp
 
 docs/_data/rules.json
+docs/_data/formatters.json
 docs/rules/*/index.html
+docs/formatters/*/index.html
 
 /coverage/
 /.nyc_output

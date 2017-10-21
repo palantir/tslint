@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isAssertionExpression, isObjectLiteralExpression, isParenthesizedExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -49,30 +50,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isTypeAssertionLike(node) && isObjectLiteral(node.expression) && node.type.kind !== ts.SyntaxKind.AnyKeyword) {
+        if (isAssertionExpression(node) && node.type.kind !== ts.SyntaxKind.AnyKeyword &&
+            isObjectLiteralExpression(isParenthesizedExpression(node.expression) ? node.expression.expression : node.expression)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function isTypeAssertionLike(node: ts.Node): node is ts.TypeAssertion | ts.AsExpression {
-    switch (node.kind) {
-        case ts.SyntaxKind.TypeAssertionExpression:
-        case ts.SyntaxKind.AsExpression:
-            return true;
-        default:
-            return false;
-    }
-}
-
-function isObjectLiteral(node: ts.Expression): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.ParenthesizedExpression:
-            return isObjectLiteral((node as ts.ParenthesizedExpression).expression);
-        case ts.SyntaxKind.ObjectLiteralExpression:
-            return true;
-        default:
-            return false;
-    }
 }
