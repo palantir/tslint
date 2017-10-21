@@ -43,3 +43,8 @@ let optionallyValid_ = "bar";
     ~~~~~~~~~~~~~~~~          [variable name must be in lowerCamelCase, PascalCase or UPPER_CASE]
 let _$httpBackend_ = "leading and trailing";
     ~~~~~~~~~~~~~~          [variable name must be in lowerCamelCase, PascalCase or UPPER_CASE]
+
+// don't crash on syntax errors
+
+class {}
+let {bar:} = foo;

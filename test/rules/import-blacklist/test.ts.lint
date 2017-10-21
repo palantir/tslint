@@ -12,4 +12,7 @@ import forOwn = require(lodash);
 
 import * as notBlacklisted from "not-blacklisted";
 
+export * from 'lodash';
+               ~~~~~~ [0]
+
 [0]: This import is blacklisted, import a submodule instead

@@ -244,6 +244,13 @@ export class RuleFailure {
     private rawLines: string;
     private ruleSeverity: RuleSeverity;
 
+    public static compare(a: RuleFailure, b: RuleFailure): number {
+        if (a.fileName !== b.fileName) {
+            return a.fileName < b.fileName ? -1 : 1;
+        }
+        return a.startPosition.getPosition() - b.startPosition.getPosition();
+    }
+
     constructor(private sourceFile: ts.SourceFile,
                 start: number,
                 end: number,

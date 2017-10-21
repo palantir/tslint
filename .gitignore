@@ -4,6 +4,7 @@
 /build/
 /docs/site/
 /scripts/*.js
+!/scripts/assertMinCircleNodes.js
 /scripts/*.js.map
 /lib/
 /test/executable/tslint.json
@@ -20,7 +21,9 @@ typings/.basedir.ts
 *.swp
 
 docs/_data/rules.json
+docs/_data/formatters.json
 docs/rules/*/index.html
+docs/formatters/*/index.html
 
 /coverage/
 /.nyc_output

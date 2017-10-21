@@ -52,6 +52,7 @@ An example `tslint.json` file might look like this:
         "no-conditional-assignment": true,
         "no-consecutive-blank-lines": false,
         "no-console": {
+            "severity": "warning",
             "options": [
                 "debug",
                 "info",

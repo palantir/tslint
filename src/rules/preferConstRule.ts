@@ -64,7 +64,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            destructuringAll: this.ruleArguments.length !== 0 && this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
+            destructuringAll: this.ruleArguments.length !== 0 &&
+                (this.ruleArguments[0] as {destructuring?: string}).destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);

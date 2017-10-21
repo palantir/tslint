@@ -1,6 +1,118 @@
 Change Log
 ===
 
+v5.8.0
+---
+
+## :warning: Deprecations
+
+- [deprecation] [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare/) is deprecated because typescript already does that check (#3286)
+- [deprecation] CLI argument `--type-check` is no longer necessary and will be removed in the next major version (#3322)
+
+## Updates to `tslint:latest` configuration
+
+```diff
++    "ban-comma-operator": true,
++    "jsdoc-format": {
++        options: "check-multiline-start",
++    },
++    "no-duplicate-switch-case": true,
++    "no-implicit-dependencies": true,
++    "no-return-await": true,
+```
+
+## :tada: Features
+
+- [feature] Added `linterOptions` configuration field to `tslint.json`, which supports a list of `exclude` globs to disable linting for a subset of files (#2409)
+- [new-rule] [`no-return-await`](https://palantir.github.io/tslint/rules/no-return-await/) (#3233)
+- [new-rule] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) (#2754)
+- [new-rule] [`no-duplicate-switch-case`](https://palantir.github.io/tslint/rules/no-duplicate-switch-case/) (#2937)
+- [new-rule] [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) (#3343)
+- [new-rule] [`no-unnecessary-class`](https://palantir.github.io/tslint/rules/no-unnecessary-class/) (#3119)
+- [new-rule] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) (#3250)
+- [new-fixer] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) (#3200)
+- [new-fixer] [`curly`](https://palantir.github.io/tslint/rules/curly/) (#3262)
+- [new-rule-option] [`jsdoc-format`](https://palantir.github.io/tslint/rules/jsdoc-format/) adds option `"check-multiline-start"` to enforce the first line of a multiline JSDoc comment to be empty. (#3181)
+- [new-rule-option] [`trailing-comma`](https://palantir.github.io/tslint/rules/trailing-comma/) adds option `"esSpecCompliant"` to make it compatible with the ES spec regarding trailing commas after object/array rest and rest parameters. (#3176)
+- [new-rule-option] `"check-parameter-property"` option for [`member-access`](https://palantir.github.io/tslint/rules/member-access/) rule (#3325)
+- [new-rule-option] `"strict-bound-class-methods"` option for [`semicolon`](https://palantir.github.io/tslint/rules/semicolon/) rule (#3294)
+- [new-rule-option] `"grouped-imports"` option for [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/) rule (#3138)
+- [new-rule-option] `"ignore-blank-lines"` option for [`no-trailing-whitespace`](https://palantir.github.io/tslint/rules/no-trailing-whitespace/) rule (#3346)
+- [new-rule-option] `"never"` option for [`object-literal-shorthand`](https://palantir.github.io/tslint/rules/object-literal-shorthand/) disallows shorthand notation (#3268)
+- [new-rule-option] `"exclude-class-expressions"` option for [`max-classes-per-file`](https://palantir.github.io/tslint/rules/max-classes-per-file/) rule (#3281)
+- [new-rule-option] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) supports a whitelist of types to ignore (#3257)
+- [new-rule-option] `"module-source-path"` for [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/) allows sorting imports by trailing end of path (#3178)
+- [new-formatter] JUnit (#3194)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`no-empty-interface`](https://palantir.github.io/tslint/rules/no-empty-interface/) allows providing type arguments for extended type (#3260)
+- [bugfix] Fixed line switches to not disable failures in the next line following the disabled line (#3177)
+- [bugfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/) handles union return types in async functions (#3298)
+- [bugfix] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) checks correct constructor overload (#3203)
+- [bugfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/) declared return type takes precedence over contextual type (#3298)
+- [bugfix] Correctly mark `inputFilePath` as an optional parameter in `Configuration.findConfiguration()` (#3195)
+- [bugfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/) fixed regressions: once again allows anything if return type is `any` (#3298)
+- [bugfix] [`only-arrow-functions`](https://palantir.github.io/tslint/rules/only-arrow-functions/) allow function if `this` is used in parameter initializer (#3315)
+- [bugfix] [`no-conditional-assignment`](https://palantir.github.io/tslint/rules/no-conditional-assignment/): exclude intentional assignments, e.g. inside functions (#2629)
+- [bugfix] [`no-angle-bracket-type-assertion`](https://palantir.github.io/tslint/rules/no-angle-bracket-type-assertion/) fixer adds parentheses when necessary (#3301)
+- [bugfix] [`no-angle-bracket-type-assertion`](https://palantir.github.io/tslint/rules/no-angle-bracket-type-assertion/) fixed order when autofixing consecutive assertions (#3301)
+- [bugfix] `vso` formatter no longer duplicates output for fixed failures (#3348)
+- [bugfix] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/): Allow negation of method (#3349)
+- [bugfix] [`arrow-parens`](https://palantir.github.io/tslint/rules/arrow-parens/) with option `"ban-single-arg-parens"` no longer produces invalid code when fixed (#3247)
+- [bugfix] Fixed regression where the lookup of `tslint.json` stopped at the current directory. (#3309)
+- [bugfix] `--test` works correctly with any `compilerOptions.target` (#3296)
+- [bugfix] `whitepace` handles files with BOM and other irregular whitespace (#3305)
+- [bugfix] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/) auto fix produces invalid results (#3342)
+- [bugfix] [`no-string-literal`](https://palantir.github.io/tslint/rules/no-string-literal/) correctly fix property names with leading underscores (#3184)
+- [bugfix] [`variable-name`](https://palantir.github.io/tslint/rules/variable-name/) fixed crash on empty variable name (#3292)
+- [bugfix] [`trailing-comma`](https://palantir.github.io/tslint/rules/trailing-comma/) fixed crash on arrow function without parens (#3246)
+- [bugfix] Fix [`space-before-function-paren`](https://palantir.github.io/tslint/rules/space-before-function-paren/) for anonymous/arrow generic functions (#3085)
+- [bugfix] Removed warning printed to console when using the [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) along with the `noUnusedLocals` and `noUnusedParameters` compiler options (#3227)
+- [bugfix] [`no-invalid-this`](https://palantir.github.io/tslint/rules/no-invalid-this/) ignores functions with a `this` param (#3267)
+- [enhancement] Sort failures by line and character for formatters (#3345)
+- [enhancement] [`import-blacklist`](https://palantir.github.io/tslint/rules/import-blacklist/) also checks exports and dynamic imports (#3258)
+- [enhancement] [`no-conditional-assignment`](https://palantir.github.io/tslint/rules/no-conditional-assignment/) added check for conditional (ternary) expressions (#2629)
+- [enhancement] Allow [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) to list doc tags that mark a node as not requiring a documentation body. Tags can also provide a regexp matcher to validate that their contents are docs-valid. (#2415)
+- [enhancement] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) enforces that `for-await-of` is only used with `AsyncIterable` (#3297)
+- [enhancement] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) checks type alias declarations (#3200)
+- [enhancement] [`deprecation`](https://palantir.github.io/tslint/rules/deprecation/) checks object destructuring (#3318)
+- [enhancement] [`no-submodule-imports`](https://palantir.github.io/tslint/rules/no-submodule-imports/) also checks exports (#3258)
+- [enhancement] [`restrict-plus-operands`](https://palantir.github.io/tslint/rules/restrict-plus-operands/): More specific error message when arguments include strings (#3220)
+- [enhancement] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) checks more expressions, for example destructuring, `yield`, property initializer (#3196)
+- [enhancement] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): allow grouping of object properties via additional blank lines when using alphabetical ordering. (#3191)
+- [enhancement] Migrated CLI from using `colors` module to `chalk` module (#3171)
+- [enhancement] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) applies the ignorePattern to imports (#3187)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Charles Samborski
+- Donald Pipowitch
+- Josh Goldberg
+- mmkal
+- Erik
+- Csaba Miklos
+- Dominik Moritz
+- Khalid Saifullah
+- Lukas Spieß
+- Merott Movahedi
+- Bowen Ni
+- ksvitkovsky
+- Hutson Betts
+- Caleb Eggensperger
+- Brent Erickson
+- Trivikram
+- Brandon Furtwangler
+- Pavel Zet
+- aervin_
+- Holger Jeromin
+- Danny Guo
+- Jeremy Morton
+- Cyril Gandon
+- Andy Hanson
+- yadan
+
 v5.7.0
 ---
 

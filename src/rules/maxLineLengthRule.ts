@@ -17,7 +17,7 @@
 
 import { getLineRanges, LineRange } from "tsutils";
 import * as ts from "typescript";
-import { urlRegex } from "url-regex";
+import * as urlRegex from "url-regex";
 import * as Lint from "..";
 
 interface Options {
@@ -87,8 +87,5 @@ function walk(ctx: Lint.WalkContext<Options>) {
 }
 
 function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
-    const lineText = sourceFile.text.substr(line.pos, line.contentLength);
-    const reg = urlRegex();
-    const containsUrl = reg.test(lineText);
-    return containsUrl;
+    return urlRegex().test(sourceFile.text.substr(line.pos, line.contentLength));
 }
