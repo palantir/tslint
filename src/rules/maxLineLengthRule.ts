@@ -109,10 +109,7 @@ function parseOptions(args: number[] | Options[]): Options {
     if (typeof args[0] === "number") {
         return { ignoreUrls: false, limit: args[0] as number };
     } else if (typeof args[0] === "object") {
-        return {
-            ignoreUrls: (args[0] as Options).ignoreUrls,
-            limit: (args[0] as Options).limit,
-        };
+        return args[0] as Options;
     }
     return { ignoreUrls: false, limit: DEFAULT_LIMIT };
 }
