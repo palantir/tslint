@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import assert = require("assert");
 import { canHaveJsDoc, getJsDoc } from "tsutils";
 import * as ts from "typescript";
 
@@ -65,33 +66,46 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function checkTag(tag: ts.JSDocTag): void {
         switch (tag.kind) {
-            case ts.SyntaxKind.JSDocTag:
-                if (redundantTags.has(tag.tagName.text)) {
-                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
+            case ts.SyntaxKind.JSDocTag: {
+                const { tagName } = tag;
+                const { text } = tagName;
+                // Allow "default" in an ambient context (since you can't write an initializer in an ambient context)
+                if (redundantTags.has(text) && !(text === "default" && isInAmbientContext(tag))) {
+                    ctx.addFailureAtNode(tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(text), removeTag(tag, sourceFile));
                 }
                 break;
+            }
 
             case ts.SyntaxKind.JSDocAugmentsTag:
                 // OK
                 break;
 
             case ts.SyntaxKind.JSDocTemplateTag:
+                if (tag.comment !== "") {
+                    break;
+                }
+                // falls through
+
+            case ts.SyntaxKind.JSDocClassTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
             case ts.SyntaxKind.JSDocPropertyTag:
                 // Always redundant
-                ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
+                ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text), removeTag(tag, sourceFile));
                 break;
 
             case ts.SyntaxKind.JSDocReturnTag:
             case ts.SyntaxKind.JSDocParameterTag: {
                 const { typeExpression, comment } = tag as ts.JSDocReturnTag | ts.JSDocParameterTag;
+                const noComment = comment === "";
                 if (typeExpression !== undefined) {
-                    ctx.addFailureAtNode(typeExpression, Rule.FAILURE_STRING_REDUNDANT_TYPE);
+                    // If noComment, we will just completely remove it in the other fix
+                    const fix = noComment ? undefined : removeTypeExpression(typeExpression, sourceFile);
+                    ctx.addFailureAtNode(typeExpression, Rule.FAILURE_STRING_REDUNDANT_TYPE, fix);
                 }
-                if (comment === "") {
+                if (noComment) {
                     // Redundant if no documentation
-                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text));
+                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text), removeTag(tag, sourceFile));
                 }
                 break;
             }
@@ -100,6 +114,83 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 throw new Error(`Unexpected tag kind: ${ts.SyntaxKind[tag.kind]}`);
         }
     }
+}
+
+function removeTag(tag: ts.JSDocTag, sourceFile: ts.SourceFile): Lint.Replacement | undefined {
+    const { text } = sourceFile;
+    const jsdoc = tag.parent;
+    if (jsdoc.comment === undefined && jsdoc.tags!.length === 1) {
+        // This is the only tag -- remove the whole comment
+        return Lint.Replacement.deleteFromTo(jsdoc.getStart(sourceFile), jsdoc.getEnd());
+    }
+
+    let start = tag.getStart(sourceFile);
+    assert(text[start] === "@");
+    start--;
+    while (ts.isWhiteSpaceSingleLine(text.charCodeAt(start))) {
+        start--;
+    }
+    if (text[start] !== "*") {
+        return undefined;
+    }
+
+    let end = tag.getEnd();
+
+    // For some tags, like `@param`, `end` will be the start of the next tag.
+    // For some tags, like `@name`, `end` will be before the start of the comment.
+    // And `@typedef` doesn't end until the last `@property` tag attached to it ends.
+    switch (tag.tagName.text) {
+        case "param":
+            const { isBracketed, isNameFirst, typeExpression } = tag as ts.JSDocParameterTag;
+            if (!isBracketed && !(isNameFirst && typeExpression !== undefined)) {
+                break;
+            }
+            // falls through
+        case "name":
+        case "return":
+        case "returns":
+        case "interface":
+        case "default":
+        case "memberof":
+        case "memberOf":
+        case "method":
+        case "type":
+            // For some reason, for "@name", "end" is before the start of the comment part of the tag.
+            // Also for "param" if the name is optional  as in `@param {number} [x]`
+            while (!ts.isLineBreak(text.charCodeAt(end))) {
+                end++;
+            }
+            end++;
+    }
+    while (ts.isWhiteSpaceSingleLine(text.charCodeAt(end))) {
+        end++;
+    }
+    if (text[end] !== "*") {
+        return undefined;
+    }
+
+    return Lint.Replacement.deleteFromTo(start, end);
+}
+
+function removeTypeExpression(typeExpression: ts.JSDocTypeExpression, sourceFile: ts.SourceFile): Lint.Replacement | undefined {
+    const start = typeExpression.getStart(sourceFile);
+    let end = typeExpression.getEnd();
+    const { text } = sourceFile;
+    if (text[start] !== "{" || text[end - 1] !== "}") {
+        // TypeScript parser messed up -- give up
+        return undefined;
+    }
+    if (ts.isWhiteSpaceSingleLine(text.charCodeAt(end))) {
+        end++;
+    }
+    return Lint.Replacement.deleteFromTo(start, end);
+}
+
+// TODO: improve once https://github.com/Microsoft/TypeScript/pull/17831 is in
+function isInAmbientContext(node: ts.Node): boolean {
+    return ts.isSourceFile(node)
+        ? node.isDeclarationFile
+        : Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword) || isInAmbientContext(node.parent!);
 }
 
 const redundantTags = new Set([
@@ -117,7 +208,9 @@ const redundantTags = new Set([
     "interface",
     "instance",
     "member",
+    "method",
     "memberof",
+    "memberOf",
     "mixes",
     "mixin",
     "module",
