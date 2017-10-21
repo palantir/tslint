@@ -25,7 +25,7 @@ interface Options {
     ignoreUrls: boolean;
 }
 
-const OPTION_IGNORE_URL = "ignore-urls";
+const DEFAULT_LIMIT = 140;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -37,23 +37,29 @@ export class Rule extends Lint.Rules.AbstractRule {
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
         optionsDescription: Lint.Utils.dedent`
-            An integer indicating the max length of lines. Additionally, the \`\"ignore-urls\"\` option
-            can be passed to ignore lines with long URLs.
+            An integer indicating the max length of lines, or a configuration object with two
+            properties: \`\"ignoreUrls\"\` and \`\"limit\"\`.
             `,
         options: {
-            type: "array",
-            items: [
+            anyOf: [
                 {
                     type: "number",
-                    minimum: "1",
                 },
                 {
-                    type: "string",
-                    enum: [OPTION_IGNORE_URL],
+                    type: "object",
+                    properties: {
+                        limit: {
+                            type: "number",
+                            minimum: "1",
+                        },
+                        ignoreUrls: {
+                            type: "boolean",
+                        },
+                    },
                 },
             ],
         },
-        optionExamples: [[true, 120], [true, 140, "ignore-urls"]],
+        optionExamples: [[true, 120], [true, { limit: 140, ignoreUrls: true }]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -63,29 +69,50 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Exceeds maximum line length of ${lineLimit}`;
     }
 
-    public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] as number > 0;
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
-            ignoreUrls: this.ruleArguments.indexOf(OPTION_IGNORE_URL) > -1,
-            limit: this.ruleArguments[0] as number,
-        });
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(ctx.sourceFile)) {
         if (line.contentLength > ctx.options.limit) {
-            if (ctx.options.ignoreUrls && hasUrl(line, ctx.sourceFile)) {
+            if (
+                ctx.options.ignoreUrls &&
+                hasUrl(line, ctx.sourceFile) &&
+                lineLengthMinusUrl(line, ctx.sourceFile) < ctx.options.limit) {
                 continue;
             }
-            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(ctx.options.limit));
+            ctx.addFailureAt(
+                line.pos,
+                line.contentLength,
+                Rule.FAILURE_STRING_FACTORY(ctx.options.limit),
+            );
         }
     }
 }
 
 function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
-    return urlRegex().test(sourceFile.text.substr(line.pos, line.contentLength));
+    return urlRegex().test(sourceFile
+                            .text.substr(line.pos, line.contentLength));
+}
+
+function lineLengthMinusUrl(line: LineRange, sourceFile: ts.SourceFile): number {
+    return sourceFile
+            .text
+            .substr(line.pos, line.contentLength)
+            .replace(urlRegex(), "")
+            .length;
+}
+
+function parseOptions(args: number[] | Options[]): Options {
+    if (typeof args[0] === "number") {
+        return { ignoreUrls: false, limit: args[0] as number };
+    } else if (typeof args[0] === "object") {
+        return {
+            ignoreUrls: (args[0] as Options).ignoreUrls,
+            limit: (args[0] as Options).limit,
+        };
+    }
+    return { ignoreUrls: false, limit: DEFAULT_LIMIT };
 }
