@@ -115,7 +115,8 @@ function getDependencies(fileName: string, options: Options): Set<string> {
     const packageJsonPath = findPackageJson(path.resolve(path.dirname(fileName)));
     if (packageJsonPath !== undefined) {
         // don't use require here to avoid caching
-        const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as PackageJson;
+        // remove BOM from file content before parsing
+        const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
         if (content.dependencies !== undefined) {
             addDependencies(result, content.dependencies);
         }
