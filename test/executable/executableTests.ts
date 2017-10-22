@@ -80,7 +80,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
-        it("doesn't warn if non-existant file is excluded by --exclude", (done) => {
+        it("doesn't warn if non-existent file is excluded by --exclude", (done) => {
             execCli(["foo/bar.js", "--exclude", "**/*.js"], (err, _stdout, stderr) => {
                 assert.isNull(err, "process should exit without error");
 
@@ -387,7 +387,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with error if passed directory does not exist", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existant"], (err) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existent"], (err) => {
                 assert.isNotNull(err, "process should exit with an error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
@@ -415,21 +415,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 [
                     "--project",
                     "test/files/tsconfig-test/tsconfig.json",
-                    "test/files/tsconfig-test/non-existant.test.ts",
+                    "test/files/tsconfig-test/non-existent.test.ts",
                 ],
                 (err, _stdout, stderr) => {
                     assert.isNull(err, "process should exit without error");
-                    assert.include(stderr, "test/files/tsconfig-test/non-existant.test.ts' does not exist");
+                    assert.include(stderr, "test/files/tsconfig-test/non-existent.test.ts' does not exist");
                     done();
                 });
         });
 
-        it("doesn't warn for non-existant file-to-lint if excluded by --exclude", (done) => {
+        it("doesn't warn for non-existent file-to-lint if excluded by --exclude", (done) => {
             execCli(
                 [
                     "--project",
                     "test/files/tsconfig-test/tsconfig.json",
-                    "test/files/tsconfig-test/non-existant.test.ts",
+                    "test/files/tsconfig-test/non-existent.test.ts",
                     "--exclude",
                     "**/*",
                 ],
