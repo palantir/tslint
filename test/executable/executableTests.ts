@@ -245,6 +245,20 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    it("finds configuration above current directory", (done) => {
+        execCli(
+            ["index.test.ts"],
+            {
+                cwd: "./test/files/config-findup/no-config",
+            },
+            (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.equal(err.code, 2, "exit code should be 2");
+                done();
+            },
+        );
+    });
+
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));

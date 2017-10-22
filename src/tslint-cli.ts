@@ -181,10 +181,10 @@ const options: Option[] = [
     {
         name: "type-check",
         type: "boolean",
-        describe: "check for type errors before linting the project",
+        describe: "(deprecated) check for type errors before linting the project",
         description: dedent`
-            Checks for type errors before linting a project. --project must be
-            specified in order to enable type checking.`,
+            (deprecated) Checks for type errors before linting a project.
+            --project must be specified in order to enable type checking.`,
     },
 ];
 
@@ -236,9 +236,12 @@ if (!(argv.init || argv.test !== undefined || argv.project !== undefined || comm
     process.exit(1);
 }
 
-if (argv.typeCheck && argv.project === undefined) {
-    console.error("--project must be specified in order to enable type checking.");
-    process.exit(1);
+if (argv.typeCheck) {
+    console.warn("--type-check is deprecated. You only need --project to enable rule which need type information.");
+    if (argv.project === undefined) {
+        console.error("--project must be specified in order to enable type checking.");
+        process.exit(1);
+    }
 }
 
 let log: (message: string) => void;

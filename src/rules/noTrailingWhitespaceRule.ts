@@ -24,11 +24,13 @@ import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
 const OPTION_IGNORE_JSDOC = "ignore-jsdoc";
 const OPTION_IGNORE_TEMPLATE_STRINGS = "ignore-template-strings";
+const OPTION_IGNORE_BLANK_LINES = "ignore-blank-lines";
 
 interface Options {
     ignoreTemplates: boolean;
     ignoreComments: boolean;
     ignoreJsDoc: boolean;
+    ignoreBlankLines: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -42,13 +44,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`"${OPTION_IGNORE_TEMPLATE_STRINGS}"\`: Allows trailing whitespace in template strings.
             * \`"${OPTION_IGNORE_COMMENTS}"\`: Allows trailing whitespace in comments.
-            * \`"${OPTION_IGNORE_JSDOC}"\`: Allows trailing whitespace only in JSDoc comments.`,
+            * \`"${OPTION_IGNORE_JSDOC}"\`: Allows trailing whitespace only in JSDoc comments.
+            * \`"${OPTION_IGNORE_BLANK_LINES}"\`: Allows trailing whitespace on empty lines.`,
         hasFix: true,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS],
+                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS, OPTION_IGNORE_BLANK_LINES],
             },
         },
         optionExamples: [
@@ -66,6 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const ignoreComments = this.ruleArguments.indexOf(OPTION_IGNORE_COMMENTS) !== -1;
         return this.applyWithFunction(sourceFile, walk, {
+            ignoreBlankLines: this.ruleArguments.indexOf(OPTION_IGNORE_BLANK_LINES) !== -1,
             ignoreComments,
             ignoreJsDoc: ignoreComments || this.ruleArguments.indexOf(OPTION_IGNORE_JSDOC) !== -1,
             ignoreTemplates: this.ruleArguments.indexOf(OPTION_IGNORE_TEMPLATE_STRINGS) !== -1,
@@ -78,8 +82,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const sourceFile = ctx.sourceFile;
     const text = sourceFile.text;
     for (const line of getLineRanges(sourceFile)) {
+        // \s matches any whitespace character (equal to [\r\n\t\f\v ])
         const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
-        if (match !== null) {
+        if (match !== null && !(ctx.options.ignoreBlankLines && match.index === 0)) {
             possibleFailures.push({
                 end: line.pos + line.contentLength,
                 pos: line.pos + match.index!,
