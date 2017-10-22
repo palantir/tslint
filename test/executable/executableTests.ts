@@ -273,9 +273,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with code 0 if `--test` and `-r` flags are used with custom rule", async () => {
-            // TODO this test doesn't make sense
             const status = await execRunner(
-                {test: true, files: ["test/files/custom-rule-rule-test"], rulesDirectory: "test/files/custom-rules-2"},
+                {test: true, files: ["test/files/custom-rule-cli-rule-test"], rulesDirectory: "test/files/custom-rules-2"},
             );
             assert.equal(status, Status.Ok, "process should exit without an error");
         });
