@@ -72,3 +72,17 @@ while (true){
     default:
     }
 }
+
+// exhaustive with unions should fail due to the default behavior
+type Tag = 'foo' | 'bar';
+
+function processTag(tag: Tag) {
+  switch (tag) {
+  ~~~~~~~~~~~~~~
+  case 'foo': return 1;
+~~~~~~~~~~~~~~~~~~~~~~~
+  case 'bar': return 2;
+~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [Switch statement should include a 'default' case]
+}
