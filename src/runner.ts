@@ -19,7 +19,7 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
-import { Minimatch } from "minimatch";
+import { filter as createMinimatchFilter, Minimatch } from "minimatch";
 import * as path from "path";
 import * as ts from "typescript";
 
@@ -194,14 +194,17 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
     } else {
         files = files.map((f) => path.resolve(f));
         filesFound = filterFiles(program.getSourceFiles().map((f) => f.fileName), files, true);
-        for (const file of files) {
-            if (!glob.hasMagic(file)) {
-                if (!filesFound.some((f) => new Minimatch(file).match(f))) {
-                    throw new FatalError(`'${file}' is not included in project`);
+        filesFound = filterFiles(filesFound, exclude, false);
+
+        // find non-glob files that have no matching file in the project and are not excluded by any exclude pattern
+        for (const file of filterFiles(files, exclude, false)) {
+            if (!glob.hasMagic(file) && !filesFound.some(createMinimatchFilter(file))) {
+                if (fs.existsSync(file)) {
+                    throw new FatalError(`'${file}' is not included in project.`);
                 }
+                console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
             }
         }
-        filesFound = filterFiles(filesFound, exclude, false);
     }
     return { files: filesFound, program };
 }
@@ -210,15 +213,23 @@ function filterFiles(files: string[], patterns: string[], include: boolean): str
     if (patterns.length === 0) {
         return include ? [] : files;
     }
-    const matcher = patterns.map((pattern) => new Minimatch(pattern));
+    const matcher = patterns.map((pattern) => new Minimatch(pattern, {dot: !include})); // `glob` always enables `dot` for ignore patterns
     return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
 }
 
 function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths?: boolean): string[] {
+    const results = flatMap(
+        files,
+        (file) => glob.sync(trimSingleQuotes(file), { ignore, nodir: true }),
+    );
+    // warn if `files` contains non-existant files, that are not patters and not excluded by any of the exclude patterns
+    for (const file of filterFiles(files, ignore, false)) {
+        if (!glob.hasMagic(file)) {
+            console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
+        }
+    }
     const cwd = process.cwd();
-    return flatMap(files, (file) =>
-        glob.sync(trimSingleQuotes(file), { ignore, nodir: true }))
-        .map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
+    return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
 }
 
 async function doLinting(
