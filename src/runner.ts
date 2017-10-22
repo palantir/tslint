@@ -41,6 +41,11 @@ export interface Options {
     config?: string;
 
     /**
+     * When running with fix: true, do not write files to disk.
+     */
+    dryRun?: boolean;
+
+    /**
      * Exclude globs from path expansion.
      */
     exclude: string[];
@@ -211,6 +216,7 @@ async function doLinting(
     const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
     const linter = new Linter(
         {
+            dryRun: !!options.dryRun,
             fix: !!options.fix,
             formatter: options.format,
             formattersDirectory: options.formattersDirectory,

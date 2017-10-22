@@ -39,12 +39,14 @@ export interface LintResult {
     warningCount: number;
     failures: RuleFailure[];
     fixes?: RuleFailure[];
+    fixedSources: Record<string, string>;
     format: string | FormatterConstructor;
     output: string;
 }
 
 export interface ILinterOptions {
     fix: boolean;
+    dryRun?: boolean;
     formatter?: string | FormatterConstructor;
     formattersDirectory?: string;
     rulesDirectory?: string | string[];

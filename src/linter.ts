@@ -52,6 +52,7 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private fixedSources: Record<string, string> = {};
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -137,6 +138,7 @@ class Linter {
         return {
             errorCount,
             failures: this.failures,
+            fixedSources: this.fixedSources,
             fixes: this.fixes,
             format: formatterName,
             output,
@@ -163,6 +165,7 @@ class Linter {
                 const fixableFailures = updatedFailures.filter((f) => f.hasFix());
                 this.fixes = this.fixes.concat(fixableFailures);
                 source = this.applyFixes(sourceFileName, source, fixableFailures);
+                this.fixedSources[sourceFileName] = source;
                 sourceFile = this.getSourceFile(sourceFileName, source);
             }
         }
@@ -176,15 +179,17 @@ class Linter {
     protected applyFixes(sourceFilePath: string, source: string, fixableFailures: RuleFailure[]): string {
         const fixesByFile = createMultiMap(fixableFailures, (f) => [f.getFileName(), f.getFix()!]);
         fixesByFile.forEach((fileFixes, filePath) => {
-            let fileNewSource: string;
+            let fileNewSource: string | undefined;
             if (path.resolve(filePath) === path.resolve(sourceFilePath)) {
                 source = Replacement.applyFixes(source, fileFixes);
                 fileNewSource = source;
-            } else {
+            } else if (!this.options.dryRun) {
                 const oldSource = fs.readFileSync(filePath, "utf-8");
                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
             }
-            fs.writeFileSync(filePath, fileNewSource);
+            if (!this.options.dryRun && typeof fileNewSource === "string") {
+                fs.writeFileSync(filePath, fileNewSource);
+            }
             this.updateProgram(filePath);
         });
 
