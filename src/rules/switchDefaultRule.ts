@@ -15,19 +15,37 @@
  * limitations under the License.
  */
 
-import { isDefaultClause } from "tsutils";
+import { isDefaultClause, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.AbstractRule {
+const OPTION_ALLOW_EXHAUSTIVE = "allow-exhaustive";
+
+interface Options {
+    allowExhaustive: boolean;
+}
+
+export class Rule extends Lint.Rules.OptionallyTypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-default",
         description: "Require a `default` case in all `switch` statements.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`"${OPTION_ALLOW_EXHAUSTIVE}"\` doesn't require the \`default\` case if all possible expression values\
+are covered by existing \`case\` labels.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_ALLOW_EXHAUSTIVE],
+            },
+            minLength: 0,
+            maxLength: 1,
+        },
+        optionExamples: [true, [true, OPTION_ALLOW_EXHAUSTIVE]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -36,16 +54,66 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Switch statement should include a 'default' case";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowExhaustive: false, // This option requires TypeChecker
+        });
+    }
+
+    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            {
+                allowExhaustive: this.ruleArguments.indexOf(OPTION_ALLOW_EXHAUSTIVE) !== -1,
+            },
+            program.getTypeChecker(),
+        );
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (node.kind === ts.SyntaxKind.SwitchStatement &&
-            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        if (
+            ts.isSwitchStatement(node)
+            && !node.caseBlock.clauses.some(isDefaultClause)
+        ) {
+            const failure = !checker || !ctx.options.allowExhaustive
+                ? `${Rule.FAILURE_STRING}`
+                : checkForUncoveredValues(
+                    checker.getTypeAtLocation(node.expression),
+                    node.caseBlock,
+                );
+
+            if (failure !== undefined) {
+                ctx.addFailureAtNode(node, failure);
+            }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function checkForUncoveredValues(exprType: ts.Type, caseBlock: ts.CaseBlock): string | void {
+    if (!isTypeFlagSet(exprType, ts.TypeFlags.Union)) {
+        return Rule.FAILURE_STRING;
+    }
+
+    for (const type of (exprType as ts.UnionType).types) {
+        if (!isTypeFlagSet(type, ts.TypeFlags.StringLiteral)) {
+            return Rule.FAILURE_STRING;
+        }
+
+        const text = (type as ts.StringLiteralType).value;
+        const hasSuchClause = caseBlock.clauses.some(
+            (clause) => ts.isCaseClause(clause)
+                && ts.isStringLiteral(clause.expression)
+                && (clause.expression.text === text),
+        );
+        if (!hasSuchClause) {
+            return failureStringWithMissingCase(text);
+        }
+    }
+
+    function failureStringWithMissingCase(missingCase: string) {
+        return `${Rule.FAILURE_STRING}, at least the '${missingCase}' case is missing`;
+    }
 }
