@@ -98,7 +98,7 @@ export interface Options {
     /**
      * That TSLint produces the correct output for the specified directory.
      */
-    test?: string;
+    test?: boolean;
 
     /**
      * Whether to enable type checking when linting a project.
@@ -113,7 +113,7 @@ export const enum Status {
 }
 
 export interface Logger {
-    log(message: string): void;
+    log(message: string, noNewline?: boolean): void;
     error(message: string): void;
 }
 
@@ -142,7 +142,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     if (options.test) {
         const test = await import("./test");
         const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
-        return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+        return test.consoleTestResultsHandler(results, logger) ? Status.Ok : Status.FatalError;
     }
 
     if (options.config && !fs.existsSync(options.config)) {

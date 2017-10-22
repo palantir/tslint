@@ -29,7 +29,12 @@ const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname)
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
-    const didAllTestsPass = consoleTestResultHandler(results);
+    const didAllTestsPass = consoleTestResultHandler(results, {
+        log(m, noNewline) {
+            process.stdout.write(noNewline ? m : `${m}\n`);
+        },
+        error: console.error,
+    });
     if (!didAllTestsPass) {
         process.exit(1);
     }
