@@ -32,7 +32,7 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import * as Linter from "./linter";
-import { arrayify, flatMap } from "./utils";
+import { arrayify, flatMap, writeFileAsync } from "./utils";
 
 export interface Options {
     /**
@@ -135,7 +135,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
             throw new FatalError(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
         }
 
-        fs.writeFileSync(CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
+        await writeFileAsync(CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
         return Status.Ok;
     }
 
