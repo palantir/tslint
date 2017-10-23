@@ -114,20 +114,24 @@ function getDependencies(fileName: string, options: Options): Set<string> {
     const result = new Set<string>();
     const packageJsonPath = findPackageJson(path.resolve(path.dirname(fileName)));
     if (packageJsonPath !== undefined) {
-        // don't use require here to avoid caching
-        // remove BOM from file content before parsing
-        const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
-        if (content.dependencies !== undefined) {
-            addDependencies(result, content.dependencies);
-        }
-        if (!options.dev && content.peerDependencies !== undefined) {
-            addDependencies(result, content.peerDependencies);
-        }
-        if (options.dev && content.devDependencies !== undefined) {
-            addDependencies(result, content.devDependencies);
-        }
-        if (options.optional && content.optionalDependencies !== undefined) {
-            addDependencies(result, content.optionalDependencies);
+        try {
+            // don't use require here to avoid caching
+            // remove BOM from file content before parsing
+            const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
+            if (content.dependencies !== undefined) {
+                addDependencies(result, content.dependencies);
+            }
+            if (!options.dev && content.peerDependencies !== undefined) {
+                addDependencies(result, content.peerDependencies);
+            }
+            if (options.dev && content.devDependencies !== undefined) {
+                addDependencies(result, content.devDependencies);
+            }
+            if (options.optional && content.optionalDependencies !== undefined) {
+                addDependencies(result, content.optionalDependencies);
+            }
+        } catch {
+            // treat malformed package.json files as empty
         }
     }
 
