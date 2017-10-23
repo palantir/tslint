@@ -24,8 +24,8 @@ import { createTempFile } from "./utils";
 import Linter = require("../src/linter");
 
 class TestLinter extends Linter {
-    public applyFixesHelper(fileName: string, source: string, ruleFailures: RuleFailure[]) {
-        return super.applyFixes(fileName, source, ruleFailures);
+    public async applyFixesHelper(fileName: string, source: string, ruleFailures: RuleFailure[]) {
+        return await super.applyFixes(fileName, source, ruleFailures);
     }
 }
 
@@ -51,7 +51,7 @@ const templateDeclarationFixed =
 
 describe("Linter", () => {
 
-    it("apply fixes to correct files", () => {
+    it("apply fixes to correct files", async () => {
         const linter = new TestLinter({ fix: true });
         const componentFile = createTempFile("ts");
         const templateFile = createTempFile("ts");
@@ -60,7 +60,7 @@ describe("Linter", () => {
         const sourceFile = createSourceFile(templateFile, `${templateDeclaration}`, ScriptTarget.ES2015);
         const replacement = new Replacement(6, 9, "");
         const failure = new RuleFailure(sourceFile, 6, 15, "Declaration doesn't exist", "foo-bar", replacement);
-        linter.applyFixesHelper(componentFile, componentDeclaration(templateFile), [failure]);
+        await linter.applyFixesHelper(componentFile, componentDeclaration(templateFile), [failure]);
         assert.equal(fs.readFileSync(templateFile, "utf-8"), templateDeclarationFixed);
     });
 

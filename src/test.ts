@@ -54,7 +54,7 @@ export interface TestResult {
     };
 }
 
-export function runTests(patterns: string[], rulesDirectory?: string | string[]): TestResult[] {
+export async function runTests(patterns: string[], rulesDirectory?: string | string[]): Promise<TestResult[]> {
     const files: string[] = [];
     for (let pattern of patterns) {
         if (path.basename(pattern) !== "tslint.json") {
@@ -62,10 +62,11 @@ export function runTests(patterns: string[], rulesDirectory?: string | string[])
         }
         files.push(...glob.sync(pattern));
     }
-    return files.map((directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory));
+    return await Promise.all(
+        files.map(async (directory: string): Promise<TestResult> => await runTest(path.dirname(directory), rulesDirectory)));
 }
 
-export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
+export async function runTest(testDirectory: string, rulesDirectory?: string | string[]): Promise<TestResult> {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
     const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
@@ -146,7 +147,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         };
         const linter = new Linter(lintOptions, program);
         // Need to use the true path (ending in '.lint') for "encoding" rule so that it can read the file.
-        linter.lint(isEncodingRule ? fileToLint : fileCompileName, fileTextWithoutMarkup, tslintConfig);
+        await linter.lint(isEncodingRule ? fileToLint : fileCompileName, fileTextWithoutMarkup, tslintConfig);
         const failures = linter.getResult().failures;
         const errorsFromLinter: LintError[] = failures.map((failure) => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();

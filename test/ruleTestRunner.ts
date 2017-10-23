@@ -18,6 +18,7 @@ import * as chalk from "chalk";
 import * as glob from "glob";
 import * as path from "path";
 
+import { Status } from "../src/runner";
 import { consoleTestResultHandler, runTest } from "../src/test";
 
 /* tslint:disable:no-console */
@@ -27,12 +28,28 @@ console.log(chalk.underline("Testing Lint Rules:"));
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
-for (const testDirectory of testDirectories) {
-    const results = runTest(testDirectory);
-    const didAllTestsPass = consoleTestResultHandler(results);
-    if (!didAllTestsPass) {
-        process.exit(1);
+async function runRuleTests(): Promise<Status> {
+    for (const testDirectory of testDirectories) {
+        const results = await runTest(testDirectory);
+        const didAllTestsPass = consoleTestResultHandler(results);
+        if (!didAllTestsPass) {
+            return Status.FatalError;
+        }
     }
+
+    return Status.Ok;
 }
 
-process.exit(0);
+// tslint:disable-next-line:no-floating-promises
+runRuleTests()
+    .catch((error: Error) => {
+        /* tslint:disable:no-console */
+        console.error(chalk.underline("Error Testing Lint Rules:"));
+        console.error(error);
+        /* tslint:enable:no-console */
+
+        return Status.FatalError;
+    })
+    .then((exitCode: Status) => {
+        process.exitCode = exitCode;
+    });
