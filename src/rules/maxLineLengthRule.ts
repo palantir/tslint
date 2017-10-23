@@ -22,10 +22,11 @@ import * as Lint from "..";
 
 interface Options {
     limit: number;
-    ignoreUrls: boolean;
+    ignoreLongUrls: boolean;
 }
 
 const DEFAULT_LIMIT = 140;
+const URL_REGEX = urlRegex();
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -38,7 +39,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             various editors, IDEs, and diff viewers.`,
         optionsDescription: Lint.Utils.dedent`
             An integer indicating the max length of lines, or a configuration object with two
-            properties: \`\"ignoreUrls\"\` and \`\"limit\"\`.
+            properties: \`\"ignoreLongUrls\"\` and \`\"limit\"\`. If no configuration is provided, a
+            default limit of 140 is used.
             `,
         options: {
             anyOf: [
@@ -52,7 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                             type: "number",
                             minimum: "1",
                         },
-                        ignoreUrls: {
+                        ignoreLongUrls: {
                             type: "boolean",
                         },
                     },
@@ -79,9 +81,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (
             line.contentLength > ctx.options.limit &&
             !(
-                ctx.options.ignoreUrls &&
+                ctx.options.ignoreLongUrls &&
                 hasUrl(line, ctx.sourceFile) &&
-                lineLengthMinusUrl(line, ctx.sourceFile) < ctx.options.limit
+                lineLengthMinusUrl(
+                    line,
+                    ctx.sourceFile,
+                    Math.round(ctx.options.limit / 2),
+                ) <= ctx.options.limit
             )
         ) {
             ctx.addFailureAt(
@@ -93,28 +99,43 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 }
 
+function buildOptions(options: Partial<Options>): Options {
+    options.ignoreLongUrls =
+        options.ignoreLongUrls === undefined ? false : options.ignoreLongUrls;
+    options.limit = options.limit === undefined ? DEFAULT_LIMIT : options.limit;
+    return options as Options;
+}
+
 function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
-    return urlRegex().test(sourceFile
-                            .text.substr(line.pos, line.contentLength));
+    return URL_REGEX.test(sourceFile.text.substr(line.pos, line.contentLength));
 }
 
 function isOptions(arg: number | Options): arg is Options {
-    return (arg as Options).limit !== undefined;
+    return (
+        (arg as Options).limit !== undefined ||
+        (arg as Options).ignoreLongUrls !== undefined
+    );
 }
 
-function lineLengthMinusUrl(line: LineRange, sourceFile: ts.SourceFile): number {
-    return sourceFile
-            .text
-            .substr(line.pos, line.contentLength)
-            .replace(urlRegex(), "")
-            .length;
+function lineLengthMinusUrl(
+    line: LineRange,
+    sourceFile: ts.SourceFile,
+    minUrlLength: number,
+): number {
+    let longUrlLength = 0;
+    const lineText = sourceFile.text.substr(line.pos, line.contentLength);
+    for (const url of lineText.match(URL_REGEX)!) {
+        if (url.length >= minUrlLength) {
+            longUrlLength += url.length;
+        }
+    }
+    return lineText.length - longUrlLength;
 }
 
 function parseOptions(args: number[] | Options[]): Options {
     return isOptions(args[0])
-        ? args[0] as Options
-        : {
-              ignoreUrls: false,
-              limit: args[0] !== undefined ? args[0] as number : DEFAULT_LIMIT,
-          };
+        ? buildOptions(args[0] as Options)
+        : buildOptions({
+              limit: (args[0] === undefined ? DEFAULT_LIMIT : args[0]) as number,
+          });
 }
