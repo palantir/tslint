@@ -20,24 +20,22 @@ import * as path from "path";
 
 import { consoleTestResultHandler, runTest } from "../src/test";
 
-/* tslint:disable:no-console */
-console.log();
-console.log(chalk.underline("Testing Lint Rules:"));
-/* tslint:enable:no-console */
+process.stdout.write(chalk.underline("\nTesting Lint Rules:\n"));
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
     const didAllTestsPass = consoleTestResultHandler(results, {
-        log(m, noNewline) {
-            process.stdout.write(noNewline ? m : `${m}\n`);
+        log(m) {
+            process.stdout.write(m);
         },
-        error: console.error,
+        error(m) {
+            process.stderr.write(m);
+        },
     });
     if (!didAllTestsPass) {
-        process.exit(1);
+        process.exitCode = 1;
+        break;
     }
 }
-
-process.exit(0);

@@ -266,10 +266,12 @@ run(
         typeCheck: argv.typeCheck,
     },
     {
-        log(m, noNewline) {
-            outputStream.write(noNewline ? m : `${m}\n`);
+        log(m) {
+            outputStream.write(m);
         },
-        error: console.error,
+        error(m) {
+            process.stdout.write(m);
+        },
     })
     .then((rc) => {
         process.exitCode = rc;

@@ -216,10 +216,10 @@ export function consoleTestResultHandler(testResult: TestResult, logger: Logger)
 
     for (const fileName of Object.keys(testResult.results)) {
         const results = testResult.results[fileName];
-        logger.log(`${fileName}:`, /*noNewline*/true);
+        logger.log(`${fileName}:`);
 
         if (results.skipped) {
-            logger.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}`));
+            logger.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}\n`));
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
@@ -227,9 +227,9 @@ export function consoleTestResultHandler(testResult: TestResult, logger: Logger)
             const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
-                logger.log(chalk.green(" Passed"));
+                logger.log(chalk.green(" Passed\n"));
             } else {
-                logger.log(chalk.red(" Failed!"));
+                logger.log(chalk.red(" Failed!\n"));
                 didAllTestsPass = false;
                 if (!didMarkupTestPass) {
                     displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION, logger);
@@ -245,8 +245,8 @@ export function consoleTestResultHandler(testResult: TestResult, logger: Logger)
 }
 
 function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, logger: Logger) {
-    logger.log(chalk.green(`Expected (from ${extension} file)`));
-    logger.log(chalk.red("Actual (from TSLint)"));
+    logger.log(chalk.green(`Expected (from ${extension} file)\n`));
+    logger.log(chalk.red("Actual (from TSLint)\n"));
 
     for (const diffResult of diffResults) {
         let color = chalk.grey;
@@ -255,6 +255,6 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, 
         } else if (diffResult.removed) {
             color = chalk.red.underline;
         }
-        logger.log(color(diffResult.value), /*noNewline*/true);
+        logger.log(color(diffResult.value));
     }
 }

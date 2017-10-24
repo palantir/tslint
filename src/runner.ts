@@ -113,7 +113,7 @@ export const enum Status {
 }
 
 export interface Logger {
-    log(message: string, noNewline?: boolean): void;
+    log(message: string): void;
     error(message: string): void;
 }
 
@@ -122,7 +122,7 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
         return await runWorker(options, logger);
     } catch (error) {
         if (error instanceof FatalError) {
-            logger.error(error.message);
+            logger.error(`${error.message}\n`);
             return Status.FatalError;
         }
         throw error;
@@ -151,7 +151,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 
     const { output, errorCount } = await runLinter(options, logger);
     if (output && output.trim()) {
-        logger.log(output);
+        logger.log(`${output}\n`);
     }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
@@ -164,7 +164,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
         if (diagnostics.length !== 0) {
             const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
             if (options.force) {
-                logger.error(message);
+                logger.error(`${message}\n`);
             } else {
                 throw new FatalError(message);
             }
@@ -259,7 +259,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.
-            logger.error(`${filename}: ignoring MPEG transport stream`);
+            logger.error(`${filename}: ignoring MPEG transport stream\n`);
             return undefined;
         }
     } finally {

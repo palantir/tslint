@@ -505,8 +505,8 @@ function execRunnerWithOutput(options: Partial<Options>) { // tslint:disable-lin
     return execRunner(
         options,
         {
-            log(text, noNewline) { stdout += noNewline ? text : `${text}\n`; },
-            error(text) { stderr += `${text}\n`; },
+            log(text) { stdout += text; },
+            error(text) { stderr += text; },
         },
     ).then((status) => ({status, stderr, stdout}));
 }
