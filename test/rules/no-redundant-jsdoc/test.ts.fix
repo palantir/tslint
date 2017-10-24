@@ -1,0 +1,96 @@
+
+type T = number;
+
+
+interface I { x: number; }
+
+
+function f() {}
+
+/**
+ * Doc
+ */
+const x = 0;
+
+/**
+ * Doc
+ * @param y useful info
+ */
+declare function f(x: number, y: string): void;
+
+/**
+ * @param x Is a number
+ */
+declare function g(x: number, y: number, z: number): number;
+
+/**
+ * @param x Useful comment
+ * @returns Useful comment
+ */
+declare function h(x: number): number;
+
+/**
+ * Doc
+ */
+function foo() {}
+
+// Test bad parse -- does not have fix
+/**
+ * @param {Foo~Bar} x Description
+ */
+declare function foo(x);
+
+/**
+ * Doc
+ */
+function f() {}
+
+class C {
+    /**
+     * Doc
+     */
+    x = 1;
+
+    /**
+     * Doc
+     */
+    y: number;
+}
+
+declare class D {
+    /** @default 1 */
+    x: number;
+}
+
+/**
+ * Doc
+ */
+interface I {}
+
+/**
+ * Doc
+ */
+function f() {}
+
+/**
+ * Doc
+ */
+function f() {}
+
+class C {
+    /**
+     * Doc
+     */
+    m() {}
+}
+
+/**
+ * @template T Useful comment
+ */
+function f<T>() {}
+
+/**
+ * Doc
+ */
+function f<T>() {}
+

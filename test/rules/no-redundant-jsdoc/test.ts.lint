@@ -1,13 +1,33 @@
 /** @typedef {number} T */
      ~~~~~~~ [tag % ('typedef')]
+type T = number;
+
+/**
+ * @typedef I
+    ~~~~~~~ [tag % ('typedef')]
+ * @property {number} x
+ */
+interface I { x: number; }
 
 /** @function */
      ~~~~~~~~ [tag % ('function')]
 function f() {}
 
-/** @type number */
-     ~~~~ [tag % ('type')]
+/**
+ * Doc
+ * @type number
+    ~~~~ [tag % ('type')]
+ */
 const x = 0;
+
+/**
+ * Doc
+ * @param {number} x
+    ~~~~~ [param]
+          ~~~~~~~~ [type]
+ * @param y useful info
+ */
+declare function f(x: number, y: string): void;
 
 /**
  * @param {number} x Is a number
@@ -29,7 +49,95 @@ declare function g(x: number, y: number, z: number): number;
  */
 declare function h(x: number): number;
 
+/**
+ * Doc
+ * @name foo
+    ~~~~ [tag % ('name')]
+ */
+function foo() {}
+
+// Test bad parse -- does not have fix
+/**
+ * @param {Foo~Bar} x Description
+          ~~~~ [Type annotation in JSDoc is redundant in TypeScript code.]
+ */
+declare function foo(x);
+
+/**
+ * Doc
+ * @param {number} [x]
+    ~~~~~ [param]
+          ~~~~~~~~ [type]
+ */
+function f() {}
+
+class C {
+    /**
+     * Doc
+     * @default 1
+        ~~~~~~~ [tag % ('default')]
+     */
+    x = 1;
+
+    /**
+     * Doc
+     * @memberOf C
+        ~~~~~~~~ [tag % ('memberOf')]
+     */
+    y: number;
+}
+
+declare class D {
+    /** @default 1 */
+    x: number;
+}
+
+/**
+ * Doc
+ * @interface I
+    ~~~~~~~~~ [tag % ('interface')]
+ */
+interface I {}
+
+/**
+ * Doc
+ * @return {number}
+    ~~~~~~ [return]
+           ~~~~~~~~ [type]
+ */
+function f() {}
+
+/**
+ * Doc
+ * @param x {number}
+    ~~~~~ [param]
+            ~~~~~~~~ [type]
+ */
+function f() {}
+
+class C {
+    /**
+     * Doc
+     * @method m
+        ~~~~~~ [tag % ('method')]
+     */
+    m() {}
+}
+
+/**
+ * @template T Useful comment
+ */
+function f<T>() {}
+
+/**
+ * Doc
+ * @template T
+    ~~~~~~~~ [tag % ('template')]
+ */
+function f<T>() {}
+
 [tag]: JSDoc tag '@%s' is redundant in TypeScript code.
 [type]: Type annotation in JSDoc is redundant in TypeScript code.
 [param]: '@param' is redundant in TypeScript code if it has no description.
+[return]: '@return' is redundant in TypeScript code if it has no description.
 [returns]: '@returns' is redundant in TypeScript code if it has no description.
