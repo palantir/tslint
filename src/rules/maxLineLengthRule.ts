@@ -39,8 +39,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             various editors, IDEs, and diff viewers.`,
         optionsDescription: Lint.Utils.dedent`
             An integer indicating the max length of lines, or a configuration object with two
-            properties: \`\"ignoreLongUrls\"\` and \`\"limit\"\`. If no configuration is provided, a
-            default limit of 140 is used.
+            properties:  \`\"limit\"\` and \`\"ignoreLongUrls\"\`. A URL is considered "long" if
+            its length exceeds half of the configured limit.
+
+            If no configuration is provided, a default limit of 140 is used.
             `,
         options: {
             anyOf: [
@@ -61,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             ],
         },
-        optionExamples: [[true, 120], [true, { limit: 140, ignoreUrls: true }]],
+        optionExamples: [[true, 120], [true, { limit: 140, ignoreLongUrls: true }]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -72,7 +74,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
+        return this.applyWithFunction(
+            sourceFile, walk, parseOptions(
+                this.ruleArguments[0] as number | Options,
+            ),
+        );
     }
 }
 
@@ -100,10 +106,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
 }
 
 function buildOptions(options: Partial<Options>): Options {
-    options.ignoreLongUrls =
-        options.ignoreLongUrls === undefined ? false : options.ignoreLongUrls;
-    options.limit = options.limit === undefined ? DEFAULT_LIMIT : options.limit;
-    return options as Options;
+    return {
+        ignoreLongUrls:
+            options.ignoreLongUrls === undefined
+                ? false
+                : options.ignoreLongUrls,
+        limit: options.limit === undefined ? DEFAULT_LIMIT : options.limit,
+    };
 }
 
 function hasUrl(line: LineRange, sourceFile: ts.SourceFile): boolean {
@@ -132,10 +141,8 @@ function lineLengthMinusUrl(
     return lineText.length - longUrlLength;
 }
 
-function parseOptions(args: number[] | Options[]): Options {
-    return isOptions(args[0])
-        ? buildOptions(args[0] as Options)
-        : buildOptions({
-              limit: (args[0] === undefined ? DEFAULT_LIMIT : args[0]) as number,
-          });
+function parseOptions(args: number | Options): Options {
+    return isOptions(args)
+        ? buildOptions(args)
+        : buildOptions({ limit: args });
 }
