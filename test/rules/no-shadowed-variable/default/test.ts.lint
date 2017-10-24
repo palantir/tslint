@@ -352,7 +352,7 @@ class Clazz<T> {
     }
 }
 
-function foo(
+export default function (
     paramA = function() {let paramB},
                              ~~~~~~ [err % ('paramB')]
     paramB,
