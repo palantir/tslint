@@ -1,0 +1,38 @@
+var simpleName = 1;
+var complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedName;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
+
+var complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicat;
+
+/**
+ * Definition of OAuth 2.0 Scopes for Google Plus.
+ * @see https://developers.google.com/resources/api-libraries/documentation/plus/v1/java/latest/com/google/api/services/plus/another/more/PlusScopes.html
+ */
+
+ /**
+ * Definition of OAuth 2.0 Scopes for Google Plus.
+ * @see complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedName
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
+ */
+
+ /**
+ * Definition of OAuth 2.0 Scopes for Google Plus.
+ * @see complicatedNameIsAcomplicatedNameIsAcomplicatedNameIshttps://developers.google.com/resources/api-libraries/documentation/plus/v1/java/latest/com/google/api/services/plus/another/more/PlusScopes.html complicatedNameIsAcomplicatedNameIsAcomplicatedNameIscomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIscomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
+ */
+
+/**
+ * @see https://a-github.com complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicdljknateddojnididijoijdoijdoijdoijdoijdoijdoijdoijdoijikdijdoijxdioj https://a-github.com
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
+ */
+
+// URL is 70 chars long (one-half of the limit 140) and should therefore be ignored.
+/**
+ * @see https://a-githonetwonetwonetwonetwonetwonetwonetwonetjwonetwsducdb.com complicatedNameIsAcomplicatedNameIsAomplicatedNameIsAcomplicdljknateddojnididijoijdoijdoijdoijdoijdo
+ */
+
+// URL is 69 chars long (less than one-half of the limit 140) and should throw.
+/**
+ * @see https://a-githonetwonetwonetwonetwonetwonetwonetwonetjwonetwsdcdb.com complicatedNameIsAcomplicatedNameIsAomplicatedNameIsAcomplicdljknateddojnididijoijdoijdoijdoijdoijdo
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
+ */
