@@ -24,7 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys max-line-length */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban-comma-operator",
-        description: "Disallows the comma operator to be used. [Read more about the comma operator here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator).",
+        description: "Disallows the comma operator to be used.",
+        descriptionDetails: "[Read more about the comma operator here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator).",
         rationale: Lint.Utils.dedent`
             Using the comma operator can create a potential for many non-obvious bugs or lead to misunderstanding of code.
 
