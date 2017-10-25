@@ -34,6 +34,7 @@ import * as Lint from "../index";
 interface Options {
     withChild?: string[];
     asChildOf?: string[];
+    exceptions?: string[];
     default?: boolean;
 }
 
@@ -59,6 +60,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                     type: "list",
                     listType: "string",
                 },
+                exceptions: {
+                    type: "list",
+                    listType: "string",
+                },
                 default: { type: "boolean" },
             },
             additionalProperties: false,
@@ -79,6 +84,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 \`{"asChildOf": ["VariableDeclaration.initializer"]}\` would
                 ban the parentheses in \`let x = (1 + 2)\`, regardless of the
                 kind of the parenthesized expression.
+
+            exceptions: A whitelist of types around which parens are never
+                banned, even if they match one of the other rules.
 
             default: Whether to default the set of bans to a set of hopefully
                 uncontroversial bans picked by tslint.
@@ -137,6 +145,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
     if (ctx.options.asChildOf == undefined) {
         ctx.options.asChildOf = [];
     }
+    if (ctx.options.exceptions == undefined) {
+        ctx.options.exceptions = [];
+    }
     const withChild = ctx.options.default ? [
         ...ctx.options.withChild,
         // ex: (foo).bar()
@@ -155,6 +166,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
         "PropertyAccessExpression",
         // ex (f());
         "CallExpression",
+        // ex <button onclick={(x => foo(x))}/>
+        "JsxExpression.expression",
     ] : ctx.options.withChild;
     const asChildOf = ctx.options.default ? [
         // ex: let x = (1 + foo());
@@ -180,11 +193,20 @@ function walk(ctx: Lint.WalkContext<Options>) {
         "TemplateSpan.expression",
         ...ctx.options.asChildOf,
     ] : ctx.options.asChildOf;
+    const exceptions = ctx.options.default ? [
+        "JsxElement",
+        "JsxFragment",
+        ...ctx.options.exceptions,
+    ] : ctx.options.exceptions;
 
     const restrictions = withChild.map((name: string) => ({
         message: `an expression of type ${name}`,
         test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
-            return isNodeOfKind(isParenthesizedExpression(node) ? node.expression : node.type, name);
+            const child = isParenthesizedExpression(node) ? node.expression : node.type;
+            if (exceptions.some((exception) => isNodeOfKind(child, exception))) {
+                return false;
+            }
+            return isNodeOfKind(child, name);
         },
     })).concat(
         asChildOf.map((name: string) => {
@@ -193,6 +215,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 message: `the ${whichChild} child of an expression${parentKind === "*" ? "" : ` of type ${parentKind}`}`,
                 test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
                     if (!isNodeOfKind(node.parent!, parentKind)) {
+                        return false;
+                    }
+                    const child = isParenthesizedExpression(node) ? node.expression : node.type;
+                    if (exceptions.some((exception) => isNodeOfKind(child, exception))) {
                         return false;
                     }
                     const parentMapping = node.parent as {} as { [k: string]: ts.Node | ts.Node[] };

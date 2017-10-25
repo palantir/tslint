@@ -1,5 +1,5 @@
-const foo = 
+const foo = (
     <div>text</div>
-;
+);
 
-<button foo={'a'} />
+<button onclick={x => x} />
