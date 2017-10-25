@@ -9,7 +9,7 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "target": "es5",
-        "lib": ["es6"],
+        "lib": ["es6", "es2016"],
         "outDir": "../build"
     },
     "include": [

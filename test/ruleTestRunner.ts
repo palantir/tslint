@@ -25,7 +25,7 @@ console.log();
 console.log(chalk.underline("Testing Lint Rules:"));
 /* tslint:enable:no-console */
 
-const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
+const testDirectories = glob.sync("test/rules1/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
