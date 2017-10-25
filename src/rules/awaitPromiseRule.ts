@@ -70,14 +70,18 @@ function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
 }
 
 function containsType(type: ts.Type, predicate: (name: string) => boolean): boolean {
-    if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any) ||
-        isTypeReference(type) && type.target.symbol !== undefined && predicate(type.target.symbol.name)) {
+    if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any)) {
+        return true;
+    }
+    if (isTypeReference(type)) {
+        type = type.target;
+    }
+    if (type.symbol !== undefined && predicate(type.symbol.name)) {
         return true;
     }
     if (isUnionOrIntersectionType(type)) {
         return type.types.some((t) => containsType(t, predicate));
     }
-
     const bases = type.getBaseTypes();
     return bases !== undefined && bases.some((t) => containsType(t, predicate));
 }
