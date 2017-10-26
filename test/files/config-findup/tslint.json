@@ -1,1 +1,5 @@
-{}
+{
+  "rules": {
+    "quotemark": true
+  }
+}

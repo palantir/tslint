@@ -17,7 +17,6 @@
 
 import {
     getChildOfKind,
-    getModifier,
     hasModifier,
     isFunctionExpression,
     isIdentifier,
@@ -64,15 +63,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isShorthandAssignment(node)) {
+        if (isShorthandPropertyAssignment(node)) {
             ctx.addFailureAtNode(
-                (node as ts.ShorthandPropertyAssignment).name,
+                node.name,
                 Rule.SHORTHAND_ASSIGNMENT,
-                isMethodDeclaration(node)
-                    ? fixShorthandMethodDeclaration(node)
-                    : fixShorthandPropertyAssignment(node as ts.ShorthandPropertyAssignment),
+                Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `),
             );
-            return;
+        } else if (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+            ctx.addFailureAtNode(
+                node.name,
+                Rule.SHORTHAND_ASSIGNMENT,
+                fixShorthandMethodDeclaration(node, ctx.sourceFile),
+            );
         }
         return ts.forEachChild(node, cb);
     });
@@ -93,47 +95,27 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                        // allow named function expressions
                        node.initializer.name === undefined) {
                 const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
-                ctx.addFailureAtNode(node, `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`, fix);
+                ctx.addFailure(
+                    node.getStart(ctx.sourceFile),
+                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
+                    `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
+                    fix,
+                );
             }
         }
         return ts.forEachChild(node, cb);
     });
 }
 
-function fixShorthandMethodDeclaration(node: ts.MethodDeclaration): Lint.Fix {
+function fixShorthandMethodDeclaration(node: ts.MethodDeclaration, sourceFile: ts.SourceFile) {
     const isGenerator = node.asteriskToken !== undefined;
     const isAsync = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
-    let
-    replacementStart =
-        (isAsync && node.modifiers !== undefined)
-            ? getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart()
-            : node.name.getStart();
-    replacementStart =
-        (isGenerator && !isAsync)
-            ? node.asteriskToken!.getStart()
-            : node.name.getStart();
 
-    const fixes: Lint.Fix = [
-        Lint.Replacement.replaceFromTo(
-            replacementStart,
-            node.name.end,
-            `${node.name.getText()}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
-        ),
-    ];
-
-    if (isAsync) {
-        fixes.unshift(
-            Lint.Replacement.deleteFromTo(
-                getModifier(node, ts.SyntaxKind.AsyncKeyword)!.getStart(),
-                node.name.getStart(),
-            ),
-        );
-    }
-    return fixes;
-}
-
-function fixShorthandPropertyAssignment(node: ts.ShorthandPropertyAssignment): Lint.Fix {
-    return Lint.Replacement.appendText(node.name.getStart(), `${node.name.text}: `);
+    return Lint.Replacement.replaceFromTo(
+        node.getStart(sourceFile),
+        node.name.end,
+        `${node.name.getText(sourceFile)}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+    );
 }
 
 function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
@@ -150,11 +132,4 @@ function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExp
         fix = [fix, Lint.Replacement.appendText(nameStart, prefix)];
     }
     return [prefix + sourceFile.text.substring(nameStart, name.end), fix];
-}
-
-function isShorthandAssignment(node: ts.Node): boolean {
-    return (
-        isShorthandPropertyAssignment(node) ||
-        (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression)
-    );
 }

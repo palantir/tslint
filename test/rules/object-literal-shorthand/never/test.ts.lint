@@ -10,8 +10,13 @@ const asyncFn = {
 };
 
 const bad = {
-  w() {},
+  w() {
   ~ [OBJECT_LITERAL_DISALLOWED]
+    const alsoBad = {
+        bad,
+        ~~~ [OBJECT_LITERAL_DISALLOWED]
+    };
+  },
   *x() {},
    ~ [OBJECT_LITERAL_DISALLOWED]
   [y]() {},
@@ -59,4 +64,9 @@ const extraCases = {
 export class ClassA extends ClassZ {
   testMethod() {}
 }
+
+({foo} = {foo});
+  ~~~ [OBJECT_LITERAL_DISALLOWED]
+          ~~~ [OBJECT_LITERAL_DISALLOWED]
+
 [OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.
