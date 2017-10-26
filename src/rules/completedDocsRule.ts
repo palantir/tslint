@@ -49,7 +49,7 @@ export const PRIVACY_PROTECTED = "protected";
 export const PRIVACY_PUBLIC = "public";
 
 export const TAGS_FOR_CONTENT = "content";
-export const TAGS_FOR_EXISTENCE = "exists";
+export const TAGS_FOR_EXISTENCE = "existence";
 
 export const VISIBILITY_EXPORTED = "exported";
 export const VISIBILITY_INTERNAL = "internal";
