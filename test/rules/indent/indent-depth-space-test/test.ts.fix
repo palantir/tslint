@@ -4,7 +4,8 @@ module TestModule {
         console.warn("hi");
     };
 
-    class TestClass {
+    class
+    TestClass {
         private variable;
 
         testFunction() {
@@ -60,6 +61,36 @@ module TestModule {
         } else {
             console.warn(i + 1);
         }
+    }
+}
+
+function abc() {
+    let a = 1
+    let b = 1
+    let c = 1
+    let d = 1
+    let e = 1
+}
+
+function() {
+    return new Promise((resolve, reject) => {
+        doxxx()
+            .then(abcd)
+        doxxx().then(resolve)
+    })
+}
+
+function fff(
+    aaa,
+    bbb,
+    ccc
+) {
+    if (
+    aaaif
+    && bbb &&
+    ccc
+    ) {
+
     }
 }
 

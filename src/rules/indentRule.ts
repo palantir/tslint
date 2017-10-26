@@ -101,16 +101,18 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { tabs, size } } = ctx;
     const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
     const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
-    // console.info(sourceFile.getChildren()[0]);
 
     for (const {pos, contentLength} of getLineRanges(sourceFile)) {
         if (contentLength === 0) { continue; }
         const line = sourceFile.text.substr(pos, contentLength);
         let indentEnd = line.search(/\S/);
+        let gotError = false;
         if (size !== undefined) {
-            checkIndentSize({ ctx, tabs, size, pos, indentEnd, line, sourceFile });
+            gotError = checkIndentSize({ ctx, tabs, size, pos, indentEnd, line, sourceFile });
+            if (gotError) {
+                continue;
+            }
         }
-        console.info("============");
         if (indentEnd === 0) { continue; }
         if (indentEnd === -1) {
             indentEnd = contentLength;
@@ -127,46 +129,49 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 }
 
 function checkIndentSize(params: {
-    ctx: any;
-    tabs: any;
+    ctx: Lint.WalkContext<Options>;
+    tabs: boolean;
     size: number;
     pos: number;
     indentEnd: number;
     line: string;
     sourceFile: ts.SourceFile;
-}): void {
+}): boolean {
     const ctx: Lint.WalkContext<Options> = params.ctx;
-    const tabs = params.tabs;
+    const tabs: boolean = params.tabs;
     const size: number = params.size;
     const pos: number = params.pos;
-    const indentEnd = params.indentEnd;
-    const line = params.line;
+    const indentEnd: number = params.indentEnd;
+    const line: string = params.line;
     const sourceFile: ts.SourceFile = params.sourceFile;
 
     const currentNodePos: number = pos + indentEnd;
-    let currentNode = recursiveGetNodeAt(sourceFile, currentNodePos);
-    console.info(currentNodePos);
-    console.info(line);
+    let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
     let depth = 0;
-    if (currentNode && currentNode.getStart() === currentNodePos) {
-        // console.info(pos, "|", currentNode.getStart(),
-        // "|", currentNode.getFullStart(), "|", currentNode.getEnd(), "|", currentNodePos);
+    if (currentNode !== undefined && inTsx(sourceFile)) {
+        return false;
+    }
+    if (currentNode !== undefined && currentNode.getStart() === currentNodePos) {
         depth = getNodeDeepth(currentNode, line);
-        console.info("Node start, depth: ", depth);
     } else {
         currentNode = recursiveGetNodeAtEnd(sourceFile, currentNodePos);
-        if (currentNode) {
+        if (currentNode !== undefined) {
             depth = getNodeDeepth(currentNode, line);
-            console.info("Node end, depth: ", depth);
         } else {
-            console.info("not found");
+            return false;
         }
     }
-    const expectedIndentSize: number = (size || 0) * depth;
-    console.info("replacement", indentEnd);
-    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${depth} space`);
-    if (size !== undefined && expectedIndentSize !== indentEnd) {
-        console.info("indent size wrong");
+    const expectedIndentation: string = tabs ? "\t".repeat(depth)
+            : " ".repeat(size * depth);
+    const actualIndentation = line.slice(0, indentEnd);
+    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${depth * size} space`);
+    if (inStringTemplate(currentNode)) {
+        return false;
+    }
+    if (line.trim().charAt(0) === "*") {
+        return false;
+    }
+    if (expectedIndentation !== actualIndentation) {
         ctx.addFailureAt(
             pos,
             indentEnd,
@@ -179,7 +184,9 @@ function checkIndentSize(params: {
                 indentEnd,
             ),
         );
+        return true;
     }
+    return false;
 }
 
 function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
@@ -192,7 +199,10 @@ function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
             ts.forEachChild(node, cb);
         });
     }
-    return result || root;
+    if (result !== undefined) {
+        return result;
+    }
+    return root;
 }
 
 function recursiveGetNodeAtEnd(root: ts.Node, pos: number): ts.Node | undefined {
@@ -209,25 +219,68 @@ function recursiveGetNodeAtEnd(root: ts.Node, pos: number): ts.Node | undefined 
     return result;
 }
 
-function getNodeDeepth(node: ts.Node, str: string): number {
+function inTsx(node: ts.SourceFile): boolean {
+    return /.tsx$/.test(node.fileName);
+}
+
+function getNodeDeepth(node: ts.Node, line: string): number {
     let result = 0;
     let parent: ts.Node | undefined = node.parent;
     const blockTypes: ts.SyntaxKind[] = [
-        ts.SyntaxKind.ModuleBlock,
-        ts.SyntaxKind.Block,
-        ts.SyntaxKind.ClassDeclaration,
-        ts.SyntaxKind.ObjectLiteralExpression,
+        ts.SyntaxKind.Block, // 207
+        ts.SyntaxKind.Parameter, // 146
+        ts.SyntaxKind.CaseBlock, // 235
+        ts.SyntaxKind.EnumMember, // 264
+        ts.SyntaxKind.CaseClause, // 257
+        // ts.SyntaxKind.IfStatement, // Have no idea on how to check whether a node is in if paren
+        ts.SyntaxKind.ModuleBlock, // 234
+        ts.SyntaxKind.TemplateSpan, // 205
+        ts.SyntaxKind.DefaultClause, // 258
+        ts.SyntaxKind.ClassDeclaration, // 229
+        ts.SyntaxKind.ArrayLiteralExpression,
+        ts.SyntaxKind.ObjectLiteralExpression, // 178
     ];
     while (parent !== undefined) {
-        if (str.includes("fuck")) {
-            console.info(parent.kind);
-        }
-        if (blockTypes.includes(parent.kind)) {
+        if (blockTypes.indexOf(parent.kind) > -1) {
             result++;
         }
         parent = parent.parent;
     }
+    if (nodeAtOutside(node)) {
+        result--;
+    }
+    if (
+        node.parent !== undefined
+        && node.parent.kind === ts.SyntaxKind.CallExpression
+        && /^\s*\./.test(line)
+    ) {
+        result ++;
+    }
     return result;
+}
+
+function inStringTemplate(node: ts.Node | undefined): boolean {
+    if (node === undefined) {
+        return false;
+    }
+    const inTemplate = [
+        ts.SyntaxKind.NoSubstitutionTemplateLiteral,
+        ts.SyntaxKind.TemplateHead,
+        ts.SyntaxKind.TemplateMiddle,
+        ts.SyntaxKind.TemplateTail,
+    ].indexOf(node.kind) > -1;
+    if (inTemplate) {
+        return true;
+    }
+    return false;
+}
+
+function nodeAtOutside(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.Identifier
+         && node.parent.kind === ts.SyntaxKind.ClassDeclaration;
 }
 
 function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {
