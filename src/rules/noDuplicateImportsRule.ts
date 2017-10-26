@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isLiteralExpression, isModuleBlock, isModuleDeclaration } from "tsutils";
+import { isImportDeclaration, isLiteralExpression, isModuleDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -50,32 +50,19 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
 function walkWorker(ctx: Lint.WalkContext<void>, statements: ReadonlyArray<ts.Statement>, seen: Set<string>): void {
     for (const statement of statements) {
-        const im = tryGetImportSpecifier(statement);
-        if (im !== undefined && isLiteralExpression(im)) {
-            const { text } = im;
+        if (isImportDeclaration(statement) && isLiteralExpression(statement.moduleSpecifier)) {
+            const { text } = statement.moduleSpecifier;
             if (seen.has(text)) {
-                ctx.addFailureAtNode(im.parent!, Rule.FAILURE_STRING(text));
+                ctx.addFailureAtNode(statement, Rule.FAILURE_STRING(text));
             }
             seen.add(text);
         }
 
-        if (isModuleDeclaration(statement) && statement.body !== undefined && isModuleBlock(statement.body)) {
+        if (isModuleDeclaration(statement) && statement.body !== undefined && statement.name.kind === ts.SyntaxKind.StringLiteral) {
             // If this is a module augmentation, re-use `seen` since those imports could be moved outside.
             // If this is an ambient module, create a fresh `seen`
             // because they should have separate imports to avoid becoming augmentations.
-            walkWorker(ctx, statement.body.statements, ts.isExternalModule(ctx.sourceFile) ? seen : new Set());
+            walkWorker(ctx, (statement.body as ts.ModuleBlock).statements, ts.isExternalModule(ctx.sourceFile) ? seen : new Set());
         }
-    }
-}
-
-function tryGetImportSpecifier(statement: ts.Statement): ts.Expression | undefined {
-    switch (statement.kind) {
-        case ts.SyntaxKind.ImportDeclaration:
-            return (statement as ts.ImportDeclaration).moduleSpecifier;
-        case ts.SyntaxKind.ImportEqualsDeclaration:
-            const ref = (statement as ts.ImportEqualsDeclaration).moduleReference;
-            return ref.kind === ts.SyntaxKind.ExternalModuleReference ? ref.expression : undefined;
-        default:
-            return undefined;
     }
 }
