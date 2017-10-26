@@ -1,0 +1,94 @@
+async function foo() {
+    return await x;
+           ~~~~~ [0]
+}
+(async () => await x);
+             ~~~~~ [0]
+
+async function allowTypeAssertion() {
+    return (await x)!;
+    return (await x as number);
+    return <string> await x;
+}
+async function allowedInsideTryCatch() {
+    try {
+        return await x;
+    } catch (e) {
+        // handle error
+        return await x; // not allowed in catch when there is no finally
+               ~~~~~ [0]
+    }
+}
+async function allowedInsideTryFinally() {
+    try {
+        return await x;
+    } finally {
+        // do cleanup, close connection for example
+        return await x; // not allowed in finally at all
+               ~~~~~ [0]
+    }
+}
+async function allowedInsideCatchFinally() {
+    try {
+        return await x;
+    } catch (e) {
+        return await x;
+    } finally {
+        return await x;
+               ~~~~~ [0]
+    }
+}
+async function nestedTryStatements() {
+    try {
+        try {
+            return await x;
+        } catch (e) {
+            return await x;
+        } finally {
+            return await foobar;
+        }
+    } catch(e) {
+        try {
+            return await x;
+        } catch (e) {
+            return await x;
+        } finally {
+            return await foobar;
+        }
+    } finally {
+        try {
+            return await x;
+        } catch (e) {
+            return await x;
+        } finally {
+            return await x;
+                   ~~~~~ [0]
+        }
+    }
+}
+
+async function handleParens() {
+    return (await x);
+            ~~~~~ [0]
+}
+async function handleBinaryExpression() {
+    return await foo || await x;
+                        ~~~~~ [0]
+    return await foo && await x;
+                        ~~~~~ [0]
+    return await foo, await x;
+                      ~~~~~ [0]
+    return await foo + await bar;
+}
+async function handleConditionalExpression() {
+    return await foo ? await bar : await baz;
+                       ~~~~~ [0]
+                                   ~~~~~ [0]
+}
+
+throw await x;
+await x;
+return await x;
+       ~~~~~ [0]
+
+[0]: Unnecessary 'await'.

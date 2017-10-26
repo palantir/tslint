@@ -48,4 +48,11 @@ async function fPromise() {
     await intersectionPromise;
 }
 
-[0]: 'await' of non-Promise.
+type AxiosResponse<T> = T;
+interface AxiosPromise<T = any> extends Promise<AxiosResponse<T>> {}
+
+async function extendsPromise(v: AxiosPromise<any>) {
+    await v;
+}
+
+[0]: Invalid 'await' of a non-Promise value.

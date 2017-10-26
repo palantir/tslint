@@ -35,7 +35,7 @@
   {
     "formatterName": "msbuild",
     "description": "Formats errors for consumption by msbuild.",
-    "descriptionDetails": "\nThe output is compatible with both msbuild and Visual Studio. All failures have the\n'warning' severity.",
+    "descriptionDetails": "The output is compatible with both msbuild and Visual Studio.",
     "sample": "myFile.ts(1,14): warning: Missing semicolon",
     "consumer": "machine"
   },

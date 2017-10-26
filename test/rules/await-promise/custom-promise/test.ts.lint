@@ -75,4 +75,4 @@ async function fCustomPromise() {
     await intersectionPromise;
 }
 
-[0]: 'await' of non-Promise.
+[0]: Invalid 'await' of a non-Promise value.
