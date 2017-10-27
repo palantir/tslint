@@ -67,7 +67,7 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString = failure.getRuleSeverity() === "warning" ? chalk.yellow(failureString) : chalk.red(failureString);
+            failureString = failure.getRuleSeverity() === "warning" ? chalk.yellow.bold(failureString) : chalk.red.bold(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();

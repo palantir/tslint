@@ -77,32 +77,32 @@ describe("CodeFrame Formatter", () => {
 
         const expectedResultColored =
             `formatters/codeFrameFormatter.test.ts
-            \u001b[31mfirst failure\u001b[39m \u001b[90m(first-name)\u001b[39m
+            \u001b[31m\u001b[1mfirst failure\u001b[22m\u001b[39m \u001b[90m(first-name)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
             \u001b[90m 4 | \u001b[39m\u001b[0m
 
-            \u001b[31mfull failure\u001b[39m \u001b[90m(full-name)\u001b[39m
+            \u001b[31m\u001b[1mfull failure\u001b[22m\u001b[39m \u001b[90m(full-name)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
             \u001b[90m 4 | \u001b[39m\u001b[0m
 
-            \u001b[33mwarning failure\u001b[39m \u001b[90m(warning-name)\u001b[39m
+            \u001b[33m\u001b[1mwarning failure\u001b[22m\u001b[39m \u001b[90m(warning-name)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
             \u001b[90m 4 | \u001b[39m\u001b[0m
 
-            \u001b[31m&<>'\" should be escaped\u001b[39m \u001b[90m(escape)\u001b[39m
+            \u001b[31m\u001b[1m&<>'\" should be escaped\u001b[22m\u001b[39m \u001b[90m(escape)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m   | \u001b[39m \u001b[31m\u001b[1m^\u001b[22m\u001b[39m
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
             \u001b[90m 4 | \u001b[39m\u001b[0m
 
-            \u001b[31mlast failure\u001b[39m \u001b[90m(last-name)\u001b[39m
+            \u001b[31m\u001b[1mlast failure\u001b[22m\u001b[39m \u001b[90m(last-name)\u001b[39m
             \u001b[0m \u001b[90m  7 | \u001b[39m        }
             \u001b[90m  8 | \u001b[39m    }
             \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  9 | \u001b[39m}
