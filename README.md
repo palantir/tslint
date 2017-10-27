@@ -45,6 +45,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 - [tslint-immutable](https://github.com/jonaskello/tslint-immutable) - TSLint rules to disable mutation in TypeScript
 - [tslint-consistent-codestyle](https://github.com/ajafff/tslint-consistent-codestyle) - TSLint rules to enforce consistent code style in TypeScript
+- [tslint-sonarts](https://github.com/SonarSource/SonarTS) - Bug-finding rules based on advanced code models to spot hard to find errors in TypeScript
 
 Development
 -----------
