@@ -100,19 +100,50 @@ interface Options {
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { tabs, size } } = ctx;
     const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
-    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
+    let failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
 
     for (const {pos, contentLength} of getLineRanges(sourceFile)) {
         if (contentLength === 0) { continue; }
         const line = sourceFile.text.substr(pos, contentLength);
         let indentEnd = line.search(/\S/);
-        let gotError = false;
+        // <check-indent-depth>
         if (size !== undefined) {
-            gotError = checkIndentSize({ ctx, tabs, size, pos, indentEnd, line, sourceFile });
-            if (gotError) {
-                continue;
+            const currentNodePos: number = pos + indentEnd;
+            let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
+            let depth = 0;
+            if (currentNode !== undefined && currentNode.getStart() === currentNodePos) {
+                depth = getNodeDeepth(currentNode, line);
+            } else {
+                currentNode = recursiveGetNodeAtEnd(sourceFile, currentNodePos);
+                if (currentNode !== undefined) {
+                    depth = getNodeDeepth(currentNode, line);
+                }
+            }
+            if (currentNode !== undefined) {
+                const expectedIndentation: string = tabs ? "\t".repeat(depth)
+                : " ".repeat(size * depth);
+                const actualIndentation = line.slice(0, indentEnd);
+                const passIndentDepthCheck = inStringTemplate(currentNode) || (line.trim().charAt(0) === "*");
+
+                if (!passIndentDepthCheck && expectedIndentation !== actualIndentation) {
+                    failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${depth * size} space`);
+                    ctx.addFailureAt(
+                        pos,
+                        indentEnd,
+                        failure,
+                        createIndentSizeFix(
+                            pos,
+                            tabs,
+                            size,
+                            depth,
+                            indentEnd,
+                        ),
+                    );
+                    continue;
+                }
             }
         }
+        // </check-indent-depth>
         if (indentEnd === 0) { continue; }
         if (indentEnd === -1) {
             indentEnd = contentLength;
@@ -128,74 +159,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 }
 
-function checkIndentSize(params: {
-    ctx: Lint.WalkContext<Options>;
-    tabs: boolean;
-    size: number;
-    pos: number;
-    indentEnd: number;
-    line: string;
-    sourceFile: ts.SourceFile;
-}): boolean {
-    const ctx: Lint.WalkContext<Options> = params.ctx;
-    const tabs: boolean = params.tabs;
-    const size: number = params.size;
-    const pos: number = params.pos;
-    const indentEnd: number = params.indentEnd;
-    const line: string = params.line;
-    const sourceFile: ts.SourceFile = params.sourceFile;
-
-    const currentNodePos: number = pos + indentEnd;
-    let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
-    let depth = 0;
-    if (currentNode !== undefined && inTsx(sourceFile)) {
-        return false;
-    }
-    if (currentNode !== undefined && currentNode.getStart() === currentNodePos) {
-        depth = getNodeDeepth(currentNode, line);
-    } else {
-        currentNode = recursiveGetNodeAtEnd(sourceFile, currentNodePos);
-        if (currentNode !== undefined) {
-            depth = getNodeDeepth(currentNode, line);
-        } else {
-            return false;
-        }
-    }
-    const expectedIndentation: string = tabs ? "\t".repeat(depth)
-            : " ".repeat(size * depth);
-    const actualIndentation = line.slice(0, indentEnd);
-    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${depth * size} space`);
-    if (inStringTemplate(currentNode)) {
-        return false;
-    }
-    if (line.trim().charAt(0) === "*") {
-        return false;
-    }
-    if (expectedIndentation !== actualIndentation) {
-        ctx.addFailureAt(
-            pos,
-            indentEnd,
-            failure,
-            createIndentSizeFix(
-                pos,
-                tabs,
-                size,
-                depth,
-                indentEnd,
-            ),
-        );
-        return true;
-    }
-    return false;
-}
-
 function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
-    let result: ts.Node | undefined = root.getChildAt(pos);
+    const result: ts.Node | undefined = root.getChildAt(pos);
     if (result === undefined) {
         ts.forEachChild(root, function cb(node: ts.Node): void {
-            if (node.getFullStart() < pos && node.getEnd() >= pos) {
-                result = recursiveGetNodeAt(node, pos);
-            }
             ts.forEachChild(node, cb);
         });
     }
@@ -219,30 +186,38 @@ function recursiveGetNodeAtEnd(root: ts.Node, pos: number): ts.Node | undefined 
     return result;
 }
 
-function inTsx(node: ts.SourceFile): boolean {
-    return /.tsx$/.test(node.fileName);
-}
-
 function getNodeDeepth(node: ts.Node, line: string): number {
     let result = 0;
     let parent: ts.Node | undefined = node.parent;
     const blockTypes: ts.SyntaxKind[] = [
-        ts.SyntaxKind.Block, // 207
-        ts.SyntaxKind.Parameter, // 146
-        ts.SyntaxKind.CaseBlock, // 235
-        ts.SyntaxKind.EnumMember, // 264
-        ts.SyntaxKind.CaseClause, // 257
-        // ts.SyntaxKind.IfStatement, // Have no idea on how to check whether a node is in if paren
-        ts.SyntaxKind.ModuleBlock, // 234
-        ts.SyntaxKind.TemplateSpan, // 205
-        ts.SyntaxKind.DefaultClause, // 258
-        ts.SyntaxKind.ClassDeclaration, // 229
+        ts.SyntaxKind.Block,
+        ts.SyntaxKind.Parameter,
+        ts.SyntaxKind.CaseBlock,
+        ts.SyntaxKind.EnumMember,
+        ts.SyntaxKind.CaseClause,
+        ts.SyntaxKind.JsxElement,
+        ts.SyntaxKind.ModuleBlock,
+        ts.SyntaxKind.TemplateSpan,
+        ts.SyntaxKind.DefaultClause,
+        ts.SyntaxKind.ClassDeclaration,
         ts.SyntaxKind.ArrayLiteralExpression,
-        ts.SyntaxKind.ObjectLiteralExpression, // 178
+        ts.SyntaxKind.ObjectLiteralExpression,
     ];
+    if (isCloseElement(node, line)) {
+        result --;
+    }
+    if (isCloseParen(node, line)) {
+        result ++;
+    }
+    if (inStatementParen(node)) {
+        result ++;
+    }
     while (parent !== undefined) {
         if (blockTypes.indexOf(parent.kind) > -1) {
             result++;
+        }
+        if (inStatementParen(parent)) {
+            result ++;
         }
         parent = parent.parent;
     }
@@ -259,20 +234,45 @@ function getNodeDeepth(node: ts.Node, line: string): number {
     return result;
 }
 
+function inStatementParen(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    const parentInstatment = [
+        ts.SyntaxKind.IfStatement,
+        ts.SyntaxKind.WhileStatement,
+        ts.SyntaxKind.ForStatement,
+        ts.SyntaxKind.ForOfStatement,
+        ts.SyntaxKind.DoStatement,
+        ts.SyntaxKind.WithStatement,
+    ].indexOf(node.parent.kind) >= 0;
+    return node.kind !== ts.SyntaxKind.Block && parentInstatment;
+}
+
+function isCloseParen(node: ts.Node, line: string): boolean {
+    if (node.kind !== ts.SyntaxKind.Block) {
+        return false;
+    }
+    return /^\s*\)/.test(line);
+}
+
+function isCloseElement(node: ts.Node, line: string): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.parent.kind === ts.SyntaxKind.JsxElement
+        && /^\s*<\//.test(line);
+}
+
 function inStringTemplate(node: ts.Node | undefined): boolean {
     if (node === undefined) {
         return false;
     }
-    const inTemplate = [
-        ts.SyntaxKind.NoSubstitutionTemplateLiteral,
-        ts.SyntaxKind.TemplateHead,
-        ts.SyntaxKind.TemplateMiddle,
-        ts.SyntaxKind.TemplateTail,
-    ].indexOf(node.kind) > -1;
-    if (inTemplate) {
-        return true;
-    }
-    return false;
+    return node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral
+    || (
+        node.kind >= ts.SyntaxKind.FirstTemplateToken
+        && node.kind <= ts.SyntaxKind.LastTemplateToken
+    );
 }
 
 function nodeAtOutside(node: ts.Node): boolean {
