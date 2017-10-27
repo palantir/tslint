@@ -69,4 +69,9 @@ export class ClassA extends ClassZ {
   ~~~ [OBJECT_LITERAL_DISALLOWED]
           ~~~ [OBJECT_LITERAL_DISALLOWED]
 
+let {foo = 1, baz: baz, bar: {bar}, ...bas} = {};
+     ~~~ [OBJECT_LITERAL_DISALLOWED]
+                              ~~~ [OBJECT_LITERAL_DISALLOWED]
+let [bar, ...foobar] = [];
+
 [OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.
