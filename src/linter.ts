@@ -59,7 +59,7 @@ class Linter {
     public static createProgram(configFile: string, projectDirectory: string = path.dirname(configFile)): ts.Program {
         const config = ts.readConfigFile(configFile, ts.sys.readFile);
         if (config.error !== undefined) {
-            throw new FatalError(ts.formatDiagnostic(config.error, {
+            throw new FatalError(ts.formatDiagnostics([config.error], {
                 getCanonicalFileName: (f) => f,
                 getCurrentDirectory: process.cwd,
                 getNewLine: () => "\n",
