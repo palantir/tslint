@@ -336,7 +336,11 @@ function getHomeDir(): string | undefined {
     return undefined;
 }
 
-// returns the absolute path (contrary to what the name implies)
+/**
+ * returns the absolute path (contrary to what the name implies)
+ *
+ * @deprecated use `path.resolve` instead
+ */
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != undefined) {
         const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
@@ -369,15 +373,14 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
                 }
             }
 
-            const absolutePath = getRelativePath(dir, relativeTo);
+            const absolutePath = relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
             if (absolutePath !== undefined) {
                 if (!fs.existsSync(absolutePath)) {
                     throw new FatalError(`Could not find custom rule directory: ${dir}`);
                 }
             }
             return absolutePath;
-        })
-        .filter((dir) => dir !== undefined) as string[];
+        });
 }
 
 /**

@@ -24,7 +24,6 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
-    getRelativePath,
     getRulesDirectories,
     IConfigurationFile,
     loadConfigurationFromPath,
@@ -33,7 +32,6 @@ import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
-import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -120,16 +118,12 @@ class Linter {
     }
 
     public getResult(): LintResult {
-        let formatter: IFormatter;
-        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
-
         const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
-        const Formatter = findFormatter(formatterName, formattersDirectory);
-        if (Formatter !== undefined) {
-            formatter = new Formatter();
-        } else {
+        const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
+        if (Formatter === undefined) {
             throw new Error(`formatter '${formatterName}' not found`);
         }
+        const formatter = new Formatter();
 
         const output = formatter.format(this.failures, this.fixes);
 
