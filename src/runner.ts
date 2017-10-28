@@ -27,7 +27,6 @@ import {
     CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
-    IConfigurationFile,
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
@@ -206,9 +205,7 @@ function resolveGlobs(files: string[] | undefined, ignore: string[], outputAbsol
         .map((file) => outputAbsolutePaths ? path.resolve(file) : path.relative(process.cwd(), file));
 }
 
-async function doLinting(
-        options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
-    const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
+async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
             fix: !!options.fix,
@@ -219,7 +216,7 @@ async function doLinting(
         program);
 
     let lastFolder: string | undefined;
-    let configFile: IConfigurationFile | undefined;
+    let configFile = options.config !== undefined ? findConfiguration(path.resolve(options.config)).results : undefined;
     const isFileExcluded = (filepath: string) => {
         if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
             return false;
@@ -235,10 +232,12 @@ async function doLinting(
 
         const contents = await tryReadFile(file, logger);
         if (contents !== undefined) {
-            const folder = path.dirname(file);
-            if (lastFolder !== folder) {
-                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-                lastFolder = folder;
+            if (options.config === undefined) {
+                const folder = path.dirname(file);
+                if (lastFolder !== folder) {
+                    configFile = findConfiguration(null, folder).results;
+                    lastFolder = folder;
+                }
             }
             if (!isFileExcluded(file)) {
                 linter.lint(file, contents, configFile);
