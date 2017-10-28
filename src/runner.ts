@@ -216,7 +216,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
         program);
 
     let lastFolder: string | undefined;
-    let configFile = options.config !== undefined ? findConfiguration(path.resolve(options.config)).results : undefined;
+    let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
     const isFileExcluded = (filepath: string) => {
         if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
             return false;
