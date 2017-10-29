@@ -39,7 +39,7 @@ export interface LintResult {
     warningCount: number;
     failures: RuleFailure[];
     fixes?: RuleFailure[];
-    fixedSources: Record<string, string>;
+    fixedSources: Map<string, string>;
     format: string | FormatterConstructor;
     output: string;
 }

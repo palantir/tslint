@@ -52,7 +52,7 @@ class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
-    private fixedSources: Record<string, string> = {};
+    private fixedSources = new Map<string, string>();
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -165,7 +165,7 @@ class Linter {
                 const fixableFailures = updatedFailures.filter((f) => f.hasFix());
                 this.fixes = this.fixes.concat(fixableFailures);
                 source = this.applyFixes(sourceFileName, source, fixableFailures);
-                this.fixedSources[sourceFileName] = source;
+                this.fixedSources.set(sourceFileName, source);
                 sourceFile = this.getSourceFile(sourceFileName, source);
             }
         }
