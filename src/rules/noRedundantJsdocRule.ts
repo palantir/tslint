@@ -107,6 +107,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
 const redundantTags = new Set([
     "abstract",
     "access",
+    "class",
     "constant",
     "constructs",
     "default",
