@@ -1,0 +1,2 @@
+import * as ts from "typescript";
+                    ~~~~~~~~~~~~ [Module 'typescript' is not listed as dependency in package.json]

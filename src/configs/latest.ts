@@ -64,8 +64,14 @@ export const rules = {
         ],
     },
 
-    // added in v5.8.0
+    // added in v5.8
+    "ban-comma-operator": true,
+    "jsdoc-format": {
+        options: "check-multiline-start",
+    },
     "no-duplicate-switch-case": true,
+    "no-implicit-dependencies": true,
+    "no-return-await": true,
 };
 // tslint:enable object-literal-sort-keys
 

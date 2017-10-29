@@ -45,13 +45,22 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isInterfaceDeclaration(node) &&
             node.members.length === 0 &&
-            (node.heritageClauses === undefined ||
-             // allow interfaces that extend 2 or more interfaces
-             node.heritageClauses[0].types.length < 2)) {
+            (node.heritageClauses === undefined || extendsOneTypeWithoutTypeArguments(node.heritageClauses[0]))) {
             return ctx.addFailureAtNode(
                 node.name,
                 node.heritageClauses !== undefined ? Rule.FAILURE_STRING_FOR_EXTENDS : Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function extendsOneTypeWithoutTypeArguments({types}: ts.HeritageClause): boolean {
+    switch (types.length) {
+        case 0:
+            return true; // don't crash on empty extends list
+        case 1:
+            return types[0].typeArguments === undefined; // allow interfaces that provide type arguments for the extended type
+        default:
+            return false; // allow interfaces extending more than one types
+    }
 }
