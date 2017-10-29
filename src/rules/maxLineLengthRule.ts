@@ -19,6 +19,11 @@ import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
+interface MaxLineLengthRuleOptions {
+    limit: number;
+    ignorePattern: RegExp | undefined;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -74,14 +79,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         const argument = this.ruleArguments[0];
-        const numberGreaterThan0 = (Number(argument) > 0);
-        const limitGreaterTHan0 = (argument instanceof Object && argument.limit > 0);
+        const numberGreaterThan0: boolean = (Number(argument) > 0);
+        const limitGreaterTHan0: boolean = (argument instanceof Object && argument.limit > 0);
         return super.isEnabled() && (numberGreaterThan0 || limitGreaterTHan0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const argument = this.ruleArguments[0];
-        const options = {
+        const argument: any = this.ruleArguments[0];
+        const options: MaxLineLengthRuleOptions = {
             ignorePattern: (typeof argument === "object") ? new RegExp(argument["ignore-pattern"]) : undefined,
             limit: (typeof argument !== "object") ? parseInt(argument, 10)
                 : parseInt(argument.limit, 10),
@@ -90,7 +95,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<{limit: number; ignorePattern: RegExp | undefined}>) {
+function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
     const limit = ctx.options.limit;
     const ignorePattern = ctx.options.ignorePattern;
     const lines = (ctx.sourceFile && ctx.sourceFile.text.split("\n") || []);
