@@ -75,12 +75,17 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 // OK
                 break;
 
-            case ts.SyntaxKind.JSDocTemplateTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
             case ts.SyntaxKind.JSDocPropertyTag:
                 // Always redundant
                 ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
+                break;
+
+            case ts.SyntaxKind.JSDocTemplateTag:
+                if ((tag as ts.JSDocTemplateTag).comment === undefined || (tag as ts.JSDocTemplateTag).comment === "") {
+                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text));
+                }
                 break;
 
             case ts.SyntaxKind.JSDocReturnTag:
