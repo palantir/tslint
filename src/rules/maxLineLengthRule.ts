@@ -60,7 +60,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 1,
             maxLength: 2,
         },
-        optionExamples: [[true, 120], [true, 120, "^import |^export \{(.*?)\}"]],
+        optionExamples: [[true, 120], [true, {
+            "limit": 120,
+            "ignore-pattern": "^import |^export \{(.*?)\}"}]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -71,11 +73,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && (this.ruleArguments[0] === true || this.ruleArguments[0]) as number > 0;
+        const argument = this.ruleArguments[0];
+        const numberGreaterThan0 = (Number(argument) > 0);
+        const limitGreaterTHan0 = (argument instanceof Object && argument.limit > 0);
+        return super.isEnabled() && (numberGreaterThan0 || limitGreaterTHan0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const argument = this.ruleArguments[1] || this.ruleArguments[0];
+        const argument = this.ruleArguments[0];
         const options = {
             ignorePattern: (typeof argument === "object") ? new RegExp(argument["ignore-pattern"]) : undefined,
             limit: (typeof argument !== "object") ? parseInt(argument, 10)
