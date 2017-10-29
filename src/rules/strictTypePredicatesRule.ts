@@ -136,7 +136,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
         return [type];
     }
-    /** Workaround because checker.getBaseConstraintOfType is not public */
+    /**
+     * Workaround because checker.getBaseConstraintOfType is not public.
+     * For some strange reason `type.constraint` gives the wrong result.
+     */
     function getTypeParameterConstraint(type: ts.TypeParameter): ts.Type | undefined {
         if (type.symbol === undefined || type.symbol.declarations === undefined) {
             return undefined;
