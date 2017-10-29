@@ -75,6 +75,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 // OK
                 break;
 
+            case ts.SyntaxKind.JSDocClassTag:
+            case ts.SyntaxKind.JSDocTypeLiteral:
             case ts.SyntaxKind.JSDocTemplateTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
@@ -105,7 +107,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
 const redundantTags = new Set([
     "abstract",
     "access",
-    "class",
     "constant",
     "constructs",
     "default",
