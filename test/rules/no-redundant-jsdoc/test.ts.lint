@@ -31,7 +31,9 @@ declare function h(x: number): number;
 
 /**
  * @template T, U
+#if typescript < 2.2.0 || >= 2.3.0
     ~~~~~~~~ [description % ('template')]
+#endif
  * @template V Some additional information
  */
 declare function i<T, U, V>(x: T, y: V): U;
