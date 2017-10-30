@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { isObjectFlagSet, isObjectType, isTypeReference } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -48,50 +47,82 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.CallExpression) {
-                this.checkCallExpression(node as ts.CallExpression);
-            } else if (node.kind === ts.SyntaxKind.NewExpression) {
-                this.checkNewExpression(node as ts.NewExpression);
+            if (node.kind === ts.SyntaxKind.CallExpression || node.kind === ts.SyntaxKind.NewExpression) {
+                this.checkSignature(node as ts.CallExpression | ts.NewExpression);
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkNewExpression(node: ts.NewExpression): void {
-        if (node.typeArguments === undefined) {
-            const type = this.checker.getTypeAtLocation(node);
-            if (isTypeReference(type) && type.typeArguments !== undefined &&
-                type.typeArguments.some((a) => isObjectType(a) && this.isEmptyObjectInterface(a))) {
-                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
-            }
-        }
-    }
-
-    private checkCallExpression(node: ts.CallExpression): void {
+    private checkSignature(node: ts.CallExpression | ts.NewExpression): void {
         if (node.typeArguments !== undefined) {
             return;
         }
 
         const callSig = this.checker.getResolvedSignature(node);
-        if (callSig === undefined) {
+        if (callSig === undefined || callSig.declaration === undefined || callSig.declaration.typeParameters === undefined) {
             return;
         }
 
-        const retType = this.checker.getReturnTypeOfSignature(callSig);
-        if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
-            this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
+        if (hasInferredEmptyObject(callSig, this.checker)) {
+            this.addFailureAtNode(
+                node,
+                node.kind === ts.SyntaxKind.NewExpression ? Rule.EMPTY_INTERFACE_INSTANCE : Rule.EMPTY_INTERFACE_FUNCTION,
+            );
         }
     }
+}
 
-    private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        return isObjectFlagSet(objType, ts.ObjectFlags.Anonymous) &&
-            objType.getProperties().length === 0 &&
-            objType.getNumberIndexType() === undefined &&
-            objType.getStringIndexType() === undefined &&
-            objType.getCallSignatures().every((signature) => {
-                const type = this.checker.getReturnTypeOfSignature(signature);
-                return isObjectType(type) && this.isEmptyObjectInterface(type);
-            });
-    }
+function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker) {
+    let level = 0;
+    let inTypeArguments = false;
+    let couldBeEmptyObject = false;
+    let hasEmptyObjectType = false;
+    let lastText: string | undefined;
+    checker.getSymbolDisplayBuilder().buildSignatureDisplay(
+        signature,
+        {
+            writeKeyword(text: string) { lastText = text; },
+            writeOperator(text: string) { lastText = text; },
+            writePunctuation(text: string) {
+                switch (text) {
+                    case "<":
+                        ++level;
+                        if (lastText === undefined) {
+                            inTypeArguments = true;
+                        }
+                        break;
+                    case ">":
+                        --level;
+                        if (level === 0) {
+                            inTypeArguments = false;
+                        }
+                        break;
+                    case "{":
+                        couldBeEmptyObject = level === 1 && inTypeArguments && (lastText === "<" || lastText === ",");
+                        break;
+                    case "}":
+                        if (couldBeEmptyObject && lastText === "{") {
+                            hasEmptyObjectType = true;
+                        }
+                }
+                lastText = text;
+            },
+            writeSpace() { /* not relevant */},
+            writeStringLiteral(text) { lastText = text; },
+            writeParameter(text) {lastText = text; },
+            writeProperty(text) { lastText = text; },
+            writeSymbol(text) { lastText = text; },
+            writeLine() { /* not relevant */},
+            increaseIndent() { /* not relevant */},
+            decreaseIndent() { /* not relevant */},
+            clear() { /* not relevant */},
+            trackSymbol() { /* not relevant */},
+            reportInaccessibleThisError() { /* not relevant */},
+            reportPrivateInBaseOfClassExpression() { /* not relevant */},
+        },
+        undefined,
+        ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+    return hasEmptyObjectType;
 }

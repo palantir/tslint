@@ -49,6 +49,7 @@ WrapperFunc(t);
 WrapperFunc(p);
 WrapperFunc(f);
 WrapperFunc<() => {}>();
+WrapperFunc<"{}": "{}">();
 
 WrapperFunc<() => void>();
 WrapperFunc<{ a: number }>();
@@ -88,3 +89,19 @@ new MultiParamsClass<{ [x: string]: string }, number>();
 // don't crash with stack overflow
 import {expect} from "chai";
 expect(1).to.eq(1);
+
+{
+    const wrapper = <L, A>(l: L) => ({ l });
+    const x = wrapper(1); // The second generic, A, is inferred as an empty object
+              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+}
+{
+    const wrapper = <L, A>(l: A): L => ({ l });
+    const x = wrapper(1);
+              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+}
+{
+    const wrapper = <L, A>(l: L): [L, A] => ({ l } as any);
+    const x = wrapper(1);
+              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+}
