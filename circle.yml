@@ -5,7 +5,7 @@ general:
 dependencies:
   pre:
     - node ./scripts/assertMinCircleNodes.js $CIRCLE_NODE_TOTAL
-    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.1.2 ;; 1) nvm use 5.7 ;; [2-3]) nvm use 6.1 ;; esac
+    - case $CIRCLE_NODE_INDEX in 0) nvm use 4.8 ;; 1) nvm use 5.7 ;; 2) nvm use 6 ;; 3) nvm use 8 ;; esac
   override:
     - yarn
 test:
