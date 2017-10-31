@@ -101,7 +101,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     }
 }
 
-function useSignatureToString(signature: ts.Signature, checker: ts.TypeChecker): boolean {
+function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker): boolean {
     const str = checker.signatureToString(signature, undefined, ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
     if (str[0] !== "<") {
         return false;
@@ -112,60 +112,4 @@ function useSignatureToString(signature: ts.Signature, checker: ts.TypeChecker):
 
 function isEmptyObject(node: ts.TypeNode): boolean {
     return isTypeLiteralNode(node) && node.members.length === 0;
-}
-
-function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker) {
-    let level = 0;
-    let inTypeArguments = false;
-    let hasEmptyObjectType = false;
-    let lastText: string | undefined;
-    checker.getSymbolDisplayBuilder().buildSignatureDisplay(
-        signature,
-        {
-            writeKeyword(text: string) { lastText = text; },
-            writeOperator(text: string) { lastText = text; },
-            writePunctuation(text: string) {
-                switch (text) {
-                    case "<":
-                        ++level;
-                        if (lastText === undefined) {
-                            inTypeArguments = true;
-                        }
-                        break;
-                    case ">":
-                        --level;
-                        if (level === 0) {
-                            inTypeArguments = false;
-                        }
-                        break;
-                    case "{":
-                        ++level;
-                        return; // don't update `lastText`
-                    case "}":
-                        --level;
-                        if (level === 1 && inTypeArguments && (lastText === "<" || lastText === ",")) {
-                            hasEmptyObjectType = true;
-                        }
-                }
-                lastText = text;
-            },
-            writeSpace() { /* not relevant */},
-            writeStringLiteral(text) { lastText = text; },
-            writeParameter(text) {lastText = text; },
-            writeProperty(text) { lastText = text; },
-            writeSymbol(text) { lastText = text; },
-            writeLine() { /* not relevant */},
-            increaseIndent() { /* not relevant */},
-            decreaseIndent() { /* not relevant */},
-            clear() { /* not relevant */},
-            trackSymbol() { /* not relevant */},
-            reportInaccessibleThisError() { /* not relevant */},
-            reportPrivateInBaseOfClassExpression() { /* not relevant */},
-        },
-        undefined,
-        ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
-    if (hasEmptyObjectType !== useSignatureToString(signature, checker)) {
-        debugger;
-    }
-    return hasEmptyObjectType;
 }
