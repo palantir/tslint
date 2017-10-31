@@ -392,6 +392,37 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
+        it("reports errors from parsing tsconfig.json", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/syntax-error.json"],
+                (err, _stdout, stderr) => {
+                    assert.isNotNull(err, "process should exit with an error");
+                    assert.equal(err.code, 1, "exit code should be 1");
+                    assert.include(stderr, "error TS");
+                    done();
+                });
+        });
+
+        it("reports errors from validating tsconfig.json", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/empty-files.json"],
+                (err, _stdout, stderr) => {
+                    assert.isNotNull(err, "process should exit with an error");
+                    assert.equal(err.code, 1, "exit code should be 1");
+                    assert.include(stderr, "error TS");
+                    done();
+                });
+        });
+
+        it("does not report an error if tsconfig.json matches no files", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/no-match.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
+
         it("can extend `tsconfig.json` with relative path", (done) => {
             execCli(
                 ["-c", "test/files/tsconfig-extends-relative/tslint-ok.json", "-p",
@@ -423,12 +454,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can handles 'allowJs' correctly", (done) => {
+        it("handles 'allowJs' correctly", (done) => {
             execCli(
                 [ "-p", "test/files/tsconfig-allow-js/tsconfig.json"],
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
+
+        it("doesn't lint external dependencies with 'allowJs'", (done) => {
+            execCli(
+                [ "-p", "test/files/allow-js-exclude-node-modules/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without error");
                     done();
                 });
         });
@@ -566,7 +606,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): fn is (...args: any[]) => any {
+function isFunction(fn: any): fn is Function { // tslint:disable-line:ban-types
     return ({}).toString.call(fn) === "[object Function]";
 }
 
