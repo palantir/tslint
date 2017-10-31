@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        deprecationMessage: ts.versionMajorMinor as string === "2.1"
+        deprecationMessage: !/^2\.1\./.test(ts.version)
             ? "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
             : "",
     };
