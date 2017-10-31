@@ -79,7 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        const argument = this.ruleArguments[0];
+        const argument: any = this.ruleArguments[0];
         const numberGreaterThan0: boolean = (Number(argument) > 0);
         const limitGreaterTHan0: boolean = (argument instanceof Object && argument.limit > 0);
         return super.isEnabled() && (numberGreaterThan0 || limitGreaterTHan0);
@@ -88,7 +88,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const argument: any = this.ruleArguments[0];
         const options: MaxLineLengthRuleOptions = {
-            ignorePattern: (typeof argument === "object") ? new RegExp(argument["ignore-pattern"]) : undefined,
+            ignorePattern: (typeof argument === "object" && typeof argument["ignore-pattern"] === "string") ?
+                new RegExp(argument["ignore-pattern"]) : undefined,
             limit: (typeof argument !== "object") ? parseInt(argument, 10)
                 : parseInt(argument.limit, 10),
         };
@@ -99,11 +100,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
     const limit = ctx.options.limit;
     const ignorePattern = ctx.options.ignorePattern;
-    const lines = (ctx.sourceFile && ctx.sourceFile.text.split("\n") || []);
-    const lineRanges = getLineRanges(ctx.sourceFile);
-    for (let i = 0; i < lines.length; i++) {
-        if (ignorePattern && ignorePattern.test(lines[i])) { continue; }
-        if (lineRanges[i].contentLength <= limit) { continue; }
-        ctx.addFailureAt(lineRanges[i].pos, lineRanges[i].contentLength, Rule.FAILURE_STRING_FACTORY(limit));
+    for (const line of getLineRanges(ctx.sourceFile)) {
+        if (line.contentLength <= limit) { continue; }
+        const lineContent = ctx.sourceFile.text.substr(line.pos, line.contentLength);
+        if (ignorePattern !== undefined && ignorePattern.test(lineContent)) { continue; }
+        ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
     }
 }
