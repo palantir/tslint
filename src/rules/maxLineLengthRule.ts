@@ -79,14 +79,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        const argument: any = this.ruleArguments[0];
-        const numberGreaterThan0: boolean = (Number(argument) > 0);
-        const limitGreaterTHan0: boolean = (argument instanceof Object && argument.limit > 0);
-        return super.isEnabled() && (numberGreaterThan0 || limitGreaterTHan0);
+        const argument = this.ruleArguments[0];
+        const numberGreaterThan0 = (Number(argument) > 0);
+        const limitGreaterThan0 = (argument instanceof Object && argument.limit > 0);
+        return super.isEnabled() && (numberGreaterThan0 || limitGreaterThan0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const argument: any = this.ruleArguments[0];
+        const argument = this.ruleArguments[0];
         const options: MaxLineLengthRuleOptions = {
             ignorePattern: (typeof argument === "object" && typeof argument["ignore-pattern"] === "string") ?
                 new RegExp(argument["ignore-pattern"]) : undefined,
