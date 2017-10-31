@@ -34,16 +34,17 @@ export class Rule extends Lint.Rules.AbstractRule {
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
         optionsDescription: Lint.Utils.dedent`
-        It can take up to 2 arguments, but only the first one is required:
-
-        * integer indicating the max length of lines.
-        * string defining ignore pattern, being parsed by \`new RegExp()\`.
-        For example:
-         * \`\/\/ \` pattern will ignore all in-line comments.
-         * \`^import \` pattern will ignore all import statements.
-         * \`^export \{(.*?)\}\` pattern will ignore all export statements.
-         * \`class [a-zA-Z] implements \` pattern will ignore all class declarations implementing interfaces.
-         * \`^import |^export \{(.*?)\}|class [a-zA-Z] implements |// \` pattern will ignore all the cases listed above.
+        It can take one argument, which can be any of the following:
+        * integer indicating maximum length of lines.
+        * object with keys:
+          * \`limit\` - number < 0 defining max line length
+          * \`ignore-pattern\` - string defining ignore pattern for this rule, being parsed by \`new RegExp()\`.
+            For example:
+             * \`\/\/ \` pattern will ignore all in-line comments.
+             * \`^import \` pattern will ignore all import statements.
+             * \`^export \{(.*?)\}\` pattern will ignore all multiple export statements.
+             * \`class [a-zA-Z] implements \` pattern will ignore all class declarations implementing interfaces.
+             * \`^import |^export \{(.*?)\}|class [a-zA-Z] implements |// \` pattern will ignore all the cases listed above.
          `,
         options: {
             type: "array",
