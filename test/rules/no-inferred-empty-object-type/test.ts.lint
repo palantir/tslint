@@ -27,15 +27,15 @@ class MultiParamsClass<U, T> {
 
 /* Bad */
 WrapperFunc();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~  [fn]
 CurriedFunc();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~  [fn]
 MultiParamFunction();
-~~~~~~~~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~~~~~~~~  [fn]
 new Wrapper();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the constructor]
+~~~~~~~~~~~~~  [new]
 new MultiParamsClass();
-~~~~~~~~~~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the constructor]
+~~~~~~~~~~~~~~~~~~~~~~  [new]
 
 /* Good */
 WrapperFunc<Object>();
@@ -55,6 +55,10 @@ WrapperFunc<() => void>();
 WrapperFunc<{ a: number }>();
 WrapperFunc<{ [x: number]: string }>();
 WrapperFunc<{ [x: string]: string }>();
+
+{
+    let wrap: Wrapper<string> = new Wrapper();
+}
 
 CurriedFunc(voidFunc);
 CurriedFunc(stringFunc);
@@ -93,15 +97,45 @@ expect(1).to.eq(1);
 {
     const wrapper = <L, A>(l: L) => ({ l });
     const x = wrapper(1); // The second generic, A, is inferred as an empty object
-              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+              ~~~~~~~~~~  [fn]
 }
 {
     const wrapper = <L, A>(l: A): L => ({ l });
     const x = wrapper(1);
-              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+              ~~~~~~~~~~  [fn]
 }
 {
     const wrapper = <L, A>(l: L): [L, A] => ({ l } as any);
     const x = wrapper(1);
-              ~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+              ~~~~~~~~~~  [fn]
 }
+{
+    let fn = <T>(obj?: T, cb?: (obj: T) => void) => {};
+    fn();
+    ~~~~ [fn]
+}
+
+{
+    // found in our code
+    abstract class Base<T> {}
+    class Child extends Base<{}> {}
+    let foo = new Child(); // quickinfo shows 'constructor Child<{}>(): Child' - but this is not an inferred type parameter
+}
+
+{
+    interface I {
+        new<T>(obj?: T, cb?: (obj: T) => void): any;
+    }
+    let C: I = null as any;
+    new C();
+    ~~~~~~~ [new]
+}
+
+{
+    let demap = <T>(map: Map<string, T>): {[key: string]: T} {}
+    demap(null as any);
+    ~~~~~~~~~~~~~~~~~~ [fn]
+}
+
+[fn]: Explicit type parameter needs to be provided to the function call
+[new]: Explicit type parameter needs to be provided to the constructor

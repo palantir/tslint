@@ -225,15 +225,8 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
         function removeAll(errorNode: ts.Node, failure: string): void {
             const start = importNode.getStart();
             let end = importNode.getEnd();
-            utils.forEachToken(
-                importNode,
-                (token) => {
-                    ts.forEachTrailingCommentRange(
-                        ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
-                            end = commentEnd;
-                        });
-                },
-                ctx.sourceFile);
+            ts.forEachTrailingCommentRange<void, void>(ctx.sourceFile.text, end, (_pos, commentEnd) => { end = commentEnd; });
+
             if (isEntireLine(start, end)) {
                 end = getNextLineStart(end);
             }

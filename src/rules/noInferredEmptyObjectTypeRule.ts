@@ -47,29 +47,55 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.CallExpression || node.kind === ts.SyntaxKind.NewExpression) {
-                this.checkSignature(node as ts.CallExpression | ts.NewExpression);
+            if (node.kind === ts.SyntaxKind.CallExpression) {
+                this.checkCallExpression(node as ts.CallExpression);
+            } else if (node.kind === ts.SyntaxKind.NewExpression) {
+                this.checkNewExpression(node as ts.NewExpression);
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkSignature(node: ts.CallExpression | ts.NewExpression): void {
+    private checkNewExpression(node: ts.NewExpression): void {
         if (node.typeArguments !== undefined) {
             return;
         }
 
-        const callSig = this.checker.getResolvedSignature(node);
-        if (callSig === undefined || callSig.declaration === undefined || callSig.declaration.typeParameters === undefined) {
+        const signature = this.checker.getResolvedSignature(node);
+        if (signature === undefined) {
+            return;
+        }
+        if (signature.declaration !== undefined) {
+            if (signature.declaration.typeParameters === undefined) {
+                // There is an explicitly declared construct signature, but it has no type parameters -> nothing to check here
+                return;
+            }
+        } else {
+            const symbol = this.checker.getSymbolAtLocation(node.expression);
+            if (symbol !== undefined && symbol.declarations !== undefined &&
+                (symbol.declarations[0] as ts.DeclarationWithTypeParameters).typeParameters === undefined) {
+                return; // the class has no type parameters -> nothing to check here
+            }
+        }
+
+        if (hasInferredEmptyObject(signature, this.checker)) {
+            this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
+        }
+    }
+
+    private checkCallExpression(node: ts.CallExpression): void {
+        if (node.typeArguments !== undefined) {
             return;
         }
 
-        if (hasInferredEmptyObject(callSig, this.checker)) {
-            this.addFailureAtNode(
-                node,
-                node.kind === ts.SyntaxKind.NewExpression ? Rule.EMPTY_INTERFACE_INSTANCE : Rule.EMPTY_INTERFACE_FUNCTION,
-            );
+        const signature = this.checker.getResolvedSignature(node);
+        if (signature === undefined || signature.declaration === undefined || signature.declaration.typeParameters === undefined) {
+            return;
+        }
+
+        if (hasInferredEmptyObject(signature, this.checker)) {
+            this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
         }
     }
 }
@@ -77,7 +103,6 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
 function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker) {
     let level = 0;
     let inTypeArguments = false;
-    let couldBeEmptyObject = false;
     let hasEmptyObjectType = false;
     let lastText: string | undefined;
     checker.getSymbolDisplayBuilder().buildSignatureDisplay(
@@ -100,10 +125,11 @@ function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker
                         }
                         break;
                     case "{":
-                        couldBeEmptyObject = level === 1 && inTypeArguments && (lastText === "<" || lastText === ",");
-                        break;
+                        ++level;
+                        return; // don't update `lastText`
                     case "}":
-                        if (couldBeEmptyObject && lastText === "{") {
+                        --level;
+                        if (level === 1 && inTypeArguments && (lastText === "<" || lastText === ",")) {
                             hasEmptyObjectType = true;
                         }
                 }
