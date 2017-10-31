@@ -37,7 +37,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent, flatMap } from "./utils";
+import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
@@ -76,7 +76,13 @@ class Linter {
      * files and excludes declaration (".d.ts") files.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return program.getSourceFiles().map((s) => s.fileName).filter((l) => l.substr(-5) !== ".d.ts");
+        return mapDefined(
+            program.getSourceFiles(),
+            (file) =>
+                file.fileName.endsWith(".d.ts") || program.isSourceFileFromExternalLibrary(file)
+                    ? undefined
+                    : file.fileName,
+        );
     }
 
     constructor(private options: ILinterOptions, private program?: ts.Program) {
