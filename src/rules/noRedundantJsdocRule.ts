@@ -75,6 +75,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 // OK
                 break;
 
+            case ts.SyntaxKind.JSDocClassTag:
             case ts.SyntaxKind.JSDocTemplateTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
