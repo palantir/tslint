@@ -21,7 +21,7 @@ import * as Lint from "../index";
 
 interface MaxLineLengthRuleOptions {
     limit: number;
-    ignorePattern: RegExp | undefined;
+    ignorePattern?: RegExp;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -79,21 +79,27 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        const argument = this.ruleArguments[0];
-        const numberGreaterThan0 = (Number(argument) > 0);
-        const limitGreaterThan0 = (argument instanceof Object && argument.limit > 0);
-        return super.isEnabled() && (numberGreaterThan0 || limitGreaterThan0);
+        const limit = this.getRuleOptions().limit;
+        return super.isEnabled() && (limit > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions());
+    }
+
+    private getRuleOptions(): MaxLineLengthRuleOptions {
         const argument = this.ruleArguments[0];
-        const options: MaxLineLengthRuleOptions = {
-            ignorePattern: (typeof argument === "object" && typeof argument["ignore-pattern"] === "string") ?
-                new RegExp(argument["ignore-pattern"]) : undefined,
-            limit: (typeof argument !== "object") ? parseInt(argument, 10)
-                : parseInt(argument.limit, 10),
-        };
-        return this.applyWithFunction(sourceFile, walk, options);
+        let options: MaxLineLengthRuleOptions = {limit: 0};
+        if (typeof argument === "number") {
+            options.limit = argument;
+        } else {
+            options = argument as MaxLineLengthRuleOptions;
+            const ignorePattern = (argument as {[key: string]: string})["ignore-pattern"];
+            options.ignorePattern = (typeof ignorePattern === "string") ?
+                new RegExp((ignorePattern)) : undefined;
+        }
+        options.limit = Number(options.limit); // user can pass a string instead of number
+        return options;
     }
 }
 
