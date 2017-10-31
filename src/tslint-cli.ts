@@ -63,7 +63,7 @@ const options: Option[] = [
             to the rules. If no option is specified, the config file named
             tslint.json is used, so long as it exists in the path.
             The format of the file is { rules: { /* rules list */ } },
-            where /* rules list */ is a key: value comma-seperated list of
+            where /* rules list */ is a key: value comma-separated list of
             rulename: rule-options pairs. Rule-options can be either a
             boolean true/false value denoting whether the rule is used or not,
             or a list [boolean, ...] where the boolean provides the same role
