@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -100,6 +101,19 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     }
 }
 
+function useSignatureToString(signature: ts.Signature, checker: ts.TypeChecker): boolean {
+    const str = checker.signatureToString(signature, undefined, ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+    if (str[0] !== "<") {
+        return false;
+    }
+    const source = ts.createSourceFile("temp.ts", `foo${str.substring(0, str.indexOf(">(") + 1)}()`, ts.ScriptTarget.Latest);
+    return ((source.statements[0] as ts.ExpressionStatement).expression as ts.CallExpression).typeArguments!.some(isEmptyObject);
+}
+
+function isEmptyObject(node: ts.TypeNode): boolean {
+    return isTypeLiteralNode(node) && node.members.length === 0;
+}
+
 function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker) {
     let level = 0;
     let inTypeArguments = false;
@@ -150,5 +164,8 @@ function hasInferredEmptyObject(signature: ts.Signature, checker: ts.TypeChecker
         },
         undefined,
         ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+    if (hasEmptyObjectType !== useSignatureToString(signature, checker)) {
+        debugger;
+    }
     return hasEmptyObjectType;
 }

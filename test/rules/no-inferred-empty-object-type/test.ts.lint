@@ -49,7 +49,7 @@ WrapperFunc(t);
 WrapperFunc(p);
 WrapperFunc(f);
 WrapperFunc<() => {}>();
-WrapperFunc<"{}": "{}">();
+WrapperFunc({"foo-bar": {}});
 
 WrapperFunc<() => void>();
 WrapperFunc<{ a: number }>();
@@ -58,6 +58,15 @@ WrapperFunc<{ [x: string]: string }>();
 
 {
     let wrap: Wrapper<string> = new Wrapper();
+    let take = <T>(param: T) => {};
+    take<any>(new Wrapper());
+              ~~~~~~~~~~~~~ [new]
+    take<{}>(new Wrapper());
+             ~~~~~~~~~~~~~ [new]
+    take<Object>(new Wrapper());
+                 ~~~~~~~~~~~~~ [new]
+    take<Wrapper<any>>(new Wrapper());
+    take<Wrapper<string>>(new Wrapper());
 }
 
 CurriedFunc(voidFunc);
