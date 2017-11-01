@@ -75,7 +75,7 @@
     "nyc": "^10.2.0",
     "rimraf": "^2.5.4",
     "ts-node": "^3.3.0",
-    "tslint": "^5.7.0",
+    "tslint": "^5.8.0",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
     "typescript": "~2.6.1"
   },
