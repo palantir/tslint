@@ -119,6 +119,12 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return initializer !== undefined &&
                     this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
+            case ts.SyntaxKind.SpreadAssignment:
+                return this.visitNode(
+                    (node as ts.SpreadAssignment).expression,
+                    // allow any in object spread, but not in object rest
+                    !isReassignmentTarget(node.parent as ts.ObjectLiteralExpression),
+                );
             case ts.SyntaxKind.ComputedPropertyName:
                 return this.visitNode((node as ts.ComputedPropertyName).expression, true);
             case ts.SyntaxKind.TaggedTemplateExpression: {
