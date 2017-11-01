@@ -16,6 +16,7 @@
  */
 
 import * as fs from "fs";
+import * as yaml from "js-yaml";
 import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
@@ -63,7 +64,10 @@ export interface IConfigurationLoadResult {
     results?: IConfigurationFile;
 }
 
-export const CONFIG_FILENAME = "tslint.json";
+// As per eslint convention, yaml config is used if present
+// over json config
+export const JSON_CONFIG_FILENAME = "tslint.json";
+export const CONFIG_FILENAMES = ["tslint.yaml", "tslint.yml", JSON_CONFIG_FILENAME];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
@@ -111,7 +115,7 @@ export function findConfiguration(configFile: string | null, inputFilePath?: str
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns An absolute path to a tslint.json file
+ * @returns An absolute path to a tslint.json or tslint.yml or tslint.yaml file
  * or undefined if neither can be found.
  */
 export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string): string | undefined;
@@ -140,7 +144,7 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
 
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, path.resolve(inputFilePath!));
+        let configFilePath = findup(CONFIG_FILENAMES, path.resolve(inputFilePath!));
         if (configFilePath !== undefined) {
             return configFilePath;
         }
@@ -148,9 +152,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         // search for tslint.json in home directory
         const homeDir = getHomeDir();
         if (homeDir != undefined) {
-            configFilePath = path.join(homeDir, CONFIG_FILENAME);
-            if (fs.existsSync(configFilePath)) {
-                return path.resolve(configFilePath);
+            for (const configFilename of CONFIG_FILENAMES) {
+                configFilePath = path.join(homeDir, configFilename);
+                if (fs.existsSync(configFilePath)) {
+                    return path.resolve(configFilePath);
+                }
             }
         }
         // no path could be found
@@ -159,10 +165,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
 }
 
 /**
- * Find a file by name in a directory or any ancestory directory.
+ * Find a file by names in a directory or any ancestor directory.
+ * Will try each filename in filenames before recursing to a parent directory.
  * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
  */
-function findup(filename: string, directory: string): string | undefined {
+function findup(filenames: string[], directory: string): string | undefined {
     while (true) {
         const res = findFile(directory);
         if (res !== undefined) {
@@ -177,18 +184,21 @@ function findup(filename: string, directory: string): string | undefined {
     }
 
     function findFile(cwd: string): string | undefined {
-        if (fs.existsSync(path.join(cwd, filename))) {
-            return filename;
-        }
+        for (const filename of filenames) {
+            if (fs.existsSync(path.join(cwd, filename))) {
+                return filename;
+            }
 
-        // TODO: remove in v6.0.0
-        // Try reading in the entire directory and looking for a file with different casing.
-        const filenameLower = filename.toLowerCase();
-        const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
-        if (result !== undefined) {
-            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ${path.join(cwd, result)}`);
+            // TODO: remove in v6.0.0
+            // Try reading in the entire directory and looking for a file with different casing.
+            const filenameLower = filename.toLowerCase();
+            const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+            if (result !== undefined) {
+                showWarningOnce(`Using mixed case ${filenameLower} is deprecated. Found: ${path.join(cwd, result)}`);
+                return result;
+            }
         }
-        return result;
+        return undefined;
     }
 }
 
@@ -207,13 +217,25 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
+        const resolvedConfigFileExt = path.extname(resolvedConfigFilePath);
         let rawConfigFile: RawConfigFile;
-        if (path.extname(resolvedConfigFilePath) === ".json") {
-            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
-                .toString()
-                .replace(/^\uFEFF/, ""));
+        if (resolvedConfigFileExt.match(/\.(json|ya?ml)/) !== null) {
+            const fileContent = fs.readFileSync(resolvedConfigFilePath).toString().replace(/^\uFEFF/, "");
             try {
-                rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
+                if (resolvedConfigFileExt === ".json") {
+                    rawConfigFile = JSON.parse(stripComments(fileContent)) as RawConfigFile;
+                } else if (resolvedConfigFileExt.match(/ya?ml/) !== null) {
+                    rawConfigFile = yaml.safeLoad(fileContent, {
+                        // Note: yaml.LoadOptions expects a schema value of type "any",
+                        // but this trips up the no-unsafe-any rule.
+                        // tslint:disable-next-line:no-unsafe-any
+                        schema: yaml.JSON_SCHEMA,
+                        strict: true,
+                    }) as RawConfigFile;
+                } else {
+                    // throw error for static analysis purpose; should not happen
+                    throw new Error("File format not supported yet.");
+                }
             } catch (e) {
                 const error = e as Error;
                 // include the configuration file being parsed in the error since it may differ from the directly referenced config
@@ -286,7 +308,6 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
                     }
                 }
             }
-
         }
     }
 
