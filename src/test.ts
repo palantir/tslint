@@ -24,7 +24,7 @@ import * as semver from "semver";
 import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
-import * as Linter from "./linter";
+import { Linter } from "./linter";
 import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
 import { LintError } from "./verify/lintError";
 import * as parse from "./verify/parse";
