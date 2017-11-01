@@ -218,6 +218,54 @@ var arr2 = [
         b: 4
     }
 ];
+// multiline condition, works well for `if`, but probably doesn't for `while`
+while(foo() &&
+  bar() &&
+~~ [1]
+      baz()) {
+~~~~~~ [1]
+    doStuff;
+}
+// might not be worth fixing, because it can be reformatted to
+while(
+foo() &&
+~nil [1]
+    bar() &&
+     baz()
+~~~~~ [1]
+) {
+     doStuff;
+~~~~~ [1]
+}
+
+// statement continuation on the next line
+let foo = bar
+  ? baz
+~~ [1]
+      : bas;
+~~~~~~ [1]
+ foo = "some"
+~ [0]
+ + "really"
+~ [1]
+  + "long"
+~~ [1]
+     + "string";
+~~~~~ [1]
+
+// multiline property access
+foo
+.bar
+~nil [1]
+.baz();
+~nil [1]
+var a = 10
+- 9
+~nil [1]
+*8
+~nil [1]
+/7
+~nil [1]
 [0]: 0 space indentation expected
 [1]: 4 space indentation expected
 [2]: 8 space indentation expected

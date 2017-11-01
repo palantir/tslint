@@ -111,10 +111,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             const currentNodePos: number = pos + indentEnd;
             let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
             let depth = 0;
-            if (currentNode !== undefined && currentNode.getStart() === currentNodePos) {
+            if (currentNode !== undefined && currentNode.getStart(sourceFile) === currentNodePos) {
                 depth = getNodeDeepth(currentNode, line);
             } else {
-                currentNode = recursiveGetNodeAtEnd(sourceFile, currentNodePos);
+                currentNode = recursiveGetNodeAt(sourceFile, currentNodePos);
                 if (currentNode !== undefined) {
                     depth = getNodeDeepth(currentNode, line);
                 }
@@ -123,10 +123,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 const expectedIndentation: string = tabs ? "\t".repeat(depth)
                 : " ".repeat(size * depth);
                 const actualIndentation = line.slice(0, indentEnd);
-                const passIndentDepthCheck = inStringTemplate(currentNode) || (line.trim().charAt(0) === "*");
+                const passIndentDepthCheck = inStringTemplate(currentNode) || (isPositionInComment(sourceFile, currentNodePos));
 
                 if (!passIndentDepthCheck && expectedIndentation !== actualIndentation) {
-                    failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${depth * size} space`);
+                    failure = Rule.FAILURE_STRING(tabs ? "tab" : `${depth * size} space`);
                     ctx.addFailureAt(
                         pos,
                         indentEnd,
@@ -160,26 +160,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 }
 
 function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
-    const result: ts.Node | undefined = root.getChildAt(pos);
-    if (result === undefined) {
-        ts.forEachChild(root, function cb(node: ts.Node): void {
-            ts.forEachChild(node, cb);
-        });
-    }
-    if (result !== undefined) {
-        return result;
-    }
-    return root;
-}
-
-function recursiveGetNodeAtEnd(root: ts.Node, pos: number): ts.Node | undefined {
-    if (root.getEnd() === pos) {
-        return root;
-    }
     let result: ts.Node | undefined;
     ts.forEachChild(root, function cb(node: ts.Node): void {
         if (node.getFullStart() < pos && node.getEnd() >= pos) {
-            result = recursiveGetNodeAt(node, pos);
+            const child = node.getChildAt(pos);
+            result = child !== undefined ? child : node;
         }
         ts.forEachChild(node, cb);
     });
@@ -197,11 +182,11 @@ function getNodeDeepth(node: ts.Node, line: string): number {
         ts.SyntaxKind.CaseClause,
         ts.SyntaxKind.JsxElement,
         ts.SyntaxKind.ModuleBlock,
-        ts.SyntaxKind.TemplateSpan,
         ts.SyntaxKind.DefaultClause,
         ts.SyntaxKind.ClassDeclaration,
         ts.SyntaxKind.ArrayLiteralExpression,
         ts.SyntaxKind.ObjectLiteralExpression,
+        ts.SyntaxKind.ConditionalExpression,
     ];
     if (isCloseElement(node, line)) {
         result --;
@@ -210,6 +195,9 @@ function getNodeDeepth(node: ts.Node, line: string): number {
         result ++;
     }
     if (inStatementParen(node)) {
+        result ++;
+    }
+    if (leadingWithBinaryOperator(node)) {
         result ++;
     }
     while (parent !== undefined) {
@@ -224,9 +212,16 @@ function getNodeDeepth(node: ts.Node, line: string): number {
     if (nodeAtOutside(node)) {
         result--;
     }
+    /*
+     * Check for property access (includes chaining function call) just like this:
+        foo()
+        .then()
+        In this case, `.then` should have one more indent.
+        Maybe this should depend on a configuration.
+     */
     if (
         node.parent !== undefined
-        && node.parent.kind === ts.SyntaxKind.CallExpression
+        && node.kind === ts.SyntaxKind.PropertyAccessExpression
         && /^\s*\./.test(line)
     ) {
         result ++;
@@ -264,17 +259,28 @@ function isCloseElement(node: ts.Node, line: string): boolean {
         && /^\s*<\//.test(line);
 }
 
-function inStringTemplate(node: ts.Node | undefined): boolean {
-    if (node === undefined) {
-        return false;
-    }
-    return node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral
-    || (
-        node.kind >= ts.SyntaxKind.FirstTemplateToken
-        && node.kind <= ts.SyntaxKind.LastTemplateToken
-    );
+function leadingWithBinaryOperator(node: ts.Node): boolean {
+    return [
+        ts.SyntaxKind.PlusToken,
+        ts.SyntaxKind.MinusToken,
+        ts.SyntaxKind.AsteriskToken,
+        ts.SyntaxKind.SlashToken,
+    ].indexOf(node.kind) > -1;
+}
+function inStringTemplate(node: ts.Node): boolean {
+    return node.kind >= ts.SyntaxKind.FirstTemplateToken
+        && node.kind <= ts.SyntaxKind.LastTemplateToken;
 }
 
+/**
+ *  To check a class declaration broken to two lines, like this:
+ *  class
+ *  Foo {
+ *      // xxx
+ *  }
+ *  In this case, the `Foo` is regarded as should have the same indent depth with `class`.
+ *  Should it have one more depth? I'm not sure.
+ */
 function nodeAtOutside(node: ts.Node): boolean {
     if (node.parent === undefined) {
         return false;

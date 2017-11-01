@@ -173,3 +173,35 @@ var arr2 = [
         b: 4
     }
 ];
+// multiline condition, works well for `if`, but probably doesn't for `while`
+while(foo() &&
+    bar() &&
+    baz()) {
+    doStuff;
+}
+// might not be worth fixing, because it can be reformatted to
+while(
+    foo() &&
+    bar() &&
+    baz()
+) {
+    doStuff;
+}
+
+// statement continuation on the next line
+let foo = bar
+    ? baz
+    : bas;
+foo = "some"
+    + "really"
+    + "long"
+    + "string";
+
+// multiline property access
+foo
+    .bar
+    .baz();
+var a = 10
+    - 9
+    *8
+    /7
