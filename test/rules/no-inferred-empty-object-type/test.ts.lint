@@ -50,11 +50,14 @@ WrapperFunc(p);
 WrapperFunc(f);
 WrapperFunc<() => {}>();
 WrapperFunc({"foo-bar": {}});
+WrapperFunc(new Wrapper("foo"));
+WrapperFunc(new Wrapper<{}>());
 
 WrapperFunc<() => void>();
 WrapperFunc<{ a: number }>();
 WrapperFunc<{ [x: number]: string }>();
 WrapperFunc<{ [x: string]: string }>();
+WrapperFunc<{ (): string }>();
 
 {
     let wrap: Wrapper<string> = new Wrapper();
