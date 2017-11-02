@@ -1,6 +1,13 @@
 // valid code
  module TestModule {
 ~ [0]
+     interface Foo {
+~~~~~ [1]
+    a: number
+~~~~ [2]
+         b: string
+~~~~~~~~~ [2]
+    }
     var func = () => {
         console.warn("hi");
     };
@@ -271,6 +278,26 @@ var a = 10
 ~nil [1]
 /7
 ~nil [1]
+namespace Foo {
+   export interface InterFoo {
+~~~ [1]
+   foo(s: string): boolean
+~~~ [2]
+   }
+~~~ [1]
+     const a = 1
+~~~~~ [1]
+      export class Bar implements Barz {
+~~~~~~ [1]
+   fff(s: string): boolean {
+~~~ [2]
+             return false
+~~~~~~~~~~~~~ [3]
+        }
+   }
+~~~ [1]
+    }
+~~~~ [0]
 [0]: 0 space indentation expected
 [1]: 4 space indentation expected
 [2]: 8 space indentation expected

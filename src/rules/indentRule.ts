@@ -184,9 +184,10 @@ function getNodeDeepth(node: ts.Node, line: string): number {
         ts.SyntaxKind.ModuleBlock,
         ts.SyntaxKind.DefaultClause,
         ts.SyntaxKind.ClassDeclaration,
+        ts.SyntaxKind.InterfaceDeclaration,
+        ts.SyntaxKind.ConditionalExpression,
         ts.SyntaxKind.ArrayLiteralExpression,
         ts.SyntaxKind.ObjectLiteralExpression,
-        ts.SyntaxKind.ConditionalExpression,
     ];
     if (isCloseElement(node, line)) {
         result --;
@@ -202,6 +203,9 @@ function getNodeDeepth(node: ts.Node, line: string): number {
     }
     if (isIdentifierInDeclarationList(node)) {
         result ++;
+    }
+    if (isExportInNamespace(node)) {
+        result --;
     }
     while (parent !== undefined) {
         if (blockTypes.indexOf(parent.kind) > -1) {
@@ -275,6 +279,16 @@ function inStringTemplate(node: ts.Node): boolean {
         && node.kind <= ts.SyntaxKind.LastTemplateToken;
 }
 
+function isExportInNamespace(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    if (node.kind !== ts.SyntaxKind.ExportKeyword) {
+        return false;
+    }
+    return node.parent.kind === ts.SyntaxKind.InterfaceDeclaration
+        || node.parent.kind === ts.SyntaxKind.ClassDeclaration;
+}
 /**
  *  To check a class declaration broken to two lines, like this:
  *  class

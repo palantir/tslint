@@ -1,5 +1,9 @@
 // valid code
 module TestModule {
+    interface Foo {
+        a: number
+        b: string
+    }
     var func = () => {
         console.warn("hi");
     };
@@ -208,3 +212,14 @@ var a = 10
     - 9
     *8
     /7
+namespace Foo {
+    export interface InterFoo {
+        foo(s: string): boolean
+    }
+    const a = 1
+    export class Bar implements Barz {
+        fff(s: string): boolean {
+            return false
+        }
+    }
+}
