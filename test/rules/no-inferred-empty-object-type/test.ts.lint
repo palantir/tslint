@@ -59,8 +59,12 @@ WrapperFunc<{ [x: number]: string }>();
 WrapperFunc<{ [x: string]: string }>();
 WrapperFunc<{ (): string }>();
 
+// check behavior with contextual type
 {
     let wrap: Wrapper<string> = new Wrapper();
+#if typescript < 2.4.0
+                                ~~~~~~~~~~~~~ [new]
+#endif
     let take = <T>(param: T) => {};
     take<any>(new Wrapper());
               ~~~~~~~~~~~~~ [new]
@@ -68,8 +72,16 @@ WrapperFunc<{ (): string }>();
              ~~~~~~~~~~~~~ [new]
     take<Object>(new Wrapper());
                  ~~~~~~~~~~~~~ [new]
+    take<Wrapper<{}>(new Wrapper());
+                     ~~~~~~~~~~~~~ [new]
     take<Wrapper<any>>(new Wrapper());
+#if typescript < 2.4.0
+                       ~~~~~~~~~~~~~ [new]
+#endif
     take<Wrapper<string>>(new Wrapper());
+#if typescript < 2.4.0
+                          ~~~~~~~~~~~~~ [new]
+#endif
 }
 
 CurriedFunc(voidFunc);
@@ -101,10 +113,6 @@ new MultiParamsClass<() => void, () => {}>();
 new MultiParamsClass<() => void, () => void>();
 new MultiParamsClass<{ [x: number]: string }, () => void>();
 new MultiParamsClass<{ [x: string]: string }, number>();
-
-// don't crash with stack overflow
-import {expect} from "chai";
-expect(1).to.eq(1);
 
 {
     const wrapper = <L, A>(l: L) => ({ l });
