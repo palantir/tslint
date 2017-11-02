@@ -200,6 +200,9 @@ function getNodeDeepth(node: ts.Node, line: string): number {
     if (leadingWithBinaryOperator(node)) {
         result ++;
     }
+    if (isIdentifierInDeclarationList(node)) {
+        result ++;
+    }
     while (parent !== undefined) {
         if (blockTypes.indexOf(parent.kind) > -1) {
             result++;
@@ -287,6 +290,14 @@ function nodeAtOutside(node: ts.Node): boolean {
     }
     return node.kind === ts.SyntaxKind.Identifier
          && node.parent.kind === ts.SyntaxKind.ClassDeclaration;
+}
+
+function isIdentifierInDeclarationList(node: ts.Node): boolean {
+    if (node.parent === undefined || node.parent.parent == undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.Identifier
+        && node.parent.parent.kind === ts.SyntaxKind.VariableDeclarationList;
 }
 
 function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {

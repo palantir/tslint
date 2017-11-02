@@ -70,6 +70,9 @@ function abc() {
     let c = 1
     let d = 1
     let e = 1
+    var a1 = 1,
+        a2 = 2,
+        a3 = 3
 }
 
 function() {
