@@ -75,7 +75,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     }
 
     private hasInferredEmptyObject(signature: ts.Signature): boolean {
-        const str = this.checker.signatureToString(signature, undefined, ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+        const str = this.signatureToString(signature);
         if (str[0] !== "<") {
             return false;
         }
@@ -112,6 +112,42 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
             }
             token = scanner.scan();
         }
+    }
+
+    /** Compatibility wrapper for typescript@2.1 */
+    private signatureToString(signature: ts.Signature): string {
+        if (this.checker.signatureToString !== undefined) {
+            return this.checker.signatureToString(signature, undefined, ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+        }
+        let result = "";
+        function addText(text: string) {
+            result += text;
+        }
+        function noop() { /* intentionally empty */ }
+        // tslint:disable-next-line:deprecation
+        this.checker.getSymbolDisplayBuilder().buildSignatureDisplay(
+            signature,
+            {
+                clear: noop,
+                decreaseIndent: noop,
+                increaseIndent: noop,
+                reportInaccessibleThisError: noop,
+                reportPrivateInBaseOfClassExpression: noop,
+                trackSymbol: noop,
+                writeKeyword: addText,
+                writeLine: noop,
+                writeOperator: addText,
+                writeParameter: addText,
+                writeProperty: addText,
+                writePunctuation: addText,
+                writeSpace: noop,
+                writeStringLiteral: addText,
+                writeSymbol: addText,
+            },
+            undefined,
+            ts.TypeFormatFlags.WriteTypeArgumentsOfSignature,
+        );
+        return result;
     }
 }
 
