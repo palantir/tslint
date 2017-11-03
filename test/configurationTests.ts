@@ -251,6 +251,22 @@ describe("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
+
+        it("overrides defaultSeverity of base configs", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity.json");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-unspecified")!.ruleSeverity,
+                "did not apply defaultSeverity to base config with no defaultSeverity");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-error")!.ruleSeverity,
+                "did not override defaultSeverity defined in base config");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-warning")!.ruleSeverity,
+                "did not apply defaultSeverity to extending config");
+        });
     });
 
     describe("findConfigurationPath", () => {

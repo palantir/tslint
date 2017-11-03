@@ -25,7 +25,7 @@ import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     /**
-     * The severity that is applied to rules in _this_ config with `severity === "default"`.
+     * The severity that is applied to rules in this and _extended_ configs with `severity === "default"`.
      * Not inherited.
      */
     defaultSeverity?: RuleSeverity;
@@ -200,9 +200,10 @@ function findup(filename: string, directory: string): string | undefined {
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @param configFilePath The configuration to load
  * @param originalFilePath The entry point configuration file
+ * @param extendingConfig The configuration which extends this one
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
+export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath, extendingConfig?: RawConfigFile) {
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
     } else {
@@ -224,6 +225,11 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
 
+        // defaultSeverity defined in the config which extends this one wins.
+        if (extendingConfig && extendingConfig.defaultSeverity) {
+            rawConfigFile.defaultSeverity = extendingConfig.defaultSeverity;
+        }
+
         const configFileDir = path.dirname(resolvedConfigFilePath);
         const configFile = parseConfigFile(rawConfigFile, configFileDir);
 
@@ -231,7 +237,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         // apply the current configuration last by placing it last in this array
         const configs: IConfigurationFile[] = configFile.extends.map((name) => {
             const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
+            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath, rawConfigFile);
         }).concat([configFile]);
 
         return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
