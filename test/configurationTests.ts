@@ -257,15 +257,15 @@ describe("Configuration", () => {
             assert.equal<RuleSeverity | undefined>(
                 "warning",
                 config.rules.get("default-severity-unspecified")!.ruleSeverity,
-                "did not apply defaultSeverity to base config with no defaultSeverity");
+                "should apply defaultSeverity to base config with no defaultSeverity");
             assert.equal<RuleSeverity | undefined>(
                 "warning",
                 config.rules.get("default-severity-error")!.ruleSeverity,
-                "did not override defaultSeverity defined in base config");
+                "should override defaultSeverity defined in base config");
             assert.equal<RuleSeverity | undefined>(
                 "warning",
                 config.rules.get("default-severity-warning")!.ruleSeverity,
-                "did not apply defaultSeverity to extending config");
+                "should apply defaultSeverity to extending config");
         });
     });
 
@@ -299,11 +299,11 @@ describe("Configuration", () => {
             assert.equal<RuleSeverity | undefined>(
                 "error",
                 config.rules.get("no-fail")!.ruleSeverity,
-                "did not pick up 'no-fail' in base config");
+                "should pick up 'no-fail' in base config");
             assert.equal<RuleSeverity | undefined>(
                 "off",
                 config.rules.get("always-fail")!.ruleSeverity,
-                "did not set 'always-fail' in top config");
+                "should set 'always-fail' in top config");
             assert.equal<RuleSeverity | undefined>("error", config.jsRules.get("no-fail")!.ruleSeverity);
             assert.equal<RuleSeverity | undefined>("off", config.jsRules.get("always-fail")!.ruleSeverity);
         });
