@@ -93,11 +93,14 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
     return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate));
 }
 
-export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+export function ancestorWhere<T extends ts.Node = ts.Node>(
+    node: ts.Node,
+    predicate: ((n: ts.Node) => n is T) | ((n: ts.Node) => boolean),
+): T | undefined {
     let cur: ts.Node | undefined = node;
     do {
         if (predicate(cur)) {
-            return cur as T;
+            return cur;
         }
         cur = cur.parent;
     } while (cur !== undefined);

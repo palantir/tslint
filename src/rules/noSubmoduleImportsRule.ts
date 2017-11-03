@@ -15,14 +15,7 @@
  * limitations under the License.
  */
 
-import {
-    isCallExpression,
-    isExternalModuleReference,
-    isIdentifier,
-    isImportDeclaration,
-    isImportEqualsDeclaration,
-    isTextualLiteral,
-} from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -51,59 +44,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Submodule import paths from this package are disallowed; import from the root instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoSubmoduleImportsWalker(sourceFile, this.ruleName, this.ruleArguments));
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
     }
 }
 
-class NoSubmoduleImportsWalker extends Lint.AbstractWalker<string[]> {
-    public walk(sourceFile: ts.SourceFile) {
-        const findDynamicImport = (node: ts.Node): void => {
-            if (isCallExpression(node) && node.arguments.length === 1 &&
-                (isIdentifier(node.expression) && node.expression.text === "require" ||
-                node.expression.kind === ts.SyntaxKind.ImportKeyword)) {
-                this.checkForBannedImport(node.arguments[0]);
-            }
-            return ts.forEachChild(node, findDynamicImport);
-        };
-
-        for (const statement of sourceFile.statements) {
-            if (isImportDeclaration(statement)) {
-                this.checkForBannedImport(statement.moduleSpecifier);
-            } else if (isImportEqualsDeclaration(statement)) {
-                if (isExternalModuleReference(statement.moduleReference) && statement.moduleReference.expression !== undefined) {
-                    this.checkForBannedImport(statement.moduleReference.expression);
-                }
-            } else {
-                ts.forEachChild(statement, findDynamicImport);
-            }
-        }
-    }
-
-    private checkForBannedImport(expression: ts.Expression) {
-        if (isTextualLiteral(expression) &&
-            // TODO remove assertion on upgrade to typescript@2.5.2
-            !(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(expression.text) &&
-            isSubmodulePath(expression.text)) {
-            /*
-             * A submodule is being imported.
-             * Check if its path contains any
-             * of the whitelist packages.
-             */
-            for (const option of this.options) {
-                if (expression.text === option || expression.text.startsWith(`${option}/`)) {
-                    return;
-                }
-            }
-
-            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<string[]>) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
+        if (!ts.isExternalModuleNameRelative(name.text) &&
+            isSubmodulePath(name.text) &&
+            !isWhitelisted(name.text, ctx.options)) {
+            ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
         }
     }
 }
 
-function isScopedPath(path: string): boolean {
-    return path[0] === "@";
+function isWhitelisted(path: string, whitelist: string[]): boolean {
+    for (const option of whitelist) {
+        if (path === option || path.startsWith(`${option}/`)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function isSubmodulePath(path: string): boolean {
-    return path.split("/").length > (isScopedPath(path) ? 2 : 1);
+    return path.split("/").length > (path[0] === "@" ? 2 : 1);
 }

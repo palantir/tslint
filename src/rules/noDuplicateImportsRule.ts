@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isModuleDeclaration, isTextualLiteral } from "tsutils";
+import { isImportDeclaration, isLiteralExpression, isModuleDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -40,35 +40,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateImportsWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDuplicateImportsWalker extends Lint.AbstractWalker<void> {
-    private seenImports = new Set<string>();
+function walk(ctx: Lint.WalkContext<void>): void {
+    walkWorker(ctx, ctx.sourceFile.statements, new Set());
+}
 
-    public walk(sourceFile: ts.SourceFile) {
-        this.checkStatements(sourceFile.statements);
-    }
-
-    private checkStatements(statements: ts.NodeArray<ts.Statement>) {
-        for (const statement of statements) {
-            if (isImportDeclaration(statement)) {
-                this.checkImport(statement);
-            } else if (this.sourceFile.isDeclarationFile && isModuleDeclaration(statement) &&
-                statement.body !== undefined && statement.name.kind === ts.SyntaxKind.StringLiteral) {
-                // module augmentations in declaration files can contain imports
-                this.checkStatements((statement.body as ts.ModuleBlock).statements);
+function walkWorker(ctx: Lint.WalkContext<void>, statements: ReadonlyArray<ts.Statement>, seen: Set<string>): void {
+    for (const statement of statements) {
+        if (isImportDeclaration(statement) && isLiteralExpression(statement.moduleSpecifier)) {
+            const { text } = statement.moduleSpecifier;
+            if (seen.has(text)) {
+                ctx.addFailureAtNode(statement, Rule.FAILURE_STRING(text));
             }
+            seen.add(text);
         }
-    }
 
-    private checkImport(statement: ts.ImportDeclaration) {
-        if (isTextualLiteral(statement.moduleSpecifier)) {
-            if (this.seenImports.has(statement.moduleSpecifier.text)) {
-                return this.addFailureAtNode(statement, Rule.FAILURE_STRING(statement.moduleSpecifier.text));
-            }
-            this.seenImports.add(statement.moduleSpecifier.text);
+        if (isModuleDeclaration(statement) && statement.body !== undefined && statement.name.kind === ts.SyntaxKind.StringLiteral) {
+            // If this is a module augmentation, re-use `seen` since those imports could be moved outside.
+            // If this is an ambient module, create a fresh `seen`
+            // because they should have separate imports to avoid becoming augmentations.
+            walkWorker(ctx, (statement.body as ts.ModuleBlock).statements, ts.isExternalModule(ctx.sourceFile) ? seen : new Set());
         }
     }
 }

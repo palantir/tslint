@@ -1,0 +1,72 @@
+const asyncFn = {
+  async f() {
+        ~ [OBJECT_LITERAL_DISALLOWED]
+    await some_promise;
+  },
+  async* fa() {
+         ~~ [OBJECT_LITERAL_DISALLOWED]
+    await some_promise;
+  }
+};
+
+const bad = {
+  w() {
+  ~ [OBJECT_LITERAL_DISALLOWED]
+    const alsoBad = {
+        bad,
+        ~~~ [OBJECT_LITERAL_DISALLOWED]
+    };
+  },
+  *x() {},
+   ~ [OBJECT_LITERAL_DISALLOWED]
+  [y]() {},
+  ~~~ [OBJECT_LITERAL_DISALLOWED]
+  z,
+  ~ [OBJECT_LITERAL_DISALLOWED]
+  nest: {
+    nestBad() {},
+    ~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+    nextGood: function(prop: string): void {}
+  }
+};
+
+const good = {
+  w: function() {},
+  x: function *() {},
+  [y]: function() {}
+};
+
+const arrows = {
+  x: (y) => y  // this is OK.
+};
+
+const namedFunctions = {
+  x: function y() {}  // named function expressions are also OK.
+};
+
+const quotes = {
+  "foo-bar": function() {},
+  "foo-bar"() {}
+  ~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+};
+
+const extraCases = {
+  x,
+  ~ [OBJECT_LITERAL_DISALLOWED]
+  a: 123,
+  b: "hello",
+  c: 'c',
+  ["a" + "nested"]: {
+    x: x
+  }
+};
+
+export class ClassA extends ClassZ {
+  testMethod() {}
+}
+
+({foo} = {foo});
+  ~~~ [OBJECT_LITERAL_DISALLOWED]
+          ~~~ [OBJECT_LITERAL_DISALLOWED]
+
+[OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.
