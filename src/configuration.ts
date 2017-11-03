@@ -226,7 +226,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         }
 
         // defaultSeverity defined in the config which extends this one wins.
-        if (extendingConfig && extendingConfig.defaultSeverity) {
+        if (extendingConfig !== undefined && extendingConfig.defaultSeverity !== undefined) {
             rawConfigFile.defaultSeverity = extendingConfig.defaultSeverity;
         }
 
