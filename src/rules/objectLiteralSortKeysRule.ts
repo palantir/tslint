@@ -208,7 +208,7 @@ function hasBlankLineBefore(sourceFile: ts.SourceFile, element: ts.ObjectLiteral
 }
 
 function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
-    return /(\r\n|\r|\n){2}/.test(sourceFile.text.slice(position, position + 4));
+    return /(\r?\n){2}/.test(sourceFile.text.slice(position, position + 4));
 }
 
 function getTypeName(t: TypeLike): string | undefined {
