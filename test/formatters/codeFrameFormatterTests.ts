@@ -42,6 +42,7 @@ describe("CodeFrame Formatter", () => {
             createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
             createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
             createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "error"),
+            createFailure(sourceFile, 0, maxPosition, "warning failure", "warning-name", undefined, "warning"),
         ];
 
         const expectedResultPlain =
@@ -82,6 +83,18 @@ describe("CodeFrame Formatter", () => {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
             \u001b[90m 4 | \u001b[39m\u001b[0m
 
+            \u001b[31mfull failure\u001b[39m \u001b[90m(full-name)\u001b[39m
+            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
+            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
+            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
+            \u001b[90m 4 | \u001b[39m\u001b[0m
+
+            \u001b[33mwarning failure\u001b[39m \u001b[90m(warning-name)\u001b[39m
+            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
+            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
+            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
+            \u001b[90m 4 | \u001b[39m\u001b[0m
+
             \u001b[31m&<>'\" should be escaped\u001b[39m \u001b[90m(escape)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m   | \u001b[39m \u001b[31m\u001b[1m^\u001b[22m\u001b[39m
@@ -95,12 +108,6 @@ describe("CodeFrame Formatter", () => {
             \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  9 | \u001b[39m}
             \u001b[90m    | \u001b[39m\u001b[31m\u001b[1m^\u001b[22m\u001b[39m
             \u001b[90m 10 | \u001b[39m\u001b[0m
-
-            \u001b[31mfull failure\u001b[39m \u001b[90m(full-name)\u001b[39m
-            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
-            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
-            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
-            \u001b[90m 4 | \u001b[39m\u001b[0m
 
         `;
 

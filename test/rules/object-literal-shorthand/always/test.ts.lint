@@ -1,0 +1,53 @@
+const bad = {
+  w: function() {},
+  ~~~~~~~~~~~ [Expected method shorthand in object literal ('{w() {...}}').]
+  x: function *() {},
+  ~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{*x() {...}}').]
+  [y]: function() {},
+  ~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{[y]() {...}}').]
+  z: z
+  ~~~~  [Expected property shorthand in object literal ('{z}').]
+};
+
+const good = {
+  w() {},
+  *x() {},
+  [y]() {},
+  z
+};
+
+const arrows = {
+  x: (y) => y  // this is OK.
+};
+
+const namedFunctions = {
+  x: function y() {}  // named function expressions are also OK.
+};
+
+const quotes = {
+  "foo-bar": function() {},
+  ~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{"foo-bar"() {...}}').]
+  "foo-bar"() {}
+};
+
+const extraCases = {
+  x,
+  a: 123,
+  b: "hello",
+  c: 'c',
+  ["a" + "nested"]: {
+    x: x
+    ~~~~  [Expected property shorthand in object literal ('{x}').]
+  }
+};
+
+const asyncFn = {
+  foo: async function() {},
+  ~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{async foo() {...}}').]
+  bar: async function*() {}
+  ~~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{async *bar() {...}}').]
+}
+
+({foo: foo} = {foo: foo});
+  ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]
+               ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]

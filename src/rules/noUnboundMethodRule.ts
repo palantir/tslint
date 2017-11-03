@@ -104,6 +104,7 @@ function isSafeUse(node: ts.Node): boolean {
         case ts.SyntaxKind.WhileStatement:
         case ts.SyntaxKind.DoStatement:
         case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.PrefixUnaryExpression:
             return true;
         default:
             return false;

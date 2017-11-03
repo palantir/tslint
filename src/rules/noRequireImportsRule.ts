@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isImportEqualsDeclaration } from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -42,16 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>) {
-    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isCallExpression(node)) {
-            if (node.arguments.length !== 0 &&
-                isIdentifier(node.expression) && node.expression.text === "require") {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-        } else if (isImportEqualsDeclaration(node) &&
-            node.moduleReference.kind === ts.SyntaxKind.ExternalModuleReference) {
-                ctx.addFailureAtNode(node.moduleReference, Rule.FAILURE_STRING);
-        }
-        return ts.forEachChild(node, cb);
-    });
+    for (const name of findImports(ctx.sourceFile, ImportKind.AllRequireLike)) {
+        ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
+    }
 }

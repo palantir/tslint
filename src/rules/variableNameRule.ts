@@ -151,7 +151,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return;
         }
 
-        if (!isCamelCase(text, options) && !isUpperCase(text)) {
+        if (text.length !== 0 && !isCamelCase(text, options) && !isUpperCase(text)) {
             ctx.addFailureAtNode(name, formatFailure());
         }
     }

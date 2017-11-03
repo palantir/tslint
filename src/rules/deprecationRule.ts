@@ -17,12 +17,15 @@
 
 import {
     getDeclarationOfBindingElement,
+    getJsDoc,
     isBindingElement,
     isCallExpression,
     isIdentifier,
-    isJsDoc,
     isNewExpression,
     isPropertyAccessExpression,
+    isPropertyAssignment,
+    isReassignmentTarget,
+    isShorthandPropertyAssignment,
     isTaggedTemplateExpression,
     isVariableDeclaration,
     isVariableDeclarationList,
@@ -102,10 +105,12 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.VariableDeclaration:
         case ts.SyntaxKind.Parameter:
         case ts.SyntaxKind.PropertyDeclaration:
-        case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
         case ts.SyntaxKind.ImportEqualsDeclaration:
             return (parent as ts.NamedDeclaration).name === identifier;
+        case ts.SyntaxKind.PropertyAssignment:
+            return (parent as ts.PropertyAssignment).name === identifier &&
+                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression);
         case ts.SyntaxKind.BindingElement:
             // return true for `b` in `const {a: b} = obj"`
             return (parent as ts.BindingElement).name === identifier &&
@@ -134,7 +139,17 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
             return result;
         }
     }
-    let symbol = tc.getSymbolAtLocation(node);
+    let symbol: ts.Symbol | undefined;
+    const parent = node.parent!;
+    if (parent.kind === ts.SyntaxKind.BindingElement) {
+        symbol = tc.getTypeAtLocation(parent.parent!).getProperty(node.text);
+    } else if (isPropertyAssignment(parent) && parent.name === node ||
+               isShorthandPropertyAssignment(parent) && parent.name === node && isReassignmentTarget(node)) {
+        symbol = tc.getPropertySymbolOfDestructuringAssignment(node);
+    } else {
+        symbol = tc.getSymbolAtLocation(node);
+    }
+
     if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
@@ -200,14 +215,11 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
 }
 
 function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
-    for (const child of declaration.getChildren()) {
-        if (!isJsDoc(child)) {
-            break;
-        }
-        if (child.tags === undefined) {
+    for (const comment of getJsDoc(declaration)) {
+        if (comment.tags === undefined) {
             continue;
         }
-        for (const tag of child.tags) {
+        for (const tag of comment.tags) {
             if (tag.tagName.text === "deprecated") {
                 return tag.comment === undefined ? "" : tag.comment;
             }

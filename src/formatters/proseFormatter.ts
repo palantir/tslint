@@ -33,6 +33,7 @@ export class Formatter extends AbstractFormatter {
         if (failures.length === 0 && (fixes === undefined || fixes.length === 0)) {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const fixLines: string[] = [];
         if (fixes !== undefined) {
