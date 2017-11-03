@@ -253,7 +253,7 @@ describe("Configuration", () => {
         });
 
         it("overrides defaultSeverity of base configs", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-only-in-extended.json");
             assert.equal<RuleSeverity | undefined>(
                 "warning",
                 config.rules.get("default-severity-unspecified")!.ruleSeverity,
@@ -266,6 +266,10 @@ describe("Configuration", () => {
                 "warning",
                 config.rules.get("default-severity-warning")!.ruleSeverity,
                 "should apply defaultSeverity to extending config");
+            assert.equal<RuleSeverity | undefined>(
+                "error",
+                config.rules.get("default-severity-only-in-extended")!.ruleSeverity,
+                "should not inherit defaultSeverity from base configs");
         });
     });
 
