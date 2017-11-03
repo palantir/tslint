@@ -196,17 +196,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const exceptions = ctx.options.default ? [
         "JsxElement",
         "JsxFragment",
+        "JsxSelfClosingElement",
         ...ctx.options.exceptions,
     ] : ctx.options.exceptions;
 
     const restrictions = withChild.map((name: string) => ({
         message: `an expression of type ${name}`,
         test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
-            const child = isParenthesizedExpression(node) ? node.expression : node.type;
-            if (exceptions.some((exception) => isNodeOfKind(child, exception))) {
-                return false;
-            }
-            return isNodeOfKind(child, name);
+            return isNodeOfKind(isParenthesizedExpression(node) ? node.expression : node.type, name);
         },
     })).concat(
         asChildOf.map((name: string) => {
@@ -215,10 +212,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 message: `the ${whichChild} child of an expression${parentKind === "*" ? "" : ` of type ${parentKind}`}`,
                 test(node: ts.ParenthesizedExpression | ts.ParenthesizedTypeNode) {
                     if (!isNodeOfKind(node.parent!, parentKind)) {
-                        return false;
-                    }
-                    const child = isParenthesizedExpression(node) ? node.expression : node.type;
-                    if (exceptions.some((exception) => isNodeOfKind(child, exception))) {
                         return false;
                     }
                     const parentMapping = node.parent as {} as { [k: string]: ts.Node | ts.Node[] };
@@ -232,8 +225,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if ((isParenthesizedExpression(node) && !parensAreNecessary(node, ctx.sourceFile)) || isParenthesizedType(node)) {
+            const child = isParenthesizedExpression(node) ? node.expression : node.type;
+            if (exceptions.some((exception) => isNodeOfKind(child, exception))) {
+                return;
+            }
             const restriction = restrictions.find((r) => r.test(node));
-            if (restriction != undefined) {
+            if (restriction !== undefined) {
                 let replacement = [
                     Lint.Replacement.deleteFromTo(node.getStart(), node.getStart() + 1),
                     Lint.Replacement.deleteFromTo(node.getEnd() - 1, node.getEnd()),
