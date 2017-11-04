@@ -1,0 +1,31 @@
+///<reference path="!TODO!.ts"/>
+
+class Clazz { /*this comment is OK*/
+    /* block comment
+    ~~~~~~~~~~~~~~~~~~~~~
+     * adada foo
+~~~~~~~~~~~~~~~~
+     */
+~~~~~~~ [Warning term 'foo' found in comment]
+    public funcxion() { // This comment has a capital letter starting it
+        //This comment is on its own line, and starts with a capital _and_ no space
+        console.log("XXX.ts");  // file XXX
+                                ~~~~~~~~~~~ [Warning term 'xxx' found in comment]
+        console.log("!TODO!.ts");  // file !TODO!
+                                   ~~~~~~~~~~~~~~ [Warning term '!todo!' found in comment]
+    }
+    /// <not a reference/>
+    ////FIXME
+    ~~~~~~~~~ [Warning term 'fixme' found in comment]
+}//
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`/*Not OK FIXME*/
+                                            ~~~~~~~~~~~~~~~~ [Warning term 'fixme' found in comment]
+
+//noinspection JSUnusedGlobalSymbols
+const unusedVar = 'unneeded value';
+
+// TODO: write more code...

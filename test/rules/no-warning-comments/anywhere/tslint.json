@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-warning-comments": [true, {"location": "anywhere", "terms": ["!todo!", "fixme", "xxx", "foo"]}]
+  }
+}
