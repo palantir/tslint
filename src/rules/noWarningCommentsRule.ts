@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import * as utils from "../utils";
 
 interface IOptionsObject {
     location?: string;
@@ -25,13 +26,8 @@ interface IOptionsObject {
 }
 
 interface Options {
-    location: "start" | "anywhere";
-    terms: string[];
-}
-
-interface RegExpWithTerm {
-    regexp: RegExp;
-    term: string;
+    location?: "start" | "anywhere";
+    terms?: string[];
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,6 +43,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 * 'start' specifies at the start.
                 * 'anywhere' specifies anywhere in the comment.
             * \`"terms"\` specifies a list of terms (case-insensitive) to be considered 'warning' terms.
+
+            By default, \`"location"\` defaults to \`"start"\` and \`"terms"\` defaults to
+            \`["todo", "fixme", "xxx"]\`.
             `,
         options: {
             type: "object",
@@ -75,36 +74,49 @@ export class Rule extends Lint.Rules.AbstractRule {
         `Warning term '${term}' found ${location === "start" ? "at start of" : "in"} comment`
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments[0]));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments[0] as IOptionsObject));
     }
 }
 
 function parseOptions(options: IOptionsObject): Options {
-    if (options && options.location !== "start" && options.location !== "anywhere") {
+    if (typeof options === "undefined" || options === null) {
+        options = {};
+    }
+
+    if (
+        (typeof options.location !== "undefined" && options.location !== null) &&
+        options.location !== "start" &&
+        options.location !== "anywhere") {
         throw new Error(`Option 'location' value is invalid: ${options.location}`);
     }
 
-    if (options && !(options.terms instanceof Array)) {
+    if (
+        (typeof options.terms !== "undefined" && options.terms !== null) &&
+        !(options.terms instanceof Array)) {
         throw new Error("Option 'terms' must be a string array.");
     }
 
     return {
-        location: options && options.location ? options.location as "start" | "anywhere" : "start",
-        terms: options && options.terms ? options.terms : ["todo", "fixme", "xxx"],
+        location: (typeof options.location !== "undefined" && options.location !== null) ?
+            options.location as "start" | "anywhere" :
+            "start",
+        terms: (typeof options.terms !== "undefined" && options.terms !== null) ?
+            options.terms :
+            ["todo", "fixme", "xxx"],
     };
 }
 
-function checkCommentContainsWarningTerms(comment: string, reTerm: RegExpWithTerm[], rng: ts.CommentRange, ctx: Lint.WalkContext<Options>) {
-    reTerm.forEach((regexpWithTerm) => {
-        const match = regexpWithTerm.regexp.exec(comment);
-        if (match) {
-            ctx.addFailure(rng.pos, rng.end, Rule.COMMENT_ERROR_FACTORY(regexpWithTerm.term, ctx.options.location));
+function checkCommentContainsWarningTerms(comment: string, regExps: RegExp[], rng: ts.CommentRange, ctx: Lint.WalkContext<Options>) {
+    regExps.forEach((regExp) => {
+        const match = regExp.exec(comment);
+        if (typeof match !== "undefined" && match !== null) {
+            ctx.addFailure(rng.pos, rng.end, Rule.COMMENT_ERROR_FACTORY(match[1], ctx.options.location!));
         }
     });
 }
 
 function convertToRegExp(term: string, location: "start" | "anywhere") {
-    const escaped = term.replace(/[-/\\$^*+?.()|[\]{}]/g, "\\$&");
+    const escaped = utils.escapeRegExp(term);
     let prefix;
 
     /*
@@ -131,26 +143,23 @@ function convertToRegExp(term: string, location: "start" | "anywhere") {
         prefix = "";
     }
 
-    return {
-        regexp: new RegExp(prefix + escaped + suffix, "i"),
-        term,
-    };
+    return new RegExp(`${prefix}(${escaped})${suffix}`, "i");
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    const warningRegExps: RegExpWithTerm[] = ctx.options.terms.map((term) => convertToRegExp(term, ctx.options.location));
+    const warningRegExps: RegExp[] = ctx.options.terms!.map((term) => convertToRegExp(term, ctx.options.location!));
 
-    utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
+    tsutils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
         let start = pos + 2;
-        if ((kind !== ts.SyntaxKind.SingleLineCommentTrivia && kind !== ts.SyntaxKind.MultiLineCommentTrivia) ||
+        if (
             // exclude empty single-line comments
             start === end ||
             // exclude /// <reference path="...">
             fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end)) {
             return;
         }
-        // skip all leading slashes
-        while (fullText[start] === "/") {
+        // skip all leading slashes/asterisks
+        while (fullText[start] === "/" || fullText[start] === "*") {
             ++start;
         }
         if (start === end) {
