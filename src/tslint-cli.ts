@@ -63,7 +63,7 @@ const options: Option[] = [
             to the rules. If no option is specified, the config file named
             tslint.json is used, so long as it exists in the path.
             The format of the file is { rules: { /* rules list */ } },
-            where /* rules list */ is a key: value comma-seperated list of
+            where /* rules list */ is a key: value comma-separated list of
             rulename: rule-options pairs. Rule-options can be either a
             boolean true/false value denoting whether the rule is used or not,
             or a list [boolean, ...] where the boolean provides the same role
@@ -181,10 +181,10 @@ const options: Option[] = [
     {
         name: "type-check",
         type: "boolean",
-        describe: "check for type errors before linting the project",
+        describe: "(deprecated) check for type errors before linting the project",
         description: dedent`
-            Checks for type errors before linting a project. --project must be
-            specified in order to enable type checking.`,
+            (deprecated) Checks for type errors before linting a project.
+            --project must be specified in order to enable type checking.`,
     },
 ];
 
@@ -236,13 +236,16 @@ if (!(argv.init || argv.test !== undefined || argv.project !== undefined || comm
     process.exit(1);
 }
 
-if (argv.typeCheck && argv.project === undefined) {
-    console.error("--project must be specified in order to enable type checking.");
-    process.exit(1);
+if (argv.typeCheck) {
+    console.warn("--type-check is deprecated. You only need --project to enable rule which need type information.");
+    if (argv.project === undefined) {
+        console.error("--project must be specified in order to enable type checking.");
+        process.exit(1);
+    }
 }
 
 let log: (message: string) => void;
-if (argv.out != null) {
+if (argv.out != undefined) {
     const outputStream = fs.createWriteStream(argv.out, {
         flags: "w+",
         mode: 420,
@@ -252,30 +255,33 @@ if (argv.out != null) {
     log = console.log;
 }
 
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: commander.args,
-    fix: argv.fix,
-    force: argv.force,
-    format: argv.format === undefined ? "prose" : argv.format,
-    formattersDirectory: argv.formattersDir,
-    init: argv.init,
-    out: argv.out,
-    outputAbsolutePaths: argv.outputAbsolutePaths,
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-    test: argv.test,
-    typeCheck: argv.typeCheck,
-}, {
-    log,
-    error: (m) => console.error(m),
-}).then((rc) => {
-    process.exitCode = rc;
-}).catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-});
+run(
+    {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: commander.args,
+        fix: argv.fix,
+        force: argv.force,
+        format: argv.format === undefined ? "prose" : argv.format,
+        formattersDirectory: argv.formattersDir,
+        init: argv.init,
+        out: argv.out,
+        outputAbsolutePaths: argv.outputAbsolutePaths,
+        project: argv.project,
+        rulesDirectory: argv.rulesDir,
+        test: argv.test,
+        typeCheck: argv.typeCheck,
+    },
+    {
+        log,
+        error: (m) => console.error(m),
+    })
+    .then((rc) => {
+        process.exitCode = rc;
+    }).catch((e) => {
+        console.error(e);
+        process.exitCode = 1;
+    });
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;

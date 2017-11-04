@@ -109,7 +109,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
     function symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
         const symbolDeclarations = symbol.getDeclarations();
-        if (symbolDeclarations == null) {
+        if (symbolDeclarations === undefined) {
             return false;
         } else if (symbolDeclarations.some((decl) => namespacesInScope.some((ns) => ns === decl))) {
             return true;
@@ -120,9 +120,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     }
 
     function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
-        // TODO remove type assertion on update to typescript@2.6.0
-        if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
-            inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
+        if (checker.getExportSymbolOfSymbol !== undefined) {
+            inScope = checker.getExportSymbolOfSymbol(inScope);
             return accessed === inScope;
         }
         return accessed === inScope ||

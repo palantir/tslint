@@ -67,4 +67,7 @@ import { submodule } from "../myModule/a/package";
 import submodule = require("./../node_modules/package");
 import submodule = require("../myModule/a/package");
 
+export * from "@angular/http/testing";
+              ~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
 [0]: Submodule import paths from this package are disallowed; import from the root instead

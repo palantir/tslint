@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { Error } from "../error";
-
 export interface PositionInFile {
    line: number;
    col: number;

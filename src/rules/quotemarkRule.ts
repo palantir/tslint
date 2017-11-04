@@ -123,7 +123,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 text = text.replace(new RegExp(fixQuoteMark, "g"), `\\${fixQuoteMark}`);
             }
             text = text.replace(new RegExp(`\\\\${actualQuoteMark}`, "g"), actualQuoteMark);
-            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, fixQuoteMark),
+            return ctx.addFailure(
+                start, node.end, Rule.FAILURE_STRING(actualQuoteMark, fixQuoteMark),
                 new Lint.Replacement(start, node.end - start, fixQuoteMark + text + fixQuoteMark));
         }
         ts.forEachChild(node, cb);

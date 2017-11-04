@@ -525,3 +525,55 @@ const enum Foo {
            ~ [Unnecessary trailing comma]
 }
 
+let {
+    ...x,
+        ~ [Unnecessary trailing comma]
+} = {};
+let [
+    ...y,
+        ~ [Unnecessary trailing comma]
+] = [];
+
+[
+    ...y,
+        ~ [Unnecessary trailing comma]
+] = [];
+({
+    ...y,
+        ~ [Unnecessary trailing comma]
+} = {})
+function foo(
+    ...z,
+        ~ [Unnecessary trailing comma]
+) {}
+
+
+let {...x,} = {};
+let [...y,] = [];
+[...y,] = [];
+({...y,} = {})
+function foo(...z,) {}
+
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}

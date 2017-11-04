@@ -37,7 +37,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr,
+                assert.include(
+                    stderr,
                     "No files specified. Use --project to lint a project folder.",
                     "stderr should contain notification about missing files");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
@@ -128,7 +129,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with code 0 if custom rules directory is passed and file contains lint warnings", (done) => {
-            execCli(["-c", "./test/config/tslint-extends-package-warning.json", "-r", "./test/files/custom-rules", "src/test.ts"],
+            execCli(
+                ["-c", "./test/config/tslint-extends-package-warning.json", "-r", "./test/files/custom-rules", "src/test.ts"],
                 (err) => {
                     assert.isNull(err, "process should exit without an error");
                     done();
@@ -216,13 +218,28 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    it("finds configuration above current directory", (done) => {
+        execCli(
+            ["index.test.ts"],
+            {
+                cwd: "./test/files/config-findup/no-config",
+            },
+            (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.equal(err.code, 2, "exit code should be 2");
+                done();
+            },
+        );
+    });
+
     describe("--fix flag", () => {
         it("fixes multiple rules without overwriting each other", (done) => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));
             fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
                 .pipe(fs.createWriteStream(tempFile))
                 .on("finish", () => {
-                    execCli(["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
+                    execCli(
+                        ["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
                         (err, stdout) => {
                             const content = fs.readFileSync(tempFile, "utf8");
                             // compare against file name which will be returned by formatter (used in TypeScript)
@@ -239,7 +256,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
     describe("--force flag", () => {
         it("exits with code 0 if `--force` flag is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/test.ts"],
+            execCli(
+                ["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/test.ts"],
                 (err, stdout) => {
                     assert.isNull(err, "process should exit without an error");
                     assert.include(stdout, "failure", "errors should be reported");
@@ -366,7 +384,39 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
-            execCli(["-c", "test/files/tsconfig-no-ts-files/tslint.json", "-p", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+            execCli(
+                ["-c", "test/files/tsconfig-no-ts-files/tslint.json", "-p", "test/files/tsconfig-no-ts-files/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without an error");
+                    done();
+                });
+        });
+
+        it("reports errors from parsing tsconfig.json", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/syntax-error.json"],
+                (err, _stdout, stderr) => {
+                    assert.isNotNull(err, "process should exit with an error");
+                    assert.equal(err.code, 1, "exit code should be 1");
+                    assert.include(stderr, "error TS");
+                    done();
+                });
+        });
+
+        it("reports errors from validating tsconfig.json", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/empty-files.json"],
+                (err, _stdout, stderr) => {
+                    assert.isNotNull(err, "process should exit with an error");
+                    assert.equal(err.code, 1, "exit code should be 1");
+                    assert.include(stderr, "error TS");
+                    done();
+                });
+        });
+
+        it("does not report an error if tsconfig.json matches no files", (done) => {
+            execCli(
+                ["-p", "test/files/tsconfig-invalid/no-match.json"],
                 (err) => {
                     assert.isNull(err, "process should exit without an error");
                     done();
@@ -404,12 +454,21 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 });
         });
 
-        it("can handles 'allowJs' correctly", (done) => {
+        it("handles 'allowJs' correctly", (done) => {
             execCli(
                 [ "-p", "test/files/tsconfig-allow-js/tsconfig.json"],
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 2, "error code should be 2");
+                    done();
+                });
+        });
+
+        it("doesn't lint external dependencies with 'allowJs'", (done) => {
+            execCli(
+                [ "-p", "test/files/allow-js-exclude-node-modules/tsconfig.json"],
+                (err) => {
+                    assert.isNull(err, "process should exit without error");
                     done();
                 });
         });
@@ -513,7 +572,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                     "--exclude", "'test/files/multiple-excludes/invalid.test.ts'",
                     "--exclude", "'test/files/multiple-excludes/invalid2*'",
                     "'test/files/multiple-excludes/**.ts'",
-                ], (err) => {
+                ],
+                (err) => {
                     assert.isNull(err, "process should exit without an error");
                     done();
                 });
@@ -546,7 +606,7 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): fn is (...args: any[]) => any {
+function isFunction(fn: any): fn is Function { // tslint:disable-line:ban-types
     return ({}).toString.call(fn) === "[object Function]";
 }
 

@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutils";
+import {
+    isBlock,
+    isIfStatement,
+    isIterationStatement,
+    isSameLine,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -66,6 +71,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "functionality",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -129,12 +135,39 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkStatement(statement: ts.Statement, node: ts.Node, childIndex: number, end = statement.end) {
+    private checkStatement(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, childIndex: number, end = statement.end) {
+        const sameLine = isSameLine(this.sourceFile, statement.pos, statement.end);
         if (statement.kind !== ts.SyntaxKind.Block &&
-            !(this.options.ignoreSameLine && isSameLine(this.sourceFile, statement.pos, statement.end))) {
+            !(this.options.ignoreSameLine && sameLine)) {
             const token = node.getChildAt(childIndex, this.sourceFile);
             const tokenText = ts.tokenToString(token.kind)!;
-            this.addFailure(token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText));
+            this.addFailure(
+                token.end - tokenText.length, end, Rule.FAILURE_STRING_FACTORY(tokenText),
+                this.createMissingBraceFix(statement, node, sameLine));
+        }
+    }
+
+    /** Generate the necessary replacement to add braces to a statement that needs them. */
+    private createMissingBraceFix(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
+        if (sameLine) {
+            return [
+                Lint.Replacement.appendText(statement.getStart(), "{ "),
+                Lint.Replacement.appendText(statement.getEnd(), " }"),
+            ];
+        } else {
+            const match = /\n([\t ])/.exec(node.getFullText(this.sourceFile)); // determine which character to use (tab or space)
+            const indentation = match === null ?
+                "" :
+                // indentation should match start of statement
+                match[1].repeat(ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).character);
+
+            const maybeCarriageReturn = this.sourceFile.text[this.sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r" ? "\r" : "";
+
+            return [
+                Lint.Replacement.appendText(
+                    this.sourceFile.getLineEndOfPosition(statement.pos), " {"),
+                Lint.Replacement.appendText(statement.getEnd(), `${maybeCarriageReturn}\n${indentation}}`),
+            ];
         }
     }
 }
