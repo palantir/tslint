@@ -207,7 +207,7 @@ export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
     return didAllTestsPass;
 }
 
-export function consoleTestResultHandler(testResult: TestResult): boolean {
+export function consoleTestResultHandler(testResult: TestResult, rootTestDirectory?: string): boolean {
     // needed to get colors to show up when passing through Grunt
     (chalk as any).enabled = true;
 
@@ -225,11 +225,14 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
             const didMarkupTestPass = !markupDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
             const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
+            const testDescriptor = rootTestDirectory === undefined
+                ? ""
+                : ` ${testResult.directory.substring(rootTestDirectory.length).replace(/\//g, " > ")}`;
 
             if (didMarkupTestPass && didFixesTestPass) {
-                console.log(chalk.green(" Passed"));
+                console.log(chalk.green(` Passed${testDescriptor}`));
             } else {
-                console.log(chalk.red(" Failed!"));
+                console.log(chalk.red(` Failed${testDescriptor}!`));
                 didAllTestsPass = false;
                 if (!didMarkupTestPass) {
                     displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
