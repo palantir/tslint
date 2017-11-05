@@ -64,10 +64,10 @@ export interface IConfigurationLoadResult {
     results?: IConfigurationFile;
 }
 
-// As per eslint convention, yaml config is used if present
-// over json config
+// Note: eslint prefers yaml over json, while tslint prefers json over yaml
+// for backward-compatibility.
 export const JSON_CONFIG_FILENAME = "tslint.json";
-export const CONFIG_FILENAMES = ["tslint.yaml", "tslint.yml", JSON_CONFIG_FILENAME];
+export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.yml"];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
@@ -184,17 +184,20 @@ function findup(filenames: string[], directory: string): string | undefined {
     }
 
     function findFile(cwd: string): string | undefined {
+        const dirFiles = fs.readdirSync(cwd);
         for (const filename of filenames) {
-            if (fs.existsSync(path.join(cwd, filename))) {
-                return filename;
+            const index = dirFiles.indexOf(filename);
+            if (index > -1) {
+                return dirFiles[index];
             }
+        }
 
+        for (const filename of filenames) {
             // TODO: remove in v6.0.0
             // Try reading in the entire directory and looking for a file with different casing.
-            const filenameLower = filename.toLowerCase();
-            const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
+            const result = dirFiles.find((entry) => entry.toLowerCase() === filename);
             if (result !== undefined) {
-                showWarningOnce(`Using mixed case ${filenameLower} is deprecated. Found: ${path.join(cwd, result)}`);
+                showWarningOnce(`Using mixed case ${filename} is deprecated. Found: ${path.join(cwd, result)}`);
                 return result;
             }
         }
@@ -219,12 +222,12 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
         const resolvedConfigFileExt = path.extname(resolvedConfigFilePath);
         let rawConfigFile: RawConfigFile;
-        if (resolvedConfigFileExt.match(/\.(json|ya?ml)/) !== null) {
+        if (/\.(json|ya?ml)/.test(resolvedConfigFileExt)) {
             const fileContent = fs.readFileSync(resolvedConfigFilePath).toString().replace(/^\uFEFF/, "");
             try {
                 if (resolvedConfigFileExt === ".json") {
                     rawConfigFile = JSON.parse(stripComments(fileContent)) as RawConfigFile;
-                } else if (resolvedConfigFileExt.match(/ya?ml/) !== null) {
+                } else { // /\.ya?ml/.test(resolvedConfigFileExt) === true
                     rawConfigFile = yaml.safeLoad(fileContent, {
                         // Note: yaml.LoadOptions expects a schema value of type "any",
                         // but this trips up the no-unsafe-any rule.
@@ -232,9 +235,6 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
                         schema: yaml.JSON_SCHEMA,
                         strict: true,
                     }) as RawConfigFile;
-                } else {
-                    // throw error for static analysis purpose; should not happen
-                    throw new Error("File format not supported yet.");
                 }
             } catch (e) {
                 const error = e as Error;

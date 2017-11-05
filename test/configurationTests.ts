@@ -274,14 +274,14 @@ describe("Configuration", () => {
                 path.resolve("./test/files/config-findup/tslint.json"),
             );
         });
-        it("prefers yaml configurations to yml and json configurations", () => {
+        it("prefers json over yaml over yml configuration files", () => {
             assert.strictEqual(
                 findConfigurationPath(null, "./test/files/config-findup/yaml-config"),
-                path.resolve("test/files/config-findup/yaml-config/tslint.yaml"),
+                path.resolve("test/files/config-findup/yaml-config/tslint.json"),
             );
             assert.strictEqual(
                 findConfigurationPath(null, "./test/files/config-findup/yml-config"),
-                path.resolve("test/files/config-findup/yml-config/tslint.yml"),
+                path.resolve("test/files/config-findup/yml-config/tslint.yaml"),
             );
         });
     });
