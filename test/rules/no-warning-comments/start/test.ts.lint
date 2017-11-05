@@ -10,6 +10,11 @@ class Clazz { // this comment is OK because FIXME isn't at the start
        ~~~                                                                  [Warning term 'XxX' found at start of comment]
      * another XxX which should not be matched either
      */
+    /******
+    hello world
+     * XxX: starts on line of block comment after other text which should NOT match
+     * another XxX which should not be matched either
+     */
     public funcxion() { // This comment has a capital letter starting it
         //This comment is on its own line, and starts with a capital _and_ no space
         console.log("test"); //this comment has no space

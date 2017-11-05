@@ -146,7 +146,7 @@ function convertToRegExp(term: string, location: "start" | "anywhere") {
         prefix = "^[\\s\\S]*?";
     }
 
-    return new RegExp(`(${prefix})(${escaped})${suffix}`, "mi");
+    return new RegExp(`(${prefix})(${escaped})${suffix}`, "i");
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
