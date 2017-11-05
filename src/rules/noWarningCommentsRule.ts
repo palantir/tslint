@@ -136,7 +136,7 @@ function convertToRegExp(term: string, location: "start" | "anywhere") {
          * When matching at the start, ignore leading whitespace, and
          * there's no need to worry about word boundaries.
          */
-        prefix = "^\\s*";
+        prefix = "^[\\s\\/\\*]*";
     } else if (/^\w/.test(term)) {
         prefix = "\\b";
     } else {
