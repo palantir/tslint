@@ -110,7 +110,10 @@ function checkCommentContainsWarningTerms(comment: string, regExps: RegExp[], rn
     regExps.forEach((regExp) => {
         const match = regExp.exec(comment);
         if (typeof match !== "undefined" && match !== null) {
-            ctx.addFailure(rng.pos, rng.end, Rule.COMMENT_ERROR_FACTORY(match[1], ctx.options.location!));
+            ctx.addFailure(
+                rng.pos + match[1].length,
+                rng.pos + match[1].length + match[2].length,
+                Rule.COMMENT_ERROR_FACTORY(match[2], ctx.options.location!));
         }
     });
 }
@@ -138,12 +141,12 @@ function convertToRegExp(term: string, location: "start" | "anywhere") {
          */
         prefix = "^[\\s\\/\\*]*";
     } else if (/^\w/.test(term)) {
-        prefix = "\\b";
+        prefix = "^[\\s\\S]*?\\b";
     } else {
-        prefix = "";
+        prefix = "^[\\s\\S]*?";
     }
 
-    return new RegExp(`${prefix}(${escaped})${suffix}`, "i");
+    return new RegExp(`(${prefix})(${escaped})${suffix}`, "mi");
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
@@ -158,14 +161,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
             fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end)) {
             return;
         }
-        // skip all leading slashes/asterisks
+        // skip all leading slashes/asterisks and return if comment contains nothing else
         while (fullText[start] === "/" || fullText[start] === "*") {
             ++start;
         }
         if (start === end) {
             return;
         }
-        const commentText = fullText.slice(start, end);
+        const commentText = fullText.slice(pos, end);
 
         checkCommentContainsWarningTerms(commentText, warningRegExps, {kind, pos, end}, ctx);
     });

@@ -2,31 +2,30 @@
 
 class Clazz { /*this comment is OK*/
     /* block comment
-    ~~~~~~~~~~~~~~~~~~~~~
      * adada foo
-~~~~~~~~~~~~~~~~
+             ~~~ [Warning term 'foo' found in comment]
+     * another foo which should not be matched because of the first 'foo'
      */
-~~~~~~~ [Warning term 'foo' found in comment]
     public funcxion() { // This comment has a capital letter starting it
         //This comment is on its own line, and starts with a capital _and_ no space
         console.log("XXX.ts");  // file XXX
-                                ~~~~~~~~~~~ [Warning term 'XXX' found in comment]
+                                        ~~~ [Warning term 'XXX' found in comment]
         console.log("!TODO!.ts");  // file !TODO!
-                                   ~~~~~~~~~~~~~~ [Warning term '!TODO!' found in comment]
+                                           ~~~~~~ [Warning term '!TODO!' found in comment]
     }
     /// <not a reference/>
     ////FIXME
-    ~~~~~~~~~ [Warning term 'FIXME' found in comment]
+        ~~~~~ [Warning term 'FIXME' found in comment]
 }//
 
 //#region test // Fixme: not at start of comment; still counts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'Fixme' found in comment]
+                  ~~~~~                                        [Warning term 'Fixme' found in comment]
 #region test
-#endregion /////////FixMe: end region!
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'FixMe' found in comment]
+#endregion /////////FixMe: end region FIxME!
+                    ~~~~~                    [Warning term 'FixMe' found in comment]
 
 `${location.protocol}//${location.hostname}`/*Not OK FIXME*/
-                                            ~~~~~~~~~~~~~~~~ [Warning term 'FIXME' found in comment]
+                                                     ~~~~~   [Warning term 'FIXME' found in comment]
 
 //noinspection JSUnusedGlobalSymbols
 const unusedVar = 'unneeded value';
