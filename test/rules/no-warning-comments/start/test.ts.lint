@@ -1,4 +1,4 @@
-///<reference path="TODO.ts"/>
+///<reference path="TODO.ts"/> (reference is OK)
 class Clazz { // this comment is OK because FIXME isn't at the start
     /* XxX: block comment
     ~~~~~~~~~~~~~~~~~~~~~
@@ -14,13 +14,17 @@ class Clazz { // this comment is OK because FIXME isn't at the start
     ////foo
 }//
 
-//#region test
-//#endregion
+//#region test // Todo: not at start of comment; doesn't count
+#region test
+#endregion /***** ToDo: end region! *****/
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'ToDo' found at start of comment]
 
 `${location.protocol}//${location.hostname}`/**/
 
 //noinspection JSUnusedGlobalSymbols
 const unusedVar = 'unneeded value';
+//////////FIXME: unused variable above!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'FIXME' found at start of comment]
 
 // TODO: write more code...
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Warning term 'TODO' found at start of comment]

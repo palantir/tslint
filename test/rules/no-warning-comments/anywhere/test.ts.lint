@@ -1,4 +1,4 @@
-///<reference path="!TODO!.ts"/>
+///<reference path="!TODO!.ts"/> (reference is OK)
 
 class Clazz { /*this comment is OK*/
     /* block comment
@@ -19,8 +19,11 @@ class Clazz { /*this comment is OK*/
     ~~~~~~~~~ [Warning term 'FIXME' found in comment]
 }//
 
-//#region test
-//#endregion
+//#region test // Fixme: not at start of comment; still counts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'Fixme' found in comment]
+#region test
+#endregion /////////FixMe: end region!
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Warning term 'FixMe' found in comment]
 
 `${location.protocol}//${location.hostname}`/*Not OK FIXME*/
                                             ~~~~~~~~~~~~~~~~ [Warning term 'FIXME' found in comment]
