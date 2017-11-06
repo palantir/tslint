@@ -188,11 +188,8 @@ function findup(filenames: string[], directory: string): string | undefined {
         for (const filename of filenames) {
             const index = dirFiles.indexOf(filename);
             if (index > -1) {
-                return dirFiles[index];
+                return filename;
             }
-        }
-
-        for (const filename of filenames) {
             // TODO: remove in v6.0.0
             // Try reading in the entire directory and looking for a file with different casing.
             const result = dirFiles.find((entry) => entry.toLowerCase() === filename);
@@ -223,7 +220,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
         const resolvedConfigFileExt = path.extname(resolvedConfigFilePath);
         let rawConfigFile: RawConfigFile;
         if (/\.(json|ya?ml)/.test(resolvedConfigFileExt)) {
-            const fileContent = fs.readFileSync(resolvedConfigFilePath).toString().replace(/^\uFEFF/, "");
+            const fileContent = fs.readFileSync(resolvedConfigFilePath, "utf8").replace(/^\uFEFF/, "");
             try {
                 if (resolvedConfigFileExt === ".json") {
                     rawConfigFile = JSON.parse(stripComments(fileContent)) as RawConfigFile;
