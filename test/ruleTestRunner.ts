@@ -25,11 +25,15 @@ console.log();
 console.log(chalk.underline("Testing Lint Rules:"));
 /* tslint:enable:no-console */
 
-const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
+const verboseResultHandler = process.argv.indexOf("--verboseResultHandler") !== -1;
+const rootTestDirectory = "test/rules/";
+const testDirectories = glob.sync(`${rootTestDirectory}**/tslint.json`).map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
-    const didAllTestsPass = consoleTestResultHandler(results);
+    const didAllTestsPass = verboseResultHandler
+        ? consoleTestResultHandler(results, rootTestDirectory)
+        : consoleTestResultHandler(results);
     if (!didAllTestsPass) {
         process.exit(1);
     }
