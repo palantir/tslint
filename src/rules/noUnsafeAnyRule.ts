@@ -99,7 +99,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                     true,
                 );
             case ts.SyntaxKind.PropertyAssignment: {
-                const {name, initializer} = (node as ts.PropertyAssignment);
+                const {name, initializer} = node as ts.PropertyAssignment;
                 this.visitNode(name, /*anyOk*/ true);
                 if (isReassignmentTarget(node.parent as ts.ObjectLiteralExpression)) {
                     return this.visitNode(initializer, true);
