@@ -127,7 +127,7 @@ class Walker extends Lint.AbstractWalker<string[]> {
 
             const typeWithoutCast =
                     modifiedChecker.getTypeAtLocation(
-                        getCorrespondingNode(node.expression, modifiedSourceFile, replacement)!);
+                        getCorrespondingNode(node.expression, modifiedSourceFile, replacement));
             if (modifiedChecker.typeToString(typeWithoutCast) ===
                     this.checker.typeToString(castType)) {
                 this.addFailureAtNode(node, Rule.FAILURE_STRING, replacement);
@@ -141,17 +141,22 @@ class Walker extends Lint.AbstractWalker<string[]> {
  * find the node that corresponds, taking into account the replacement that was
  * applied. "Corresponds" here means that it has the same start and end.
  */
-function getCorrespondingNode(needle: ts.Node, haystack: ts.Node, replacement: Lint.Replacement): ts.Node | null {
+function getCorrespondingNode(needle: ts.Node, haystack: ts.Node, replacement: Lint.Replacement): ts.Node {
     // Update location of needle to account for replacement that's been applied.
     const updatedPos = needle.pos > replacement.start ? needle.pos - replacement.length - 1 : needle.pos;
     const updatedEnd = needle.end > replacement.start ? needle.end - replacement.length : needle.end;
     if (haystack.pos === updatedPos && haystack.end === updatedEnd) {
         return haystack;
     }
-    for (const child of haystack.getChildren()) {
+    const foundNode = ts.forEachChild(haystack, (child) => {
         if (child.pos <= updatedPos && child.end >= updatedEnd) {
             return getCorrespondingNode(needle, child, replacement);
+        } else {
+            return undefined;
         }
+    });
+    if (foundNode != undefined) {
+        return foundNode;
     }
     throw new Error("Can't find corresponding node");
 }
