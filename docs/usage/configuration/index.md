@@ -4,7 +4,7 @@ title: Configuring TSLint
 permalink: /usage/configuration/
 ---
 
-### The `tslint` File
+### TSLint Configuration
 
 When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` or `tslint.yaml` is used to
 configure which rules get run and each of their options.

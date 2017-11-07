@@ -224,7 +224,8 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             try {
                 if (resolvedConfigFileExt === ".json") {
                     rawConfigFile = JSON.parse(stripComments(fileContent)) as RawConfigFile;
-                } else { // /\.ya?ml/.test(resolvedConfigFileExt) === true
+                } else {
+                    // choose this branch only if /\.ya?ml/.test(resolvedConfigFileExt) === true
                     rawConfigFile = yaml.safeLoad(fileContent, {
                         // Note: yaml.LoadOptions expects a schema value of type "any",
                         // but this trips up the no-unsafe-any rule.
