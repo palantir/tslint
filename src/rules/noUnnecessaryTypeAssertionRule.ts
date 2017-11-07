@@ -42,13 +42,15 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker()));
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, this.ruleArguments, program));
     }
 }
 
 class Walker extends Lint.AbstractWalker<string[]> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
+    private readonly checker: ts.TypeChecker;
+    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly program: ts.Program) {
         super(sourceFile, ruleName, options);
+        this.checker = program.getTypeChecker();
     }
 
     public walk(sourceFile: ts.SourceFile) {
@@ -92,9 +94,64 @@ class Walker extends Lint.AbstractWalker<string[]> {
 
         const uncastType = this.checker.getTypeAtLocation(node.expression);
         if (uncastType === castType) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
+            // In some cases, this is still not enough; the type in the
+            // assertion can actually impact the type in the expression being
+            // asserted. To avoid these false positives, we create a new
+            // ts.Program with the edited file, to see if the assertion is still
+            // unnecessary.
+            // This can be a bit slow, so we still want to guard it by the more
+            // basic check above.
+            const replacement = node.kind === ts.SyntaxKind.TypeAssertionExpression
                 ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
-                : Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
+                : Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd());
+            const sourceFile = this.sourceFile;
+            const modifiedHost = ts.createCompilerHost(this.program.getCompilerOptions());
+            const modifiedSourceFile =
+                ts.createSourceFile(
+                    sourceFile.fileName,
+                    replacement.apply(sourceFile.text),
+                    sourceFile.languageVersion);
+            const oldGetSourceFile = modifiedHost.getSourceFile;
+            modifiedHost.getSourceFile = function(fileName: string, ...args: any[]) {
+                if (fileName === sourceFile.fileName) {
+                    return modifiedSourceFile;
+                }
+                // tslint:disable-next-line:no-unsafe-any Passing args along to original function.
+                return oldGetSourceFile.apply(this, [fileName, ...args]);
+            };
+            const modifiedChecker =
+                    ts.createProgram(
+                        this.program.getRootFileNames(),
+                        this.program.getCompilerOptions(),
+                        modifiedHost).getTypeChecker();
+
+            const typeWithoutCast =
+                    modifiedChecker.getTypeAtLocation(
+                        getCorrespondingNode(node.expression, modifiedSourceFile, replacement)!);
+            if (modifiedChecker.typeToString(typeWithoutCast) ===
+                    this.checker.typeToString(castType)) {
+                this.addFailureAtNode(node, Rule.FAILURE_STRING, replacement);
+            }
         }
     }
+}
+
+/**
+ * Given a node (needle) and a parent node (haystack) from a modified file,
+ * find the node that corresponds, taking into account the replacement that was
+ * applied. "Corresponds" here means that it has the same start and end.
+ */
+function getCorrespondingNode(needle: ts.Node, haystack: ts.Node, replacement: Lint.Replacement): ts.Node | null {
+    // Update location of needle to account for replacement that's been applied.
+    const updatedPos = needle.pos > replacement.start ? needle.pos - replacement.length - 1 : needle.pos;
+    const updatedEnd = needle.end > replacement.start ? needle.end - replacement.length : needle.end;
+    if (haystack.pos === updatedPos && haystack.end === updatedEnd) {
+        return haystack;
+    }
+    for (const child of haystack.getChildren()) {
+        if (child.pos <= updatedPos && child.end >= updatedEnd) {
+            return getCorrespondingNode(needle, child, replacement);
+        }
+    }
+    throw new Error("Can't find corresponding node");
 }
