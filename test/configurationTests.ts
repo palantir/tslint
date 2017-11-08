@@ -274,6 +274,16 @@ describe("Configuration", () => {
                 path.resolve("./test/files/config-findup/tslint.json"),
             );
         });
+        it("prefers json over yaml over yml configuration files", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yaml-config"),
+                path.resolve("test/files/config-findup/yaml-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yml-config"),
+                path.resolve("test/files/config-findup/yml-config/tslint.yaml"),
+            );
+        });
     });
 
     describe("loadConfigurationFromPath", () => {
@@ -419,6 +429,17 @@ describe("Configuration", () => {
 
         it("can load .json files with BOM", () => {
             assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
+        });
+
+        it("can load .yaml files with comments", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-with-comments.yaml");
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.rules.set("rule-two", { ruleSeverity: "error" });
+            expectedConfig.rules.set("rule-three", { ruleSeverity: "error", ruleArguments: ["#not a comment"] });
+
+            assertConfigEquals(config.rules, expectedConfig.rules);
+            assertConfigEquals(config.jsRules, expectedConfig.rules);
         });
 
         it("can load a built-in configuration", () => {

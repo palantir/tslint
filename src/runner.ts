@@ -24,10 +24,10 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
-    CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
     IConfigurationFile,
+    JSON_CONFIG_FILENAME,
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
@@ -131,11 +131,11 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
 
 async function runWorker(options: Options, logger: Logger): Promise<Status> {
     if (options.init) {
-        if (fs.existsSync(CONFIG_FILENAME)) {
-            throw new FatalError(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
+        if (fs.existsSync(JSON_CONFIG_FILENAME)) {
+            throw new FatalError(`Cannot generate ${JSON_CONFIG_FILENAME}: file already exists`);
         }
 
-        fs.writeFileSync(CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
+        fs.writeFileSync(JSON_CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
         return Status.Ok;
     }
 
