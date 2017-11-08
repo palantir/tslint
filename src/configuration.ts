@@ -25,7 +25,8 @@ import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     /**
-     * The severity that is applied to rules in this and _extended_ configs with `severity === "default"`.
+     * The severity that is applied to rules in this config file as well as rules
+     * in any inherited config files which have their severity set to "default".
      * Not inherited.
      */
     defaultSeverity?: RuleSeverity;
