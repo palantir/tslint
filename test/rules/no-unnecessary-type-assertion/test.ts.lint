@@ -3,41 +3,44 @@ const nonNullString: string;
 const nullableString: string|undefined;
 let anyType: any;
 type AnyDuringMigration = any;
+let tuple: [number, number] = [1, 2];
 
 // non-null
 let a = nonNullStringLiteral!;
-        ~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
 let b = nonNullString!;
-        ~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~  [0]
 let c = nullableString!;
+tuple!;
+~~~~~~ [0]
 
 // as
 let d = nonNullStringLiteral as string;
 let e = nonNullString as string;
-        ~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let f = nullableString as string;
 
 // type assertion
 let g = <string>nonNullStringLiteral;
 let h = <string>nonNullString;
-        ~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
 let i = <string>nullableString;
 
 // complex inner expression
 let j = (nonNullString + nonNullStringLiteral)!;
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let k = (nonNullString + nonNullStringLiteral) as string;
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let l = <string>(nonNullString + nonNullStringLiteral);
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let m = nonNullString.trim()!;
-        ~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
 let n = nonNullString.trim() as string;
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let o = <string>nonNullString.trim();
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
 let p = nonNullString!.trim();
-        ~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~  [0]
 
 // custom types
 interface Iface1 {
@@ -51,10 +54,10 @@ const value1: Iface1 = {prop: 'test'};
 const value2: Iface2 = {prop: 'test'};
 
 let q = <Iface1>value1;
-        ~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~  [0]
 let r = <Iface2>value1;
 let s = value2 as Iface2;
-        ~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+        ~~~~~~~~~~~~~~~~  [0]
 let t = value2 as Iface1;
 let aa = anyType as AnyDuringMigration;
 
@@ -75,18 +78,18 @@ function func(aOrB: TypeA|TypeB) {
 
     if (aOrB.kind === 'a') {
         let w = aOrB as TypeA;
-                ~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+                ~~~~~~~~~~~~~  [0]
     } else {
         let x = <TypeB>aOrB;
-                ~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+                ~~~~~~~~~~~  [0]
     }
 
     if (isB(aOrB)) {
         let y = aOrB as TypeB;
-                ~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+                ~~~~~~~~~~~~~  [0]
     } else {
         let z = <TypeA>aOrB;
-                ~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
+                ~~~~~~~~~~~  [0]
     }
 }
 
@@ -100,3 +103,15 @@ const data = {
 
 [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
 let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+
+interface NotATuple {
+    0: number,
+    0.5: number,
+    2: number,
+}
+
+declare const notATuple: NotATuple;
+<NotATuple>notATuple;
+~~~~~~~~~~~~~~~~~~~~ [0]
+
+[0]: This assertion is unnecessary since it does not change the type of the expression.
