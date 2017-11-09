@@ -26,12 +26,6 @@ import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     /**
-     * The severity that is applied to rules in _this_ config with `severity === "default"`.
-     * Not inherited.
-     */
-    defaultSeverity?: RuleSeverity;
-
-    /**
      * An array of config files whose rules are inherited by this config file.
      */
     extends: string[];
@@ -70,18 +64,16 @@ export const JSON_CONFIG_FILENAME = "tslint.json";
 export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.yml"];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
-    defaultSeverity: "error",
     extends: ["tslint:recommended"],
-    jsRules: new Map<string, Partial<IOptions>>(),
-    rules: new Map<string, Partial<IOptions>>(),
+    jsRules: new Map(),
+    rules: new Map(),
     rulesDirectory: [],
 };
 
 export const EMPTY_CONFIG: IConfigurationFile = {
-    defaultSeverity: "error",
     extends: [],
-    jsRules: new Map<string, Partial<IOptions>>(),
-    rules: new Map<string, Partial<IOptions>>(),
+    jsRules: new Map(),
+    rules: new Map(),
     rulesDirectory: [],
 };
 
