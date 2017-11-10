@@ -44,6 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 2,
         },
         optionExamples: [[true, "Copyright \\d{4}", "Copyright 2017"]],
+        hasFix: true,
         type: "style",
         typescriptOnly: false,
     };
