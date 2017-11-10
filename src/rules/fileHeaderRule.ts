@@ -25,7 +25,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "file-header",
         description: "Enforces a certain header comment for all files, matched by a regular expression.",
-        optionsDescription: "Regular expression to match the header.",
+        optionsDescription: Lint.Utils.dedent`
+            The first option, which is mandatory, is a regular expression that all headers should match.
+            The second argument, which is optional, is a string that should be inserted as a header comment
+            if fixing is enabled and no header that matches the first argument is found.`,
         options: {
             type: "array",
             items: [
@@ -40,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 1,
             maxLength: 2,
         },
-        optionExamples: [[true, "Copyright \\d{4}"]],
+        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2017"]],
         type: "style",
         typescriptOnly: false,
     };
@@ -50,12 +53,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const { text } = sourceFile;
-        const testRegex = new RegExp(this.ruleArguments[0] as string);
-        const insertText = this.ruleArguments[1] as string | undefined;
+        const headerFormat = new RegExp(this.ruleArguments[0] as string);
+        const textToInsert = this.ruleArguments[1] as string | undefined;
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        // returns the text of the first comment or undefined
+        // returns details about the first comment or undefined
         const commentDetails  = ts.forEachLeadingCommentRange(
             text,
             offset,
@@ -64,20 +67,21 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (offset !== 0) {
             ++offset; // show warning in next line after shebang
         }
+
         if (commentDetails === undefined) {
-            const fix = insertText !== undefined
-                ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, insertText))
+            const fix = textToInsert !== undefined
+                ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert))
                 : undefined;
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
         } else {
             const { pos, end, kind } = commentDetails;
             const commentText = text.substring(pos, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2);
-            if (!testRegex.test(commentText)) {
-                const hasContentBeforeComment = !ONLY_WHITESPACE.test(text.substring(offset, pos));
-                const fix = insertText !== undefined
-                    ? hasContentBeforeComment
-                        ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, insertText))
-                        : Lint.Replacement.replaceFromTo(pos, end, this.createComment(sourceFile, insertText, false))
+            if (!headerFormat.test(commentText)) {
+                const isFirstCommentAHeader = ONLY_WHITESPACE.test(text.substring(offset, pos));
+                const fix = textToInsert !== undefined
+                    ? isFirstCommentAHeader
+                        ? Lint.Replacement.replaceFromTo(pos, end, this.createComment(sourceFile, textToInsert, 0))
+                        : Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert))
                     : undefined;
                 return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
             }
@@ -85,15 +89,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         return [];
     }
 
-    private createComment(sourceFile: ts.SourceFile, commentText: string, trailingNewline=true) {
+    private createComment(sourceFile: ts.SourceFile, commentText: string, trailingNewlines = 2) {
         const maybeCarriageReturn = sourceFile.text[sourceFile.getLineEndOfPosition(0)] === "\r" ? "\r" : "";
         const lineEnding = `${maybeCarriageReturn}\n`;
         return [
-            '/*',
-            ...commentText.split(lineEnding).map(l => ` * ${l}`),
-            ' */',
-            ...(trailingNewline ? [''] : []),
-        ].join(lineEnding);
+            "/*",
+            ...commentText.split(lineEnding).map((line) => ` * ${line}`),
+            " */",
+        ].join(lineEnding) + lineEnding.repeat(trailingNewlines);
     }
 }
-
