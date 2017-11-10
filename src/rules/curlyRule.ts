@@ -164,8 +164,7 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
             const maybeCarriageReturn = this.sourceFile.text[this.sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r" ? "\r" : "";
 
             return [
-                Lint.Replacement.appendText(
-                    statement.pos, " {"),
+                Lint.Replacement.appendText(statement.pos, " {"),
                 Lint.Replacement.appendText(statement.end, `${maybeCarriageReturn}\n${indentation}}`),
             ];
         }
