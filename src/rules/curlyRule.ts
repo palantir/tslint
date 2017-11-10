@@ -151,8 +151,8 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
     private createMissingBraceFix(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
         if (sameLine) {
             return [
-                Lint.Replacement.appendText(statement.getStart(), "{ "),
-                Lint.Replacement.appendText(statement.getEnd(), " }"),
+                Lint.Replacement.appendText(statement.pos, " {"),
+                Lint.Replacement.appendText(statement.end, " }"),
             ];
         } else {
             const match = /\n([\t ])/.exec(node.getFullText(this.sourceFile)); // determine which character to use (tab or space)
@@ -165,8 +165,8 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
 
             return [
                 Lint.Replacement.appendText(
-                    this.sourceFile.getLineEndOfPosition(statement.pos), " {"),
-                Lint.Replacement.appendText(statement.getEnd(), `${maybeCarriageReturn}\n${indentation}}`),
+                    statement.pos, " {"),
+                Lint.Replacement.appendText(statement.end, `${maybeCarriageReturn}\n${indentation}}`),
             ];
         }
     }
