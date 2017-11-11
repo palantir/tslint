@@ -95,3 +95,5 @@ interface NotATuple {
 declare const notATuple: NotATuple;
 notATuple;
 
+unknownName;
+

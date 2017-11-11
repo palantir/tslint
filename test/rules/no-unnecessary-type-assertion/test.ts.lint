@@ -114,4 +114,7 @@ declare const notATuple: NotATuple;
 <NotATuple>notATuple;
 ~~~~~~~~~~~~~~~~~~~~ [0]
 
+unknownName!;
+~~~~~~~~~~~~ [0]
+
 [0]: This assertion is unnecessary since it does not change the type of the expression.
