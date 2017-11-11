@@ -313,7 +313,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
-        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+        const equalsGreaterThanToken = utils.getChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken, sourceFile);
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {
             return;

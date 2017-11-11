@@ -21,13 +21,15 @@ import { IOptions } from "../rule/rule";
 import { isBlockScopeBoundary } from "../utils";
 import { ScopeAwareRuleWalker } from "./scopeAwareRuleWalker";
 
+// tslint:disable:deprecation
+
 /**
  * @deprecated See comment on ScopeAwareRuleWalker.
  *
  * An AST walker that is aware of block scopes in addition to regular scopes. Block scopes
  * are a superset of regular scopes (new block scopes are created more frequently in a program).
  */
-export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> { // tslint:disable-line:deprecation
+export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
     private blockScopeStack: U[];
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTokenKind, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -363,9 +363,9 @@ function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
-    return Lint.isTypeFlagSet(checker.getTypeAtLocation(expr), ts.TypeFlags.StringLike);
+    return isTypeFlagSet(checker.getTypeAtLocation(expr), ts.TypeFlags.StringLike);
 }
 
 function isAny(type: ts.Type | undefined): boolean {
-    return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
+    return type !== undefined && isTypeFlagSet(type, ts.TypeFlags.Any);
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBlockScopedVariableDeclarationList, isVariableDeclarationList, isVariableStatement } from "tsutils";
+import { hasModifier, isBlockScopedVariableDeclarationList, isNodeFlagSet, isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -64,6 +64,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
 // Allow `declare var x: number;` or `declare global { var x: number; }`
 function isGlobalVarDeclaration(node: ts.VariableStatement): boolean {
     const parent = node.parent!;
-    return Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-        || parent.kind === ts.SyntaxKind.ModuleBlock && Lint.isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
+    return hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+        || parent.kind === ts.SyntaxKind.ModuleBlock && isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
 }

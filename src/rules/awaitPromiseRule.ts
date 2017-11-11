@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isAwaitExpression, isForOfStatement, isTypeReference, isUnionOrIntersectionType } from "tsutils";
+import { isAwaitExpression, isForOfStatement, isTypeFlagSet, isTypeReference, isUnionOrIntersectionType } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -70,7 +70,7 @@ function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
 }
 
 function containsType(type: ts.Type, predicate: (name: string) => boolean): boolean {
-    if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any)) {
+    if (isTypeFlagSet(type, ts.TypeFlags.Any)) {
         return true;
     }
     if (isTypeReference(type)) {

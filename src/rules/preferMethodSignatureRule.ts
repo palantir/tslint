@@ -47,8 +47,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
             const { type } = node;
             if (type !== undefined && isFunctionTypeNode(type)) {
                 ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type === undefined ? undefined : [
-                    Lint.Replacement.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
-                    Lint.Replacement.replaceFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.pos, type.type.pos, ":"),
+                    Lint.Replacement.deleteFromTo(type.pos - 1, type.getStart()), // delete colon in 'foo: () => void'
+                    Lint.Replacement.replaceFromTo(type.parameters.end + 1, type.type.pos, ":"), // replace => with colon
                 ]);
             }
         }
