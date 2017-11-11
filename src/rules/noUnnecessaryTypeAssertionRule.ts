@@ -70,7 +70,7 @@ class Walker extends Lint.AbstractWalker<string[]> {
 
     private checkNonNullAssertion(node: ts.NonNullExpression) {
         const type = this.checker.getTypeAtLocation(node.expression);
-        if (type !== undefined && type === this.checker.getNonNullableType(type)) {
+        if (type === this.checker.getNonNullableType(type)) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.deleteFromTo(node.expression.end, node.end));
         }
     }
@@ -80,9 +80,6 @@ class Walker extends Lint.AbstractWalker<string[]> {
             return;
         }
         const castType = this.checker.getTypeAtLocation(node);
-        if (castType === undefined) {
-            return;
-        }
 
         if (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
             isObjectType(castType) && (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType))) {
