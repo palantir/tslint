@@ -67,6 +67,8 @@ export interface IConfigurationLoadResult {
 // Note: eslint prefers yaml over json, while tslint prefers json over yaml
 // for backward-compatibility.
 export const JSON_CONFIG_FILENAME = "tslint.json";
+/** @deprecated use `JSON_CONFIG_FILENAME` or `CONFIG_FILENAMES` instead. */
+export const CONFIG_FILENAME = JSON_CONFIG_FILENAME;
 export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.yml"];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
