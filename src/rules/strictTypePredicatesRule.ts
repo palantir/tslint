@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isTypeParameter, isTypeParameterDeclaration, isUnionType } from "tsutils";
+import { isBinaryExpression, isTypeParameter, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import { showWarningOnce } from "../error";
@@ -116,25 +116,35 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
     }
 
-    function unionParts(type: ts.Type): ts.Type[] | undefined {
-        if (Lint.isTypeFlagSet(type, ts.TypeFlags.Any)) {
-            return undefined;
-        }
-        if (isUnionType(type)) {
-            const result: ts.Type[] = [];
-            for (const t of type.types) {
-                const parts = unionParts(t);
-                if (parts === undefined) {
-                    return undefined;
-                }
-                result.push(...parts);
+    function unionParts(type: ts.Type) {
+        let typeParametersSeen: Set<ts.Type> | undefined;
+        return (function toParts(t): ts.Type[] | undefined {
+            if (Lint.isTypeFlagSet(t, ts.TypeFlags.Any)) {
+                return undefined;
             }
-            return result;
-        } else if (isTypeParameter(type)) {
-            const constraint = getTypeParameterConstraint(type);
-            return constraint === undefined ? undefined : unionParts(constraint);
-        }
-        return [type];
+            if (isUnionType(t)) {
+                const result: ts.Type[] = [];
+                for (const ty of t.types) {
+                    const parts = toParts(ty);
+                    if (parts === undefined) {
+                        return undefined;
+                    }
+                    result.push(...parts);
+                }
+                return result;
+            } else if (isTypeParameter(t)) {
+                if (typeParametersSeen === undefined) {
+                    typeParametersSeen = new Set([t]);
+                } else if (!typeParametersSeen.has(t)) {
+                    typeParametersSeen.add(t);
+                } else {
+                    return undefined; // avoid infinite recursion for circular type parameter constraints
+                }
+                const constraint = getTypeParameterConstraint(t);
+                return constraint === undefined ? undefined : toParts(constraint);
+            }
+            return [t];
+        })(type);
     }
     /**
      * Workaround because checker.getBaseConstraintOfType is not public.
@@ -144,11 +154,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         if (type.symbol === undefined || type.symbol.declarations === undefined) {
             return undefined;
         }
-        const declaration = type.symbol.declarations[0];
-        if (!isTypeParameterDeclaration(declaration) || declaration.constraint === undefined) {
-            return undefined;
-        }
-        return checker.getTypeAtLocation(declaration.constraint);
+        const declaration = type.symbol.declarations[0] as ts.TypeParameterDeclaration;
+        return declaration.constraint === undefined ? undefined : checker.getTypeAtLocation(declaration.constraint);
     }
 }
 

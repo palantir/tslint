@@ -251,6 +251,18 @@ export function extendsAny<T extends any>(param: T) {
     }
 }
 
+export function circular<T extends U, U extends T>(param: T) {
+    if (typeof param === "number") {
+        return param;
+    }
+    if (typeof param === "string") {
+        return +param;
+    }
+    if (typeof param === "object") {
+        return 0;
+    }
+}
+
 [T]: Expression is always true.
 [F]: Expression is always false.
 [typeof]: Bad comparison for 'typeof'.
