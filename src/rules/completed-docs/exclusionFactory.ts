@@ -23,9 +23,11 @@ import { Exclusion } from "./exclusion";
 import { IInputExclusionDescriptors, InputExclusionDescriptor } from "./exclusionDescriptors";
 import { ITagExclusionDescriptor, TagExclusion } from "./tagExclusion";
 
+export type ExclusionsMap = Map<DocType, Array<Exclusion<any>>>;
+
 export class ExclusionFactory {
-    public constructExclusionsMap(ruleArguments: IInputExclusionDescriptors[]): Map<DocType, Array<Exclusion<any>>> {
-        const exclusionsMap: Map<DocType, Array<Exclusion<any>>> = new Map();
+    public constructExclusionsMap(ruleArguments: IInputExclusionDescriptors[]): ExclusionsMap {
+        const exclusionsMap: ExclusionsMap = new Map();
 
         for (const ruleArgument of ruleArguments) {
             this.addRequirements(exclusionsMap, ruleArgument);
@@ -34,7 +36,7 @@ export class ExclusionFactory {
         return exclusionsMap;
     }
 
-    private addRequirements(exclusionsMap: Map<DocType, Array<Exclusion<any>>>, descriptors: IInputExclusionDescriptors) {
+    private addRequirements(exclusionsMap: ExclusionsMap, descriptors: IInputExclusionDescriptors) {
         if (typeof descriptors === "string") {
             exclusionsMap.set(descriptors, this.createRequirementsForDocType(descriptors, {}));
             return;
