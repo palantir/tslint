@@ -314,88 +314,48 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
     function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
-                visitClassDeclaration(node as ts.ClassDeclaration);
+                checkNode(node as ts.ClassDeclaration, ARGUMENT_CLASSES);
                 break;
 
             case ts.SyntaxKind.EnumDeclaration:
-                visitEnumDeclaration(node as ts.EnumDeclaration);
+                checkNode(node as ts.EnumDeclaration, ARGUMENT_ENUMS);
                 break;
 
             case ts.SyntaxKind.EnumMember:
-                visitEnumMember(node as ts.EnumMember);
+                // Enum members don't have modifiers, so use the parent
+                // enum declaration when checking the requirements.
+                checkNode(node as ts.EnumMember, ARGUMENT_ENUM_MEMBERS, node.parent);
                 break;
 
             case ts.SyntaxKind.FunctionDeclaration:
-                visitFunctionDeclaration(node as ts.FunctionDeclaration);
+                checkNode(node as ts.FunctionDeclaration, ARGUMENT_FUNCTIONS);
                 break;
 
             case ts.SyntaxKind.InterfaceDeclaration:
-                visitInterfaceDeclaration(node as ts.InterfaceDeclaration);
+                checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
                 break;
 
             case ts.SyntaxKind.MethodDeclaration:
-                visitMethodDeclaration(node as ts.MethodDeclaration);
+                checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
                 break;
 
             case ts.SyntaxKind.ModuleDeclaration:
-                visitModuleDeclaration(node as ts.ModuleDeclaration);
+                checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:
-                visitPropertyDeclaration(node as ts.PropertyDeclaration);
+                checkNode(node as ts.PropertyDeclaration, ARGUMENT_PROPERTIES);
                 break;
 
             case ts.SyntaxKind.TypeAliasDeclaration:
-                visitTypeAliasDeclaration(node as ts.TypeAliasDeclaration);
+                checkNode(node as ts.TypeAliasDeclaration, ARGUMENT_TYPES);
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
-                visitVariableDeclaration(node as ts.VariableDeclaration);
+                checkVariable(node as ts.VariableDeclaration);
         }
 
         return ts.forEachChild(node, cb);
-    }
-
-    function visitClassDeclaration(node: ts.ClassDeclaration): void {
-        checkNode(node, ARGUMENT_CLASSES);
-    }
-
-    function visitEnumDeclaration(node: ts.EnumDeclaration): void {
-        checkNode(node, ARGUMENT_ENUMS);
-    }
-
-    function visitEnumMember(node: ts.EnumMember): void {
-        // Enum members don't have modifiers, so use the parent
-        // enum declaration when checking the requirements.
-        checkNode(node, ARGUMENT_ENUM_MEMBERS, node.parent);
-    }
-
-    function visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        checkNode(node, ARGUMENT_FUNCTIONS);
-    }
-
-    function visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        checkNode(node, ARGUMENT_INTERFACES);
-    }
-
-    function visitMethodDeclaration(node: ts.MethodDeclaration): void {
-        checkNode(node, ARGUMENT_METHODS);
-    }
-
-    function visitModuleDeclaration(node: ts.ModuleDeclaration): void {
-        checkNode(node, ARGUMENT_NAMESPACES);
-    }
-
-    function visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
-        checkNode(node, ARGUMENT_PROPERTIES);
-    }
-
-    function visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration): void {
-        checkNode(node, ARGUMENT_TYPES);
-    }
-
-    function visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        checkVariable(node);
     }
 
     function checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {

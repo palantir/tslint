@@ -4,6 +4,8 @@
   },
   "extends": "tslint:all",
   "rules": {
+    "linebreak-style": false,
+
     // Don't want these
     "cyclomatic-complexity": false,
     "newline-before-return": false,
