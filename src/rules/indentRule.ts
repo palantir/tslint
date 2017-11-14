@@ -322,7 +322,7 @@ function getPreChild(node: ts.Node, root: ts.SourceFile): ts.Node | undefined {
         return undefined;
     }
     const children = parent.getChildren(root);
-    if (!children.length) {
+    if (children.length === 0) {
         return undefined;
     }
     children.forEach((child) => {
