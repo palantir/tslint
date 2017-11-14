@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getLineRanges, getTokenAtPosition, isPositionInComment } from "tsutils";
+import { getLineRanges, getTokenAtPosition, isPositionInComment, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -112,14 +112,17 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
             let depth = 0;
             if (currentNode !== undefined && currentNode.getStart(sourceFile) === currentNodePos) {
-                depth = getNodeDeepth(currentNode, line);
+                depth = getNodeDeepth(currentNode, line, sourceFile);
             } else {
                 currentNode = recursiveGetNodeAt(sourceFile, currentNodePos);
                 if (currentNode !== undefined) {
-                    depth = getNodeDeepth(currentNode, line);
+                    depth = getNodeDeepth(currentNode, line, sourceFile);
                 }
             }
             if (currentNode !== undefined) {
+                if (isInStringTemplate(currentNode)) {
+                    continue;
+                }
                 const expectedIndentation: string = tabs ? "\t".repeat(depth)
                 : " ".repeat(size * depth);
                 const actualIndentation = line.slice(0, indentEnd);
@@ -131,13 +134,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                         pos,
                         indentEnd,
                         failure,
-                        createIndentSizeFix(
-                            pos,
-                            tabs,
-                            size,
-                            depth,
-                            indentEnd,
-                        ),
+                        createIndentSizeFix(pos, tabs, size, depth, indentEnd),
                     );
                     continue;
                 }
@@ -159,6 +156,19 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 }
 
+function isInStringTemplate(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    while (node.parent !== undefined) {
+        if (node.parent.kind === ts.SyntaxKind.TemplateExpression) {
+            return true;
+        }
+        node = node.parent;
+    }
+    return false;
+}
+
 function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
     let result: ts.Node | undefined;
     ts.forEachChild(root, function cb(node: ts.Node): void {
@@ -171,12 +181,11 @@ function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
     return result;
 }
 
-function getNodeDeepth(node: ts.Node, line: string): number {
+function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile): number {
     let result = 0;
     let parent: ts.Node | undefined = node.parent;
     const blockTypes: ts.SyntaxKind[] = [
         ts.SyntaxKind.Block,
-        ts.SyntaxKind.Parameter,
         ts.SyntaxKind.CaseBlock,
         ts.SyntaxKind.EnumMember,
         ts.SyntaxKind.CaseClause,
@@ -188,14 +197,19 @@ function getNodeDeepth(node: ts.Node, line: string): number {
         ts.SyntaxKind.ConditionalExpression,
         ts.SyntaxKind.ArrayLiteralExpression,
         ts.SyntaxKind.ObjectLiteralExpression,
+        ts.SyntaxKind.NamedImports,
+        ts.SyntaxKind.NamedExports,
+        ts.SyntaxKind.TypeLiteral,
     ];
     if (isCloseElement(node, line)) {
         result --;
     }
-    if (isCloseParen(node, line)) {
+    if (isCloseParen(node, line) && !isArrowFunctionWithBlock(node)) {
         result ++;
     }
     if (inStatementParen(node)) {
+        result ++;
+    } else if (isInParen(node, root)) {
         result ++;
     }
     if (leadingWithBinaryOperator(node)) {
@@ -211,7 +225,14 @@ function getNodeDeepth(node: ts.Node, line: string): number {
         if (blockTypes.indexOf(parent.kind) > -1) {
             result++;
         }
+        if (isArrowFunctionWithoutBlock(parent)) {
+            result ++;
+        }
         if (inStatementParen(parent)) {
+            if (!leadingWithBinaryOperator(node) && !isElseIf(parent)) {
+                result ++;
+            }
+        } else if (isInParen(parent, root) && !isSameLineWithParent(parent, root)) {
             result ++;
         }
         parent = parent.parent;
@@ -236,11 +257,35 @@ function getNodeDeepth(node: ts.Node, line: string): number {
     return result;
 }
 
+function isElseIf(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.IfStatement
+         && node.parent.kind === ts.SyntaxKind.IfStatement;
+}
+
+function isArrowFunctionWithBlock(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.Block
+     && node.parent.kind === ts.SyntaxKind.ArrowFunction;
+}
+
+function isArrowFunctionWithoutBlock(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.kind !== ts.SyntaxKind.Block
+     && node.parent.kind === ts.SyntaxKind.ArrowFunction;
+}
+
 function inStatementParen(node: ts.Node): boolean {
     if (node.parent === undefined) {
         return false;
     }
-    const parentInstatment = [
+    const parentInStatement = [
         ts.SyntaxKind.IfStatement,
         ts.SyntaxKind.WhileStatement,
         ts.SyntaxKind.ForStatement,
@@ -248,7 +293,44 @@ function inStatementParen(node: ts.Node): boolean {
         ts.SyntaxKind.DoStatement,
         ts.SyntaxKind.WithStatement,
     ].indexOf(node.parent.kind) >= 0;
-    return node.kind !== ts.SyntaxKind.Block && parentInstatment;
+    return node.kind !== ts.SyntaxKind.Block && parentInStatement;
+}
+
+function isInParen(node: ts.Node, root: ts.SourceFile): boolean {
+    const preChild: ts.Node | undefined = getPreChild(node, root);
+    if (preChild === undefined) {
+        return false;
+    }
+    return preChild.kind === ts.SyntaxKind.OpenParenToken;
+}
+
+function isSameLineWithParent(node: ts.Node, root: ts.SourceFile): boolean {
+    const preChild: ts.Node | undefined = getPreChild(node, root);
+    if (preChild === undefined) {
+        return false;
+    }
+    if (preChild.getText().trim() !== "(") {
+        return false;
+    }
+    return isSameLine(root, node.getStart(), preChild.getEnd());
+}
+
+function getPreChild(node: ts.Node, root: ts.SourceFile): ts.Node | undefined {
+    let preChild: ts.Node | undefined;
+    const parent = node.parent;
+    if (parent === undefined) {
+        return undefined;
+    }
+    const children = parent.getChildren(root);
+    if (!children.length) {
+        return undefined;
+    }
+    children.forEach((child) => {
+        if (child.getEnd() <= node.getFullStart() && child.getText().length > 0) {
+            preChild = child;
+        }
+    });
+    return preChild;
 }
 
 function isCloseParen(node: ts.Node, line: string): boolean {
@@ -272,6 +354,8 @@ function leadingWithBinaryOperator(node: ts.Node): boolean {
         ts.SyntaxKind.MinusToken,
         ts.SyntaxKind.AsteriskToken,
         ts.SyntaxKind.SlashToken,
+        ts.SyntaxKind.AmpersandAmpersandToken,
+        ts.SyntaxKind.BarBarToken,
     ].indexOf(node.kind) > -1;
 }
 function inStringTemplate(node: ts.Node): boolean {
@@ -333,7 +417,6 @@ function createIndentSizeFix(
     len: number,
 ): Lint.Fix {
     const replacement = useTab ?
-        "\t".repeat(indentTimes) :
-        " ".repeat(tabSize * indentTimes);
+        "\t".repeat(indentTimes) : " ".repeat(tabSize * indentTimes);
     return new Lint.Replacement(lineStart, len, replacement);
 }
