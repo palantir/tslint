@@ -18,8 +18,6 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-const ONLY_WHITESPACE = /^\s*$/;
-
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -60,32 +58,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
         // returns details about the first comment or undefined
-        const commentDetails  = ts.forEachLeadingCommentRange(
+        const commentText  = ts.forEachLeadingCommentRange(
             text,
             offset,
-            (pos, end, kind) => ({pos, end, kind}));
+            (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
 
-        if (offset !== 0) {
-            ++offset; // show warning in next line after shebang
-        }
+        if (commentText === undefined || !headerFormat.test(commentText)) {
+            if (offset !== 0) {
+                ++offset; // show warning in next line after shebang
+            }
 
-        if (commentDetails === undefined) {
             const fix = textToInsert !== undefined
                 ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert))
                 : undefined;
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
-        } else {
-            const { pos, end, kind } = commentDetails;
-            const commentText = text.substring(pos, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2);
-            if (!headerFormat.test(commentText)) {
-                const isFirstCommentAHeader = ONLY_WHITESPACE.test(text.substring(offset, pos));
-                const fix = textToInsert !== undefined
-                    ? isFirstCommentAHeader
-                        ? Lint.Replacement.replaceFromTo(pos, end, this.createComment(sourceFile, textToInsert, 0))
-                        : Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert))
-                    : undefined;
-                return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
-            }
         }
         return [];
     }
@@ -95,7 +81,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const lineEnding = `${maybeCarriageReturn}\n`;
         return [
             "/*",
-            ...commentText.split(lineEnding).map((line) => ` * ${line}`),
+            // split on both types of line endings in case users just typed "\n" in their configs
+            // but are working in files with \r\n line endings
+            ...commentText.split(/\r?\n/g).map((line) => ` * ${line}`),
             " */",
         ].join(lineEnding) + lineEnding.repeat(trailingNewlines);
     }
