@@ -57,19 +57,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        // returns details about the first comment or undefined
-        const commentText  = ts.forEachLeadingCommentRange(
+        // returns the text of the first comment or undefined
+        const commentText = ts.forEachLeadingCommentRange(
             text,
             offset,
             (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
-            const errorAtStart = offset === 0;
-            if (!errorAtStart) {
+            const isErrorAtStart = offset === 0;
+            if (!isErrorAtStart) {
                 ++offset; // show warning in next line after shebang
             }
-            const leadingNewlines = errorAtStart ? 0 : 1;
-            const trailingNewlines = errorAtStart ? 2 : 1;
+            const leadingNewlines = isErrorAtStart ? 0 : 1;
+            const trailingNewlines = isErrorAtStart ? 2 : 1;
 
             const fix = textToInsert !== undefined
                 ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert, leadingNewlines, trailingNewlines))
