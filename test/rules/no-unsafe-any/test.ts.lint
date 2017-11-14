@@ -309,4 +309,25 @@ function hasThisParameter(this: any) {
            ~ [0]
 })
 
+namespace TestNS {
+    export interface ITest {}
+}
+namespace TestNS2 {
+    "";
+    export interface ITest {}
+}
+{
+    class Test implements TestNS.ITest {}
+    type T = any;
+    class Test2 implements T {}
+                           ~ [0]
+    let C = null as any;
+    class Test3 extends C {}
+                        ~ [0]
+
+    interface I {}
+    class Test4 implements I {}
+    class Test5 implements TestNS2.ITest {}
+}
+
 [0]: Unsafe use of expression of type 'any'.

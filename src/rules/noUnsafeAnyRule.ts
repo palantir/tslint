@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTokenKind, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -359,6 +359,16 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
+    const symbol = checker.getSymbolAtLocation(node);
+    if (symbol !== undefined) {
+        // NamespaceModule is a type-only namespace without runtime value, its type is 'any' when used as 'ns.Type' -> avoid error
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.NamespaceModule)) {
+            return false;
+        }
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+            return isAny(checker.getDeclaredTypeOfSymbol(symbol));
+        }
+    }
     return isAny(checker.getTypeAtLocation(node));
 }
 
