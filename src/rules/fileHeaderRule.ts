@@ -64,22 +64,25 @@ export class Rule extends Lint.Rules.AbstractRule {
             (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
-            if (offset !== 0) {
+            const errorAtStart = offset === 0;
+            if (!errorAtStart) {
                 ++offset; // show warning in next line after shebang
             }
+            const leadingNewlines = errorAtStart ? 0 : 1;
+            const trailingNewlines = errorAtStart ? 2 : 1;
 
             const fix = textToInsert !== undefined
-                ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert))
+                ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert, leadingNewlines, trailingNewlines))
                 : undefined;
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
         }
         return [];
     }
 
-    private createComment(sourceFile: ts.SourceFile, commentText: string, trailingNewlines = 2) {
+    private createComment(sourceFile: ts.SourceFile, commentText: string, leadingNewlines = 1, trailingNewlines = 1) {
         const maybeCarriageReturn = sourceFile.text[sourceFile.getLineEndOfPosition(0)] === "\r" ? "\r" : "";
         const lineEnding = `${maybeCarriageReturn}\n`;
-        return [
+        return lineEnding.repeat(leadingNewlines) + [
             "/*",
             // split on both types of line endings in case users just typed "\n" in their configs
             // but are working in files with \r\n line endings
