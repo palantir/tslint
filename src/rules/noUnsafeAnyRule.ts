@@ -359,7 +359,10 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
-    const symbol = checker.getSymbolAtLocation(node);
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+        symbol = checker.getAliasedSymbol(symbol);
+    }
     if (symbol !== undefined) {
         // NamespaceModule is a type-only namespace without runtime value, its type is 'any' when used as 'ns.Type' -> avoid error
         if (isSymbolFlagSet(symbol, ts.SymbolFlags.NamespaceModule)) {
