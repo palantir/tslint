@@ -1,0 +1,46 @@
+let x = (3);
+        ~~~  [Don't include parentheses around an expression of type LiteralExpression]
+let y = (x);
+        ~~~  [Don't include parentheses around an expression of type Identifier]
+function foo() {
+    return (1);
+           ~~~  [Don't include parentheses around an expression of type LiteralExpression]
+}
+(     x    );
+~~~~~~~~~~~~  [Don't include parentheses around an expression of type Identifier]
+
+let x = (1 + 1);
+        ~~~~~~~  [Don't include parentheses around the initializer child of an expression of type VariableDeclaration]
+foo((1 + 1), (2 + 2));
+    ~~~~~~~            [Don't include parentheses around the arguments child of an expression of type CallExpression]
+             ~~~~~~~   [Don't include parentheses around the arguments child of an expression of type CallExpression]
+console.log(((1 + 1)) * 2);
+             ~~~~~~~        [Don't include parentheses around the expression child of an expression of type ParenthesizedExpression]
+let x: (string) = 'b';
+       ~~~~~~~~        [Don't include parentheses around an expression of type Keyword]
+let x = (false);
+        ~~~~~~~  [Don't include parentheses around an expression of type Keyword]
+let x: (number|string) = 1;
+       ~~~~~~~~~~~~~~~      [Don't include parentheses around the type child of an expression of type VariableDeclaration]
+let x: Foo<(string|number)>;
+           ~~~~~~~~~~~~~~~   [Don't include parentheses around the typeArguments child of an expression]
+let x = foo<(string|number)>();
+            ~~~~~~~~~~~~~~~     [Don't include parentheses around the typeArguments child of an expression]
+let x = (y = 1, z = 2);
+        ~~~~~~~~~~~~~~  [Don't include parentheses around the initializer child of an expression of type VariableDeclaration]
+typeof(x);
+      ~~~  [Don't include parentheses around an expression of type Identifier]
+(obj = {a, b});
+~~~~~~~~~~~~~~  [Don't include parentheses around the expression child of an expression of type ExpressionStatement]
+
+// Exceptions
+(0).toLocaleString('en-US', {style: 'percent'});
+return (
+    0);
+({a, b} = obj);
+let foo = () => ({a: 1}.a);
+
+// No issues with
+let z = (x) => x + 1;
+let x = (1 + 1) * 2;
+(f()) + 1;

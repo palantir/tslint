@@ -1,0 +1,26 @@
+{
+    "rules": {
+        "ban-parens": [true,
+            {
+                "withChild": [
+                    "Identifier",
+                    "LiteralExpression",
+                    "Keyword",
+                    "PropertyAccessExpression"
+                ],
+                "asChildOf": [
+                    "VariableDeclaration.initializer",
+                    "ParenthesizedExpression.expression",
+                    "CallExpression.arguments",
+                    "VariableDeclaration.type",
+                    "ExpressionStatement.expression",
+                    "JsxExpression.expression",
+                    "*.typeArguments"
+                ],
+                "exceptions": [
+                    "JsxElement"
+                ]
+            }
+        ]
+    }
+}

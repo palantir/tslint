@@ -96,7 +96,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             options = argument as MaxLineLengthRuleOptions;
             const ignorePattern = (argument as {[key: string]: string})["ignore-pattern"];
             options.ignorePattern = (typeof ignorePattern === "string") ?
-                new RegExp((ignorePattern)) : undefined;
+                new RegExp(ignorePattern) : undefined;
         }
         options.limit = Number(options.limit); // user can pass a string instead of number
         return options;

@@ -1,0 +1,6 @@
+const foo = (
+    <div>text</div>
+);
+
+<button onclick={(x => x)} />
+                 ~~~~~~~~     [Don't include parentheses around the expression child of an expression of type JsxExpression]

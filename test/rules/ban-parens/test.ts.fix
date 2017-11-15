@@ -1,0 +1,30 @@
+let x = 3;
+let y = x;
+function foo() {
+    return 1;
+}
+     x    ;
+
+let x = 1 + 1;
+foo(1 + 1, 2 + 2);
+console.log((1 + 1) * 2);
+let x: string = 'b';
+let x = false;
+let x: number|string = 1;
+let x: Foo<string|number>;
+let x = foo<string|number>();
+let x = (y = 1, z = 2);
+typeof x;
+obj = {a, b};
+
+// Exceptions
+(0).toLocaleString('en-US', {style: 'percent'});
+return (
+    0);
+({a, b} = obj);
+let foo = () => ({a: 1}.a);
+
+// No issues with
+let z = (x) => x + 1;
+let x = (1 + 1) * 2;
+(f()) + 1;
