@@ -353,6 +353,14 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.VariableDeclaration:
                 checkVariable(node as ts.VariableDeclaration);
+                break;
+
+            case ts.SyntaxKind.GetAccessor:
+                checkNode(node as ts.GetAccessorDeclaration, ARGUMENT_PROPERTIES);
+                break;
+
+            case ts.SyntaxKind.SetAccessor:
+                checkNode(node as ts.SetAccessorDeclaration, ARGUMENT_PROPERTIES);
         }
 
         return ts.forEachChild(node, cb);
