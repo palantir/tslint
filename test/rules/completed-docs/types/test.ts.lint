@@ -346,3 +346,12 @@ const EmptyVariable = 1;
  * ...
  */
 const GoodVariable = 1;
+
+/**
+ * Properties and accessors in object literals should not require documentation.
+ */
+let literal = {
+    prop: 1,
+    get accessor() { return literal.prop; },
+    set accessor(value) { literal.prop = value; }
+}
