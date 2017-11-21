@@ -24,12 +24,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "import-blacklist",
         description: Lint.Utils.dedent`
-            Disallows importing the specified modules directly via \`import\` and \`require\`.
-            Instead only sub modules may be imported from that module.`,
+            Disallows importing the specified modules directly via \`import\` and \`require\`.`,
         rationale: Lint.Utils.dedent`
-            Some libraries allow importing their submodules instead of the entire module.
-            This is good practise as it avoids loading unused modules.`,
-        optionsDescription: "A list of blacklisted modules.",
+            Some projects may wish to exclude imports matching certain patterns.
+
+            Examples:
+            ^loadsh$ Blacklist any import of the entire lodash module.
+            Since lodash allows importing submodules, a better practice
+            would be to import the desired submodule instead.
+
+            .*\\.temp$ Blacklist any imports ending in .temp`,
+        optionsDescription: Lint.Utils.dedent`
+            A list of blacklist pattern strings to be compiled to regular expressions.
+            The corresponding regular expressions will be tested against the imports.`,
         options: {
             type: "array",
             items: {
@@ -37,12 +44,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             minLength: 1,
         },
-        optionExamples: [true, [true, "rxjs", "lodash"]],
+        optionExamples: [true, [true, "^rxjs$", "^lodash$", ".*\\.temp$"]],
         type: "functionality",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "This import is blacklisted, import a submodule instead";
+    public static FAILURE_STRING = "This import is blacklisted by ";
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
@@ -54,9 +61,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<string[]>) {
+    const regexOptions = [];
+    for (const option of ctx.options) {
+        if (typeof option === "string") {
+            regexOptions.push(RegExp(option));
+        }
+    }
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
-        if (ctx.options.indexOf(name.text) !== -1) {
-            ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING);
+        for (const regex of regexOptions) {
+            if (regex.test(name.text)) {
+                ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING + regex.toString());
+            }
         }
     }
 }
