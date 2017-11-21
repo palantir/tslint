@@ -20,6 +20,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_MODULE = "ignore-module";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -27,8 +29,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows invocation of `require()`.",
         rationale: "Prefer the newer ES6-style imports over `require()`.",
         optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        options: {
+            items: {
+                properties: {
+                    "ignore-module": {
+                        type: "string",
+                    },
+                },
+                type: "object",
+            },
+            maxLength: 1,
+            minLength: 0,
+            type: "array",
+        },
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -37,12 +51,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require() style import is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string } | undefined;
+        const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+        return this.applyWithFunction(sourceFile, walk, ignorePattern);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
-    for (const name of findImports(ctx.sourceFile, ImportKind.AllRequireLike)) {
-        ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<RegExp | undefined>) {
+    const { options: ignorePattern, sourceFile } = ctx;
+    for (const name of findImports(sourceFile, ImportKind.AllRequireLike)) {
+        if (ignorePattern === undefined || !ignorePattern.test(name.text)) {
+            ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
+        }
     }
 }

@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_MODULE = "ignore-module";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -28,8 +30,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             In other words, the use of forms such as \`var module = require("module")\` are banned.
             Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
         optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        options: {
+            items: {
+                properties: {
+                    "ignore-module": {
+                        type: "string",
+                    },
+                },
+                type: "object",
+            },
+            maxLength: 1,
+            minLength: 0,
+            type: "array",
+        },
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
         type: "typescript",
         typescriptOnly: true,
     };
