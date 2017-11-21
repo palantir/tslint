@@ -112,21 +112,21 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             let currentNode: ts.Node | undefined = recursiveGetNodeAt(sourceFile, currentNodePos);
             let depth = 0;
             if (currentNode !== undefined && currentNode.getStart(sourceFile) === currentNodePos) {
-                depth = getNodeDeepth(currentNode, line, sourceFile);
+                depth = getNodeDeepth(currentNode, line, sourceFile, currentNodePos);
             } else {
                 currentNode = recursiveGetNodeAt(sourceFile, currentNodePos);
                 if (currentNode !== undefined) {
-                    depth = getNodeDeepth(currentNode, line, sourceFile);
+                    depth = getNodeDeepth(currentNode, line, sourceFile, currentNodePos);
                 }
             }
             if (currentNode !== undefined) {
-                if (isInStringTemplate(currentNode)) {
+                if (isInStringTemplate(currentNode, currentNodePos)) {
                     continue;
                 }
                 const expectedIndentation: string = tabs ? "\t".repeat(depth)
                 : " ".repeat(size * depth);
                 const actualIndentation = line.slice(0, indentEnd);
-                const passIndentDepthCheck = inStringTemplate(currentNode) || (isPositionInComment(sourceFile, currentNodePos));
+                const passIndentDepthCheck = isPositionInComment(sourceFile, currentNodePos);
 
                 if (!passIndentDepthCheck && expectedIndentation !== actualIndentation) {
                     failure = Rule.FAILURE_STRING(tabs ? "tab" : `${depth * size} space`);
@@ -156,9 +156,12 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 }
 
-function isInStringTemplate(node: ts.Node): boolean {
+function isInStringTemplate(node: ts.Node, currentPos: number): boolean {
     if (node.parent === undefined) {
         return false;
+    }
+    if (node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral && currentPos > node.getStart()) {
+        return true;
     }
     while (node.parent !== undefined) {
         if (node.parent.kind === ts.SyntaxKind.TemplateExpression) {
@@ -181,13 +184,14 @@ function recursiveGetNodeAt(root: ts.Node, pos: number): ts.Node | undefined {
     return result;
 }
 
-function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile): number {
+function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos: number): number {
     let result = 0;
     let parent: ts.Node | undefined = node.parent;
     const blockTypes: ts.SyntaxKind[] = [
         ts.SyntaxKind.Block,
         ts.SyntaxKind.CaseBlock,
         ts.SyntaxKind.EnumMember,
+        ts.SyntaxKind.EnumDeclaration,
         ts.SyntaxKind.CaseClause,
         ts.SyntaxKind.JsxElement,
         ts.SyntaxKind.ModuleBlock,
@@ -200,61 +204,206 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile): number
         ts.SyntaxKind.NamedImports,
         ts.SyntaxKind.NamedExports,
         ts.SyntaxKind.TypeLiteral,
+        ts.SyntaxKind.UnionType,
+        ts.SyntaxKind.TypeAliasDeclaration,
     ];
+
     if (isCloseElement(node, line)) {
         result --;
     }
     if (isCloseParen(node, line) && !isArrowFunctionWithBlock(node)) {
         result ++;
     }
-    if (inStatementParen(node)) {
-        result ++;
-    } else if (isInParen(node, root)) {
-        result ++;
-    }
-    if (leadingWithBinaryOperator(node)) {
+    if (!inStatementParen(node) && isInParen(node, root)) {
         result ++;
     }
     if (isIdentifierInDeclarationList(node)) {
         result ++;
     }
-    if (isExportInNamespace(node)) {
-        result --;
-    }
-    while (parent !== undefined) {
-        if (blockTypes.indexOf(parent.kind) > -1) {
-            result++;
-        }
-        if (isArrowFunctionWithoutBlock(parent)) {
-            result ++;
-        }
-        if (inStatementParen(parent)) {
-            if (!leadingWithBinaryOperator(node) && !isElseIf(parent)) {
-                result ++;
+    let tokenInBinary = false;
+    let sameLineWithBinary = false;
+    if (node.parent !== undefined) {
+        const token: ts.Node | undefined = getTokenAtPosition(node.parent, nodePos, root);
+        if (token !== undefined) {
+            if (token.kind === ts.SyntaxKind.CloseBraceToken && result > 0) {
+                result --;
             }
-        } else if (isInParen(parent, root) && !isSameLineWithParent(parent, root)) {
-            result ++;
+            const binaryNode: ts.Node | undefined = getBinaryParent(token);
+            if (binaryNode !== undefined) {
+                if (!isSameLine(root, nodePos, binaryNode.getStart())) {
+                    result ++;
+                    tokenInBinary = true;
+                } else {
+                    sameLineWithBinary = true;
+                }
+            }
         }
-        parent = parent.parent;
+        if (
+            (node.parent.kind === ts.SyntaxKind.PropertyDeclaration || node.kind === ts.SyntaxKind.TypeAliasDeclaration)
+            && !isSameLine(root, nodePos, node.parent.getStart())) {
+                result ++;
+        }
     }
+
     if (nodeAtOutside(node)) {
         result--;
     }
-    /*
-     * Check for property access (includes chaining function call) just like this:
-        foo()
-        .then()
-        In this case, `.then` should have one more indent.
-        Maybe this should depend on a configuration.
-     */
+
+    const chainCallAmount = getChainableCallNumberBeforeNode(root, nodePos);
+    result += chainCallAmount;
     if (
-        node.parent !== undefined
-        && node.kind === ts.SyntaxKind.PropertyAccessExpression
-        && /^\s*\./.test(line)
+        chainCallAmount === 0
+        && isMultiLineChainableCall(node, nodePos, root)
     ) {
-        result ++;
+            result ++;
+    }
+    const temptoken = getTokenAtPosition(root, nodePos);
+    if (temptoken !== undefined && node.parent !== undefined) {
+        if (
+            node.kind === ts.SyntaxKind.Block
+            && node.parent.kind === ts.SyntaxKind.CaseClause
+            && temptoken.kind === ts.SyntaxKind.CloseBraceToken
+        ) {
+            result --;
+        }
+    }
+
+    while (parent !== undefined) {
+        if (blockTypes.indexOf(parent.kind) > -1) {
+            if (
+                !isArrowFunctionWithBlock(parent)
+                && !isCaseWithBlock(parent)
+                // && !isSameLineWithConditionalExpr(root, nodePos, parent)
+                && !isSameLine(root, nodePos, parent.getStart())
+            ) {
+                result++;
+            }
+        }
+        if (
+            parent.kind === ts.SyntaxKind.TypeAliasDeclaration
+            && temptoken !== undefined
+            && temptoken.kind === ts.SyntaxKind.GreaterThanToken
+        ) {
+            result --;
+        }
+
+        if (isArrowFunctionWithoutBlock(parent)) {
+            result ++;
+        } else if (isArrowFunctionWithBlock(parent)
+            && !isSameLine(root, parent.getStart(), nodePos)) {
+                result ++;
+        }
+        if (inStatementParen(parent)) {
+            if (!leadingWithBinaryOperator(node) && !isElseIf(parent) && !tokenInBinary) {
+                result ++;
+            }
+        } else if (isInParen(parent, root)) {
+            if (!isSameLineWithParent(parent, root)) {
+                result ++;
+            }
+        }
+
+        if (sameLineWithBinary && parent.kind !== ts.SyntaxKind.SourceFile) {
+            if (parent.kind === ts.SyntaxKind.VariableDeclaration) {
+                result ++;
+            }
+        }
+        parent = parent.parent;
+    }
+
+    return result;
+}
+
+// function isSameLineWithConditionalExpr(sourceFile: ts.SourceFile, nodePos: number, parent: ts.Node): boolean {
+//     if (parent.kind !== ts.SyntaxKind.ConditionalExpression && parent.kind !== ts.SyntaxKind.ClassDeclaration) {
+//         return false;
+//     }
+//     return isSameLine(sourceFile, nodePos, parent.getStart());
+// }
+function isCaseWithBlock(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.Block
+         && node.parent.kind === ts.SyntaxKind.CaseClause;
+}
+
+function isChainCall(node: ts.Node): boolean {
+    if (node.parent === undefined) {
+        return false;
+    }
+    if (node.kind !== ts.SyntaxKind.DotToken) {
+        return false;
+    }
+
+    const parent: ts.Node = node.parent;
+    let result = false;
+    ts.forEachChild(parent, (child: ts.Node) => {
+        if (child.kind === ts.SyntaxKind.CallExpression) {
+            result = true;
+        }
+    });
+    return result;
+}
+
+function getChainableCallNumberBeforeNode(sourceFile: ts.SourceFile, nodePos: number): number {
+    let result = 0;
+    const checkedNodes: ts.Node[] = [];
+    for (const { pos } of getLineRanges(sourceFile)) {
+        if (pos >= nodePos) {
+            continue;
+        }
+        const currentNode: ts.Node | undefined = getTokenAtPosition(sourceFile, pos);
+        if (currentNode === undefined) {
+            continue;
+        }
+        if (checkedNodes.indexOf(currentNode) > -1) {
+            continue;
+        } else {
+            checkedNodes.push(currentNode);
+        }
+        if (isChainCall(currentNode)) {
+            if (currentNode.parent === undefined) {
+                continue;
+            }
+            if (currentNode.parent.parent === undefined) {
+                continue;
+            }
+            const grandpa: ts.Node = currentNode.parent.parent;
+            if (grandpa.getEnd() > nodePos) {
+                result++;
+            }
+        }
     }
     return result;
+}
+/*
+* Check for property access (includes chaining function call) just like this:
+foo()
+.then()
+In this case, `.then` should have one more indent.
+Maybe this should depend on a configuration.
+*/
+function isMultiLineChainableCall(node: ts.Node, nodePos: number, root: ts.SourceFile): boolean {
+    const token: ts.Node | undefined = getTokenAtPosition(node, nodePos, root);
+    if (node.parent === undefined || token === undefined) {
+        return false;
+    }
+    return node.kind === ts.SyntaxKind.PropertyAccessExpression
+        && token.kind === ts.SyntaxKind.DotToken;
+}
+
+function getBinaryParent(node: ts.Node): ts.Node | undefined {
+    if (node.parent === undefined) {
+        return undefined;
+    }
+    while (node.parent !== undefined) {
+        if (node.parent.kind === ts.SyntaxKind.BinaryExpression) {
+            return node.parent;
+        }
+        node = node.parent;
+    }
+    return undefined;
 }
 
 function isElseIf(node: ts.Node): boolean {
@@ -358,21 +507,7 @@ function leadingWithBinaryOperator(node: ts.Node): boolean {
         ts.SyntaxKind.BarBarToken,
     ].indexOf(node.kind) > -1;
 }
-function inStringTemplate(node: ts.Node): boolean {
-    return node.kind >= ts.SyntaxKind.FirstTemplateToken
-        && node.kind <= ts.SyntaxKind.LastTemplateToken;
-}
 
-function isExportInNamespace(node: ts.Node): boolean {
-    if (node.parent === undefined) {
-        return false;
-    }
-    if (node.kind !== ts.SyntaxKind.ExportKeyword) {
-        return false;
-    }
-    return node.parent.kind === ts.SyntaxKind.InterfaceDeclaration
-        || node.parent.kind === ts.SyntaxKind.ClassDeclaration;
-}
 /**
  *  To check a class declaration broken to two lines, like this:
  *  class

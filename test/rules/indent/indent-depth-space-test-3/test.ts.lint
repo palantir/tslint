@@ -1,10 +1,74 @@
+type T = Map<
+    string, // row-
+    string // 0 space indentation expected
+>; // row-5
+export type Location =
+    | ts.PrefixUnaryExpression // 0 spaces indentation expected (for all of them) // row-
+    | ts.IfStatement // row-
+    | ts.WhileStatement // row-
+    | ts.DoStatement
+    | ts.ForStatement
+    | ts.ConditionalExpression
+    | ts.BinaryExpression;
+abstract class Foo {} // row-
+class Foo {
+    public static FAILURE_STRING_TRAILING =
+        "Did not expect single-line type literal to have a trailing ';'."; // row-
+}
+return find(sym.declarations, (decl) =>
+    isClassLikeDeclaration(decl) ? decl.typeParameters : undefined); // row-
+function a(x) {
+    switch (x) {
+        case ts.SyntaxKind.BinaryExpression: {
+             break; // row-
+~~~~~~~~~~~~~ [3]
+         } // row-
+~~~~~~~~~ [2]
+    }
+}
+fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
+// comment
+.pipe(fs.createWriteStream(tempFile)) // row-
+~nil [1]
+.on("finish", () => { // row-
+~nil [1]
+    doStuff(); // row-
+~~~~ [2]
+})
+~nil [1]
+    .def(() => {
+        ghi()
+            .jkl()
+            .ohMyGod()
+    })
+    .def(() => {
+        ghi()
+           .jkl()
+~~~~~~~~~~~ [3]
+            .ohMyGod()
+    })
+
+const expectedResult =
+getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") + // row-
+~nil [1]
+getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
+~nil [1]
+getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+~nil [1]
+
+const linter = new Linter({
+ fix: false,
+~ [1]
+  formatter: "prose",
+~~ [1]
+}); // row-
 foo(
-    `foo`, // this line is valid
+    `foo`,
 // next line should have an error, currently it is ignored
-  `
+  ` // row-
 ~~ [1]
 bar
-`,
+`, // row-
 // the two lines above are valid, because the indent is inside the template string
 );
 
@@ -50,7 +114,7 @@ let someReallyLongVariableName =
 ~~~~~ [1]
 
 return foo
- && bar
+ && bar // row-
 ~ [1]
   && baz;
 ~~ [1]
@@ -62,7 +126,7 @@ const someFn = (element) =>
     doStuff(element);
 function() {
     return new Promise((resolve, reject) => {
-    doxxxy()
+    doxxxy() // row-
 ~~~~ [2]
     .then(abcd)
 ~~~~ [3]
@@ -132,14 +196,14 @@ aaaxxx
         + "C" }
 		string`;
 
-    export enum TestEnum {
-        VALUE1,
+    export enum TestEnum2 {
+        VALUE1, // row-
         VALUE2
     }
 
     switch (integerValue) {
         case 1:
-            console.warn("1");
+            console.warn("y1"); // row-
             break;
         default:
             console.warn("default");
@@ -197,7 +261,7 @@ aaayyy,
 ~~~~~ [1]
 ) {
     if (
-aaaif
+aaaif // row-
 ~nil [2]
 && bbb &&
 ~nil [2]
@@ -246,7 +310,7 @@ var obj = {
     c: 3
 };
 
-enum TestEnum {
+enum TestEnum1 {
 	VALUE1,
 ~ [1]
     VALUE2
@@ -255,7 +319,7 @@ enum TestEnum {
 switch (integerValue) {
 	case 0:
 ~ [1]
-		console.warn("1");
+		console.warn("x1");
 ~~ [2]
 		break;
 ~~ [2]
@@ -336,7 +400,7 @@ let foo = bar
 ~~ [1]
       : bas;
 ~~~~~~ [1]
- foo = "some"
+ foo = "some" // row-
 ~ [0]
  + "really"
 ~ [1]
