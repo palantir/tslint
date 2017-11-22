@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ],
             additionalItems: false,
         },
-        optionExamples: [[true, 200, false]],
+        optionExamples: [[true, 200, OPTION_INCLUDE]],
         type: "maintainability",
         typescriptOnly: false,
     };
