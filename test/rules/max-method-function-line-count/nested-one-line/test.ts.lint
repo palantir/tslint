@@ -1,0 +1,23 @@
+namespace App {
+    class GiveMeANumber {
+
+
+
+        function reallyLong() {
+        ~~~~~~~~~~~~~~~~~~~~~   [This method or function has 10 lines, which exceeds the maximum of 1 lines allowed. Consider breaking this up into smaller parts.]
+            var i = 0;
+            let foo = function() {}; // you end here and consider this line the end of the function
+            i++;
+            statement;
+            function foo() {
+            ~~~~~~~~~~~~~~   [This method or function has 2 lines, which exceeds the maximum of 1 lines allowed. Consider breaking this up into smaller parts.]
+            }
+            i++;
+            // ... and so on
+        }
+    }
+
+
+}
+
+[err]: This method or function has %s lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts.

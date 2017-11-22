@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
-import { isFunctionWithBody } from "tsutils";
+import { isFunctionDeclaration, isFunctionWithBody } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+
+const OPTION_INCLUDE = "include-nested-functions";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             single purpose, and maintainable.`,
         optionsDescription: Lint.Utils.dedent`
             An integer indicating the maximum line count of functions and methods.
-            An optional boolean indicating if nested functions of functions are included in the count (default true).`,
+            An optional string "include-nested-functions" indicating if nested functions of functions are included in the count.`,
         options: {
             type: "array",
             items: [
@@ -37,7 +39,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     type: "number",
                 },
                 {
-                    type: "boolean",
+                    type: "string",
+                    enum: [OPTION_INCLUDE],
                 },
             ],
             additionalItems: false,
@@ -53,9 +56,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public includesNested(): boolean {
         if (this.ruleArguments.length > 1) {
-            return this.ruleArguments[1] as boolean;
+            return typeof this.ruleArguments[1] === "string" && this.ruleArguments[1] as string === OPTION_INCLUDE;
         }
-        return true;
+        return false;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -72,6 +75,10 @@ function FAILURE_STRING(lineCount: number, lineLimit: number) {
 }
 
 class MaxMethodLine extends Lint.AbstractWalker<{limit: number; includesNested: boolean}> {
+
+    // cache for line count
+    private linesOfCode = new Map<string, number>();
+
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isFunctionWithBody(node)) {
@@ -86,23 +93,30 @@ class MaxMethodLine extends Lint.AbstractWalker<{limit: number; includesNested: 
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private countLines(node: ts.Node) {
-        const includesNested = this.options.includesNested;
-        let end = node.end;
-        if (!includesNested) {
-            const firstNestedFunction = (anode: ts.Node): ts.Node | undefined => {
-                if (isFunctionWithBody(anode)) {
-                    return anode;
-                }
-                return ts.forEachChild(anode, firstNestedFunction);
-            };
-            const firstNode = ts.forEachChild(node, firstNestedFunction);
-            if (firstNode != null) {
-                end = firstNode.end;
+    private countLines(node: ts.Node): number {
+        const nodeText = node.getText();
+        // check if size of node is already cached
+        if (this.linesOfCode.has(nodeText)) {
+            const alreadyComputed = this.linesOfCode.get(nodeText);
+            return alreadyComputed as number;
+        } else {
+            // compute the number of lines
+            const includesNested = this.options.includesNested;
+            let nbLinesToDrop = 0;
+            if (!includesNested) {
+                const nbLinesToDropFunction = (anode: ts.Node): void => {
+                    if (isFunctionDeclaration(anode) || isFunctionWithBody(anode)) {
+                        nbLinesToDrop += this.countLines(anode.body!);
+                    }
+                    ts.forEachChild(anode, nbLinesToDropFunction);
+                };
+                ts.forEachChild(node, nbLinesToDropFunction);
             }
+            const nbLines = ts.getLineAndCharacterOfPosition(this.sourceFile, node.end).line
+                - ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line;
+            const result = nbLines + 1 - nbLinesToDrop;
+            this.linesOfCode.set(nodeText, result);
+            return result;
         }
-        return ts.getLineAndCharacterOfPosition(this.sourceFile, end).line
-            - ts.getLineAndCharacterOfPosition(this.sourceFile, node.getStart(this.sourceFile)).line
-            + 1;
     }
 }

@@ -29,6 +29,7 @@ namespace App {
     function walk0(ctx: Lint.WalkContext<Option>): void {
         const { sourceFile, options: option } = ctx;
         return ts.forEachChild(sourceFile, function cb(node): void {
+                                           ~~~~~~~~~~~~~~~~~~~~~~~   [err % ("7")]
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayType:
                     checkArrayType(node as ts.ArrayTypeNode
@@ -41,6 +42,7 @@ namespace App {
     function walk1(ctx: Lint.WalkContext<Option>): void {
         const { sourceFile, options: option } = ctx;
         return ts.forEachChild(sourceFile, function cb(node): void {
+                                           ~~~~~~~~~~~~~~~~~~~~~~~   [err % ("7")]
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayType:
                     checkArrayType(node as ts.ArrayTypeNode
@@ -101,9 +103,10 @@ namespace App {
 
     // test nested functions
     function walk2(ctx: Lint.WalkContext<Option>): void {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [err % ("12")]
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [err % ("8")]
         const { sourceFile, options: option } = ctx;
         return ts.forEachChild(sourceFile, function cb(node): void {
+                                           ~~~~~~~~~~~~~~~~~~~~~~~   [err % ("10")]
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayType:
                     checkArrayType(node as ts.ArrayTypeNode);
@@ -113,6 +116,9 @@ namespace App {
             }
             return ts.forEachChild(node, cb);
         });
+
+        let i = 0 ;
+        i ++ ;
 
         function checkArrayType(node: ts.ArrayTypeNode): void {
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [err % ("17")]
@@ -168,4 +174,4 @@ namespace App {
 
 }
 
-[err]: This method or function has %s lines, which exceeds the maximum of 10 lines allowed. Consider breaking this up into smaller parts.
+[err]: This method or function has %s lines, which exceeds the maximum of 5 lines allowed. Consider breaking this up into smaller parts.
