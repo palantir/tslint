@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "space-within-parens",
-        description: "Enforces spaces within parentheses or disallow them.",
+        description: "Enforces spaces within parentheses or disallow them.  Empty parentheses () are always allowed.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             You may enforce the amount of whitespace within parentheses.
@@ -73,9 +73,13 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         forEachToken(sourceFile, (token: ts.Node) => {
             if (token.kind === ts.SyntaxKind.OpenParenToken) {
-                this.checkOpenParenToken(token);
+                if (sourceFile.text.charAt(token.end) !== ts.tokenToString(ts.SyntaxKind.CloseParenToken)) {
+                    this.checkOpenParenToken(token);
+                }
             } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
-                this.checkCloseParenToken(token);
+                if (sourceFile.text.charAt(token.end - 2) !== ts.tokenToString(ts.SyntaxKind.OpenParenToken)) {
+                    this.checkCloseParenToken(token);
+                }
             }
         });
     }
@@ -116,10 +120,10 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
             currentChar = this.sourceFile.text.charCodeAt(currentPos);
         }
         /**
-         * Number 40 is open parenthese char code, we skip this cause
-         * it's already been caught by `checkOpenParenToken`
+         * Skip the open parenthesis character because it
+         * has already been caught by `checkOpenParenToken`
          */
-        if (!ts.isLineBreak(currentChar) && currentChar !== 40) {
+        if (!ts.isLineBreak(currentChar) && this.sourceFile.text.charAt(currentPos) !== ts.tokenToString(ts.SyntaxKind.OpenParenToken)) {
             const whitespaceCount = tokenNode.end - currentPos - 2;
             if (whitespaceCount !== allowedSpaceCount) {
                 let length = 0;

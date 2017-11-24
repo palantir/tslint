@@ -17,6 +17,9 @@ if (  x === y  ) {
     return (  {result: true, error: (  x + y  )}  );
 }
 
-// be well
+// expected number of spaces provided
 new Foo(  );
+
+// empty parens are always allowed
+new Foo();
 
