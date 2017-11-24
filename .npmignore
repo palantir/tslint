@@ -12,6 +12,7 @@
 .vscode
 .nycrc
 .editorconfig
+.circleci
 appveyor.yml
 circle.yml
 tslint.json

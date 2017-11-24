@@ -116,7 +116,7 @@ export class DoubleClass {
 
         class SecondNestedClass {
         ~~~~~ [STATIC_ONLY]
-            static number myNum = 0;
+            static myNum: number = 0;
         }
     }
 }

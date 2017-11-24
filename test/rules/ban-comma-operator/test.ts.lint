@@ -16,5 +16,8 @@ switch (blah) {
         return false;
 }
 
+for(let i = 0, j = 0; i < 10, j < 10; i++, j++) {
+                      ~~~~~~~~~~~~~~ [0]
+}
 
 [0]: Do not use comma operator here because it can be easily misunderstood or lead to unintended bugs.
