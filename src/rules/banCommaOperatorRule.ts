@@ -64,9 +64,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+        if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.CommaToken && !isForLoopIncrementor(node)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isForLoopIncrementor(node: ts.Node) {
+    const parent = node.parent!;
+    return parent.kind === ts.SyntaxKind.ForStatement && (parent as ts.ForStatement).incrementor === node;
 }

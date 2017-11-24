@@ -1,0 +1,17 @@
+---
+jsRules:
+  # rule-one: true
+  rule-two:
+    severity: error # after comment
+  rule-three:
+    - true
+    - "#not a comment"
+  # a noice comment
+rules:
+  # rule-one: true
+  rule-two:
+    severity: error # after comment
+  rule-three:
+    - true
+    - "#not a comment"
+...

@@ -15,4 +15,4 @@ let a: any = 2, // error
 let {a: c, b: d}: {c: any, d: number} = {c: 99, d: 100};  // error
                       ~~~                                          [0]
 
-[0]: Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type, the empty type ('{}'), or suppress this occurrence.
+[0]: Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.
