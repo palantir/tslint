@@ -258,6 +258,13 @@ for (let {var1, var2} of someArr) {
     var2 = null;
 }
 
+{
+    let k: any = 0;
+    function foo(param: {[k: string]: string}) {
+        k = param;
+    }
+}
+
 [_base]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
 [let]: _base % ('let')
 [var]: _base % ('var')

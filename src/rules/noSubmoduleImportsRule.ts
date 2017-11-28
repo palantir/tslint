@@ -50,8 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<string[]>) {
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
-        // TODO remove assertion on upgrade to typescript@2.5.2
-        if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(name.text) &&
+        if (!ts.isExternalModuleNameRelative(name.text) &&
             isSubmodulePath(name.text) &&
             !isWhitelisted(name.text, ctx.options)) {
             ctx.addFailureAtNode(name, Rule.FAILURE_STRING);

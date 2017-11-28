@@ -19,7 +19,7 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as Utils from "../utils";
 
