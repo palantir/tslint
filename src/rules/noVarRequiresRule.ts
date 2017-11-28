@@ -20,7 +20,6 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_MODULE = "ignore-module";
-
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -52,26 +51,37 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        const requiresWalker = new NoVarRequiresWalker(sourceFile, this.getOptions());
+        return this.applyWithWalker(requiresWalker);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
-    return ts.forEachChild(ctx.sourceFile, cb);
+// tslint:disable-next-line:deprecation
+class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
+    public createScope(): {} {
+        return {};
+    }
 
-    function cb(node: ts.Node): void {
-        if (ts.isCallExpression(node)) {
-            const expression = node.expression;
+    public visitCallExpression(node: ts.CallExpression) {
+        const expression = node.expression;
 
-            if (expression.kind === ts.SyntaxKind.Identifier) {
-                const identifierName = (expression as ts.Identifier).text;
-                if (identifierName === "require") {
-                    // if we're calling (invoking) require, then it's not part of an import statement
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        const options = this.getOptions() as any[];
+        const patternConfig = options[0] as { "ignore-module": string } | undefined;
+        const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+
+        if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
+            const identifierName = (expression as ts.Identifier).text;
+            if (identifierName === "require") {
+                const requireArguments = node.arguments;
+                for (const arg of requireArguments) {
+                    if (ignorePattern === undefined || !ignorePattern.test((arg as ts.Identifier).text)) {
+                        // if we're calling (invoking) require, then it's not part of an import statement
+                        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+                    }
                 }
             }
         }
 
-        return ts.forEachChild(node, cb);
+        super.visitCallExpression(node);
     }
 }

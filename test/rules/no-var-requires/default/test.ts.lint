@@ -1,0 +1,11 @@
+import a = require("a");
+import a = require("a.css");
+
+var b = require("b.css");
+        ~~~~~~~~~~~~~~~~  [require statement not part of an import statement]
+
+var b = require("allow-require");
+        ~~~~~~~~~~~~~~~~~~~~~~~~  [require statement not part of an import statement]
+
+var b = require("b");
+        ~~~~~~~~~~~~  [require statement not part of an import statement]
