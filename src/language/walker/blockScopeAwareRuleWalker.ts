@@ -21,7 +21,7 @@ import { IOptions } from "../rule/rule";
 import { isBlockScopeBoundary } from "../utils";
 import { ScopeAwareRuleWalker } from "./scopeAwareRuleWalker";
 
-// tslint:disable:deprecation
+// tslint:disable:deprecation (extends deprecated class and uses deprecated utils - doesn't matter because it's deprecated, too)
 
 /**
  * @deprecated See comment on ScopeAwareRuleWalker.
