@@ -16,8 +16,8 @@
  */
 
 import {
-    hasModifier, isBlockScopedVariableDeclarationList, isClassExpression, isFunctionExpression, isFunctionWithBody, isScopeBoundary,
-    isThisParameter, ScopeBoundary,
+    hasModifier, isBlockScopedVariableDeclarationList, isClassExpression, isFunctionExpression, isFunctionWithBody, isNodeFlagSet,
+    isScopeBoundary, isThisParameter, ScopeBoundary,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -111,6 +111,9 @@ class Scope {
 class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
     private scope: Scope;
     public walk(sourceFile: ts.SourceFile) {
+        if (sourceFile.isDeclarationFile) {
+            return;
+        }
         this.scope = new Scope();
 
         const cb = (node: ts.Node): void => {
@@ -204,8 +207,15 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ModuleDeclaration:
                     if (this.options.namespace &&
                         node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
-                        (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier) {
+                        (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
+                        !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
+                    ) {
                         parentScope.addVariable((node as ts.NamespaceDeclaration).name, false);
+                    }
+                    if (hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                        this.onScopeEnd(parentScope);
+                        this.scope = parentScope;
+                        return; // don't check any ambient declaration blocks
                     }
                     break;
                 case ts.SyntaxKind.ImportClause:
