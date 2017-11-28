@@ -413,7 +413,7 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
         readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
         getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
-        writeFile: () => {}, // tslint:disable-line no-empty
+        writeFile: () => undefined,
         getCurrentDirectory: () => "",
         getDirectories: () => [],
         getCanonicalFileName,

@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
     }
 
@@ -57,7 +57,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
     }
 
     /** Wraps `visitNode` with the correct `this` binding and discards the return value to prevent `forEachChild` from returning early */
-    private visitNodeCallback = (node: ts.Node) => void this.visitNode(node);
+    private readonly visitNodeCallback = (node: ts.Node) => void this.visitNode(node);
 
     private visitNode(node: ts.Node, anyOk?: boolean): boolean | undefined {
         switch (node.kind) {

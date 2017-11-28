@@ -1,0 +1,28 @@
+class SampleClass {
+    private readonly correctlyReadonlyDelayedArrow: () => void;
+
+    private readonly correctlyReadonlyInlineArrow = () => {}
+
+    private readonly correctlyReadonlyValue = 7;
+
+    private correctlyModifiableDelayedArrow: () => void;
+
+    private incorrectlyModifiableDelayedArrow: () => void;
+
+    private readonly incorrectlyModifiableInlineArrow = () => {}
+
+    private correctlyModifiableInlineArrow =  () => {}
+
+    private correctlyModifiableValue = 7;
+
+    public constructor() {
+        this.correctlyModifiableDelayedArrow = () => {};
+        this.incorrectlyModifiableDelayedArrow = () => {};
+    }
+
+    public mutate() {
+        this.correctlyModifiableDelayedArrow = () => {};
+        this.correctlyModifiableInlineArrow = () => {};
+        this.correctlyModifiableValue += 1;
+    }
+}
