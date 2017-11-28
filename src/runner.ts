@@ -96,7 +96,8 @@ export interface Options {
     rulesDirectory?: string | string[];
 
     /**
-     * That TSLint produces the correct output for the specified directory.
+     * Run the tests in the given directories to ensure a (custom) TSLint rule's output matches the expected output.
+     * When this property is `true` the `files` property is used to specify the directories from which the tests should be executed.
      */
     test?: boolean;
 
