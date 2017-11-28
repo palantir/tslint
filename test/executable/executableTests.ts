@@ -437,7 +437,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             assert.equal(status, Status.LintError, "exit code should be 2");
         });
 
-        it("doesn't lint external dependencies with 'allowJs'", async() => {
+        it("doesn't lint external dependencies with 'allowJs'", async () => {
             const status = await execRunner({project: "test/files/allow-js-exclude-node-modules/tsconfig.json"});
             assert.equal(status, Status.Ok, "process should exit without error");
         });

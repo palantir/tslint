@@ -158,7 +158,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 }
 
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
-    const { files, program } = resolveFilesAndProgram(options);
+    const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
@@ -174,12 +174,15 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
+function resolveFilesAndProgram(
+    { files, project, exclude, outputAbsolutePaths }: Options,
+    logger: Logger,
+): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     exclude = exclude.map(trimSingleQuotes);
 
     if (project === undefined) {
-        return { files: resolveGlobs(files, exclude, outputAbsolutePaths) };
+        return { files: resolveGlobs(files, exclude, outputAbsolutePaths, logger) };
     }
 
     const projectPath = findTsconfig(project);
@@ -203,7 +206,7 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
                 if (fs.existsSync(file)) {
                     throw new FatalError(`'${file}' is not included in project.`);
                 }
-                console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
+                logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
             }
         }
     }
@@ -218,15 +221,15 @@ function filterFiles(files: string[], patterns: string[], include: boolean): str
     return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
 }
 
-function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths?: boolean): string[] {
+function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: boolean | undefined, logger: Logger): string[] {
     const results = flatMap(
         files,
         (file) => glob.sync(trimSingleQuotes(file), { ignore, nodir: true }),
     );
     // warn if `files` contains non-existent files, that are not patters and not excluded by any of the exclude patterns
     for (const file of filterFiles(files, ignore, false)) {
-        if (!glob.hasMagic(file)) {
-            console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
+        if (!glob.hasMagic(file) && !results.some(createMinimatchFilter(file))) {
+            logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
         }
     }
     const cwd = process.cwd();
@@ -249,17 +252,17 @@ async function doLinting(
     let configFile: IConfigurationFile | undefined;
 
     for (const file of files) {
+        const folder = path.dirname(file);
+        if (lastFolder !== folder) {
+            configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+            lastFolder = folder;
+        }
         if (isFileExcluded(file)) {
             continue;
         }
 
         const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
         if (contents !== undefined) {
-            const folder = path.dirname(file);
-            if (lastFolder !== folder) {
-                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-                lastFolder = folder;
-            }
             linter.lint(file, contents, configFile);
         }
     }
