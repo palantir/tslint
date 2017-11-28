@@ -5,7 +5,7 @@ import * as path from 'path'
 
 export function foo(wam: boolean) {
     if (wam) {
-        const now = new Date();
+        const now = new Date(); // no error because it's in the temporal dead zone of the outer `now`
         return now.getTime();
     }
 
@@ -15,7 +15,7 @@ export function foo(wam: boolean) {
 
 function foo(v) {
     if (v) {
-        const Foo = null;
+        const Foo = null; // classes are block scoped, therefore no error in the temporal dead zone
         return Foo;
     }
     class Foo {}
@@ -24,7 +24,7 @@ function foo(v) {
 
 function foo(v) {
     if (v) {
-        const Foo = null;
+        const Foo = null; // interfaces are block scoped, but hoisted -> error in temporal dead zone
               ~~~ [err % ('Foo')]
         return Foo;
     }
@@ -35,7 +35,7 @@ function foo(v) {
 
 function foo() {
     {
-        let tmp = 1;
+        let tmp = 1; // error because `var` is hoisted
             ~~~ [err % ('tmp')]
         return tmp;
     }
@@ -64,11 +64,11 @@ function foo(
 
 {
     {
-        class Foo {}
+        class Foo {} // tdz
     }
-    enum Foo {}
+    enum Foo {} // tdz
     {
-        class Foo {}
+        class Foo {} // shadowing enum Foo
               ~~~ [err % ('Foo')]
     }
 }

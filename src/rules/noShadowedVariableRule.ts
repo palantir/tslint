@@ -36,7 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             All checks default to \`true\`, i.e. are enabled by default.
             Note that you cannot disable variables and parameters.
 
-            The option \`"temporalDeadZone"\` defaults to \`false\`. When set to \`true\` parameters, classes, enums and variables declared
+            The option \`"temporalDeadZone"\` defaults to \`true\` which shows errors when shadowing block scoped declarations in their
+            temporal dead zone. When set to \`false\` parameters, classes, enums and variables declared
             with \`let\` or \`const\` are not considered shadowed if the shadowing occurs within their
             [temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).
 
@@ -45,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`\`\`ts
             function fn(value) {
                 if (value) {
-                    const tmp = value; // no error on this line if "temporalDeadZone" is true
+                    const tmp = value; // no error on this line if "temporalDeadZone" is false
                     return tmp;
                 }
                 let tmp = undefined;
@@ -101,7 +102,7 @@ function parseOptions(option: Partial<Options> | undefined): Options {
         import: true,
         interface: true,
         namespace: true,
-        temporalDeadZone: false,
+        temporalDeadZone: true,
         typeAlias: true,
         typeParameter: true,
         ...option,
@@ -316,7 +317,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
             const declarationsInScope = variables.get(name);
             for (const identifier of identifiers) {
                 if (declarationsInScope !== undefined &&
-                    (!this.options.temporalDeadZone ||
+                    (this.options.temporalDeadZone ||
                      // check if any of the declaration either has no temporal dead zone or is declared before the identifier
                      declarationsInScope.some((declaration) => !declaration.tdz || declaration.identifier.pos < identifier.pos))
                 ) {

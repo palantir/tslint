@@ -3,7 +3,7 @@
     "no-shadowed-variable": [
       true,
       {
-        "temporalDeadZone": true
+        "temporalDeadZone": false
       }
     ]
   }
