@@ -38,7 +38,7 @@ interface Argv {
     formattersDir: string;
     format?: string;
     typeCheck?: boolean;
-    test?: string;
+    test?: boolean;
     version?: boolean;
 }
 
@@ -244,16 +244,9 @@ if (argv.typeCheck) {
     }
 }
 
-let log: (message: string) => void;
-if (argv.out != undefined) {
-    const outputStream = fs.createWriteStream(argv.out, {
-        flags: "w+",
-        mode: 420,
-    });
-    log = (message) => outputStream.write(`${message}\n`);
-} else {
-    log = console.log;
-}
+const outputStream: NodeJS.WritableStream = argv.out === undefined
+    ? process.stdout
+    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
 
 run(
     {
@@ -273,8 +266,12 @@ run(
         typeCheck: argv.typeCheck,
     },
     {
-        log,
-        error: (m) => console.error(m),
+        log(m) {
+            outputStream.write(m);
+        },
+        error(m) {
+            process.stdout.write(m);
+        },
     })
     .then((rc) => {
         process.exitCode = rc;
