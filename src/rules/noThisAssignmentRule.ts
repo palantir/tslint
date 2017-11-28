@@ -108,7 +108,7 @@ class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
         ts.forEachChild(sourceFile, this.visitNode);
     }
 
-    private visitNode = (node: ts.Node): void => {
+    private readonly visitNode = (node: ts.Node): void => {
         if (utils.isVariableDeclaration(node)) {
             this.visitVariableDeclaration(node);
         }
