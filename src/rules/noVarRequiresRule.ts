@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_MODULE = "ignore-module";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
