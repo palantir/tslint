@@ -114,3 +114,10 @@ if (true) /* some
 ~~~~~~~~~~~~~~~~~~~~~~~
     console.log(z);
 ~~~~~~~~~~~~~~~~~~~ [if statements must be braced]
+
+if (foo === "bar") throw new Error(
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  "baz"
+~~~~~~~
+)
+~ [if statements must be braced]
