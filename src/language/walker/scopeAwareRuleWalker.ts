@@ -107,6 +107,6 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return isScopeBoundary(node);
+        return isScopeBoundary(node); // tslint:disable-line:deprecation
     }
 }

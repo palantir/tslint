@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration } from "tsutils";
+import { isConstructorDeclaration, isIterationStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -51,7 +51,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     });
 
     function getSuperForNode(node: ts.Node): Super {
-        if (Lint.isLoop(node)) {
+        if (isIterationStatement(node)) {
             const bodySuper = combineSequentialChildren(node);
             if (typeof bodySuper === "number") {
                 return Kind.NoSuper;
