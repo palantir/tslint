@@ -66,18 +66,15 @@ class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public visitCallExpression(node: ts.CallExpression) {
         const expression = node.expression;
 
-        const options = this.getOptions() as any[];
-        const patternConfig = options[0] as { "ignore-module": string } | undefined;
-        const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
-
         if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
             const identifierName = (expression as ts.Identifier).text;
-            if (identifierName === "require") {
-                for (const arg of node.arguments) {
-                    if (ignorePattern === undefined || !ignorePattern.test((arg as ts.Identifier).text)) {
-                        // if we're calling (invoking) require, then it's not part of an import statement
-                        this.addFailureAtNode(node, Rule.FAILURE_STRING);
-                    }
+            if (identifierName === "require" && node.arguments.length === 1) {
+                const options = this.getOptions() as any[];
+                const patternConfig = options[0] as { "ignore-module": string } | undefined;
+                const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+                if (ignorePattern === undefined || !ignorePattern.test((node.arguments[0] as ts.Identifier).text)) {
+                    // if we're calling (invoking) require, then it's not part of an import statement
+                    this.addFailureAtNode(node, Rule.FAILURE_STRING);
                 }
             }
         }

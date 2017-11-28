@@ -51,9 +51,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require() style import is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string } | undefined;
-        const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
-        return this.applyWithFunction(sourceFile, walk, ignorePattern);
+        const patternConfig = this.ruleArguments[0] as { "ignore-module": string } | undefined;
+        return this.applyWithFunction(sourceFile, walk, extractIgnoreModule(patternConfig));
     }
 }
 
@@ -64,4 +63,11 @@ function walk(ctx: Lint.WalkContext<RegExp | undefined>) {
             ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
         }
     }
+}
+
+function extractIgnoreModule(patternConfig: { "ignore-module": string } | undefined) {
+    if (patternConfig === undefined || patternConfig[OPTION_IGNORE_MODULE] === undefined) {
+        return undefined;
+    }
+    return new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
 }
