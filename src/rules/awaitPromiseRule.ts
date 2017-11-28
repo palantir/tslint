@@ -25,7 +25,11 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "await-promise",
         description: "Warns for an awaited value that is not a Promise.",
         optionsDescription: Lint.Utils.dedent`
-            A list of 'string' names of any additional classes that should also be handled as Promises.
+            A list of 'string' names of any additional classes that should also be treated as Promises.
+            For example, if you are using a class called 'Future' that implements the Thenable interface,
+            you might tell the rule to consider type references with the name 'Future' as valid Promise-like
+            types. Note that this rule doesn't check for type assignability or compatibility; it just checks
+            type reference names.
         `,
         options: {
             type: "list",
@@ -35,6 +39,10 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [true, [true, "Thenable"]],
+        rationale: Lint.Utils.dedent`
+            While it is valid TypeScript to await a non-Promise-like value (it will resolve immediately),
+            this pattern is often a programmer error and the resulting semantics can be unintuitive.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
