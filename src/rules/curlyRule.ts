@@ -94,7 +94,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (isBlock(node) && isBlockUnnecessary(node)) {
-            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_AS_NEEDED);
+            ctx.addFailureAt(node.statements.pos - 1, 1, Rule.FAILURE_STRING_AS_NEEDED);
         }
         ts.forEachChild(node, cb);
     });

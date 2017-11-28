@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isUnionType } from "tsutils";
+import { isBinaryExpression, isTypeFlagSet, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import { showWarningOnce } from "../error";
@@ -87,7 +87,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         const exprType = checker.getTypeAtLocation(exprPred.expression);
         // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
-        if (Lint.isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
+        if (isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
             return;
         }
 
@@ -199,14 +199,14 @@ function getTypePredicateForKind(kind: string): Predicate | undefined {
             // It's an object if it's not any of the above.
             const allFlags = ts.TypeFlags.Undefined | ts.TypeFlags.Void | ts.TypeFlags.BooleanLike |
                 ts.TypeFlags.NumberLike | ts.TypeFlags.StringLike | ts.TypeFlags.ESSymbol;
-            return (type) => !Lint.isTypeFlagSet(type, allFlags) && !isFunction(type);
+            return (type) => !isTypeFlagSet(type, allFlags) && !isFunction(type);
         default:
             return undefined;
     }
 }
 
 function flagPredicate(testedFlag: ts.TypeFlags): Predicate {
-    return (type) => Lint.isTypeFlagSet(type, testedFlag);
+    return (type) => isTypeFlagSet(type, testedFlag);
 }
 
 function isFunction(t: ts.Type): boolean {
@@ -242,9 +242,9 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
     let anyUndefined = false;
     let anyOther = false;
     for (const ty of unionParts(type)) {
-        if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Null)) {
+        if (isTypeFlagSet(ty, ts.TypeFlags.Null)) {
             anyNull = true;
-        } else if (Lint.isTypeFlagSet(ty, undefinedFlags)) {
+        } else if (isTypeFlagSet(ty, undefinedFlags)) {
             anyUndefined = true;
         } else {
             anyOther = true;

@@ -283,7 +283,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
     }
 
     const symbol = checker.getAliasedSymbol(importedSymbol);
-    if (!Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+    if (!utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
         return false;
     }
 

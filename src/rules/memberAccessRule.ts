@@ -20,6 +20,7 @@ import {
     getModifier,
     getNextToken,
     getTokenAtPosition,
+    hasModifier,
     isClassLikeDeclaration,
     isConstructorDeclaration,
     isParameterProperty,
@@ -135,15 +136,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function check(node: ts.ClassElement | ts.ParameterDeclaration): void {
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
+        if (hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
             return;
         }
         const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
         if (noPublic && publicKeyword !== undefined) {
-            const readonlyKeyword = getModifier(node, ts.SyntaxKind.ReadonlyKeyword);
             // public is not optional for parameter property without the readonly modifier
-            const isPublicOptional = node.kind !== ts.SyntaxKind.Parameter || readonlyKeyword !== undefined;
-            if (isPublicOptional) {
+            if (node.kind !== ts.SyntaxKind.Parameter || hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)) {
                 const start = publicKeyword.end - "public".length;
                 ctx.addFailure(
                     start,

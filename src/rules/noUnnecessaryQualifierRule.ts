@@ -131,5 +131,5 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 }
 
 function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol | undefined {
-    return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
+    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
 }
