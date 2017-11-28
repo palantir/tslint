@@ -96,9 +96,10 @@ export interface Options {
     rulesDirectory?: string | string[];
 
     /**
-     * That TSLint produces the correct output for the specified directory.
+     * Run the tests in the given directories to ensure a (custom) TSLint rule's output matches the expected output.
+     * When this property is `true` the `files` property is used to specify the directories from which the tests should be executed.
      */
-    test?: string;
+    test?: boolean;
 
     /**
      * Whether to enable type checking when linting a project.
@@ -122,7 +123,7 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
         return await runWorker(options, logger);
     } catch (error) {
         if (error instanceof FatalError) {
-            logger.error(error.message);
+            logger.error(`${error.message}\n`);
             return Status.FatalError;
         }
         throw error;
@@ -142,7 +143,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     if (options.test) {
         const test = await import("./test");
         const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
-        return test.consoleTestResultsHandler(results) ? Status.Ok : Status.FatalError;
+        return test.consoleTestResultsHandler(results, logger) ? Status.Ok : Status.FatalError;
     }
 
     if (options.config && !fs.existsSync(options.config)) {
@@ -151,20 +152,20 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 
     const { output, errorCount } = await runLinter(options, logger);
     if (output && output.trim()) {
-        logger.log(output);
+        logger.log(`${output}\n`);
     }
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
-    const { files, program } = resolveFilesAndProgram(options);
+    const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
             const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
             if (options.force) {
-                logger.error(message);
+                logger.error(`${message}\n`);
             } else {
                 throw new FatalError(message);
             }
@@ -173,12 +174,15 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }: Options): { files: string[]; program?: ts.Program } {
+function resolveFilesAndProgram(
+    { files, project, exclude, outputAbsolutePaths }: Options,
+    logger: Logger,
+): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     exclude = exclude.map(trimSingleQuotes);
 
     if (project === undefined) {
-        return { files: resolveGlobs(files, exclude, outputAbsolutePaths) };
+        return { files: resolveGlobs(files, exclude, outputAbsolutePaths, logger) };
     }
 
     const projectPath = findTsconfig(project);
@@ -202,7 +206,7 @@ function resolveFilesAndProgram({ files, project, exclude, outputAbsolutePaths }
                 if (fs.existsSync(file)) {
                     throw new FatalError(`'${file}' is not included in project.`);
                 }
-                console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
+                logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
             }
         }
     }
@@ -217,15 +221,15 @@ function filterFiles(files: string[], patterns: string[], include: boolean): str
     return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
 }
 
-function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths?: boolean): string[] {
+function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: boolean | undefined, logger: Logger): string[] {
     const results = flatMap(
         files,
         (file) => glob.sync(trimSingleQuotes(file), { ignore, nodir: true }),
     );
     // warn if `files` contains non-existent files, that are not patters and not excluded by any of the exclude patterns
     for (const file of filterFiles(files, ignore, false)) {
-        if (!glob.hasMagic(file)) {
-            console.warn(`'${file}' does not exist. This will be an error in TSLint 6.`); // TODO make this an error in v6.0.0
+        if (!glob.hasMagic(file) && !results.some(createMinimatchFilter(file))) {
+            logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
         }
     }
     const cwd = process.cwd();
@@ -248,17 +252,17 @@ async function doLinting(
     let configFile: IConfigurationFile | undefined;
 
     for (const file of files) {
+        const folder = path.dirname(file);
+        if (lastFolder !== folder) {
+            configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+            lastFolder = folder;
+        }
         if (isFileExcluded(file)) {
             continue;
         }
 
         const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
         if (contents !== undefined) {
-            const folder = path.dirname(file);
-            if (lastFolder !== folder) {
-                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-                lastFolder = folder;
-            }
             linter.lint(file, contents, configFile);
         }
     }
@@ -287,7 +291,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.
-            logger.error(`${filename}: ignoring MPEG transport stream`);
+            logger.error(`${filename}: ignoring MPEG transport stream\n`);
             return undefined;
         }
     } finally {
