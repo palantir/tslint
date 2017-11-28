@@ -30,7 +30,7 @@ import { ScopeAwareRuleWalker } from "./scopeAwareRuleWalker";
  * are a superset of regular scopes (new block scopes are created more frequently in a program).
  */
 export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
-    private blockScopeStack: U[];
+    private readonly blockScopeStack: U[];
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
