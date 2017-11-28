@@ -75,7 +75,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             execCli(["foo/bar.ts"], (err, _stdout, stderr) => {
                 assert.isNull(err, "process should exit without error");
 
-                assert.include(stderr, "'foo/bar.ts' does not exist");
+                assert.include(stderr, `'${path.normalize("foo/bar.ts")}' does not exist`);
                 done();
             });
         });
@@ -430,7 +430,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 ],
                 (err, _stdout, stderr) => {
                     assert.isNull(err, "process should exit without error");
-                    assert.include(stderr, "test/files/tsconfig-test/non-existent.test.ts' does not exist");
+                    assert.include(stderr, `${path.normalize("test/files/tsconfig-test/non-existent.test.ts")}' does not exist`);
                     done();
                 });
         });
