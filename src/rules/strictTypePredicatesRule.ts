@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isUnionType } from "tsutils";
+import { isBinaryExpression, isTypeParameter, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import { showWarningOnce } from "../error";
@@ -81,40 +81,81 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
 
         if (exprPred.kind === TypePredicateKind.TypeofTypo) {
-            fail(Rule.FAILURE_STRING_BAD_TYPEOF);
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_BAD_TYPEOF);
             return;
         }
 
         const exprType = checker.getTypeAtLocation(exprPred.expression);
-        // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
-        if (Lint.isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
-            return;
+        const types = unionParts(exprType);
+        if (types === undefined) {
+            return; // must be `any` or a type parameter without constraint
         }
 
         switch (exprPred.kind) {
             case TypePredicateKind.Plain: {
                 const { predicate, isNullOrUndefined } = exprPred;
-                const value = getConstantBoolean(exprType, predicate);
+                const value = getConstantBoolean(types, predicate);
                 // 'null'/'undefined' are the only two values *not* assignable to '{}'.
                 if (value !== undefined && (isNullOrUndefined || !isEmptyType(checker, exprType))) {
-                    fail(Rule.FAILURE_STRING(value === isPositive));
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(value === isPositive));
                 }
                 break;
             }
 
             case TypePredicateKind.NonStructNullUndefined: {
-                const result = testNonStrictNullUndefined(exprType);
+                const result = testNonStrictNullUndefined(types);
                 if (result !== undefined) {
-                    fail(typeof result === "boolean"
-                        ? Rule.FAILURE_STRING(result === isPositive)
-                        : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive));
+                    ctx.addFailureAtNode(
+                        node,
+                        typeof result === "boolean"
+                            ? Rule.FAILURE_STRING(result === isPositive)
+                            : Rule.FAILURE_STRICT_PREFER_STRICT_EQUALS(result, isPositive),
+                    );
                 }
             }
         }
+    }
 
-        function fail(failure: string): void {
-            ctx.addFailureAtNode(node, failure);
+    function unionParts(type: ts.Type) {
+        let typeParametersSeen: Set<ts.Type> | undefined;
+        return (function toParts(t): ts.Type[] | undefined {
+            if (Lint.isTypeFlagSet(t, ts.TypeFlags.Any)) {
+                return undefined;
+            }
+            if (isUnionType(t)) {
+                const result: ts.Type[] = [];
+                for (const ty of t.types) {
+                    const parts = toParts(ty);
+                    if (parts === undefined) {
+                        return undefined;
+                    }
+                    result.push(...parts);
+                }
+                return result;
+            } else if (isTypeParameter(t)) {
+                if (typeParametersSeen === undefined) {
+                    typeParametersSeen = new Set([t]);
+                } else if (!typeParametersSeen.has(t)) {
+                    typeParametersSeen.add(t);
+                } else {
+                    return undefined; // avoid infinite recursion for circular type parameter constraints
+                }
+                const constraint = getTypeParameterConstraint(t);
+                return constraint === undefined ? undefined : toParts(constraint);
+            }
+            return [t];
+        })(type);
+    }
+    /**
+     * Workaround because checker.getBaseConstraintOfType is not public.
+     * For some strange reason `type.constraint` gives the wrong result.
+     */
+    function getTypeParameterConstraint(type: ts.TypeParameter): ts.Type | undefined {
+        if (type.symbol === undefined || type.symbol.declarations === undefined) {
+            return undefined;
         }
+        const declaration = type.symbol.declarations[0] as ts.TypeParameterDeclaration;
+        return declaration.constraint === undefined ? undefined : checker.getTypeAtLocation(declaration.constraint);
     }
 }
 
@@ -218,10 +259,10 @@ function isFunction(t: ts.Type): boolean {
 }
 
 /** Returns a boolean value if that should always be the result of a type predicate. */
-function getConstantBoolean(type: ts.Type, predicate: (t: ts.Type) => boolean): boolean | undefined {
+function getConstantBoolean(types: ts.Type[], predicate: (t: ts.Type) => boolean): boolean | undefined {
     let anyTrue = false;
     let anyFalse = false;
-    for (const ty of unionParts(type)) {
+    for (const ty of types) {
         if (predicate(ty)) {
             anyTrue = true;
         } else {
@@ -237,11 +278,11 @@ function getConstantBoolean(type: ts.Type, predicate: (t: ts.Type) => boolean): 
 }
 
 /** Returns bool for always/never true, or a string to recommend strict equality. */
-function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefined" | undefined {
+function testNonStrictNullUndefined(types: ts.Type[]): boolean | "null" | "undefined" | undefined {
     let anyNull = false;
     let anyUndefined = false;
     let anyOther = false;
-    for (const ty of unionParts(type)) {
+    for (const ty of types) {
         if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Null)) {
             anyNull = true;
         } else if (Lint.isTypeFlagSet(ty, undefinedFlags)) {
@@ -256,8 +297,4 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
         : anyNull ? "null"
         : anyUndefined ? "undefined"
         : false;
-}
-
-function unionParts(type: ts.Type) {
-    return isUnionType(type) ? type.types : [type];
 }

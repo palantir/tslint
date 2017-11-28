@@ -176,9 +176,9 @@ declare function get<T>(): T;
         typeof t === "boolean";
     }
 
-    // TODO: Would be nice to catch this.
     function g<T extends string>(t: T) {
         typeof t === "boolean";
+        ~~~~~~~~~~~~~~~~~~~~~~ [F]
     }
 }
 
@@ -189,6 +189,78 @@ declare function get<T>(): T;
 
     typeof get<any>() === "orbject";
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+}
+
+export type Wrap<T> = {
+  value: T,
+}
+
+export function test<T extends string>(valueOrWrap: T | Wrap<T>): T {
+  if (typeof valueOrWrap === 'string') {
+    return valueOrWrap
+  }
+  if (typeof valueOrWrap === 'number') {
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+    return valueOrWrap;
+  }
+  return valueOrWrap.value
+}
+
+export function noConstraint<T>(param: T) {
+    if (typeof param === "number") {
+        return param;
+    }
+    if (typeof param === "string") {
+        return +param;
+    }
+}
+
+export function indirection<T extends U, U extends string>(param: T) {
+    if (typeof param === "number") {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+        return param;
+    }
+    if (typeof param === "string") {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+        return +param;
+    }
+}
+
+export function unionConstraint<T extends string | number>(param: T) {
+    if (typeof param === "number") {
+        return param;
+    }
+    if (typeof param === "string") {
+        return +param;
+    }
+    if (typeof param === "object") {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+        return 0;
+    }
+}
+
+export function extendsAny<T extends any>(param: T) {
+    if (typeof param === "number") {
+        return param;
+    }
+    if (typeof param === "string") {
+        return +param;
+    }
+    if (typeof param === "object") {
+        return 0;
+    }
+}
+
+export function circular<T extends U, U extends T>(param: T) {
+    if (typeof param === "number") {
+        return param;
+    }
+    if (typeof param === "string") {
+        return +param;
+    }
+    if (typeof param === "object") {
+        return 0;
+    }
 }
 
 [T]: Expression is always true.
