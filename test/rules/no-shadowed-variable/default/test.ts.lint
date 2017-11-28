@@ -352,6 +352,12 @@ class Clazz<T> {
     }
 }
 
+export default function (
+    paramA = function() {let paramB},
+                             ~~~~~~ [err % ('paramB')]
+    paramB,
+) {}
+
 // allow IndexSignature names
 function baz(param: {[baz: string]: string}) {}
 

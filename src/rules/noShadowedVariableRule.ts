@@ -35,6 +35,27 @@ export class Rule extends Lint.Rules.AbstractRule {
             and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
             All checks default to \`true\`, i.e. are enabled by default.
             Note that you cannot disable variables and parameters.
+
+            The option \`"temporalDeadZone"\` defaults to \`true\` which shows errors when shadowing block scoped declarations in their
+            temporal dead zone. When set to \`false\` parameters, classes, enums and variables declared
+            with \`let\` or \`const\` are not considered shadowed if the shadowing occurs within their
+            [temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).
+
+            The following example shows how the \`"temporalDeadZone"\` option changes the linting result:
+
+            \`\`\`ts
+            function fn(value) {
+                if (value) {
+                    const tmp = value; // no error on this line if "temporalDeadZone" is false
+                    return tmp;
+                }
+                let tmp = undefined;
+                if (!value) {
+                    const tmp = value; // this line always contains an error
+                    return tmp;
+                }
+            }
+            \`\`\`
         `,
         options: {
             type: "object",
@@ -47,6 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 namespace: {type: "boolean"},
                 typeAlias: {type: "boolean"},
                 typeParameter: {type: "boolean"},
+                temporalDeadZone: {type: "boolean"},
             },
         },
         optionExamples: [
@@ -69,7 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Kind = "class" | "import" | "interface" | "function" | "enum" | "namespace" | "typeParameter" | "typeAlias";
+type Kind = "class" | "import" | "interface" | "function" | "enum" | "namespace" | "typeParameter" | "typeAlias" | "temporalDeadZone";
 type Options = Record<Kind, boolean>;
 
 function parseOptions(option: Partial<Options> | undefined): Options {
@@ -80,15 +102,21 @@ function parseOptions(option: Partial<Options> | undefined): Options {
         import: true,
         interface: true,
         namespace: true,
+        temporalDeadZone: true,
         typeAlias: true,
         typeParameter: true,
         ...option,
     };
 }
 
+interface VariableInfo {
+    identifier: ts.Identifier;
+    tdz: boolean;
+}
+
 class Scope {
     public functionScope: Scope;
-    public variables = new Map<string, ts.Identifier[]>();
+    public variables = new Map<string, VariableInfo[]>();
     public variablesSeen = new Map<string, ts.Identifier[]>();
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
@@ -96,14 +124,18 @@ class Scope {
         this.functionScope = functionScope !== undefined ? functionScope : this;
     }
 
-    public addVariable(identifier: ts.Identifier, blockScoped = true) {
+    public addVariable(identifier: ts.Identifier, blockScoped = true, tdz = false) {
         // block scoped variables go to the block scope, function scoped variables to the containing function scope
         const scope = blockScoped ? this : this.functionScope;
         const list = scope.variables.get(identifier.text);
+        const variableInfo: VariableInfo = {
+            identifier,
+            tdz,
+        };
         if (list === undefined) {
-            scope.variables.set(identifier.text, [identifier]);
+            scope.variables.set(identifier.text, [variableInfo]);
         } else {
-            list.push(identifier);
+            list.push(variableInfo);
         }
     }
 }
@@ -174,7 +206,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.ClassDeclaration:
                     if (this.options.class && (node as ts.ClassDeclaration).name !== undefined) {
-                        parentScope.addVariable((node as ts.ClassDeclaration).name!);
+                        parentScope.addVariable((node as ts.ClassDeclaration).name!, true, true);
                     }
                     // falls through
                 case ts.SyntaxKind.ClassExpression:
@@ -189,7 +221,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.EnumDeclaration:
                     if (this.options.enum) {
-                        parentScope.addVariable((node as ts.EnumDeclaration).name);
+                        parentScope.addVariable((node as ts.EnumDeclaration).name, true, true);
                     }
                     break;
                 case ts.SyntaxKind.InterfaceDeclaration:
@@ -201,7 +233,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     if (node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
                         !isThisParameter(node as ts.ParameterDeclaration) &&
                         isFunctionWithBody(node.parent!)) {
-                        this.handleBindingName((node as ts.ParameterDeclaration).name, false);
+                        this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
                     break;
                 case ts.SyntaxKind.ModuleDeclaration:
@@ -267,13 +299,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    private handleBindingName(node: ts.BindingName, blockScoped: boolean) {
+    private handleBindingName(node: ts.BindingName, blockScoped: boolean, tdz = blockScoped) {
         if (node.kind === ts.SyntaxKind.Identifier) {
-            this.scope.addVariable(node, blockScoped);
+            this.scope.addVariable(node, blockScoped, tdz);
         } else {
             for (const element of node.elements) {
                 if (element.kind !== ts.SyntaxKind.OmittedExpression) {
-                    this.handleBindingName(element.name, blockScoped);
+                    this.handleBindingName(element.name, blockScoped, tdz);
                 }
             }
         }
@@ -282,12 +314,17 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
     private onScopeEnd(parent?: Scope) {
         const {variables, variablesSeen} = this.scope;
         variablesSeen.forEach((identifiers, name) => {
-            if (variables.has(name)) {
-                for (const identifier of identifiers) {
+            const declarationsInScope = variables.get(name);
+            for (const identifier of identifiers) {
+                if (declarationsInScope !== undefined &&
+                    (this.options.temporalDeadZone ||
+                     // check if any of the declaration either has no temporal dead zone or is declared before the identifier
+                     declarationsInScope.some((declaration) => !declaration.tdz || declaration.identifier.pos < identifier.pos))
+                ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
+                } else if (parent !== undefined) {
+                    addOneToList(parent.variablesSeen, name, identifier);
                 }
-            } else if (parent !== undefined) {
-                addToList(parent.variablesSeen, name, identifiers);
             }
         });
         if (parent !== undefined) {
@@ -298,11 +335,22 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
     }
 }
 
-function addToList(map: Map<string, ts.Identifier[]>, name: string, identifiers: ts.Identifier[]) {
+function addToList(map: Map<string, ts.Identifier[]>, name: string, variables: VariableInfo[]) {
+    let list = map.get(name);
+    if (list === undefined) {
+        list = [];
+        map.set(name, list);
+    }
+    for (const variable of variables) {
+        list.push(variable.identifier);
+    }
+}
+
+function addOneToList(map: Map<string, ts.Identifier[]>, name: string, identifier: ts.Identifier) {
     const list = map.get(name);
     if (list === undefined) {
-        map.set(name, identifiers);
+        map.set(name, [identifier]);
     } else {
-        list.push(...identifiers);
+        list.push(identifier);
     }
 }
