@@ -9,7 +9,7 @@ if (y == 4)
     console.log("y");
 }
 
-    if (z == 5) // failure {
+    if (z == 5) { // failure
         console.log("z");
     }
 
@@ -24,19 +24,19 @@ for (j = 0; j < 1; ++j)
     console.log("j");
 }
 
-  for (k = 0; k < 1; ++k) // failure {
+  for (k = 0; k < 1; ++k) { // failure
       console.log("k");
   }
 
 for (k1 in l1) console.log("l1");
 
-for (k in l) // failure {
+for (k in l) { // failure
     console.log("l");
 }
 
 for (k3 of l3) console.log("l3");
 
-for (k4 of l4) // failure {
+for (k4 of l4) { // failure
     console.log("l4");
 }
 
@@ -51,7 +51,7 @@ while (n < 0)
     console.log("r");
 }
 
-while (n < 0) // failure {
+while (n < 0) { // failure
     console.log("s");
 }
 
@@ -71,7 +71,7 @@ do
 }
 while (j == 1);
 
-do // failure {
+do { // failure
     console.log("o");
 }
 while (k == 1);
@@ -88,6 +88,6 @@ for (let x of [1, 2, 3]) {
     console.log(x);
 }
 
-for (let y of [1, 2, 3]) // failure {
+for (let y of [1, 2, 3]) { // failure
     console.log(y);
 }

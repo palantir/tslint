@@ -70,6 +70,33 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("warns if file does not exist", (done) => {
+            execCli(["foo/bar.ts"], (err, _stdout, stderr) => {
+                assert.isNull(err, "process should exit without error");
+
+                assert.include(stderr, "'foo/bar.ts' does not exist");
+                done();
+            });
+        });
+
+        it("doesn't warn if non-existent file is excluded by --exclude", (done) => {
+            execCli(["foo/bar.js", "--exclude", "**/*.js"], (err, _stdout, stderr) => {
+                assert.isNull(err, "process should exit without error");
+
+                assert.notInclude(stderr, "does not exist");
+                done();
+            });
+        });
+
+        it("doesn't warn if glob pattern doesn't match any file", (done) => {
+            execCli(["foobar/*.js"], (err, _stdout, stderr) => {
+                assert.isNull(err, "process should exit without error");
+
+                assert.notInclude(stderr, "does not exist");
+                done();
+            });
+        });
     });
 
     describe("Configuration file", () => {
@@ -87,12 +114,23 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             });
         });
 
-        it("exits with code 1 if config file is invalid", (done) => {
+        it("exits with code 1 if json config file is invalid", (done) => {
             execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
+                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json config");
+                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
+                done();
+            });
+        });
+
+        it("exits with code 1 if yaml config file is invalid", (done) => {
+            execCli(["-c", "test/config/tslint-invalid.yaml", "src/test.ts"], (err, stdout, stderr) => {
+                assert.isNotNull(err, "process should exit with error");
+                assert.strictEqual(err.code, 1, "error code should be 1");
+
+                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load yaml config");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
             });
@@ -103,7 +141,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 assert.isNotNull(err, "process should exit with error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
 
-                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
+                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json config");
                 assert.include(stderr, "tslint-invalid.json", "stderr should mention the problem file");
                 assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
                 done();
@@ -360,7 +398,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("exits with error if passed directory does not exist", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existant"], (err) => {
+            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existent"], (err) => {
                 assert.isNotNull(err, "process should exit with an error");
                 assert.strictEqual(err.code, 1, "error code should be 1");
                 done();
@@ -379,6 +417,50 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 (err) => {
                     assert.isNotNull(err, "process should exit with error");
                     assert.strictEqual(err.code, 1, "error code should be 1");
+                    done();
+                });
+        });
+
+        it("warns if file-to-lint does not exist", (done) => {
+            execCli(
+                [
+                    "--project",
+                    "test/files/tsconfig-test/tsconfig.json",
+                    "test/files/tsconfig-test/non-existent.test.ts",
+                ],
+                (err, _stdout, stderr) => {
+                    assert.isNull(err, "process should exit without error");
+                    assert.include(stderr, "test/files/tsconfig-test/non-existent.test.ts' does not exist");
+                    done();
+                });
+        });
+
+        it("doesn't warn for non-existent file-to-lint if excluded by --exclude", (done) => {
+            execCli(
+                [
+                    "--project",
+                    "test/files/tsconfig-test/tsconfig.json",
+                    "test/files/tsconfig-test/non-existent.test.ts",
+                    "--exclude",
+                    "**/*",
+                ],
+                (err, _stdout, stderr) => {
+                    assert.isNull(err, "process should exit without error");
+                    assert.notInclude(stderr, "does not exist");
+                    done();
+                });
+        });
+
+        it("doesn't warn ig glob pattern doesn't match any file", (done) => {
+            execCli(
+                [
+                    "--project",
+                    "test/files/tsconfig-test/tsconfig.json",
+                    "*.js",
+                ],
+                (err, _stdout, stderr) => {
+                    assert.isNull(err, "process should exit without error");
+                    assert.notInclude(stderr, "does not exist");
                     done();
                 });
         });

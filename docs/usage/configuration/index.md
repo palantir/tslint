@@ -4,12 +4,12 @@ title: Configuring TSLint
 permalink: /usage/configuration/
 ---
 
-### tslint.json
+### TSLint Configuration
 
-When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` is used to
-configure which rules get run and each of their options. This configuration file may be comp
+When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` or `tslint.yaml` is used to
+configure which rules get run and each of their options.
 
-`tslint.json` files can have the following fields specified:
+`tslint.json` or `tslint.yaml` files can have the following fields specified:
 
 * `extends?: string | string[]`:
 The name of a built-in configuration preset (see built-in presets below), or a path or
@@ -69,6 +69,37 @@ An example `tslint.json` file might look like this:
         }
     }
 }
+```
+
+The corresponding YAML file looks like this:
+
+```yaml
+---
+extends: "tslint:recommended"
+rulesDirectory:
+    - path/to/custom/rules/directory/
+    - another/path/
+rules:
+    max-line-length:
+        options: [120]
+    new-parens: true
+    no-arg: true
+    no-bitwise: true
+    no-conditional-assignment: true
+    no-consecutive-blank-lines: false
+    no-console:
+        severity: warning
+        options:
+            - debug
+            - info
+            - log
+            - time
+            - timeEnd
+            - trace
+jsRules:
+    max-line-length:
+        options: [120]
+...
 ```
 
 ### Rule severity
