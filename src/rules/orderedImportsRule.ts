@@ -181,7 +181,7 @@ function parseOptions(ruleArguments: any[]): Options {
 }
 
 class Walker extends Lint.AbstractWalker<Options> {
-    private importsBlocks = [new ImportsBlock()];
+    private readonly importsBlocks = [new ImportsBlock()];
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
     private lastFix: Lint.Replacement[] | undefined;
     private nextType = ImportType.LIBRARY_IMPORT;

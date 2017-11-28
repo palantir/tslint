@@ -1,0 +1,155 @@
+class SampleClass {
+    private static readonly correctlyReadonlyStatic = 7;
+
+    private static readonly incorrectlyModifiableStatic = 7;
+
+    private static readonly incorrectlyModifiableStaticArrow = () => {};
+
+    private static correctlyModifiableStatic = 7;
+
+    private static correctlyModifiableByParameterProperty = 7;
+
+    private readonly correctlyReadonlyInline = 7;
+
+    private readonly correctlyReadonlyDelayed;
+
+    private readonly incorrectlyModifiableInline = 7;
+
+    private readonly incorrectlyModifiableDelayed;
+
+    private correctlyModifiableInline = 7;
+
+    private correctlyModifiableDelayed;
+
+    private correctlyModifiableDeleted = 7;
+
+    private readonly childClassExpressionModifiable = 7;
+
+    private correctlyModifiableWithinConstructor;
+
+    private correctlyModifiableWithinConstructorInArrowFunction;
+
+    private correctlyModifiableWithinConstructorInFunctionExpression;
+
+    private correctlyModifiableWithinConstructorInGetAccessor;
+
+    private correctlyModifiableWithinConstructorInMethodDeclaration;
+
+    private correctlyModifiableWithinConstructorInSetAccessor;
+
+    private correctlyModifiablePostDecremented;
+
+    private correctlyModifiablePostIncremented;
+
+    private readonly incorrectlyModifiablePostMinus;
+
+    private readonly incorrectlyModifiablePostPlus;
+
+    private correctlyModifiablePreDecremented;
+
+    private correctlyModifiablePreIncremented;
+
+    private readonly incorrectlyModifiablePreMinus;
+
+    private readonly incorrectlyModifiablePrePlus;
+
+    private readonly overlappingClassVariable = 7;
+
+    protected protectedModifiable = 7;
+
+    protected publicModifiable = 7;
+
+    public constructor(
+        private readonly correctlyReadonlyParameter: number = 7,
+        private readonly incorrectlyModifiableParameter: number = 7,
+        private correctlyModifiableParameter: number = 7,
+        public correctlyModifiablePublicParameter: number = (() => {
+            return SampleClass.correctlyModifiableByParameterProperty = 7;
+        })();
+    ) {
+        this.correctlyReadonlyDelayed = 7;
+        this.incorrectlyModifiableDelayed = 7;
+        this.incorrectlyModifiableParameter = 7;
+
+        (() => {
+            const self = this;
+
+            this.correctlyModifiableWithinConstructor = 7;
+
+            (() => {
+                this.correctlyModifiableWithinConstructorInArrowFunction = 7;
+            })();
+
+            (function () {
+                self.correctlyModifiableWithinConstructorInFunctionExpression = 7;
+            })();
+
+            const confusingObject = {
+                get getAccessor() {
+                    return self.correctlyModifiableWithinConstructorInGetAccessor = 7;
+                }
+
+                methodDeclaration() {
+                    self.correctlyModifiableWithinConstructorInMethodDeclaration = 7;
+                }
+
+                set setAccessor() {
+                    self.correctlyModifiableWithinConstructorInSetAccessor = 7;
+                }
+            };
+        })();
+
+        SampleClass.correctlyModifiableStatic += 1;
+    }
+
+    public mutate() {
+        this.correctlyModifiableDelayed = 7;
+        this.correctlyModifiableInline = 7;
+        this.correctlyModifiableMember = () => {};
+        this.correctlyModifiableParameter = 7;
+
+        delete this.correctlyModifiableDeleted;
+
+        this.correctlyModifiablePostDecremented--;
+        this.correctlyModifiablePostIncremented++;
+        this.incorrectlyModifiablePostMinus+;
+        this.incorrectlyModifiablePostPlus+;
+        --this.correctlyModifiablePreDecremented;
+        ++this.correctlyModifiablePreIncremented;
+        -this.incorrectlyModifiablePreMinus;
+        +this.incorrectlyModifiablePrePlus;
+    }
+
+    public createConfusingChildClass() {
+        return class {
+            private correctlyModifiableInline = 7;
+
+            private readonly incorrectlyModifiableInline = 7;
+
+            private readonly incorrectlyUniqueModifiableInline = 7;
+
+            private childClassExpressionModifiable = 7;
+
+            mutate() {
+                this.correctlyModifiableInline = 7;
+                this.childClassExpressionModifiable = 7;
+            }
+        }
+    }
+
+    public workWithSimilarClass(other: SimilarClass) {
+        other.overlappingClassVariable = 7;
+    }
+
+    private readonly incorrectlyModifiableMember = () => { };
+
+    private correctlyModifiableMember = () => { };
+}
+
+class SimilarClass {
+    public overlappingClassVariable = 7;
+}
+
+declare class DeclaredClass {
+    private declaredMember = 7;
+}
