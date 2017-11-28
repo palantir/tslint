@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as glob from "glob";
 import * as path from "path";
 

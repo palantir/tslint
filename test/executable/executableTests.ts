@@ -76,6 +76,24 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("warns if file does not exist", async () => {
+            const result = await execRunnerWithOutput({files: ["foo/bar.ts"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.include(result.stderr, "'foo/bar.ts' does not exist");
+        });
+
+        it("doesn't warn if non-existent file is excluded by --exclude", async () => {
+            const result = await execRunnerWithOutput({files: ["foo/bar.js"], exclude: ["**/*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
+
+        it("doesn't warn if glob pattern doesn't match any file", async () => {
+            const result = await execRunnerWithOutput({files: ["foobar/*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
     });
 
     describe("Configuration file", () => {
@@ -93,7 +111,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             const result = await execRunnerWithOutput({config: "test/config/tslint-invalid.json", files: ["src/test.ts"]});
 
             assert.equal(result.status, Status.FatalError, "process should exit with error");
-            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json");
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json config");
+            assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
+        });
+
+        it("exits with code 1 if yaml config file is invalid", async () => {
+            const result = await execRunnerWithOutput({config: "test/config/tslint-invalid.yaml", files: ["src/test.ts"]});
+            assert.strictEqual(result.status, Status.FatalError, "error code should be 1");
+
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load yaml config");
             assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
         });
 
@@ -101,7 +127,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             const result = await execRunnerWithOutput({config: "test/config/tslint-extends-invalid.json", files: ["src/test.ts"]});
 
             assert.equal(result.status, Status.FatalError, "process should exit with error");
-            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json");
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json config");
             assert.include(result.stderr, "tslint-invalid.json", "stderr should mention the problem file");
             assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
         });
@@ -344,21 +370,61 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
 
         it("can extend `tsconfig.json` with relative path", async () => {
-            let status = await execRunner(
+            const status1 = await execRunner(
                 {
                     config: "test/files/tsconfig-extends-relative/tslint-ok.json",
                     project: "test/files/tsconfig-extends-relative/test/tsconfig.json",
                 },
             );
-            assert.equal(status, Status.Ok, "process should exit without an error");
-
-            status = await execRunner(
+            assert.equal(status1, Status.Ok, "process should exit without an error");
+            const status2 = await execRunner(
                 {
                     config: "test/files/tsconfig-extends-relative/tslint-fail.json",
                     project: "test/files/tsconfig-extends-relative/test/tsconfig.json",
                 },
             );
-            assert.equal(status, Status.LintError, "exit code should be 2");
+            assert.equal(status2, Status.LintError, "exit code should be 2");
+        });
+
+        it("warns if file-to-lint does not exist", async () => {
+            const result = await execRunnerWithOutput(
+                {project: "test/files/tsconfig-test/tsconfig.json", files: ["test/files/tsconfig-test/non-existent.test.ts"]},
+            );
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.include(result.stderr, `${path.normalize("test/files/tsconfig-test/non-existent.test.ts")}' does not exist`);
+        });
+
+        it("doesn't warn for non-existent file-to-lint if excluded by --exclude", async () => {
+            const result = await execRunnerWithOutput({
+                exclude: ["**/*"],
+                files: ["test/files/tsconfig-test/non-existent.test.ts"],
+                project: "test/files/tsconfig-test/tsconfig.json",
+            });
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
+
+        it("doesn't warn if glob pattern doesn't match any file", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-test/tsconfig.json", files: ["*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
+
+        it("reports errors from parsing tsconfig.json", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-invalid/syntax-error.json"});
+            assert.strictEqual(result.status, Status.FatalError, "exit code should be 1");
+            assert.include(result.stderr, "error TS");
+        });
+
+        it("reports errors from validating tsconfig.json", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-invalid/empty-files.json"});
+            assert.strictEqual(result.status, Status.FatalError, "exit code should be 1");
+            assert.include(result.stderr, "error TS");
+        });
+
+        it("does not report an error if tsconfig.json matches no files", async () => {
+            const status = await execRunner({project: "test/files/tsconfig-invalid/no-match.json"});
+            assert.strictEqual(status, Status.Ok, "process should exit without an error");
         });
 
         it("can execute typed rules without --type-check", async () => {
@@ -369,6 +435,11 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("handles 'allowJs' correctly", async () => {
             const status = await execRunner({project: "test/files/tsconfig-allow-js/tsconfig.json"});
             assert.equal(status, Status.LintError, "exit code should be 2");
+        });
+
+        it("doesn't lint external dependencies with 'allowJs'", async() => {
+            const status = await execRunner({project: "test/files/allow-js-exclude-node-modules/tsconfig.json"});
+            assert.equal(status, Status.Ok, "process should exit without error");
         });
 
         it("works with '--exclude'", async () => {
@@ -512,10 +583,10 @@ function execRunnerWithOutput(options: Partial<Options>) { // tslint:disable-lin
 }
 
 function execRunner(options: Partial<Options>, logger: Logger = dummyLogger) { // tslint:disable-line:promise-function-async
-    return run({exclude: [], ...options}, logger);
+    return run({exclude: [], files: [], ...options}, logger);
 }
 
-function isFunction(fn: any): fn is (...args: any[]) => any {
+function isFunction(fn: any): fn is Function { // tslint:disable-line:ban-types
     return ({}).toString.call(fn) === "[object Function]";
 }
 

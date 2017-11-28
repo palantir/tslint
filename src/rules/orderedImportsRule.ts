@@ -132,7 +132,7 @@ const TRANSFORMS = new Map<string, Transform>([
     ["lowercase-last", (x) => x],
     ["full", (x) => x],
     ["basename", (x) => {
-        if (!(ts as any as {isExternalModuleNameRelative(m: string): boolean}).isExternalModuleNameRelative(x)) {
+        if (!ts.isExternalModuleNameRelative(x)) {
             return x;
         }
 
@@ -181,7 +181,7 @@ function parseOptions(ruleArguments: any[]): Options {
 }
 
 class Walker extends Lint.AbstractWalker<Options> {
-    private importsBlocks = [new ImportsBlock()];
+    private readonly importsBlocks = [new ImportsBlock()];
     // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
     private lastFix: Lint.Replacement[] | undefined;
     private nextType = ImportType.LIBRARY_IMPORT;

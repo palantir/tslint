@@ -22,7 +22,7 @@ import * as fs from "fs";
 
 import { VERSION } from "./linter";
 import { run } from "./runner";
-import { dedent } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 interface Argv {
     config?: string;
@@ -63,7 +63,7 @@ const options: Option[] = [
             to the rules. If no option is specified, the config file named
             tslint.json is used, so long as it exists in the path.
             The format of the file is { rules: { /* rules list */ } },
-            where /* rules list */ is a key: value comma-seperated list of
+            where /* rules list */ is a key: value comma-separated list of
             rulename: rule-options pairs. Rule-options can be either a
             boolean true/false value denoting whether the rule is used or not,
             or a list [boolean, ...] where the boolean provides the same role
@@ -252,7 +252,7 @@ run(
     {
         config: argv.config,
         exclude: argv.exclude,
-        files: commander.args,
+        files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
         format: argv.format === undefined ? "prose" : argv.format,
