@@ -98,11 +98,9 @@ function getError(node: ts.Node, allowSingleConcat: boolean): string | undefined
 type StringLike = ts.StringLiteral | ts.TemplateLiteral;
 
 function containsNewline(node: StringLike): boolean {
-    if (node.kind === ts.SyntaxKind.TemplateExpression) {
-        return node.templateSpans.some(({ literal: { text } }) => text.includes("\n"));
-    } else {
-        return node.text.includes("\n");
-    }
+    return node.kind === ts.SyntaxKind.TemplateExpression
+        ? node.templateSpans.some(({ literal: { text } }) => text.includes("\n"))
+        : node.text.includes("\n");
 }
 
 function containsOnlyStringLiterals(node: ts.Expression): boolean {

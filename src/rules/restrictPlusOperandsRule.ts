@@ -48,11 +48,9 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
             const leftType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.left));
             const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));
             if (leftType === "invalid" || rightType === "invalid" || leftType !== rightType) {
-                if (leftType === "string" || rightType === "string") {
-                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS);
-                } else {
-                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
-                }
+                return leftType === "string" || rightType === "string"
+                    ? ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS)
+                    : ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
             }
         }
         return ts.forEachChild(node, cb);
