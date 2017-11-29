@@ -23,3 +23,6 @@ new Foo(  );
 // empty parens are always allowed
 new Foo();
 
+// Missing a space
+new Foo(  );
+

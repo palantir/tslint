@@ -73,11 +73,11 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         forEachToken(sourceFile, (token: ts.Node) => {
             if (token.kind === ts.SyntaxKind.OpenParenToken) {
-                if (sourceFile.text.charAt(token.end) !== ts.tokenToString(ts.SyntaxKind.CloseParenToken)) {
+                if (sourceFile.text.charAt(token.end) !== ")") {
                     this.checkOpenParenToken(token);
                 }
             } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
-                if (sourceFile.text.charAt(token.end - 2) !== ts.tokenToString(ts.SyntaxKind.OpenParenToken)) {
+                if (sourceFile.text.charAt(token.end - 2) !== "(") {
                     this.checkCloseParenToken(token);
                 }
             }
@@ -120,10 +120,10 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
             currentChar = this.sourceFile.text.charCodeAt(currentPos);
         }
         /**
-         * Skip the open parenthesis character because it
-         * has already been caught by `checkOpenParenToken`
+         * Number 40 is open parenthese char code, we skip this cause
+         * it's already been caught by `checkOpenParenToken`
          */
-        if (!ts.isLineBreak(currentChar) && this.sourceFile.text.charAt(currentPos) !== ts.tokenToString(ts.SyntaxKind.OpenParenToken)) {
+        if (!ts.isLineBreak(currentChar) && currentChar !== 40) {
             const whitespaceCount = tokenNode.end - currentPos - 2;
             if (whitespaceCount !== allowedSpaceCount) {
                 let length = 0;

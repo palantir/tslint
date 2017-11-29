@@ -33,6 +33,10 @@ new Foo(  );
 // empty parens are always allowed
 new Foo();
 
+// Missing a space
+new Foo( );
+         ~nil [0]
+
 [0]: Needs 1 whitespace within parentheses
 [1]: Needs 2 whitespaces within parentheses
 [2]: No more than 2 whitespaces within parentheses allowed
