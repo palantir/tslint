@@ -51,4 +51,56 @@ if (true) {
     foo(bar).baz = 1;
 }
 
+if (length === 0) {
+~~ [err % ('x')]
+    x = "foo";
+} else if (length === 1) {
+    x = "bar";
+} else if (length === 2) {
+    x = "something else";
+} else {
+    x = "unknown";
+}
+
+if (length === 0) {
+~~ [err % ('x')]
+    x = "foo";
+} else {
+    if (length === 1) {
+        x = "bar";
+    } else {
+        if (length === 2) {
+            x = "something else";
+        } else {
+            x = "unknown";
+        }
+    }
+}
+
+if (length === 0) {
+    y = "foo";
+} else if (length === 1) {
+       ~~ [err % ('x')]
+    x = "bar";
+} else if (length === 2) {
+    x = "something else";
+} else {
+    x = "unknown";
+}
+
+if (length === 0) {
+    y = "foo";
+} else {
+    if (length === 1) {
+    ~~ [err % ('x')]
+        x = "bar";
+    } else {
+        if (length === 2) {
+            x = "something else";
+        } else {
+            x = "unknown";
+        }
+    }
+}
+
 [err]: Use a conditional expression instead of assigning to '%s' in multiple places.
