@@ -22,7 +22,7 @@ import * as fs from "fs";
 
 import { VERSION } from "./linter";
 import { run } from "./runner";
-import { dedent } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 interface Argv {
     config?: string;
@@ -38,7 +38,7 @@ interface Argv {
     formattersDir: string;
     format?: string;
     typeCheck?: boolean;
-    test?: string;
+    test?: boolean;
     version?: boolean;
 }
 
@@ -237,29 +237,22 @@ if (!(argv.init || argv.test !== undefined || argv.project !== undefined || comm
 }
 
 if (argv.typeCheck) {
-    console.warn("--type-check is deprecated. You only need --project to enable rule which need type information.");
+    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
     if (argv.project === undefined) {
         console.error("--project must be specified in order to enable type checking.");
         process.exit(1);
     }
 }
 
-let log: (message: string) => void;
-if (argv.out != undefined) {
-    const outputStream = fs.createWriteStream(argv.out, {
-        flags: "w+",
-        mode: 420,
-    });
-    log = (message) => outputStream.write(`${message}\n`);
-} else {
-    log = console.log;
-}
+const outputStream: NodeJS.WritableStream = argv.out === undefined
+    ? process.stdout
+    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
 
 run(
     {
         config: argv.config,
         exclude: argv.exclude,
-        files: commander.args,
+        files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
         format: argv.format === undefined ? "prose" : argv.format,
@@ -273,8 +266,12 @@ run(
         typeCheck: argv.typeCheck,
     },
     {
-        log,
-        error: (m) => console.error(m),
+        log(m) {
+            outputStream.write(m);
+        },
+        error(m) {
+            process.stdout.write(m);
+        },
     })
     .then((rc) => {
         process.exitCode = rc;

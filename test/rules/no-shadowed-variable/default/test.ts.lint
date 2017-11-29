@@ -352,7 +352,30 @@ class Clazz<T> {
     }
 }
 
+export default function (
+    paramA = function() {let paramB},
+                             ~~~~~~ [err % ('paramB')]
+    paramB,
+) {}
+
 // allow IndexSignature names
 function baz(param: {[baz: string]: string}) {}
+
+// no error INSIDE ambient namespaces and module
+declare global {
+    function baz(): void;
+}
+declare module "foo" {
+    class Clazz {}
+}
+declare namespace MyNamespaceName {
+    interface I {}
+}
+
+{
+    let MyNamespaceName; // still check names of declare namespace
+        ~~~~~~~~~~~~~~~ [err % ('MyNamespaceName')]
+    let global; // don't treat `declare global` as variable
+}
 
 [err]: Shadowed name: '%s'

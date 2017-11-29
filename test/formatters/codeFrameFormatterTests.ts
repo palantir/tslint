@@ -15,7 +15,7 @@
  */
 
 import { assert } from "chai";
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as ts from "typescript";
 
