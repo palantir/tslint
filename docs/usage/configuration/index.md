@@ -30,7 +30,7 @@ A path to a directory or an array of paths to directories of [custom rules][2]. 
   - Any rules specified in this block will override those configured in any base configuration being extended.
   - [Check out the full rules list here][3].
 * `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files.
-* `defaultSeverity?: "error" | "warning" | "off"`: The severity level used when a rule specifies a default warning level. If undefined, "error" is used. If specified, overrides the values defined in the configuration files which are extended by this configuration.
+* `defaultSeverity?: "error" | "warning" | "off"`: The severity level that is applied to rules in this config file as well as rules in any inherited config files which have their severity set to "default". If undefined, "error" is used as the defaultSeverity.
 * `linterOptions?: { exclude?: string[] }`:
   - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
 
