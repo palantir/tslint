@@ -66,6 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
             [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };
