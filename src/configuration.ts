@@ -213,58 +213,46 @@ function findup(filenames: string[], directory: string): string | undefined {
  * './path/to/config' will be treated as a relative path
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @param configFilePath The configuration to load
- * @param originalFilePath The entry point configuration file
- * @param extendingConfig The configuration which extends this one
+ * @param originalFilePath (deprecated) The entry point configuration file
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath, extendingConfig?: RawConfigFile) {
+export function loadConfigurationFromPath(configFilePath?: string, _originalFilePath?: string) {
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        const resolvedConfigFileExt = path.extname(resolvedConfigFilePath);
-        let rawConfigFile: RawConfigFile;
-        if (/\.(json|ya?ml)/.test(resolvedConfigFileExt)) {
-            const fileContent = fs.readFileSync(resolvedConfigFilePath, "utf8").replace(/^\uFEFF/, "");
-            try {
-                if (resolvedConfigFileExt === ".json") {
-                    rawConfigFile = JSON.parse(stripComments(fileContent)) as RawConfigFile;
-                } else {
-                    // choose this branch only if /\.ya?ml/.test(resolvedConfigFileExt) === true
-                    rawConfigFile = yaml.safeLoad(fileContent, {
-                        // Note: yaml.LoadOptions expects a schema value of type "any",
-                        // but this trips up the no-unsafe-any rule.
-                        // tslint:disable-next-line:no-unsafe-any
-                        schema: yaml.JSON_SCHEMA,
-                        strict: true,
-                    }) as RawConfigFile;
-                }
-            } catch (e) {
-                const error = e as Error;
-                // include the configuration file being parsed in the error since it may differ from the directly referenced config
-                throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
+        const rawConfigFile = readConfigurationFile(resolvedConfigFilePath);
+
+        return parseConfigFile(rawConfigFile, path.dirname(resolvedConfigFilePath), readConfigurationFile);
+    }
+}
+
+/** Reads the configuration file from disk and parses it as raw JSON, YAML or JS depending on the extension. */
+export function readConfigurationFile(filepath: string): RawConfigFile {
+    const resolvedConfigFileExt = path.extname(filepath);
+    if (/\.(json|ya?ml)/.test(resolvedConfigFileExt)) {
+        const fileContent = fs.readFileSync(filepath, "utf8").replace(/^\uFEFF/, "");
+        try {
+            if (resolvedConfigFileExt === ".json") {
+                return JSON.parse(stripComments(fileContent)) as RawConfigFile;
+            } else {
+                return yaml.safeLoad(fileContent, {
+                    // Note: yaml.LoadOptions expects a schema value of type "any",
+                    // but this trips up the no-unsafe-any rule.
+                    // tslint:disable-next-line:no-unsafe-any
+                    schema: yaml.JSON_SCHEMA,
+                    strict: true,
+                }) as RawConfigFile;
             }
-        } else {
-            rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
-            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
+        } catch (e) {
+            const error = e as Error;
+            // include the configuration file being parsed in the error since it may differ from the directly referenced config
+            throw new Error(`${error.message} in ${filepath}`);
         }
-
-        // defaultSeverity defined in the config which extends this one wins.
-        if (extendingConfig !== undefined && extendingConfig.defaultSeverity !== undefined) {
-            rawConfigFile.defaultSeverity = extendingConfig.defaultSeverity;
-        }
-
-        const configFileDir = path.dirname(resolvedConfigFilePath);
-        const configFile = parseConfigFile(rawConfigFile, configFileDir);
-
-        // load configurations, in order, using their identifiers or relative paths
-        // apply the current configuration last by placing it last in this array
-        const configs: IConfigurationFile[] = configFile.extends.map((name) => {
-            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath, rawConfigFile);
-        }).concat([configFile]);
-
-        return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
+    } else {
+        const rawConfigFile = require(filepath) as RawConfigFile;
+        delete (require.cache as { [key: string]: any })[filepath];
+        return rawConfigFile;
     }
 }
 
@@ -485,34 +473,64 @@ export type RawRuleConfig = null | undefined | boolean | any[] | {
  * @param configFile The raw object read from the JSON of a config file
  * @param configFileDir The directory of the config file
  */
-export function parseConfigFile(configFile: RawConfigFile, configFileDir?: string): IConfigurationFile {
-    return {
-        extends: arrayify(configFile.extends),
-        jsRules: parseRules(configFile.jsRules),
-        linterOptions: parseLinterOptions(configFile.linterOptions),
-        rules: parseRules(configFile.rules),
-        rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
-    };
+export function parseConfigFile(
+    configFile: RawConfigFile,
+    configFileDir?: string,
+    readConfig?: (path: string) => RawConfigFile,
+): IConfigurationFile {
+    let defaultSeverity = configFile.defaultSeverity;
+    if (readConfig === undefined) {
+        return parse(configFile, configFileDir);
+    }
+
+    return loadExtendsRecursive(configFile, configFileDir!)
+        .map(({dir, config}) => parse(config, dir))
+        .reduce(extendConfigurationFile, EMPTY_CONFIG);
+
+    /** Read files in order, depth first, and assign `defaultSeverity` (last config in extends wins). */
+    function loadExtendsRecursive(raw: RawConfigFile, dir: string) {
+        const configs: Array<{dir: string; config: RawConfigFile}> = [];
+        for (const relativePath of arrayify(raw.extends)) {
+            const resolvedPath = resolveConfigurationPath(relativePath, dir);
+            const extendedRaw = readConfig!(resolvedPath);
+            configs.push(...loadExtendsRecursive(extendedRaw, path.dirname(resolvedPath)));
+        }
+        if (raw.defaultSeverity !== undefined) {
+            defaultSeverity = raw.defaultSeverity;
+        }
+        configs.push({dir, config: raw});
+        return configs;
+    }
+
+    function parse(config: RawConfigFile, dir?: string): IConfigurationFile {
+        return {
+            extends: arrayify(config.extends),
+            jsRules: parseRules(config.jsRules),
+            linterOptions: parseLinterOptions(config.linterOptions, dir),
+            rules: parseRules(config.rules),
+            rulesDirectory: getRulesDirectories(config.rulesDirectory, dir),
+        };
+    }
 
     function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
         const map = new Map<string, Partial<IOptions>>();
         if (config !== undefined) {
             for (const ruleName in config) {
                 if (hasOwnProperty(config, ruleName)) {
-                    map.set(ruleName, parseRuleOptions(config[ruleName], configFile.defaultSeverity));
+                    map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
                 }
             }
         }
         return map;
     }
 
-    function parseLinterOptions(raw: RawConfigFile["linterOptions"]): IConfigurationFile["linterOptions"] {
+    function parseLinterOptions(raw: RawConfigFile["linterOptions"], dir?: string): IConfigurationFile["linterOptions"] {
         if (raw === undefined || raw.exclude === undefined) {
             return {};
         }
         return {
             exclude: arrayify(raw.exclude).map(
-                (pattern) => configFileDir === undefined ? path.resolve(pattern) : path.resolve(configFileDir, pattern),
+                (pattern) => dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
             ),
         };
     }
