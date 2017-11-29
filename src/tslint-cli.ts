@@ -237,7 +237,7 @@ if (!(argv.init || argv.test !== undefined || argv.project !== undefined || comm
 }
 
 if (argv.typeCheck) {
-    console.warn("--type-check is deprecated. You only need --project to enable rule which need type information.");
+    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
     if (argv.project === undefined) {
         console.error("--project must be specified in order to enable type checking.");
         process.exit(1);
