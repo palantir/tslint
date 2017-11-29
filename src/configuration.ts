@@ -468,10 +468,12 @@ export type RawRuleConfig = null | undefined | boolean | any[] | {
 };
 
 /**
- * Parses a config file and normalizes legacy config settings
+ * Parses a config file and normalizes legacy config settings.
+ * If `configFileDir` and `readConfig` are provided, this function will load all base configs and reduce them to the final configuration.
  *
  * @param configFile The raw object read from the JSON of a config file
  * @param configFileDir The directory of the config file
+ * @param readConfig Will be used to load all base configurations while parsing. The function is called with the resolved path.
  */
 export function parseConfigFile(
     configFile: RawConfigFile,
@@ -479,11 +481,11 @@ export function parseConfigFile(
     readConfig?: (path: string) => RawConfigFile,
 ): IConfigurationFile {
     let defaultSeverity = configFile.defaultSeverity;
-    if (readConfig === undefined) {
+    if (readConfig === undefined || configFileDir === undefined) {
         return parse(configFile, configFileDir);
     }
 
-    return loadExtendsRecursive(configFile, configFileDir!)
+    return loadExtendsRecursive(configFile, configFileDir)
         .map(({dir, config}) => parse(config, dir))
         .reduce(extendConfigurationFile, EMPTY_CONFIG);
 
