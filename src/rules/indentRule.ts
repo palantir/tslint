@@ -273,7 +273,6 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos
             if (
                 !isArrowFunctionWithBlock(parent)
                 && !isCaseWithBlock(parent)
-                // && !isSameLineWithConditionalExpr(root, nodePos, parent)
                 && !isSameLine(root, nodePos, parent.getStart())
             ) {
                 result++;
@@ -314,12 +313,6 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos
     return result;
 }
 
-// function isSameLineWithConditionalExpr(sourceFile: ts.SourceFile, nodePos: number, parent: ts.Node): boolean {
-//     if (parent.kind !== ts.SyntaxKind.ConditionalExpression && parent.kind !== ts.SyntaxKind.ClassDeclaration) {
-//         return false;
-//     }
-//     return isSameLine(sourceFile, nodePos, parent.getStart());
-// }
 function isCaseWithBlock(node: ts.Node): boolean {
     if (node.parent === undefined) {
         return false;
@@ -377,13 +370,12 @@ function getChainableCallNumberBeforeNode(sourceFile: ts.SourceFile, nodePos: nu
     }
     return result;
 }
-/*
-* Check for property access (includes chaining function call) just like this:
-foo()
-.then()
-In this case, `.then` should have one more indent.
-Maybe this should depend on a configuration.
-*/
+/**
+ * Check for property access (includes chaining function call) just like this:
+ * foo()
+ * .then()
+ * In this case, `.then` should have one more indent.
+ */
 function isMultiLineChainableCall(node: ts.Node, nodePos: number, root: ts.SourceFile): boolean {
     const token: ts.Node | undefined = getTokenAtPosition(node, nodePos, root);
     if (node.parent === undefined || token === undefined) {
@@ -509,13 +501,13 @@ function leadingWithBinaryOperator(node: ts.Node): boolean {
 }
 
 /**
- *  To check a class declaration broken to two lines, like this:
- *  class
- *  Foo {
- *      // xxx
- *  }
- *  In this case, the `Foo` is regarded as should have the same indent depth with `class`.
- *  Should it have one more depth? I'm not sure.
+ * To check a class declaration broken to two lines, like this:
+ * class
+ * Foo {
+ *     // xxx
+ * }
+ * In this case, the `Foo` is regarded as should have the same indent depth with `class`.
+ * Should it have one more depth? I'm not sure.
  */
 function nodeAtOutside(node: ts.Node): boolean {
     if (node.parent === undefined) {
