@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Some projects may wish to exclude imports matching certain patterns.
 
             Examples:
-            ^loadsh$ Blacklist any import of the entire lodash module.
+            ^lodash$ Blacklist any import of the entire lodash module.
             Since lodash allows importing submodules, a better practice
             would be to import the desired submodule instead.
 
