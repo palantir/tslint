@@ -353,6 +353,11 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.VariableDeclaration:
                 checkVariable(node as ts.VariableDeclaration);
+                break;
+
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+                checkAccessor(node as ts.NamedDeclaration);
         }
 
         return ts.forEachChild(node, cb);
@@ -403,6 +408,14 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             case ts.SyntaxKind.SourceFile:
             case ts.SyntaxKind.ModuleBlock:
                 checkNode(node, ARGUMENT_VARIABLES, statement);
+        }
+    }
+
+    function checkAccessor(node: ts.NamedDeclaration): void {
+        // Properties in object literal expressions do not
+        // require documentation, so neither do accessors.
+        if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+            checkNode(node, ARGUMENT_PROPERTIES);
         }
     }
 
