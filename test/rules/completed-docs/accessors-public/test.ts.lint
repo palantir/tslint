@@ -1,0 +1,16 @@
+export class Foo {
+
+    private myField: string;
+
+    public get myAccessor(): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for public properties.]
+
+
+    public set myAccessor(value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for public properties.]
+
+    private hiddenField: string;
+    private get hiddenAccessor(): string { return this.hiddenField; }
+    private set hiddenAccessor(value: string) { this.hiddenField = value; }
+
+}
