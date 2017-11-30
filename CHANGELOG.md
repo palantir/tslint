@@ -1,6 +1,57 @@
 Change Log
 ===
 
+v5.8.1
+---
+
+## :tada: Features
+
+- [new-fixer] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) (#3475)
+- [new-rule-option], [enhancement] allow to define ignore pattern for [`max-line-length`](https://palantir.github.io/tslint/rules/max-line-length/) rule (#3099)
+- [new-rule-option] `"temporalDeadZone"` for [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) to ignore shadowing in the temporal dead zone of classes, parameters, enums and variables declared with `let` or `const` (#3389)
+- [new-rule] [`prefer-readonly`](https://palantir.github.io/tslint/rules/prefer-readonly/) (#2896)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] removed fixer of [`no-any`](https://palantir.github.io/tslint/rules/no-any/) (#3486)
+- [bugfix] [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) don't crash on malformed package.json (#3373)
+- [bugfix] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) fixed crash on unhandled tag (#3414)
+- [bugfix] `--project` excludes all files of exteral dependencies (#3320)
+- [bugfix] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) fixed regression that effectively disabled the rule with `\r\n` line breaks (#3427)
+- [bugfix] show errors when `tsconfig.json` is invalid (#3410)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/) false negative with index signature named like a variable (#3385)
+- [bugfix] [`curly`](https://palantir.github.io/tslint/rules/curly/) fixer now correctly handles comments (#3473)
+- [bugfix] better error message for files not contained in the project (#3313)
+- [bugfix] no-duplicate-imports: Allow duplicate imports from separate ambient module declarations (#3398)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) correctly recognises classes extending Promise (#3383)
+- [bugfix] Update commander.js dependency to prevent users from transitively installing a buggy 2.12.0 release (#3510)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) now excludes declaration files and ambient modules (#3387)
+- [deprecation] Linting non-existent files outputs a warning. This will be an error in TSLint 6. (#3313)
+- [deprecation] several utility functions have been deprecated (#3476)
+- [docs] Enhance [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) options documentation (#3519)
+- [docs] Enhance [`no-use-before-declare`](https://palantir.github.io/tslint/rules/no-use-before-declare/) documentation to clarify the rule's status (#3520)
+- [enhancement] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) ignores comma operator inside for-loop incrementor (#3485)
+- [enhancement] avoid duplicate IO when using `--project` option (#3313)
+
+Thanks to our contributors!
+
+- Adi Dahiya
+- Klaus Meinhardt
+- Josh Goldberg
+- Chris Barr
+- Nathan Shively-Sanders
+- Andy
+- Jeremy Morton
+- Sergey Koshechkin
+- Daniel Kucal
+- Eric Smekens
+- Johannes Choo
+- Elena Vilchik
+- Jason Killian
+- Eugene Timokhov
+- Carlo Bottiglieri
+
+
 v5.8.0
 ---
 
