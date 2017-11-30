@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
@@ -70,6 +71,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
+            if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
+                return;
+            }
+
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
                 return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
