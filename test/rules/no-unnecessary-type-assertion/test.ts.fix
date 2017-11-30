@@ -83,3 +83,10 @@ const data = {
 
 [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
 let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+
+function foo() {
+    let xx: 1 | 2 = 1;
+    const f = () => xx = 2;
+    f();
+    xx as 1 | 2 === 2; // xx is inferred as 1, assertion is necessary to avoid compile error
+}
