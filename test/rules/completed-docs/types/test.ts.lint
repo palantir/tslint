@@ -50,54 +50,54 @@ class BadClass {
 }
 
 /**
- * 
+ *
  */
 class EmptyClass {
 ~~~~~~~~~~~~~~~~~~      [Documentation must exist for classes.]
     /**
-     * 
+     *
      */
     emptyDefaultProperty;
     ~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for properties.]
 
     /**
-     * 
+     *
      */
     public emptyPublicProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for public properties.]
 
     /**
-     * 
+     *
      */
     protected emptyProtectedProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for protected properties.]
 
     /**
-     * 
+     *
      */
     private emptyPrivateProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private properties.]
 
     /**
-     * 
+     *
      */
     emptyDefaultMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for methods.]
 
     /**
-     * 
+     *
      */
     public emptyPublicMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for public methods.]
 
     /**
-     * 
+     *
      */
     protected emptyProtectedMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for protected methods.]
 
     /**
-     * 
+     *
      */
     private emptyPrivateMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private methods.]
@@ -240,7 +240,7 @@ enum BadEnum { }
 ~~~~~~~~~~~~~~~~      [Documentation must exist for enums.]
 
 /**
- * 
+ *
  */
 enum EmptyEnum { }
 ~~~~~~~~~~~~~~~~~~      [Documentation must exist for enums.]
@@ -267,7 +267,7 @@ function BadFunction() { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for functions.]
 
 /**
- * 
+ *
  */
 function EmptyFunction() { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for functions.]
@@ -281,7 +281,7 @@ interface BadInterface { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for interfaces.]
 
 /**
- * 
+ *
  */
 interface EmptyInterface { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for interfaces.]
@@ -295,7 +295,7 @@ namespace BadNamespace { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for namespaces.]
 
 /**
- * 
+ *
  */
 namespace EmptyNamespace { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for namespaces.]
@@ -309,7 +309,7 @@ type BadType = 1;
 ~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
 
 /**
- * 
+ *
  */
 type EmptyType = 1;
 ~~~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
@@ -323,7 +323,7 @@ type BadType = 1;
 ~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
 
 /**
- * 
+ *
  */
 type EmptyType = 1;
 ~~~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
@@ -337,7 +337,7 @@ const BadVariable = 1;
       ~~~~~~~~~~~~~~~       [Documentation must exist for variables.]
 
 /**
- * 
+ *
  */
 const EmptyVariable = 1;
       ~~~~~~~~~~~~~~~~~       [Documentation must exist for variables.]
@@ -348,10 +348,11 @@ const EmptyVariable = 1;
 const GoodVariable = 1;
 
 /**
- * Properties and accessors in object literals should not require documentation.
+ * Properties, methods and accessors in object literals should not require documentation.
  */
 let literal = {
     prop: 1,
     get accessor() { return literal.prop; },
     set accessor(value) { literal.prop = value; }
+    someMethod() {}
 }
