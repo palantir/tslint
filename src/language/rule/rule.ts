@@ -205,7 +205,7 @@ export class Replacement {
 }
 
 export class RuleFailurePosition {
-    constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
+    constructor(private readonly position: number, private readonly lineAndCharacter: ts.LineAndCharacter) {
     }
 
     public getPosition() {
@@ -238,10 +238,10 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private fileName: string;
-    private startPosition: RuleFailurePosition;
-    private endPosition: RuleFailurePosition;
-    private rawLines: string;
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
     public static compare(a: RuleFailure, b: RuleFailure): number {
@@ -251,12 +251,12 @@ export class RuleFailure {
         return a.startPosition.getPosition() - b.startPosition.getPosition();
     }
 
-    constructor(private sourceFile: ts.SourceFile,
+    constructor(private readonly sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                private failure: string,
-                private ruleName: string,
-                private fix?: Fix) {
+                private readonly failure: string,
+                private readonly ruleName: string,
+                private readonly fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);

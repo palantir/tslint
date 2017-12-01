@@ -10,6 +10,8 @@ function f() {}
 const x = 0;
 
 /**
+ * @class
+    ~~~~~ [tag % ('class')]
  * @param {number} x Is a number
           ~~~~~~~~ [type]
  * @param y
