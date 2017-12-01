@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
+import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
-import { isTypeFlagSet } from "../language/utils";
 
 const OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND = "ignore-arrow-function-shorthand";
 
