@@ -44,4 +44,7 @@ switch (  typeof x ) {
         break;
 }
 
+// empty parens are always allowed
+foo();
+
 [0]: Whitespace within parentheses is not allowed
