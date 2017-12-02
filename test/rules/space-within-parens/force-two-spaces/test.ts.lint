@@ -27,9 +27,15 @@ if (x === y) {
                                               ~ [2]
 }
 
-// be well
+// expected number of spaces provided
+new Foo(  );
+
+// empty parens are always allowed
 new Foo();
-        ~nil [1]
+
+// Missing a space
+new Foo( );
+         ~nil [0]
 
 [0]: Needs 1 whitespace within parentheses
 [1]: Needs 2 whitespaces within parentheses

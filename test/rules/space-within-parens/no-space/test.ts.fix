@@ -32,3 +32,6 @@ switch (typeof x) {
         break;
 }
 
+// empty parens are always allowed
+foo();
+
