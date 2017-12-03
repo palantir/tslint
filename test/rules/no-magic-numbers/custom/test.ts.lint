@@ -1,4 +1,8 @@
+parseInt();
+parseInt('123', 2);
+parseInt('123', 8);
 parseInt('123', 10);
+parseInt('123', 16);
 console.log(1337);
 console.log(-1337);
 console.log(- 1337);
@@ -7,6 +11,8 @@ console.log(1338);
             ~~~~                      ['magic numbers' are not allowed]
 console.log(-1338)
             ~~~~~                     ['magic numbers' are not allowed]
+parseInt(foo === 4711 ? bar : baz, 10);
+                 ~~~~                 ['magic numbers' are not allowed]
 export let x = 1337;
 export let x = -1337;
 export let x = 1337.7;
