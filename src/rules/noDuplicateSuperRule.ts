@@ -80,6 +80,11 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     ? { node: node.parent! as ts.CallExpression, break: false }
                     : Kind.NoSuper;
 
+            case ts.SyntaxKind.ConditionalExpression: {
+                const { whenTrue, whenFalse } = node as ts.ConditionalExpression;
+                return worse(getSuperForNode(whenTrue), whenFalse !== undefined ? getSuperForNode(whenFalse) : Kind.NoSuper);
+            }
+
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
                 return worse(getSuperForNode(thenStatement), elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper);
