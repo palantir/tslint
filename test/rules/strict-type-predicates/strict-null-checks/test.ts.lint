@@ -191,6 +191,18 @@ declare function get<T>(): T;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
 }
 
+let a: string, b: string;
+typeof a === typeof b;
+typeof a === b;
+a === typeof b;
+typeof a === undefined;
+~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+undefined === typeof a;
+~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+null === typeof b;
+~~~~~~~~~~~~~~~~~ [typeof]
+
 [T]: Expression is always true.
 [F]: Expression is always false.
 [typeof]: Bad comparison for 'typeof'.
