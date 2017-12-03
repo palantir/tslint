@@ -72,7 +72,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
-                return;
+                return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
             }
 
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
