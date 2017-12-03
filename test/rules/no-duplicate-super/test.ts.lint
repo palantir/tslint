@@ -259,5 +259,14 @@ declare const n: number;
     }
 }
 
+// With ternary operator
+{
+    class {
+        constructor(props?: any) {
+            props ? super(props) : super();
+        }
+    }
+}
+
 [0]: Multiple calls to 'super()' found. It must be called only once.
 [1]: 'super()' called in a loop. It must be called only once.
