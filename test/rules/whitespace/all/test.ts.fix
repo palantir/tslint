@@ -121,3 +121,49 @@ type A = number | string;
 type B = number | string | {result: string};
 
 type C = {result: string} & {type: "A" | "B"};
+
+if () {
+  console.info()
+} else {
+  console.info()
+}
+
+try {
+// try111
+} catch (e) {
+// 111
+} finally {
+// finally111
+}
+
+if () {
+
+} else {
+
+}
+
+if () {
+
+}//xxx
+
+if () {
+
+}/*xxx*/
+
+try {
+
+} catch (e) {
+// 222
+} finally {
+
+}
+
+do {
+
+} while ()
+
+try {
+
+} finally {
+
+}

@@ -32,6 +32,7 @@ const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
 const OPTION_TYPE_OPERATOR = "check-type-operator";
 const OPTION_PREBLOCK = "check-preblock";
+const OPTION_POSTBLOCK_PREKEYWORD = "check-postblock-prekeyword";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -39,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Ten arguments may be optionally provided:
+            Eleven arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -50,7 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
             * \`"check-type-operator"\` checks for whitespace between type operators \`|\` and \`&\`.
-            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
+            * \`"check-preblock"\` checks for whitespace before the opening brace of a block.
+            * \`"check-postblock-prekeyword"\` checks for whitespace between the closing brace of a block
+            and the following keyword (\`} else\` / \`} catch\` / \`} while\`).`,
         options: {
             type: "array",
             items: {
@@ -58,6 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 enum: [
                     "check-branch", "check-decl", "check-operator", "check-module", "check-separator",
                     "check-rest-spread", "check-type", "check-typecast", "check-type-operator", "check-preblock",
+                    "check-postblock-prekeyword",
                 ],
             },
             minLength: 0,
@@ -78,7 +82,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 type Options = Record<
-    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
+    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock"
+    | "postblockPrekeyword",
     boolean>;
 
 function parseOptions(ruleArguments: string[]): Options {
@@ -93,6 +98,7 @@ function parseOptions(ruleArguments: string[]): Options {
         typecast: has(OPTION_TYPECAST),
         typeOperator: has(OPTION_TYPE_OPERATOR),
         preblock: has(OPTION_PREBLOCK),
+        postblockPrekeyword: has(OPTION_POSTBLOCK_PREKEYWORD),
     };
 
     function has(option: string): boolean {
@@ -122,6 +128,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             case ts.SyntaxKind.Block:
                 if (options.preblock) {
                     checkForTrailingWhitespace(node.getFullStart());
+                }
+                if (options.postblockPrekeyword && matchPostblockPreKeyword(node)) {
+                    checkForTrailingWhitespace(node.end);
                 }
                 break;
 
@@ -307,7 +316,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
         }
     });
-
     function checkEqualsGreaterThanTokenInNode(node: ts.Node): void {
         if (!options.operator) {
             return;
@@ -348,4 +356,18 @@ function walk(ctx: Lint.WalkContext<Options>) {
         const fix = Lint.Replacement.deleteText(position, 1);
         ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_INVALID, fix);
     }
+}
+
+function matchPostblockPreKeyword(node: ts.Node): boolean {
+    const parent: ts.Node = node.parent!;
+    const isDoWhile = utils.isDoStatement(parent);
+    const isIfElse = utils.isIfStatement(parent)
+        && parent.elseStatement !== undefined
+        && parent.elseStatement !== node;
+    const hasTry = utils.isTryStatement(parent)
+        && parent.tryBlock === node;
+    const hasFinally = utils.isCatchClause(parent)
+        && parent.parent!.finallyBlock !== undefined;
+    const isTryCatchFinally = hasTry || hasFinally;
+    return isDoWhile || isIfElse || isTryCatchFinally;
 }
