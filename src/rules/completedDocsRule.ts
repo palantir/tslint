@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -319,12 +318,11 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.EnumDeclaration:
                 checkNode(node as ts.EnumDeclaration, ARGUMENT_ENUMS);
-                break;
-
-            case ts.SyntaxKind.EnumMember:
-                // Enum members don't have modifiers, so use the parent
-                // enum declaration when checking the requirements.
-                checkNode(node as ts.EnumMember, ARGUMENT_ENUM_MEMBERS, node.parent);
+                for (const member of (node as ts.EnumDeclaration).members) {
+                    // Enum members don't have modifiers, so use the parent
+                    // enum declaration when checking the requirements.
+                    checkNode(member, ARGUMENT_ENUM_MEMBERS, node);
+                }
                 break;
 
             case ts.SyntaxKind.FunctionDeclaration:
@@ -336,7 +334,9 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 break;
 
             case ts.SyntaxKind.MethodDeclaration:
-                checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                }
                 break;
 
             case ts.SyntaxKind.ModuleDeclaration:
@@ -351,13 +351,23 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 checkNode(node as ts.TypeAliasDeclaration, ARGUMENT_TYPES);
                 break;
 
-            case ts.SyntaxKind.VariableDeclaration:
-                checkVariable(node as ts.VariableDeclaration);
+            case ts.SyntaxKind.VariableStatement:
+                // Only check variables at the namespace/module-level or file-level
+                // and not variables declared inside functions and other things.
+                switch (node.parent!.kind) {
+                    case ts.SyntaxKind.SourceFile:
+                    case ts.SyntaxKind.ModuleBlock:
+                        for (const declaration of (node as ts.VariableStatement).declarationList.declarations) {
+                            checkNode(declaration, ARGUMENT_VARIABLES, node);
+                        }
+                }
                 break;
 
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
-                checkAccessor(node as ts.NamedDeclaration);
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                }
         }
 
         return ts.forEachChild(node, cb);
@@ -387,36 +397,6 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
         const comments = symbol.getDocumentationComment();
         checkComments(node, describeNode(nodeType), comments, requirementNode);
-    }
-
-    function checkVariable(node: ts.VariableDeclaration) {
-        // Only check variables in variable declaration lists
-        // and not variables in catch clauses and for loops.
-        const list = node.parent!;
-        if (!isVariableDeclarationList(list)) {
-            return;
-        }
-
-        const statement = list.parent!;
-        if (!isVariableStatement(statement)) {
-            return;
-        }
-
-        // Only check variables at the namespace/module-level or file-level
-        // and not variables declared inside functions and other things.
-        switch (statement.parent!.kind) {
-            case ts.SyntaxKind.SourceFile:
-            case ts.SyntaxKind.ModuleBlock:
-                checkNode(node, ARGUMENT_VARIABLES, statement);
-        }
-    }
-
-    function checkAccessor(node: ts.NamedDeclaration): void {
-        // Properties in object literal expressions do not
-        // require documentation, so neither do accessors.
-        if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
-            checkNode(node, ARGUMENT_PROPERTIES);
-        }
     }
 
     function checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
