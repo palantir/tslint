@@ -18,6 +18,7 @@
 import {
     getChildOfKind,
     hasModifier,
+    isBindingElement,
     isFunctionExpression,
     isIdentifier,
     isMethodDeclaration,
@@ -63,7 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isShorthandPropertyAssignment(node)) {
+        if (isShorthandPropertyAssignment(node) || isShorthandBindingElement(node)) {
             ctx.addFailureAtNode(
                 node.name,
                 Rule.SHORTHAND_ASSIGNMENT,
@@ -83,9 +84,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
 function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
-            if (node.name.kind === ts.SyntaxKind.Identifier &&
-                isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text) {
+            if (isEqualIdentifier(node.name, node.initializer)) {
                 ctx.addFailureAtNode(
                     node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
@@ -102,9 +101,25 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                     fix,
                 );
             }
+        } else if (isBindingElement(node) && node.propertyName !== undefined && isEqualIdentifier(node.propertyName, node.name)) {
+            ctx.addFailure(
+                node.propertyName.getStart(ctx.sourceFile),
+                node.name.end,
+                `${Rule.LONGHAND_PROPERTY}('{${node.propertyName.text}}').`,
+                Lint.Replacement.deleteFromTo(node.propertyName.end, node.name.end),
+            );
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isShorthandBindingElement(node: ts.Node): node is ts.BindingElement & {name: ts.Identifier} {
+    return isBindingElement(node) && node.propertyName === undefined && node.name.kind === ts.SyntaxKind.Identifier &&
+        node.dotDotDotToken === undefined && node.parent!.kind === ts.SyntaxKind.ObjectBindingPattern;
+}
+
+function isEqualIdentifier(propertyName: ts.PropertyName, other: ts.Node): propertyName is ts.Identifier {
+    return propertyName.kind === ts.SyntaxKind.Identifier && isIdentifier(other) && propertyName.text === other.text;
 }
 
 function fixShorthandMethodDeclaration(node: ts.MethodDeclaration, sourceFile: ts.SourceFile) {

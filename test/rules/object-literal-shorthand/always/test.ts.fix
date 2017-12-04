@@ -41,3 +41,6 @@ const asyncFn = {
 }
 
 ({foo} = {foo});
+
+let {foo, bar = foo, "baz": baz, bas = baz, foobar: barfoo} = {};
+let {foo: {foo}} = {};

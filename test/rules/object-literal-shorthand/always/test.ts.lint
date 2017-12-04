@@ -51,3 +51,7 @@ const asyncFn = {
 ({foo: foo} = {foo: foo});
   ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]
                ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]
+
+let {foo, bar = foo, "baz": baz, bas: bas = baz, foobar: barfoo} = {};
+                                 ~~~~~~~~ [Expected property shorthand in object literal ('{bas}').]
+let {foo: {foo}} = {};
