@@ -203,6 +203,7 @@ export const rules = {
     "no-parameter-properties": true,
     "no-redundant-jsdoc": true,
     "no-reference-import": true,
+    "no-self-compare" : true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
