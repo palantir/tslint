@@ -4,7 +4,7 @@ declare const n: number;
 
 // Simple
 {
-    class {
+    class A {
         constructor() {
             super();
             ~~~~~~~~
@@ -13,14 +13,14 @@ declare const n: number;
         }
     }
 
-    class {
+    class B {
         constructor() {
             super();
             super.foo();
         }
     }
 
-    class {
+    class C1 {
         constructor() {
             super();
 
@@ -32,7 +32,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class D {
         constructor() {
             super(super());
             ~~~~~~~~~~~~~ [0]
@@ -42,7 +42,7 @@ declare const n: number;
 
 // If/else
 {
-    class {
+    class A {
         constructor() {
             if (b) {
                 super();
@@ -52,7 +52,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class B {
         constructor() {
             if (b) {
                 super();
@@ -62,7 +62,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class C {
         constructor() {
             if (b) {
                 super();
@@ -77,7 +77,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class D {
         constructor() {
             if (b) {
                 super();
@@ -93,7 +93,7 @@ declare const n: number;
 
 // Loop
 {
-    class {
+    class A {
         constructor() {
             while (b) {
                 if (b) {
@@ -104,7 +104,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class B {
         constructor() {
             while (b) {
                 if (b) {
@@ -121,7 +121,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class C {
         constructor() {
             while (b) {
                 if (b) {
@@ -136,7 +136,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class D {
         constructor() {
             while (b) {
                 if (b) {
@@ -156,7 +156,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class E {
         constructor() {
             while (b) {
                 if (b) {
@@ -182,7 +182,7 @@ declare const n: number;
 
 // Switch
 {
-    class {
+    class A {
         constructor() {
             switch (n) {
                 case 0:
@@ -196,7 +196,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class B {
         constructor() {
             switch (n) {
                 case 0:
@@ -209,7 +209,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class C {
         constructor() {
             switch (n) {
                 case 0:
@@ -230,7 +230,7 @@ declare const n: number;
 
 // Wierd
 {
-    class {
+    class A {
         constructor() {
             if (b) {
                 super();
@@ -242,7 +242,7 @@ declare const n: number;
         }
     }
 
-    class {
+    class B {
         constructor() {
             switch (n) {
                 case 0:
@@ -261,12 +261,20 @@ declare const n: number;
 
 // With ternary operator
 {
-    class {
+    class A {
         constructor(props?: any) {
             props ? super(props) : super();
         }
     }
+
+    class B {
+        constructor(props?: any) {
+            props ? super(props) : super() ? super() : super();
+                                   ~~~~~~~~~~~~~~~~~ [0]
+        }
+    }
 }
+
 
 [0]: Multiple calls to 'super()' found. It must be called only once.
 [1]: 'super()' called in a loop. It must be called only once.
