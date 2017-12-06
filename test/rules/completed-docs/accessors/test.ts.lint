@@ -45,7 +45,8 @@ export class CommentsOnGetOnly {
      */
     get myAccessor(): string { return this.myField; }
 
-    set myAccessor(value: string) { this.myField = value; } // Comments for the setter are inherited from the getter.
+    set myAccessor(value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
 
 }
 
@@ -56,7 +57,8 @@ export class CommentsOnSetOnly {
      */
     private myField: string;
 
-    get myAccessor(): string { return this.myField; }   // Comments from the getter are inherited from the setter.
+    get myAccessor(): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
 
     /**
      * The set accessor.

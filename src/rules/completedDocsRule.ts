@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -79,7 +80,7 @@ export type Visibility = All
     | typeof VISIBILITY_EXPORTED
     | typeof VISIBILITY_INTERNAL;
 
-export class Rule extends Lint.Rules.TypedRule {
+export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
 
     public static defaultArguments: IInputExclusionDescriptors = {
@@ -281,17 +282,16 @@ export class Rule extends Lint.Rules.TypedRule {
 
         type: "style",
         typescriptOnly: false,
-        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     private readonly exclusionFactory = new ExclusionFactory();
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const exclusionsMap = this.getExclusionsMap(options.ruleArguments);
 
-        return this.applyWithFunction(sourceFile, walk, exclusionsMap, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, exclusionsMap);
     }
 
     private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): ExclusionsMap {
@@ -307,7 +307,22 @@ const modifierAliases: { [i: string]: string } = {
     export: "exported",
 };
 
-function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChecker) {
+/**
+ * @remarks See https://github.com/ajafff/tsutils/issues/16
+ */
+const getApparentJsDoc = (node: ts.Node): ts.JSDoc[] => {
+    if (node.kind === ts.SyntaxKind.VariableDeclaration) {
+        const parent = node.parent as ts.VariableDeclarationList;
+
+        return node === parent.declarations[0]
+            ? tsutils.parseJsDocOfNode(parent)
+            : tsutils.parseJsDocOfNode(node);
+    }
+
+    return tsutils.getJsDoc(node);
+};
+
+function walk(context: Lint.WalkContext<ExclusionsMap>) {
     return ts.forEachChild(context.sourceFile, cb);
 
     function cb(node: ts.Node): void {
@@ -390,18 +405,16 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             }
         }
 
-        const symbol = typeChecker.getSymbolAtLocation(name);
-        if (symbol === undefined) {
-            return;
-        }
-
-        const comments = symbol.getDocumentationComment();
-        checkComments(node, describeNode(nodeType), comments, requirementNode);
+        checkNodeDocs(node, nodeType, getApparentJsDoc(node), requirementNode);
     }
 
-    function checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
-        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
-            addDocumentationFailure(node, nodeDescriptor, requirementNode);
+    function checkNodeDocs(node: ts.Node, nodeType: DocType, docs: ts.JSDoc[], requirementNode: ts.Node) {
+        const comments = docs
+            .map((doc) => doc.comment)
+            .filter((comment) => comment !== undefined && comment.trim() !== "");
+
+        if (comments.length === 0) {
+            addDocumentationFailure(node, describeNode(nodeType), requirementNode);
         }
     }
 

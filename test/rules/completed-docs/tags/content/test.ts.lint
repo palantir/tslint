@@ -27,4 +27,15 @@ const ContentValidVariable = 4;
 /**
  * ...
  */
-const CommentBodyVariableRofl = 5;
+const CommentBodyVariableDots = 5;
+
+/**
+ * ...content
+ */
+const CommentBodyVariableDotsAndContent = 6;
+
+/** content */
+const CommentBodyVariableSingleLineContent = 7;
+
+/** ...content */
+const CommentBodyVariableSingleLineDotsAndContent = 8;
