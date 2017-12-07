@@ -1470,7 +1470,7 @@
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
     "rationale": "\nA variable can be reassigned if necessary -\nthere's no good reason to have a duplicate variable declaration.",
-    "optionsDescription": "You can specify `\"check-parameters\"` to check for variables with the same name as a paramter.",
+    "optionsDescription": "You can specify `\"check-parameters\"` to check for variables with the same name as a parameter.",
     "options": {
       "type": "string",
       "enum": [
