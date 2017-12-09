@@ -201,6 +201,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
                 const { name, type, initializer } = node as ts.VariableDeclaration;
                 if (options.decl && initializer !== undefined) {
                     checkForTrailingWhitespace((type !== undefined ? type : name).getEnd());

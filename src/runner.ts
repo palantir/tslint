@@ -26,7 +26,6 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
-    IConfigurationFile,
     JSON_CONFIG_FILENAME,
 } from "./configuration";
 import { FatalError } from "./error";
@@ -236,9 +235,7 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
     return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
 }
 
-async function doLinting(
-        options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
-    const possibleConfigAbsolutePath = options.config !== undefined ? path.resolve(options.config) : null;
+async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
             fix: !!options.fix,
@@ -249,13 +246,15 @@ async function doLinting(
         program);
 
     let lastFolder: string | undefined;
-    let configFile: IConfigurationFile | undefined;
+    let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
     for (const file of files) {
-        const folder = path.dirname(file);
-        if (lastFolder !== folder) {
-            configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
-            lastFolder = folder;
+        if (options.config === undefined) {
+            const folder = path.dirname(file);
+            if (lastFolder !== folder) {
+                configFile = findConfiguration(null, folder).results;
+                lastFolder = folder;
+            }
         }
         if (isFileExcluded(file)) {
             continue;
