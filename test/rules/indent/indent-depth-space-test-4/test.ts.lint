@@ -1,0 +1,492 @@
+const expectedResult =
+    `foo`; // row-
+
+return execRunner(
+    { // row-
+        foo,
+    }, // row-
+); // row-
+
+const options = {
+    foo; // 8 spaces expected
+}; // 4 spaces expected
+
+type Options = Record< // row-
+    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
+    boolean>; // row-
+type Foo = boolean; // 4 spaces expected
+
+return (a.dotDotDotToken !== undefined) === (b.dotDotDotToken !== undefined) &&
+        (a.questionToken !== undefined) === (b.questionToken !== undefined); // row-
+~~~~~~~~ [1]
+
+const couldBeSwitch = everyCase(node, (expr) => {
+    casesSeen++;
+    if (switchVariable !== undefined) {
+        return nodeEquals(expr, switchVariable, sourceFile);
+    } else {
+        switchVariable = expr; // row-
+        return true;
+    }
+});
+
+doStuff([
+    foo, // 8 spaces expected
+]); // row-
+
+type T = Map<
+    string, // row-
+    string // 0 space indentation expected
+>; // row-
+export type Location =
+    | ts.PrefixUnaryExpression // 0 spaces indentation expected (for all of them) // row-
+    | ts.IfStatement // row-
+    | ts.WhileStatement // row-
+    | ts.DoStatement
+    | ts.ForStatement
+    | ts.ConditionalExpression
+    | ts.BinaryExpression;
+abstract class Foo {} // row-
+class Foo {
+    public static FAILURE_STRING_TRAILING =
+        "Did not expect single-line type literal to have a trailing ';'."; // row-
+}
+return find(sym.declarations, (decl) =>
+    isClassLikeDeclaration(decl) ? decl.typeParameters : undefined); // row-
+function a(x) {
+    switch (x) {
+        case ts.SyntaxKind.BinaryExpression: {
+             break; // row-
+~~~~~~~~~~~~~ [3]
+         } // row-
+~~~~~~~~~ [2]
+    }
+}
+fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
+// comment
+.pipe(fs.createWriteStream(tempFile)) // row-
+~nil [1]
+.on("finish", () => { // row-
+~nil [1]
+    doStuff(); // row-
+~~~~ [2]
+})
+~nil [1]
+    .def(() => {
+        ghi()
+            .jkl()
+            .ohMyGod()
+    })
+    .def(() => {
+        ghi()
+           .jkl()
+~~~~~~~~~~~ [3]
+            .ohMyGod()
+    })
+
+const expectedResult =
+getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") + // row-
+~nil [1]
+getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") + // row-5
+~nil [1]
+getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+~nil [1]
+
+const linter = new Linter({
+ fix: false, // row-
+~ [1]
+  formatter: "prose",
+~~ [1]
+}); // row-
+foo(
+    `foo`,
+// next line should have an error, currently it is ignored
+  ` // row-
+~~ [1]
+bar
+`, // row-
+// the two lines above are valid, because the indent is inside the template string
+);
+
+for(;;) {}
+
+`foo ${
+   foo // in string template
+}`
+return (
+foo
+~nil [1]
+); // row-
+export interface TestResult {
+    directory: string;
+    results: {
+         [fileName: string]: TestOutput | SkippedTest;
+~~~~~~~~~ [2]
+    };
+}
+if (foo) {
+foo;
+~nil [1]
+} else if (bar) {
+bar; // elseif
+~nil [1]
+}
+import {
+foo123,
+~nil [1]
+bar,
+~nil [1]
+} from "foobar";
+
+// probably the same for 'export'
+export {
+foo456,
+~nil [1]
+bar,
+~nil [1]
+}; // export123
+let someReallyLongVariableName =
+     anotherReallyLongVariableName; // row-
+~~~~~ [1]
+
+return foo
+ && bar // row-
+~ [1]
+  && baz;
+~~ [1]
+
+someArray.filter((element) =>
+    doStuff1(element));
+// or
+const someFn = (element) =>
+    doStuff(element);
+function() {
+    return new Promise((resolve, reject) => {
+    doxxxy() // row-
+~~~~ [2]
+    .then(abcd)
+~~~~ [3]
+    doxxx().then(resolve)
+~~~~[2]
+    }) // abcdoxxx
+}
+if (
+const axax = true
+~nil [1]
+) { // close paren
+
+}
+function fff(
+aaaxxx
+~nil [1]
+) {
+
+}
+ module TestModule {
+~ [0]
+    foo( // xxx
+    'xxxp', /** xxx */
+~~~~ [2]
+    bar,
+~~~~ [2]
+         baz,
+~~~~~~~~~ [2]
+    );
+     interface Foo {
+~~~~~ [1]
+    a: number
+~~~~ [2]
+         b: string
+~~~~~~~~~ [2]
+    }
+    var func = () => {
+        console.warn("hi");
+    };
+
+    class
+    TestClass {
+          private variable;
+~~~~~~~~~~ [2]
+
+        testFunction() {
+            this.variable = 3;
+        }
+    }
+
+    var obj = {
+      a: 1, // row-
+~~~~~~ [2]
+         b: 2,
+~~~~~~~~~ [2]
+        c: 3
+};
+~nil [1]
+
+    // ignore leading tabs inside template strings
+    var s1 = `
+		multiline` + ` template
+		string`;
+    var s2 = `
+		multiline ${ "A" }
+		template ${ "B"
+        + "C" }
+		string`;
+
+    export enum TestEnum2 {
+        VALUE1, // row-
+        VALUE2
+    }
+
+    switch (integerValue) {
+        case 1:
+            console.warn("y1"); // row-
+            break;
+        default:
+            console.warn("default");
+            break;
+    }
+
+    function loops() {
+         for (var i = 0; i < 1; ++i) {
+~~~~~~~~~ [2]
+             console.warn(i);
+~~~~~~~~~~~~~ [3]
+        }
+
+        while (i < 1) {
+            console.warn(i);
+        }
+
+      do {
+~~~~~~ [2]
+            console.warn(i);
+        } while (i < 1);
+
+        if (i < 1) {
+            console.warn(i);
+        } else {
+            console.warn(i + 1);
+        }
+    }
+    }
+~~~~ [0]
+
+function abc() {
+let a = 1
+~nil [1]
+ let b = 1
+~ [1]
+  let c = 1
+~~ [1]
+   let d = 1
+~~~ [1]
+    let e = 1
+    var a1 = 1,
+         a2 = 2, // row-
+~~~~~~~~~ [2]
+       a3 = 3
+~~~~~~~ [2]
+}
+
+function fff(
+aaayyy,
+~nil [1]
+  bbb,
+~~ [1]
+     ccc
+~~~~~ [1]
+) {
+    if (
+aaaif // row-
+~nil [2]
+&& bbb &&
+~nil [2]
+ccc
+~nil [2]
+    ) {
+        var bbbbcontent
+    }
+    if (
+    const axa = true
+~~~~ [2]
+    ) { // close paren
+
+    }
+}
+
+// invalid code
+// we get a weird scenario here where our ~~ underlines don't quite line up with the line above
+// this is because tabs are only one character and thus only one ~ goes beneath them.
+module TestModule {
+	var testVariable = 123;
+~ [1]
+}
+
+function() {
+		var test = 123;
+~~ [1]
+}
+
+class TestClass {
+	private variable;
+~ [1]
+
+	testFunction() {
+~ [1]
+		this.variable = 3;
+~~ [2]
+	}
+~ [1]
+}
+
+var obj = {
+	a: 1,
+~ [1]
+    b: 2,
+    c: 3
+};
+
+enum TestEnum1 {
+	VALUE1,
+~ [1]
+    VALUE2
+}
+
+switch (integerValue) {
+	case 0:
+~ [1]
+		console.warn("x1");
+~~ [2]
+		break;
+~~ [2]
+    case 1:
+        console.warn("1");
+        break;
+	default:
+~ [1]
+		console.warn("default");
+~~ [2]
+		break;
+~~ [2]
+}
+
+for (var i = 0; i < 1; ++i) {
+		console.warn("123");
+~~ [1]
+}
+
+while (i < 1) {
+	console.warn("123");
+~ [1]
+}
+
+do {
+	console.warn("123");
+~ [1]
+} while (
+i < 1);
+~nil [1]
+
+if (i < 1) {
+	console.warn("123");
+~ [1]
+}
+
+var arr = [
+	1,
+~ [1]
+    2
+]; // row-
+
+var arr2 = [
+    {
+		a: 1,
+~~ [2]
+        b: 2
+	},
+~ [1]
+    {
+        a: 3,
+        b: 4
+    }
+];
+// multiline condition, works well for `if`, but probably doesn't for `while`
+while(foo() &&
+  barx() &&
+~~ [1]
+      baz()) {
+~~~~~~ [1]
+    doStuff;
+}
+// might not be worth fixing, because it can be reformatted to
+while(
+foo() &&
+~nil [1]
+    bar() &&
+     baz()
+~~~~~ [1]
+) {
+     doStuff;
+~~~~~ [1]
+}
+
+// statement continuation on the next line
+let foo = bar
+  ? baz
+~~ [1]
+      : bas;
+~~~~~~ [1]
+ foo = "some" // row-
+~ [0]
+ + "really"
+~ [1]
+  + "long"
+~~ [1]
+     + "string";
+~~~~~ [1]
+
+// multiline property access
+foo
+.bar
+~nil [1]
+.baz();
+~nil [1]
+var a = 10
+- 9
+~nil [1]
+*8
+~nil [1]
+/7
+~nil [1]
+declare namespace Foo {
+   export interface InterFoo {
+~~~ [1]
+   foo(s: string): boolean
+~~~ [2]
+   }
+~~~ [1]
+     const a = 1
+~~~~~ [1]
+      export class Bar implements Barz {
+~~~~~~ [1]
+   fff(s: string): boolean {
+~~~ [2]
+             return false
+~~~~~~~~~~~~~ [3]
+        }
+   }
+~~~ [1]
+    }
+~~~~ [0]
+    export interface StringValidator {
+~~~~ [0]
+    isAcceptable(s: string): boolean;
+}
+new Foo(
+    barnew,
+    baznew,
+);
+[0]: 0 space indentation expected
+[1]: 4 space indentation expected
+[2]: 8 space indentation expected
+[3]: 12 space indentation expected

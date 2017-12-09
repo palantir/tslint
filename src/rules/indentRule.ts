@@ -205,42 +205,72 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos
         ts.SyntaxKind.NamedExports,
         ts.SyntaxKind.TypeLiteral,
         ts.SyntaxKind.UnionType,
-        ts.SyntaxKind.TypeAliasDeclaration,
+        ts.SyntaxKind.TypeReference,
     ];
 
     if (isCloseElement(node, line)) {
         result --;
     }
+    let nodeIsCloseParen = false;
     if (isCloseParen(node, line) && !isArrowFunctionWithBlock(node)) {
+        nodeIsCloseParen = true;
         result ++;
     }
+    let nodeIsParenthesizedExpr = false;
+    if (node.kind === ts.SyntaxKind.ParenthesizedExpression) {
+        nodeIsParenthesizedExpr = true;
+        result ++;
+    }
+    let nodeIsInParen = false;
     if (!inStatementParen(node) && isInParen(node, root)) {
+        nodeIsInParen = true;
         result ++;
     }
+    let nodeIsInIdentifierDeclarationList = false;
     if (isIdentifierInDeclarationList(node)) {
+        nodeIsInIdentifierDeclarationList = true;
+        result ++;
+    }
+    let nodeIsTypeReference = false;
+    if (node.kind === ts.SyntaxKind.TypeReference) {
+        nodeIsTypeReference = true;
+        console.info("type reference");
         result ++;
     }
     let tokenInBinary = false;
-    let sameLineWithBinary = false;
     if (node.parent !== undefined) {
-        const token: ts.Node | undefined = getTokenAtPosition(node.parent, nodePos, root);
+        const token: ts.Node | undefined = getTokenAtPosition(node, nodePos, root);
         if (token !== undefined) {
-            if (token.kind === ts.SyntaxKind.CloseBraceToken && result > 0) {
+            if ((token.kind === ts.SyntaxKind.CloseBraceToken || token.kind === ts.SyntaxKind.CloseBracketToken) && result > 0) {
+                if (nodeIsInParen) {
+                    const nextToken: ts.Node | undefined = getTokenAtPosition(node.parent, nodePos + 1, root);
+                    if (nextToken !== undefined && nextToken.kind === ts.SyntaxKind.CloseParenToken) {
+                        result --;
+                    }
+                } else {
+                    result --;
+                }
+            } else if (token.kind === ts.SyntaxKind.CloseParenToken && nodeIsParenthesizedExpr && result > 0) {
                 result --;
             }
             const binaryNode: ts.Node | undefined = getBinaryParent(token);
             if (binaryNode !== undefined) {
-                if (!isSameLine(root, nodePos, binaryNode.getStart())) {
+                if (!isSameLine(root, nodePos, binaryNode.getStart()) && !nodeIsInIdentifierDeclarationList) {
                     result ++;
                     tokenInBinary = true;
-                } else {
-                    sameLineWithBinary = true;
                 }
+            } else if (token.kind === ts.SyntaxKind.BarToken) {
+                result ++;
+            }
+            if (token.kind === ts.SyntaxKind.GreaterThanToken && nodeIsTypeReference) {
+                result--;
             }
         }
         if (
             (node.parent.kind === ts.SyntaxKind.PropertyDeclaration || node.kind === ts.SyntaxKind.TypeAliasDeclaration)
-            && !isSameLine(root, nodePos, node.parent.getStart())) {
+            && !isSameLine(root, nodePos, node.parent.getStart())
+            && node.parent.kind !== ts.SyntaxKind.SourceFile
+        ) {
                 result ++;
         }
     }
@@ -259,37 +289,54 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos
     }
     const temptoken = getTokenAtPosition(root, nodePos);
     if (temptoken !== undefined && node.parent !== undefined) {
+        const parentKind = node.parent.kind;
         if (
             node.kind === ts.SyntaxKind.Block
-            && node.parent.kind === ts.SyntaxKind.CaseClause
+            && parentKind === ts.SyntaxKind.CaseClause
             && temptoken.kind === ts.SyntaxKind.CloseBraceToken
         ) {
             result --;
         }
     }
-
+    const parentsAddingIndent: ts.Node[] = [];
+    let hasDepthOfMultiLineAssignment = false;
+    let foundBlockType = false;
     while (parent !== undefined) {
+        if (parent.kind === ts.SyntaxKind.VariableDeclaration
+                && !isSameLine(root, parent.getStart(), node.getStart())
+                && !hasDepthOfMultiLineAssignment
+                && !foundBlockType
+                && !nodeIsInIdentifierDeclarationList
+                && !tokenInBinary
+        ) {
+            hasDepthOfMultiLineAssignment = true;
+            result ++;
+        }
+
         if (blockTypes.indexOf(parent.kind) > -1) {
             if (
                 !isArrowFunctionWithBlock(parent)
                 && !isCaseWithBlock(parent)
                 && !isSameLine(root, nodePos, parent.getStart())
+                && !(nodeIsInParen && parent.kind === ts.SyntaxKind.ReturnStatement)
+                && !(nodeIsCloseParen && parent.kind === ts.SyntaxKind.ReturnStatement)
             ) {
+                parentsAddingIndent.push(parent);
+                foundBlockType = true;
                 result++;
             }
-        }
-        if (
-            parent.kind === ts.SyntaxKind.TypeAliasDeclaration
-            && temptoken !== undefined
-            && temptoken.kind === ts.SyntaxKind.GreaterThanToken
-        ) {
-            result --;
         }
 
         if (isArrowFunctionWithoutBlock(parent)) {
             result ++;
-        } else if (isArrowFunctionWithBlock(parent)
-            && !isSameLine(root, parent.getStart(), nodePos)) {
+            foundBlockType = true;
+        } else if (
+            isArrowFunctionWithBlock(parent)
+            && !isSameLine(root, parent.getStart(), nodePos)
+            && parentsAddingIndent.filter((item: ts.Node) => item !== parent)
+                .every((item: ts.Node) => !isSameLine(root, item.getStart(), parent!.getStart()))
+        ) {
+                foundBlockType = true;
                 result ++;
         }
         if (inStatementParen(parent)) {
@@ -301,13 +348,10 @@ function getNodeDeepth(node: ts.Node, line: string, root: ts.SourceFile, nodePos
                 result ++;
             }
         }
-
-        if (sameLineWithBinary && parent.kind !== ts.SyntaxKind.SourceFile) {
-            if (parent.kind === ts.SyntaxKind.VariableDeclaration) {
-                result ++;
-            }
-        }
         parent = parent.parent;
+    }
+    if (hasDepthOfMultiLineAssignment && foundBlockType && result > 0) {
+        result--;
     }
 
     return result;

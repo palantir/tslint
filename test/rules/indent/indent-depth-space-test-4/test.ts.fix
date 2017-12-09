@@ -1,0 +1,382 @@
+const expectedResult =
+    `foo`; // row-
+
+return execRunner(
+    { // row-
+        foo,
+    }, // row-
+); // row-
+
+const options = {
+    foo; // 8 spaces expected
+}; // 4 spaces expected
+
+type Options = Record< // row-
+    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
+    boolean>; // row-
+type Foo = boolean; // 4 spaces expected
+
+return (a.dotDotDotToken !== undefined) === (b.dotDotDotToken !== undefined) &&
+    (a.questionToken !== undefined) === (b.questionToken !== undefined); // row-
+
+const couldBeSwitch = everyCase(node, (expr) => {
+    casesSeen++;
+    if (switchVariable !== undefined) {
+        return nodeEquals(expr, switchVariable, sourceFile);
+    } else {
+        switchVariable = expr; // row-
+        return true;
+    }
+});
+
+doStuff([
+    foo, // 8 spaces expected
+]); // row-
+
+type T = Map<
+    string, // row-
+    string // 0 space indentation expected
+>; // row-
+export type Location =
+    | ts.PrefixUnaryExpression // 0 spaces indentation expected (for all of them) // row-
+    | ts.IfStatement // row-
+    | ts.WhileStatement // row-
+    | ts.DoStatement
+    | ts.ForStatement
+    | ts.ConditionalExpression
+    | ts.BinaryExpression;
+abstract class Foo {} // row-
+class Foo {
+    public static FAILURE_STRING_TRAILING =
+        "Did not expect single-line type literal to have a trailing ';'."; // row-
+}
+return find(sym.declarations, (decl) =>
+    isClassLikeDeclaration(decl) ? decl.typeParameters : undefined); // row-
+function a(x) {
+    switch (x) {
+        case ts.SyntaxKind.BinaryExpression: {
+            break; // row-
+        } // row-
+    }
+}
+fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
+// comment
+    .pipe(fs.createWriteStream(tempFile)) // row-
+    .on("finish", () => { // row-
+        doStuff(); // row-
+    })
+    .def(() => {
+        ghi()
+            .jkl()
+            .ohMyGod()
+    })
+    .def(() => {
+        ghi()
+            .jkl()
+            .ohMyGod()
+    })
+
+const expectedResult =
+    getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") + // row-
+    getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") + // row-5
+    getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+
+const linter = new Linter({
+    fix: false, // row-
+    formatter: "prose",
+}); // row-
+foo(
+    `foo`,
+// next line should have an error, currently it is ignored
+    ` // row-
+bar
+`, // row-
+// the two lines above are valid, because the indent is inside the template string
+);
+
+for(;;) {}
+
+`foo ${
+   foo // in string template
+}`
+return (
+    foo
+); // row-
+export interface TestResult {
+    directory: string;
+    results: {
+        [fileName: string]: TestOutput | SkippedTest;
+    };
+}
+if (foo) {
+    foo;
+} else if (bar) {
+    bar; // elseif
+}
+import {
+    foo123,
+    bar,
+} from "foobar";
+
+// probably the same for 'export'
+export {
+    foo456,
+    bar,
+}; // export123
+let someReallyLongVariableName =
+    anotherReallyLongVariableName; // row-
+
+return foo
+    && bar // row-
+    && baz;
+
+someArray.filter((element) =>
+    doStuff1(element));
+// or
+const someFn = (element) =>
+    doStuff(element);
+function() {
+    return new Promise((resolve, reject) => {
+        doxxxy() // row-
+            .then(abcd)
+        doxxx().then(resolve)
+    }) // abcdoxxx
+}
+if (
+    const axax = true
+) { // close paren
+
+}
+function fff(
+    aaaxxx
+) {
+
+}
+module TestModule {
+    foo( // xxx
+        'xxxp', /** xxx */
+        bar,
+        baz,
+    );
+    interface Foo {
+        a: number
+        b: string
+    }
+    var func = () => {
+        console.warn("hi");
+    };
+
+    class
+    TestClass {
+        private variable;
+
+        testFunction() {
+            this.variable = 3;
+        }
+    }
+
+    var obj = {
+        a: 1, // row-
+        b: 2,
+        c: 3
+    };
+
+    // ignore leading tabs inside template strings
+    var s1 = `
+		multiline` + ` template
+		string`;
+    var s2 = `
+		multiline ${ "A" }
+		template ${ "B"
+        + "C" }
+		string`;
+
+    export enum TestEnum2 {
+        VALUE1, // row-
+        VALUE2
+    }
+
+    switch (integerValue) {
+        case 1:
+            console.warn("y1"); // row-
+            break;
+        default:
+            console.warn("default");
+            break;
+    }
+
+    function loops() {
+        for (var i = 0; i < 1; ++i) {
+            console.warn(i);
+        }
+
+        while (i < 1) {
+            console.warn(i);
+        }
+
+        do {
+            console.warn(i);
+        } while (i < 1);
+
+        if (i < 1) {
+            console.warn(i);
+        } else {
+            console.warn(i + 1);
+        }
+    }
+}
+
+function abc() {
+    let a = 1
+    let b = 1
+    let c = 1
+    let d = 1
+    let e = 1
+    var a1 = 1,
+        a2 = 2, // row-
+        a3 = 3
+}
+
+function fff(
+    aaayyy,
+    bbb,
+    ccc
+) {
+    if (
+        aaaif // row-
+        && bbb &&
+        ccc
+    ) {
+        var bbbbcontent
+    }
+    if (
+        const axa = true
+    ) { // close paren
+
+    }
+}
+
+// invalid code
+// we get a weird scenario here where our ~~ underlines don't quite line up with the line above
+// this is because tabs are only one character and thus only one ~ goes beneath them.
+module TestModule {
+    var testVariable = 123;
+}
+
+function() {
+    var test = 123;
+}
+
+class TestClass {
+    private variable;
+
+    testFunction() {
+        this.variable = 3;
+    }
+}
+
+var obj = {
+    a: 1,
+    b: 2,
+    c: 3
+};
+
+enum TestEnum1 {
+    VALUE1,
+    VALUE2
+}
+
+switch (integerValue) {
+    case 0:
+        console.warn("x1");
+        break;
+    case 1:
+        console.warn("1");
+        break;
+    default:
+        console.warn("default");
+        break;
+}
+
+for (var i = 0; i < 1; ++i) {
+    console.warn("123");
+}
+
+while (i < 1) {
+    console.warn("123");
+}
+
+do {
+    console.warn("123");
+} while (
+    i < 1);
+
+if (i < 1) {
+    console.warn("123");
+}
+
+var arr = [
+    1,
+    2
+]; // row-
+
+var arr2 = [
+    {
+        a: 1,
+        b: 2
+    },
+    {
+        a: 3,
+        b: 4
+    }
+];
+// multiline condition, works well for `if`, but probably doesn't for `while`
+while(foo() &&
+    barx() &&
+    baz()) {
+    doStuff;
+}
+// might not be worth fixing, because it can be reformatted to
+while(
+    foo() &&
+    bar() &&
+    baz()
+) {
+    doStuff;
+}
+
+// statement continuation on the next line
+let foo = bar
+    ? baz
+    : bas;
+foo = "some" // row-
+    + "really"
+    + "long"
+    + "string";
+
+// multiline property access
+foo
+    .bar
+    .baz();
+var a = 10
+    - 9
+    *8
+    /7
+declare namespace Foo {
+    export interface InterFoo {
+        foo(s: string): boolean
+    }
+    const a = 1
+    export class Bar implements Barz {
+        fff(s: string): boolean {
+            return false
+        }
+    }
+}
+export interface StringValidator {
+    isAcceptable(s: string): boolean;
+}
+new Foo(
+    barnew,
+    baznew,
+);
