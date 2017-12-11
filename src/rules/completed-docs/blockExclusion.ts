@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../../index";
 import { ALL, Visibility, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL } from "../completedDocsRule";
 import { Exclusion } from "./exclusion";
 
@@ -33,7 +33,7 @@ export class BlockExclusion extends Exclusion<IBlockExclusionDescriptor> {
             return false;
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
+        if (hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
             return !this.visibilities.has(VISIBILITY_EXPORTED);
         }
 

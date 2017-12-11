@@ -56,7 +56,7 @@ import { RuleWalker } from "./ruleWalker";
  * }
  */
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
-    private scopeStack: T[];
+    private readonly scopeStack: T[];
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
@@ -107,6 +107,6 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return isScopeBoundary(node);
+        return isScopeBoundary(node); // tslint:disable-line:deprecation
     }
 }

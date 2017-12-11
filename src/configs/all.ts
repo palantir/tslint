@@ -55,6 +55,7 @@ export const rules = {
     "no-var-requires": true,
     "only-arrow-functions": true,
     "prefer-for-of": true,
+    "prefer-readonly": true,
     "promise-function-async": true,
     "typedef": [
         true,
