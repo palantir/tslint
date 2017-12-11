@@ -307,21 +307,6 @@ const modifierAliases: { [i: string]: string } = {
     export: "exported",
 };
 
-/**
- * @remarks See https://github.com/ajafff/tsutils/issues/16
- */
-const getApparentJsDoc = (node: ts.Node): ts.JSDoc[] => {
-    if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-        const parent = node.parent as ts.VariableDeclarationList;
-
-        return node === parent.declarations[0]
-            ? tsutils.parseJsDocOfNode(parent)
-            : tsutils.parseJsDocOfNode(node);
-    }
-
-    return tsutils.getJsDoc(node);
-};
-
 function walk(context: Lint.WalkContext<ExclusionsMap>) {
     return ts.forEachChild(context.sourceFile, cb);
 
@@ -381,7 +366,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
                 if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
-                    checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                    checkAccessorNode(node as ts.AccessorDeclaration);
                 }
         }
 
@@ -389,33 +374,58 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
     }
 
     function checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
+        if (!nodeIsExcluded(node, nodeType, requirementNode) && !nodeHasDocs(node)) {
+            addDocumentationFailure(node, describeNode(nodeType), requirementNode);
+        }
+    }
+
+    function checkAccessorNode(node: ts.AccessorDeclaration): void {
+        if (nodeIsExcluded(node, ARGUMENT_PROPERTIES, node) || nodeHasDocs(node)) {
+            return;
+        }
+
+        const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
+        const correspondingKind = node.kind === ts.SyntaxKind.GetAccessor
+            ? ts.SyntaxKind.SetAccessor
+            : ts.SyntaxKind.GetAccessor;
+        const correspondingAccessor = getNodeOfKind(parent.members, correspondingKind);
+
+        if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor)) {
+            addDocumentationFailure(node, ARGUMENT_PROPERTIES, node);
+        }
+    }
+
+    function nodeIsExcluded(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node): boolean {
         const { name } = node;
         if (name === undefined) {
-            return;
+            return true;
         }
 
         const exclusions = context.options.get(nodeType);
         if (exclusions === undefined) {
-            return;
+            return true;
         }
 
         for (const exclusion of exclusions) {
             if (exclusion.excludes(requirementNode)) {
-                return;
+                return true;
             }
         }
 
-        checkNodeDocs(node, nodeType, getApparentJsDoc(node), requirementNode);
+        return false;
     }
 
-    function checkNodeDocs(node: ts.Node, nodeType: DocType, docs: ts.JSDoc[], requirementNode: ts.Node) {
+    function nodeHasDocs(node: ts.Node): boolean {
+        const docs = getApparentJsDoc(node);
+        if (docs === undefined) {
+            return false;
+        }
+
         const comments = docs
             .map((doc) => doc.comment)
             .filter((comment) => comment !== undefined && comment.trim() !== "");
 
-        if (comments.length === 0) {
-            addDocumentationFailure(node, describeNode(nodeType), requirementNode);
-        }
+        return comments.length !== 0;
     }
 
     function addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
@@ -425,6 +435,44 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
 
         context.addFailureAt(start, width, description);
     }
+}
+
+function getNodeOfKind(nodes: ts.NodeArray<ts.Node>, kind: ts.SyntaxKind) {
+    for (const node of nodes) {
+        if (node.kind === kind) {
+            return node;
+        }
+    }
+
+    return undefined;
+}
+
+/**
+ * @remarks See https://github.com/ajafff/tsutils/issues/16
+ */
+function getApparentJsDoc(node: ts.Node): ts.JSDoc[] | undefined {
+    if (ts.isVariableDeclaration(node)) {
+        if (variableIsAfterFirstInDeclarationList(node)) {
+            return undefined;
+        }
+
+        node = node.parent!;
+    }
+
+    if (ts.isVariableDeclarationList(node)) {
+        node = node.parent!;
+    }
+
+    return tsutils.getJsDoc(node);
+}
+
+function variableIsAfterFirstInDeclarationList(node: ts.VariableDeclaration): boolean {
+    const parent = node.parent;
+    if (parent === undefined) {
+        return false;
+    }
+
+    return ts.isVariableDeclarationList(parent) && node !== parent.declarations[0];
 }
 
 function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
