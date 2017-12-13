@@ -1,5 +1,3 @@
-this.foo()["bar"]();
-          ~~~~~~~ [ERROR]
 foo().bar();
      ~~~~ [ERROR]
 
