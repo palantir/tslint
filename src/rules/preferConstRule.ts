@@ -175,10 +175,12 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     });
                 }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
-                this.handleBindingName((node as ts.ParameterDeclaration).name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if (node.parent!.kind !== ts.SyntaxKind.IndexSignature) {
+                    this.handleBindingName((node as ts.ParameterDeclaration).name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (utils.isPostfixUnaryExpression(node) ||
                        utils.isPrefixUnaryExpression(node) &&
                        (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) {

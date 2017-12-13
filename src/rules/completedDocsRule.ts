@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { Exclusion } from "./completed-docs/exclusion";
 import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
-import { ExclusionFactory } from "./completed-docs/exclusionFactory";
+import { ExclusionFactory, ExclusionsMap } from "./completed-docs/exclusionFactory";
 
 export const ALL = "all";
 
@@ -49,7 +47,7 @@ export const PRIVACY_PROTECTED = "protected";
 export const PRIVACY_PUBLIC = "public";
 
 export const TAGS_FOR_CONTENT = "content";
-export const TAGS_FOR_EXISTENCE = "exists";
+export const TAGS_FOR_EXISTENCE = "existence";
 
 export const VISIBILITY_EXPORTED = "exported";
 export const VISIBILITY_INTERNAL = "internal";
@@ -291,14 +289,12 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
+        const exclusionsMap = this.getExclusionsMap(options.ruleArguments);
 
-        completedDocsWalker.setExclusionsMap(this.getExclusionsMap(options.ruleArguments));
-
-        return this.applyWithWalker(completedDocsWalker);
+        return this.applyWithFunction(sourceFile, walk, exclusionsMap, program.getTypeChecker());
     }
 
-    private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): Map<DocType, Array<Exclusion<any>>> {
+    private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): ExclusionsMap {
         if (ruleArguments.length === 0) {
             ruleArguments = [Rule.defaultArguments];
         }
@@ -307,76 +303,83 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
-    private static modifierAliases: { [i: string]: string } = {
-        export: "exported",
-    };
+const modifierAliases: { [i: string]: string } = {
+    export: "exported",
+};
 
-    private exclusionsMap: Map<DocType, Array<Exclusion<any>>>;
+function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChecker) {
+    return ts.forEachChild(context.sourceFile, cb);
 
-    public setExclusionsMap(exclusionsMap: Map<DocType, Array<Exclusion<any>>>): void {
-        this.exclusionsMap = exclusionsMap;
+    function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+                checkNode(node as ts.ClassDeclaration, ARGUMENT_CLASSES);
+                break;
+
+            case ts.SyntaxKind.EnumDeclaration:
+                checkNode(node as ts.EnumDeclaration, ARGUMENT_ENUMS);
+                for (const member of (node as ts.EnumDeclaration).members) {
+                    // Enum members don't have modifiers, so use the parent
+                    // enum declaration when checking the requirements.
+                    checkNode(member, ARGUMENT_ENUM_MEMBERS, node);
+                }
+                break;
+
+            case ts.SyntaxKind.FunctionDeclaration:
+                checkNode(node as ts.FunctionDeclaration, ARGUMENT_FUNCTIONS);
+                break;
+
+            case ts.SyntaxKind.InterfaceDeclaration:
+                checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
+                break;
+
+            case ts.SyntaxKind.MethodDeclaration:
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                }
+                break;
+
+            case ts.SyntaxKind.ModuleDeclaration:
+                checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
+                break;
+
+            case ts.SyntaxKind.PropertyDeclaration:
+                checkNode(node as ts.PropertyDeclaration, ARGUMENT_PROPERTIES);
+                break;
+
+            case ts.SyntaxKind.TypeAliasDeclaration:
+                checkNode(node as ts.TypeAliasDeclaration, ARGUMENT_TYPES);
+                break;
+
+            case ts.SyntaxKind.VariableStatement:
+                // Only check variables at the namespace/module-level or file-level
+                // and not variables declared inside functions and other things.
+                switch (node.parent!.kind) {
+                    case ts.SyntaxKind.SourceFile:
+                    case ts.SyntaxKind.ModuleBlock:
+                        for (const declaration of (node as ts.VariableStatement).declarationList.declarations) {
+                            checkNode(declaration, ARGUMENT_VARIABLES, node);
+                        }
+                }
+                break;
+
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                }
+        }
+
+        return ts.forEachChild(node, cb);
     }
 
-    public visitClassDeclaration(node: ts.ClassDeclaration): void {
-        this.checkNode(node, ARGUMENT_CLASSES);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitEnumDeclaration(node: ts.EnumDeclaration): void {
-        this.checkNode(node, ARGUMENT_ENUMS);
-        super.visitEnumDeclaration(node);
-    }
-
-    public visitEnumMember(node: ts.EnumMember): void {
-        // Enum members don't have modifiers, so use the parent
-        // enum declaration when checking the requirements.
-        this.checkNode(node, ARGUMENT_ENUM_MEMBERS, node.parent);
-        super.visitEnumMember(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        this.checkNode(node, ARGUMENT_FUNCTIONS);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkNode(node, ARGUMENT_INTERFACES);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
-        this.checkNode(node, ARGUMENT_METHODS);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitModuleDeclaration(node: ts.ModuleDeclaration): void {
-        this.checkNode(node, ARGUMENT_NAMESPACES);
-        super.visitModuleDeclaration(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
-        this.checkNode(node, ARGUMENT_PROPERTIES);
-        super.visitPropertyDeclaration(node);
-    }
-
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration): void {
-        this.checkNode(node, ARGUMENT_TYPES);
-        super.visitTypeAliasDeclaration(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.checkVariable(node);
-        super.visitVariableDeclaration(node);
-    }
-
-    private checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
+    function checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
         const { name } = node;
         if (name === undefined) {
             return;
         }
 
-        const exclusions = this.exclusionsMap.get(nodeType);
+        const exclusions = context.options.get(nodeType);
         if (exclusions === undefined) {
             return;
         }
@@ -387,68 +390,46 @@ class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
             }
         }
 
-        const symbol = this.getTypeChecker().getSymbolAtLocation(name);
+        const symbol = typeChecker.getSymbolAtLocation(name);
         if (symbol === undefined) {
             return;
         }
 
         const comments = symbol.getDocumentationComment();
-        this.checkComments(node, this.describeNode(nodeType), comments, requirementNode);
+        checkComments(node, describeNode(nodeType), comments, requirementNode);
     }
 
-    private checkVariable(node: ts.VariableDeclaration) {
-        // Only check variables in variable declaration lists
-        // and not variables in catch clauses and for loops.
-        const list = node.parent!;
-        if (!isVariableDeclarationList(list)) {
-            return;
-        }
-
-        const statement = list.parent!;
-        if (!isVariableStatement(statement)) {
-            return;
-        }
-
-        // Only check variables at the namespace/module-level or file-level
-        // and not variables declared inside functions and other things.
-        switch (statement.parent!.kind) {
-            case ts.SyntaxKind.SourceFile:
-            case ts.SyntaxKind.ModuleBlock:
-                this.checkNode(node, ARGUMENT_VARIABLES, statement);
-        }
-    }
-
-    private checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
+    function checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
         if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
-            this.addDocumentationFailure(node, nodeDescriptor, requirementNode);
+            addDocumentationFailure(node, nodeDescriptor, requirementNode);
         }
     }
 
-    private addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
+    function addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = this.describeDocumentationFailure(requirementNode, nodeType);
+        const description = describeDocumentationFailure(requirementNode, nodeType);
 
-        this.addFailureAt(start, width, description);
+        context.addFailureAt(start, width, description);
+    }
+}
+
+function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
+    let description = Rule.FAILURE_STRING_EXIST;
+
+    if (node.modifiers !== undefined) {
+        description += `${node.modifiers.map((modifier) => describeModifier(modifier.kind)).join(" ")} `;
     }
 
-    private describeDocumentationFailure(node: ts.Node, nodeType: string): string {
-        let description = Rule.FAILURE_STRING_EXIST;
+    return `${description}${nodeType}.`;
+}
 
-        if (node.modifiers !== undefined) {
-            description += `${node.modifiers.map((modifier) => this.describeModifier(modifier.kind)).join(" ")} `;
-        }
+function describeModifier(kind: ts.SyntaxKind) {
+    const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
+    const alias = modifierAliases[description];
+    return alias !== undefined ? alias : description;
+}
 
-        return `${description}${nodeType}.`;
-    }
-
-    private describeModifier(kind: ts.SyntaxKind) {
-        const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
-        const alias = CompletedDocsWalker.modifierAliases[description];
-        return alias !== undefined ? alias : description;
-    }
-
-    private describeNode(nodeType: DocType): string {
-        return nodeType.replace("-", " ");
-    }
+function describeNode(nodeType: DocType): string {
+    return nodeType.replace("-", " ");
 }

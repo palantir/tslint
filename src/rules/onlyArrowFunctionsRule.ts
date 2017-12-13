@@ -84,7 +84,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.FunctionExpression: {
                 const f = node as ts.FunctionLikeDeclaration;
                 if (!(allowNamedFunctions && f.name !== undefined) && !functionIsExempt(f)) {
-                    ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
+                    ctx.addFailureAtNode(utils.getChildOfKind(node, ts.SyntaxKind.FunctionKeyword, ctx.sourceFile)!, Rule.FAILURE_STRING);
                 }
             }
         }

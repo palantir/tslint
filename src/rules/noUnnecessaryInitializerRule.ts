@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBindingPattern } from "tsutils";
+import { getChildOfKind, isBindingPattern, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -52,7 +52,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
-                if (!isBindingPattern((node as ts.VariableDeclaration).name) && !Lint.isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
+                if (!isBindingPattern((node as ts.VariableDeclaration).name) && !isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
                     checkInitializer(node as ts.VariableDeclaration);
                 }
                 break;
@@ -84,7 +84,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
         const fix = Lint.Replacement.deleteFromTo(
-            Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
+            getChildOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
             node.end);
         ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
     }

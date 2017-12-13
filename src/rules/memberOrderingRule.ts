@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -334,8 +335,8 @@ function memberKindFromName(name: string): MemberKind[] {
 }
 
 function getMemberKind(member: Member): MemberKind | undefined {
-    const accessLevel =  hasModifier(ts.SyntaxKind.PrivateKeyword) ? "private"
-        : hasModifier(ts.SyntaxKind.ProtectedKeyword) ? "protected"
+    const accessLevel =  hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword) ? "private"
+        : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword) ? "protected"
         : "public";
 
     switch (member.kind) {
@@ -356,12 +357,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     }
 
     function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
+        const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
         return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
-    }
-
-    function hasModifier(kind: ts.SyntaxKind) {
-        return Lint.hasModifier(member.modifiers, kind);
     }
 }
 

@@ -94,7 +94,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (isBlock(node) && isBlockUnnecessary(node)) {
-            ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!, Rule.FAILURE_STRING_AS_NEEDED);
+            ctx.addFailureAt(node.statements.pos - 1, 1, Rule.FAILURE_STRING_AS_NEEDED);
         }
         ts.forEachChild(node, cb);
     });
@@ -151,8 +151,8 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
     private createMissingBraceFix(statement: ts.Statement, node: ts.IterationStatement | ts.IfStatement, sameLine: boolean) {
         if (sameLine) {
             return [
-                Lint.Replacement.appendText(statement.getStart(), "{ "),
-                Lint.Replacement.appendText(statement.getEnd(), " }"),
+                Lint.Replacement.appendText(statement.pos, " {"),
+                Lint.Replacement.appendText(statement.end, " }"),
             ];
         } else {
             const match = /\n([\t ])/.exec(node.getFullText(this.sourceFile)); // determine which character to use (tab or space)
@@ -164,9 +164,8 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
             const maybeCarriageReturn = this.sourceFile.text[this.sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r" ? "\r" : "";
 
             return [
-                Lint.Replacement.appendText(
-                    this.sourceFile.getLineEndOfPosition(statement.pos), " {"),
-                Lint.Replacement.appendText(statement.getEnd(), `${maybeCarriageReturn}\n${indentation}}`),
+                Lint.Replacement.appendText(statement.pos, " {"),
+                Lint.Replacement.appendText(statement.end, `${maybeCarriageReturn}\n${indentation}}`),
             ];
         }
     }
