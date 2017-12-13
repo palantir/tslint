@@ -116,3 +116,106 @@ export class OnlyHasSetAccessorWithNoComments {
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
 
 }
+
+const computedName = "myComputedName";
+
+export class ComputedNamesWithCommentsOnGetOnly {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * ...
+     */
+    get [computedName](): string { return this.myField; }
+
+    set [computedName](value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}
+
+export class ComputedNamesWithCommentsOnSetOnly {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get [computedName](): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+    /**
+     * ...
+     */
+    set [computedName](value: string) { this.myField = value; }
+
+}
+
+export class OnlyComputedGetAccessorNameWithNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get [computedName](): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}
+
+export class OnlyComputedGetAccessorNameWithComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * ...
+     */
+    get [computedName](): string { return this.myField; }
+
+}
+
+export class OnlyComputedSetAccessorNameWithNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    set [computedName](value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}
+
+export class OnlyComputedSetAccessorNameWithComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * ...
+     */
+    set [computedName](value: string) { this.myField = value; }
+
+}
+
+export class SameComputedNamesWithNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get [computedName](): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+    set [computedName](value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}

@@ -384,11 +384,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
             return;
         }
 
-        const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
-        const correspondingKind = node.kind === ts.SyntaxKind.GetAccessor
-            ? ts.SyntaxKind.SetAccessor
-            : ts.SyntaxKind.GetAccessor;
-        const correspondingAccessor = getNodeOfKind(parent.members, correspondingKind);
+        const correspondingAccessor = getCorrespondingAccessor(node);
 
         if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor)) {
             addDocumentationFailure(node, ARGUMENT_PROPERTIES, node);
@@ -437,10 +433,24 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
     }
 }
 
-function getNodeOfKind(nodes: ts.NodeArray<ts.Node>, kind: ts.SyntaxKind) {
-    for (const node of nodes) {
-        if (node.kind === kind) {
-            return node;
+function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
+    const propertyName = tsutils.getPropertyName(node.name);
+    if (propertyName === undefined) {
+        return undefined;
+    }
+
+    const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
+    const correspondingKindCheck = node.kind === ts.SyntaxKind.GetAccessor
+        ? ts.isSetAccessor
+        : ts.isGetAccessor;
+
+    for (const member of parent.members) {
+        if (!correspondingKindCheck(member)) {
+            continue;
+        }
+
+        if (tsutils.getPropertyName(member.name) === propertyName) {
+            return member;
         }
     }
 
