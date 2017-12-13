@@ -39,3 +39,5 @@ const asyncFn = {
   async foo() {},
   async *bar() {}
 }
+
+({foo} = {foo});
