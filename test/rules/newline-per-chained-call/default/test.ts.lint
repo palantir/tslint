@@ -1,6 +1,9 @@
 this.getFoo()[0].toString();
                 ~~~~~~~~~ [ERROR]
 
+this.foo()["bar"]().buzz();
+                   ~~~~~ [ERROR]
+
 this.foo()["bar"]();
 
 foo().bar();
