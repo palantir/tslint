@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -91,9 +92,9 @@ function walk(context: Lint.WalkContext<Options>) {
     }
 
     return ts.forEachChild(context.sourceFile, function callback(node: ts.Node): void {
-        if (ts.isPostfixUnaryExpression(node)) {
+        if (tsutils.isPostfixUnaryExpression(node)) {
             checkPostfixUnaryExpression(node);
-        } else if (ts.isPrefixUnaryExpression(node)) {
+        } else if (tsutils.isPrefixUnaryExpression(node)) {
             checkPrefixUnaryExpression(node);
         }
 
