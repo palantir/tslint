@@ -70,7 +70,7 @@ function walk(ctx: Lint.WalkContext<number>) {
 
     for (const line of utils.getLineRanges(ctx.sourceFile)) {
         if (line.contentLength === 0 || sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1) {
-            ++consecutiveBlankLines;
+            consecutiveBlankLines += 1;
             if (consecutiveBlankLines === threshold) {
                 possibleFailures.push({
                     end: line.end,

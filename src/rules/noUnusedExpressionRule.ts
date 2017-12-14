@@ -201,7 +201,7 @@ function isDirective(node: ts.ExpressionStatement) {
 
     const parent = node.parent as ts.BlockLike;
     // check if all previous statements in block are also directives
-    for (let i = parent.statements.indexOf(node) - 1; i >= 0; --i) {
+    for (let i = parent.statements.indexOf(node) - 1; i >= 0; i -= 1) {
         const statement = parent.statements[i];
         if (!isExpressionStatement(statement) || statement.expression.kind !== ts.SyntaxKind.StringLiteral) {
             return false;

@@ -101,9 +101,9 @@ function walk(ctx: Lint.WalkContext<void>) {
     }
 
     function check(node: ts.Node): void {
-        ++checking;
+        checking += 1;
         cb(node);
-        --checking;
+        checking -= 1;
     }
     function noCheck(node: ts.Node): void {
         const old = checking;

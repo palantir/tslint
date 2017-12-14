@@ -55,7 +55,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "Use explicit += 1 or -=1 operators.";
+    public static FAILURE_STRING_FACTORY = (newOperatorText: string) =>
+        `Use an explicit ${newOperatorText} operator.`
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
@@ -69,14 +70,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(context: Lint.WalkContext<Options>) {
     function complainOnNode(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
         const newOperatorText = node.operator === ts.SyntaxKind.PlusPlusToken
-            ? " += 1"
-            : " -= 1";
+            ? "+= 1"
+            : "-= 1";
 
         const replacement = Lint.Replacement.replaceNode(
             node,
-            `${node.operand.getText(context.sourceFile)}${newOperatorText}`);
+            `${node.operand.getText(context.sourceFile)} ${newOperatorText}`);
 
-        context.addFailureAtNode(node, Rule.FAILURE_STRING, replacement);
+        const failure = Rule.FAILURE_STRING_FACTORY(newOperatorText);
+
+        context.addFailureAtNode(node, failure, replacement);
     }
 
     function checkPostfixUnaryExpression(node: ts.PostfixUnaryExpression): void {

@@ -104,7 +104,7 @@ function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Ide
         return undefined;
     }
 
-    // Must end with `i++`
+    // Must end with `i += 1` or `i++`
     if (!isIncremented(incrementor, indexVariable.text)) {
         return undefined;
     }

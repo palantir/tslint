@@ -162,7 +162,7 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
         let line = pos.line;
 
         // skip first node in list
-        for (let i = 1; i < nodes.length; ++i) {
+        for (let i = 1; i < nodes.length; i += 1) {
             const node = nodes[i];
             const start = this.getStart(node);
             pos = ts.getLineAndCharacterOfPosition(sourceFile, start);

@@ -90,7 +90,7 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
         const allowedSpaceCount = this.options.size;
 
         while (ts.isWhiteSpaceSingleLine(currentChar)) {
-            ++currentPos;
+            currentPos += 1;
             currentChar = this.sourceFile.text.charCodeAt(currentPos);
         }
         if (!ts.isLineBreak(currentChar)) {
@@ -116,7 +116,7 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
         const allowedSpaceCount = this.options.size;
 
         while (ts.isWhiteSpaceSingleLine(currentChar)) {
-            --currentPos;
+            currentPos -= 1;
             currentChar = this.sourceFile.text.charCodeAt(currentPos);
         }
         /**

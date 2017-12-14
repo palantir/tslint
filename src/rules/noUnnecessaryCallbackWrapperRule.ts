@@ -70,7 +70,7 @@ function isRedundantCallback(
     if (parameters.length !== args.length) {
         return false;
     }
-    for (let i = 0; i < parameters.length; ++i) {
+    for (let i = 0; i < parameters.length; i += 1) {
         const {dotDotDotToken, name} = parameters[i];
         let arg = args[i];
         if (dotDotDotToken !== undefined) {

@@ -286,7 +286,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             const sortedDeclarations = sortByKey(imports, (x) =>
                 this.options.namedImportsOrderTransform(x.getText())).map((x) => x.getText());
             // replace in reverse order to preserve earlier offsets
-            for (let i = imports.length - 1; i >= 0; i--) {
+            for (let i = imports.length - 1; i >= 0; i -= 1) {
                 const start = imports[i].getStart();
                 const length = imports[i].getText().length;
 
@@ -494,7 +494,7 @@ function flipCase(str: string): string {
 // After applying a transformation, are the nodes sorted according to the text they contain?
 // If not, return the pair of nodes which are out of order.
 function findUnsortedPair(xs: ReadonlyArray<ts.Node>, transform: (x: string) => string): [ts.Node, ts.Node] | undefined {
-    for (let i = 1; i < xs.length; i++) {
+    for (let i = 1; i < xs.length; i += 1) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
             return [xs[i - 1], xs[i]];
         }

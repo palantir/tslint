@@ -66,7 +66,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
     public findBlockScope(predicate: (scope: U) => boolean) {
         // look through block scopes from local -> global
-        for (let i = this.blockScopeStack.length - 1; i >= 0; i--) {
+        for (let i = this.blockScopeStack.length - 1; i >= 0; i -= 1) {
             if (predicate(this.blockScopeStack[i])) {
                 return this.blockScopeStack[i];
             }

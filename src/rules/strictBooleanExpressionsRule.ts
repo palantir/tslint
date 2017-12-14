@@ -255,11 +255,11 @@ function handleUnion(type: ts.UnionType, options: Options): TypeFailure | undefi
                 anyTruthy = true;
                 break;
             case false:
-                seenFalsy++;
+                seenFalsy += 1;
                 break;
             default:
                 anyTruthy = true;
-                seenFalsy++;
+                seenFalsy += 1;
         }
     }
 
@@ -395,7 +395,7 @@ function stringOr(parts: string[]): string {
             return `${parts[0]} or ${parts[1]}`;
         default:
             let res = "";
-            for (let i = 0; i < parts.length - 1; i++) {
+            for (let i = 0; i < parts.length - 1; i += 1) {
                 res += `${parts[i]}, `;
             }
             return `${res}or ${parts[parts.length - 1]}`;

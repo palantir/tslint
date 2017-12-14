@@ -81,7 +81,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     let classes = 0;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isClassDeclaration(node) || (!excludeClassExpressions && isClassExpression(node))) {
-            classes++;
+            classes += 1;
             if (classes > maxClasses) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING(maxClasses));
             }

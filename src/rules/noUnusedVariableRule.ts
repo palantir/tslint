@@ -198,7 +198,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
                 ctx.addFailureAtNode(namedBindings, failure, fix);
             } else {
                 const { elements } = namedBindings;
-                for (let i = 0; i < elements.length; i++) {
+                for (let i = 0; i < elements.length; i += 1) {
                     const element = elements[i];
                     const failure = tryDelete(element.name);
                     if (failure === undefined) {

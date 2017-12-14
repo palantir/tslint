@@ -66,7 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (commentText === undefined || !headerFormat.test(commentText)) {
             const isErrorAtStart = offset === 0;
             if (!isErrorAtStart) {
-                ++offset; // show warning in next line after shebang
+                offset += 1; // show warning in next line after shebang
             }
             const leadingNewlines = isErrorAtStart ? 0 : 1;
             const trailingNewlines = isErrorAtStart ? 2 : 1;

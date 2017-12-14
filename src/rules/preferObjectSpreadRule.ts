@@ -84,7 +84,7 @@ function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix
         Lint.Replacement.replaceFromTo(node.getStart(sourceFile), args[0].getStart(sourceFile), `${objectNeedsParens ? "(" : ""}{`),
         new Lint.Replacement(node.end - 1, 1, `}${objectNeedsParens ? ")" : ""}`),
     ];
-    for (let i = 0; i < args.length; ++i) {
+    for (let i = 0; i < args.length; i += 1) {
         const arg = args[i];
         if (isObjectLiteralExpression(arg)) {
             if (arg.properties.length === 0) {

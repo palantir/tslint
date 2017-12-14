@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
             array.forEach((value, index) => { ... });
             for (const [index, value] of array.entries()) { ... }
-            for (let i = 0; i < array.length; i++) { ... }
+            for (let i = 0; i < array.length; i += 1) { ... }
             `,
         optionsDescription: "Not configurable.",
         options: null,

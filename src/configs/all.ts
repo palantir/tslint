@@ -191,6 +191,7 @@ export const rules = {
     "deprecation": true,
     "encoding": true,
     "import-spacing": true,
+    "increment-decrement": true,
     "interface-name": true,
     "interface-over-type-literal": true,
     "jsdoc-format": [true, "check-multiline-start"],

@@ -167,7 +167,7 @@ function hasInconsistentQuotes(properties: ReadonlyArray<ts.LiteralLikeNode>) {
         return false;
     }
     const quoted = properties[0].kind === ts.SyntaxKind.StringLiteral;
-    for (let i = 1; i < properties.length; ++i) {
+    for (let i = 1; i < properties.length; i += 1) {
         if (quoted !== (properties[i].kind === ts.SyntaxKind.StringLiteral)) {
             return true;
         }

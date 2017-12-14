@@ -167,7 +167,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         // skip all leading slashes
         while (fullText[start] === "/") {
-            ++start;
+            start += 1;
         }
         if (start === end) {
             return;

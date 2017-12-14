@@ -91,7 +91,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 function parametersAllOptionalAfter(parameters: ReadonlyArray<ts.ParameterDeclaration>, idx: number): boolean {
-    for (let i = idx + 1; i < parameters.length; i++) {
+    for (let i = idx + 1; i < parameters.length; i += 1) {
         if (parameters[i].questionToken !== undefined) {
             return true;
         }

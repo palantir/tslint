@@ -96,7 +96,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
             complexity = old;
         } else {
             if (increasesComplexity(node)) {
-                complexity++;
+                complexity += 1;
             }
             return ts.forEachChild(node, cb);
         }

@@ -141,7 +141,7 @@ export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U |
 /** Returns an array that is the concatenation of all output arrays. */
 export function flatMap<T, U>(inputs: ReadonlyArray<T>, getOutputs: (input: T, index: number) => ReadonlyArray<U>): U[] {
     const out = [];
-    for (let i = 0; i < inputs.length; i++) {
+    for (let i = 0; i < inputs.length; i += 1) {
         out.push(...getOutputs(inputs[i], i));
     }
     return out;

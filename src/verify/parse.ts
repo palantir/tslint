@@ -150,7 +150,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
             } else if (errorLine instanceof MultilineErrorLine) {
 
                 // iterate through the MultilineErrorLines until we get to an EndErrorLine
-                for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
+                for (let nextLineNo = lineNo + 1; ; nextLineNo += 1) {
                     if (!isValidErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
                             `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`,
@@ -257,7 +257,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
         } else {
             // multiline error
             errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
-            for (let lineNo = startPos.line + 1; lineNo < endPos.line; ++lineNo) {
+            for (let lineNo = startPos.line + 1; lineNo < endPos.line; lineNo += 1) {
                 errorLinesForCodeText[lineNo].push(new MultilineErrorLine(0));
             }
             errorLinesForCodeText[endPos.line].push(new EndErrorLine(0, endPos.col, message));

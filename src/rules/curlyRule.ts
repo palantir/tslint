@@ -40,12 +40,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             \`\`\`ts
             if (foo === bar)
-                foo++;
-                bar++;
+                foo += 1;
+                bar += 1;
             \`\`\`
 
-            In the code above, the author almost certainly meant for both \`foo++\` and \`bar++\`
-            to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
+            In the code above, the author almost certainly meant for both \`foo += 1\` and \`bar += 1\`
+            to be executed only if \`foo === bar\`. However, he forgot braces and \`bar += 1\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: Lint.Utils.dedent`
             One of the following options may be provided:

@@ -138,7 +138,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
             return;
         }
         while (ts.isWhiteSpaceSingleLine(current)) {
-            ++pos;
+            pos += 1;
             current = text.charCodeAt(pos);
         }
         return this.validateWhitespace(colonEnd, pos, option, "after", key);
@@ -149,7 +149,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
         const {text} = this.sourceFile;
         let current = text.charCodeAt(pos - 1);
         while (ts.isWhiteSpaceSingleLine(current)) {
-            --pos;
+            pos -= 1;
             current = text.charCodeAt(pos - 1);
         }
         if (ts.isLineBreak(current)) {

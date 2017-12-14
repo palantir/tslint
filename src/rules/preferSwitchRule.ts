@@ -77,7 +77,7 @@ function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number
     let switchVariable: ts.Expression | undefined;
     let casesSeen = 0;
     const couldBeSwitch = everyCase(node, (expr) => {
-        casesSeen++;
+        casesSeen += 1;
         if (switchVariable !== undefined) {
             return nodeEquals(expr, switchVariable, sourceFile);
         } else {

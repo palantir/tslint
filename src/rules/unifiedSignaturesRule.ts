@@ -229,13 +229,13 @@ function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.Paramet
     // If one is has 2+ parameters more than the other, they must all be optional/rest.
     // Differ by optional parameters: f() and f(x), f() and f(x, ?y, ...z)
     // Not allowed: f() and f(x, y)
-    for (let i = minLength + 1; i < longer.length; i++) {
+    for (let i = minLength + 1; i < longer.length; i += 1) {
         if (!parameterMayBeMissing(longer[i])) {
             return undefined;
         }
     }
 
-    for (let i = 0; i < minLength; i++) {
+    for (let i = 0; i < minLength; i += 1) {
         if (!typesAreEqual(sig1[i].type, sig2[i].type)) {
             return undefined;
         }
@@ -337,7 +337,7 @@ function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): 
 
 /** Returns the first index where `a` and `b` differ. */
 function getIndexOfFirstDifference<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>, equal: Equal<T>): number | undefined {
-    for (let i = 0; i < a.length && i < b.length; i++) {
+    for (let i = 0; i < a.length && i < b.length; i += 1) {
         if (!equal(a[i], b[i])) {
             return i;
         }
@@ -347,8 +347,8 @@ function getIndexOfFirstDifference<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>, 
 
 /** Calls `action` for every pair of values in `values`. */
 function forEachPair<T, Out>(values: ReadonlyArray<T>, action: (a: T, b: T) => Out | undefined): Out | undefined {
-    for (let i = 0; i < values.length; i++) {
-        for (let j = i + 1; j < values.length; j++) {
+    for (let i = 0; i < values.length; i += 1) {
+        for (let j = i + 1; j < values.length; j += 1) {
             const result = action(values[i], values[j]);
             if (result !== undefined) {
                 return result;

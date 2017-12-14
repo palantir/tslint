@@ -55,7 +55,7 @@ function walk(ctx: Lint.WalkContext<boolean>) {
     const expectedCr = ctx.options;
     const sourceText = ctx.sourceFile.text;
     const lineStarts = ctx.sourceFile.getLineStarts();
-    for (let i = 1; i < lineStarts.length; ++i) {
+    for (let i = 1; i < lineStarts.length; i += 1) {
         const lineEnd = lineStarts[i] - 1;
         if (sourceText[lineEnd - 1] === "\r") {
             if (!expectedCr) {

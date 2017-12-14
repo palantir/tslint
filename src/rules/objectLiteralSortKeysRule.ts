@@ -173,7 +173,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
 
             const propName = prop.name.text;
 
-            for (; memberIndex !== members.length; memberIndex++) {
+            for (; memberIndex !== members.length; memberIndex += 1) {
                 const { name: memberName } = members[memberIndex];
                 if (memberName.kind !== ts.SyntaxKind.ComputedPropertyName && propName === memberName.text) {
                     continue outer;
