@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isUnionType } from "tsutils";
+import { isBinaryExpression, isTypeFlagSet, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -60,14 +60,14 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
 }
 
 function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid" {
-    if (Lint.isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || Lint.isTypeFlagSet(type, ts.TypeFlags.String)) {
+    if (isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || isTypeFlagSet(type, ts.TypeFlags.String)) {
         return "string";
-    } else if (Lint.isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || Lint.isTypeFlagSet(type, ts.TypeFlags.Number)) {
+    } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
         return "number";
-    } else if (isUnionType(type) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+    } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
-    } else if (Lint.isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
+    } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         // Compatibility for TypeScript pre-2.4, which used EnumLiteralType instead of LiteralType
         getBaseTypeOfLiteralType((type as any as { baseType: ts.LiteralType }).baseType);
     }

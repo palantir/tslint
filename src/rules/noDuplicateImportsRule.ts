@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { findImports, ImportKind } from "tsutils";
+import { isImportDeclaration, isLiteralExpression, isModuleDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -44,13 +44,25 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
-    const seen = new Set<string>();
-    for (const {text, parent} of findImports(ctx.sourceFile, ImportKind.ImportDeclaration)) {
-        if (seen.has(text)) {
-            ctx.addFailureAtNode(parent!, Rule.FAILURE_STRING(text));
-        } else {
+function walk(ctx: Lint.WalkContext<void>): void {
+    walkWorker(ctx, ctx.sourceFile.statements, new Set());
+}
+
+function walkWorker(ctx: Lint.WalkContext<void>, statements: ReadonlyArray<ts.Statement>, seen: Set<string>): void {
+    for (const statement of statements) {
+        if (isImportDeclaration(statement) && isLiteralExpression(statement.moduleSpecifier)) {
+            const { text } = statement.moduleSpecifier;
+            if (seen.has(text)) {
+                ctx.addFailureAtNode(statement, Rule.FAILURE_STRING(text));
+            }
             seen.add(text);
+        }
+
+        if (isModuleDeclaration(statement) && statement.body !== undefined && statement.name.kind === ts.SyntaxKind.StringLiteral) {
+            // If this is a module augmentation, re-use `seen` since those imports could be moved outside.
+            // If this is an ambient module, create a fresh `seen`
+            // because they should have separate imports to avoid becoming augmentations.
+            walkWorker(ctx, (statement.body as ts.ModuleBlock).statements, ts.isExternalModule(ctx.sourceFile) ? seen : new Set());
         }
     }
 }
