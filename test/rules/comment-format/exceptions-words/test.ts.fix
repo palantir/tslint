@@ -1,4 +1,3 @@
-///<reference path="something.ts"/>
 class Clazz { // this comment is correct
     /* block comment
      * adada
@@ -7,7 +6,7 @@ class Clazz { // this comment is correct
         // this comment is on its own line, and starts with a capital _and_ no space
         console.log("test"); // this comment has no space
     }
-    /// <not a reference/>
+    /// <not a reference>
     //// foo
 }
 
@@ -19,12 +18,12 @@ class Clazz { // this comment is correct
 //noinspection JSUnusedGlobalSymbols
 const unusedVar = 'unneeded value';
 
-// tODO: Write more tests
+// TODO: Write more tests
+
 // hACKING is not an exception
 
-// STDIN for input
-// STDOUT for output
+// sTDIN for input
+// sTDOUT for output
 // stderr for errors
-
 
 

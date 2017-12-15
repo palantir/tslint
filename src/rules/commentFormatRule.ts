@@ -38,6 +38,7 @@ interface Failures {
     leadingSpace: boolean;
     uppercase: boolean;
     lowercase: boolean;
+    firstLetterPos: number;
 }
 
 const enum Case {
@@ -193,7 +194,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
-        let failures: Failures = { leadingSpace: false, uppercase: false, lowercase: false};
+        const failures: Failures = { leadingSpace: false, uppercase: false, lowercase: false, firstLetterPos: -1};
         if (ctx.options.space && commentText[0] !== " ") {
             failures.leadingSpace = true;
         }
@@ -203,41 +204,60 @@ function walk(ctx: Lint.WalkContext<Options>) {
             (ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText)) ||
             ENABLE_DISABLE_REGEX.test(commentText)
         ) {
-            addFailure(ctx, start, end, failures);
+            addFailure(ctx, commentText, start, end, failures);
             return;
         }
 
         // search for first non-space character to check if lower or upper
         const charPos = commentText.search(/\S/);
         if (charPos === -1) {
-            addFailure(ctx, start, end, failures);
+            addFailure(ctx, commentText, start, end, failures);
             return;
         }
+        failures.firstLetterPos = charPos;
         if (ctx.options.case === Case.Lower && !isLowerCase(commentText[charPos])) {
             failures.lowercase = true;
-            // ctx.addFailure(start, end, Rule.LOWERCASE_FAILURE + ctx.options.failureSuffix);
         } else if (ctx.options.case === Case.Upper && !isUpperCase(commentText[charPos])) {
             failures.uppercase = true;
-            // ctx.addFailure(start, end, Rule.UPPERCASE_FAILURE + ctx.options.failureSuffix);
         }
-        addFailure(ctx, start, end, failures);
+        addFailure(ctx, commentText, start, end, failures);
     });
 }
 
-function addFailure(ctx: Lint.WalkContext<Options>, start: number, end: number, failures: Failures) {
+function addFailure(ctx: Lint.WalkContext<Options>, comment: string, start: number, end: number, failures: Failures) {
     // No failure detected
     if (!failures.leadingSpace && !failures.lowercase && !failures.uppercase) {
         return;
     }
 
     if (failures.lowercase) {
-        let msg = failures.leadingSpace ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
-        ctx.addFailure(start, end, msg + ctx.options.failureSuffix);
+        const msg = failures.leadingSpace ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
+        const fix = generateFix(comment, start, failures);
+        ctx.addFailure(start, end, msg + ctx.options.failureSuffix, fix);
     } else if (failures.uppercase) {
-        let msg = failures.leadingSpace ? Rule.SPACE_UPPERCASE_FAILURE : Rule.UPPERCASE_FAILURE;
-        ctx.addFailure(start, end, msg + ctx.options.failureSuffix);
+        const msg = failures.leadingSpace ? Rule.SPACE_UPPERCASE_FAILURE : Rule.UPPERCASE_FAILURE;
+        const fix = generateFix(comment, start, failures);
+        ctx.addFailure(start, end, msg + ctx.options.failureSuffix, fix);
     } else {
         // Only whitespace failure
-        ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE);
+        ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, generateFix(comment, start, failures));
+    }
+}
+
+function generateFix(comment: string, start: number, failures: Failures) {
+    if (failures.lowercase) {
+        const fix = comment[failures.firstLetterPos].toLowerCase();
+        if (failures.leadingSpace) {
+            return new Lint.Replacement(start, 1, ` ${fix}`);
+        }
+        return new Lint.Replacement(start + failures.firstLetterPos, 1, fix);
+    } else if (failures.uppercase) {
+        const fix = comment[failures.firstLetterPos].toUpperCase();
+        if (failures.leadingSpace) {
+            return new Lint.Replacement(start, 1, ` ${fix}`);
+        }
+        return new Lint.Replacement(start + failures.firstLetterPos, 1, fix);
+    } else {
+        return Lint.Replacement.appendText(start, " ");
     }
 }

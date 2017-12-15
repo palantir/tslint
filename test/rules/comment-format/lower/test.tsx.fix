@@ -1,0 +1,9 @@
+const a = (
+    <a href="https://github.com/">
+        https://github.com/ {
+            // invalid comment
+            content
+        },	text
+    </a>
+);
+
