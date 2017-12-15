@@ -34,6 +34,12 @@ interface Options {
     failureSuffix: string;
 }
 
+interface Failures {
+    leadingSpace: boolean;
+    uppercase: boolean;
+    lowercase: boolean;
+}
+
 const enum Case {
     None,
     Lower,
@@ -107,7 +113,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
+    public static SPACE_LOWERCASE_FAILURE = "comment must start with a space and lowercase letter";
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
+    public static SPACE_UPPERCASE_FAILURE = "comment must start with a space and uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
     public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string =>
         ` or the word(s): ${words.join(", ")}`;
@@ -185,10 +193,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
+        let failures: Failures = { leadingSpace: false, uppercase: false, lowercase: false};
         if (ctx.options.space && commentText[0] !== " ") {
-            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, [
-                Lint.Replacement.appendText(start, " "),
-            ]);
+            failures.leadingSpace = true;
         }
 
         if (
@@ -196,20 +203,41 @@ function walk(ctx: Lint.WalkContext<Options>) {
             (ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText)) ||
             ENABLE_DISABLE_REGEX.test(commentText)
         ) {
+            addFailure(ctx, start, end, failures);
             return;
         }
 
         // search for first non-space character to check if lower or upper
         const charPos = commentText.search(/\S/);
         if (charPos === -1) {
+            addFailure(ctx, start, end, failures);
             return;
         }
-        if (ctx.options.case === Case.Lower) {
-            if (!isLowerCase(commentText[charPos])) {
-                ctx.addFailure(start, end, Rule.LOWERCASE_FAILURE + ctx.options.failureSuffix);
-            }
-        } else if (!isUpperCase(commentText[charPos])) {
-            ctx.addFailure(start, end, Rule.UPPERCASE_FAILURE + ctx.options.failureSuffix);
+        if (ctx.options.case === Case.Lower && !isLowerCase(commentText[charPos])) {
+            failures.lowercase = true;
+            // ctx.addFailure(start, end, Rule.LOWERCASE_FAILURE + ctx.options.failureSuffix);
+        } else if (ctx.options.case === Case.Upper && !isUpperCase(commentText[charPos])) {
+            failures.uppercase = true;
+            // ctx.addFailure(start, end, Rule.UPPERCASE_FAILURE + ctx.options.failureSuffix);
         }
+        addFailure(ctx, start, end, failures);
     });
+}
+
+function addFailure(ctx: Lint.WalkContext<Options>, start: number, end: number, failures: Failures) {
+    // No failure detected
+    if (!failures.leadingSpace && !failures.lowercase && !failures.uppercase) {
+        return;
+    }
+
+    if (failures.lowercase) {
+        let msg = failures.leadingSpace ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
+        ctx.addFailure(start, end, msg + ctx.options.failureSuffix);
+    } else if (failures.uppercase) {
+        let msg = failures.leadingSpace ? Rule.SPACE_UPPERCASE_FAILURE : Rule.UPPERCASE_FAILURE;
+        ctx.addFailure(start, end, msg + ctx.options.failureSuffix);
+    } else {
+        // Only whitespace failure
+        ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE);
+    }
 }
