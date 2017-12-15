@@ -32,6 +32,7 @@ interface Options {
     case: Case;
     exceptions?: RegExp;
     failureSuffix: string;
+    allowTrailingLowercase: boolean;
 }
 
 interface Failures {
@@ -50,6 +51,7 @@ const enum Case {
 const OPTION_SPACE = "check-space";
 const OPTION_LOWERCASE = "check-lowercase";
 const OPTION_UPPERCASE = "check-uppercase";
+const OPTION_ALLOW_TRAILING_LOWERCASE = "allow-trailing-lowercase";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -58,20 +60,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces formatting rules for single-line comments.",
         rationale: "Helps maintain a consistent, readable style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Three arguments may be optionally provided:
+            Four arguments may be optionally provided:
 
-            * \`"check-space"\` requires that all single-line comments must begin with a space, as in \`// comment\`
+            * \`"${OPTION_SPACE}"\` requires that all single-line comments must begin with a space, as in \`// comment\`
                 * note that for comments starting with multiple slashes, e.g. \`///\`, leading slashes are ignored
                 * TypeScript reference comments are ignored completely
-            * \`"check-lowercase"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
-            * \`"check-uppercase"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
+            * \`"${OPTION_LOWERCASE}"\` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
+            * \`"${OPTION_UPPERCASE}"\` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
+            * \`"${OPTION_ALLOW_TRAILING_LOWERCASE}"\` allows that only the first comment of a series of comments needs to be uppercase.
+                * requires \`"${OPTION_UPPERCASE}"\`
+                * comments must start at the same position
 
-            Exceptions to \`"check-lowercase"\` or \`"check-uppercase"\` can be managed with object that may be passed as last argument.
+            Exceptions to \`"${OPTION_LOWERCASE}"\` or \`"${OPTION_UPPERCASE}"\` can be managed with object that may be passed as last
+            argument.
 
             One of two options can be provided in this object:
 
-                * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
-                * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
+            * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
+            * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
             `,
         options: {
             type: "array",
@@ -79,7 +85,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 anyOf: [
                     {
                         type: "string",
-                        enum: ["check-space", "check-lowercase", "check-uppercase"],
+                        enum: [
+                            OPTION_SPACE,
+                            OPTION_LOWERCASE,
+                            OPTION_UPPERCASE,
+                            OPTION_ALLOW_TRAILING_LOWERCASE,
+                        ],
                     },
                     {
                         type: "object",
@@ -100,12 +111,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
             minLength: 1,
-            maxLength: 4,
+            maxLength: 5,
         },
         optionExamples: [
-            [true, "check-space", "check-uppercase"],
-            [true, "check-lowercase", { "ignore-words": ["TODO", "HACK"] }],
-            [true, "check-lowercase", { "ignore-pattern": "STD\\w{2,3}\\b" }],
+            [true, OPTION_SPACE, OPTION_UPPERCASE, OPTION_ALLOW_TRAILING_LOWERCASE],
+            [true, OPTION_LOWERCASE, { "ignore-words": ["TODO", "HACK"] }],
+            [true, OPTION_LOWERCASE, { "ignore-pattern": "STD\\w{2,3}\\b" }],
         ],
         type: "style",
         typescriptOnly: false,
@@ -130,16 +141,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function parseOptions(options: Array<string | IExceptionsObject>): Options {
     return {
+        allowTrailingLowercase: has(OPTION_ALLOW_TRAILING_LOWERCASE),
         case:
-            options.indexOf(OPTION_LOWERCASE) !== -1
+            has(OPTION_LOWERCASE)
                 ? Case.Lower
-                : options.indexOf(OPTION_UPPERCASE) !== -1
+                : has(OPTION_UPPERCASE)
                     ? Case.Upper
                     : Case.None,
         failureSuffix: "",
-        space: options.indexOf(OPTION_SPACE) !== -1,
+        space: has(OPTION_SPACE),
         ...composeExceptions(options[options.length - 1]),
     };
+
+    function has(option: string): boolean {
+        return options.indexOf(option) !== -1;
+    }
 }
 
 function composeExceptions(
@@ -181,6 +197,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         ) {
             return;
         }
+
         // skip all leading slashes
         while (fullText[start] === "/") {
             ++start;
@@ -219,6 +236,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
             failures.lowercase = true;
         } else if (ctx.options.case === Case.Upper && !isUpperCase(commentText[charPos])) {
             failures.uppercase = true;
+            if (ctx.options.allowTrailingLowercase) {
+                const lineAndCharCurrentComment = ts.getLineAndCharacterOfPosition(ctx.sourceFile, pos);
+                const posPrevComment = ctx.sourceFile.getPositionOfLineAndCharacter(
+                    lineAndCharCurrentComment.line - 1, 0) + lineAndCharCurrentComment.character;
+
+                const prevComment = utils.getCommentAtPosition(ctx.sourceFile, posPrevComment);
+                if (prevComment !== undefined && prevComment.pos === posPrevComment) {
+                    failures.uppercase = false;
+                }
+            }
         }
         addFailure(ctx, commentText, start, end, failures);
     });

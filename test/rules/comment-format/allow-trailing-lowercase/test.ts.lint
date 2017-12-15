@@ -1,0 +1,13 @@
+// This is a valid
+// multiline comment
+
+// This is an invalid
+//multiline
+  ~~~~~~~~~[space]
+
+let a = 1; // Some description
+let b = "foo"; // another description
+                 ~~~~~~~~~~~~~~~~~~~~[upper]
+
+[upper]: comment must start with uppercase letter
+[space]: comment must start with a space
