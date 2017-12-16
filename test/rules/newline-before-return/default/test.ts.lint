@@ -110,5 +110,4 @@ function bar() {
     //comment
     return;
 }
-
 [0]: Missing blank line before return

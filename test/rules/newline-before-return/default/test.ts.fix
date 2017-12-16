@@ -111,4 +111,3 @@ function bar() {
     //comment
     return;
 }
-

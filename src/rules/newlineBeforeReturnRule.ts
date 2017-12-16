@@ -52,15 +52,15 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private getFixer(returnStart: number, previousNode: ts.Node): Lint.Replacement {
+    private getFixer(returnNode: ts.ReturnStatement, previousNode: ts.Node): Lint.Replacement {
         const prevText = previousNode.getFullText(this.sourceFile);
+        const returnText = returnNode.getFullText(this.sourceFile);
         const indentationOfPrevStmt = prevText.substring(0, prevText.search(/\S/)).match(/ /g)!.length;
-        return Lint.Replacement
-                        .replaceFromTo(
-                            previousNode.getEnd() + 1,
-                            returnStart,
-                            `\r\n${" ".repeat(indentationOfPrevStmt)}`,
-                        );
+        return Lint.Replacement.replaceFromTo(
+                                    returnNode.getFullStart(),
+                                    returnNode.getEnd(),
+                                    `\n\n${" ".repeat(indentationOfPrevStmt) + returnText.trim()}`,
+                                );
     }
 
     private visitReturnStatement(node: ts.ReturnStatement) {
@@ -88,7 +88,7 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
         if (prevLine >= line - 1) {
             // Previous statement is on the same or previous line
-            this.addFailure(start, start, Rule.FAILURE_STRING, this.getFixer(start, prev));
+            this.addFailure(start, start, Rule.FAILURE_STRING, this.getFixer(node, prev));
         }
     }
 }
