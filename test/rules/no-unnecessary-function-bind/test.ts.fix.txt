@@ -1,0 +1,29 @@
+const arrowLambda = () => {};
+const functionVar = function () {};
+
+class Class {
+    public constructor() { }
+
+    public bind() { }
+
+    public method() { }
+}
+
+const instance = new Class();
+
+arrowLambda.bind(this);
+arrowLambda.bind(arrowLambda);
+arrowLambda.bind(undefined);
+
+functionVar.bind(this);
+functionVar.bind(functionVar);
+functionVar.bind(undefined);
+
+const immediatelyBoundFunction = () => {};
+const immediatelyBoundFunctionWrapped = () => {};
+
+instance.method.bind(this);
+
+instance.bind(this);
+
+Class.bind(this);
