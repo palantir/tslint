@@ -27,14 +27,12 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         rationale: ".",
         requiresTypeInfo: true,
-        ruleName: "no-unnecessary-function-bind",
+        ruleName: "no-unnecessary-bind",
         type: "functionality",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING_FUNCTION = Lint.Utils.dedent`
-        Don't bind \`this\` without arguments as a scope to a function. Use an arrow lambda instead.
-    `;
+    public static FAILURE_STRING_FUNCTION = "Don't bind \`this\` without arguments as a scope to a function. Use an arrow lambda instead.";
 
     public static FAILURE_STRING_ARROW = "Don't bind scopes to arrow lambdas, as they already have a bound scope.";
 
@@ -44,28 +42,35 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
-    function createReplacement(node: ts.CallExpression, declaration: ts.FunctionExpression): Lint.Replacement | undefined {
-        const parameters = declaration.parameters
+    function checkArrowFunction(node: ts.CallExpression, boundExpression: ts.Node): void {
+        if (node.arguments.length !== 1) {
+            return;
+        }
+
+        const replacement = Lint.Replacement.replaceNode(
+            node,
+            boundExpression.getText(context.sourceFile));
+
+        context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW, replacement);
+    }
+
+    function checkFunctionExpression(node: ts.CallExpression, valueDeclaration: ts.FunctionExpression): void {
+        if (node.arguments.length !== 1 || node.arguments[0].kind !== ts.SyntaxKind.ThisKeyword) {
+            return;
+        }
+
+        const parameters = valueDeclaration.parameters
             .map((parameter) => parameter.getText(context.sourceFile))
             .join(", ");
-        const body = declaration.body.getText(context.sourceFile);
+        const body = valueDeclaration.body.getText(context.sourceFile);
+        const replacement = Lint.Replacement.replaceNode(
+            node,
+            `(${parameters}) => ${body}`);
 
-        return Lint.Replacement.replaceNode(node, `(${parameters}) => ${body}`);
+        context.addFailureAtNode(node, Rule.FAILURE_STRING_FUNCTION, replacement);
     }
 
-    function checkArrowFunctionDeclaration(node: ts.CallExpression): void {
-        if (node.arguments.length > 0) {
-            context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW);
-        }
-    }
-
-    function checkFunctionDeclarationOrExpression(node: ts.CallExpression, valueDeclaration: ts.FunctionLike): void {
-        if (node.arguments.length === 1 && node.arguments[0].kind === ts.SyntaxKind.ThisKeyword) {
-            context.addFailureAtNode(node, Rule.FAILURE_STRING_FUNCTION, createReplacement(node, valueDeclaration));
-        }
-    }
-
-    function getFunctionLikeValueDeclaration(node: ts.LeftHandSideExpression): ts.FunctionLike | undefined {
+    function getFunctionLikeValueDeclaration(node: ts.Node): ts.FunctionLike | undefined {
         const { symbol } = typeChecker.getTypeAtLocation(node);
         if (symbol === undefined) {
             return undefined;
@@ -84,20 +89,20 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
     }
 
     function checkCallExpression(node: ts.CallExpression): void {
-        const { expression } = node;
-        if (!isBindPropertyAccess(expression)) {
+        const bindExpression = node.expression;
+        if (!isBindPropertyAccess(bindExpression)) {
             return;
         }
 
-        const valueDeclaration = getFunctionLikeValueDeclaration(node.expression);
-        if (valueDeclaration === undefined) {
+        const boundExpression = Lint.getNodeWithinParenthesis(bindExpression.expression);
+        if (ts.isFunctionExpression(boundExpression)) {
+            checkFunctionExpression(node, boundExpression);
             return;
         }
 
-        if (ts.isArrowFunction(valueDeclaration)) {
-            checkArrowFunctionDeclaration(node);
-        } else {
-            checkFunctionDeclarationOrExpression(node, valueDeclaration);
+        const valueDeclaration = getFunctionLikeValueDeclaration(boundExpression);
+        if (valueDeclaration !== undefined && ts.isArrowFunction(valueDeclaration)) {
+            checkArrowFunction(node, boundExpression);
         }
     }
 

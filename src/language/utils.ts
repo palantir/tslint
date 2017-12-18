@@ -491,3 +491,10 @@ export function isWhiteSpace(ch: number): boolean {
     // tslint:disable-next-line
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
+
+/** Gets a node ignoring any levels of parenthesis around it. */
+export function getNodeWithinParenthesis(node: ts.Node): ts.Node {
+    return ts.isParenthesizedExpression(node)
+        ? getNodeWithinParenthesis(node.expression)
+        : node;
+}
