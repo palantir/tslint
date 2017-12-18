@@ -16,7 +16,7 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isParenthesizedExpression, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import { IDisabledInterval, RuleFailure } from "./rule/rule";
@@ -494,7 +494,7 @@ export function isWhiteSpace(ch: number): boolean {
 
 /** Gets a node ignoring any levels of parenthesis around it. */
 export function getNodeWithinParenthesis(node: ts.Node): ts.Node {
-    return ts.isParenthesizedExpression(node)
+    return isParenthesizedExpression(node)
         ? getNodeWithinParenthesis(node.expression)
         : node;
 }
