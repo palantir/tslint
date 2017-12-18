@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -91,7 +92,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 
     function check(node: ts.Node, option: "always" | "never"): void {
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = getChildOfKind(node, ts.SyntaxKind.OpenParenToken, sourceFile);
         // openParen may be missing for an async arrow function `async x => ...`.
         if (openParen === undefined) { return; }
 
@@ -110,16 +111,21 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 function getOption(node: ts.Node, options: Options): Option | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
-            return Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? options.asyncArrow : undefined;
+            return !hasTypeParameters(node) && hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+                ? options.asyncArrow : undefined;
 
         case ts.SyntaxKind.Constructor:
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
-            return options.named;
+            // name is optional for function declaration which is default export (TS will emit error in other cases).
+            // Can be handled in the same way as function expression.
+        case ts.SyntaxKind.FunctionExpression: {
+            const functionName = (node as ts.FunctionExpression).name;
+            const hasName = functionName !== undefined && functionName.text !== "";
 
-        case ts.SyntaxKind.FunctionExpression:
-            return (node as ts.FunctionExpression).name !== undefined ? options.named : options.anonymous;
+            return hasName ? options.named : !hasTypeParameters(node) ? options.anonymous : undefined;
+        }
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
@@ -130,4 +136,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
         default:
             return undefined;
     }
+}
+
+function hasTypeParameters(node: ts.Node): boolean {
+    return (node as ts.SignatureDeclaration).typeParameters !== undefined;
 }

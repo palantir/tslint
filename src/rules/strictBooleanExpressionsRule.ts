@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -25,7 +26,7 @@ const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
 
-// tslint:disable object-literal-sort-keys switch-default
+// tslint:disable object-literal-sort-keys
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -88,7 +89,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments, Lint.isStrictNullChecksEnabled(program.getCompilerOptions()));
-        return this.applyWithFunction(sourceFile, (ctx: Lint.WalkContext<Options>) => walk(ctx, program.getTypeChecker()), options);
+        return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
     }
 }
 
@@ -183,7 +184,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 return;
             }
 
-            ctx.addFailureAtNode(node,
+            ctx.addFailureAtNode(
+                node,
                 showFailure(location, failure, isUnionType(type), options));
         }
     }
@@ -204,10 +206,10 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
         case true:
             // Allow 'any'. Allow 'true' itself, but not any other always-truthy type.
             // tslint:disable-next-line no-bitwise
-            return Lint.isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysTruthy;
+            return isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysTruthy;
         case false:
             // Allow 'false' itself, but not any other always-falsy type
-            return Lint.isTypeFlagSet(type, ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysFalsy;
+            return isTypeFlagSet(type, ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysFalsy;
         case undefined:
             return undefined;
     }
@@ -216,11 +218,11 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
 function isBooleanUndefined(type: ts.UnionType): boolean | undefined {
     let isTruthy = false;
     for (const ty of type.types) {
-        if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Boolean)) {
+        if (isTypeFlagSet(ty, ts.TypeFlags.Boolean)) {
             isTruthy = true;
-        } else if (Lint.isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
+        } else if (isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
             isTruthy = isTruthy || (ty as ts.IntrinsicType).intrinsicName === "true";
-        } else if (!Lint.isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) { // tslint:disable-line:no-bitwise
+        } else if (!isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) { // tslint:disable-line:no-bitwise
             return undefined;
         }
     }
@@ -356,7 +358,7 @@ function getKind(type: ts.Type): TypeKind {
         : TypeKind.AlwaysTruthy;
 
     function is(flags: ts.TypeFlags) {
-        return Lint.isTypeFlagSet(type, flags);
+        return isTypeFlagSet(type, flags);
     }
 }
 
@@ -401,7 +403,7 @@ function stringOr(parts: string[]): string {
 }
 
 function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum);
+    return isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum);
 }
 
 function showLocation(n: Location): string {

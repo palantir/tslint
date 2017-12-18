@@ -64,12 +64,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
         return ts.forEachChild(node, cb);
     });
 
-    function visitStatements(statements: ts.Statement[]): void {
+    function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
         addFailures(getMisplacedOverloads(statements, (statement) =>
             utils.isFunctionDeclaration(statement) && statement.name !== undefined ? statement.name.text : undefined));
     }
 
-    function addFailures(misplacedOverloads: ts.SignatureDeclaration[]): void {
+    function addFailures(misplacedOverloads: ReadonlyArray<ts.SignatureDeclaration>): void {
         for (const node of misplacedOverloads) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printOverload(node)));
         }
@@ -77,7 +77,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
 }
 
 /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
-function getMisplacedOverloads<T extends ts.Node>(overloads: T[], getKey: (node: T) => string | undefined): ts.SignatureDeclaration[] {
+function getMisplacedOverloads<T extends ts.Node>(
+    overloads: ReadonlyArray<T>,
+    getKey: (node: T) => string | undefined): ts.SignatureDeclaration[] {
     const result: ts.SignatureDeclaration[] = [];
     let lastKey: string | undefined;
     const seen = new Set<string>();
@@ -112,7 +114,7 @@ export function getOverloadKey(node: ts.SignatureDeclaration): string | undefine
     }
 
     const [computed, name] = typeof info === "string" ? [false, info] : [info.computed, info.name];
-    const isStatic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
+    const isStatic = utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
     return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
 

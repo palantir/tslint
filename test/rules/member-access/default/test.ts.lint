@@ -56,3 +56,12 @@ function main() {
         public n: number;
     }
 }
+
+abstract class Decorated {
+    @decorator prop;
+               ~~~~ [The class property 'prop' must be marked either 'private', 'public', or 'protected']
+    @decorator abstract method() {}
+                        ~~~~~~ [The class method 'method' must be marked either 'private', 'public', or 'protected']
+    @decorator @moreDecorator({}) readonly static PROP = 'FOO';
+                                                  ~~~~ [The class property 'PROP' must be marked either 'private', 'public', or 'protected']
+}

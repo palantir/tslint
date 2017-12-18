@@ -105,6 +105,20 @@ describe("Configuration", () => {
                 ruleSeverity: "error",
             });
         });
+
+        it("resolves exclude pattern relative to the configuration file", () => {
+            const config: RawConfigFile = {
+                linterOptions: {
+                    exclude: ["foo.ts", "**/*.d.ts"],
+                },
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").linterOptions,
+                {
+                    exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
+                },
+            );
+        });
     });
 
     describe("defaultSeverity", () => {
@@ -140,7 +154,7 @@ describe("Configuration", () => {
             config.jsRules.set("row", { ruleArguments: ["oar", "column"], ruleSeverity: "error" });
             config.rules.set("foo", { ruleArguments: ["bar"], ruleSeverity: "off" });
             config.rulesDirectory = ["foo"];
-            config.linterOptions = { typeCheck: true };
+            config.linterOptions = { exclude: ["foo"] };
             assertConfigEquals(extendConfigurationFile(EMPTY_CONFIG, config), config);
         });
 
@@ -193,6 +207,50 @@ describe("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
+
+        it("replaces exclude option", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
+
+        it("empty linter options does not replace exclude", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {};
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
     });
 
     describe("findConfigurationPath", () => {
@@ -214,6 +272,16 @@ describe("Configuration", () => {
             assert.strictEqual(
                 findConfigurationPath(null, "./test/files/config-findup/somefilename.ts"),
                 path.resolve("./test/files/config-findup/tslint.json"),
+            );
+        });
+        it("prefers json over yaml over yml configuration files", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yaml-config"),
+                path.resolve("test/files/config-findup/yaml-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yml-config"),
+                path.resolve("test/files/config-findup/yml-config/tslint.yaml"),
             );
         });
     });
@@ -295,14 +363,14 @@ describe("Configuration", () => {
         });
 
         describe("with config not relative to tslint", () => {
-            let tmpfile: string | null;
+            let tmpfile: string | undefined;
 
             beforeEach(() => {
                 tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
-                if (tmpfile != null) {
+                if (tmpfile !== undefined) {
                     fs.unlinkSync(tmpfile);
                 }
             });
@@ -363,6 +431,17 @@ describe("Configuration", () => {
             assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
         });
 
+        it("can load .yaml files with comments", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-with-comments.yaml");
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.rules.set("rule-two", { ruleSeverity: "error" });
+            expectedConfig.rules.set("rule-three", { ruleSeverity: "error", ruleArguments: ["#not a comment"] });
+
+            assertConfigEquals(config.rules, expectedConfig.rules);
+            assertConfigEquals(config.jsRules, expectedConfig.rules);
+        });
+
         it("can load a built-in configuration", () => {
             const config = loadConfigurationFromPath("tslint:recommended");
             assert.strictEqual<RuleSeverity | undefined>("error", config.jsRules.get("no-eval")!.ruleSeverity);
@@ -388,7 +467,7 @@ function getEmptyConfig(): IConfigurationFile {
 }
 
 function demap<T>(map: Map<string, T>) {
-    if (map == null) {
+    if (map == undefined) {
         return map;
     }
     const output: { [key: string]: T } = {};

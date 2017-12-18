@@ -498,3 +498,53 @@ const enum Foo {
     Baz = 2,
 }
 
+let {
+    ...x,
+} = {};
+let [
+    ...y,
+] = [];
+
+[
+    ...y,
+] = [];
+({
+    ...y,
+} = {})
+function foo(
+    ...z,
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
+
+let {
+    ...x
+} = {};
+let [
+    ...y
+] = [];
+
+[
+    ...y
+] = [];
+({
+    ...y
+} = {})
+function foo(
+    ...z
+) {}
+
+
+let {...x} = {};
+let [...y] = [];
+[...y] = [];
+({...y} = {})
+function foo(...z) {}
+
+let foo = bar => bar;
+let foo = (bar => bar);

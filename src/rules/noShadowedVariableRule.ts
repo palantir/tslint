@@ -16,7 +16,8 @@
  */
 
 import {
-    isBlockScopedVariableDeclarationList, isFunctionExpression, isFunctionWithBody, isScopeBoundary, isThisParameter, ScopeBoundary,
+    hasModifier, isBlockScopedVariableDeclarationList, isClassExpression, isFunctionExpression, isFunctionWithBody, isNodeFlagSet,
+    isScopeBoundary, isThisParameter, ScopeBoundary,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -28,9 +29,52 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-shadowed-variable",
         description: "Disallows shadowing variable declarations.",
         rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            You can optionally pass an object to disable checking for certain kinds of declarations.
+            Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
+            and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
+            All checks default to \`true\`, i.e. are enabled by default.
+            Note that you cannot disable variables and parameters.
+
+            The option \`"temporalDeadZone"\` defaults to \`true\` which shows errors when shadowing block scoped declarations in their
+            temporal dead zone. When set to \`false\` parameters, classes, enums and variables declared
+            with \`let\` or \`const\` are not considered shadowed if the shadowing occurs within their
+            [temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).
+
+            The following example shows how the \`"temporalDeadZone"\` option changes the linting result:
+
+            \`\`\`ts
+            function fn(value) {
+                if (value) {
+                    const tmp = value; // no error on this line if "temporalDeadZone" is false
+                    return tmp;
+                }
+                let tmp = undefined;
+                if (!value) {
+                    const tmp = value; // this line always contains an error
+                    return tmp;
+                }
+            }
+            \`\`\`
+        `,
+        options: {
+            type: "object",
+            properties: {
+                class: {type: "boolean"},
+                enum: {type: "boolean"},
+                function: {type: "boolean"},
+                import: {type: "boolean"},
+                interface: {type: "boolean"},
+                namespace: {type: "boolean"},
+                typeAlias: {type: "boolean"},
+                typeParameter: {type: "boolean"},
+                temporalDeadZone: {type: "boolean"},
+            },
+        },
+        optionExamples: [
+            true,
+            [true, {class: true, enum: true, function: true, interface: false, namespace: true, typeAlias: false, typeParameter: false}],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -41,13 +85,38 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoShadowedVariableWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NoShadowedVariableWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0] as Partial<Options> | undefined)),
+        );
     }
+}
+
+type Kind = "class" | "import" | "interface" | "function" | "enum" | "namespace" | "typeParameter" | "typeAlias" | "temporalDeadZone";
+type Options = Record<Kind, boolean>;
+
+function parseOptions(option: Partial<Options> | undefined): Options {
+    return {
+        class: true,
+        enum: true,
+        function: true,
+        import: true,
+        interface: true,
+        namespace: true,
+        temporalDeadZone: true,
+        typeAlias: true,
+        typeParameter: true,
+        ...option,
+    };
+}
+
+interface VariableInfo {
+    identifier: ts.Identifier;
+    tdz: boolean;
 }
 
 class Scope {
     public functionScope: Scope;
-    public variables = new Map<string, ts.Identifier[]>();
+    public variables = new Map<string, VariableInfo[]>();
     public variablesSeen = new Map<string, ts.Identifier[]>();
     public reassigned = new Set<string>();
     constructor(functionScope?: Scope) {
@@ -55,40 +124,64 @@ class Scope {
         this.functionScope = functionScope !== undefined ? functionScope : this;
     }
 
-    public addVariable(identifier: ts.Identifier, blockScoped = true) {
+    public addVariable(identifier: ts.Identifier, blockScoped = true, tdz = false) {
         // block scoped variables go to the block scope, function scoped variables to the containing function scope
         const scope = blockScoped ? this : this.functionScope;
         const list = scope.variables.get(identifier.text);
+        const variableInfo: VariableInfo = {
+            identifier,
+            tdz,
+        };
         if (list === undefined) {
-            scope.variables.set(identifier.text, [identifier]);
+            scope.variables.set(identifier.text, [variableInfo]);
         } else {
-            list.push(identifier);
+            list.push(variableInfo);
         }
     }
 }
 
-class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
+class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
     private scope: Scope;
     public walk(sourceFile: ts.SourceFile) {
+        if (sourceFile.isDeclarationFile) {
+            return;
+        }
         this.scope = new Scope();
 
         const cb = (node: ts.Node): void => {
             const parentScope = this.scope;
-            if (isFunctionExpression(node) && node.name !== undefined) {
-                /* special handling for named function expressions:
+            if ((this.options.function && isFunctionExpression(node) || this.options.class && isClassExpression(node)) &&
+                node.name !== undefined) {
+                /* special handling for named function and class expressions:
                    technically the name of the function is only visible inside of it,
                    but variables with the same name declared inside don't cause compiler errors.
                    Therefore we add an additional function scope only for the function name to avoid merging with other declarations */
                 const functionScope = new Scope();
                 functionScope.addVariable(node.name, false);
                 this.scope = new Scope();
-                ts.forEachChild(node, cb);
+                if (isClassExpression(node)) {
+                    this.visitClassLikeDeclaration(node, functionScope, cb);
+                } else {
+                    ts.forEachChild(node, cb);
+                }
                 this.onScopeEnd(functionScope);
                 this.scope = functionScope;
                 this.onScopeEnd(parentScope);
                 this.scope = parentScope;
                 return;
             }
+
+            /* Visit decorators before entering a function scope.
+               In the AST decorators are children of the declaration they decorate, but we don't want to warn for the following code:
+               @decorator((param) => param)
+               function foo(param) {}
+            */
+            if (node.decorators !== undefined) {
+                for (const decorator of node.decorators) {
+                    ts.forEachChild(decorator, cb);
+                }
+            }
+
             const boundary = isScopeBoundary(node);
             if (boundary === ScopeBoundary.Block) {
                 this.scope = new Scope(parentScope.functionScope);
@@ -96,49 +189,78 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
                 this.scope = new Scope();
             }
             switch (node.kind) {
+                case ts.SyntaxKind.Decorator:
+                    return; // handled above
                 case ts.SyntaxKind.VariableDeclarationList:
                     this.handleVariableDeclarationList(node as ts.VariableDeclarationList);
                     break;
-                case ts.SyntaxKind.ClassExpression:
-                    if ((node as ts.ClassExpression).name !== undefined) {
-                        this.scope.addVariable((node as ts.ClassExpression).name!);
-                    }
-                    break;
                 case ts.SyntaxKind.TypeParameter:
-                    this.scope.addVariable((node as ts.TypeParameterDeclaration).name);
+                    if (this.options.typeParameter) {
+                        this.scope.addVariable((node as ts.TypeParameterDeclaration).name);
+                    }
                     break;
                 case ts.SyntaxKind.FunctionDeclaration:
-                case ts.SyntaxKind.ClassDeclaration:
-                    if ((node as ts.FunctionDeclaration | ts.ClassDeclaration).name !== undefined) {
-                        parentScope.addVariable((node as ts.FunctionDeclaration | ts.ClassDeclaration).name!,
-                                                node.kind !== ts.SyntaxKind.FunctionDeclaration);
+                    if (this.options.function && (node as ts.FunctionDeclaration).name !== undefined) {
+                        parentScope.addVariable((node as ts.FunctionDeclaration).name!, false);
                     }
                     break;
+                case ts.SyntaxKind.ClassDeclaration:
+                    if (this.options.class && (node as ts.ClassDeclaration).name !== undefined) {
+                        parentScope.addVariable((node as ts.ClassDeclaration).name!, true, true);
+                    }
+                    // falls through
+                case ts.SyntaxKind.ClassExpression:
+                    this.visitClassLikeDeclaration(node as ts.ClassLikeDeclaration, parentScope, cb);
+                    this.onScopeEnd(parentScope);
+                    this.scope = parentScope;
+                    return;
                 case ts.SyntaxKind.TypeAliasDeclaration:
+                    if (this.options.typeAlias) {
+                        parentScope.addVariable((node as ts.TypeAliasDeclaration).name);
+                    }
+                    break;
                 case ts.SyntaxKind.EnumDeclaration:
+                    if (this.options.enum) {
+                        parentScope.addVariable((node as ts.EnumDeclaration).name, true, true);
+                    }
+                    break;
                 case ts.SyntaxKind.InterfaceDeclaration:
-                    parentScope.addVariable((node as ts.TypeAliasDeclaration | ts.EnumDeclaration | ts.InterfaceDeclaration).name);
+                    if (this.options.interface) {
+                        parentScope.addVariable((node as ts.InterfaceDeclaration).name);
+                    }
                     break;
                 case ts.SyntaxKind.Parameter:
-                    if (!isThisParameter(node as ts.ParameterDeclaration) && isFunctionWithBody(node.parent!)) {
-                        this.handleBindingName((node as ts.ParameterDeclaration).name, false);
+                    if (node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                        !isThisParameter(node as ts.ParameterDeclaration) &&
+                        isFunctionWithBody(node.parent!)) {
+                        this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
                     break;
                 case ts.SyntaxKind.ModuleDeclaration:
-                    if (node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
-                        (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier) {
+                    if (this.options.namespace &&
+                        node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
+                        (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
+                        !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
+                    ) {
                         parentScope.addVariable((node as ts.NamespaceDeclaration).name, false);
+                    }
+                    if (hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                        this.onScopeEnd(parentScope);
+                        this.scope = parentScope;
+                        return; // don't check any ambient declaration blocks
                     }
                     break;
                 case ts.SyntaxKind.ImportClause:
-                    if ((node as ts.ImportClause).name !== undefined) {
+                    if (this.options.import && (node as ts.ImportClause).name !== undefined) {
                         this.scope.addVariable((node as ts.ImportClause).name!, false);
                     }
                     break;
                 case ts.SyntaxKind.NamespaceImport:
                 case ts.SyntaxKind.ImportSpecifier:
                 case ts.SyntaxKind.ImportEqualsDeclaration:
-                    this.scope.addVariable((node as ts.NamespaceImport | ts.ImportSpecifier | ts.ImportEqualsDeclaration).name, false);
+                    if (this.options.import) {
+                        this.scope.addVariable((node as ts.NamespaceImport | ts.ImportSpecifier | ts.ImportEqualsDeclaration).name, false);
+                    }
             }
             if (boundary !== ScopeBoundary.None) {
                 ts.forEachChild(node, cb);
@@ -153,6 +275,23 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
         this.onScopeEnd();
     }
 
+    private visitClassLikeDeclaration(declaration: ts.ClassLikeDeclaration, parentScope: Scope, cb: (node: ts.Node) => void) {
+        const currentScope = this.scope;
+        ts.forEachChild(declaration, (node) => {
+            if (!hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
+                return cb(node);
+            }
+            /* Don't treat static members as children of the class' scope. That avoid shadowed type parameter warnings on static members.
+               class C<T> {
+                   static method<T>() {}
+               }
+            */
+            this.scope = parentScope;
+            cb(node);
+            this.scope = currentScope;
+        });
+    }
+
     private handleVariableDeclarationList(node: ts.VariableDeclarationList) {
         const blockScoped = isBlockScopedVariableDeclarationList(node);
         for (const variable of node.declarations) {
@@ -160,13 +299,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
         }
     }
 
-    private handleBindingName(node: ts.BindingName, blockScoped: boolean) {
+    private handleBindingName(node: ts.BindingName, blockScoped: boolean, tdz = blockScoped) {
         if (node.kind === ts.SyntaxKind.Identifier) {
-            this.scope.addVariable(node, blockScoped);
+            this.scope.addVariable(node, blockScoped, tdz);
         } else {
             for (const element of node.elements) {
                 if (element.kind !== ts.SyntaxKind.OmittedExpression) {
-                    this.handleBindingName(element.name, blockScoped);
+                    this.handleBindingName(element.name, blockScoped, tdz);
                 }
             }
         }
@@ -175,12 +314,17 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
     private onScopeEnd(parent?: Scope) {
         const {variables, variablesSeen} = this.scope;
         variablesSeen.forEach((identifiers, name) => {
-            if (variables.has(name)) {
-                for (const identifier of identifiers) {
+            const declarationsInScope = variables.get(name);
+            for (const identifier of identifiers) {
+                if (declarationsInScope !== undefined &&
+                    (this.options.temporalDeadZone ||
+                     // check if any of the declaration either has no temporal dead zone or is declared before the identifier
+                     declarationsInScope.some((declaration) => !declaration.tdz || declaration.identifier.pos < identifier.pos))
+                ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
+                } else if (parent !== undefined) {
+                    addOneToList(parent.variablesSeen, name, identifier);
                 }
-            } else if (parent !== undefined) {
-                addToList(parent.variablesSeen, name, identifiers);
             }
         });
         if (parent !== undefined) {
@@ -191,11 +335,22 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<void> {
     }
 }
 
-function addToList(map: Map<string, ts.Identifier[]>, name: string, identifiers: ts.Identifier[]) {
+function addToList(map: Map<string, ts.Identifier[]>, name: string, variables: VariableInfo[]) {
+    let list = map.get(name);
+    if (list === undefined) {
+        list = [];
+        map.set(name, list);
+    }
+    for (const variable of variables) {
+        list.push(variable.identifier);
+    }
+}
+
+function addOneToList(map: Map<string, ts.Identifier[]>, name: string, identifier: ts.Identifier) {
     const list = map.get(name);
     if (list === undefined) {
-        map.set(name, identifiers);
+        map.set(name, [identifier]);
     } else {
-        list.push(...identifiers);
+        list.push(identifier);
     }
 }

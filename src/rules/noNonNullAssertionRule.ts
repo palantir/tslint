@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
-        description: "Disallows non-null assertions.",
+        description: "Disallows non-null assertions using the `!` postfix operator.",
         rationale: "Using non-null assertion cancels the benefits of the strict null checking mode.",
         optionsDescription: "Not configurable.",
         options: null,

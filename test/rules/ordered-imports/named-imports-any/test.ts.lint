@@ -5,7 +5,7 @@ import {B, A} from 'foo'; // should not fail
 // Case is irrelevant for named import ordering.
 import {A, b, C} from 'zfoo';
 import {bz, A, C} from 'foo'; // should not fail
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                    [Import sources within a group must be alphabetized.] 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                    [Import sources within a group must be alphabetized.]
 
 // Import sources should be alphabetized.
 import * as bar from 'bar';
@@ -26,6 +26,27 @@ import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 import someDefault from "module";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 import "something";
+
+// contains ImportEqualsDeclaration
+import c = require('./c');
+import * as a from './a';
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+import b from './b';
+
+import * as a from './a';
+import c = require('./c');
+import b from './b';
+~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+
+import c = require('./c');
+import b from './b';
+~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+import * as a from './a';
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+
+import d = require('./d');
+import c = require('./c');
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
 
 [ordered-imports]: Named imports must be alphabetized.
 [ordered-sources]: Import sources within a group must be alphabetized.

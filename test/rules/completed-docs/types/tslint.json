@@ -4,6 +4,7 @@
       true,
       "classes",
       "enums",
+      "enum-members",
       "functions",
       "interfaces",
       "methods",

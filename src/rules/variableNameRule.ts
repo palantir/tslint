@@ -17,7 +17,7 @@
 
 // tslint:disable object-literal-sort-keys
 
-import * as utils from "tsutils";
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -126,7 +126,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
             case ts.SyntaxKind.VariableStatement:
                 // skip 'declare' keywords
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                if (tsutils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
                     return;
                 }
                 break;
@@ -165,7 +165,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return;
         }
 
-        if (!isCamelCase(text, options) && !isUpperCase(text)) {
+        if (text.length !== 0 && !isCamelCase(text, options) && !isUpperCase(text)) {
             ctx.addFailureAtNode(name, formatFailure());
         }
     }
@@ -179,14 +179,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     function handleVariableDeclaration(node: ts.VariableDeclaration): void {
         handleDeclaredVariable(node);
 
-        if (!ctx.options.allCapsForConst || utils.isBindingPattern(node.name)) {
+        if (!ctx.options.allCapsForConst || tsutils.isBindingPattern(node.name)) {
             return;
         }
 
         const declarationList = node.parent!;
         const text = node.name.text;
 
-        if (isUpperCase(text) && !utils.isNodeFlagSet(declarationList, ts.NodeFlags.Const)) {
+        if (isUpperCase(text) && !tsutils.isNodeFlagSet(declarationList, ts.NodeFlags.Const)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING_CONST);
         }
     }

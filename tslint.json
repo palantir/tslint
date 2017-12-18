@@ -8,17 +8,9 @@
     "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
-    },
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"
@@ -43,7 +35,7 @@
     "no-void-expression": false,
     "prefer-function-over-method": false,
     "strict-type-predicates": false,
-    "triple-equals": false,
+    "triple-equals": [true, "allow-undefined-check"],
     "typedef": false,
 
     "ban": [true,

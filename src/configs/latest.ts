@@ -41,6 +41,37 @@ export const rules = {
         true,
         "check-parameters",
     ],
+
+    // added in v5.5
+    "no-this-assignment": true,
+
+    // added in v5.6
+    "no-duplicate-imports": true,
+    "space-within-parens": [true, 0],
+    "no-submodule-imports": true,
+
+    // added in v5.7
+    "whitespace": {
+        options: [
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-type-operator",
+            "check-rest-spread",
+        ],
+    },
+
+    // added in v5.8
+    "ban-comma-operator": true,
+    "jsdoc-format": {
+        options: "check-multiline-start",
+    },
+    "no-duplicate-switch-case": true,
+    "no-implicit-dependencies": true,
+    "no-return-await": true,
 };
 // tslint:enable object-literal-sort-keys
 

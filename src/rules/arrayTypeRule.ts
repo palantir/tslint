@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as Option);
     }
 }
 
@@ -145,6 +145,7 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.SymbolKeyword:
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
+        case ts.SyntaxKind.ThisType:
             return true;
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type

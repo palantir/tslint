@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "completed-docs": [
+      true,
+      "variables"
+    ]
+  }
+}

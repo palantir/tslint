@@ -1,0 +1,89 @@
+['a', 'b', 'c'].map((path) => path.resolve(path))
+                     ~~~~ [err % ('path')]
+
+import * as path from 'path'
+
+export function foo(wam: boolean) {
+    if (wam) {
+        const now = new Date(); // no error because it's in the temporal dead zone of the outer `now`
+        return now.getTime();
+    }
+
+    const now = new Date();
+    return now.getTime() + 1000;
+}
+
+function foo(v) {
+    if (v) {
+        const Foo = null; // classes are block scoped, therefore no error in the temporal dead zone
+        return Foo;
+    }
+    class Foo {}
+    return new Foo();
+}
+
+function foo(v) {
+    if (v) {
+        const Foo = null; // interfaces are block scoped, but hoisted -> error in temporal dead zone
+              ~~~ [err % ('Foo')]
+        return Foo;
+    }
+    interface Foo {}
+    class Foo {}
+    return new Foo();
+}
+
+function foo() {
+    {
+        let tmp = 1; // error because `var` is hoisted
+            ~~~ [err % ('tmp')]
+        return tmp;
+    }
+    var tmp = undefined;
+    return tmp;
+}
+
+function foo(v) {
+    let tmp = 1;
+    if (v) {
+        const tmp = v;
+              ~~~ [err % ('tmp')]
+        return v;
+    } else {
+        const v = tmp;
+              ~ [err % ('v')]
+        return v;
+    }
+}
+
+// parameters also have a temporal dead zone
+function foo(
+    a = function() {let b},
+    b,
+) {}
+
+{
+    {
+        class Foo {} // tdz
+    }
+    enum Foo {} // tdz
+    {
+        class Foo {} // shadowing enum Foo
+              ~~~ [err % ('Foo')]
+    }
+}
+class Foo {}
+{
+    {
+        class Foo {}
+              ~~~ [err % ('Foo')]
+    }
+    enum Foo {}
+         ~~~ [err % ('Foo')]
+    {
+        class Foo {}
+              ~~~ [err % ('Foo')]
+    }
+}
+
+[err]: Shadowed name: '%s'

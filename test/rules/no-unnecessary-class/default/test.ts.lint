@@ -1,0 +1,146 @@
+class Foo {
+    public prop = 1;
+    constructor() {
+        class Bar {
+        ~~~~~ [STATIC_ONLY]
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+        ~~~~~ [STATIC_ONLY]
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
+            constructor() {
+                class FizzBuzz {
+                ~~~~~ [STATIC_ONLY]
+                    public static a = 'hello mom!';
+                }
+            }
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+            public static helper(): void {}
+            private private Helper(): boolean {
+                return true;
+            }
+            constructor() {}
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+        ~~~~~ [CONSTRUCTOR_ONLY]
+            constructor() {
+                class FizzBuzz {
+                    public static helper(): void {}
+                    private privateHelper(): boolean {
+                        return true;
+                    }
+                    constructor() {}
+                }
+            }
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+            private a: SomeType;
+            static PROP = 2;
+        }
+    }
+}
+
+class Foo {
+~~~~~ [CONSTRUCTOR_ONLY]
+    constructor() {
+        class Bar {
+        ~~~~~ [STATIC_ONLY]
+            static PROP = 2;
+        }
+    }
+}
+
+class EmptyClassA {}
+~~~~~ [EMPTY_CLASS]
+
+class EmptyClassB { constructor() {} }
+~~~~~ [CONSTRUCTOR_ONLY]
+
+export class AClass {
+       ~~~~~ [STATIC_ONLY]
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() {
+        class nestedClass {
+        ~~~~~ [EMPTY_CLASS]
+        }
+    }
+}
+
+export class BClass {
+       ~~~~~ [STATIC_ONLY]
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+}
+
+export class CClass extends BaseClass {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    constructor() {}
+}
+
+export class ShorthandPropsClass {
+    public static helper(): void {}
+    constructor(private a: string) {}
+}
+
+export class DClass {
+    public static helper(): void {}
+    private static privateHelper(): boolean {
+        return true;
+    }
+    public index = 0;
+    constructor() {}
+}
+
+export class EClass {
+    public static helper(): void {}
+    private Helper(): boolean {
+        return true;
+    }
+    constructor() {}
+}
+
+[CONSTRUCTOR_ONLY]: Every member of this class is a constructor. Use functions instead.
+[STATIC_ONLY]: Every member of this class is static. Use namespaces or plain objects instead.
+[EMPTY_CLASS]: This class has no members.

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isClassLikeDeclaration, isInterfaceDeclaration, isTypeAliasDeclaration } from "tsutils";
+import { isClassLikeDeclaration, isInterfaceDeclaration, isSymbolFlagSet, isTypeAliasDeclaration } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 import { find } from "../utils";
@@ -37,25 +37,25 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "This is the default value for this type parameter, so it can be omitted.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
 interface ArgsAndParams {
-    typeArguments: ts.TypeNode[];
-    typeParameters: ts.TypeParameterDeclaration[];
+    typeArguments: ts.NodeArray<ts.TypeNode>;
+    typeParameters: ReadonlyArray<ts.TypeParameterDeclaration>;
 }
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const argsAndParams = getArgsAndParameters(node, checker);
         if (argsAndParams !== undefined) {
-            checkArgsAndParameters(node, argsAndParams);
+            checkArgsAndParameters(argsAndParams);
         }
         return ts.forEachChild(node, cb);
     });
 
-    function checkArgsAndParameters(node: ts.Node, { typeArguments, typeParameters }: ArgsAndParams): void {
+    function checkArgsAndParameters({ typeArguments, typeParameters }: ArgsAndParams): void {
         // Just check the last one. Must specify previous type parameters if the last one is specified.
         const i = typeArguments.length - 1;
         const arg = typeArguments[i];
@@ -67,11 +67,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         function createFix(): Lint.Fix {
             if (i === 0) {
-                const lt = Lint.childOfKind(node, ts.SyntaxKind.LessThanToken)!;
-                const gt = Lint.childOfKind(node, ts.SyntaxKind.GreaterThanToken)!;
-                return Lint.Replacement.deleteFromTo(lt.getStart(), gt.getEnd());
+                return Lint.Replacement.deleteFromTo(typeArguments.pos - 1, typeArguments.end + 1);
             } else {
-                return Lint.Replacement.deleteFromTo(typeArguments[i - 1].getEnd(), arg.getEnd());
+                return Lint.Replacement.deleteFromTo(typeArguments[i - 1].end, arg.end);
             }
         }
     }
@@ -99,7 +97,7 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
     }
 }
 
-function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sig = checker.getResolvedSignature(node);
     const sigDecl = sig === undefined ? undefined : sig.getDeclaration();
     if (sigDecl === undefined) {
@@ -109,7 +107,9 @@ function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker
     return sigDecl.typeParameters === undefined ? undefined : sigDecl.typeParameters;
 }
 
-function typeParamsFromType(type: ts.EntityName | ts.Expression, checker: ts.TypeChecker): ts.TypeParameterDeclaration[] | undefined {
+function typeParamsFromType(
+    type: ts.EntityName | ts.Expression,
+    checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
     if (sym === undefined || sym.declarations === undefined) {
         return undefined;
@@ -123,5 +123,5 @@ function getAliasedSymbol(symbol: ts.Symbol | undefined, checker: ts.TypeChecker
     if (symbol === undefined) {
         return undefined;
     }
-    return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
+    return isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
 }

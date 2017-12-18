@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-implicit-dependencies": true
+  },
+  "jsRules": {
+    "no-implicit-dependencies": true
+  }
+}

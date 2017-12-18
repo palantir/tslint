@@ -64,7 +64,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            destructuringAll: this.ruleArguments.length !== 0 && this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
+            destructuringAll: this.ruleArguments.length !== 0 &&
+                (this.ruleArguments[0] as {destructuring?: string}).destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -167,15 +168,19 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
             if (node.kind === ts.SyntaxKind.VariableDeclarationList) {
                 this.handleVariableDeclaration(node as ts.VariableDeclarationList);
             } else if (node.kind === ts.SyntaxKind.CatchClause) {
-                this.handleBindingName((node as ts.CatchClause).variableDeclaration.name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if ((node as ts.CatchClause).variableDeclaration !== undefined) {
+                    this.handleBindingName((node as ts.CatchClause).variableDeclaration!.name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
-                this.handleBindingName((node as ts.ParameterDeclaration).name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if (node.parent!.kind !== ts.SyntaxKind.IndexSignature) {
+                    this.handleBindingName((node as ts.ParameterDeclaration).name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (utils.isPostfixUnaryExpression(node) ||
                        utils.isPrefixUnaryExpression(node) &&
                        (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) {

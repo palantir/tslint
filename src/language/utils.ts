@@ -16,10 +16,10 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList, isPrefixUnaryExpression } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
-import { IDisabledInterval, RuleFailure } from "./rule/rule"; // tslint:disable-line deprecation
+import { IDisabledInterval, RuleFailure } from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
@@ -37,20 +37,23 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
 
 /**
  * @returns true if any modifier kinds passed along exist in the given modifiers array
+ *
+ * @deprecated use `hasModifier` from `tsutils`
  */
 export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]): boolean {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
 
-    return modifiers.some((m) => {
-        return modifierKinds.some((k) => m.kind === k);
-    });
+    return modifiers.some(
+        (m) => modifierKinds.some((k) => m.kind === k));
 }
 
 /**
  * Determines if the appropriate bit in the parent (VariableDeclarationList) is set,
  * which indicates this is a "let" or "const".
+ *
+ * @deprecated use `isBlockScopedVariableDeclarationList` from `tsutils`
  */
 export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
     if (node.kind === ts.SyntaxKind.VariableDeclaration) {
@@ -61,16 +64,18 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
     }
 }
 
+/** @deprecated use `isBlockScopedVariableDeclarationList` and `getDeclarationOfBindingElement` from `tsutils` */
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
-    const variableDeclaration = getBindingElementVariableDeclaration(node);
+    const variableDeclaration = getBindingElementVariableDeclaration(node); // tslint:disable-line:deprecation
     // if no variable declaration, it must be a function param, which is block scoped
-    return (variableDeclaration == null) || isBlockScopedVariable(variableDeclaration);
+    return (variableDeclaration === null) || isBlockScopedVariable(variableDeclaration); // tslint:disable-line:deprecation
 }
 
+/** @deprecated use `getDeclarationOfBindingElement` from `tsutils` */
 export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
     let currentParent = node.parent! as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
-        if (currentParent.parent == null) {
+        if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
         } else {
             currentParent = currentParent.parent;
@@ -82,6 +87,8 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
 /**
  * Finds a child of a given node with a given kind.
  * Note: This uses `node.getChildren()`, which does extra parsing work to include tokens.
+ *
+ * @deprecated use `getChildOfKind` from `tsutils`
  */
 export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
     return node.getChildren().find((child) => child.kind === kind);
@@ -89,22 +96,28 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
 
 /**
  * @returns true if some ancestor of `node` satisfies `predicate`, including `node` itself.
+ *
+ * @deprecated no longer used, use a `while` loop instead
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent != null && someAncestor(node.parent, predicate));
+    return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate)); // tslint:disable-line:deprecation
 }
 
-export function ancestorWhere<T extends ts.Node>(node: ts.Node, predicate: (n: ts.Node) => boolean): ts.Node | undefined {
+export function ancestorWhere<T extends ts.Node = ts.Node>(
+    node: ts.Node,
+    predicate: ((n: ts.Node) => n is T) | ((n: ts.Node) => boolean),
+): T | undefined {
     let cur: ts.Node | undefined = node;
     do {
         if (predicate(cur)) {
-            return cur as T;
+            return cur;
         }
         cur = cur.parent;
     } while (cur !== undefined);
     return undefined;
 }
 
+/** @deprecated use `isBinaryExpression(node) && isAssignmentKind(node.operatorToken.kind)` with functions from `tsutils` */
 export function isAssignment(node: ts.Node) {
     if (node.kind === ts.SyntaxKind.BinaryExpression) {
         const binaryExpression = node as ts.BinaryExpression;
@@ -117,6 +130,8 @@ export function isAssignment(node: ts.Node) {
 
 /**
  * Bitwise check for node flags.
+ *
+ * @deprecated use `isNodeFlagSet` from `tsutils`
  */
 export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -125,6 +140,8 @@ export function isNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean
 
 /**
  * Bitwise check for combined node flags.
+ *
+ * @deprecated no longer used
  */
 export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -133,6 +150,8 @@ export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags):
 
 /**
  * Bitwise check for combined modifier flags.
+ *
+ * @deprecated no longer used
  */
 export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -141,6 +160,8 @@ export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.Modifie
 
 /**
  * Bitwise check for type flags.
+ *
+ * @deprecated use `isTypeFlagSet` from `tsutils`
  */
 export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -149,6 +170,8 @@ export function isTypeFlagSet(type: ts.Type, flagToCheck: ts.TypeFlags): boolean
 
 /**
  * Bitwise check for symbol flags.
+ *
+ * @deprecated use `isSymbolFlagSet` from `tsutils`
  */
 export function isSymbolFlagSet(symbol: ts.Symbol, flagToCheck: ts.SymbolFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -158,6 +181,8 @@ export function isSymbolFlagSet(symbol: ts.Symbol, flagToCheck: ts.SymbolFlags):
 /**
  * Bitwise check for object flags.
  * Does not work with TypeScript 2.0.x
+ *
+ * @deprecated use `isObjectFlagSet` from `tsutils`
  */
 export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.ObjectFlags): boolean {
     // tslint:disable-next-line:no-bitwise
@@ -166,6 +191,8 @@ export function isObjectFlagSet(objectType: ts.ObjectType, flagToCheck: ts.Objec
 
 /**
  * @returns true if decl is a nested module declaration, i.e. represents a segment of a dotted module path.
+ *
+ * @deprecated use `decl.parent!.kind === ts.SyntaxKind.ModuleDeclaration`
  */
 export function isNestedModuleDeclaration(decl: ts.ModuleDeclaration) {
     // in a declaration expression like 'module a.b.c' - 'a' is the top level module declaration node and 'b' and 'c'
@@ -181,6 +208,7 @@ export function unwrapParentheses(node: ts.Expression) {
     return node;
 }
 
+/** @deprecated use `isFunctionScopeBoundary` from `tsutils` */
 export function isScopeBoundary(node: ts.Node): boolean {
     return node.kind === ts.SyntaxKind.FunctionDeclaration
         || node.kind === ts.SyntaxKind.FunctionExpression
@@ -199,10 +227,11 @@ export function isScopeBoundary(node: ts.Node): boolean {
         || node.kind === ts.SyntaxKind.SourceFile && ts.isExternalModule(node as ts.SourceFile);
 }
 
+/** @deprecated use `isBlockScopeBoundary` from `tsutils` */
 export function isBlockScopeBoundary(node: ts.Node): boolean {
-    return isScopeBoundary(node)
+    return isScopeBoundary(node) // tslint:disable-line:deprecation
         || node.kind === ts.SyntaxKind.Block
-        || isLoop(node)
+        || isLoop(node) // tslint:disable-line:deprecation
         || node.kind === ts.SyntaxKind.WithStatement
         || node.kind === ts.SyntaxKind.SwitchStatement
         || node.parent !== undefined
@@ -210,12 +239,26 @@ export function isBlockScopeBoundary(node: ts.Node): boolean {
             || node.parent.kind === ts.SyntaxKind.IfStatement);
 }
 
+/** @deprecated use `isIterationStatement` from `tsutils` or `typescript` */
 export function isLoop(node: ts.Node): node is ts.IterationStatement {
    return node.kind === ts.SyntaxKind.DoStatement
         || node.kind === ts.SyntaxKind.WhileStatement
         || node.kind === ts.SyntaxKind.ForStatement
         || node.kind === ts.SyntaxKind.ForInStatement
         || node.kind === ts.SyntaxKind.ForOfStatement;
+}
+
+/**
+ * @returns Whether node is a numeric expression.
+ */
+export function isNumeric(node: ts.Expression) {
+    while (isPrefixUnaryExpression(node) &&
+           (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+        node = node.operand;
+    }
+
+    return node.kind === ts.SyntaxKind.NumericLiteral ||
+        isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity");
 }
 
 export interface TokenPosition {
@@ -239,6 +282,8 @@ export type FilterCallback = (node: ts.Node) => boolean;
  * @param skipTrivia If set to false all trivia preceeding `node` or any of its children is included
  * @param cb Is called for every token of `node`. It gets the full text of the SourceFile and the position of the token within that text.
  * @param filter If provided, will be called for every Node and Token found. If it returns false `cb` will not be called for this subtree.
+ *
+ * @deprecated use `forEachToken` or `forEachTokenWithTrivia` from `tsutils`
  */
 export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachTokenCallback, filter?: FilterCallback) {
     // this function will most likely be called with SourceFile anyways, so there is no need for an additional parameter
@@ -309,14 +354,18 @@ function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback
     return handleTrivia;
 }
 
-/** Iterate over all comments owned by `node` or its children */
+/**
+ * Iterate over all comments owned by `node` or its children
+ *
+ * @deprecated use `forEachComment` from `tsutils`
+ */
 export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
     /* Visit all tokens and skip trivia.
        Comment ranges between tokens are parsed without the need of a scanner.
        forEachToken also does intentionally not pay attention to the correct comment ownership of nodes as it always
        scans all trivia before each token, which could include trailing comments of the previous token.
        Comment onwership is done right in this function*/
-    return forEachToken(node, true, (fullText, tokenKind, pos, parent) => {
+    return forEachToken(node, true, (fullText, tokenKind, pos, parent) => { // tslint:disable-line:deprecation
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment

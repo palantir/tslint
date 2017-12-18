@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -159,9 +160,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, { order: "fields-first" }],
             [true, {
                 order: [
-                    "static-field",
-                    "instance-field",
-                    "constructor",
+                    "public-static-field",
+                    "public-instance-field",
+                    "public-constructor",
+                    "private-static-field",
+                    "private-instance-field",
+                    "private-constructor",
                     "public-instance-method",
                     "protected-instance-method",
                     "private-instance-method",
@@ -221,7 +225,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkMembers(members: Member[]) {
+    private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
         for (const member of members) {
@@ -250,7 +254,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                     const curName = nameString(member.name);
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(member.name,
+                        this.addFailureAtNode(
+                            member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
                     } else {
                         prevName = curName;
@@ -264,7 +269,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the lowest name higher than 'targetName'. */
-    private findLowerName(members: Member[], targetRank: Rank, targetName: string): string {
+    private findLowerName(members: ReadonlyArray<Member>, targetRank: Rank, targetName: string): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
@@ -278,7 +283,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /** Finds the highest existing rank lower than `targetRank`. */
-    private findLowerRank(members: Member[], targetRank: Rank): Rank | -1 {
+    private findLowerRank(members: ReadonlyArray<Member>, targetRank: Rank): Rank | -1 {
         let max: Rank | -1 = -1;
         for (const member of members) {
             const rank = this.memberRank(member);
@@ -330,8 +335,8 @@ function memberKindFromName(name: string): MemberKind[] {
 }
 
 function getMemberKind(member: Member): MemberKind | undefined {
-    const accessLevel =  hasModifier(ts.SyntaxKind.PrivateKeyword) ? "private"
-        : hasModifier(ts.SyntaxKind.ProtectedKeyword) ? "protected"
+    const accessLevel =  hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword) ? "private"
+        : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword) ? "protected"
         : "public";
 
     switch (member.kind) {
@@ -352,12 +357,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     }
 
     function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
+        const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
         return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
-    }
-
-    function hasModifier(kind: ts.SyntaxKind) {
-        return Lint.hasModifier(member.modifiers, kind);
     }
 }
 
@@ -385,7 +386,7 @@ function parseOptions(options: any[]): Options {
     return { order, alphabetize };
 }
 function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
-    if (allOptions == null || allOptions.length === 0 || allOptions[0] == null) {
+    if (allOptions == undefined || allOptions.length === 0 || allOptions[0] == undefined) {
         throw new Error("Got empty options");
     }
 
