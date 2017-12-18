@@ -25,10 +25,13 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
-        rationale: ".",
+        rationale: Lint.Utils.dedent`
+            \`function\` expressions that are immediately bound to \`this\` are equivalent to \`() =>\` arrow lambdas.
+            Additionally, there's no use in binding a scope to an arrow lambda, as it already has one.
+        `,
         requiresTypeInfo: true,
         ruleName: "no-unnecessary-bind",
-        type: "functionality",
+        type: "style",
         typescriptOnly: false,
     };
 
