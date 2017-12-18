@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -73,7 +74,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
         context.addFailureAtNode(node, Rule.FAILURE_STRING_FUNCTION, replacement);
     }
 
-    function getFunctionLikeValueDeclaration(node: ts.Node): ts.FunctionLike | undefined {
+    function getArrowFunctionDeclaration(node: ts.Node): ts.ArrowFunction | undefined {
         const { symbol } = typeChecker.getTypeAtLocation(node);
         if (symbol === undefined) {
             return undefined;
@@ -84,7 +85,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
             return undefined;
         }
 
-        if (!ts.isFunctionLike(valueDeclaration)) {
+        if (!tsutils.isArrowFunction(valueDeclaration)) {
             return undefined;
         }
 
@@ -98,13 +99,13 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
         }
 
         const boundExpression = Lint.getNodeWithinParenthesis(bindExpression.expression);
-        if (ts.isFunctionExpression(boundExpression)) {
+        if (tsutils.isFunctionExpression(boundExpression)) {
             checkFunctionExpression(node, boundExpression);
             return;
         }
 
-        const valueDeclaration = getFunctionLikeValueDeclaration(boundExpression);
-        if (valueDeclaration !== undefined && ts.isArrowFunction(valueDeclaration)) {
+        const valueDeclaration = getArrowFunctionDeclaration(boundExpression);
+        if (valueDeclaration !== undefined) {
             checkArrowFunction(node, boundExpression);
         }
     }
