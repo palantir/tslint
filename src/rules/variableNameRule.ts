@@ -179,12 +179,12 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     function handleVariableDeclaration(node: ts.VariableDeclaration): void {
         handleDeclaredVariable(node);
 
-        if (!ctx.options.allCapsForConst) {
+        if (!ctx.options.allCapsForConst || utils.isBindingPattern(node.name)) {
             return;
         }
 
-        const declarationList = node.parent as ts.VariableDeclarationList;
-        const text = node.name.getText();
+        const declarationList = node.parent!;
+        const text = node.name.text;
 
         if (isUpperCase(text) && !utils.isNodeFlagSet(declarationList, ts.NodeFlags.Const)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING_CONST);
