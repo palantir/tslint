@@ -269,11 +269,13 @@ export class Rule extends Lint.Rules.TypedRule {
                         [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
                         [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
                     },
-                    [DESCRIPTOR_TAGS]: {
-                        [TAGS_FOR_CONTENT]: {
-                            see: ["#.*"],
+                    [ARGUMENT_PROPERTIES]: {
+                        [DESCRIPTOR_TAGS]: {
+                            [TAGS_FOR_CONTENT]: {
+                                see: ["#.*"],
+                            },
+                            [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                         },
-                        [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                     },
                 },
             ],
