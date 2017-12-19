@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getPreviousStatement } from "tsutils";
+import { getPreviousStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -52,15 +52,13 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private getFixer(returnNode: ts.ReturnStatement, previousNode: ts.Node): Lint.Replacement {
-        const prevText = previousNode.getFullText(this.sourceFile);
-        const returnText = returnNode.getFullText(this.sourceFile);
-        const indentationOfPrevStmt = prevText.substring(0, prevText.search(/\S/)).match(/ /g)!.length;
-        return Lint.Replacement.replaceFromTo(
-                                    returnNode.getFullStart(),
-                                    returnNode.getEnd(),
-                                    `\n\n${" ".repeat(indentationOfPrevStmt) + returnText.trim()}`,
-                                );
+    private getFixer(returnNode: ts.ReturnStatement, previousNode: ts.Node): Lint.Replacement | undefined {
+        const newLineType = this.sourceFile
+                                .text[this.sourceFile.getLineStarts()[1] - 2] === "\r"
+                                    ? "\r\n" : "\n";
+        return isSameLine(this.sourceFile, previousNode.end, returnNode.getStart())
+                ? undefined
+                : Lint.Replacement.appendText(returnNode.pos, newLineType);
     }
 
     private visitReturnStatement(node: ts.ReturnStatement) {

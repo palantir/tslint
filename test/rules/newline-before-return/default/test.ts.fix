@@ -34,9 +34,7 @@ function foo() {
 }
 
 function foo(fn) {
-    fn();
-
-    return;
+    fn(); return;
 }
 
 function foo() {
