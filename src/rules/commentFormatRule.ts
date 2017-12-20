@@ -21,6 +21,7 @@ import * as ts from "typescript";
 import { ENABLE_DISABLE_REGEX } from "../enableDisableRules";
 import * as Lint from "../index";
 import { escapeRegExp, isLowerCase, isUpperCase } from "../utils";
+import { LineAndCharacter } from 'typescript';
 
 interface IExceptionsObject {
     "ignore-words"?: string[];
@@ -35,10 +36,12 @@ interface Options {
     allowTrailingLowercase: boolean;
 }
 
-interface Failures {
-    leadingSpace: boolean;
-    uppercase: boolean;
-    lowercase: boolean;
+interface CommentStatus {
+    text: string;
+    start: number;
+    leadingSpaceError: boolean;
+    uppercaseError: boolean;
+    lowercaseError: boolean;
     firstLetterPos: number;
 }
 
@@ -135,7 +138,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
+        const commentFormatWalker = new CommentFormatWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments));
+        return this.applyWithWalker(commentFormatWalker);
     }
 }
 
@@ -184,107 +188,112 @@ function composeExceptions(
     return undefined;
 }
 
-function walk(ctx: Lint.WalkContext<Options>) {
-    utils.forEachComment(ctx.sourceFile, (fullText, { kind, pos, end }) => {
-        let start = pos + 2;
+class CommentFormatWalker extends Lint.AbstractWalker<Options> {
+    private prevComment: LineAndCharacter;
+
+    public walk(sourceFile: ts.SourceFile) {
+        utils.forEachComment(sourceFile, (fullText, comment) => {
+            const commentStatus = this.checkComment(fullText, comment);
+            this.handleFailure(commentStatus, comment.end);
+            // cache position of last comment
+            this.prevComment = ts.getLineAndCharacterOfPosition(sourceFile, comment.pos);
+        });
+    }
+
+    private checkComment(fullText: string, {kind, pos, end}: ts.CommentRange): CommentStatus {
+        const status: CommentStatus = {
+            text: "",
+            start: pos + 2,
+            leadingSpaceError: false,
+            uppercaseError: false,
+            lowercaseError: false,
+            firstLetterPos: -1
+        };
+
         if (
             kind !== ts.SyntaxKind.SingleLineCommentTrivia ||
             // exclude empty comments
-            start === end ||
+            status.start === end ||
             // exclude /// <reference path="...">
-            (fullText[start] === "/" &&
-                ctx.sourceFile.referencedFiles.some(ref => ref.pos >= pos && ref.end <= end))
+            (fullText[status.start] === "/" &&
+                this.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end))
         ) {
-            return;
+            return status;
         }
 
         // skip all leading slashes
-        while (fullText[start] === "/") {
-            ++start;
+        while (fullText[status.start] === "/") {
+            ++status.start;
         }
-        if (start === end) {
-            return;
+        if (status.start === end) {
+            return status;
         }
-        const commentText = fullText.slice(start, end);
+        status.text = fullText.slice(status.start, end);
         // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
-        if (/^(?:#(?:end)?region|noinspection\s)/.test(commentText)) {
-            return;
+        if (/^(?:#(?:end)?region|noinspection\s)/.test(status.text)) {
+            return status;
         }
 
-        const failures: Failures = { leadingSpace: false, uppercase: false, lowercase: false, firstLetterPos: -1};
-        if (ctx.options.space && commentText[0] !== " ") {
-            failures.leadingSpace = true;
+        if (this.options.space && status.text[0] !== " ") {
+            status.leadingSpaceError = true;
         }
 
         if (
-            ctx.options.case === Case.None ||
-            (ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText)) ||
-            ENABLE_DISABLE_REGEX.test(commentText)
+            this.options.case === Case.None ||
+            (this.options.exceptions !== undefined && this.options.exceptions.test(status.text)) ||
+            ENABLE_DISABLE_REGEX.test(status.text)
         ) {
-            addFailure(ctx, commentText, start, end, failures);
-            return;
+            return status;
         }
 
         // search for first non-space character to check if lower or upper
-        const charPos = commentText.search(/\S/);
+        const charPos = status.text.search(/\S/);
         if (charPos === -1) {
-            addFailure(ctx, commentText, start, end, failures);
-            return;
+            return status;
         }
-        failures.firstLetterPos = charPos;
-        if (ctx.options.case === Case.Lower && !isLowerCase(commentText[charPos])) {
-            failures.lowercase = true;
-        } else if (ctx.options.case === Case.Upper && !isUpperCase(commentText[charPos])) {
-            failures.uppercase = true;
-            if (ctx.options.allowTrailingLowercase) {
-                const lineAndCharCurrentComment = ts.getLineAndCharacterOfPosition(ctx.sourceFile, pos);
-                const posPrevComment = ctx.sourceFile.getPositionOfLineAndCharacter(
-                    lineAndCharCurrentComment.line - 1, 0) + lineAndCharCurrentComment.character;
-
-                const prevComment = utils.getCommentAtPosition(ctx.sourceFile, posPrevComment);
-                if (prevComment !== undefined && prevComment.pos === posPrevComment) {
-                    failures.uppercase = false;
+        status.firstLetterPos = charPos;
+        if (this.options.case === Case.Lower && !isLowerCase(status.text[charPos])) {
+            status.lowercaseError = true;
+        } else if (this.options.case === Case.Upper && !isUpperCase(status.text[charPos])) {
+            status.uppercaseError = true;
+            if (this.options.allowTrailingLowercase && this.prevComment !== undefined) {
+                const currentComment = ts.getLineAndCharacterOfPosition(this.sourceFile, pos);
+                if (this.prevComment.line + 1 === currentComment.line
+                    &&  this.prevComment.character === currentComment.character) {
+                    status.uppercaseError = false;
                 }
             }
         }
-        addFailure(ctx, commentText, start, end, failures);
-    });
-}
-
-function addFailure(ctx: Lint.WalkContext<Options>, comment: string, start: number, end: number, failures: Failures) {
-    // No failure detected
-    if (!failures.leadingSpace && !failures.lowercase && !failures.uppercase) {
-        return;
+        return status;
     }
 
-    if (failures.lowercase) {
-        const msg = failures.leadingSpace ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
-        const fix = generateFix(comment, start, failures);
-        ctx.addFailure(start, end, msg + ctx.options.failureSuffix, fix);
-    } else if (failures.uppercase) {
-        const msg = failures.leadingSpace ? Rule.SPACE_UPPERCASE_FAILURE : Rule.UPPERCASE_FAILURE;
-        const fix = generateFix(comment, start, failures);
-        ctx.addFailure(start, end, msg + ctx.options.failureSuffix, fix);
-    } else {
+
+    private handleFailure(status: CommentStatus, end: number) {
+        // No failure detected
+        if (!status.leadingSpaceError && !status.lowercaseError && !status.uppercaseError) {
+            return;
+        }
+
         // Only whitespace failure
-        ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, generateFix(comment, start, failures));
-    }
-}
+        if (status.leadingSpaceError && !status.lowercaseError && !status.uppercaseError) {
+            this.addFailure(status.start, end, Rule.LEADING_SPACE_FAILURE, Lint.Replacement.appendText(status.start, " "));
+            return;
+        }
 
-function generateFix(comment: string, start: number, failures: Failures) {
-    if (failures.lowercase) {
-        const fix = comment[failures.firstLetterPos].toLowerCase();
-        if (failures.leadingSpace) {
-            return new Lint.Replacement(start, 1, ` ${fix}`);
+        let msg: string;
+        let firstLetterFix: string
+
+        if (status.lowercaseError) {
+            msg = status.leadingSpaceError ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
+            firstLetterFix = status.text[status.firstLetterPos].toLowerCase();
+        } else {
+            msg = status.leadingSpaceError ? Rule.SPACE_UPPERCASE_FAILURE : Rule.UPPERCASE_FAILURE;
+            firstLetterFix = status.text[status.firstLetterPos].toUpperCase();
         }
-        return new Lint.Replacement(start + failures.firstLetterPos, 1, fix);
-    } else if (failures.uppercase) {
-        const fix = comment[failures.firstLetterPos].toUpperCase();
-        if (failures.leadingSpace) {
-            return new Lint.Replacement(start, 1, ` ${fix}`);
-        }
-        return new Lint.Replacement(start + failures.firstLetterPos, 1, fix);
-    } else {
-        return Lint.Replacement.appendText(start, " ");
+
+        const fix = status.leadingSpaceError
+            ? new Lint.Replacement(status.start, 1, ` ${firstLetterFix}`)
+            : new Lint.Replacement(status.start + status.firstLetterPos, 1, firstLetterFix);
+        this.addFailure(status.start, end, msg + this.options.failureSuffix, fix);
     }
 }
