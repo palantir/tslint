@@ -21,7 +21,6 @@ import * as ts from "typescript";
 import { ENABLE_DISABLE_REGEX } from "../enableDisableRules";
 import * as Lint from "../index";
 import { escapeRegExp, isLowerCase, isUpperCase } from "../utils";
-import { LineAndCharacter } from 'typescript';
 
 interface IExceptionsObject {
     "ignore-words"?: string[];
@@ -43,6 +42,7 @@ interface CommentStatus {
     uppercaseError: boolean;
     lowercaseError: boolean;
     firstLetterPos: number;
+    validForTrailingLowercase: boolean;
 }
 
 const enum Case {
@@ -138,7 +138,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const commentFormatWalker = new CommentFormatWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments));
+        const commentFormatWalker = new CommentFormatWalker(
+            sourceFile,
+            this.ruleName,
+            parseOptions(this.ruleArguments),
+        );
         return this.applyWithWalker(commentFormatWalker);
     }
 }
@@ -146,12 +150,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function parseOptions(options: Array<string | IExceptionsObject>): Options {
     return {
         allowTrailingLowercase: has(OPTION_ALLOW_TRAILING_LOWERCASE),
-        case:
-            has(OPTION_LOWERCASE)
-                ? Case.Lower
-                : has(OPTION_UPPERCASE)
-                    ? Case.Upper
-                    : Case.None,
+        case: has(OPTION_LOWERCASE) ? Case.Lower : has(OPTION_UPPERCASE) ? Case.Upper : Case.None,
         failureSuffix: "",
         space: has(OPTION_SPACE),
         ...composeExceptions(options[options.length - 1]),
@@ -189,7 +188,8 @@ function composeExceptions(
 }
 
 class CommentFormatWalker extends Lint.AbstractWalker<Options> {
-    private prevComment: LineAndCharacter;
+    private prevComment: ts.LineAndCharacter | undefined;
+    private prevCommentIsValid: boolean | undefined;
 
     public walk(sourceFile: ts.SourceFile) {
         utils.forEachComment(sourceFile, (fullText, comment) => {
@@ -197,17 +197,19 @@ class CommentFormatWalker extends Lint.AbstractWalker<Options> {
             this.handleFailure(commentStatus, comment.end);
             // cache position of last comment
             this.prevComment = ts.getLineAndCharacterOfPosition(sourceFile, comment.pos);
+            this.prevCommentIsValid = commentStatus.validForTrailingLowercase;
         });
     }
 
-    private checkComment(fullText: string, {kind, pos, end}: ts.CommentRange): CommentStatus {
+    private checkComment(fullText: string, { kind, pos, end }: ts.CommentRange): CommentStatus {
         const status: CommentStatus = {
-            text: "",
-            start: pos + 2,
+            firstLetterPos: -1,
             leadingSpaceError: false,
-            uppercaseError: false,
             lowercaseError: false,
-            firstLetterPos: -1
+            start: pos + 2,
+            text: "",
+            uppercaseError: false,
+            validForTrailingLowercase: false,
         };
 
         if (
@@ -216,7 +218,7 @@ class CommentFormatWalker extends Lint.AbstractWalker<Options> {
             status.start === end ||
             // exclude /// <reference path="...">
             (fullText[status.start] === "/" &&
-                this.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end))
+                this.sourceFile.referencedFiles.some(ref => ref.pos >= pos && ref.end <= end))
         ) {
             return status;
         }
@@ -251,22 +253,29 @@ class CommentFormatWalker extends Lint.AbstractWalker<Options> {
         if (charPos === -1) {
             return status;
         }
+        // All non-empty and not whitelisted comments are valid for the trailing lowercase rule
+        status.validForTrailingLowercase = true;
         status.firstLetterPos = charPos;
         if (this.options.case === Case.Lower && !isLowerCase(status.text[charPos])) {
             status.lowercaseError = true;
         } else if (this.options.case === Case.Upper && !isUpperCase(status.text[charPos])) {
             status.uppercaseError = true;
-            if (this.options.allowTrailingLowercase && this.prevComment !== undefined) {
+            if (
+                this.options.allowTrailingLowercase &&
+                this.prevComment !== undefined &&
+                this.prevCommentIsValid
+            ) {
                 const currentComment = ts.getLineAndCharacterOfPosition(this.sourceFile, pos);
-                if (this.prevComment.line + 1 === currentComment.line
-                    &&  this.prevComment.character === currentComment.character) {
+                if (
+                    this.prevComment.line + 1 === currentComment.line &&
+                    this.prevComment.character === currentComment.character
+                ) {
                     status.uppercaseError = false;
                 }
             }
         }
         return status;
     }
-
 
     private handleFailure(status: CommentStatus, end: number) {
         // No failure detected
@@ -276,12 +285,17 @@ class CommentFormatWalker extends Lint.AbstractWalker<Options> {
 
         // Only whitespace failure
         if (status.leadingSpaceError && !status.lowercaseError && !status.uppercaseError) {
-            this.addFailure(status.start, end, Rule.LEADING_SPACE_FAILURE, Lint.Replacement.appendText(status.start, " "));
+            this.addFailure(
+                status.start,
+                end,
+                Rule.LEADING_SPACE_FAILURE,
+                Lint.Replacement.appendText(status.start, " "),
+            );
             return;
         }
 
         let msg: string;
-        let firstLetterFix: string
+        let firstLetterFix: string;
 
         if (status.lowercaseError) {
             msg = status.leadingSpaceError ? Rule.SPACE_LOWERCASE_FAILURE : Rule.LOWERCASE_FAILURE;
