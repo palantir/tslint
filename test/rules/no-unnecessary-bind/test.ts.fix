@@ -7,6 +7,10 @@ class Class {
     public bind() { }
 
     public method() { }
+
+    public boundFunction = () => {}
+
+    public boundAsyncFunction = async () => {}
 }
 
 const instance = new Class();
@@ -24,16 +28,24 @@ functionVar.bind(this, 1);
 functionVar.bind(this, undefined);
 
 const immediatelyBoundFunction = () => {};
-const immediatelyBoundFunctionReturn = (i: number) => { return i; };
+const immediatelyBoundFunctionReturn = (i: number): number => { return i; };
 const immediatelyBoundFunctionWrapped = () => {};
-const immediatelyBoundFunctionWrappedReturn = (i: number) => { return i; };
-const immediatelyBoundFunctionArgs = function (i: number) {}.bind(this, 1);
-const immediatelyBoundFunctionArgsReturn = function (i: number) { return i; }.bind(this, 1);
+const immediatelyBoundFunctionWrappedReturn = (i: number): number => { return i; };
+const immediatelyBoundFunctionArgs = function (i: number): number {}.bind(this, 1);
+const immediatelyBoundFunctionArgsReturn = function (i: number): number { return i; }.bind(this, 1);
+const immediatelyBoundFunctionNameUnused = () => { functionVar(); };
+const immediatelyBoundFunctionNameUsed = function foo() { foo(); }.bind(this);
 
 const immediatelyBoundArrow = (i: number) => i;
 const immediatelyBoundArrowArgs = ((i: number) => i).bind(this, 1);
-const immediatelyBoundArrowArgsReturn = function (i: number) { return i; }.bind(this, 1);
+const immediatelyBoundArrowArgsReturn = function (i: number): number { return i; }.bind(this, 1);
 
+const asyncFunction = async () => {};
+const asyncFunctionReturn = async (): number => { return 1; };
+const asyncArrow = async () => {};
+const asyncArrowReturn = async (): number => { return 1; };
+
+(function* generator() {}).bind(this);
 instance.method.bind(this);
 instance.bind(this);
 Class.bind(this);

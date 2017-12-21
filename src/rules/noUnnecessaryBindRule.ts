@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2017 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-export class Rule extends Lint.Rules.TypedRule {
+export class Rule extends Lint.Rules.OptionallyTypedRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Prevents unnecessary and/or misleading scope bindings on functions.",
         optionExamples: [true],
@@ -40,12 +40,16 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static FAILURE_STRING_ARROW = "Don't bind scopes to arrow lambdas, as they already have a bound scope.";
 
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, walk);
+    }
+
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
+function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
     function checkArrowFunction(node: ts.CallExpression, boundExpression: ts.Node): void {
         if (node.arguments.length !== 1) {
             return;
@@ -58,23 +62,23 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
         context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW, replacement);
     }
 
-    function checkFunctionExpression(node: ts.CallExpression, valueDeclaration: ts.FunctionExpression): void {
-        if (node.arguments.length !== 1 || node.arguments[0].kind !== ts.SyntaxKind.ThisKeyword) {
+    function checkFunctionExpression(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): void {
+        if (!canFunctionExpressionBeFixed(callExpression, valueDeclaration)) {
             return;
         }
 
-        const parameters = valueDeclaration.parameters
-            .map((parameter) => parameter.getText(context.sourceFile))
-            .join(", ");
-        const body = valueDeclaration.body.getText(context.sourceFile);
         const replacement = Lint.Replacement.replaceNode(
-            node,
-            `(${parameters}) => ${body}`);
+            callExpression,
+            Lint.convertFunctionToArrowText(valueDeclaration, context.sourceFile));
 
-        context.addFailureAtNode(node, Rule.FAILURE_STRING_FUNCTION, replacement);
+        context.addFailureAtNode(callExpression, Rule.FAILURE_STRING_FUNCTION, replacement);
     }
 
     function getArrowFunctionDeclaration(node: ts.Node): ts.ArrowFunction | undefined {
+        if (typeChecker === undefined) {
+            return undefined;
+        }
+
         const { symbol } = typeChecker.getTypeAtLocation(node);
         if (symbol === undefined) {
             return undefined;
@@ -98,7 +102,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
             return;
         }
 
-        const boundExpression = Lint.getNodeWithinParenthesis(bindExpression.expression);
+        const boundExpression = Lint.unwrapParentheses(bindExpression.expression);
         if (tsutils.isFunctionExpression(boundExpression)) {
             checkFunctionExpression(node, boundExpression);
             return;
@@ -121,4 +125,27 @@ function walk(context: Lint.WalkContext<void>, typeChecker: ts.TypeChecker) {
 
 function isBindPropertyAccess(node: ts.LeftHandSideExpression): node is ts.PropertyAccessExpression {
     return ts.isPropertyAccessExpression(node) && node.name.text === "bind";
+}
+
+function canFunctionExpressionBeFixed(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): boolean {
+    if (callExpression.arguments.length !== 1
+        || callExpression.arguments[0].kind !== ts.SyntaxKind.ThisKeyword
+        || valueDeclaration.asteriskToken !== undefined) {
+        return false;
+    }
+
+    const { name } = valueDeclaration;
+    if (name === undefined) {
+        return true;
+    }
+
+    return !ts.forEachChild(
+        valueDeclaration.body,
+        function search(node: ts.Node): boolean {
+            if (tsutils.isIdentifier(node)) {
+                return node.text === name.text;
+            }
+
+            return !!ts.forEachChild(node, search);
+        });
 }

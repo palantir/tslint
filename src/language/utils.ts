@@ -16,7 +16,7 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList, isIdentifier, isParenthesizedExpression, isPrefixUnaryExpression } from "tsutils";
+import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import { IDisabledInterval, RuleFailure } from "./rule/rule";
@@ -492,9 +492,29 @@ export function isWhiteSpace(ch: number): boolean {
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
 
-/** Gets a node ignoring any levels of parenthesis around it. */
-export function getNodeWithinParenthesis(node: ts.Node): ts.Node {
-    return isParenthesizedExpression(node)
-        ? getNodeWithinParenthesis(node.expression)
-        : node;
+export function convertModifiersToText(modifiers: ts.ModifiersArray | undefined, sourceFile?: ts.SourceFile): string {
+    if (modifiers === undefined || modifiers.length === 0) {
+        return "";
+    }
+
+    let text = "";
+
+    for (const modifier of modifiers) {
+        text += modifier.getText(sourceFile);
+    }
+
+    return `${text} `;
+}
+
+export function convertFunctionToArrowText(node: ts.FunctionExpression, sourceFile: ts.SourceFile): string {
+    const parenthesisIndex = sourceFile.text.indexOf("(", node.pos);
+    const functionIndex = sourceFile.text.lastIndexOf("function", parenthesisIndex);
+
+    const body = sourceFile.text.substring(node.body.pos, node.body.end);
+    const modifiers = functionIndex <= node.pos + 1
+        ? ""
+        : `${sourceFile.text.substring(node.pos, functionIndex).trim()} `;
+    const parametersAndReturn = sourceFile.text.substring(parenthesisIndex, node.body.pos);
+
+    return `${modifiers}${parametersAndReturn} =>${body}`;
 }
