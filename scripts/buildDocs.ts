@@ -195,6 +195,12 @@ function generateRuleFile(metadata: IRuleMetadata): string {
             typeof example === "string" ? example : stringify(example));
     }
 
+    /* Prep code examples for markdownify */
+    if (metadata.codeExamples) {
+        metadata.codeExamples.pass = `\`\`\`${metadata.codeExamples.pass}\`\`\``;
+        metadata.codeExamples.fail = `\`\`\`${metadata.codeExamples.fail}\`\`\``;
+    }
+
     const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
     return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;

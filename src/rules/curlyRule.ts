@@ -24,6 +24,7 @@ import {
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { dedent } from "../utils";
 
 const OPTION_AS_NEEDED = "as-needed";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
@@ -72,6 +73,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "functionality",
         typescriptOnly: false,
         hasFix: true,
+        codeExamples: {
+            pass: dedent`
+                if (x > 0) {
+                    doStuff();
+                }
+            `,
+            fail: dedent`
+                if (x > 0)
+                    doStuff();
+            `,
+        },
     };
     /* tslint:enable:object-literal-sort-keys */
 
