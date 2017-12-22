@@ -68,14 +68,21 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(context: Lint.WalkContext<Options>) {
+    function createReplacement(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression, newOperatorText: string): Lint.Replacement {
+        let text = `${node.operand.getText(context.sourceFile)} ${newOperatorText}`;
+
+        if (node.parent !== undefined && tsutils.isBinaryExpression(node.parent)) {
+            text = `(${text})`;
+        }
+
+        return Lint.Replacement.replaceNode(node, text);
+    }
+
     function complainOnNode(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
         const newOperatorText = node.operator === ts.SyntaxKind.PlusPlusToken
             ? "+= 1"
             : "-= 1";
-
-        const replacement = Lint.Replacement.replaceNode(
-            node,
-            `${node.operand.getText(context.sourceFile)} ${newOperatorText}`);
+        const replacement = createReplacement(node, newOperatorText);
 
         const failure = Rule.FAILURE_STRING_FACTORY(newOperatorText);
 

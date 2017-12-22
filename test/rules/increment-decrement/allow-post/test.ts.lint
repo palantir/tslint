@@ -14,5 +14,13 @@ x + 1;
 x - 1;
 1 + x;
 1 - x;
+
+x + ++x;
+    ~~~       [plus]
+x + x++;
+
+x - --x;
+    ~~~       [minus]
+x - x--;
 [plus]:       Use an explicit += 1 operator.
 [minus]:       Use an explicit -= 1 operator.
