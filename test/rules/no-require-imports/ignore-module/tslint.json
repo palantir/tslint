@@ -3,7 +3,10 @@
         "no-require-imports": [
         true,
         {
-            "ignore-module": "(allow-require|\\.css)$"
+            "ignore-module": [
+                "allow-require$",
+                "\\.css$"
+            ]
         }
         ]
     }

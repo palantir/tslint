@@ -34,7 +34,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 properties: {
                     "ignore-module": {
-                        type: "string",
+                        type: "array",
+                        items: {
+                            type: "string",
+                        },
+                        minLength: 1,
                     },
                 },
                 type: "object",
@@ -43,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             type: "array",
         },
-        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: ["\\.html$", "\\.css$"] }]],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -70,10 +74,10 @@ class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
             const identifierName = (expression as ts.Identifier).text;
             if (identifierName === "require" && node.arguments.length === 1) {
                 const options = this.getOptions() as any[];
-                const patternConfig = options[0] as { "ignore-module": string } | undefined;
-                const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
-                if (ignorePattern === undefined || !ignorePattern.test((node.arguments[0] as ts.Identifier).text)) {
-                    // if we're calling (invoking) require, then it's not part of an import statement
+                const patternConfig = options[0] as { "ignore-module": string[] } | undefined;
+                const ignorePatterns = extractIgnoreModule(patternConfig);
+                // if we're calling (invoking) require, then it's not part of an import statement
+                if (ignorePatterns === undefined || !ignoreNode(node, ignorePatterns)) {
                     this.addFailureAtNode(node, Rule.FAILURE_STRING);
                 }
             }
@@ -81,4 +85,27 @@ class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
 
         super.visitCallExpression(node);
     }
+}
+
+function extractIgnoreModule(patternConfig: { "ignore-module": string[] } | undefined) {
+    if (patternConfig === undefined || patternConfig[OPTION_IGNORE_MODULE] === undefined) {
+        return undefined;
+    }
+
+    const ignoredExpressions = [];
+    for (const exp of patternConfig[OPTION_IGNORE_MODULE]) {
+        ignoredExpressions.push(new RegExp(exp));
+    }
+
+    return ignoredExpressions;
+}
+
+function ignoreNode(node: ts.CallExpression, ignorePatterns: RegExp[]) {
+    for (const ignorePattern of ignorePatterns) {
+        if (!!ignorePattern.test((node.arguments[0] as ts. Identifier).text)) {
+            return true;
+        }
+    }
+
+    return false;
 }

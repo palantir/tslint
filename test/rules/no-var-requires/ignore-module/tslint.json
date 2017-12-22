@@ -3,7 +3,10 @@
     "no-var-requires": [
       true,
       {
-          "ignore-module": "(allow-require|\\.css)$"
+          "ignore-module": [
+            "allow-require$",
+            "\\.css$"
+          ]
       }
       ]
   }

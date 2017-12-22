@@ -33,7 +33,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 properties: {
                     "ignore-module": {
-                        type: "string",
+                        type: "array",
+                        items: {
+                            type: "string",
+                        },
+                        minLength: 1,
                     },
                 },
                 type: "object",
@@ -42,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             type: "array",
         },
-        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: "(\\.html|\\.css)$" }]],
+        optionExamples: [true, [true, { [OPTION_IGNORE_MODULE]: ["\\.html$", "\\.css$"] }]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -51,23 +55,39 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require() style import is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const patternConfig = this.ruleArguments[0] as { "ignore-module": string } | undefined;
+        const patternConfig = this.ruleArguments[0] as { "ignore-module": string[] } | undefined;
         return this.applyWithFunction(sourceFile, walk, extractIgnoreModule(patternConfig));
     }
 }
 
-function walk(ctx: Lint.WalkContext<RegExp | undefined>) {
-    const { options: ignorePattern, sourceFile } = ctx;
+function walk(ctx: Lint.WalkContext<RegExp[] | undefined>) {
+    const { options: ignorePatterns, sourceFile } = ctx;
     for (const name of findImports(sourceFile, ImportKind.AllRequireLike)) {
-        if (ignorePattern === undefined || !ignorePattern.test(name.text)) {
+        if (ignorePatterns === undefined || !ignoreNode(name, ignorePatterns)) {
             ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
         }
     }
 }
 
-function extractIgnoreModule(patternConfig: { "ignore-module": string } | undefined) {
+function extractIgnoreModule(patternConfig: { "ignore-module": string[] } | undefined) {
     if (patternConfig === undefined || patternConfig[OPTION_IGNORE_MODULE] === undefined) {
         return undefined;
     }
-    return new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+
+    const ignoredExpressions = [];
+    for (const exp of patternConfig[OPTION_IGNORE_MODULE]) {
+        ignoredExpressions.push(new RegExp(exp));
+    }
+
+    return ignoredExpressions;
+}
+
+function ignoreNode(name: ts.LiteralExpression, ignorePatterns: RegExp[]) {
+    for (const ignorePattern of ignorePatterns) {
+        if (ignorePattern.test(name.text)) {
+            return true;
+        }
+    }
+
+    return false;
 }
