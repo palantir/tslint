@@ -117,6 +117,21 @@ export class OnlyHasSetAccessorWithNoComments {
 
 }
 
+export class BothAccessorWithDifferentNamesNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get myGetAccessor() { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+    set mySetAccessor(value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}
+
 const computedName = "myComputedName";
 
 export class ComputedNamesWithCommentsOnGetOnly {

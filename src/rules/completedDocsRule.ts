@@ -441,8 +441,8 @@ function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
 
     const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
     const correspondingKindCheck = node.kind === ts.SyntaxKind.GetAccessor
-        ? ts.isSetAccessor
-        : ts.isGetAccessor;
+        ? isSetAccessor
+        : isGetAccessor;
 
     for (const member of parent.members) {
         if (!correspondingKindCheck(member)) {
@@ -503,4 +503,12 @@ function describeModifier(kind: ts.SyntaxKind) {
 
 function describeNode(nodeType: DocType): string {
     return nodeType.replace("-", " ");
+}
+
+function isGetAccessor(node: ts.Node): node is ts.GetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.GetAccessor;
+}
+
+function isSetAccessor(node: ts.Node): node is ts.SetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.SetAccessor;
 }
