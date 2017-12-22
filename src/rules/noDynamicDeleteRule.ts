@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(context: Lint.WalkContext<void>) {
     function checkDeleteAccessExpression(node: ts.Expression | undefined): void {
-        if (node === undefined || !ts.isElementAccessExpression(node)) {
+        if (node === undefined || !tsutils.isElementAccessExpression(node)) {
             return;
         }
 
@@ -54,12 +54,12 @@ function walk(context: Lint.WalkContext<void>) {
         const width = argumentExpression.getWidth() + 2;
         let fix: Lint.Replacement | undefined;
 
-        if (ts.isPrefixUnaryExpression(argumentExpression)) {
+        if (tsutils.isPrefixUnaryExpression(argumentExpression)) {
             const convertedOperand = convertUnaryOperand(argumentExpression);
             if (convertedOperand !== undefined) {
                 fix = Lint.Replacement.replaceFromTo(start, start + width, `[${convertedOperand}]`);
             }
-        } else if (ts.isStringLiteral(argumentExpression)) {
+        } else if (tsutils.isStringLiteral(argumentExpression)) {
             fix = Lint.Replacement.replaceFromTo(start, start + width, `.${argumentExpression.text}`);
         }
 
@@ -76,7 +76,7 @@ function walk(context: Lint.WalkContext<void>) {
 }
 
 function convertUnaryOperand(node: ts.PrefixUnaryExpression) {
-    return ts.isNumericLiteral(node.operand)
+    return tsutils.isNumericLiteral(node.operand)
         ? node.operand.text
         : undefined;
 }
@@ -86,11 +86,11 @@ function isDeleteExpression(node: ts.Node): node is ts.DeleteExpression {
 }
 
 function isNumberLike(node: ts.Node): boolean {
-    if (ts.isPrefixUnaryExpression(node)) {
-        return ts.isNumericLiteral(node.operand) && node.operator === ts.SyntaxKind.MinusToken;
+    if (tsutils.isPrefixUnaryExpression(node)) {
+        return tsutils.isNumericLiteral(node.operand) && node.operator === ts.SyntaxKind.MinusToken;
     }
 
-    return ts.isNumericLiteral(node);
+    return tsutils.isNumericLiteral(node);
 }
 
 function isNecessaryDynamicAccess(argumentExpression: ts.Expression): boolean {
@@ -98,5 +98,5 @@ function isNecessaryDynamicAccess(argumentExpression: ts.Expression): boolean {
         return true;
     }
 
-    return ts.isStringLiteral(argumentExpression) && !tsutils.isValidPropertyAccess(argumentExpression.text);
+    return tsutils.isStringLiteral(argumentExpression) && !tsutils.isValidPropertyAccess(argumentExpression.text);
 }
