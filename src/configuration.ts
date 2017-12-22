@@ -242,6 +242,7 @@ export function loadConfigurationFromPath(configFilePath?: string, originalFileP
             }
         } else {
             rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
+            // tslint:disable-next-line:no-dynamic-delete
             delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
         }
 
