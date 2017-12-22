@@ -67,7 +67,7 @@ function walk(context: Lint.WalkContext<void>) {
     }
 
     return ts.forEachChild(context.sourceFile, function callback(node: ts.Node): void {
-        if (ts.isDeleteExpression(node)) {
+        if (isDeleteExpression(node)) {
             checkDeleteAccessExpression(node.expression);
         }
 
@@ -79,6 +79,10 @@ function convertUnaryOperand(node: ts.PrefixUnaryExpression) {
     return ts.isNumericLiteral(node.operand)
         ? node.operand.text
         : undefined;
+}
+
+function isDeleteExpression(node: ts.Node): node is ts.DeleteExpression {
+    return node.kind === ts.SyntaxKind.DeleteExpression;
 }
 
 function isNumberLike(node: ts.Node): boolean {
