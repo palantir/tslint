@@ -17,9 +17,14 @@
 
 import * as ts from "typescript";
 
-import { isCallExpression, isIdentifier } from "tsutils";
+import { isCallExpression, isElementAccessExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
+
+interface Options {
+    allowedNumbers: number[] | Set<string>;
+    allowElementAccess: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,11 +38,19 @@ export class Rule extends Lint.Rules.AbstractRule {
             them to be stored in variables gives them implicit documentation.`,
         optionsDescription: "A list of allowed numbers.",
         options: {
-            type: "array",
-            items: {
-                type: "number",
+            type: "object",
+            properties: {
+                "allowed-numbers": {
+                    type: "array",
+                    items: {
+                        type: "number",
+                    },
+                    minLength: 1,
+                },
+                "allow-element-access": {
+                    type: "boolean",
+                },
             },
-            minLength: 1,
         },
         optionExamples: [true, [true, 1, 2, 3]],
         type: "typescript",
@@ -62,13 +75,42 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
+    /* tslint:disable no-unsafe-any */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
+        return this.applyWithWalker(
+            new NoMagicNumbersWalker(
+                sourceFile, this.ruleName,
+                this.parseOptions(this.ruleArguments[0] as {[key: string]: any}),
+            ),
+        );
     }
+
+    private parseOptions(args: {[key: string]: any}): Options {
+        const options: Options =
+            args !== undefined
+                ? {
+                    allowElementAccess:
+                        typeof (args as {[key: string]: boolean})["allow-element-access"] === "boolean"
+                            ? args["allow-element-access"]
+                            : false,
+                    allowedNumbers:
+                        (args as {[key: string]: Set<string>})["allowed-numbers"] !== undefined
+                            ? args["allowed-numbers"]
+                            : Rule.DEFAULT_ALLOWED,
+                }
+                : {
+                    allowElementAccess: false,
+                    allowedNumbers: Rule.DEFAULT_ALLOWED,
+                };
+        options.allowedNumbers =
+            new Set((options.allowedNumbers as number[]).map(String));
+
+        return options;
+    }
+    /* tslint:enable no-unsafe-any */
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
@@ -87,7 +129,15 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     }
 
     private checkNumericLiteral(node: ts.Node, num: string) {
-        if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
+        if (
+            !(
+                node.parent !== undefined &&
+                isElementAccessExpression(node.parent) &&
+                this.options.allowElementAccess
+            ) &&
+            !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
+            !(this.options.allowedNumbers as Set<string>).has(num)
+        ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }

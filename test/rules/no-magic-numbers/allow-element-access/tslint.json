@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "no-magic-numbers": [
+      true,
+      {
+        "allow-element-access": true
+      }
+    ]
+  }
+}

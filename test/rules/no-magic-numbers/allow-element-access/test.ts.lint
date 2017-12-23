@@ -18,17 +18,6 @@ for(let i = 0;i>1341;++i) {
 throw 1342;
       ~~~~ [ERROR]
 
-class A {
-    static test = 1337;
-
-    constructor (private a = 1337) {
-    }
-}
-
-enum Test {
-    key = 1337,
-}
-
 it('should provide a link to the landing page', () => {
   expect($ctrl.actions[0]).toEqual({ label: 'Landing page', state: 'core-landingPage' });
 });
@@ -39,7 +28,9 @@ it('should provide a link to the person summary', () => {
 
 it('should provide a link to create a new person', () => {
   expect($ctrl.actions[2]).toEqual({ label: 'Create a new person', state: 'hrm-person-details', params: { personId: 'new' } });
-                       ~ [ERROR]
 });
+
+const stringA = ['oh', 'hello', 'mom'];
+stringA[2] = 'there';
 
 [ERROR]: 'magic numbers' are not allowed
