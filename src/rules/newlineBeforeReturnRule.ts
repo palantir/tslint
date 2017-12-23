@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getPreviousStatement, isSameLine } from "tsutils";
+import { getLineBreakStyle, getPreviousStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -52,15 +52,6 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private getFixer(returnNode: ts.ReturnStatement, previousNode: ts.Node): Lint.Replacement | undefined {
-        const newLineType = this.sourceFile
-                                .text[this.sourceFile.getLineStarts()[1] - 2] === "\r"
-                                    ? "\r\n" : "\n";
-        return isSameLine(this.sourceFile, previousNode.end, returnNode.getStart())
-                ? undefined
-                : Lint.Replacement.appendText(returnNode.pos, newLineType);
-    }
-
     private visitReturnStatement(node: ts.ReturnStatement) {
         const prev = getPreviousStatement(node);
         if (prev === undefined) {
@@ -86,7 +77,12 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
         if (prevLine >= line - 1) {
             // Previous statement is on the same or previous line
-            this.addFailure(start, start, Rule.FAILURE_STRING, this.getFixer(node, prev));
+            this.addFailure(
+                start, start, Rule.FAILURE_STRING,
+                isSameLine(this.sourceFile, prev.end, node.getStart())
+                    ? undefined
+                    : Lint.Replacement.appendText(node.pos, getLineBreakStyle(this.sourceFile)),
+            );
         }
     }
 }
