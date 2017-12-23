@@ -80,12 +80,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         return this.applyWithWalker(
             new NoMagicNumbersWalker(
                 sourceFile, this.ruleName,
-                this.parseOptions(this.ruleArguments[0] as {[key: string]: any}),
+                this.parseOptions(this.ruleArguments[0]),
             ),
         );
     }
 
-    private parseOptions(args: {[key: string]: any}): Options {
+    private parseOptions(args: any): Options {
+        /* For legacy config support */
+        if (args !== undefined && args.length && typeof args[0] === "number") {
+            return {
+                allowElementAccess: false,
+                allowedNumbers: new Set((args as number[]).map(String)),
+            };
+        }
+
         const options: Options =
             args !== undefined
                 ? {
