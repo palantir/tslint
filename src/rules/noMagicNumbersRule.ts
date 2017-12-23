@@ -168,16 +168,10 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
             }
 
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
-                return this.checkNumericLiteral(
-                    node,
-                    (node as ts.NumericLiteral).text,
-                );
+                return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
             if (isNegativeNumberLiteral(node)) {
-                return this.checkNumericLiteral(
-                    node,
-                    `-${(node.operand as ts.NumericLiteral).text}`,
-                );
+                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
             }
             return ts.forEachChild(node, cb);
         };
@@ -186,7 +180,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
 
     private checkNumericLiteral(node: ts.Node, num: string) {
         if (
-            /* "allow-element-access": true logic */
+            /* "allow-element-access" logic */
             !(
                 node.parent !== undefined &&
                 isElementAccessExpression(node.parent) &&
