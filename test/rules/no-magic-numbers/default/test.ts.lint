@@ -1,3 +1,8 @@
+/* Ignore magic numbers with trailing comments */
+console.log(1340); /* explains the magic */
+for(let i = 0;i>1341;++i) { /* pulls back the curtain */
+}
+
 console.log(-1, 0, 1);
 console.log(42.42);
             ~~~~~ [ERROR]
@@ -15,6 +20,7 @@ for(let i = 0;i>1341;++i) {
                 ~~~~ [ERROR]
 }
 
+/* A comment that does no good as far as this rule is concerned */
 throw 1342;
       ~~~~ [ERROR]
 

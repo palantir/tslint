@@ -17,7 +17,12 @@
 
 import * as ts from "typescript";
 
-import { isCallExpression, isElementAccessExpression, isIdentifier } from "tsutils";
+import {
+    forEachComment,
+    isCallExpression,
+    isElementAccessExpression,
+    isIdentifier,
+    isSameLine } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
@@ -36,7 +41,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Magic numbers should be avoided as they often lack documentation, forcing
             them to be stored in variables gives them implicit documentation.`,
-        optionsDescription: "A list of allowed numbers.",
+        optionsDescription: Lint.Utils.dedent`
+            An optional config object may be provided with one or both of the following properties:
+                * \`"ignore-element-access": boolean\`
+                    * Ignores cases such as \`argv[4]\`
+                * \`"allowed-numbers": number[]\`
+                    * List of numbers the rule should ignore
+            `,
         options: {
             type: "object",
             properties: {
@@ -52,7 +63,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             },
         },
-        optionExamples: [true, [true, 1, 2, 3]],
+        optionExamples: [true, [true, 1, 2, 3], [true, {
+            "allow-element-access": true,
+            "allowed-numbers": [4, 5, 6],
+        }]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -119,17 +133,51 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
+    /**
+     * Used for checking when a magic number is on the same line as
+     * a comment. In such a case, the magic number should be ignored.
+     */
+    private readonly commentPositions: number[] = [];
+
+    private generateCommentPositions(): void {
+        for (const statement of this.sourceFile.statements) {
+            forEachComment(
+                statement,
+                (_fullText: string, comment: ts.CommentRange) => {
+                    this.commentPositions.push(comment.pos);
+                },
+                this.sourceFile,
+            );
+        }
+    }
+
+    /* tslint:disable-next-line: member-ordering */
     public walk(sourceFile: ts.SourceFile) {
+        this.generateCommentPositions();
         const cb = (node: ts.Node): void => {
+            if (
+                this.commentPositions.some(
+                    (pos: number) => isSameLine(this.sourceFile, node.pos, pos),
+                )
+            ) {
+                /* This node is documented so let's ignore it */
+                return;
+            }
             if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
                 return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
             }
 
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
-                return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
+                return this.checkNumericLiteral(
+                    node,
+                    (node as ts.NumericLiteral).text,
+                );
             }
             if (isNegativeNumberLiteral(node)) {
-                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
+                return this.checkNumericLiteral(
+                    node,
+                    `-${(node.operand as ts.NumericLiteral).text}`,
+                );
             }
             return ts.forEachChild(node, cb);
         };
@@ -138,6 +186,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
 
     private checkNumericLiteral(node: ts.Node, num: string) {
         if (
+            /* "allow-element-access": true logic */
             !(
                 node.parent !== undefined &&
                 isElementAccessExpression(node.parent) &&

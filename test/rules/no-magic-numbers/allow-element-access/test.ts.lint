@@ -15,8 +15,7 @@ for(let i = 0;i>1341;++i) {
                 ~~~~ [ERROR]
 }
 
-throw 1342;
-      ~~~~ [ERROR]
+throw 1342; /* test trailing comment */
 
 it('should provide a link to the landing page', () => {
   expect($ctrl.actions[0]).toEqual({ label: 'Landing page', state: 'core-landingPage' });
