@@ -1,7 +1,31 @@
+// Passing testcases
+
+// OK to concatenate strings without newlines on different lines.
+"a" +
+"b" +
+"c";
+
+// See above but with mixed strings
+"a" +
+`${b}` +
+"c";
+
+x`a` + y; // OK, can't simplify something with a tag
+
+1 + 1;
+x + y;
+
+// Failing testcases
+
 "a" + x;
 ~~~~~~~ [0]
 x + "a";
 ~~~~~~~ [0]
+
+`${a}` + x;
+~~~~~~~~~~ [0]
+x + `${a}`;
+~~~~~~~~~~ [0]
 
 "a" + x + "b";
 ~~~~~~~~~~~~~ [0]
@@ -18,11 +42,20 @@ x + "a" + y;
 `a` + x + `b${y}c`;
 ~~~~~~~~~~~~~~~~~~ [0]
 
-"a" + "b" + "c";
+"a" + "b" + "c"; // Not OK, because strings are on the same line
+~~~~~~~~~~~~~~~ [0]
 
-x`a` + y; // OK, can't simplify something with a tag
+"a" + `${b}` + "c"; // Same for mixed string concatenation
+~~~~~~~~~~~~~~~~~~ [0]
 
-"a" + "b"; // OK to concatenate strings without newlines.
+"a" + "b";
+~~~~~~~~~ [0]
+
+`${hello}` + ` ${world}`;
+~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+"hello" + ` ${world}`;
+~~~~~~~~~~~~~~~~~~~~~ [0]
 
 "a\n" + "b";
 ~~~~~~~~~~~ [1]
@@ -30,10 +63,18 @@ x`a` + y; // OK, can't simplify something with a tag
 "a" + "\nb";
 ~~~~~~~~~~~ [1]
 
-1 + 1;
+`a
+~~
+b` +
+~~~~
+"c";
+~~~ [1]
+
 1 + 1 + "a";
 ~~~~~~~~~~~ [0]
-x + y;
+
+1 + "a" + "b" + "c"
+~~~~~~~~~~~~~~~~~~~ [0]
 
 [0]: Use a template literal instead of concatenating with a string literal.
 [1]: Use a multiline template literal instead of concatenating string literals with newlines.
