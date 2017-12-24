@@ -133,30 +133,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
-    /**
-     * Used for checking when a magic number is on the same line as
-     * a comment. In such a case, the magic number should be ignored.
-     */
-    private readonly commentPositions: number[] = [];
-
-    private generateCommentPositions(): void {
-        for (const statement of this.sourceFile.statements) {
-            forEachComment(
-                statement,
-                (_fullText: string, comment: ts.CommentRange) => {
-                    this.commentPositions.push(comment.pos);
-                },
-                this.sourceFile,
-            );
-        }
-    }
-
-    /* tslint:disable-next-line: member-ordering */
     public walk(sourceFile: ts.SourceFile) {
-        this.generateCommentPositions();
         const cb = (node: ts.Node): void => {
             if (
-                this.commentPositions.some(
+                commentPositions(this.sourceFile).some(
                     (pos: number) => isSameLine(this.sourceFile, node.pos, pos),
                 )
             ) {
@@ -192,4 +172,22 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
+}
+
+/**
+ * Used for checking when a magic number is on the same line as
+ * a comment. In such a case, the magic number should be ignored.
+ */
+function commentPositions(sourceFile: ts.SourceFile): number[] {
+    const positions: number[] = [];
+    for (const statement of sourceFile.statements) {
+        forEachComment(
+            statement,
+            (_fullText: string, comment: ts.CommentRange) => {
+                positions.push(comment.pos);
+            },
+            sourceFile,
+        );
+    }
+    return positions;
 }
