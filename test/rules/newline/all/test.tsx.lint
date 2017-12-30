@@ -1,18 +1,20 @@
 import * as React from 'react';
-
+ 
 <div>{ [].map((child: any) => {
     let i = 0;
+~nil [0 % ('first statement')]
     return <span />;
-~nil  [0]
+~nil [0 % ('return')]
 }) }</div>
-
+ 
 <div>{ [].map((child: any) => {
     return <span />;
+~nil [0 % ('first statement')]
 }) }</div>
-
+ 
 <div>{ [].map((child: any) =>
     <span />;
 ) }</div>
-
-
-[0]: Missing blank line before return
+ 
+ 
+[0]: Missing blank line before %s

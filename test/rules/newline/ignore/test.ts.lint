@@ -1,0 +1,46 @@
+function foo(bar) {
+    // test
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+ 
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+    return bar;
+}

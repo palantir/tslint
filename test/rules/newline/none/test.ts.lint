@@ -1,0 +1,60 @@
+function foo(bar) {
+    // test
+ 
+~ [0 % ('first statement')]
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+~ [0 % ('first statement')]
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+~ [0 % ('first statement')]
+    var statement = '';
+}
+ 
+function foo(bar) {
+ 
+~
+ 
+~ [0 % ('first statement')]
+    var statement = '';
+}
+ 
+ 
+function foo(bar) {
+ 
+~ [0 % ('first statement')]
+    if (!bar) {
+ 
+~ [0 % ('first statement')]
+        return;
+    }
+ 
+~ [0 % ('return')]
+    return bar;
+}
+ 
+[0]: Unneeded blank line before %s

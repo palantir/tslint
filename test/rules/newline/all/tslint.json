@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "newline": [true, {"class": "always", "block": "always", "return": "always", "functionBlock": "always"}]
+    }
+}

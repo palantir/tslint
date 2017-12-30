@@ -3,14 +3,14 @@ function foo(bar) {
         return;
     }
     return bar;
-    ~nil  [0]
+~nil  [0]
 }
 
 function foo(bar) {
     if (!bar) {
         var statement = '';
         return statement;
-        ~nil  [0]
+~nil  [0]
     }
 
     return bar;
@@ -21,7 +21,7 @@ function foo(bar) {
         return;
     }
     /* multi-line
-    ~nil  [0]
+~nil  [0]
     comment */
     return bar;
 }
@@ -30,12 +30,7 @@ var fn = () => null;
 function foo() {
     fn();
     return;
-    ~nil  [0]
-}
-
-function foo(fn) {
-    fn(); return;
-          ~nil [0]
+~nil  [0]
 }
 
 function foo() {
@@ -105,7 +100,7 @@ function foo() {
 function bar() {
     "some statement";
     //comment
-    ~nil [0]
+~nil [0]
     //comment
     //comment
     return;

@@ -1,0 +1,72 @@
+function foo(bar) {
+    // test
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+~nil [0]
+    // test
+    var statement = '';
+}
+ 
+function foo(bar) {
+    var statement = '';
+~nil [0]
+}
+ 
+function foo(bar) {
+    // test
+~nil [0]
+    var statement = '';
+}
+ 
+function foo(bar) {
+    // test
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+ 
+ 
+    var statement = '';
+}
+ 
+function foo(bar) {
+    if (!bar) {
+~nil [0]
+        return;
+~nil [0]
+    }
+    return bar;
+~nil [1]
+}
+
+class Foo {}
+
+class Foo {
+
+}
+
+class Foo {
+    public bar = 'foo';
+~nil [2]
+}
+
+class Foo {
+
+    public bar = 'foo';
+}
+
+[0]: Missing blank line before first statement
+[1]: Missing blank line before return
+[2]: Missing blank line before first member
