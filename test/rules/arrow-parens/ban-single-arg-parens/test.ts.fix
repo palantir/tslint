@@ -22,6 +22,8 @@ const validAsync = async (param: any) => {};
 var e = (a => {})(1);
 var f = ab => {};
 
+arr.map(a => b);
+
 // invalid case
 var a = a => {};
 const invalidAsync = async param => {};
@@ -38,3 +40,4 @@ let foo = bar => bar;
 
 let foo = async bar => bar;
 
+arr.map(a => b);

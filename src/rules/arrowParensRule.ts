@@ -19,6 +19,7 @@ import { getChildOfKind, isArrowFunction } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isCallExpression } from 'typescript';
 
 const BAN_SINGLE_ARG_PARENS = "ban-single-arg-parens";
 
@@ -72,8 +73,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
             } else if (ctx.options.banSingleArgParens) {
                 const closeParen = getChildOfKind(node, ts.SyntaxKind.CloseParenToken)!;
+                const parentNode = node.parent!;
+                const replaceValue = isCallExpression(parentNode) ? "" : " ";
                 ctx.addFailureAtNode(node.parameters[0], Rule.FAILURE_STRING_EXISTS, [
-                    Lint.Replacement.replaceFromTo(openParen.pos, node.parameters[0].getStart(ctx.sourceFile), " "),
+                    Lint.Replacement.replaceFromTo(openParen.pos, node.parameters[0].getStart(ctx.sourceFile), replaceValue),
                     Lint.Replacement.deleteFromTo(node.parameters[0].end, closeParen.end),
                 ]);
             }
