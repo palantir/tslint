@@ -55,4 +55,7 @@ let foo = async (
 
 arr.map((a) => b);
          ~ [0]
+
+foo(async (a) => b)
+           ~ [0]
 [0]: Parentheses are prohibited around the parameter in this single parameter arrow function

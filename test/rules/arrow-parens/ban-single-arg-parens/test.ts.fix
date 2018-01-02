@@ -41,3 +41,5 @@ let foo = bar => bar;
 let foo = async bar => bar;
 
 arr.map(a => b);
+
+foo(async a => b)
