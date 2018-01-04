@@ -154,4 +154,8 @@ switch(foo) {
     }
 }
 
+returnsPromiseFunction().catch(e => { console.error(e.stack); });
+
+returnsPromiseFunction().then(() => {}, e => { console.error(e.stack); });
+
 [0]: Promises must be handled appropriately

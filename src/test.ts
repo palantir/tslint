@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as colors from "colors";
+import chalk from "chalk";
 import * as diff from "diff";
 import * as fs from "fs";
 import * as glob from "glob";
@@ -23,11 +23,12 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
-import {Replacement} from "./language/rule/rule";
+import { Replacement } from "./language/rule/rule";
 import * as Linter from "./linter";
-import {LintError} from "./test/lintError";
-import * as parse from "./test/parse";
-import {denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding} from "./utils";
+import { Logger } from "./runner";
+import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
+import { LintError } from "./verify/lintError";
+import * as parse from "./verify/parse";
 
 const MARKUP_FILE_EXTENSION = ".lint";
 const FIXES_FILE_EXTENSION = ".fix";
@@ -94,9 +95,8 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement !== undefined) {
-            const tsVersion = new semver.SemVer(ts.version);
             // remove prerelease suffix when matching to allow testing with nightly builds
-            if (!semver.satisfies(`${tsVersion.major}.${tsVersion.minor}.${tsVersion.patch}`, tsVersionRequirement)) {
+            if (!semver.satisfies(parse.getNormalizedTypescriptVersion(), tsVersionRequirement)) {
                 results.results[fileToLint] = {
                     requirement: tsVersionRequirement,
                     skipped: true,
@@ -107,6 +107,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const lineBreak = fileText.search(/\n/);
             fileText = lineBreak === -1 ? "" : fileText.substr(lineBreak + 1);
         }
+        fileText = parse.preprocessDirectives(fileText);
         const fileTextWithoutMarkup = parse.removeErrorMarkup(fileText);
         const errorsFromMarkup = parse.parseErrorsFromMarkup(fileText);
 
@@ -117,15 +118,15 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getCanonicalFileName: (filename) => filename,
                 getCurrentDirectory: () => process.cwd(),
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: (path) => fs.readdirSync(path),
+                getDirectories: (dir) => fs.readdirSync(dir),
                 getNewLine: () => "\n",
-                getSourceFile(filenameToGet) {
-                    const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
-                    if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
-                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
-                        return ts.createSourceFile(filenameToGet, fileContent, target);
-                    } else if (denormalizeWinPath(filenameToGet) === fileCompileName) {
+                getSourceFile(filenameToGet, target) {
+                    if (denormalizeWinPath(filenameToGet) === fileCompileName) {
                         return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
+                    }
+                    if (path.basename(filenameToGet) === filenameToGet) {
+                        // resolve path of lib.xxx.d.ts
+                        filenameToGet = path.join(path.dirname(ts.getDefaultLibFilePath(compilerOptions)), filenameToGet);
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");
                     return ts.createSourceFile(filenameToGet, text, target, true);
@@ -195,11 +196,11 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     return results;
 }
 
-export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
+export function consoleTestResultsHandler(testResults: TestResult[], logger: Logger): boolean {
     let didAllTestsPass = true;
 
     for (const testResult of testResults) {
-        if (!consoleTestResultHandler(testResult)) {
+        if (!consoleTestResultHandler(testResult, logger)) {
             didAllTestsPass = false;
         }
     }
@@ -207,57 +208,53 @@ export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
     return didAllTestsPass;
 }
 
-export function consoleTestResultHandler(testResult: TestResult): boolean {
+export function consoleTestResultHandler(testResult: TestResult, logger: Logger): boolean {
     // needed to get colors to show up when passing through Grunt
-    (colors as any).enabled = true;
+    (chalk as any).enabled = true;
 
     let didAllTestsPass = true;
 
     for (const fileName of Object.keys(testResult.results)) {
         const results = testResult.results[fileName];
-        process.stdout.write(`${fileName}:`);
+        logger.log(`${fileName}:`);
 
-        /* tslint:disable:no-console */
         if (results.skipped) {
-            console.log(colors.yellow(` Skipped, requires typescript ${results.requirement}`));
+            logger.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}\n`));
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((diff) => diff.added === true || diff.removed === true);
-            const didFixesTestPass = !fixesDiffResults.some((diff) => diff.added === true || diff.removed === true);
+            const didMarkupTestPass = !markupDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
+            const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
-                console.log(colors.green(" Passed"));
+                logger.log(chalk.green(" Passed\n"));
             } else {
-                console.log(colors.red(" Failed!"));
+                logger.log(chalk.red(" Failed!\n"));
                 didAllTestsPass = false;
                 if (!didMarkupTestPass) {
-                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
+                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION, logger);
                 }
                 if (!didFixesTestPass) {
-                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
+                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION, logger);
                 }
             }
         }
-        /* tslint:enable:no-console */
     }
 
     return didAllTestsPass;
 }
 
-function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) {
-    /* tslint:disable:no-console */
-    console.log(colors.green(`Expected (from ${extension} file)`));
-    console.log(colors.red("Actual (from TSLint)"));
+function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, logger: Logger) {
+    logger.log(chalk.green(`Expected (from ${extension} file)\n`));
+    logger.log(chalk.red("Actual (from TSLint)\n"));
 
     for (const diffResult of diffResults) {
-        let color = colors.grey;
-        if (diffResult.added === true) {
-            color = colors.green.underline;
-        } else if (diffResult.removed === true) {
-            color = colors.red.underline;
+        let color = chalk.grey;
+        if (diffResult.added) {
+            color = chalk.green.underline;
+        } else if (diffResult.removed) {
+            color = chalk.red.underline;
         }
-        process.stdout.write(color(diffResult.value));
+        logger.log(color(diffResult.value));
     }
-    /* tslint:enable:no-console */
 }

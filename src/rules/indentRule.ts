@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getLineRanges, getTokenAtPosition, isPositionInComment } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -43,7 +44,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
             * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
 
-            Indentation size is required for auto-fixing, but not for rule checking.
+            Indentation size is **required** for auto-fixing, but not for rule checking.
+
+            **NOTE**: auto-fixing will only convert invalid indent whitespace to the desired type, it will not fix invalid whitespace sizes.
             `,
         options: {
             type: "array",
@@ -65,6 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
             [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -96,85 +100,37 @@ interface Options {
     readonly size?: 2 | 4;
 }
 
-// visit every token and enforce that only the right character is used for indentation
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { tabs, size } } = ctx;
     const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
+    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
 
-    let endOfComment = -1;
-    let endOfTemplateString = -1;
-    const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
-    for (const lineStart of sourceFile.getLineStarts()) {
-        if (lineStart < endOfComment || lineStart < endOfTemplateString) {
-            // skip checking lines inside multi-line comments or template strings
+    for (const {pos, contentLength} of getLineRanges(sourceFile)) {
+        if (contentLength === 0) { continue; }
+        const line = sourceFile.text.substr(pos, contentLength);
+        let indentEnd = line.search(/\S/);
+        if (indentEnd === 0) { continue; }
+        if (indentEnd === -1) {
+            indentEnd = contentLength;
+        }
+        const whitespace = line.slice(0, indentEnd);
+        if (!regExp.test(whitespace)) { continue; }
+        const token = getTokenAtPosition(sourceFile, pos)!;
+        if (token.kind !== ts.SyntaxKind.JsxText &&
+            (pos >= token.getStart(sourceFile) || isPositionInComment(sourceFile, pos, token))) {
             continue;
         }
-
-        scanner.setTextPos(lineStart);
-
-        let currentScannedType = scanner.scan();
-        let fullLeadingWhitespace = "";
-        let lastStartPos = -1;
-
-        while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
-            const startPos = scanner.getStartPos();
-            if (startPos === lastStartPos) {
-                break;
-            }
-            lastStartPos = startPos;
-
-            fullLeadingWhitespace += scanner.getTokenText();
-            currentScannedType = scanner.scan();
-        }
-
-        const commentRanges = ts.getTrailingCommentRanges(sourceFile.text, lineStart);
-        if (commentRanges !== undefined) {
-            endOfComment = commentRanges[commentRanges.length - 1].end;
-        } else {
-            let scanType = currentScannedType;
-
-            // scan until we reach end of line, skipping over template strings
-            while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
-                    // template string without expressions - skip past it
-                    endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                } else if (scanType === ts.SyntaxKind.TemplateHead) {
-                    // find end of template string containing expressions...
-                    while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                        scanType = scanner.scan();
-                        if (scanType === ts.SyntaxKind.CloseBraceToken) {
-                            scanType = scanner.reScanTemplateToken();
-                        }
-                    }
-                    // ... and skip past it
-                    endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                }
-                scanType = scanner.scan();
-            }
-        }
-
-        switch (currentScannedType) {
-            case ts.SyntaxKind.SingleLineCommentTrivia:
-            case ts.SyntaxKind.MultiLineCommentTrivia:
-            case ts.SyntaxKind.NewLineTrivia:
-                // ignore lines that have comments before the first token
-                continue;
-        }
-
-        if (regExp.test(fullLeadingWhitespace)) {
-            const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
-            ctx.addFailureAt(lineStart, fullLeadingWhitespace.length, failure, createFix(lineStart, fullLeadingWhitespace));
-        }
+        ctx.addFailureAt(pos, indentEnd, failure, createFix(pos, whitespace, tabs, size));
     }
+}
 
-    function createFix(lineStart: number, fullLeadingWhitespace: string): Lint.Fix | undefined {
-        if (size === undefined) { return undefined; }
-        const replaceRegExp = tabs
-            // we want to find every group of `size` spaces, plus up to one 'incomplete' group
-            ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
-            : /\t/g;
-        const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
-            (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size!)));
-        return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
-    }
+function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {
+    if (size === undefined) { return undefined; }
+    const replaceRegExp = tabs
+        // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+        ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
+        : /\t/g;
+    const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
+        (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)));
+    return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
 }

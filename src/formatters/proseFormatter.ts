@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
-import {RuleFailure} from "../language/rule/rule";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,6 +33,7 @@ export class Formatter extends AbstractFormatter {
         if (failures.length === 0 && (fixes === undefined || fixes.length === 0)) {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const fixLines: string[] = [];
         if (fixes !== undefined) {

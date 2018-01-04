@@ -49,11 +49,8 @@ switch(y)
 {
 ~ [0 % ('{')]
     case 0:
-    {
-    ~ [0 % ('{')]
         x--;
         break;
-    }
     default:
         x++;
         break;
@@ -152,6 +149,49 @@ if (true)
     true;
 else
     false;
+
+class Foo<
+    Bar,
+    Baz,
+    Bas
+> {
+    // works for multiline type parameters
+}
+
+type Foo = {
+    bar,
+};
+type Bar =
+{ bar };
+~ [0 % ('{')]
+type Baz<T> =
+{ [K in T]: T };
+~ [0 % ('{')]
+type Bas = "a";
+
+{
+    {}{}{} // just some random blocks
+}
+
+if (true) {
+    true;
+}else {
+ ~~~~   [SPACE]
+    false;
+}
+
+// don't crash on parse error
+interface InvalidInterface = {
+  foo: string,
+}
+
+class InvalidClass = {
+  foo: string,
+}
+
+foo = class InvalidClassExpression = {
+  foo: string,
+}
 
 [0]: Expected '%s' to go on the same line as the preceding token.
 [SPACE]: Expected a space.

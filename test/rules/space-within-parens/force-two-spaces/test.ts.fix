@@ -1,0 +1,28 @@
+// simple expression
+var x = [{
+    a: 1,
+    b: 2,
+    d: 34,
+    c: (  a + b  ),
+}];
+
+// simple expression on one liner
+var b = [{a: 1, b: 2, d: 34, c: (  a + b  )}];
+
+// function parameters
+function foo(  bar: string, baz: string  );
+
+// conditional & nested expression
+if (  x === y  ) {
+    return (  {result: true, error: (  x + y  )}  );
+}
+
+// expected number of spaces provided
+new Foo(  );
+
+// empty parens are always allowed
+new Foo();
+
+// Missing a space
+new Foo(  );
+

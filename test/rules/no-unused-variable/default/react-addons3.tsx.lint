@@ -1,2 +1,6 @@
 import * as React from "react/addons";
-            ~~~~~                      ['React' is declared but never used.]
+#if typescript >= 2.6.0
+            ~~~~~               ['React' is declared but its value is never read.]
+#else
+            ~~~~~               ['React' is declared but never used.]
+#endif

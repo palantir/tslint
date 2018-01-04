@@ -1,0 +1,173 @@
+module Module
+{
+~ [0 % ('{')]
+    export enum Enumeration
+    {
+    ~ [0 % ('{')]
+        A,
+        B,
+        C,
+        D
+    }
+
+    export function Call()
+    {
+    ~ [0 % ('{')]
+        if (x == 3)
+        {
+        ~ [0 % ('{')]
+            x = 4;
+        }
+        else {
+        ~~~~ [0 % ('else')]
+            x = 5;
+        }
+        return "called";
+    }
+}
+
+interface Class
+{
+~ [0 % ('{')]
+    variable: string;
+}
+
+var object =
+{
+~ [0 % ('{')]
+    a: 1,
+    b: 2
+};
+
+for(var x= 0; x < 1; ++x)
+{
+~ [0 % ('{')]
+    ++i;
+}
+
+switch(y)
+{
+~ [0 % ('{')]
+    case 0:
+        x--;
+        break;
+    default:
+        x++;
+        break;
+}
+
+try
+{
+~ [0 % ('{')]
+    throw new Error("hi");
+}
+catch (e)
+~~~~~ [0 % ('catch')]
+{
+~ [0 % ('{')]
+    throw(e);
+}
+finally
+~~~~~~~ [0 % ('finally')]
+{
+~ [0 % ('{')]
+    // do something
+}
+
+try {
+    foo();
+}
+finally
+~~~~~~~ [0 % ('finally')]
+{
+~ [0 % ('{')]
+    bar();
+}
+
+try{
+    foo();
+} catch(e){
+    bar();
+} finally{
+    baz();
+}
+
+while(x < 10){
+    x++;
+}
+
+function f():
+    number {
+
+    return 5;
+}
+
+class BarBooBaz
+{
+~ [0 % ('{')]
+
+}
+
+class FooBarBaz {
+}
+
+// Valid multiline declarations
+export class LongDescriptiveClassName<T extends ISomeInterface<number>, S>
+    extends SomeAbstractBaseClass<T, S> implements IImportantInterface<T, S> {
+}
+
+export interface LongDescriptiveInterfaceName<T extends ISomeOtherInterface>
+    extends AThirdInterface {
+}
+
+function longFunctionNameWithLotsOfParams<T>(
+    x: number,
+    y: number,
+    z: number,
+    a: T) {
+}
+
+let geoConfig: {
+    maximumAge?: number;
+    timeout?: number;
+    enableHighAccuracy?: boolean;
+} = {
+    maximumAge: 3000,
+    timeout: 5000,
+    enableHighAccuracy: false
+};
+
+declare module "*";
+declare module "someLibrary/*";
+
+// No error if there are no braces
+if (true)
+    true;
+else
+    false;
+
+class Foo<
+    Bar,
+    Baz,
+    Bas
+> {
+    // works for multiline type parameters
+}
+
+type Foo = {
+    bar,
+};
+type Bar =
+{ bar };
+~ [0 % ('{')]
+type Baz<T> =
+{ [K in T]: T };
+~ [0 % ('{')]
+type Bas = "a";
+
+{
+    {}{}{} // just some random blocks
+}
+
+[0]: Expected '%s' to go on the same line as the preceding token.
+[SPACE]: Expected a space.

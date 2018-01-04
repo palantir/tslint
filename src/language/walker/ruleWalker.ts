@@ -17,17 +17,17 @@
 
 import * as ts from "typescript";
 
-import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
-import {SyntaxWalker} from "./syntaxWalker";
-import {IWalker} from "./walker";
+import { Fix, IOptions, Replacement, RuleFailure } from "../rule/rule";
+import { SyntaxWalker } from "./syntaxWalker";
+import { IWalker } from "./walker";
 
 export class RuleWalker extends SyntaxWalker implements IWalker {
-    private limit: number;
-    private options?: any[];
-    private failures: RuleFailure[];
-    private ruleName: string;
+    private readonly limit: number;
+    private readonly options?: any[];
+    private readonly failures: RuleFailure[];
+    private readonly ruleName: string;
 
-    constructor(private sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(private readonly sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
         this.failures = [];

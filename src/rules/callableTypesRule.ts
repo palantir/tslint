@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallSignatureDeclaration, isIdentifier, isInterfaceDeclaration, isTypeLiteralNode } from "tsutils";
+import { getChildOfKind, isCallSignatureDeclaration, isIdentifier, isInterfaceDeclaration, isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -45,18 +45,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if ((isInterfaceDeclaration(node) && noSupertype(node)
-             || isTypeLiteralNode(node))
+        if ((isInterfaceDeclaration(node) && noSupertype(node) || isTypeLiteralNode(node))
             && node.members.length === 1) {
             const member = node.members[0];
             if (isCallSignatureDeclaration(member) &&
                 // avoid bad parse
                 member.type !== undefined) {
                 const suggestion = renderSuggestion(member, node, ctx.sourceFile);
+                const fixStart = node.kind === ts.SyntaxKind.TypeLiteral
+                    ? node.getStart(ctx.sourceFile)
+                    : getChildOfKind(node, ts.SyntaxKind.InterfaceKeyword)!.getStart(ctx.sourceFile);
                 ctx.addFailureAtNode(
                     member,
                     Rule.FAILURE_STRING_FACTORY(node.kind === ts.SyntaxKind.TypeLiteral ? "Type literal" : "Interface", suggestion),
-                    Lint.Replacement.replaceNode(node, suggestion),
+                    Lint.Replacement.replaceFromTo(fixStart, node.end, suggestion),
                 );
             }
         }
@@ -72,18 +74,22 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
     if (node.heritageClauses.length !== 1) {
         return false;
     }
-    const expr = node.heritageClauses[0].types![0].expression;
+    const expr = node.heritageClauses[0].types[0].expression;
     return isIdentifier(expr) && expr.text === "Function";
 }
 
 function renderSuggestion(call: ts.CallSignatureDeclaration,
                           parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
                           sourceFile: ts.SourceFile): string {
+
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
-    const suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
 
+    let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
+    if (shouldWrapSuggestion(parent.parent!)) {
+        suggestion = `(${suggestion})`;
+    }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {
             return `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${suggestion}`;
@@ -92,4 +98,14 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
         }
     }
     return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
+}
+
+function shouldWrapSuggestion(parent: ts.Node) {
+    switch (parent.kind) {
+        case ts.SyntaxKind.UnionType:
+        case ts.SyntaxKind.IntersectionType:
+            return true;
+        default:
+            return false;
+    }
 }

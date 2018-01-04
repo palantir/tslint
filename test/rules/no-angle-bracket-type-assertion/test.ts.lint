@@ -1,14 +1,26 @@
 var a = <any>5;
-        ~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+        ~~~~~~ [0]
 
 var b = <number><any>5;
-        ~~~~~~~~~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
-                ~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+        ~~~~~~~~~~~~~~ [0]
 
 var c = <number>(5 as any);
-        ~~~~~~~~~~~~~~~~~~  [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+        ~~~~~~~~~~~~~~~~~~ [0]
 
 var d = <any> 5 as number;
-        ~~~~~~~            [Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.]
+        ~~~~~~~ [0]
 
 var e = 5 as any as number;
+
+let f = <number><any>flag & value;
+        ~~~~~~~~~~~~~~~~~ [0]
+f = <number><any>flag | value;
+    ~~~~~~~~~~~~~~~~~ [0]
+
+let g = <A><any>a;
+        ~~~~~~~~~ [0]
+
+let h = <AsyncIterableIterator><any>a;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+[0]: Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.

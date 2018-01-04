@@ -1,0 +1,47 @@
+/** @typedef {number} T */
+     ~~~~~~~ [tag % ('typedef')]
+
+/** @function */
+     ~~~~~~~~ [tag % ('function')]
+function f() {}
+
+/** @type number */
+     ~~~~ [tag % ('type')]
+const x = 0;
+
+/**
+ * @class
+    ~~~~~ [tag % ('class')]
+ * @param {number} x Is a number
+          ~~~~~~~~ [type]
+ * @param y
+    ~~~~~ [param]
+ * @param {number} z
+    ~~~~~ [param]
+          ~~~~~~~~ [type]
+ * @returns {number}
+    ~~~~~~~ [returns]
+            ~~~~~~~~ [type]
+ */
+declare function g(x: number, y: number, z: number): number;
+
+/**
+ * @param x Useful comment
+ * @returns Useful comment
+ */
+declare function h(x: number): number;
+
+/**
+ * @template T, U
+#if typescript < 2.2.0 || >= 2.3.0
+    ~~~~~~~~ [description % ('template')]
+#endif
+ * @template V Some additional information
+ */
+declare function i<T, U, V>(x: T, y: V): U;
+
+[tag]: JSDoc tag '@%s' is redundant in TypeScript code.
+[type]: Type annotation in JSDoc is redundant in TypeScript code.
+[description]: '@%s' is redundant in TypeScript code if it has no description.
+[param]: description % ('param')
+[returns]: description % ('returns')

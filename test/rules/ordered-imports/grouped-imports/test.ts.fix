@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+import {afoo, foo} from 'foo';
+import x = require('y');
+
+import {bar} from '../bar';
+
+import './baa';
+import './baz'; // required
+
+export class Test {}

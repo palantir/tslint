@@ -4,6 +4,8 @@ var f = function (): void {
 };
 var f = function (a: string, cb: ()=>{}): void {};
 
+function <T>() {}
+var f = function <T>() {};
 
 // Named
 function foobar(){}
@@ -16,6 +18,11 @@ var f = function foobar(): void{
 };
 var f = function foobar(a: string, cb: ()=>{}): void{};
 
+function foobar<T>() {}
+var f = function foobar<T>() {}
+
+// Default export (name ommited)
+export default function () {}
 
 // Async Arrow
 // ignore
@@ -25,18 +32,25 @@ var arrow = () => {};
 async () => {};
 var arrow = async () => {};
 
+<T>() => {};
+var arrow = <T>() => {};
+
+async <T>() => {};
+var arrow = async <T>() => {};
 
 // Method
 interface IMyInterface {
         one();
         two(): void;
         three(a: string, cb: ()=>{}): void;
+        four<T>();
 }
 class MyClass {
         one() {}
         two(): void {
         }
         three(a: string, cb: ()=>{}): void {}
+        four<T>() {}
 }
 
 

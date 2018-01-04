@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
+import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
-import { isTypeFlagSet } from "../language/utils";
 
 const OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND = "ignore-arrow-function-shorthand";
 
@@ -49,8 +48,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const ignoreArrowFunctionShorthand = this.ruleArguments.indexOf(OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND) !== -1;
-        return this.applyWithFunction<Options, Options>(
-            sourceFile, (ctx) => walk(ctx, program.getTypeChecker()), { ignoreArrowFunctionShorthand });
+        return this.applyWithFunction(sourceFile, walk, { ignoreArrowFunctionShorthand }, program.getTypeChecker());
     }
 }
 

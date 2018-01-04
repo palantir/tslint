@@ -46,7 +46,7 @@ class Walker extends Lint.AbstractWalker<void> {
         return this.checkStatements(node.statements);
     }
 
-    private checkStatements(statements: ts.Statement[]): void {
+    private checkStatements(statements: ReadonlyArray<ts.Statement>): void {
         const seen = new Map<string, ts.NamespaceDeclaration>();
 
         for (const statement of statements) {

@@ -1,6 +1,8 @@
 const nonNullStringLiteral: 'test';
 const nonNullString: string;
 const nullableString: string|undefined;
+let anyType: any;
+type AnyDuringMigration = any;
 
 // non-null
 let a = nonNullStringLiteral!;
@@ -54,6 +56,7 @@ let r = <Iface2>value1;
 let s = value2 as Iface2;
         ~~~~~~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
 let t = value2 as Iface1;
+let aa = anyType as AnyDuringMigration;
 
 interface TypeA {
     kind: 'a';
@@ -86,3 +89,14 @@ function func(aOrB: TypeA|TypeB) {
                 ~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]
     }
 }
+
+// Expecting no warning for these assertions as they are not unnecessary.
+
+type Bar = 'bar';
+const data = {
+    x: 'foo' as 'foo',
+    y: 'bar' as Bar,
+}
+
+[1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);

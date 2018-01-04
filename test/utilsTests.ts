@@ -15,7 +15,7 @@
  */
 
 import { assert } from "chai";
-import {arrayify, dedent, escapeRegExp} from "../src/utils";
+import { arrayify, dedent, escapeRegExp } from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
@@ -30,9 +30,11 @@ describe("Utils", () => {
     });
 
     it("dedent", () => {
-        assert.equal(dedent`
-        foo
-        bar`, "\nfoo\nbar");
+        assert.equal(
+            dedent`
+            foo
+            bar`,
+            "\nfoo\nbar");
 
         assert.equal(dedent`   one-line`, "one-line");
 

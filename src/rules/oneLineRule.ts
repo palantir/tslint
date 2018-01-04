@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, isBlockLike, isObjectLiteralExpression, isSameLine } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -33,6 +34,14 @@ const optionSchema = {
     enum: [OPTION_SAME_LINE, OPTION_NEXT_LINE],
     type: "string",
 };
+
+interface Options {
+    catch?: BraceSetting;
+    finally?: BraceSetting;
+    else?: BraceSetting;
+    "open-brace"?: BraceSetting;
+    "check-whitespace"?: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -69,47 +78,39 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
-                    "open-brace": OPTION_SAME_LINE,
-                    "catch": OPTION_NEXT_LINE,
-                    "else": OPTION_NEXT_LINE,
-                    "finally": OPTION_NEXT_LINE,
-                    "check-whitespace": true,
+                    [OPTION_BRACE]: OPTION_SAME_LINE,
+                    [OPTION_CATCH]: OPTION_NEXT_LINE,
+                    [OPTION_ELSE]: OPTION_NEXT_LINE,
+                    [OPTION_FINALLY]: OPTION_NEXT_LINE,
+                    [OPTION_WHITESPACE]: true,
                 },
             ],
         ],
         type: "style",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static WHITESPACE_FAILURE_STRING = "Expected a space.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options = parseOptions(this.ruleArguments);
-        return options === undefined ? [] : this.applyWithFunction(sourceFile, walk, options);
+        return this.applyWithWalker(new OneLineWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
     }
 }
 
-interface Options {
-    catch?: BraceSetting;
-    finally?: BraceSetting;
-    else?: BraceSetting;
-    "open-brace"?: BraceSetting;
-    "check-whitespace"?: boolean;
-}
-
-function parseOptions(ruleArguments: any[]): Options | undefined {
+function parseOptions(ruleArguments: any[]): Options {
     if (ruleArguments.length === 0) {
-        return undefined;
+        throw new Error("'one-line' rule expects options");
     }
+
     if (typeof ruleArguments[0] === "object") {
         return ruleArguments[0] as Options;
     }
 
-    // Parse old-style options (TODO: remove in tslint 6.0)
     const options: Options = {};
     for (const arg of ruleArguments) {
-        switch (arg) { // tslint:disable-line no-unsafe-any (fixed in tslint 5.4)
+        switch (arg) {
             case "check-catch":
                 options.catch = "same-line";
                 break;
@@ -120,10 +121,10 @@ function parseOptions(ruleArguments: any[]): Options | undefined {
                 options.else = "same-line";
                 break;
             case "check-open-brace":
-                options["open-brace"] = "same-line";
+                options[OPTION_BRACE] = "same-line";
                 break;
             case "check-whitespace":
-                options["check-whitespace"] = true;
+                options[OPTION_WHITESPACE] = true;
                 break;
             default:
                 throw new Error(`bad option: ${arg}`);
@@ -132,205 +133,95 @@ function parseOptions(ruleArguments: any[]): Options | undefined {
     return options;
 }
 
-function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options } = ctx;
-    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.IfStatement: {
-                const { thenStatement, elseStatement } = node as ts.IfStatement;
-                const thenIsBlock = thenStatement.kind === ts.SyntaxKind.Block;
-                if (thenIsBlock) {
-                    const expressionCloseParen = node.getChildAt(3);
-                    const thenOpeningBrace = thenStatement.getChildAt(0);
-                    checkBrace(expressionCloseParen, thenOpeningBrace);
-                }
-
-                if (elseStatement !== undefined) {
-                    // find the else keyword
-                    const elseKeyword = Lint.childOfKind(node, ts.SyntaxKind.ElseKeyword)!;
-                    if (elseStatement.kind === ts.SyntaxKind.Block) {
-                        const elseOpeningBrace = elseStatement.getChildAt(0);
-                        checkBrace(elseKeyword, elseOpeningBrace);
+class OneLineWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile) {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.Block:
+                    if (!isBlockLike(node.parent!)) {
+                        this.check({pos: node.pos, end: (node as ts.Block).statements.pos});
                     }
-                    if (thenIsBlock) {
-                        check(options.else, thenStatement, elseKeyword);
+                    break;
+                case ts.SyntaxKind.CaseBlock:
+                    this.check({pos: node.pos, end: (node as ts.CaseBlock).clauses.pos});
+                    break;
+                case ts.SyntaxKind.ModuleBlock:
+                    this.check({pos: node.pos, end: (node as ts.ModuleBlock).statements.pos});
+                    break;
+                case ts.SyntaxKind.EnumDeclaration:
+                    this.check({pos: (node as ts.EnumDeclaration).name.end, end: (node as ts.EnumDeclaration).members.pos});
+                    break;
+                case ts.SyntaxKind.InterfaceDeclaration:
+                case ts.SyntaxKind.ClassDeclaration:
+                case ts.SyntaxKind.ClassExpression: {
+                    const openBrace = getChildOfKind(node, ts.SyntaxKind.OpenBraceToken, sourceFile);
+                    if (openBrace !== undefined) {
+                        this.check(openBrace);
                     }
+                    break;
                 }
-                break;
-            }
-
-            case ts.SyntaxKind.CatchClause: {
-                const { block } = node as ts.CatchClause;
-                const catchClosingParen = Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken)!;
-                const catchOpeningBrace = block.getChildAt(0);
-                checkBrace(catchClosingParen, catchOpeningBrace);
-                break;
-            }
-
-            case ts.SyntaxKind.TryStatement: {
-                const { tryBlock, catchClause, finallyBlock } = node as ts.TryStatement;
-                const finallyKeyword = Lint.childOfKind(node, ts.SyntaxKind.FinallyKeyword);
-
-                // "visit" try block
-                const tryKeyword = node.getChildAt(0);
-                const tryOpeningBrace = tryBlock.getChildAt(0);
-                checkBrace(tryKeyword, tryOpeningBrace);
-
-                if (catchClause !== undefined) {
-                    const tryClosingBrace = tryBlock.getChildAt(tryBlock.getChildCount() - 1);
-                    const catchKeyword = catchClause.getChildAt(0);
-                    check(options.catch, tryClosingBrace, catchKeyword);
+                case ts.SyntaxKind.IfStatement: {
+                    const { thenStatement, elseStatement } = node as ts.IfStatement;
+                    if (elseStatement !== undefined && thenStatement.kind === ts.SyntaxKind.Block) {
+                        this.check({pos: thenStatement.end, end: elseStatement.pos}, "else");
+                    }
+                    break;
                 }
-
-                if (finallyBlock !== undefined && finallyKeyword !== undefined) {
-                    const finallyOpeningBrace = finallyBlock.getChildAt(0);
-                    checkBrace(finallyKeyword, finallyOpeningBrace);
-
-                    const previousBlock = catchClause !== undefined ? catchClause.block : tryBlock;
-                    const closingBrace = previousBlock.getChildAt(previousBlock.getChildCount() - 1);
-                    check(options.finally, closingBrace, finallyKeyword);
+                case ts.SyntaxKind.TryStatement: {
+                    const { finallyBlock, catchClause, tryBlock } = node as ts.TryStatement;
+                    if (catchClause !== undefined) {
+                        this.check(catchClause.getChildAt(0, sourceFile), "catch");
+                        if (finallyBlock !== undefined) {
+                            this.check({pos: catchClause.end, end: finallyBlock.pos}, "finally");
+                        }
+                    } else if (finallyBlock !== undefined) {
+                        this.check({pos: tryBlock.end, end: finallyBlock.pos}, "finally");
+                    }
+                    break;
                 }
-                break;
-            }
-
-            case ts.SyntaxKind.ForStatement:
-            case ts.SyntaxKind.ForInStatement:
-            case ts.SyntaxKind.WhileStatement: {
-                const { statement } = node as ts.IterationStatement;
-                // last child is the statement, second to last child is the close paren
-                const closeParenToken = node.getChildAt(node.getChildCount() - 2);
-                if (statement.kind === ts.SyntaxKind.Block) {
-                    const openBraceToken = statement.getChildAt(0);
-                    checkBrace(closeParenToken, openBraceToken);
+                case ts.SyntaxKind.BinaryExpression: {
+                    const { operatorToken, right } = node as ts.BinaryExpression;
+                    if (operatorToken.kind === ts.SyntaxKind.EqualsToken && isObjectLiteralExpression(right)) {
+                        this.check({pos: right.pos, end: right.properties.pos});
+                    }
+                    break;
                 }
-                break;
-            }
-
-            case ts.SyntaxKind.BinaryExpression:
-                const { operatorToken, right } = node as ts.BinaryExpression;
-                if (operatorToken.kind === ts.SyntaxKind.EqualsToken && right.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-                    const equalsToken = node.getChildAt(1);
-                    const openBraceToken = right.getChildAt(0);
-                    checkBrace(equalsToken, openBraceToken);
+                case ts.SyntaxKind.VariableDeclaration: {
+                    const { initializer } = node as ts.VariableDeclaration;
+                    if (initializer !== undefined && isObjectLiteralExpression(initializer)) {
+                        this.check({pos: initializer.pos, end: initializer.properties.pos});
+                    }
+                    break;
                 }
-                break;
-
-            case ts.SyntaxKind.VariableDeclaration:
-                const { initializer } = node as ts.VariableDeclaration;
-                if (initializer !== undefined && initializer.kind === ts.SyntaxKind.ObjectLiteralExpression) {
-                    const equalsToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!;
-                    const openBraceToken = initializer.getChildAt(0);
-                    checkBrace(equalsToken, openBraceToken);
-                }
-                break;
-
-            case ts.SyntaxKind.DoStatement:
-                const doKeyword = node.getChildAt(0);
-                const { statement } = node as ts.DoStatement;
-                if (statement.kind === ts.SyntaxKind.Block) {
-                    const openBraceToken = statement.getChildAt(0);
-                    checkBrace(doKeyword, openBraceToken);
-                }
-                break;
-
-            case ts.SyntaxKind.ModuleDeclaration: {
-                const { name, body } = node as ts.ModuleDeclaration;
-                if (body !== undefined && body.kind === ts.SyntaxKind.ModuleBlock) {
-                    const openBraceToken = body.getChildAt(0);
-                    checkBrace(name, openBraceToken);
-                }
-                break;
-            }
-
-            case ts.SyntaxKind.EnumDeclaration: {
-                const { name } = node as ts.EnumDeclaration;
-                const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-                checkBrace(name, openBraceToken);
-                break;
-            }
-
-            case ts.SyntaxKind.SwitchStatement: {
-                const closeParenToken = node.getChildAt(3);
-                const openBraceToken = (node as ts.SwitchStatement).caseBlock.getChildAt(0);
-                checkBrace(closeParenToken, openBraceToken);
-                break;
-            }
-
-            case ts.SyntaxKind.CaseClause: {
-                const { statements } = node as ts.CaseClause;
-                const block = statements[0];
-                if (block !== undefined && block.kind === ts.SyntaxKind.Block) {
-                    checkBrace(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!, Lint.childOfKind(block, ts.SyntaxKind.OpenBraceToken)!);
-                }
-                break;
-            }
-
-            case ts.SyntaxKind.InterfaceDeclaration:
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.ClassExpression: {
-                const { heritageClauses, typeParameters, name } = node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration;
-
-                let lastNodeOfDeclaration: ts.Node;
-                const openBraceToken = Lint.childOfKind(node, ts.SyntaxKind.OpenBraceToken)!;
-
-                if (heritageClauses !== undefined) {
-                    lastNodeOfDeclaration = heritageClauses[heritageClauses.length - 1];
-                } else if (typeParameters !== undefined) {
-                    lastNodeOfDeclaration = typeParameters[typeParameters.length - 1];
-                } else if (name !== undefined) {
-                    lastNodeOfDeclaration = name;
-                } else {
-                    lastNodeOfDeclaration = Lint.childOfKind(node, ts.SyntaxKind.ClassKeyword)!;
-                    if (lastNodeOfDeclaration === undefined) {
-                        lastNodeOfDeclaration = Lint.childOfKind(node, ts.SyntaxKind.InterfaceKeyword)!;
+                case ts.SyntaxKind.TypeAliasDeclaration: {
+                    const { type } = node as ts.TypeAliasDeclaration;
+                    if (type.kind === ts.SyntaxKind.MappedType || type.kind === ts.SyntaxKind.TypeLiteral) {
+                        this.check(type.getChildAt(0, sourceFile));
                     }
                 }
-
-                checkBrace(lastNodeOfDeclaration, openBraceToken);
-                break;
             }
-
-            case ts.SyntaxKind.FunctionDeclaration:
-            case ts.SyntaxKind.MethodDeclaration:
-            case ts.SyntaxKind.Constructor: {
-                const { body, type } = node as ts.FunctionLikeDeclaration;
-                if (body !== undefined && body.kind === ts.SyntaxKind.Block) {
-                    const openBraceToken = body.getChildAt(0);
-                    const tokenBefore = type !== undefined ? type : Lint.childOfKind(node, ts.SyntaxKind.CloseParenToken)!;
-                    checkBrace(tokenBefore, openBraceToken);
-                }
-                break;
-            }
-
-            case ts.SyntaxKind.ArrowFunction: {
-                const { body } = node as ts.ArrowFunction;
-                if (body !== undefined && body.kind === ts.SyntaxKind.Block) {
-                    const arrowToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken)!;
-                    const openBraceToken = body.getChildAt(0);
-                    checkBrace(arrowToken, openBraceToken);
-                }
-            }
-        }
-        ts.forEachChild(node, cb);
-    });
-
-    function checkBrace(previousNode: ts.Node, openBraceToken: ts.Node): void {
-        check(options["open-brace"], previousNode, openBraceToken);
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
     }
 
-    function check(braces: BraceSetting | undefined, preceding: ts.Node, token: ts.Node): void {
-        if (braces === undefined) {
+    private check(range: ts.TextRange, kind?: "catch" | "else" | "finally") {
+        const option = this.options[kind === undefined ? OPTION_BRACE : kind];
+        if (option === undefined) {
             return;
         }
 
-        const aEnd = preceding.getEnd();
-        const bStart = token.getStart(sourceFile);
-        const nl = sourceFile.text.slice(aEnd, bStart).includes("\n");
-        if (nl !== (braces === "next-line")) {
-            const expected = braces === "next-line" ? "line after" : "same line as";
-            ctx.addFailureAtNode(token, `Expected '${ts.tokenToString(token.kind)}' to go on the ${expected} the preceding token.`);
-        } else if (braces === "same-line" && options["check-whitespace"] === true && aEnd === bStart) {
-            ctx.addFailureAtNode(token, Rule.WHITESPACE_FAILURE_STRING);
+        const tokenStart = range.end - (kind === undefined ? 1 : kind.length);
+        if (isSameLine(this.sourceFile, range.pos, tokenStart) !== (option === "same-line")) {
+            const expected = option === "next-line" ? "line after" : "same line as";
+            this.addFailure(
+                tokenStart,
+                range.end,
+                `Expected '${kind === undefined ? "{" : kind}' to go on the ${expected} the preceding token.`,
+                Lint.Replacement.replaceFromTo(range.pos, tokenStart, this.options[OPTION_WHITESPACE] ? " " : ""),
+            );
+        } else if (this.options[OPTION_WHITESPACE] && range.pos === tokenStart) {
+            this.addFailure(tokenStart, range.end, Rule.WHITESPACE_FAILURE_STRING, Lint.Replacement.appendText(range.pos, " "));
         }
     }
 }

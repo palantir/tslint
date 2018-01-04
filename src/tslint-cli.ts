@@ -20,12 +20,13 @@
 import commander = require("commander");
 import * as fs from "fs";
 
+import { VERSION } from "./linter";
 import { run } from "./runner";
-import { dedent } from "./utils";
+import { arrayify, dedent } from "./utils";
 
 interface Argv {
     config?: string;
-    exclude?: string;
+    exclude: string[];
     fix?: boolean;
     force?: boolean;
     help?: boolean;
@@ -37,7 +38,7 @@ interface Argv {
     formattersDir: string;
     format?: string;
     typeCheck?: boolean;
-    test?: string;
+    test?: boolean;
     version?: boolean;
 }
 
@@ -45,7 +46,7 @@ interface Option {
     short?: string;
     // Commander will camelCase option names.
     name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
-    type: "string" | "boolean";
+    type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
 }
@@ -62,7 +63,7 @@ const options: Option[] = [
             to the rules. If no option is specified, the config file named
             tslint.json is used, so long as it exists in the path.
             The format of the file is { rules: { /* rules list */ } },
-            where /* rules list */ is a key: value comma-seperated list of
+            where /* rules list */ is a key: value comma-separated list of
             rulename: rule-options pairs. Rule-options can be either a
             boolean true/false value denoting whether the rule is used or not,
             or a list [boolean, ...] where the boolean provides the same role
@@ -74,7 +75,7 @@ const options: Option[] = [
     {
         short: "e",
         name: "exclude",
-        type: "string",
+        type: "array",
         describe: "exclude globs from path expansion",
         description: dedent`
             A filename or glob which indicates files to exclude from linting.
@@ -180,21 +181,44 @@ const options: Option[] = [
     {
         name: "type-check",
         type: "boolean",
-        describe: "check for type errors before linting the project",
+        describe: "(deprecated) check for type errors before linting the project",
         description: dedent`
-            Checks for type errors before linting a project. --project must be
-            specified in order to enable type checking.`,
+            (deprecated) Checks for type errors before linting a project.
+            --project must be specified in order to enable type checking.`,
     },
 ];
 
+const builtinOptions: Option[] = [
+    {
+        short: "v",
+        name: "version",
+        type: "boolean",
+        describe: "current version",
+        description: "The current version of tslint.",
+    },
+    {
+        short: "h",
+        name: "help",
+        type: "boolean",
+        describe: "display detailed help",
+        description: "Prints this help message.",
+    },
+];
+
+commander.version(VERSION, "-v, --version");
+
 for (const option of options) {
-    const commanderStr = optionUsageTag(option) + (option.type === "string" ? ` [${option.name}]` : "");
-    commander.option(commanderStr, option.describe);
+    const commanderStr = optionUsageTag(option) + optionParam(option);
+    if (option.type === "array") {
+        commander.option(commanderStr, option.describe, collect, []);
+    } else {
+        commander.option(commanderStr, option.describe);
+    }
 }
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.map((o) =>
+    const optionDetails = options.concat(builtinOptions).map((o) =>
         `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
     console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
 });
@@ -203,49 +227,74 @@ commander.on("--help", () => {
 const parsed = commander.parseOptions(process.argv.slice(2));
 commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
-    (commander.parseArgs as any)([], parsed.unknown);
+    (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init === true || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
-    console.error("Missing files");
+if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+    console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 
-if (argv.typeCheck === true && argv.project === undefined) {
-    console.error("--project must be specified in order to enable type checking.");
-    process.exit(1);
+if (argv.typeCheck) {
+    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
+    if (argv.project === undefined) {
+        console.error("--project must be specified in order to enable type checking.");
+        process.exit(1);
+    }
 }
 
-let log: (message: string) => void;
-if (argv.out != null) {
-    const outputStream = fs.createWriteStream(argv.out, {
-        flags: "w+",
-        mode: 420,
+const outputStream: NodeJS.WritableStream = argv.out === undefined
+    ? process.stdout
+    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
+
+run(
+    {
+        config: argv.config,
+        exclude: argv.exclude,
+        files: arrayify(commander.args),
+        fix: argv.fix,
+        force: argv.force,
+        format: argv.format === undefined ? "prose" : argv.format,
+        formattersDirectory: argv.formattersDir,
+        init: argv.init,
+        out: argv.out,
+        outputAbsolutePaths: argv.outputAbsolutePaths,
+        project: argv.project,
+        rulesDirectory: argv.rulesDir,
+        test: argv.test,
+        typeCheck: argv.typeCheck,
+    },
+    {
+        log(m) {
+            outputStream.write(m);
+        },
+        error(m) {
+            process.stdout.write(m);
+        },
+    })
+    .then((rc) => {
+        process.exitCode = rc;
+    }).catch((e) => {
+        console.error(e);
+        process.exitCode = 1;
     });
-    log = (message) => outputStream.write(`${message}\n`);
-} else {
-    log = console.log;
-}
-
-// tslint:disable-next-line no-floating-promises
-run({
-    config: argv.config,
-    exclude: argv.exclude,
-    files: commander.args,
-    fix: argv.fix,
-    force: argv.force,
-    format: argv.format === undefined ? "prose" : argv.format,
-    formattersDirectory: argv.formattersDir,
-    init: argv.init,
-    out: argv.out,
-    outputAbsolutePaths: argv.outputAbsolutePaths,
-    project: argv.project,
-    rulesDirectory: argv.rulesDir,
-    test: argv.test,
-    typeCheck: argv.typeCheck,
-}, { log, error(m) { console.error(m); } }).then(process.exit);
 
 function optionUsageTag({short, name}: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
+}
+
+function optionParam(option: Option) {
+    switch (option.type) {
+        case "string":
+            return ` [${option.name}]`;
+        case "array":
+            return ` <${option.name}>`;
+        case "boolean":
+            return "";
+    }
+}
+function collect(val: string, memo: string[]) {
+    memo.push(val);
+    return memo;
 }

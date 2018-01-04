@@ -21,6 +21,15 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 import { RuleFailure } from "./language/rule/rule";
 
+/**
+ * regex is: start of string followed by any amount of whitespace
+ * followed by tslint and colon
+ * followed by either "enable" or "disable"
+ * followed optionally by -line or -next-line
+ * followed by either colon, whitespace or end of string
+ */
+export const ENABLE_DISABLE_REGEX = /^\s*tslint:(enable|disable)(?:-(line|next-line))?(:|\s|$)/;
+
 export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: RuleFailure[]): RuleFailure[] {
     if (failures.length === 0) {
         // Usually there won't be failures anyway, so no need to look for "tslint:disable".
@@ -34,7 +43,7 @@ export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: Rule
         return disabledIntervals === undefined || !disabledIntervals.some(({ pos, end }) => {
             const failPos = failure.getStartPosition().getPosition();
             const failEnd = failure.getEndPosition().getPosition();
-            return failEnd >= pos && (end === -1 || failPos <= end);
+            return failEnd >= pos && (end === -1 || failPos < end);
         });
     });
 }
@@ -125,12 +134,7 @@ function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.
 
 type Modifier = "line" | "next-line" | undefined;
 function parseComment(commentText: string): { rulesList: string[] | "all"; isEnabled: boolean; modifier: Modifier } | undefined {
-    // regex is: start of string followed by any amount of whitespace
-    // followed by tslint and colon
-    // followed by either "enable" or "disable"
-    // followed optionally by -line or -next-line
-    // followed by either colon, whitespace or end of string
-    const match = /^\s*tslint:(enable|disable)(?:-(line|next-line))?(:|\s|$)/.exec(commentText);
+    const match = ENABLE_DISABLE_REGEX.exec(commentText);
     if (match === null) {
         return undefined;
     }
