@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -92,7 +93,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 
     function check(node: ts.Node, option: "always" | "never"): void {
-        const openParen = Lint.childOfKind(node, ts.SyntaxKind.OpenParenToken);
+        const openParen = getChildOfKind(node, ts.SyntaxKind.OpenParenToken, sourceFile);
         // openParen may be missing for an async arrow function `async x => ...`.
         if (openParen === undefined) { return; }
 
@@ -111,7 +112,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 function getOption(node: ts.Node, options: Options): Option | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
-            return !hasTypeParameters(node) && Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+            return !hasTypeParameters(node) && hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
                 ? options.asyncArrow : undefined;
 
         case ts.SyntaxKind.Constructor:

@@ -79,13 +79,13 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
             const parent = contextualNode.parent!;
             if (isPropertyAssignment(parent)) {
-                contextualNode = parent.parent! as ts.ObjectLiteralExpression;
+                contextualNode = parent.parent;
             } else if (isArrayLiteralExpression(parent)) {
                 contextualNode = parent;
             } else {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
                 return;
             }
-        } while (true); // tslint:disable-line strict-boolean-expressions (Fixed in tslint 5.3)
+        } while (true);
     }
 }
