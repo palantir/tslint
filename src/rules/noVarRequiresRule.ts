@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Instead use ES6 style imports or \`import foo = require('foo')\` imports.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -43,6 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+// tslint:disable-next-line:deprecation
 class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
     public createScope(): {} {
         return {};

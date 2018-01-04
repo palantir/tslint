@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             for most of the use cases for \`eval()\`.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

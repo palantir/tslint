@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-invalid-template-strings": true
-  },
-  "jsRules": {
-    "no-invalid-template-strings": true
   }
 }

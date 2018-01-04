@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { isThisParameter } from "tsutils";
 import * as ts from "typescript";
-
-import * as Lint from "../index";
+import * as Lint from "..";
 
 const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";
 const DEPRECATED_OPTION_FUNCTION_IN_METHOD = "no-this-in-function-in-method";
@@ -41,13 +41,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_FUNCTION_IN_METHOD}"]`],
+        optionExamples: [true, [true, OPTION_FUNCTION_IN_METHOD]],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body" ;
+    public static FAILURE_STRING_OUTSIDE = "the \"this\" keyword is disallowed outside of a class body";
     public static FAILURE_STRING_INSIDE = "the \"this\" keyword is disallowed in function bodies inside class methods, " +
         "use arrow functions instead";
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -76,6 +76,9 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
 
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
+                if ((node as ts.FunctionLikeDeclaration).parameters.some(isThisParameter)) {
+                    return;
+                }
                 if (inClass) {
                     inFunctionInClass = true;
                     ts.forEachChild(node, cb);

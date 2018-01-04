@@ -7,6 +7,8 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "importHelpers": true,
         "declaration": true,
         "sourceMap": false,
         "target": "es5",

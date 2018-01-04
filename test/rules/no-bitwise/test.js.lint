@@ -1,6 +1,0 @@
-var z = (x || 3) && (y || 4);
-var yy = x | 3;
-         ~~~~~  [Forbidden bitwise operation]
-var zz = (z || y) & (x | y);
-         ~~~~~~~~~~~~~~~~~~  [Forbidden bitwise operation]
-                     ~~~~~   [Forbidden bitwise operation]

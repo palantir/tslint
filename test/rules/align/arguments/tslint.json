@@ -1,8 +1,5 @@
 {
   "rules": {
     "align": [true, "arguments"]
-  },
-  "jsRules": {
-    "align": [true, "arguments"]
   }
 }

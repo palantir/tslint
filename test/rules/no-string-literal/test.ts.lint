@@ -18,6 +18,8 @@ obj["invalid_accessor"];
     ~~~~~~~~~~~~~~~~~~   [0]
 obj["_AnotherInvalidAccessor"];
     ~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+obj["\u0061"]; // unicode value "a"
+    ~~~~~~~~ [0]
 
 // valid accessors
 obj["a-2"];
@@ -26,5 +28,9 @@ obj["?a#$!$^&%&"];
 
 // invalid accessor - no crash
 obj[]
+
+// that underscrore escaping thing typescript does
+obj['__foo__'];
+    ~~~~~~~~~ [0]
 
 [0]: object access via string literals is disallowed

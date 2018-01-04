@@ -1,0 +1,37 @@
+import {} from 'foo';
+
+let noSubstitution;
+    ~~~~~~~~~~~~~~ [Identifier 'noSubstitution' is never reassigned; use 'const' instead of 'let'.]
+let noFormat;
+    ~~~~~~~~ [no_format]
+let format;
+    ~~~~~~ [let_base % ('format')]
+let formatMultiArgs;
+    ~~~~~~~~~~~~~~~ [base % ('formatMultiArgs', 'let')]
+var formatMultiArgsTrailingComma;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [base % ('formatMultiArgsTrailingComma', 'var', )]
+let indirection;
+    ~~~~~~~~~~~ [let % ('indirection')]
+var indirection2;
+    ~~~~~~~~~~~~ [var % ('indirection2')]
+let indirection3;
+    ~~~~~~~~~~~~ [partial_format % ('let')]
+var formatInSubstitution;
+    ~~~~~~~~~~~~~~~~~~~~ [preformatted]
+let worksWithEscape;
+    ~~~~~~~~~~~~~~~ [full-substitution % ('Identifier \'worksWithEscape\' is never reassigned; use \'const\' instead of \'let\'.')]
+var worksWithDoubleQuotes;
+    ~~~~~~~~~~~~~~~~~~~~~ [full-substitution % ("Identifier 'worksWithDoubleQuotes' is never reassigned; use 'const' instead of 'var'.")]
+let doesntTrimSpaces;
+    ~~~~~~~~~~~~~~~~ [base3 % ("Identifier 'doesntTrimSpaces' is never reassigned; ", " 'let'")]
+
+[no_format]: Identifier 'noFormat' is never reassigned; use 'const' instead of 'let'.
+[base]: Identifier '%s' is never reassigned; use 'const' instead of '%s'.
+[let_base]: Identifier '%s' is never reassigned; use 'const' instead of 'let'.
+[base2]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
+[let]: base2 % ('let')
+[var]: base2 % ('var')
+[partial_format]: base % ('indirection3')
+[preformatted]: base % ('formatInSubstitution', 'var')
+[full-substitution]: %s
+[base3]: %suse 'const' instead of%s.

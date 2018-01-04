@@ -1,0 +1,19 @@
+// Other styles of import statements.
+import someDefault from "module";
+import "something";
+import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
+
+// contains relative path & ImportEqualsDeclaration
+import a from './foo/a';
+import b from './bar/b';
+import c = require('./baz/c');
+
+// contains relative path & ImportEqualsDeclaration
+import a from '../../foo/a';
+import b from './bar/b';
+import c = require('./baz/c');
+
+// contains scoped import
+import a from 'foo/a';
+import b = require('foo/b');
+import c from 'foo/c';

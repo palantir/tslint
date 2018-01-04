@@ -18,6 +18,7 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
+import { needsParenthesesForNegate } from "..";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -28,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -40,7 +41,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -48,7 +49,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isBinaryExpression(node)) {
             const cmp = getBooleanComparison(node, checker);
-            if (cmp) {
+            if (cmp !== undefined) {
                 ctx.addFailureAtNode(cmp.expression, Rule.FAILURE_STRING(cmp.negate), fix(node, cmp));
             }
         }
@@ -63,7 +64,7 @@ interface Compare {
 
 function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
     const cmp = deconstructComparison(node);
-    return cmp === undefined || !Lint.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+    return cmp === undefined || !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
 }
 
 function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {
@@ -86,20 +87,10 @@ function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.F
     }
 }
 
-export function needsParenthesesForNegate(node: ts.Expression): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.AsExpression:
-        case ts.SyntaxKind.BinaryExpression:
-            return true;
-        default:
-            return false;
-    }
-}
-
 function deconstructComparison(node: ts.BinaryExpression): Compare | undefined {
     const { left, operatorToken, right } = node;
     const eq = Lint.getEqualsKind(operatorToken);
-    if (!eq) {
+    if (eq === undefined) {
         return undefined;
     }
 

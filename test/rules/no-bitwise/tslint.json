@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-bitwise": true
-  },
-  "jsRules": {
-    "no-bitwise": true
   }
 }

@@ -14,15 +14,15 @@ let b4 = 1;
 
 // basic failure
 let c = 1; // failure
-    ~                 [Identifier 'c' is never reassigned; use 'const' instead of 'let'.]
+    ~                 [let % ('c')]
 
 // multiple declarations
 const c5 = 5, c6 = 6;
 let c1 = 1, c2 = 2; // 2 failures
-    ~~                            [Identifier 'c1' is never reassigned; use 'const' instead of 'let'.]
-            ~~                    [Identifier 'c2' is never reassigned; use 'const' instead of 'let'.]
+    ~~                            [let % ('c1')]
+            ~~                    [let % ('c2')]
 let c3 = 1, c4 = 2; // 1 failure
-            ~~                   [Identifier 'c4' is never reassigned; use 'const' instead of 'let'.]
+            ~~                   [let % ('c4')]
 c3 = 4;
 
 // destructuring
@@ -36,14 +36,14 @@ c3 = 4;
 }
 
 let {h, i} = {h: 1, i: 1}; // failure for 'h'
-     ~                                        [Identifier 'h' is never reassigned; use 'const' instead of 'let'.]
+     ~                                        [let % ('h')]
 let [j, k] = [1, 1]; // failure for 'j'
-     ~                                  [Identifier 'j' is never reassigned; use 'const' instead of 'let'.]
+     ~                                  [let % ('j')]
 let [x1, x3] = [1, 2], [x2] = [3]; // failure for x1, x3
-     ~~                                                  [Identifier 'x1' is never reassigned; use 'const' instead of 'let'.]
-         ~~                                              [Identifier 'x3' is never reassigned; use 'const' instead of 'let'.]
+     ~~                                                  [let % ('x1')]
+         ~~                                              [let % ('x3')]
 let {a: {b: {q}, c: {r}}} = { a: { b: { q: 3 }, c: { r: 2 } } }; // failure for 'r'
-                     ~                                                              [Identifier 'r' is never reassigned; use 'const' instead of 'let'.]
+                     ~                                                              [let % ('r')]
 i = 2;
 k = 2;
 q = 4;
@@ -52,24 +52,23 @@ x2 = 5;
 // functions
 function myFunc(d: number, e: number) {
     let f = 1; // failure
-        ~                 [Identifier 'f' is never reassigned; use 'const' instead of 'let'.]
+        ~                 [let % ('f')]
     const g = 1;
     d = 2;
 }
 function myFunc2() {
     let [l, m] = [1, 1]; // failure for 'l'
-         ~                                  [Identifier 'l' is never reassigned; use 'const' instead of 'let'.]
+         ~                                  [let % ('l')]
     m = 2;
     return l;
 }
 
 // for-of
 for (let n of [1, 1]) { // failure for 'n'
-         ~                                 [Identifier 'n' is never reassigned; use 'const' instead of 'let'.]
+         ~                                 [let % ('n')]
     console.log(n);
 }
-for (let {o, p} of [{1, 1}, {1, 1}]) { // failure for 'o'
-          ~                                               [Identifier 'o' is never reassigned; use 'const' instead of 'let'.]
+for (let {o, p} of [{1, 1}, {1, 1}]) {
     console.log(o);
     p = 2;
 }
@@ -78,7 +77,7 @@ for (let {o, p} of [{1, 1}, {1, 1}]) { // failure for 'o'
 for (let i1 = 0; i1 < 4; i1++) {
 }
 for (let i2 = 0;;) {    // failure
-         ~~                        [Identifier 'i2' is never reassigned; use 'const' instead of 'let'.]
+         ~~                        [let % ('i2')]
 }
 for (const i2 = 0;;) {
 }
@@ -86,7 +85,7 @@ for (const i2 = 0;;) {
 // scope
 let sc = 0;
 let sc1 = 0;
-    ~~~      [Identifier 'sc1' is never reassigned; use 'const' instead of 'let'.]
+    ~~~      [let % ('sc1')]
 let sc2 = 0;
 let sc3 = 0;
 {
@@ -100,7 +99,7 @@ class MyClass {
     public Increment() {
         let sc4 = 0;
         let sc5 = 0;    // error
-            ~~~                  [Identifier 'sc5' is never reassigned; use 'const' instead of 'let'.]
+            ~~~                  [let % ('sc5')]
         this.classVar++;
         sc3++;
         sc4++;
@@ -113,25 +112,25 @@ x = 5;
 
 // ignores RHS of declaration
 let usedAsRHS = 3;
-    ~~~~~~~~~                  [Identifier 'usedAsRHS' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~                  [let % ('usedAsRHS')]
 let LHS: number | string = usedAsRHS;
-    ~~~                  [Identifier 'LHS' is never reassigned; use 'const' instead of 'let'.]
+    ~~~                  [let % ('LHS')]
 
 // handle nested declaration
 let nest = () => {
-    ~~~~          [Identifier 'nest' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~          [let % ('nest')]
     const a = 4;
     let b = 0;
     let c = 1;
-        ~      [Identifier 'c' is never reassigned; use 'const' instead of 'let'.]
+        ~      [let % ('c')]
     b = 2;
     return a + b + c;
 };
 
 let nest2 = () => {
-    ~~~~~           [Identifier 'nest2' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~           [let % ('nest2')]
     let error = false;
-        ~~~~~           [Identifier 'error' is never reassigned; use 'const' instead of 'let'.]
+        ~~~~~           [let % ('error')]
     try {
     } catch(error) {
         // variable error is block scoped
@@ -144,7 +143,7 @@ export let x = 4;
 
 // array
 let arr = [];
-    ~~~           [Identifier 'arr' is never reassigned; use 'const' instead of 'let'.]
+    ~~~           [let % ('arr')]
 arr.push(0);
 arr[1] = 1;
 arr.length = 1;
@@ -158,28 +157,28 @@ let forwardDecl: number;
 
 module E {
     let x = 1;
-        ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+        ~      [let % ('x')]
 }
 
 switch (1) {
     case 1:
         let x = 1;
-            ~      [Identifier 'x' is never reassigned; use 'const' instead of 'let'.]
+            ~      [let % ('x')]
         break;
     case 2:
         let y = 1;
-            ~      [Identifier 'y' is never reassigned; use 'const' instead of 'let'.]
+            ~      [let % ('y')]
         break;
 }
 
 var someVariable = 0;
-    ~~~~~~~~~~~~           [Identifier 'someVariable' is never reassigned; use 'const' instead of 'var'.]
+    ~~~~~~~~~~~~           [var % ('someVariable')]
 function funcxion(someVariable, someParameter) {
     someVariable = 1;
     {
         var var1 = 0;
         var var2 = 0;
-            ~~~~           [Identifier 'var2' is never reassigned; use 'const' instead of 'var'.]
+            ~~~~           [var % ('var2')]
     }
     {
         var1 = 1;
@@ -191,11 +190,11 @@ function funcxion(someVariable, someParameter) {
 }
 
 let shadowed1 = 0;
-    ~~~~~~~~~           [Identifier 'shadowed1' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~           [let % ('shadowed1')]
 let shadowed2 = 0;
-    ~~~~~~~~~           [Identifier 'shadowed2' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~           [let % ('shadowed2')]
 let shadowed3 = 0;
-    ~~~~~~~~~           [Identifier 'shadowed3' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~           [let % ('shadowed3')]
 function shadowVariables({shadowed1, ...shadowed2}, shadowed3) {
     shadowed1 = 1;
     shadowed2 = 1;
@@ -208,18 +207,64 @@ for (let i = 1, l = arr.length; i < l; ++i) {
 
 {
     let var1 = 0;
-        ~~~~           [Identifier 'var1' is never reassigned; use 'const' instead of 'let'.]
+        ~~~~           [let % ('var1')]
     let var2 = 0;
     function foo(var1 = var2 = 1, var2 = var1 = 1) {}
     function foo2(p1 = var2 = 1) {
         let var2 = 0;
-            ~~~~           [Identifier 'var2' is never reassigned; use 'const' instead of 'let'.]
+            ~~~~           [let % ('var2')]
     }
 }
 
 // cannot fix, because of uninitialized variables
 let uninitialized;
-    ~~~~~~~~~~~~~           [Identifier 'uninitialized' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~~~~~           [let % ('uninitialized')]
 let initialized1 = 0, uninitialized2;
-    ~~~~~~~~~~~~           [Identifier 'initialized1' is never reassigned; use 'const' instead of 'let'.]
-                      ~~~~~~~~~~~~~~           [Identifier 'uninitialized2' is never reassigned; use 'const' instead of 'let'.]
+    ~~~~~~~~~~~~           [let % ('initialized1')]
+                      ~~~~~~~~~~~~~~           [let % ('uninitialized2')]
+
+// ambient declarations are not checked
+declare let ambient = 0;
+
+declare namespace ambient {
+    let foo = 0;
+}
+
+{
+    let someVar: string;
+    for (someVar in someObj) {}
+}
+{
+    let someVar: string;
+    for (someVar of someArr) {}
+}
+{
+    let someVar: string, someVar2: string;
+    for ({someVar, foo: someVar2} of someArr) {}
+}
+{
+    let someVar: string, someObj: any;
+        ~~~~~~~ [let % ('someVar')]
+                         ~~~~~~~ [let % ('someObj')]
+    for ({someVar: someObj.val} of someArr) {}
+}
+for (let [var1, var2] of someArr) {
+    var1 = null;
+}
+for (let [var1, var2] of someArr) {}
+          ~~~~ [let % ('var1')]
+                ~~~~ [let % ('var2')]
+for (let {var1, var2} of someArr) {
+    var2 = null;
+}
+
+{
+    let k: any = 0;
+    function foo(param: {[k: string]: string}) {
+        k = param;
+    }
+}
+
+[_base]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
+[let]: _base % ('let')
+[var]: _base % ('var')

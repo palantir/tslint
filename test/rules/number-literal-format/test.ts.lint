@@ -1,0 +1,40 @@
+0;
+0.5;
+10;
+1.1e10;
+
+01;
+~~ [leading-0]
+
+1.
+~~ [trailing-decimal]
+
+0.0;
+~~~ [trailing-0]
+0.50;
+~~~~ [trailing-0]
+
+.5;
+~~ [leading-decimal]
+
+.50;
+~~~ [trailing-0]
+~~~ [leading-decimal]
+
+1e01;
+  ~~ [leading-0]
+1E01;
+  ~~ [leading-0]
+1e-01;
+  ~~~ [leading-0]
+1.0e10;
+~~~ [trailing-0]
+
+0xDEAdBEEF;
+~~~~~~~~~~ [uppercase]
+
+[leading-0]: Number literal should not have a leading '0'.
+[trailing-0]: Number literal should not have a trailing '0'.
+[trailing-decimal]: Number literal should not end in '.'.
+[leading-decimal]: Number literal should begin with '0.' and not just '.'.
+[uppercase]: Hexadecimal number literal should be uppercase.

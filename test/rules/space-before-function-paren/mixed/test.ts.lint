@@ -1,12 +1,4 @@
 // Anonymous
-function() {}
-        ~  [missing-space]
-function(): void {
-        ~  [missing-space]
-}
-function(a: string, cb: ()=>{}): void {}
-        ~  [missing-space]
-
 var f = function() {};
                 ~  [missing-space]
 var f = function(): void {
@@ -15,6 +7,8 @@ var f = function(): void {
 var f = function(a: string, cb: ()=>{}): void {};
                 ~  [missing-space]
 
+function <T>() {}
+var f = function <T>() {};
 
 // Named
 function foobar (){}
@@ -33,6 +27,14 @@ var f = function foobar (): void{
 var f = function foobar (a: string, cb: ()=>{}): void{};
                        ~  [invalid-space]
 
+function foobar<T> () {}
+                  ~  [invalid-space]
+var f = function foobar<T> () {}
+                          ~  [invalid-space]
+
+// Default export (name ommited)
+export default function() {}
+                       ~  [missing-space]
 
 // Async Arrow
 // ignore
@@ -44,6 +46,11 @@ async() => {};
 var arrow = async() => {};
                  ~  [missing-space]
 
+<T>() => {};
+var arrow = <T>() => {};
+
+async <T>() => {};
+var arrow = async <T>() => {};
 
 // Method
 interface IMyInterface {
@@ -53,6 +60,8 @@ interface IMyInterface {
            ~  [invalid-space]
         three (a: string, cb: ()=>{}): void;
              ~  [invalid-space]
+        four<T> ();
+               ~  [invalid-space]
 }
 class MyClass {
         one () {}
@@ -62,6 +71,8 @@ class MyClass {
         }
         three (a: string, cb: ()=>{}): void {}
              ~  [invalid-space]
+        four<T> () {}
+               ~  [invalid-space]
 }
 
 

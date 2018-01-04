@@ -1,17 +1,15 @@
-[typescript]: >= 2.1.0
-
 export function func1(x: number, y: number, ...args: number[]) {
-                                               ~~~~              ['args' is declared but never used.]
+                                               ~~~~              [err % ('args')]
     return x + y;
 }
 
 export function func2(x: number, y: number, ...args: number[]) {
-                                 ~                               ['y' is declared but never used.]
+                                 ~                               [err % ('y')]
     return x + args[0];
 }
 
 export function func3(x?: number, y?: number) {
-                                  ~             ['y' is declared but never used.]
+                                  ~             [err % ('y')]
     return x;
 }
 
@@ -21,7 +19,7 @@ export interface ITestInterface {
 
 export class ABCD {
     constructor(private x: number, public y: number, private z: number) {
-                        ~                                                 [Property 'x' is declared but never used.]
+                        ~                                                 [prop % ('x')]
     }
 
     func5() {
@@ -42,7 +40,7 @@ export function func7(f: (x: number) => number) {
 }
 
 export function func8([x, y]: [number, number]) {
-                          ~                       ['y' is declared but never used.]
+                          ~                       [err % ('y')]
     return x;
 }
 
@@ -51,23 +49,31 @@ export class DestructuringTests {
     }
 
     public func9({a, b}) {
-                     ~     ['b' is declared but never used.]
+                     ~     [err % ('b')]
         return a;
     }
 
     public func10([a, b]) {
-                      ~     ['b' is declared but never used.]
+                      ~     [err % ('b')]
         return [a];
     }
 
     // destructuring with default value
     public func11([x = 0]) {
-                   ~         ['x' is declared but never used.]
+                   ~         [err % ('x')]
         return;
     }
 }
 
 abstract class AbstractTest {
-               ~~~~~~~~~~~~ ['AbstractTest' is declared but never used.]
+               ~~~~~~~~~~~~ [err % ('AbstractTest')]
     abstract foo(x);
 }
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+[prop]: Property '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+[prop]: Property '%s' is declared but never used.
+#endif

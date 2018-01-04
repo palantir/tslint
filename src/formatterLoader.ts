@@ -17,13 +17,13 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {FormatterFunction} from "./index";
-import {camelize} from "./utils";
+import { FormatterConstructor } from "./index";
+import { camelize } from "./utils";
 
 const moduleDirectory = path.dirname(module.filename);
 const CORE_FORMATTERS_DIRECTORY = path.resolve(moduleDirectory, ".", "formatters");
 
-export function findFormatter(name: string | FormatterFunction, formattersDirectory?: string) {
+export function findFormatter(name: string | FormatterConstructor, formattersDirectory?: string): FormatterConstructor | undefined {
     if (typeof name === "function") {
         return name;
     } else if (typeof name === "string") {
@@ -32,14 +32,14 @@ export function findFormatter(name: string | FormatterFunction, formattersDirect
 
         // first check for core formatters
         let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName);
-        if (Formatter != null) {
+        if (Formatter !== undefined) {
             return Formatter;
         }
 
         // then check for rules within the first level of rulesDirectory
-        if (formattersDirectory) {
+        if (formattersDirectory !== undefined) {
             Formatter = loadFormatter(formattersDirectory, camelizedName);
-            if (Formatter) {
+            if (Formatter !== undefined) {
                 return Formatter;
             }
         }
@@ -52,24 +52,24 @@ export function findFormatter(name: string | FormatterFunction, formattersDirect
     }
 }
 
-function loadFormatter(...paths: string[]) {
+function loadFormatter(...paths: string[]): FormatterConstructor | undefined {
     const formatterPath = paths.reduce((p, c) => path.join(p, c), "");
     const fullPath = path.resolve(moduleDirectory, formatterPath);
 
     if (fs.existsSync(`${fullPath}.js`)) {
-        const formatterModule = require(fullPath);
+        const formatterModule = require(fullPath) as { Formatter: FormatterConstructor };
         return formatterModule.Formatter;
     }
 
     return undefined;
 }
 
-function loadFormatterModule(name: string) {
+function loadFormatterModule(name: string): FormatterConstructor | undefined {
     let src: string;
     try {
         src = require.resolve(name);
     } catch (e) {
         return undefined;
     }
-    return require(src).Formatter;
+    return (require(src) as { Formatter: FormatterConstructor }).Formatter;
 }

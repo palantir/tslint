@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier } from "tsutils";
+import { hasModifier, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 1,
         },
-        optionExamples: ["true", `[true, "${OPTION_ALLOW_DECLARATIONS}"]`],
+        optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS]],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -69,9 +69,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     if (ctx.sourceFile.isDeclarationFile && ctx.options.allowDeclarations) {
         return;
     }
-    for (const node of ctx.sourceFile.statements){
+    for (const node of ctx.sourceFile.statements) {
         if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
             if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
+                !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation) &&
                 (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }

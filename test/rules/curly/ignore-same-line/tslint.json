@@ -1,8 +1,5 @@
 {
   "rules": {
     "curly": [true, "ignore-same-line"]
-  },
-  "jsRules": {
-    "curly": [true, "ignore-same-line"]
   }
 }

@@ -2,16 +2,48 @@
   "lintOptions": {
     "typeCheck": true
   },
-  "extends": "tslint:latest",
+  "extends": "tslint:all",
   "rules": {
+    // Don't want these
+    "cyclomatic-complexity": false,
+    "newline-before-return": false,
+    "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
+    "no-unused-variable": false,
+    // TODO: Enable stricter options for these
+    "comment-format": [
+        true,
+        "check-space"
+    ],
+    "member-access": true,
+    "only-arrow-functions": [
+        true,
+        "allow-declarations",
+        "allow-named-functions"
+    ],
+
+    // TODO: Enable these
+    "completed-docs": false,
+    "no-any": false,
+    "no-magic-numbers": false,
+    "no-non-null-assertion": false,
+    "no-null-keyword": false,
+    "no-require-imports": false,
+    "no-unbound-method": false,
+    "no-unnecessary-qualifier": false,
+    "no-use-before-declare": false,
+    "no-void-expression": false,
+    "prefer-function-over-method": false,
+    "strict-type-predicates": false,
+    "triple-equals": [true, "allow-undefined-check"],
+    "typedef": false,
+
     "ban": [true,
       ["describe", "only"],
       ["it", "only"]
     ],
 
-    "callable-types": true,
     "interface-name": false,
-    "interface-over-type-literal": true,
     "file-header": [true,
       "Copyright \\d{4} Palantir Technologies, Inc."
     ],
@@ -22,12 +54,11 @@
       "static-before-instance",
       "variables-before-functions"
     ],
-    "no-angle-bracket-type-assertion": true,
-    "no-default-export": true,
-    "no-empty-interface": true,
-    "no-string-throw": true,
+    "no-console": {
+      "options": ["log"]
+    },
     "no-switch-case-fall-through": true,
-    "prefer-const": true,
+    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",

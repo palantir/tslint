@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [More details](http://stackoverflow.com/q/4719320/3124288) are available on StackOverflow.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

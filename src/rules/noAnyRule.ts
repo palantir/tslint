@@ -24,19 +24,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-any",
         description: "Disallows usages of `any` as a type declaration.",
-        hasFix: true,
+        hasFix: false,
         rationale: "Using `any` as a type declaration nullifies the compile-time benefits of the type system.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type declaration of 'any' loses type-safety. " +
-        "Consider replacing it with a more precise type, the empty type ('{}'), " +
-        "or suppress this occurrence.";
+    public static FAILURE_STRING = "Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -47,7 +45,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.AnyKeyword) {
             const start = node.end - 3;
-            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING, new Lint.Replacement(start, 3, "{}"));
+            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });

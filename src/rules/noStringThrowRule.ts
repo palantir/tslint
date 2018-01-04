@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isThrowStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,8 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-throw",
-        description: `Flags throwing plain strings or concatenations of strings ` +
-            `because only Errors produce proper stack traces.`,
+        description: "Flags throwing plain strings or concatenations of strings " +
+            "because only Errors produce proper stack traces.",
         hasFix: true,
         options: null,
         optionsDescription: "Not configurable.",
@@ -37,41 +38,39 @@ export class Rule extends Lint.Rules.AbstractRule {
             "Throwing plain strings (not instances of Error) gives no stack traces";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitThrowStatement(node: ts.ThrowStatement) {
-        const {expression} = node;
-        if (this.stringConcatRecursive(expression)) {
-            const fix = this.createReplacement(
-                expression.getStart(),
-                expression.getEnd() - expression.getStart(),
-                `new Error(${expression.getText()})`);
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isThrowStatement(node)) {
+            const { expression } = node;
+            if (isString(expression)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
+                    Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
+                    Lint.Replacement.appendText(expression.getEnd(), ")"),
+                ]);
+            }
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        super.visitThrowStatement(node);
-    }
-
-    private stringConcatRecursive(node: ts.Node): boolean {
-        switch (node.kind) {
-            case ts.SyntaxKind.StringLiteral:
-            case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
-            case ts.SyntaxKind.TemplateExpression:
-                return true;
-            case ts.SyntaxKind.BinaryExpression:
-                const n = node as ts.BinaryExpression;
-                const op = n.operatorToken.kind;
-                return op === ts.SyntaxKind.PlusToken &&
-                        (this.stringConcatRecursive(n.left) ||
-                         this.stringConcatRecursive(n.right));
-            case ts.SyntaxKind.ParenthesizedExpression:
-                return this.stringConcatRecursive(
-                        (node as ts.ParenthesizedExpression).expression);
-            default:
-                return false;
+function isString(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.StringLiteral:
+        case ts.SyntaxKind.NoSubstitutionTemplateLiteral:
+        case ts.SyntaxKind.TemplateExpression:
+            return true;
+        case ts.SyntaxKind.BinaryExpression: {
+            const { operatorToken, left, right } = node as ts.BinaryExpression;
+            return operatorToken.kind === ts.SyntaxKind.PlusToken && (isString(left) || isString(right));
         }
+        case ts.SyntaxKind.ParenthesizedExpression:
+            return isString((node as ts.ParenthesizedExpression).expression);
+        default:
+            return false;
     }
 }

@@ -1,0 +1,28 @@
+if (x === 1) {}
+    ~~~~~~~ [0]
+else if (x === 2) {} // Notice that we don't get *another* error here.
+// Dangling `else` OK (this becomes `default:`)
+else if (x === 3) {}
+else {}
+
+if (x === 1) {} else if (x === 2) {}
+    ~~~~~~~ [0]
+
+// Works with `||`
+if (this === 1 || this === 2) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+// Default minumum of 2 cases.
+if (x === 1) {} else {}
+
+// Different variables, no failure
+if (x === 1) {} else if (y === 2) {}
+
+// Non-simple cases, no failure
+if (x === f()) {} else if (x === g()) {}
+
+// Allow properties
+if (x.y.z === a.b) else if (x.y.z === c.d) {}
+    ~~~~~~~~~~~~~ [0]
+
+[0]: Use a switch statement instead of using multiple '===' checks.

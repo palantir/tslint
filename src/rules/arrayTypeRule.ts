@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
         },
-        optionExamples: [`[true, "${OPTION_ARRAY}"]`, `[true, "${OPTION_GENERIC}"]`, `[true, "${OPTION_ARRAY_SIMPLE}"]`],
+        optionExamples: [[true, OPTION_ARRAY], [true, OPTION_GENERIC], [true, OPTION_ARRAY_SIMPLE]],
         type: "style",
         typescriptOnly: true,
     };
@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0]);
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as Option);
     }
 }
 
@@ -65,7 +65,6 @@ function walk(ctx: Lint.WalkContext<Option>): void {
                 break;
             case ts.SyntaxKind.TypeReference:
                 checkTypeReference(node as ts.TypeReferenceNode);
-                break;
         }
         return ts.forEachChild(node, cb);
     });
@@ -79,9 +78,9 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
         const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-        const space = !parens && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+        const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
         const fix = [
-            new Lint.Replacement(elementType.getStart(), parens, (space ? " " : "") + "Array<"),
+            new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
             Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
         ];
@@ -96,10 +95,9 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         }
 
         const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
-        if (!typeArguments || typeArguments.length === 0) {
+        if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
-            const fix = Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]");
-            ctx.addFailureAtNode(node, failureString, fix);
+            ctx.addFailureAtNode(node, failureString, Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"));
             return;
         }
 
@@ -109,13 +107,12 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
         const type = typeArguments[0];
         const parens = typeNeedsParentheses(type);
-        const fix = [
+        ctx.addFailureAtNode(node, failureString, [
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
             Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
-        ];
-        ctx.addFailureAtNode(node, failureString, fix);
+        ]);
     }
 }
 
@@ -148,11 +145,12 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.SymbolKeyword:
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
+        case ts.SyntaxKind.ThisType:
             return true;
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type
             const { typeName, typeArguments } = nodeType as ts.TypeReferenceNode;
-            if (!typeArguments) {
+            if (typeArguments === undefined) {
                 return true;
             }
             switch (typeArguments.length) {

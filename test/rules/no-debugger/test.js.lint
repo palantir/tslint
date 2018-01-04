@@ -1,8 +1,0 @@
-var testVariable = "debugger";
-
-function testFunction(): number {
-    if (testVariable === "debugger") {
-        debugger;
-        ~~~~~~~~~  [Use of debugger statements is forbidden]
-    }
-}

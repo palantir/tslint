@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "jsdoc-format": true
+  }
+}

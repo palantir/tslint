@@ -41,30 +41,30 @@ describe("PMD Formatter", () => {
             createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "warning"),
         ];
         const expectedResult =
-            "<pmd version=\"tslint\">" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"3\" rule=\"first failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"1\" priority=\"3\" rule=\"&amp;&lt;&gt;&#39;&quot; should be escaped\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"3\" beginline=\"6\" priority=\"4\" rule=\"last failure\"> " +
-                    "</violation>" +
-                "</file>" +
-                "<file name=\"formatters/pmdFormatter.test.ts\">" +
-                    "<violation begincolumn=\"1\" beginline=\"1\" priority=\"4\" rule=\"full failure\"> " +
-                    "</violation>" +
-                "</file>" +
-            "</pmd>";
+            `<pmd version="tslint">
+                <file name="formatters/pmdFormatter.test.ts">
+                    <violation begincolumn="1" beginline="1" priority="3" rule="first failure">
+                    </violation>
+                </file>
+                <file name="formatters/pmdFormatter.test.ts">
+                    <violation begincolumn="3" beginline="1" priority="3" rule="&amp;&lt;&gt;&#39;&quot; should be escaped">
+                    </violation>
+                </file>
+                <file name="formatters/pmdFormatter.test.ts">
+                    <violation begincolumn="3" beginline="6" priority="4" rule="last failure">
+                    </violation>
+                </file>
+                <file name="formatters/pmdFormatter.test.ts">
+                    <violation begincolumn="1" beginline="1" priority="4" rule="full failure">
+                    </violation>
+                </file>
+            </pmd>`.replace(/>\s+/g, ">"); // Remove whitespace between tags
 
         assert.equal(formatter.format(failures), expectedResult);
     });
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.deepEqual(result, "<pmd version=\"tslint\"></pmd>");
+        assert.deepEqual(result, '<pmd version="tslint"></pmd>');
     });
 });

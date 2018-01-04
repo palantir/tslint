@@ -23,11 +23,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
-        description: "Disallows non-null assertions.",
+        description: "Disallows non-null assertions using the `!` postfix operator.",
         rationale: "Using non-null assertion cancels the benefits of the strict null checking mode.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
     };
@@ -36,13 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden non null assertion";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNonNullAssertionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoNonNullAssertionWalker extends Lint.RuleWalker {
-    public visitNonNullExpression(node: ts.NonNullExpression) {
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        super.visitNonNullExpression(node);
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (node.kind === ts.SyntaxKind.NonNullExpression) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

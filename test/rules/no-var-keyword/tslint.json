@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-var-keyword": true
-  },
-  "jsRules": {
-    "no-var-keyword": true
   }
 }

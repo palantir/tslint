@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-trailing-whitespace": [true, "ignore-comments"]
-  },
-  "jsRules": {
-    "no-trailing-whitespace": [true, "ignore-comments"]
   }
 }

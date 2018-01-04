@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -28,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "cyclomatic-complexity",
         description: "Enforces a threshold of cyclomatic complexity.",
         descriptionDetails: Lint.Utils.dedent`
-            Cyclomatic complexity is assessed for each function of any type. A starting value of 20
+            Cyclomatic complexity is assessed for each function of any type. A starting value of 0
             is assigned and this value is then incremented for every statement which can branch the
             control flow within the function. The following statements and expressions contribute
             to cyclomatic complexity:
@@ -36,34 +37,32 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`if\` and \`? :\`
             * \`||\` and \`&&\` due to short-circuit evaluation
             * \`for\`, \`for in\` and \`for of\` loops
-            * \`while\` and \`do while\` loops`,
+            * \`while\` and \`do while\` loops
+            * \`case\` clauses that contain statements`,
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a
             function. High cyclomatic complexity indicates confusing code which may be prone to
             errors or difficult to modify.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
-            is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.`,
+            is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_THRESHOLD)",
+            minimum: Rule.MINIMUM_THRESHOLD,
         },
-        optionExamples: ["true", "[true, 20]"],
+        optionExamples: [true, [true, 20]],
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static ANONYMOUS_FAILURE_STRING = (expected: number, actual: number) => {
-        return `The function has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
-    }
-
-    public static NAMED_FAILURE_STRING = (expected: number, actual: number, name: string) => {
-        return `The function ${name} has a cyclomatic complexity of ${actual} which is higher than the threshold of ${expected}`;
+    public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
+        return `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
+            `${actual} which is higher than the threshold of ${expected}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new CyclomaticComplexityWalker(sourceFile, this.getOptions(), this.threshold));
+        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
     }
 
     public isEnabled(): boolean {
@@ -74,145 +73,60 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private get threshold(): number {
         if (this.ruleArguments[0] !== undefined) {
-            return this.ruleArguments[0];
+            return this.ruleArguments[0] as number;
         }
         return Rule.DEFAULT_THRESHOLD;
     }
 }
 
-class CyclomaticComplexityWalker extends Lint.RuleWalker {
+function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
+    const { options: { threshold } } = ctx;
+    let complexity = 0;
 
-    private functions: number[] = [];
-
-    public constructor(sourceFile: ts.SourceFile, options: Lint.IOptions, private threshold: number) {
-        super(sourceFile, options);
-    }
-
-    protected visitArrowFunction(node: ts.ArrowFunction) {
-        this.startFunction();
-        super.visitArrowFunction(node);
-        this.endFunction(node);
-    }
-
-    protected visitBinaryExpression(node: ts.BinaryExpression) {
-        switch (node.operatorToken.kind) {
-            case ts.SyntaxKind.BarBarToken:
-            case ts.SyntaxKind.AmpersandAmpersandToken:
-                this.incrementComplexity();
-                break;
-            default:
-                break;
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isFunctionScopeBoundary(node)) {
+            const old = complexity;
+            complexity = 1;
+            ts.forEachChild(node, cb);
+            if (complexity > threshold) {
+                const { name } = node as ts.FunctionLikeDeclaration;
+                const nameStr = name !== undefined && isIdentifier(name) ? name.text : undefined;
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING(threshold, complexity, nameStr));
+            }
+            complexity = old;
+        } else {
+            if (increasesComplexity(node)) {
+                complexity++;
+            }
+            return ts.forEachChild(node, cb);
         }
-        super.visitBinaryExpression(node);
-    }
+    });
+}
 
-    protected visitCaseClause(node: ts.CaseClause) {
-        this.incrementComplexity();
-        super.visitCaseClause(node);
-    }
+function increasesComplexity(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.CaseClause:
+            return (node as ts.CaseClause).statements.length > 0;
+        case ts.SyntaxKind.CatchClause:
+        case ts.SyntaxKind.ConditionalExpression:
+        case ts.SyntaxKind.DoStatement:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.IfStatement:
+        case ts.SyntaxKind.WhileStatement:
+            return true;
 
-    protected visitCatchClause(node: ts.CatchClause) {
-        this.incrementComplexity();
-        super.visitCatchClause(node);
-    }
-
-    protected visitConditionalExpression(node: ts.ConditionalExpression) {
-        this.incrementComplexity();
-        super.visitConditionalExpression(node);
-    }
-
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.startFunction();
-        super.visitConstructorDeclaration(node);
-        this.endFunction(node);
-    }
-
-    protected visitDoStatement(node: ts.DoStatement) {
-        this.incrementComplexity();
-        super.visitDoStatement(node);
-    }
-
-    protected visitForStatement(node: ts.ForStatement) {
-        this.incrementComplexity();
-        super.visitForStatement(node);
-    }
-
-    protected visitForInStatement(node: ts.ForInStatement) {
-        this.incrementComplexity();
-        super.visitForInStatement(node);
-    }
-
-    protected visitForOfStatement(node: ts.ForOfStatement) {
-        this.incrementComplexity();
-        super.visitForOfStatement(node);
-    }
-
-    protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.startFunction();
-        super.visitFunctionDeclaration(node);
-        this.endFunction(node);
-    }
-
-    protected visitFunctionExpression(node: ts.FunctionExpression) {
-        this.startFunction();
-        super.visitFunctionExpression(node);
-        this.endFunction(node);
-    }
-
-    protected visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.startFunction();
-        super.visitGetAccessor(node);
-        this.endFunction(node);
-    }
-
-    protected visitIfStatement(node: ts.IfStatement) {
-        this.incrementComplexity();
-        super.visitIfStatement(node);
-    }
-
-    protected visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.startFunction();
-        super.visitMethodDeclaration(node);
-        this.endFunction(node);
-    }
-
-    protected visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.startFunction();
-        super.visitSetAccessor(node);
-        this.endFunction(node);
-    }
-
-    protected visitWhileStatement(node: ts.WhileStatement) {
-        this.incrementComplexity();
-        super.visitWhileStatement(node);
-    }
-
-    private startFunction() {
-        // Push an initial complexity value to the stack for the new function.
-        this.functions.push(1);
-    }
-
-    private endFunction(node: ts.FunctionLikeDeclaration) {
-        const complexity = this.functions.pop();
-
-        // Check for a violation.
-        if (complexity !== undefined && complexity > this.threshold) {
-            let failureString: string;
-
-            // Attempt to find a name for the function.
-            if (node.name && node.name.kind === ts.SyntaxKind.Identifier) {
-                failureString = Rule.NAMED_FAILURE_STRING(this.threshold, complexity, (node.name as ts.Identifier).text);
-            } else {
-                failureString = Rule.ANONYMOUS_FAILURE_STRING(this.threshold, complexity);
+        case ts.SyntaxKind.BinaryExpression:
+            switch ((node as ts.BinaryExpression).operatorToken.kind) {
+                case ts.SyntaxKind.BarBarToken:
+                case ts.SyntaxKind.AmpersandAmpersandToken:
+                    return true;
+                default:
+                    return false;
             }
 
-            this.addFailureAtNode(node, failureString);
-        }
-    }
-
-    private incrementComplexity() {
-        if (this.functions.length) {
-            this.functions[this.functions.length - 1]++;
-        }
+        default:
+            return false;
     }
 }

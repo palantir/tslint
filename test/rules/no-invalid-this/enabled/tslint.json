@@ -4,11 +4,5 @@
       true,
       "check-function-in-method"
     ]
-  },
-  "jsRules": {
-    "no-invalid-this": [
-      true,
-      "check-function-in-method"
-    ]
   }
 }

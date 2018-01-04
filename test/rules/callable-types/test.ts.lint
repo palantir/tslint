@@ -1,25 +1,67 @@
 interface I {
-          ~   [Interface has only a call signature — use `type I = () => void` instead.]
     (): void;
+    ~~~~~~~~~   [interface % ('type I = () => void;')]
 }
 
 interface J extends Function {
-          ~                    [Interface has only a call signature — use `type J = () => void` instead.]
     (): void;
+    ~~~~~~~~~                    [interface % ('type J = () => void;')]
+}
+
+interface K<T> {
+    <U extends T>(param1: U, param2: T): U;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [interface % ('type K<T> = <U extends T>(param1: U, param2: T) => U;')]
+}
+
+interface L<T> {
+    (): T
+    ~~~~~ [interface % ('type L<T> = () => T')]
 }
 
 type T = {
     (): void;
-    ~~~~~~~~~ [Type literal has only a call signature — use `() => void` instead.]
-}
+    ~~~~~~~~~ [type % ('() => void')]
+};
 
 type U = {
     <T>(t: T): T;
-    ~~~~~~~~~~~~~ [Type literal has only a call signature — use `<T>(t: T) => T` instead.]
+    ~~~~~~~~~~~~~ [type % ('<T>(t: T) => T')]
 }
+
+var fn: {(): void;};
+         ~~~~~~~~~ [type % ('() => void')]
+function f(x: { (): void }): void;
+                ~~~~~~~~ [type % ('() => void')]
+function f(x: string | { (): void }): void;
+                         ~~~~~~~~ [type % ('(() => void)')]
+function f(x: string | ({ (): void })): void;
+                          ~~~~~~~~ [type % ('() => void')]
+function f(x: { (): string } | { (): number }): void;
+                ~~~~~~~~~~ [type % ('(() => string)')]
+                                 ~~~~~~~~~~ [type % ('(() => number)')]
+function f(x: string & { (): void }): void;
+                         ~~~~~~~~ [type % ('(() => void)')]
+function f(x: { (): string } & { (): number }): void;
+                ~~~~~~~~~~ [type % ('(() => string)')]
+                                 ~~~~~~~~~~ [type % ('(() => number)')]
 
 // Overloads OK
 interface K {
     (x: number): number;
     (x: string): string;
 }
+
+// handle modifiers
+export interface I {
+    (): void;
+    ~~~~~~~~~ [interface % ('type I = () => void;')]
+}
+
+export type T = {
+    (): void;
+    ~~~~~~~~~ [type % ('() => void')]
+}
+
+[_base]: %s has only a call signature — use `%s` instead.
+[interface]: _base % ('Interface')
+[type]: _base % ('Type literal')

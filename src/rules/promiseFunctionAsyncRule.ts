@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -31,7 +32,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -41,45 +42,30 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "functions that return promises must be async";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        this.handleDeclaration(node);
-        super.visitArrowFunction(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.handleDeclaration(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.handleDeclaration(node);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.handleDeclaration(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    private handleDeclaration(node: ts.SignatureDeclaration & { body?: ts.Node }) {
-        const tc = this.getTypeChecker();
-        const signature = tc.getTypeAtLocation(node).getCallSignatures()[0];
-        const returnType = tc.typeToString(tc.getReturnTypeOfSignature(signature));
-
-        const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
-        const isPromise = returnType.indexOf("Promise<") === 0;
-
-        const signatureEnd = node.body != null
-            ? node.body.getStart() - node.getStart() - 1
-            : node.getWidth();
-
-        if (isPromise && !isAsync) {
-            this.addFailureAt(node.getStart(), signatureEnd, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.FunctionDeclaration:
+                if ((node as ts.FunctionLikeDeclaration).body === undefined) {
+                    break;
+                }
+                // falls through
+            case ts.SyntaxKind.FunctionExpression:
+            case ts.SyntaxKind.ArrowFunction:
+                if (!hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) && returnsPromise(node as ts.FunctionLikeDeclaration, tc)) {
+                    ctx.addFailure(node.getStart(ctx.sourceFile), (node as ts.FunctionLikeDeclaration).body!.pos, Rule.FAILURE_STRING);
+                }
         }
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
+
+function returnsPromise(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
+    const type = tc.getReturnTypeOfSignature(tc.getTypeAtLocation(node).getCallSignatures()[0]);
+    return type.symbol !== undefined && type.symbol.name === "Promise";
 }

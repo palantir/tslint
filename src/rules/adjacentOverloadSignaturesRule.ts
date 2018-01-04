@@ -21,142 +21,125 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
-
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "adjacent-overload-signatures",
         description: "Enforces function overloads to be consecutive.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         rationale: "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (name: string) => {
+    public static FAILURE_STRING(name: string): string {
         return `All '${name}' signatures should be adjacent`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new AdjacentOverloadSignaturesWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class AdjacentOverloadSignaturesWalker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        this.visitStatements(node.statements);
-        super.visitSourceFile(node);
-    }
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    visitStatements(sourceFile.statements);
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ModuleBlock:
+                visitStatements((node as ts.ModuleBlock).statements);
+                break;
 
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        const { body } = node;
-        if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
-            this.visitStatements((body as ts.ModuleBlock).statements);
+            case ts.SyntaxKind.InterfaceDeclaration:
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.TypeLiteral: {
+                const { members } = node as ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeLiteralNode;
+                addFailures(getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, (member) =>
+                    utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined));
+            }
         }
-        super.visitModuleDeclaration(node);
+
+        return ts.forEachChild(node, cb);
+    });
+
+    function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
+        addFailures(getMisplacedOverloads(statements, (statement) =>
+            utils.isFunctionDeclaration(statement) && statement.name !== undefined ? statement.name.text : undefined));
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkOverloadsAdjacent(node.members, getOverloadIfSignature);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.visitMembers(node.members);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
-        this.visitMembers(node.members);
-        super.visitTypeLiteral(node);
-    }
-
-    private visitStatements(statements: ts.Statement[]) {
-        this.checkOverloadsAdjacent(statements, (statement) => {
-            if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
-                const name = (statement as ts.FunctionDeclaration).name;
-                return name && { name: name.text, key: name.text };
-            } else {
-                return undefined;
-            }
-        });
-    }
-
-    private visitMembers(members: Array<ts.TypeElement | ts.ClassElement>) {
-        this.checkOverloadsAdjacent(members, getOverloadIfSignature);
-    }
-
-    /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
-    private checkOverloadsAdjacent<T extends ts.Node>(overloads: T[], getOverload: (node: T) => Overload | undefined) {
-        let lastKey: string | undefined;
-        const seen = new Set<string>();
-        for (const node of overloads) {
-            const overload = getOverload(node);
-            if (overload) {
-                const { name, key } = overload;
-                if (seen.has(key) && lastKey !== key) {
-                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(name));
-                }
-                seen.add(key);
-                lastKey = key;
-            } else {
-                lastKey = undefined;
-            }
+    function addFailures(misplacedOverloads: ReadonlyArray<ts.SignatureDeclaration>): void {
+        for (const node of misplacedOverloads) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printOverload(node)));
         }
     }
 }
 
-interface Overload {
-    /** Unique key for this overload. */
-    key: string;
-    /** Display name for the overload. `foo` and `static foo` have the same name but different keys. */
-    name: string;
+/** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
+function getMisplacedOverloads<T extends ts.Node>(
+    overloads: ReadonlyArray<T>,
+    getKey: (node: T) => string | undefined): ts.SignatureDeclaration[] {
+    const result: ts.SignatureDeclaration[] = [];
+    let lastKey: string | undefined;
+    const seen = new Set<string>();
+    for (const node of overloads) {
+        if (node.kind === ts.SyntaxKind.SemicolonClassElement) {
+            continue;
+        }
+
+        const key = getKey(node);
+        if (key !== undefined) {
+            if (seen.has(key) && lastKey !== key) {
+                result.push(node as any as ts.SignatureDeclaration);
+            }
+            seen.add(key);
+            lastKey = key;
+        } else {
+            lastKey = undefined;
+        }
+    }
+    return result;
+}
+
+function printOverload(node: ts.SignatureDeclaration): string {
+    const info = getOverloadInfo(node);
+    return typeof info === "string" ? info : info === undefined ? "<unknown>" : info.name;
 }
 
 export function getOverloadKey(node: ts.SignatureDeclaration): string | undefined {
-    const o = getOverload(node);
-    return o && o.key;
+    const info = getOverloadInfo(node);
+    if (info === undefined) {
+        return undefined;
+    }
+
+    const [computed, name] = typeof info === "string" ? [false, info] : [info.computed, info.name];
+    const isStatic = utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
+    return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
 
-function getOverloadIfSignature(node: ts.TypeElement | ts.ClassElement): Overload | undefined {
-    return utils.isSignatureDeclaration(node) ? getOverload(node) : undefined;
-}
-
-function getOverload(node: ts.SignatureDeclaration): Overload | undefined {
+function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string; computed?: boolean } | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.Constructor:
-            return { name: "constructor", key: "constructor" };
+            return "constructor";
         case ts.SyntaxKind.CallSignature:
-            return { name: "()", key: "()" };
-        default:
-    }
+            return "()";
+        default: {
+            const { name } = node;
+            if (name === undefined) {
+                return undefined;
+            }
 
-    if (node.name === undefined) {
-        return undefined;
-    }
-
-    const propertyInfo = getPropertyInfo(node.name);
-    if (!propertyInfo) {
-        return undefined;
-    }
-
-    const { name, computed } = propertyInfo;
-    const isStatic = Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword);
-    const key = (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
-    return { name, key };
-}
-
-function getPropertyInfo(name: ts.PropertyName): { name: string, computed?: boolean } | undefined {
-    switch (name.kind) {
-        case ts.SyntaxKind.Identifier:
-            return { name: (name as ts.Identifier).text };
-        case ts.SyntaxKind.ComputedPropertyName:
-            const { expression } = (name as ts.ComputedPropertyName);
-            return utils.isLiteralExpression(expression) ? { name: expression.text } : { name: expression.getText(), computed: true };
-        default:
-            return utils.isLiteralExpression(name) ? { name: (name as ts.StringLiteral).text } : undefined;
+            switch (name.kind) {
+                case ts.SyntaxKind.Identifier:
+                    return name.text;
+                case ts.SyntaxKind.ComputedPropertyName:
+                    const { expression } = name;
+                    return utils.isLiteralExpression(expression) ? expression.text : { name: expression.getText(), computed: true };
+                default:
+                    return utils.isLiteralExpression(name) ? name.text : undefined;
+            }
+        }
     }
 }

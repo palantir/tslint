@@ -1,6 +1,23 @@
-class one {
-    public foo = "bar";
+export abstract class UnsupportedVisitor extends NodeVisitor {
+    public static withDescriptor(descriptor: string): typeof UnsupportedVisitor {
+        return class extends UnsupportedVisitor {
+            protected descriptor = descriptor;
+        };
+    }
+
+    protected abstract descriptor: string;
+
+    public visit(node: Node): undefined {
+        return `${this.descriptor} is not supported.`;
+    }
 }
+
+class one {
+~~~~~~~~~~~
+    public foo = "bar";
+~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [0]
 
 class two {
 ~~~~~~~~~~~
@@ -9,11 +26,10 @@ class two {
     public theAbovePropertyMakesSense = false;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [A maximum of 1 class per file is allowed]
+~ [0]
 
 let three = class {
-            ~~~~~~~
     public foo = "bar";
-~~~~~~~~~~~~~~~~~~~~~~~
 }
-~ [A maximum of 1 class per file is allowed]
+
+[0]: A maximum of 1 class per file is allowed.

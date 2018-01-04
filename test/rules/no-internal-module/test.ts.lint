@@ -63,4 +63,14 @@ module module.mod
 {
 }
 
+module global {}
+~~~~~~ [0]
+module foo.global {}
+~~~~~~ [0]
+module foo {
+~~~~~~ [0]
+    export module global {}
+           ~~~~~~ [0]
+}
+
 [0]: The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.

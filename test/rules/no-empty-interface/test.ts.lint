@@ -10,3 +10,5 @@ interface L extends J, K {} // extending more than one interface is ok, as it ca
 
 interface M extends {} // don't crash on empty extends list
           ~               [An interface declaring no members is equivalent to its supertype.]
+
+interface N extends Promise<string|number> {}

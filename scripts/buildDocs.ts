@@ -33,14 +33,19 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
+import stringify = require("json-stringify-pretty-compact");
 import * as yaml from "js-yaml";
 import * as path from "path";
+import * as rimraf from "rimraf";
 
 import {IFormatterMetadata} from "../lib/language/formatter/formatter";
 import {IRuleMetadata} from "../lib/language/rule/rule";
 
 type Metadata = IRuleMetadata | IFormatterMetadata;
-type Documented = { metadata: Metadata };
+
+interface Documented {
+    metadata: Metadata;
+};
 
 interface IDocumentation {
     /**
@@ -107,13 +112,32 @@ const formatterDocumentation: IDocumentation = {
  */
 function buildDocumentation(documentation: IDocumentation) {
     // Create each module's documentation file.
-    const paths = glob.sync(documentation.globPattern);
-    const metadataJson = paths.map((path: string) => {
-        return buildSingleModuleDocumentation(documentation, path);
-    });
+    const modulePaths = glob.sync(documentation.globPattern);
+    const metadataJson = modulePaths.map((modulePath: string) =>
+        buildSingleModuleDocumentation(documentation, modulePath));
+
+    // Delete outdated directories
+    const rulesDirs = metadataJson.map((metadata: any) => metadata[documentation.nameMetadataKey]);
+    deleteOutdatedDocumentation(documentation.subDirectory, rulesDirs);
 
     // Create a data file with details of every module.
     buildDocumentationDataFile(documentation, metadataJson);
+}
+
+/**
+ * Deletes directories which are outdated
+ * @param directory Path from which outdated subdirectories have to be checked and removed
+ * @param rulesDirs The names of the current and new rules documentation directories
+ */
+function deleteOutdatedDocumentation(directory: string, rulesDirs: string[]) {
+    // find if the thing at particular location is a directory
+    const isDirectory = (source: string) => fs.lstatSync(source).isDirectory();
+    // get all subdirectories in source directory
+    const getDirectories = (source: string) => fs.readdirSync(source).filter((name) => isDirectory(path.join(source, name)));
+
+    const subDirs = getDirectories(directory);
+    const outdatedDirs = subDirs.filter((dir) => rulesDirs.indexOf(dir) < 0);
+    outdatedDirs.forEach((outdatedDir) => rimraf.sync(path.join(directory, outdatedDir)));
 }
 
 /**
@@ -153,10 +177,11 @@ function buildDocumentationDataFile(documentation: IDocumentation, metadataJson:
  * Generates Jekyll data from any item's metadata.
  */
 function generateJekyllData(metadata: any, layout: string, type: string, name: string): any {
-    return Object.assign({}, metadata, {
+    return {
+        ...metadata,
         layout,
         title: `${type}: ${name}`,
-    });
+    };
 }
 
 /**
@@ -164,9 +189,15 @@ function generateJekyllData(metadata: any, layout: string, type: string, name: s
  * that only consists of a YAML front matter block.
  */
 function generateRuleFile(metadata: IRuleMetadata): string {
+    if (metadata.optionExamples) {
+        metadata = { ...metadata };
+        metadata.optionExamples = (metadata.optionExamples as any[]).map((example) =>
+            typeof example === "string" ? example : stringify(example));
+    }
+
     const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
-    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
 }
 
 /**
@@ -175,7 +206,7 @@ function generateRuleFile(metadata: IRuleMetadata): string {
  */
 function generateFormatterFile(metadata: IFormatterMetadata): string {
     const yamlData = generateJekyllData(metadata, "formatter", "TSLint formatter", metadata.formatterName);
-    return `---\n${yaml.safeDump(yamlData, <any> {lineWidth: 140})}---`;
+    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
 }
 
 buildDocumentation(ruleDocumentation);

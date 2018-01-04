@@ -1,8 +1,5 @@
 {
   "rules": {
     "comment-format": [true, "check-space", "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]
-  },
-  "jsRules": {
-    "comment-format": [true, "check-uppercase", {"ignore-words": ["todo"]}]
   }
 }

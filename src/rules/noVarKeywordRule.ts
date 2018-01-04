@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasModifier, isBlockScopedVariableDeclarationList, isNodeFlagSet, isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -28,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -37,46 +38,32 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden 'var' keyword, use 'let' or 'const' instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const noVarKeywordWalker = new NoVarKeywordWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(noVarKeywordWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoVarKeywordWalker extends Lint.RuleWalker {
-    public visitVariableStatement(node: ts.VariableStatement) {
-        if (!Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-                && !Lint.isBlockScopedVariable(node)) {
-            this.reportFailure(node.declarationList);
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        const parent = node.parent!;
+        if (isVariableDeclarationList(node)
+                && !isBlockScopedVariableDeclarationList(node)
+                // If !isVariableStatement, this is inside of a for loop.
+                && (!isVariableStatement(parent) || !isGlobalVarDeclaration(parent))) {
+            const start = node.getStart(sourceFile);
+            const width = "var".length;
+            // Don't apply fix in a declaration file, because may have meant 'const'.
+            const fix = sourceFile.isDeclarationFile ? undefined : new Lint.Replacement(start, width, "let");
+            ctx.addFailureAt(start, width, Rule.FAILURE_STRING, fix);
         }
 
-        super.visitVariableStatement(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-    public visitForStatement(node: ts.ForStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForStatement(node);
-    }
-
-    public visitForInStatement(node: ts.ForInStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForInStatement(node);
-    }
-
-    public visitForOfStatement(node: ts.ForOfStatement) {
-        this.handleInitializerNode(node.initializer);
-        super.visitForOfStatement(node);
-    }
-
-    private handleInitializerNode(node: ts.VariableDeclarationList | ts.Expression | undefined) {
-        if (node && node.kind === ts.SyntaxKind.VariableDeclarationList &&
-                !(Lint.isNodeFlagSet(node, ts.NodeFlags.Let) || Lint.isNodeFlagSet(node, ts.NodeFlags.Const))) {
-            this.reportFailure(node);
-        }
-    }
-
-    private reportFailure(node: ts.Node) {
-        const nodeStart = node.getStart(this.getSourceFile());
-        this.addFailureAt(nodeStart, "var".length, Rule.FAILURE_STRING,
-            this.createReplacement(nodeStart, "var".length, "let"));
-    }
+// Allow `declare var x: number;` or `declare global { var x: number; }`
+function isGlobalVarDeclaration(node: ts.VariableStatement): boolean {
+    const parent = node.parent!;
+    return hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+        || parent.kind === ts.SyntaxKind.ModuleBlock && isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
 }

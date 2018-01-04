@@ -15,9 +15,15 @@
  * limitations under the License.
  */
 
+import { isTypeReferenceNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+interface Option {
+    pattern: RegExp;
+    message?: string;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -38,38 +44,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             A list of \`["regex", "optional explanation here"]\`, which bans
             types that match \`regex\``,
-        optionExamples: [`[true, ["Object", "Use {} instead."], ["String"]]`],
+        optionExamples: [[true, ["Object", "Use {} instead."], ["String"]]],
         type: "typescript",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(typeName: string, messageAddition?: string) {
-        return `Don't use '${typeName}' as a type.` +
-            (messageAddition ? " " + messageAddition : "");
+        return `Don't use '${typeName}' as a type.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(
-            new BanTypeWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments.map(parseOption));
     }
 }
 
-class BanTypeWalker extends Lint.RuleWalker {
-    private bans: string[][];
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.bans = options.ruleArguments!;
-    }
+function parseOption([pattern, message]: [string, string | undefined]): Option {
+    return {message, pattern: new RegExp(`^${pattern}$`)};
+}
 
-    public visitTypeReference(node: ts.TypeReferenceNode) {
-        const typeName = node.typeName.getText();
-        const ban =
-            this.bans.find(([bannedType]) =>
-                typeName.match(`^${bannedType}$`) != null) as string[];
-        if (ban) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(typeName, ban[1]));
+function walk(ctx: Lint.WalkContext<Option[]>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isTypeReferenceNode(node)) {
+            const typeName = node.getText(ctx.sourceFile);
+            for (const ban of ctx.options) {
+                if (ban.pattern.test(typeName)) {
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(typeName, ban.message));
+                    break;
+                }
+            }
         }
-        super.visitTypeReference(node);
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

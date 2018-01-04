@@ -4,12 +4,12 @@ title: Configuring TSLint
 permalink: /usage/configuration/
 ---
 
-### tslint.json
+### TSLint Configuration
 
-When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` is used to
-configure which rules get run and each of their options. This configuration file may be comp
+When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` or `tslint.yaml` is used to
+configure which rules get run and each of their options.
 
-`tslint.json` files can have the following fields specified:
+`tslint.json` or `tslint.yaml` files can have the following fields specified:
 
 * `extends?: string | string[]`:
 The name of a built-in configuration preset (see built-in presets below), or a path or
@@ -20,7 +20,7 @@ named "tslint-config" as a configuration file. Specific files inside node module
 specified, eg. `"tslint-config/path/to/submodule"`. Relative paths to JSON files or JS modules
 are also supported, e.g. `"./tslint-config"`.
 * `rulesDirectory?: string | string[]`:
-A path or array of paths to a directories of [custom rules][2]. These may be relative or absolute paths.
+A path to a directory or an array of paths to directories of [custom rules][2]. These values are handled using node module resolution semantics, if an `index.js` is placed in your rules directory. We fallback to use relative or absolute paths, if the module can't be resolved. If you want to avoid module resolution you can directly use a relative or absolute path (e.g. with `./`).
 * `rules?: { [name: string]: RuleSetting }`: A map of rule names to their configuration settings.
   - These rules are applied to `.ts` and `.tsx` files.
   - Each rule is associated with an object containing:
@@ -31,6 +31,8 @@ A path or array of paths to a directories of [custom rules][2]. These may be rel
   - [Check out the full rules list here][3].
 * `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files.
 * `defaultSeverity?: "error" | "warning" | "off"`: The severity level used when a rule specifies a default warning level. If undefined, "error" is used. This value is not inherited and is only applied to rules in this file.
+* `linterOptions?: { exclude?: string[] }`:
+  - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
 
 `tslint.json` configuration files may have JavaScript-style `// single-line` and `/* multi-line */` comments in them (even though this is technically invalid JSON). If this confuses your syntax highlighter, you may want to switch it to JavaScript format.
 
@@ -50,6 +52,7 @@ An example `tslint.json` file might look like this:
         "no-conditional-assignment": true,
         "no-consecutive-blank-lines": false,
         "no-console": {
+            "severity": "warning",
             "options": [
                 "debug",
                 "info",
@@ -66,6 +69,37 @@ An example `tslint.json` file might look like this:
         }
     }
 }
+```
+
+The corresponding YAML file looks like this:
+
+```yaml
+---
+extends: "tslint:recommended"
+rulesDirectory:
+    - path/to/custom/rules/directory/
+    - another/path/
+rules:
+    max-line-length:
+        options: [120]
+    new-parens: true
+    no-arg: true
+    no-bitwise: true
+    no-conditional-assignment: true
+    no-consecutive-blank-lines: false
+    no-console:
+        severity: warning
+        options:
+            - debug
+            - info
+            - log
+            - time
+            - timeEnd
+            - trace
+jsRules:
+    max-line-length:
+        options: [120]
+...
 ```
 
 ### Rule severity

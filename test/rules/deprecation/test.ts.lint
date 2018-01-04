@@ -1,0 +1,174 @@
+// don't show an error on imports, because they don't do any harm if not used
+import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
+import * as namespaceImport from './other.test';
+import * as other2 from './other2.test';
+
+other();
+~~~~~ [errmsg % ('other', 'reason')]
+other(1);
+foobar();
+~~~~~~ [err % ('foobar')]
+other2;
+~~~~~~ [err % ('other2')]
+
+import tmp = namespaceImport.other;
+
+tmp;
+~~~ [errmsg % ('tmp', 'reason')]
+
+declare interface D {
+    /** @deprecated */ m: () => void;
+}
+
+
+declare let d: D;
+d.m();
+  ~ [err % ('m')]
+
+/**
+ * Some text
+ * @one-tag
+ * @deprecated reason is this
+ * @two-tag
+ */
+export class P {
+    /** @deprecated */ f: string;
+    g,
+    /** @deprecated Use g instead.*/ h: number;
+}
+
+let p = new P();
+            ~ [errmsg % ('P', 'reason is this')]
+let pf = p.f;
+           ~ [err % ('f')]
+pf; // that indirection is allowed
+p.g;
+p.h;
+  ~ [errmsg % ('h', 'Use g instead.')]
+
+interface I extends P {}
+                    ~ [errmsg % ('P', 'reason is this')]
+declare var i: I;
+i.f;
+  ~ [err % ('f')]
+i.g;
+
+/** @deprecated */
+const A = 1, B = 2;
+
+A + B;
+~     [err % ('A')]
+#if typescript < 2.6.1
+    ~ [err % ('B')]
+#endif
+
+export default A;
+
+declarationIsMissing();
+
+function fn<T>(): T;
+/** @deprecated */
+function fn(bar: any): any;
+function fn() { }
+
+fn<number>();
+fn(1);
+~~ [err % ('fn')]
+fn;
+~~ [err % ('fn')]
+
+class TestClass {
+    /** @deprecated */
+    static method(): void;
+    static method(param): void;
+    static method(param?): void {}
+}
+
+TestClass.method();
+          ~~~~~~ [err % ('method')]
+TestClass.method(1);
+
+interface TestInterface {
+    /** @deprecated */
+    method(): void;
+    method(param): void;
+}
+declare let interfaceTest: TestInterface;
+interfaceTest.method();
+              ~~~~~~ [err % ('method')]
+interfaceTest.method(1);
+
+declare let callSignatureTest: {
+    /** @deprecated */
+    (): void;
+    (param): void;
+}
+callSignatureTest();
+~~~~~~~~~~~~~~~~~ [err % ('callSignatureTest')]
+callSignatureTest(1);
+
+/** @deprecated */
+declare let variableWithCallSignature: {
+    (): void;
+}
+variableWithCallSignature();
+~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature')]
+
+/** @deprecated */
+declare let variableWithCallSignature2: () => void;
+variableWithCallSignature2();
+~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('variableWithCallSignature2')]
+
+function dedent(strings: TemplateStringsArray, ...values: string[]): string;
+function dedent(strings: TemplateStringsArray, ...values: number[]): string;
+/** @deprecated */
+function dedent(strings: TemplateStringsArray, ...values: any[]): string;
+function dedent(strings: TemplateStringsArray, ...values: any[]): string {
+    return "foo";
+}
+
+dedent``;
+dedent`${"foo"}`;
+dedent`${1}`;
+dedent`${[]}`;
+~~~~~~ [err % ('dedent')]
+
+import {DeprecatedClass, DeprecatedConstructorClass, PartiallyDeprecatedClass} from "./other.test"
+{
+    const a: DeprecatedClass = new DeprecatedClass();
+             ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+                                   ~~~~~~~~~~~~~~~ [err % ('DeprecatedClass')]
+    const b: DeprecatedConstructorClass = new DeprecatedConstructorClass();
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('DeprecatedConstructorClass')]
+    const c: PartiallyDeprecatedClass = new PartiallyDeprecatedClass();
+    const d: PartiallyDeprecatedClass = new PartiallyDeprecatedClass(1);
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('PartiallyDeprecatedClass')]
+}
+
+let {f, g, h} = p;
+     ~ [err % ('f')]
+           ~ [errmsg % ('h', 'Use g instead.')]
+({f, g, h} = p);
+  ~ [err % ('f')]
+        ~ [errmsg % ('h', 'Use g instead.')]
+
+({f: g, g: h, h: f} = p);
+  ~ [err % ('f')]
+              ~ [errmsg % ('h', 'Use g instead.')]
+
+{
+    /** @deprecated Just don't use. */
+    let tmp;
+    ({f: tmp} = p);
+      ~ [err % ('f')]
+         ~~~ [errmsg % ('tmp', "Just don't use.")]
+}
+
+(function ({f, g, h: tmp}: I) {})
+            ~ [err % ('f')]
+                  ~ [errmsg % ('h', 'Use g instead.')]
+(function ({foo: {f, g}}: {foo: I}) {})
+                  ~ [err % ('f')]
+
+[err]: %s is deprecated.
+[errmsg]: %s is deprecated: %s

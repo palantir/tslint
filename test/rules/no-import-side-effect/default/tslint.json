@@ -1,11 +1,5 @@
 {
   "rules": {
     "no-import-side-effect": [true]
-  },
-  "jsRules": {
-    "no-import-side-effect": [true]
-  },
-  "linterOptions": {
-    "typeCheck": false
   }
 }

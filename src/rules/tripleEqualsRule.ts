@@ -47,7 +47,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 0,
             maxLength: 2,
         },
-        optionExamples: ["true", '[true, "allow-null-check"]', '[true, "allow-undefined-check"]'],
+        optionExamples: [
+            true,
+            [true, "allow-null-check"],
+            [true, "allow-undefined-check"],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };

@@ -1,8 +1,0 @@
-{
-  "rules": {
-    "no-shadowed-variable": true
-  },
-  "jsRules": {
-    "no-shadowed-variable": true
-  }
-}

@@ -1,0 +1,17 @@
+{
+    "rules": {
+        "trailing-comma": [
+            true,
+            {
+                "multiline": {
+                    "arrays": "never",
+                    "exports": "never",
+                    "functions": "never",
+                    "imports": "never",
+                    "objects": "never",
+                    "typeLiterals": "never"
+                }
+            }
+        ]
+    }
+}

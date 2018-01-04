@@ -1,8 +1,5 @@
 {
   "rules": {
     "object-literal-key-quotes": [true, "as-needed"]
-  },
-  "jsRules": {
-    "object-literal-key-quotes": [true, "as-needed"]
   }
 }

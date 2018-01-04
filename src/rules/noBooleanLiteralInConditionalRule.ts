@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import { isConditionalExpression } from "tsutils";
+import { isConditionalExpression, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
+import { needsParenthesesForNegate } from "..";
 import * as Lint from "../index";
-import { needsParenthesesForNegate } from "./noBooleanLiteralCompareRule";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -57,7 +57,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     });
 }
 
-function check(node: ts.ConditionalExpression, checker: ts.TypeChecker): { desc: string, fix: Lint.Fix | undefined } | undefined {
+function check(node: ts.ConditionalExpression, checker: ts.TypeChecker): { desc: string; fix: Lint.Fix | undefined } | undefined {
     const { condition, whenTrue, whenFalse } = node;
     const l = getLiteralBoolean(whenTrue);
     const r = getLiteralBoolean(whenFalse);
@@ -68,29 +68,35 @@ function check(node: ts.ConditionalExpression, checker: ts.TypeChecker): { desc:
 
     if (l !== undefined && r !== undefined) {
         const deleteThenAndElse = Lint.Replacement.deleteFromTo(condition.getEnd(), node.getEnd());
-        return l && !r
-            ? { desc: "x", fix: deleteThenAndElse }
-            : !l && r
-            ? { desc: "!x", fix: [...negateCondition(), deleteThenAndElse] }
+        if (l && !r) {
+            return { desc: "x", fix: deleteThenAndElse };
+        } else if (!l && r) {
+            return { desc: "!x", fix: [...negateCondition(), deleteThenAndElse] };
+        } else {
             // Don't try fixing `? true : true` or ? false : false`, they probably were typos that should be examined.
-            : { desc: l.toString(), fix: undefined };
+            return { desc: l.toString(), fix: undefined };
+        }
     } else if (l !== undefined && isBoolean(whenFalse, checker)) {
         const op = (operator: string) =>
             Lint.Replacement.replaceFromTo(condition.getEnd(), whenFalse.getStart(), ` ${operator} `);
-        return l
+        if (l) {
             // `b ? true : c` -> `b || c`
-            ? { desc: "x || y", fix: op("||") }
+            return { desc: "x || y", fix: op("||") };
+        } else {
             // `b ? false : c` -> `!b && c`
-            : { desc: "!x && y", fix: [...negateCondition(), op("&&")] };
+            return { desc: "!x && y", fix: [...negateCondition(), op("&&")] };
+        }
     } else if (r !== undefined && isBoolean(whenTrue, checker)) {
         const op = (operator: string) =>
             Lint.Replacement.replaceFromTo(condition.getEnd(), whenTrue.getStart(), ` ${operator} `);
         const deleteElse = Lint.Replacement.deleteFromTo(whenTrue.getEnd(), whenFalse.getEnd());
-        return r!
+        if (r) {
             // `b ? c : true` -> `!b || c`
-            ? { desc: "!x || y", fix: [...negateCondition(), op("||"), deleteElse] }
+            return { desc: "!x || y", fix: [...negateCondition(), op("||"), deleteElse] };
             // `b ? c : false` -> `b && c`
-            : { desc: "x && y", fix: [op("&&"), deleteElse] };
+        } else {
+            return { desc: "x && y", fix: [op("&&"), deleteElse] };
+        }
     } else {
         return undefined;
     }
@@ -106,7 +112,7 @@ function check(node: ts.ConditionalExpression, checker: ts.TypeChecker): { desc:
 }
 
 function isBoolean(node: ts.Expression, checker: ts.TypeChecker): boolean {
-    return Lint.isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Boolean);
+    return isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Boolean);
 }
 
 function getLiteralBoolean(node: ts.Expression): boolean | undefined {

@@ -1,8 +1,5 @@
 {
   "rules": {
     "switch-default": true
-  },
-  "jsRules": {
-    "switch-default": true
   }
 }

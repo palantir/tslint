@@ -9,9 +9,9 @@ const o = {
   123: "hello", // failure
   ~~~  [Unquoted property '123' found.]
   1e4: "something", // failure
-  ~~~  [Unquoted property '1e4' found.]
+  ~~~  [Unquoted property '10000' found.]
   .123: "float", // failure
-  ~~~~  [Unquoted property '.123' found.]
+  ~~~~  [Unquoted property '0.123' found.]
   '123': 'numbers do not need quotes',
   '010': 'but this one does.',
   '.123': 'as does this one',

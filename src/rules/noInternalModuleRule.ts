@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-import { getChildOfKind } from "tsutils";
+import { isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -28,9 +27,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -46,7 +46,7 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
         return this.checkStatements(sourceFile.statements);
     }
 
-    private checkStatements(statements: ts.Statement[]) {
+    private checkStatements(statements: ReadonlyArray<ts.Statement>) {
         for (const statement of statements) {
             if (statement.kind === ts.SyntaxKind.ModuleDeclaration) {
                 this.checkModuleDeclaration(statement as ts.ModuleDeclaration);
@@ -57,13 +57,13 @@ class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
     private checkModuleDeclaration(node: ts.ModuleDeclaration, nested?: boolean): void {
         if (!nested &&
             node.name.kind === ts.SyntaxKind.Identifier &&
+            !isNodeFlagSet(node, ts.NodeFlags.Namespace) &&
             // augmenting global uses a special syntax that is allowed
             // see https://github.com/Microsoft/TypeScript/pull/6213
-            node.name.text !== "global") {
-            const moduleKeyword = getChildOfKind(node, ts.SyntaxKind.ModuleKeyword, this.sourceFile);
-            if (moduleKeyword) {
-                this.addFailureAtNode(moduleKeyword, Rule.FAILURE_STRING);
-            }
+            !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)) {
+            const end = node.name.pos;
+            const start = end - "module".length;
+            this.addFailure(start, end, Rule.FAILURE_STRING, Lint.Replacement.replaceFromTo(start, end, "namespace"));
         }
         if (node.body !== undefined) {
             switch (node.body.kind) {

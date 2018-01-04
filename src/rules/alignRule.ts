@@ -15,15 +15,23 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { getNextToken, isBlockLike } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_STATEMENTS = "statements";
+const OPTION_MEMBERS = "members";
+const OPTION_ELEMENTS = "elements";
+const OPTION_PARAMETERS = "parameters";
+const OPTION_ARGUMENTS = "arguments";
 
 interface Options {
     statements: boolean;
     parameters: boolean;
     arguments: boolean;
+    members: boolean;
+    elements: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -34,37 +42,38 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Three arguments may be optionally provided:
+            Five arguments may be optionally provided:
 
-            * \`"parameters"\` checks alignment of function parameters.
-            * \`"arguments"\` checks alignment of function call arguments.
-            * \`"statements"\` checks alignment of statements.`,
+            * \`"${OPTION_PARAMETERS}"\` checks alignment of function parameters.
+            * \`"${OPTION_ARGUMENTS}"\` checks alignment of function call arguments.
+            * \`"${OPTION_STATEMENTS}"\` checks alignment of statements.
+            * \`"${OPTION_MEMBERS}"\` checks alignment of members of classes, interfaces, type literal, object literals and
+            object destructuring.
+            * \`"${OPTION_ELEMENTS}"\` checks alignment of elements of array iterals, array destructuring and tuple types.`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["arguments", "parameters", "statements"],
+                enum: [OPTION_ARGUMENTS, OPTION_ELEMENTS, OPTION_MEMBERS, OPTION_PARAMETERS, OPTION_STATEMENTS],
             },
             minLength: 1,
-            maxLength: 3,
+            maxLength: 5,
         },
-        optionExamples: ['[true, "parameters", "statements"]'],
+        optionExamples: [[true, "parameters", "statements"]],
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static PARAMETERS_OPTION = "parameters";
-    public static ARGUMENTS_OPTION = "arguments";
-    public static STATEMENTS_OPTION = "statements";
-
     public static FAILURE_STRING_SUFFIX = " are not aligned";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new AlignWalker(sourceFile, this.ruleName, {
-            arguments: this.ruleArguments.indexOf(Rule.ARGUMENTS_OPTION) !== -1,
-            parameters: this.ruleArguments.indexOf(Rule.PARAMETERS_OPTION) !== -1,
-            statements: this.ruleArguments.indexOf(Rule.STATEMENTS_OPTION) !== -1,
+            arguments: this.ruleArguments.indexOf(OPTION_ARGUMENTS) !== -1,
+            elements: this.ruleArguments.indexOf(OPTION_ELEMENTS) !== -1,
+            members: this.ruleArguments.indexOf(OPTION_MEMBERS) !== -1,
+            parameters: this.ruleArguments.indexOf(OPTION_PARAMETERS) !== -1,
+            statements: this.ruleArguments.indexOf(OPTION_STATEMENTS) !== -1,
         }));
     }
 }
@@ -72,10 +81,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 class AlignWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (this.options.statements && utils.isBlockLike(node)) {
-                this.checkAlignment(node.statements, Rule.STATEMENTS_OPTION);
-            } else if (this.options.parameters) {
+            if (this.options.statements && isBlockLike(node)) {
+                this.checkAlignment(node.statements.filter((s) => s.kind !== ts.SyntaxKind.EmptyStatement), OPTION_STATEMENTS);
+            } else {
                 switch (node.kind) {
+                    case ts.SyntaxKind.NewExpression:
+                        if ((node as ts.NewExpression).arguments === undefined) {
+                            break;
+                        }
+                        // falls through
+                    case ts.SyntaxKind.CallExpression:
+                        if (this.options.arguments) {
+                            this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments!, OPTION_ARGUMENTS);
+                        }
+                        break;
                     case ts.SyntaxKind.FunctionDeclaration:
                     case ts.SyntaxKind.FunctionExpression:
                     case ts.SyntaxKind.Constructor:
@@ -86,45 +105,94 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                     case ts.SyntaxKind.MethodSignature:
                     case ts.SyntaxKind.FunctionType:
                     case ts.SyntaxKind.ConstructorType:
-                        this.checkAlignment((node as ts.SignatureDeclaration).parameters, Rule.PARAMETERS_OPTION);
+                        if (this.options.parameters) {
+                            this.checkAlignment((node as ts.SignatureDeclaration).parameters, OPTION_PARAMETERS);
+                        }
+                        break;
+                    case ts.SyntaxKind.ArrayLiteralExpression:
+                    case ts.SyntaxKind.ArrayBindingPattern:
+                        if (this.options.elements) {
+                            this.checkAlignment((node as ts.ArrayBindingOrAssignmentPattern).elements, OPTION_ELEMENTS);
+                        }
+                        break;
+                    case ts.SyntaxKind.TupleType:
+                        if (this.options.elements) {
+                            this.checkAlignment((node as ts.TupleTypeNode).elementTypes, OPTION_ELEMENTS);
+                        }
+                        break;
+                    case ts.SyntaxKind.ObjectLiteralExpression:
+                        if (this.options.members) {
+                            this.checkAlignment((node as ts.ObjectLiteralExpression).properties, OPTION_MEMBERS);
+                        }
+                        break;
+                    case ts.SyntaxKind.ObjectBindingPattern:
+                        if (this.options.members) {
+                            this.checkAlignment((node as ts.ObjectBindingPattern).elements, OPTION_MEMBERS);
+                        }
+                        break;
+                    case ts.SyntaxKind.ClassDeclaration:
+                    case ts.SyntaxKind.ClassExpression:
+                        if (this.options.members) {
+                            this.checkAlignment(
+                                (node as ts.ClassLikeDeclaration).members.filter((m) => m.kind !== ts.SyntaxKind.SemicolonClassElement),
+                                OPTION_MEMBERS,
+                            );
+                        }
+                        break;
+                    case ts.SyntaxKind.InterfaceDeclaration:
+                    case ts.SyntaxKind.TypeLiteral:
+                        if (this.options.members) {
+                            this.checkAlignment((node as ts.InterfaceDeclaration | ts.TypeLiteralNode).members, OPTION_MEMBERS);
+                        }
                 }
-            } else if (this.options.arguments &&
-                       (node.kind === ts.SyntaxKind.CallExpression ||
-                        node.kind === ts.SyntaxKind.NewExpression && (node as ts.NewExpression).arguments !== undefined)) {
-                this.checkAlignment((node as ts.CallExpression | ts.NewExpression).arguments, Rule.ARGUMENTS_OPTION);
             }
             return ts.forEachChild(node, cb);
         };
         return cb(sourceFile);
     }
 
-    private checkAlignment(nodes: ts.Node[], kind: string) {
+    private checkAlignment(nodes: ReadonlyArray<ts.Node>, kind: string) {
         if (nodes.length <= 1) {
             return;
         }
         const sourceFile = this.sourceFile;
 
-        let pos = ts.getLineAndCharacterOfPosition(sourceFile, nodes[0].getStart(sourceFile));
+        let pos = getLineAndCharacterWithoutBom(sourceFile, this.getStart(nodes[0]));
         const alignToColumn = pos.character;
         let line = pos.line;
 
         // skip first node in list
         for (let i = 1; i < nodes.length; ++i) {
             const node = nodes[i];
-            const start = node.getStart(sourceFile);
+            const start = this.getStart(node);
             pos = ts.getLineAndCharacterOfPosition(sourceFile, start);
             if (line !== pos.line && pos.character !== alignToColumn) {
                 const diff = alignToColumn - pos.character;
                 let fix: Lint.Fix | undefined;
-                if (0 < diff) {
+                if (diff >= 0) {
                     fix = Lint.Replacement.appendText(start, " ".repeat(diff));
                 } else if (node.pos <= start + diff && /^\s+$/.test(sourceFile.text.substring(start + diff, start))) {
                     // only delete text if there is only whitespace
                     fix = Lint.Replacement.deleteText(start + diff, -diff);
                 }
-                this.addFailure(start, node.end, kind + Rule.FAILURE_STRING_SUFFIX, fix);
+                this.addFailure(start, Math.max(node.end, start), kind + Rule.FAILURE_STRING_SUFFIX, fix);
             }
             line = pos.line;
         }
     }
+
+    private getStart(node: ts.Node) {
+        return node.kind !== ts.SyntaxKind.OmittedExpression
+            ? node.getStart(this.sourceFile)
+            // find the comma token following the OmmitedExpression
+            : getNextToken(node, this.sourceFile)!.getStart(this.sourceFile);
+    }
+}
+
+function getLineAndCharacterWithoutBom(sourceFile: ts.SourceFile, pos: number): ts.LineAndCharacter {
+    const result = ts.getLineAndCharacterOfPosition(sourceFile, pos);
+    if (result.line === 0 && sourceFile.text[0] === "\uFEFF") {
+        result.character -= 1;
+    }
+    return result;
 }

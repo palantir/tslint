@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             So, instead of \`if (myVar === NaN)\`, do \`if (isNaN(myVar))\`.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };

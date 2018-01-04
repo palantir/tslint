@@ -23,11 +23,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "file-header",
         description: "Enforces a certain header comment for all files, matched by a regular expression.",
-        optionsDescription: "Regular expression to match the header.",
+        optionsDescription: Lint.Utils.dedent`
+            The first option, which is mandatory, is a regular expression that all headers should match.
+            The second argument, which is optional, is a string that should be inserted as a header comment
+            if fixing is enabled and no header that matches the first argument is found.`,
         options: {
-            type: "string",
+            type: "array",
+            items: [
+                {
+                    type: "string",
+                },
+                {
+                    type: "string",
+                },
+            ],
+            additionalItems: false,
+            minLength: 1,
+            maxLength: 2,
         },
-        optionExamples: ['[true, "Copyright \\\\d{4}"]'],
+        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2017"]],
+        hasFix: true,
         type: "style",
         typescriptOnly: false,
     };
@@ -37,27 +52,42 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const { text } = sourceFile;
+        const headerFormat = new RegExp(this.ruleArguments[0] as string);
+        const textToInsert = this.ruleArguments[1] as string | undefined;
+
         // ignore shebang if it exists
-        const offset = text.startsWith("#!") ? text.indexOf("\n") + 1 : 0;
-        if (!textHasComment(text, offset, new RegExp(this.ruleArguments[0]))) {
-            return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName)];
+        let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
+        // returns the text of the first comment or undefined
+        const commentText = ts.forEachLeadingCommentRange(
+            text,
+            offset,
+            (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
+
+        if (commentText === undefined || !headerFormat.test(commentText)) {
+            const isErrorAtStart = offset === 0;
+            if (!isErrorAtStart) {
+                ++offset; // show warning in next line after shebang
+            }
+            const leadingNewlines = isErrorAtStart ? 0 : 1;
+            const trailingNewlines = isErrorAtStart ? 2 : 1;
+
+            const fix = textToInsert !== undefined
+                ? Lint.Replacement.appendText(offset, this.createComment(sourceFile, textToInsert, leadingNewlines, trailingNewlines))
+                : undefined;
+            return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
         }
         return [];
     }
-}
 
-// match a single line or multi line comment with leading whitespace
-// the wildcard dot does not match new lines - we can use [\s\S] instead
-const commentRegexp = /^\s*(\/\/(.*)|\/\*([\s\S]*?)\*\/)/;
-
-function textHasComment(text: string, offset: number, headerRegexp: RegExp): boolean {
-    // check for a comment
-    const match = commentRegexp.exec(text.slice(offset));
-    if (match === null) {
-        return false;
+    private createComment(sourceFile: ts.SourceFile, commentText: string, leadingNewlines = 1, trailingNewlines = 1) {
+        const maybeCarriageReturn = sourceFile.text[sourceFile.getLineEndOfPosition(0)] === "\r" ? "\r" : "";
+        const lineEnding = `${maybeCarriageReturn}\n`;
+        return lineEnding.repeat(leadingNewlines) + [
+            "/*",
+            // split on both types of line endings in case users just typed "\n" in their configs
+            // but are working in files with \r\n line endings
+            ...commentText.split(/\r?\n/g).map((line) => ` * ${line}`),
+            " */",
+        ].join(lineEnding) + lineEnding.repeat(trailingNewlines);
     }
-
-    // either the third or fourth capture group contains the comment contents
-    const comment = match[2] !== undefined ? match[2] : match[3];
-    return comment.search(headerRegexp) !== -1;
 }

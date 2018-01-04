@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
+import { RuleFailure } from "../rule/rule";
 
 export interface IFormatterMetadata {
     /**
@@ -46,11 +46,15 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
+export interface FormatterConstructor {
+    new(): IFormatter;
+}
+
 export interface IFormatter {
     /**
      * Formats linter results
-     * @param {RuleFailure[]} failures Linter failures that were not fixed
-     * @param {RuleFailure[]} fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
+     * @param failures Linter failures that were not fixed
+     * @param fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
      */
     format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
 }

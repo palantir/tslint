@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-default-export": true
-  },
-  "jsRules": {
-    "no-default-export": true
   }
 }

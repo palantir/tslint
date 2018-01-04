@@ -27,7 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: true,
     };

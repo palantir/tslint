@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-arg": true
-  },
-  "jsRules": {
-    "no-arg": true
   }
 }

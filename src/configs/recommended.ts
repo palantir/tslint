@@ -76,16 +76,7 @@ export const rules = {
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": true,
-    "no-console": {
-        options: [
-            "debug",
-            "info",
-            "log",
-            "time",
-            "timeEnd",
-            "trace",
-        ],
-    },
+    "no-console": true,
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
@@ -137,6 +128,7 @@ export const rules = {
     "ordered-imports": {
         options: {
             "import-sources-order": "case-insensitive",
+            "module-source-path": "full",
             "named-imports-order": "case-insensitive",
         },
     },
@@ -172,19 +164,22 @@ export const rules = {
     },
     "typedef": false,
     "typedef-whitespace": {
-        options: [{
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            "parameter": "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        }, {
-            "call-signature": "onespace",
-            "index-signature": "onespace",
-            "parameter": "onespace",
-            "property-declaration": "onespace",
-            "variable-declaration": "onespace",
-        }],
+        options: [
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                "parameter": "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                "parameter": "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace",
+            },
+        ],
     },
     "typeof-compare": true,
     "unified-signatures": true,
@@ -232,16 +227,7 @@ export const jsRules = {
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-consecutive-blank-lines": true,
-    "no-console": {
-        options: [
-            "debug",
-            "info",
-            "log",
-            "time",
-            "timeEnd",
-            "trace",
-        ],
-    },
+    "no-console": true,
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,

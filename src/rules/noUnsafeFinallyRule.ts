@@ -17,6 +17,7 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -34,177 +35,116 @@ export class Rule extends Lint.Rules.AbstractRule {
             This is confusing and unexpected behavior.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_TYPE_BREAK = "break";
-    public static FAILURE_TYPE_CONTINUE = "continue";
-    public static FAILURE_TYPE_RETURN = "return";
-    public static FAILURE_TYPE_THROW = "throw";
-    public static FAILURE_STRING_FACTORY = (name: string) => {
-        return `${name} statements in finally blocks are forbidden.`;
+    public static FAILURE_STRING(name: string): string {
+        return `'${name}' statements in finally blocks are forbidden.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoReturnInFinallyScopeAwareWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-/**
- * Represents details associated with tracking finally scope.
- */
-interface IFinallyScope {
-    /**
-     * A value indicating whether the current scope is a `break` boundary.
-     */
-    isBreakBoundary: boolean;
+type JumpStatement = ts.BreakStatement | ts.ContinueStatement | ts.ThrowStatement | ts.ReturnStatement;
 
-    /**
-     * A value indicating whether the current scope is a `continue` boundary.
-     */
-    isContinueBoundary: boolean;
+function walk(ctx: Lint.WalkContext<void>): void {
+    let inFinally = false;
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.TryStatement:
+                const { tryBlock, catchClause, finallyBlock } = node as ts.TryStatement;
+                ts.forEachChild(tryBlock, cb);
+                if (catchClause !== undefined) {
+                    ts.forEachChild(catchClause, cb);
+                }
+                if (finallyBlock !== undefined) {
+                    const old = inFinally;
+                    inFinally = true;
+                    cb(finallyBlock);
+                    inFinally = old;
+                }
+                break;
 
-    /**
-     * A value indicating whether the current scope is within a finally block.
-     */
-    isFinallyBlock: boolean;
+            case ts.SyntaxKind.BreakStatement:
+            case ts.SyntaxKind.ContinueStatement:
+            case ts.SyntaxKind.ThrowStatement:
+            case ts.SyntaxKind.ReturnStatement:
+                if (inFinally && !jumpIsLocalToFinallyBlock(node as JumpStatement)) {
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printJumpKind(node as JumpStatement)));
+                }
+                // falls through
 
-    /**
-     * A value indication whether the current scope is a `return` and `throw` boundary.
-     */
-    isReturnsThrowsBoundary: boolean;
-
-    /**
-     * A collection of `break` or `continue` labels in this scope.
-     */
-    labels: string[];
+            default:
+                return ts.forEachChild(node, cb);
+        }
+    });
 }
 
-/**
- * Represents a block walker that identifies finally blocks and walks
- * only the blocks that do not change scope for return statements.
- */
-class NoReturnInFinallyScopeAwareWalker extends Lint.ScopeAwareRuleWalker<IFinallyScope> {
+function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
+    const isBreakOrContinue = utils.isBreakOrContinueStatement(jump);
+    const label = isBreakOrContinue ? (jump as ts.BreakOrContinueStatement).label : undefined;
 
-    protected visitBreakStatement(node: ts.BreakOrContinueStatement) {
-        if (!this.isControlFlowWithinFinallyBlock(isBreakBoundary, node)) {
-            super.visitBreakStatement(node);
-            return;
-        }
+    let node: ts.Node = jump;
+    // This should only be called inside a finally block, so we'll eventually reach the TryStatement case and return.
+    while (true) {
+        const parent = node.parent!;
+        switch (parent.kind) {
+            case ts.SyntaxKind.TryStatement:
+                if ((parent as ts.TryStatement).finallyBlock === node) {
+                    return false;
+                }
+                break;
 
-        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_BREAK));
-    }
+            case ts.SyntaxKind.SwitchStatement:
+                if (jump.kind === ts.SyntaxKind.BreakStatement && label === undefined) {
+                    return true;
+                }
+                break;
 
-    protected visitContinueStatement(node: ts.BreakOrContinueStatement) {
-        if (!this.isControlFlowWithinFinallyBlock(isContinueBoundary, node)) {
-            super.visitContinueStatement(node);
-            return;
-        }
+            case ts.SyntaxKind.ForInStatement:
+            case ts.SyntaxKind.ForOfStatement:
+            case ts.SyntaxKind.ForStatement:
+            case ts.SyntaxKind.WhileStatement:
+            case ts.SyntaxKind.DoStatement:
+                if (isBreakOrContinue && label === undefined) {
+                    return true;
+                }
+                break;
 
-        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_CONTINUE));
-    }
-
-    protected visitLabeledStatement(node: ts.LabeledStatement) {
-        this.getCurrentScope().labels.push(node.label.text);
-
-        super.visitLabeledStatement(node);
-    }
-
-    protected visitReturnStatement(node: ts.ReturnStatement): void {
-        if (!this.isControlFlowWithinFinallyBlock(isReturnsOrThrowsBoundary)) {
-            super.visitReturnStatement(node);
-            return;
-        }
-
-        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_RETURN));
-    }
-
-    protected visitThrowStatement(node: ts.ThrowStatement): void {
-        if (!this.isControlFlowWithinFinallyBlock(isReturnsOrThrowsBoundary)) {
-            super.visitThrowStatement(node);
-            return;
-        }
-
-        this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(Rule.FAILURE_TYPE_THROW));
-    }
-
-    public createScope(node: ts.Node): IFinallyScope {
-        const isScopeBoundary = super.isScopeBoundary(node);
-
-        return {
-            isBreakBoundary: isScopeBoundary || isLoopBlock(node) || isCaseBlock(node),
-            isContinueBoundary: isScopeBoundary || isLoopBlock(node),
-            isFinallyBlock: isFinallyBlock(node),
-            isReturnsThrowsBoundary: isScopeBoundary,
-            labels: [],
-        };
-    }
-
-    protected isScopeBoundary(node: ts.Node): boolean {
-        return super.isScopeBoundary(node) ||
-                isFinallyBlock(node) ||
-                isLoopBlock(node) ||
-                isCaseBlock(node);
-    }
-
-    private isControlFlowWithinFinallyBlock<TNode>(
-        isControlFlowBoundary: (scope: IFinallyScope, node?: TNode) => boolean, node?: TNode): boolean {
-        const scopes = this.getAllScopes();
-
-        let currentScope = this.getCurrentScope();
-        let depth = this.getCurrentDepth();
-
-        while (currentScope) {
-            if (isControlFlowBoundary(currentScope, node)) {
-                return false;
+            case ts.SyntaxKind.LabeledStatement: {
+                const { text } = (parent as ts.LabeledStatement).label;
+                if (label !== undefined && label.text === text) {
+                    return true;
+                }
+                break;
             }
 
-            if (currentScope.isFinallyBlock) {
-                return true;
-            }
-
-            currentScope = scopes[--depth];
+            default:
+                if (utils.isFunctionScopeBoundary(parent)) {
+                    // Haven't seen TryStatement yet, so the function is inside it.
+                    // No jump statement can escape a function, so the jump is local.
+                    return true;
+                }
         }
-        return false;
+
+        node = parent;
     }
 }
 
-function isLoopBlock(node: ts.Node): boolean {
-    const parent = node.parent;
-
-    return parent !== undefined &&
-        node.kind === ts.SyntaxKind.Block &&
-        (parent.kind === ts.SyntaxKind.ForInStatement ||
-        parent.kind === ts.SyntaxKind.ForOfStatement ||
-        parent.kind === ts.SyntaxKind.ForStatement ||
-        parent.kind === ts.SyntaxKind.WhileStatement ||
-        parent.kind === ts.SyntaxKind.DoStatement);
-}
-
-function isCaseBlock(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.CaseBlock;
-}
-
-function isFinallyBlock(node: ts.Node): boolean {
-    const parent = node.parent;
-
-    return parent !== undefined &&
-        node.kind === ts.SyntaxKind.Block &&
-        utils.isTryStatement(parent) &&
-        parent.finallyBlock === node;
-}
-
-function isReturnsOrThrowsBoundary(scope: IFinallyScope) {
-    return scope.isReturnsThrowsBoundary;
-}
-
-function isContinueBoundary(scope: IFinallyScope, node: ts.ContinueStatement): boolean {
-    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isContinueBoundary;
-}
-
-function isBreakBoundary(scope: IFinallyScope, node: ts.BreakStatement): boolean {
-    return node.label ? scope.labels.indexOf(node.label.text) >= 0 : scope.isBreakBoundary;
+function printJumpKind(node: JumpStatement): string {
+    switch (node.kind) {
+        case ts.SyntaxKind.BreakStatement:
+            return "break";
+        case ts.SyntaxKind.ContinueStatement:
+            return "continue";
+        case ts.SyntaxKind.ThrowStatement:
+            return "throw";
+        case ts.SyntaxKind.ReturnStatement:
+            return "return";
+    }
 }

@@ -1,2 +1,0 @@
-let x = undefined;
-    ~~~~~~~~~~~~~ [Unnecessary initialization to 'undefined'.]

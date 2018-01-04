@@ -12,5 +12,5 @@ class TypesInFunctionWithReturnMemberArrowFn {
 
 class NoTypesMemberArrowFn {
   fn = (param) => {}
-             ~       [expected member-variable-declaration: 'param' to have a typedef]
+        ~~~~~ [expected member-variable-declaration: 'param' to have a typedef]
 }

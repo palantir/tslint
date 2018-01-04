@@ -1,8 +1,5 @@
 {
   "rules": {
     "trailing-comma": [true, {"multiline": "always"}]
-  },
-  "jsRules": {
-    "trailing-comma": [true, {"multiline": "always"}]
   }
 }

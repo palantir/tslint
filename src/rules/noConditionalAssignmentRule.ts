@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isAssignmentKind, isNodeKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,14 +25,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-conditional-assignment",
         description: "Disallows any type of assignment in conditionals.",
-        descriptionDetails: "This applies to `do-while`, `for`, `if`, and `while` statements.",
-        rationale: Lint.Utils.dedent `
+        descriptionDetails: "This applies to `do-while`, `for`, `if`, and `while` statements and conditional (ternary) expressions.",
+        rationale: Lint.Utils.dedent`
             Assignments in conditionals are often typos:
             for example \`if (var1 = var2)\` instead of \`if (var1 == var2)\`.
             They also can be an indicator of overly clever code which decreases maintainability.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -40,61 +41,80 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Assignments in conditional expressions are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const walker = new NoConditionalAssignmentWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(walker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoConditionalAssignmentWalker extends Lint.RuleWalker {
-    private isInConditional = false;
+function walk(ctx: Lint.WalkContext<void>) {
+    let checking = 0;
+    return ts.forEachChild(ctx.sourceFile, cb);
 
-    protected visitIfStatement(node: ts.IfStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitIfStatement(node);
-    }
-
-    protected visitWhileStatement(node: ts.WhileStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitWhileStatement(node);
-    }
-
-    protected visitDoStatement(node: ts.DoStatement) {
-        this.validateConditionalExpression(node.expression);
-        super.visitDoStatement(node);
-    }
-
-    protected visitForStatement(node: ts.ForStatement) {
-        if (node.condition != null) {
-            this.validateConditionalExpression(node.condition);
+    function cb(node: ts.Node): void {
+        const kind = node.kind;
+        if (!isNodeKind(kind)) {
+            return; // return early for tokens
         }
-        super.visitForStatement(node);
+        switch (kind) {
+            case ts.SyntaxKind.ConditionalExpression:
+                check((node as ts.ConditionalExpression).condition);
+                cb((node as ts.ConditionalExpression).whenTrue);
+                cb((node as ts.ConditionalExpression).whenFalse);
+                return;
+            case ts.SyntaxKind.IfStatement:
+                check((node as ts.IfStatement).expression);
+                cb((node as ts.IfStatement).thenStatement);
+                maybeCallback(cb, (node as ts.IfStatement).elseStatement);
+                return;
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+                check((node as ts.DoStatement | ts.WhileStatement).expression);
+                cb((node as ts.IterationStatement).statement);
+                return;
+            case ts.SyntaxKind.ForStatement:
+                maybeCallback(cb, (node as ts.ForStatement).initializer);
+                maybeCallback(check, (node as ts.ForStatement).condition);
+                maybeCallback(cb, (node as ts.ForStatement).incrementor);
+                cb((node as ts.ForStatement).statement);
+                return;
+        }
+        if (checking !== 0) {
+            switch (kind) {
+                case ts.SyntaxKind.BinaryExpression:
+                    if (isAssignmentKind((node as ts.BinaryExpression).operatorToken.kind)) {
+                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+                    }
+                    cb((node as ts.BinaryExpression).left);
+                    cb((node as ts.BinaryExpression).right);
+                    return;
+                case ts.SyntaxKind.ParenthesizedExpression:
+                case ts.SyntaxKind.NonNullExpression:
+                case ts.SyntaxKind.AsExpression:
+                case ts.SyntaxKind.TypeAssertionExpression:
+                    return cb((node as ts.AssertionExpression | ts.NonNullExpression | ts.ParenthesizedExpression).expression);
+                case ts.SyntaxKind.PrefixUnaryExpression:
+                    return cb((node as ts.PrefixUnaryExpression).operand);
+                default:
+                    return noCheck(node);
+            }
+        }
+        return ts.forEachChild(node, cb);
     }
 
-    protected visitBinaryExpression(expression: ts.BinaryExpression) {
-        if (this.isInConditional) {
-            this.checkForAssignment(expression);
-        }
-        super.visitBinaryExpression(expression);
+    function check(node: ts.Node): void {
+        ++checking;
+        cb(node);
+        --checking;
     }
-
-    private validateConditionalExpression(expression: ts.Expression) {
-        this.isInConditional = true;
-        if (expression.kind === ts.SyntaxKind.BinaryExpression) {
-            // check for simple assignment in a conditional, like `if (a = 1) {`
-            this.checkForAssignment(expression as ts.BinaryExpression);
-        }
-        // walk the children of the conditional expression for nested assignments, like `if ((a = 1) && (b == 1)) {`
-        this.walkChildren(expression);
-        this.isInConditional = false;
-    }
-
-    private checkForAssignment(expression: ts.BinaryExpression) {
-        if (isAssignmentToken(expression.operatorToken)) {
-            this.addFailureAtNode(expression, Rule.FAILURE_STRING);
-        }
+    function noCheck(node: ts.Node): void {
+        const old = checking;
+        checking = 0;
+        ts.forEachChild(node, cb);
+        checking = old;
     }
 }
 
-function isAssignmentToken(token: ts.Node) {
-    return token.kind >= ts.SyntaxKind.FirstAssignment && token.kind <= ts.SyntaxKind.LastAssignment;
+function maybeCallback(cb: (node: ts.Node) => void, node?: ts.Node) {
+    if (node !== undefined) {
+        cb(node);
+    }
 }

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { getChildOfKind, isBindingPattern, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -40,71 +40,62 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Also, the type declaration does not need to include '| undefined'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        if (utils.isBindingPattern(node.name)) {
-            for (const elem of node.name.elements) {
-                if (elem.kind === ts.SyntaxKind.BindingElement) {
-                    this.checkInitializer(elem);
+function walk(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.BindingElement:
+                checkInitializer(node as ts.BindingElement);
+                break;
+
+            case ts.SyntaxKind.VariableDeclaration:
+                if (!isBindingPattern((node as ts.VariableDeclaration).name) && !isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
+                    checkInitializer(node as ts.VariableDeclaration);
                 }
+                break;
+
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.FunctionDeclaration:
+            case ts.SyntaxKind.Constructor: {
+                const { parameters } = node as ts.FunctionLikeDeclaration;
+                parameters.forEach((parameter, i) => {
+                    if (isUndefined(parameter.initializer)) {
+                        if (parametersAllOptionalAfter(parameters, i)) {
+                            // No fix since they may want to remove '| undefined' from the type.
+                            ctx.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
+                        } else {
+                            failWithFix(parameter);
+                        }
+                    }
+                });
             }
-        } else if (!Lint.isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
-            this.checkInitializer(node);
         }
+        ts.forEachChild(node, cb);
+    });
 
-        super.visitVariableDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.checkSignature(node);
-        super.visitMethodDeclaration(node);
-    }
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.checkSignature(node);
-        super.visitFunctionDeclaration(node);
-    }
-    public visitConstructorDeclaration(node: ts.ConstructorDeclaration) {
-        this.checkSignature(node);
-        super.visitConstructorDeclaration(node);
-    }
-
-    private checkSignature({ parameters }: ts.MethodDeclaration | ts.FunctionDeclaration | ts.ConstructorDeclaration) {
-        parameters.forEach((parameter, i) => {
-            if (isUndefined(parameter.initializer)) {
-                if (parametersAllOptionalAfter(parameters, i)) {
-                    // No fix since they may want to remove '| undefined' from the type.
-                    this.addFailureAtNode(parameter, Rule.FAILURE_STRING_PARAMETER);
-                } else {
-                    this.failWithFix(parameter);
-                }
-            }
-        });
-    }
-
-    private checkInitializer(node: ts.VariableDeclaration | ts.BindingElement) {
+    function checkInitializer(node: ts.VariableDeclaration | ts.BindingElement) {
         if (isUndefined(node.initializer)) {
-            this.failWithFix(node);
+            failWithFix(node);
         }
     }
 
-    private failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
-        const fix = this.deleteFromTo(
-            Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
+    function failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
+        const fix = Lint.Replacement.deleteFromTo(
+            getChildOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
             node.end);
-        this.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
+        ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
     }
 }
 
-function parametersAllOptionalAfter(parameters: ts.ParameterDeclaration[], idx: number): boolean {
+function parametersAllOptionalAfter(parameters: ReadonlyArray<ts.ParameterDeclaration>, idx: number): boolean {
     for (let i = idx + 1; i < parameters.length; i++) {
-        if (parameters[i].questionToken) {
+        if (parameters[i].questionToken !== undefined) {
             return true;
         }
-        if (!parameters[i].initializer) {
+        if (parameters[i].initializer === undefined) {
             return false;
         }
     }

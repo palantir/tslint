@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: "Missing elements are probably an accidentally duplicated comma.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -89,7 +89,6 @@ function traverseExpressionsInLHS(node: ts.Node, cb: (node: ts.Expression) => vo
                 traverseExpressionsInLHS(left, cb);
                 cb(right);
             }
-            break;
         }
     }
 }

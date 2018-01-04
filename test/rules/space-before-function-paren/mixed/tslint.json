@@ -10,15 +10,5 @@
             "named": "never"
         }
     ]
-  },
-  "jsRules": {
-    "space-before-function-paren": [
-        true,
-        {
-            "anonymous": "always",
-            "asyncArrow": "always",
-            "named": "never"
-        }
-    ]
   }
 }

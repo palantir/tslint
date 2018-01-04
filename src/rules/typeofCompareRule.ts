@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -28,9 +29,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Makes sure result of `typeof` is compared to correct string values",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        deprecationMessage: ts.versionMajorMinor as string === "2.1"
+            ? "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
+            : "",
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -38,18 +42,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         `'typeof' expression must be compared to one of: ${Array.from(LEGAL_TYPEOF_RESULTS).map((x) => `"${x}"`).join(", ")}`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        const { operatorToken, left, right } = node;
-        if (Lint.getEqualsKind(operatorToken) && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<void>): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (tsutils.isBinaryExpression(node)) {
+            const { operatorToken, left, right } = node;
+            if (Lint.getEqualsKind(operatorToken) !== undefined && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        ts.forEachChild(node, cb);
+    });
 }
 
 function isFaultyTypeof(left: ts.Expression, right: ts.Expression) {

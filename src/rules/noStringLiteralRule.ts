@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isElementAccessExpression, isStringLiteral, isValidPropertyAccess } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,47 +24,44 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-literal",
-        description: "Disallows object access via string literals.",
-        rationale: "Encourages using strongly-typed property access.",
+        description: Lint.Utils.dedent`
+            Forbids unnecessary string literal property access.
+            Allows \`obj["prop-erty"]\` (can't be a regular property access).
+            Disallows \`obj["property"]\` (should be \`obj.property\`).`,
+        rationale: Lint.Utils.dedent`
+            If \`--noImplicitAny\` is turned off,
+            property access via a string literal will be 'any' if the property does not exist.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "object access via string literals is disallowed";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoStringLiteralWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoStringLiteralWalker extends Lint.RuleWalker {
-    public visitElementAccessExpression(node: ts.ElementAccessExpression) {
-        const argument = node.argumentExpression;
-        if (argument != null) {
-            const accessorText = argument.getText();
-
-            // the argument expression should be a string of length at least 2 (due to quote characters)
-            if (argument.kind === ts.SyntaxKind.StringLiteral && accessorText.length > 2) {
-                const unquotedAccessorText = accessorText.substring(1, accessorText.length - 1);
-
-                // only create a failure if the identifier is valid, in which case there's no need to use string literals
-                if (isValidIdentifier(unquotedAccessorText)) {
-                    this.addFailureAtNode(argument, Rule.FAILURE_STRING);
-                }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isElementAccessExpression(node)) {
+            const argument = node.argumentExpression;
+            if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
+                // for compatibility with typescript@<2.5.0 to avoid fixing expr['__foo'] to expr.___foo
+                const propertyName = ts.unescapeIdentifier(argument.text); // tslint:disable-line:deprecation
+                ctx.addFailureAtNode(
+                    argument,
+                    Rule.FAILURE_STRING,
+                    // expr['foo'] -> expr.foo
+                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${propertyName}`),
+                );
             }
         }
-
-        super.visitElementAccessExpression(node);
-    }
-}
-
-function isValidIdentifier(token: string) {
-    const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, token);
-    scanner.scan();
-    // if we scanned to the end of the token, we can check if the scanned item was an identifier
-    return scanner.getTokenText() === token && scanner.isIdentifier();
+        return ts.forEachChild(node, cb);
+    });
 }

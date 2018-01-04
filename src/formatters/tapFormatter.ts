@@ -57,7 +57,7 @@ export class Formatter extends AbstractFormatter {
             output = output.concat([`1..${failures.length}`]).concat(this.mapToMessages(failures));
         }
 
-        return output.join("\n") + "\n";
+        return `${output.join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {

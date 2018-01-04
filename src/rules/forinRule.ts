@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isBlock, isForInStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -37,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             documentation for more information about \`for...in\` loops.`,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -46,63 +47,29 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ForInWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class ForInWalker extends Lint.RuleWalker {
-    public visitForInStatement(node: ts.ForInStatement) {
-        this.handleForInStatement(node);
-        super.visitForInStatement(node);
-    }
-
-    private handleForInStatement(node: ts.ForInStatement) {
-        const statement = node.statement;
-        const statementKind = node.statement.kind;
-
-        // a direct if statement under a for...in is valid
-        if (statementKind === ts.SyntaxKind.IfStatement) {
-            return;
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isForInStatement(node) && isBlock(node.statement) && !isFiltered(node.statement)) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        // if there is a block, verify that it has a single if statement or starts with if (..) continue;
-        if (statementKind === ts.SyntaxKind.Block) {
-            const blockNode = statement as ts.Block;
-            const blockStatements = blockNode.statements;
-            if (blockStatements.length >= 1) {
-                const firstBlockStatement = blockStatements[0];
-                if (firstBlockStatement.kind === ts.SyntaxKind.IfStatement) {
-                    // if this "if" statement is the only statement within the block
-                    if (blockStatements.length === 1) {
-                        return;
-                    }
-
-                    // if this "if" statement has a single continue block
-                    const ifStatement = (firstBlockStatement as ts.IfStatement).thenStatement;
-                    if (nodeIsContinue(ifStatement)) {
-                        return;
-                    }
-                }
-            }
-        }
-
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function isFiltered({statements}: ts.Block): boolean {
+    switch (statements.length) {
+        case 0: return true;
+        case 1: return statements[0].kind === ts.SyntaxKind.IfStatement;
+        default:
+            return statements[0].kind === ts.SyntaxKind.IfStatement && nodeIsContinue((statements[0] as ts.IfStatement).thenStatement);
     }
 }
 
 function nodeIsContinue(node: ts.Node) {
-    const kind = node.kind;
-
-    if (kind === ts.SyntaxKind.ContinueStatement) {
-        return true;
-    }
-
-    if (kind === ts.SyntaxKind.Block) {
-        const blockStatements = (node as ts.Block).statements;
-        if (blockStatements.length === 1 && blockStatements[0].kind === ts.SyntaxKind.ContinueStatement) {
-            return true;
-        }
-    }
-
-    return false;
+    return node.kind === ts.SyntaxKind.ContinueStatement ||
+        isBlock(node) && node.statements.length === 1 && node.statements[0].kind === ts.SyntaxKind.ContinueStatement;
 }

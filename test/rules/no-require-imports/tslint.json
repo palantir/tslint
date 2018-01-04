@@ -1,8 +1,5 @@
 {
   "rules": {
     "no-require-imports": true
-  },
-  "jsRules": {
-    "no-require-imports": true
   }
 }

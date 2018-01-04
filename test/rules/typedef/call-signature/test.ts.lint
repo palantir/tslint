@@ -1,9 +1,9 @@
 function foge() {}
-              ~    [expected call-signature: 'foge' to have a typedef]
+         ~~~~ [expected call-signature: 'foge' to have a typedef]
 
 class TsLint {
     helloWorld() {
-               ~   [expected call-signature: 'helloWorld' to have a typedef]
+    ~~~~~~~~~~ [expected call-signature: 'helloWorld' to have a typedef]
         return 'Hello World';
     };
 
@@ -14,13 +14,13 @@ class TsLint {
 
 var obj = {
     foge: function() {},
-                   ~     [expected call-signature to have a typedef]
+                  ~~ [expected call-signature to have a typedef]
     bar: () => {}
 }
 
 setTimeout(() => {}, 1000);
 setTimeout(function() {}, 1000);
-                    ~            [expected call-signature to have a typedef]
+                   ~~ [expected call-signature to have a typedef]
 
 someFunc(n => n+1);
 someFunc(n => {});

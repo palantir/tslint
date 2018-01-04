@@ -15,12 +15,15 @@
  * limitations under the License.
  */
 
+import { getLineRanges, getTokenAtPosition, isPositionInComment } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
 const OPTION_USE_TABS = "tabs";
 const OPTION_USE_SPACES = "spaces";
+const OPTION_INDENT_SIZE_2 = 2;
+const OPTION_INDENT_SIZE_4 = 4;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,112 +36,101 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             One of the following arguments must be provided:
 
-            * \`"spaces"\` enforces consistent spaces.
-            * \`"tabs"\` enforces consistent tabs.`,
+            * \`${OPTION_USE_SPACES}\` enforces consistent spaces.
+            * \`${OPTION_USE_TABS}\` enforces consistent tabs.
+
+            A second optional argument specifies indentation size:
+
+            * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
+            * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
+
+            Indentation size is **required** for auto-fixing, but not for rule checking.
+
+            **NOTE**: auto-fixing will only convert invalid indent whitespace to the desired type, it will not fix invalid whitespace sizes.
+            `,
         options: {
-            type: "string",
-            enum: ["tabs", "spaces"],
+            type: "array",
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_USE_TABS, OPTION_USE_SPACES],
+                },
+                {
+                    type: "number",
+                    enum: [OPTION_INDENT_SIZE_2, OPTION_INDENT_SIZE_4],
+                },
+            ],
+            minLength: 0,
+            maxLength: 5,
         },
-        optionExamples: ['[true, "spaces"]'],
+        optionExamples: [
+            [true, OPTION_USE_SPACES],
+            [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
+            [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
+        ],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_TABS = "tab indentation expected";
-    public static FAILURE_STRING_SPACES = "space indentation expected";
+    public static FAILURE_STRING(expected: string): string {
+        return `${expected} indentation expected`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new IndentWalker(sourceFile, this.getOptions()));
+        const options = parseOptions(this.ruleArguments);
+        return options === undefined ? [] : this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
-// visit every token and enforce that only the right character is used for indentation
-class IndentWalker extends Lint.RuleWalker {
-    private failureString: string;
-    private regExp: RegExp;
+function parseOptions(ruleArguments: any[]): Options | undefined {
+    const type = ruleArguments[0] as string;
+    if (type !== OPTION_USE_TABS && type !== OPTION_USE_SPACES) { return undefined; }
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
+    const size = ruleArguments[1] as number | undefined;
+    return {
+        size: size === OPTION_INDENT_SIZE_2 || size === OPTION_INDENT_SIZE_4 ? size : undefined,
+        tabs: type === OPTION_USE_TABS,
+    };
+}
 
-        if (this.hasOption(OPTION_USE_TABS)) {
-            this.regExp = new RegExp(" ");
-            this.failureString = Rule.FAILURE_STRING_TABS;
-        } else if (this.hasOption(OPTION_USE_SPACES)) {
-            this.regExp = new RegExp("\t");
-            this.failureString = Rule.FAILURE_STRING_SPACES;
+interface Options {
+    readonly tabs: boolean;
+    readonly size?: 2 | 4;
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const { sourceFile, options: { tabs, size } } = ctx;
+    const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
+    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
+
+    for (const {pos, contentLength} of getLineRanges(sourceFile)) {
+        if (contentLength === 0) { continue; }
+        const line = sourceFile.text.substr(pos, contentLength);
+        let indentEnd = line.search(/\S/);
+        if (indentEnd === 0) { continue; }
+        if (indentEnd === -1) {
+            indentEnd = contentLength;
         }
+        const whitespace = line.slice(0, indentEnd);
+        if (!regExp.test(whitespace)) { continue; }
+        const token = getTokenAtPosition(sourceFile, pos)!;
+        if (token.kind !== ts.SyntaxKind.JsxText &&
+            (pos >= token.getStart(sourceFile) || isPositionInComment(sourceFile, pos, token))) {
+            continue;
+        }
+        ctx.addFailureAt(pos, indentEnd, failure, createFix(pos, whitespace, tabs, size));
     }
+}
 
-    public visitSourceFile(node: ts.SourceFile) {
-        if (!this.hasOption(OPTION_USE_TABS) && !this.hasOption(OPTION_USE_SPACES)) {
-            // if we don't have either option, no need to check anything, and no need to call super, so just return
-            return;
-        }
-
-        let endOfComment = -1;
-        let endOfTemplateString = -1;
-        const scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, node.text);
-        for (const lineStart of node.getLineStarts()) {
-            if (lineStart < endOfComment || lineStart < endOfTemplateString) {
-                // skip checking lines inside multi-line comments or template strings
-                continue;
-            }
-
-            scanner.setTextPos(lineStart);
-
-            let currentScannedType = scanner.scan();
-            let fullLeadingWhitespace = "";
-            let lastStartPos = -1;
-
-            while (currentScannedType === ts.SyntaxKind.WhitespaceTrivia) {
-                const startPos = scanner.getStartPos();
-                if (startPos === lastStartPos) {
-                    break;
-                }
-                lastStartPos = startPos;
-
-                fullLeadingWhitespace += scanner.getTokenText();
-                currentScannedType = scanner.scan();
-            }
-
-            const commentRanges = ts.getTrailingCommentRanges(node.text, lineStart);
-            if (commentRanges) {
-                endOfComment = commentRanges[commentRanges.length - 1].end;
-            } else {
-                let scanType = currentScannedType;
-
-                // scan until we reach end of line, skipping over template strings
-                while (scanType !== ts.SyntaxKind.NewLineTrivia && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                    if (scanType === ts.SyntaxKind.NoSubstitutionTemplateLiteral) {
-                        // template string without expressions - skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                    } else if (scanType === ts.SyntaxKind.TemplateHead) {
-                        // find end of template string containing expressions...
-                        while (scanType !== ts.SyntaxKind.TemplateTail && scanType !== ts.SyntaxKind.EndOfFileToken) {
-                            scanType = scanner.scan();
-                            if (scanType === ts.SyntaxKind.CloseBraceToken) {
-                                scanType = scanner.reScanTemplateToken();
-                            }
-                        }
-                        // ... and skip past it
-                        endOfTemplateString = scanner.getStartPos() + scanner.getTokenText().length;
-                    }
-                    scanType = scanner.scan();
-                }
-            }
-
-            if (currentScannedType === ts.SyntaxKind.SingleLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.MultiLineCommentTrivia
-                    || currentScannedType === ts.SyntaxKind.NewLineTrivia) {
-                // ignore lines that have comments before the first token
-                continue;
-            }
-
-            if (fullLeadingWhitespace.match(this.regExp)) {
-                this.addFailureAt(lineStart, fullLeadingWhitespace.length, this.failureString);
-            }
-        }
-        // no need to call super to visit the rest of the nodes, so don't call super here
-    }
+function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {
+    if (size === undefined) { return undefined; }
+    const replaceRegExp = tabs
+        // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+        ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
+        : /\t/g;
+    const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
+        (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)));
+    return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
 }

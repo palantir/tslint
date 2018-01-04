@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isFunctionTypeNode, isPropertySignature } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -27,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };
@@ -36,25 +37,21 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use a method signature instead of a property signature of function type.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitPropertySignature(node: ts.PropertyDeclaration) {
-        const { type } = node;
-        if (type !== undefined && type.kind === ts.SyntaxKind.FunctionType) {
-            this.addFailureAtNode(node.name, Rule.FAILURE_STRING, this.createMethodSignatureFix(node, type as ts.FunctionTypeNode));
+function walk(ctx: Lint.WalkContext<void>): void {
+    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (isPropertySignature(node)) {
+            const { type } = node;
+            if (type !== undefined && isFunctionTypeNode(type)) {
+                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type === undefined ? undefined : [
+                    Lint.Replacement.deleteFromTo(type.pos - 1, type.getStart()), // delete colon in 'foo: () => void'
+                    Lint.Replacement.replaceFromTo(type.parameters.end + 1, type.type.pos, ":"), // replace => with colon
+                ]);
+            }
         }
-
-        super.visitPropertySignature(node);
-    }
-
-    private createMethodSignatureFix(node: ts.PropertyDeclaration, type: ts.FunctionTypeNode): Lint.Fix | undefined {
-        return type.type && [
-            this.deleteFromTo(Lint.childOfKind(node, ts.SyntaxKind.ColonToken)!.getStart(), type.getStart()),
-            this.deleteFromTo(Lint.childOfKind(type, ts.SyntaxKind.EqualsGreaterThanToken)!.getStart(), type.type.getStart()),
-            this.appendText(Lint.childOfKind(type, ts.SyntaxKind.CloseParenToken)!.end, ":"),
-        ];
-    }
+        return ts.forEachChild(node, cb);
+    });
 }

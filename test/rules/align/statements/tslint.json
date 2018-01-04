@@ -1,8 +1,5 @@
 {
   "rules": {
     "align": [true, "statements"]
-  },
-  "jsRules": {
-    "align": [true, "statements"]
   }
 }

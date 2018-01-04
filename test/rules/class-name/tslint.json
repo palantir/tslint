@@ -1,8 +1,5 @@
 {
   "rules": {
     "class-name": true
-  },
-  "jsRules": {
-    "class-name": true
   }
 }

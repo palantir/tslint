@@ -1,8 +1,5 @@
 {
   "rules": {
     "use-isnan": true
-  },
-  "jsRules": {
-    "use-isnan": true
   }
 }

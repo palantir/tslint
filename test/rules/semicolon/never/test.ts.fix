@@ -32,6 +32,9 @@ debugger
 import v = require("i")
 module M {
     export var x
+    []
+    export var y = x;
+    []
     export function f(s: string): string
     export function f(n: number): number
     export function f(x: any) { return x }
@@ -126,3 +129,90 @@ if (true);
 for(;;);
 
 
+
+switch(foo.bar) {
+    case 'header':  header  = foo; break
+    case 'sidebar': sidebar = foo; break
+    case 'track':   track   = foo; /* some comment */ break
+}
+
+switch(foo.bar) {
+    case 'header':  header  = foo
+        break
+    case 'sidebar': sidebar = foo /* some comment
+        */ break
+    case 'track':   track   = foo // some comment
+        break
+}
+
+const x = f(() =>
+    0); const y = 2
+
+a = b
+++c
+
+foo();
+(bar).foo()
+
+foo();
+(bar as Bar).foo()
+
+foo();
+<Bar>bar.foo()
+
+foo();
+() => {}
+
+foo();
+`bar`
+
+foo();
+`bar${baz}`
+
+a;
+/b/g
+
+a;
+/=b/i
+
+function bar(foo) { if (foo) return true; return false }
+function bar(foo) { if (foo) {return true} return false}
+
+class Foo {
+    public [foo]
+    ['moo']
+    public bar = foo;
+    ['foo']
+    public baz = () => true;
+    ['foobar']
+    public baz2 = () => () => {return true}
+    ['foobarbaz']
+    public bas = () => {return true}
+    ['barfoo']
+    public moar = () =>
+        true;
+    ['barbaz']
+}
+
+declare module "foo";
+{ /* don't remove semicolon, otherwise the shorthand module get's a body */ }
+
+function *gen() {
+    yield
+    []
+    yield 1;
+    []
+    if (foo)
+        return yield
+    []
+    if (!foo)
+        return yield 1 || yield
+    []
+    return yield 1;
+    []
+}
+
+var foo = () => {}
+[]
+var bar; var foo = function() {};
+[]

@@ -1,11 +1,5 @@
 {
   "rules": {
     "no-for-in-array": true
-  },
-  "jsRules": {
-    "no-for-in-array": true
-  },
-  "linterOptions": {
-    "typeCheck": true
   }
 }

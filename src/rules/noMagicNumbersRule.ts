@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { isPrefixUnaryExpression } from "tsutils";
 import * as ts from "typescript";
 
+import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
+import { isNegativeNumberLiteral } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -38,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
             minLength: 1,
         },
-        optionExamples: ["true", "[true, 1, 2, 3]"],
+        optionExamples: [true, [true, 1, 2, 3]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -70,13 +71,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
+            if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
+                return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
+            }
+
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
                 return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
-            if (isPrefixUnaryExpression(node) &&
-                node.operator === ts.SyntaxKind.MinusToken &&
-                node.operand.kind === ts.SyntaxKind.NumericLiteral) {
-                return this.checkNumericLiteral(node, "-" + (node.operand as ts.NumericLiteral).text);
+            if (isNegativeNumberLiteral(node)) {
+                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
             }
             return ts.forEachChild(node, cb);
         };

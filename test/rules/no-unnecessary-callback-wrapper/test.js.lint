@@ -1,2 +1,0 @@
-x => f(x);
-~~~~~~~~~ [No need to wrap 'f' in another function. Just use it directly.]
