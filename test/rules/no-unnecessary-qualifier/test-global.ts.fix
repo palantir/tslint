@@ -1,4 +1,4 @@
-namespace N {
+namespace Global {
     export type T = number;
     export const x: T = 0;
     export const x: M.T = 0;

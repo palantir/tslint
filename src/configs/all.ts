@@ -127,6 +127,7 @@ export const rules = {
     "no-unnecessary-class": [true, "allow-empty-class"],
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
+    "no-unused": true,
     "no-unused-expression": true,
     "no-unused-variable": true,
     "no-use-before-declare": true,

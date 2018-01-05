@@ -128,7 +128,7 @@ export function arraysAreEqual<T>(a: ReadonlyArray<T> | undefined, b: ReadonlyAr
 }
 
 /** Returns the first non-`undefined` result. */
-export function find<T, U>(inputs: T[], getResult: (t: T) => U | undefined): U | undefined {
+export function find<T, U>(inputs: ReadonlyArray<T>, getResult: (t: T) => U | undefined): U | undefined {
     for (const element of inputs) {
         const result = getResult(element);
         if (result !== undefined) {

@@ -37,6 +37,7 @@ import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
+import { createMultiMap } from "./rules/no-unused/utils";
 import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 
 /**
@@ -266,20 +267,3 @@ class Linter {
 namespace Linter { }
 
 export = Linter;
-
-function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
-    const map = new Map<K, V[]>();
-    for (const input of inputs) {
-        const pair = getPair(input);
-        if (pair !== undefined) {
-            const [k, v] = pair;
-            const vs = map.get(k);
-            if (vs !== undefined) {
-                vs.push(v);
-            } else {
-                map.set(k, [v]);
-            }
-        }
-    }
-    return map;
-}

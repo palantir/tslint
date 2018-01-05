@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { tryGetAliasedSymbol } from "./no-unused/utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -128,8 +129,4 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
             Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
     }
-}
-
-function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol | undefined {
-    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
 }

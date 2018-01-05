@@ -1,0 +1,588 @@
+[typescript]: >= 2.4.0
+declare const any: any;
+declare function use(...args: any[]): void;
+
+// Catches unused locals, type parameters, etc.
+{
+    function f<T>(x: number) {}
+             ~ [noread]
+               ~ [noread]
+                  ~ [noread]
+    type T = number;
+         ~ [noread]
+    interface I<T> {
+              ~ [noread]
+                ~ [noread]
+        p: number;
+        ~ [unused]
+        m(): void;
+        ~ [noread]
+    }
+    enum E {}
+         ~ [noread]
+}
+// Namespaces must go at top-level
+namespace N {}
+          ~ [noread]
+
+// We use getRootSymbols to track all symbols we're using
+{
+    type T = { readonly x: number } | { readonly x: string };
+    function f(p: T) {
+        return p.x;
+    }
+    use(f({ x: 0 }));
+}
+
+// Special handling of enum members
+{
+    {
+        enum E {
+            A,
+            B,
+            ~ [enummembernevercreated]
+            C,
+            ~ [unused]
+        }
+
+        function f(e: E) {
+            switch (e) { //TODO: similar test with 'if' and '==='
+                case E.A:
+                case E.B:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        use(f(E.A));
+    }
+
+    // Internal uses of an enum member don't count.
+    {
+        enum Flags {
+            A = 1 << 0,
+            ~ [unused]
+            B = 1 << 1,
+            All = A | B,
+        }
+        use(Flags.B, Flags.All);
+    }
+}
+
+{
+    class C {
+        m(): void;
+        m(n: number): void; // Doesn't complain about unused parameter in an overload.
+        m(_?: number) {}
+    }
+    new C().m();
+}
+
+// Detects functions used only for side-effects that return values.
+{
+    function f() { return 0; }
+             ~ [sideeffectonly]
+    f();
+}
+
+// Catches 'let' that could be 'const', just like for properties that could be 'readonly'.
+{
+    let x = 0;
+        ~ [const]
+    use(x);
+}
+
+// Detects never-created properties.
+{
+    class C {
+        readonly p: number;
+                 ~ [nocreate]
+    }
+    use(new C().p);
+}
+
+//// Tests for indirect assignment of properties
+{
+    // Casting indirectly creates properties
+    use((<{ readonly x: number }> any).x);
+    use((any as { x: number }).x);
+                  ~ [readonly]
+
+    // Casting to T[] (or any generic type) casts to T too.
+    use((any as Array<{ readonly x: number}>)[0].x);
+
+    // Fills in properties of properties too.
+    use((any as { readonly x: { readonly y: { readonly z: number } } }).x.y.z);
+
+    // Assigning a type to itself doesn't count.
+    {
+        interface I { x: number; }
+                      ~ [unused]
+        function _(i: I): I { return i; }
+    }
+
+    // 'any' indirectly assigns to all properties
+    {
+        function f(p: { readonly x: number }) {
+            use(p.x);
+        }
+        f(any);
+    }
+
+    // Type predicate indirectly creates properties
+    {
+        function magic(o: {}): o is { readonly x: string } {
+            return true;
+        }
+        if (magic(any)) {
+            use(any.x);
+        }
+    }
+
+    // Assigning writes to only matching properties
+    {
+        function f(p: { readonly x?: number, readonly y?: number }) {
+                                                      ~ [nocreate]
+            use(p.x, p.y);
+        }
+        // Deliberately *don't* give this a contextual type, so these isn't directly a creation of the 'x' property above.
+        const o = { x: 0 };
+        f(o);
+    }
+
+    // Same as above but with some other types in the way
+    {
+        function f(p: ReadonlyArray<{ readonly x: number, readonly y?: number } | number> | number) {
+                                                                   ~ [nocreate]
+            if (typeof p !== "number") {
+                const z = p[0];
+                if (typeof z !== "number") {
+                    use(z.x, z.y);
+                }
+            }
+        }
+        const o = [{ x: 1 }];
+        f(o);
+    }
+
+    // Can't use a ReadonlyArray if we need to assign to mutable array type
+    {
+        class C {
+            constructor(readonly x: string[]) {}
+        }
+        interface I {
+            readonly x: string[];
+        }
+        const i: I = new C([]);
+        i.x.push("");
+        use(i.x);
+    }
+
+    // Works on unions
+    {
+        interface I { readonly name: number };
+        const x = any as I | { readonly name: string };
+        const y: I | { readonly name: string } = x;
+        use(y.name);
+    }
+
+    // Works on intersections
+    {
+        interface I { readonly name: number };
+        const x = any as I & { readonly name: string };
+        const y: I & { readonly name: string } = x;
+        use(y.name);
+    }
+}
+
+// Conversely: Tests for indirect use of properties
+{
+    // Assigning to a readonly property is a readonly use
+    {
+        class C {
+            constructor(public x: number) {}
+                               ~ [readonly]
+        }
+        interface I {
+            readonly x: number;
+        }
+        const i: I = new C(0);
+        use(i.x);
+    }
+
+    // Assigning to a mutable property is a mutable use
+    {
+        class C {
+            constructor(public x: number) {}
+        }
+        interface I {
+            x: number;
+        }
+        const i: I = new C(0);
+        use(i.x++);
+    }
+    // Negative of above test
+    {
+        class C {
+            constructor(readonly x: number[]) {}
+                                    ~~~~~~~~ [readonlyarray]
+        }
+        interface I {
+            readonly x: ReadonlyArray<number>;
+        }
+        const i: I = new C([]);
+        use(i.x);
+    }
+
+    // No error if the type it's assigned to isn't a readonly collection
+    {
+        class C {
+            constructor(readonly x: number[]) {}
+        }
+        interface I {
+            readonly x: number[];
+        }
+        const i: I = new C([]);
+        i.x.push(0);
+        use(i.x);
+    }
+}
+
+// Privacy tests
+{
+    class C {
+        static readonly zero = 0;
+                        ~~~~ [private]
+        constructor(readonly x: number) {}
+                             ~ [private]
+	    m() {
+	        this.n(this.x);
+	    }
+        n(x: number) {
+        ~ [private]
+            use(x, C.zero);
+        }
+	}
+	new C(0).m();
+}
+
+// Prefer readonly collection types
+{
+    // Exception for rest parameters, which can't be ReadonlyArray
+    {
+        function _(x: number[], ...y: number[]) {
+                      ~~~~~~~~ [readonlyarray]
+            return [...x, ...y];
+        }
+    }
+
+    // Uses inferred type if no type annotation -- handles unions too.
+    {
+        class C {
+            readonly x = any ? [] : 2;
+                     ~ [readonlyarray]
+        }
+        const { x } = new C();
+        if (typeof x !== "number") {
+            use(x.length);
+        }
+    }
+
+    {
+        // Does not complain on implicitly-typed local variables
+        const x = [0];
+        use(x);
+    }
+
+    {
+        // Assignment to 'any' still considered readonly
+        const x: number[] = [];
+                 ~~~~~~~~ [readonlyarray]
+        const _: any = x;
+    }
+
+    // Works on Set and Map
+    {
+        const s: Set<number> = new Set();
+                 ~~~~~~~~~~~ [readonlyset]
+        s.has(0);
+        const m: Map<number, number> = new Map();
+                 ~~~~~~~~~~~~~~~~~~~ [readonlymap]
+        m.get(0);
+    }
+
+    // If collection is aliased, looks for mutable uses in those aliases.
+    {
+        // Testing that we propagate across multpile aliases.
+        const x: number[] = [0];
+        const y = x;
+        const z = y;
+        z.push(0);
+        use(x[0]);
+    }
+    // Negative of above test
+    {
+        const x: number[] = [0];
+                 ~~~~~~~~ [readonlyarray]
+        const y = x;
+        const z = y;
+        use(z[0]);
+    }
+}
+// Does complain at top-level
+const readonlyArray = [0];
+      ~~~~~~~~~~~~~ [readonlyarray]
+use(readonlyArray);
+
+// Detects collections that are written to but not read from.
+{
+    // "push" and "unshift" just return the length, so this isn't really using the collection (could just use a counter).
+    {
+        const x: number[] = [];
+              ~ [pushonly]
+        use(x.push(0));
+        use(x.unshift());
+    }
+
+    // Element accesses make it not readonly
+    {
+        function _assignTo(x: number[]) {
+            x[0] = 1;
+        }
+        let _: any;
+        function _assignFrom(x: number[]) {
+                                ~~~~~~~~ [readonlyarray]
+            _ = x[0];
+        }
+        function _delete(x: number[]) {
+            delete x[0];
+        }
+    }
+
+    // Works on properties too.
+    {
+        class C {
+            m = new Map<number, number>();
+            ~ [pushonly]
+        }
+        const c = new C();
+        c.m.set(0, 0);
+    }
+
+    // If we the collection is initialized to an alias, it's *not* unused.
+    {
+        const x: number[] = any;
+        x.push(0);
+    }
+
+    // Counterexamples: "pop" and "shift" and "splice" return useful data.
+    {
+        const x: number[] = [];
+        use(x.pop());
+    }
+    {
+        const x: number[] = [];
+        use(x.shift());
+    }
+    {
+        const x: number[] = [];
+        use(x.splice(0, 3));
+    }
+
+    // Some methods return the collection, so we must consider what happens after that.
+    {
+        const x: number[] = [];
+              ~ [pushonly]
+        x.sort();
+    }
+    {
+        const x: number[] = [];
+        use(x.sort());
+    }
+    {
+        const x: number[] = [];
+        use(x.sort().pop());
+    }
+
+    // Also works on Set/Map
+    {
+        const x = new Set();
+              ~ [pushonly]
+        x.add(1);
+        x.delete(1);
+    }
+    {
+        const x = new Set();
+        x.add(1);
+        use(x.delete(1)); // 'delete' tells us whether it was in the set, so the set content is used.
+    }
+
+    // Detects chaining
+    {
+        const s = new Set();
+              ~ [pushonly]
+        s.add(1).delete(1);
+    }
+    {
+        const s = new Set();
+        use(s.add(1).delete(1));
+    }
+}
+
+// Anything in `@deprecated` is ignored
+{
+    /** @deprecated */
+    interface I {
+        x: {
+            y: number[];
+        }
+    }
+    interface J {
+              ~ [noread]
+        /** @deprecated */
+        x: number[];
+    }
+}
+// Anything starting with `_` is ignored
+{
+    const _x = 0;
+}
+
+// Object literal shorthand
+{
+    const x = 0;
+    const i: { readonly x: number } = { x };
+    use(i.x);
+}
+
+// Tests with destructuring -- be sure to have both `const { x } = y` and `({ x } = y)` versions as the code for each differs.
+{
+    {
+        interface I { readonly x: number; }
+                               ~ [nocreate]
+        function _(i: I) {
+            const { x } = i;
+                    ~ [noread]
+        }
+    }
+
+    {
+        interface I { readonly x: number; }
+                               ~ [nocreate]
+        function _(i: I) {
+            let x: number;
+                ~ [noread]
+            ({ x } = i);
+        }
+    }
+
+    {
+        interface I { readonly x: number; }
+                               ~ [nocreate]
+        function _(i: I) {
+            const { x: y } = i;
+                       ~ [noread]
+        }
+    }
+
+    {
+        interface I { readonly x: number; }
+                               ~ [nocreate]
+        function _(i: I) {
+            let y: number;
+                ~ [noread]
+            ({ x: y } = i);
+        }
+    }
+
+    {
+        interface I { readonly x: { readonly y: number; }[]; }
+                               ~ [nocreate]
+                                             ~ [nocreate]
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~ [readonlyarray]
+        function _(i: I) {
+            let z: number;
+                ~ [noread]
+            ({ x: [{ y: z }] } = i);
+        }
+    }
+
+    {
+        interface I { readonly x: number[]; }
+                               ~ [nocreate]
+        function _(i: I) {
+            let z: number[];
+            ({ x: z } = i);
+            z.push(0);
+        }
+    }
+
+    // Parameters too
+    {
+        function _({ x }: { readonly x: number[] }) {
+                                     ~ [nocreate]
+            x.push(0);
+        }
+    }
+
+    {
+        interface I { readonly x: { readonly y: number[]; }[]; }
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [readonlyarray]
+        function f(i: I) {
+            const { x: [{ y: z }] } = i;
+            z.push(0);
+        }
+        f({ x: [{ y: [] }] });
+    }
+
+    {
+        interface I { readonly x: { readonly y: number[]; }[]; }
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [readonlyarray]
+        function f(i: I) {
+            let z: number[];
+            ({ x: [{ y: z }] } = i);
+            z.push(0);
+        }
+        f({ x: [{ y: [] }] });
+    }
+
+    // Uses getRootSymbols to handle destructuring union
+    {
+        function _(o: { readonly x: number[] } | { readonly x: string[] }) {
+                                 ~ [nocreate]
+                                                            ~ [nocreate]
+            const { x } = o;
+            x.pop();
+        }
+    }
+}
+
+// Property mutated in constructor can still be readonly
+{
+    {
+        class C {
+            private x: number;
+                    ~ [readonly]
+            constructor() {
+                this.x = 0;
+                this.x++;
+                this.x *= 2;
+            }
+            _() { return this.x; }
+        }
+    }
+}
+
+[enummembernevercreated]: Enum member is compared against, but analysis found no cases of something being given this value.
+[const]: Analysis found no mutable uses of this variable; use `const`.
+[unused]: Analysis found no uses of this symbol.
+[private]: Analysis found no public uses; this should be private.
+[pushonly]: This collection is created and filled with values, but never read from.
+[sideeffectonly]: This function is used for its side effect, but the return value is never used.
+[nocreate]: Analysis found places where this is read, but found no places where it is given a value.
+[noread]: This symbol is given a value, but analysis found no reads. This is likely dead code.
+[readonly]: Analysis found no writes to this property; mark it as `readonly`.
+[readonlyarray]: Analysis indicates this could be a ReadonlyArray.
+[readonlyset]: Analysis indicates this could be a ReadonlySet.
+[readonlymap]: Analysis indicates this could be a ReadonlyMap.
+

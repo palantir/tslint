@@ -31,6 +31,7 @@
     "no-require-imports": false,
     "no-unbound-method": false,
     "no-unnecessary-qualifier": false,
+    "no-unused": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,

@@ -16,9 +16,6 @@
  */
 
 import {
-    getDeclarationOfBindingElement,
-    getJsDoc,
-    isBindingElement,
     isCallExpression,
     isIdentifier,
     isNewExpression,
@@ -28,11 +25,10 @@ import {
     isShorthandPropertyAssignment,
     isSymbolFlagSet,
     isTaggedTemplateExpression,
-    isVariableDeclaration,
-    isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { getSignatureDeprecation, getSymbolDeprecation } from "./no-unused/deprecationUtils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -161,72 +157,6 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         return undefined;
     }
     return getSymbolDeprecation(symbol);
-}
-
-function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
-    for (const tag of tags) {
-        if (tag.name === "deprecated") {
-            return tag.text;
-        }
-    }
-    return undefined;
-}
-
-function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
-    if (symbol.getJsDocTags !== undefined) {
-        return findDeprecationTag(symbol.getJsDocTags());
-    }
-    // for compatibility with typescript@<2.3.0
-    return getDeprecationFromDeclarations(symbol.declarations);
-}
-
-function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
-    if (signature === undefined) {
-        return undefined;
-    }
-    if (signature.getJsDocTags !== undefined) {
-        return findDeprecationTag(signature.getJsDocTags());
-    }
-
-    // for compatibility with typescript@<2.3.0
-    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
-}
-
-function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
-    if (declarations === undefined) {
-        return undefined;
-    }
-    let declaration: ts.Node;
-    for (declaration of declarations) {
-        if (isBindingElement(declaration)) {
-            declaration = getDeclarationOfBindingElement(declaration);
-        }
-        if (isVariableDeclaration(declaration)) {
-            declaration = declaration.parent!;
-        }
-        if (isVariableDeclarationList(declaration)) {
-            declaration = declaration.parent!;
-        }
-        const result = getDeprecationFromDeclaration(declaration);
-        if (result !== undefined) {
-            return result;
-        }
-    }
-    return undefined;
-}
-
-function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
-    for (const comment of getJsDoc(declaration)) {
-        if (comment.tags === undefined) {
-            continue;
-        }
-        for (const tag of comment.tags) {
-            if (tag.tagName.text === "deprecated") {
-                return tag.comment === undefined ? "" : tag.comment;
-            }
-        }
-    }
-    return undefined;
 }
 
 function isFunctionOrMethod(declarations?: ts.Declaration[]) {

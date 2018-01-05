@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { ImportLike, isImportLike, isImportUsed } from "./no-unused/importUtils";
 
 const OPTION_CHECK_PARAMETERS = "check-parameters";
 const OPTION_IGNORE_PATTERN = "ignore-pattern";
@@ -270,54 +271,6 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
         }
         return undefined;
     }
-}
-
-/**
- * Ignore this import if it's used as an implicit type somewhere.
- * Workround for https://github.com/Microsoft/TypeScript/issues/9944
- */
-function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
-    const importedSymbol = checker.getSymbolAtLocation(importSpecifier);
-    if (importedSymbol === undefined) {
-        return false;
-    }
-
-    const symbol = checker.getAliasedSymbol(importedSymbol);
-    if (!utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
-        return false;
-    }
-
-    return ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
-        if (isImportLike(child)) {
-            return false;
-        }
-
-        const type = getImplicitType(child, checker);
-        // TODO: checker.typeEquals https://github.com/Microsoft/TypeScript/issues/13502
-        if (type !== undefined && checker.typeToString(type) === checker.symbolToString(symbol)) {
-            return true;
-        }
-
-        return ts.forEachChild(child, cb);
-    }) === true;
-}
-
-function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
-    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) &&
-        node.type === undefined && node.name.kind === ts.SyntaxKind.Identifier ||
-        utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier) {
-        return checker.getTypeAtLocation(node);
-    } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
-        const sig = checker.getSignatureFromDeclaration(node);
-        return sig === undefined ? undefined : sig.getReturnType();
-    } else {
-        return undefined;
-    }
-}
-
-type ImportLike = ts.ImportDeclaration | ts.ImportEqualsDeclaration;
-function isImportLike(node: ts.Node): node is ImportLike {
-    return node.kind === ts.SyntaxKind.ImportDeclaration || node.kind === ts.SyntaxKind.ImportEqualsDeclaration;
 }
 
 function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | undefined): T | undefined {
