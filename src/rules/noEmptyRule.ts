@@ -21,9 +21,11 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const ALLOW_EMPTY_CATCH = "allow-empty-catch";
+const ALLOW_EMPTY_FUNCTIONS = "allow-empty-functions";
 
 interface Options {
     allowEmptyCatch: boolean;
+    allowEmptyFunctions: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -34,12 +36,29 @@ export class Rule extends Lint.Rules.AbstractRule {
         descriptionDetails: "Blocks with a comment inside are not considered empty.",
         rationale: "Empty blocks are often indicators of missing code.",
         optionsDescription: Lint.Utils.dedent`
-            If \`${ALLOW_EMPTY_CATCH}\` is specified, then catch blocks are allowed to be empty.`,
+            If \`${ALLOW_EMPTY_CATCH}\` is specified, then catch blocks are allowed to be empty.
+            If \`${ALLOW_EMPTY_FUNCTIONS}\` is specified, then function definitions are allowed to be empty.`,
         options: {
-            type: "string",
-            enum: [ALLOW_EMPTY_CATCH],
+            type: "array",
+            items: {
+                anyOf: [
+                    {
+                        type: "string",
+                        enum: [ALLOW_EMPTY_CATCH],
+                    },
+                    {
+                        type: "string",
+                        enum: [ALLOW_EMPTY_FUNCTIONS],
+                    },
+                ],
+            },
         },
-        optionExamples: [true, [true, ALLOW_EMPTY_CATCH]],
+        optionExamples: [
+            true,
+            [true, ALLOW_EMPTY_CATCH],
+            [true, ALLOW_EMPTY_FUNCTIONS],
+            [true, ALLOW_EMPTY_CATCH, ALLOW_EMPTY_FUNCTIONS],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -50,6 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
             allowEmptyCatch: this.ruleArguments.indexOf(ALLOW_EMPTY_CATCH) !== -1,
+            allowEmptyFunctions: this.ruleArguments.indexOf(ALLOW_EMPTY_FUNCTIONS) !== -1,
         });
     }
 }
@@ -73,6 +93,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
 function isExcluded(node: ts.Node, options: Options): boolean {
     if (options.allowEmptyCatch && node.kind === ts.SyntaxKind.CatchClause) {
+        return true;
+    }
+
+    if (options.allowEmptyFunctions &&
+        (node.kind === ts.SyntaxKind.FunctionDeclaration ||
+         node.kind === ts.SyntaxKind.FunctionExpression ||
+         node.kind === ts.SyntaxKind.ArrowFunction)) {
         return true;
     }
 
