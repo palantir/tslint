@@ -63,7 +63,7 @@ interface Compare {
 
 function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
     const cmp = deconstructComparison(node);
-    return cmp === undefined || !Lint.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+    return cmp === undefined || !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
 }
 
 function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {

@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
-import * as Lint from "../../index";
 import {
     ALL, Location, LOCATION_INSTANCE, LOCATION_STATIC, Privacy, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC,
 } from "../completedDocsRule";
@@ -43,7 +43,7 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
             return true;
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
+        if (hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
             return this.locations.has(LOCATION_STATIC);
         }
 
@@ -55,11 +55,11 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
             return true;
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
+        if (hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
             return this.privacies.has(PRIVACY_PRIVATE);
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
+        if (hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
             return this.privacies.has(PRIVACY_PROTECTED);
         }
 

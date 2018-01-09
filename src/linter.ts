@@ -103,7 +103,7 @@ export class Linter {
         );
     }
 
-    constructor(private options: ILinterOptions, private program?: ts.Program) {
+    constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
             throw new Error(`Unknown Linter options type: ${typeof options}`);
         }

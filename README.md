@@ -1,7 +1,6 @@
 [![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
 [![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
 [![Circle CI](https://circleci.com/gh/palantir/tslint.svg?style=svg)](https://circleci.com/gh/palantir/tslint)
-[![Join the chat at https://gitter.im/palantir/tslint](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/palantir/tslint?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 TSLint
 ======
@@ -10,9 +9,10 @@ TSLint is an extensible static analysis tool that checks [TypeScript](https://gi
 
 TSLint supports:
 
+- an extensive set of core rules
 - custom lint rules
 - custom formatters (failure reporters)
-- inline disabling and enabling of rules with comment flags
+- inline disabling and enabling of rules with comment flags in source code
 - configuration presets (`tslint:latest`, `tslint-react`, etc.) and plugin composition
 - automatic fixing of formatting & style violations
 - integration with [MSBuild](https://github.com/joshuakgoldberg/tslint.msbuild), [Grunt](https://github.com/palantir/grunt-tslint), [Gulp](https://github.com/panuhorsmalahti/gulp-tslint), [Atom](https://github.com/AtomLinter/linter-tslint), [Eclipse](https://github.com/palantir/eclipse-tslint), [Emacs](http://flycheck.org), [Sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [Vim](https://github.com/scrooloose/syntastic), [Visual Studio 2015](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebAnalyzer), [Visual Studio 2017](https://marketplace.visualstudio.com/items?itemName=RichNewman.TypeScriptAnalyzer), [Visual Studio code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [WebStorm](https://www.jetbrains.com/webstorm/help/tslint.html) and [more](https://palantir.github.io/tslint/usage/third-party-tools/)
@@ -45,14 +45,17 @@ If we don't have all the rules you're looking for, you can either write your own
 - [vrsource-tslint-rules](https://github.com/vrsource/vrsource-tslint-rules)
 - [tslint-immutable](https://github.com/jonaskello/tslint-immutable) - TSLint rules to disable mutation in TypeScript
 - [tslint-consistent-codestyle](https://github.com/ajafff/tslint-consistent-codestyle) - TSLint rules to enforce consistent code style in TypeScript
+- [tslint-sonarts](https://github.com/SonarSource/SonarTS) - Bug-finding rules based on advanced code models to spot hard to find errors in TypeScript
+- [tslint-clean-code](https://github.com/Glavin001/tslint-clean-code) - A set of TSLint rules inspired by the Clean Code handbook
+- [rxjs-tslint-rules](https://github.com/cartant/rxjs-tslint-rules) - TSLint rules for RxJS 
 
 Development
 -----------
 
-Requirements:
+Prerequisites:
 
-- `node` v7
-- `yarn` v0.23+
+- `node` v7+
+- `yarn` v1.0+
 
 #### Quick Start
 
@@ -68,7 +71,7 @@ Creating a new release
 
 1. Bump the version number in `package.json` and `src/linter.ts`
 2. Add release notes in `CHANGELOG.md`
-    - Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a Github.com personal access token to exist at `~/github_token.txt` with "repo" permissions.
+    - Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a [Github.com personal access token](https://github.com/settings/tokens) to exist at `~/github_token.txt` with "repo" permissions.
 4. Commit with message `Prepare release <version>`
 5. Push your branch to GitHub and make a PR
 6. Once your PR is merged, wait for the tests to pass on CircleCI for develop

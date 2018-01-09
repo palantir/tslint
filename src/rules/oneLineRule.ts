@@ -97,7 +97,10 @@ class OneLineWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.InterfaceDeclaration:
                 case ts.SyntaxKind.ClassDeclaration:
                 case ts.SyntaxKind.ClassExpression: {
-                    this.check(getChildOfKind(node, ts.SyntaxKind.OpenBraceToken, sourceFile)!);
+                    const openBrace = getChildOfKind(node, ts.SyntaxKind.OpenBraceToken, sourceFile);
+                    if (openBrace !== undefined) {
+                        this.check(openBrace);
+                    }
                     break;
                 }
                 case ts.SyntaxKind.IfStatement: {
