@@ -276,7 +276,7 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
     }
 
     const symbol = checker.getAliasedSymbol(importedSymbol);
-    if (!Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+    if (!utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
         return false;
     }
 
@@ -406,7 +406,7 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
         readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
         getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
-        writeFile: () => {}, // tslint:disable-line no-empty
+        writeFile: () => undefined,
         getCurrentDirectory: () => "",
         getDirectories: () => [],
         getCanonicalFileName,

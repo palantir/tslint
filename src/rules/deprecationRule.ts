@@ -26,6 +26,7 @@ import {
     isPropertyAssignment,
     isReassignmentTarget,
     isShorthandPropertyAssignment,
+    isSymbolFlagSet,
     isTaggedTemplateExpression,
     isVariableDeclaration,
     isVariableDeclarationList,
@@ -150,7 +151,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         symbol = tc.getSymbolAtLocation(node);
     }
 
-    if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
     if (symbol === undefined ||

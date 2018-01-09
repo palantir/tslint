@@ -309,4 +309,14 @@ function hasThisParameter(this: any) {
            ~ [0]
 })
 
+{
+    let obj = {...x};
+    ({...obj} = x);
+         ~~~ [0]
+    let arr = [...x];
+                  ~ [0]
+    predicate(...x);
+                 ~ [0]
+}
+
 [0]: Unsafe use of expression of type 'any'.

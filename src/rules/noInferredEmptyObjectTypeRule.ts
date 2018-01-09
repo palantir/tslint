@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.TypedRule {
 class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     private scanner: ts.Scanner | undefined = undefined;
 
-    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
     }
 
