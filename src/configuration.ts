@@ -338,24 +338,6 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     };
 }
 
-function getHomeDir(): string | undefined {
-    const environment = global.process.env as { [key: string]: string };
-    const paths: string[] = [
-        environment.USERPROFILE,
-        environment.HOME,
-        environment.HOMEPATH,
-        environment.HOMEDRIVE + environment.HOMEPATH,
-    ];
-
-    for (const homePath of paths) {
-        if (homePath !== undefined && fs.existsSync(homePath)) {
-            return homePath;
-        }
-    }
-
-    return undefined;
-}
-
 /**
  * returns the absolute path (contrary to what the name implies)
  *
