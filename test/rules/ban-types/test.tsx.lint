@@ -11,6 +11,17 @@ let c: F;
 let d: Foooooo;
        ~~~~~~~ [Don't use 'Foooooo' as a type.]
 
+render(): {
+    return (
+        <h/>
+        ~~~~ [Don't use 'h' as a type. Use 'div' instead.]
+        <h>test</h>
+        ~~~ [Don't use 'h' as a type. Use 'div' instead.]
+        );
+}
+
+render
+
 // no warning for separately scoped types
 let e: foo.String;
 
