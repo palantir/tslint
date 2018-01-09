@@ -42,7 +42,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 /**
  * Linter that can lint multiple files in consecutive runs.
  */
-class Linter {
+export class Linter {
     public static VERSION = "5.8.0";
 
     public static findConfiguration = findConfiguration;
@@ -261,11 +261,6 @@ class Linter {
         }
     }
 }
-
-// tslint:disable-next-line:no-namespace
-namespace Linter { }
-
-export = Linter;
 
 function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
     const map = new Map<K, V[]>();
