@@ -117,4 +117,11 @@ declare const notATuple: NotATuple;
 unknownName!;
 ~~~~~~~~~~~~ [0]
 
+function foo() {
+    let xx: 1 | 2 = 1;
+    const f = () => xx = 2;
+    f();
+    xx as 1 | 2 === 2; // xx is inferred as 1, assertion is necessary to avoid compile error
+}
+
 [0]: This assertion is unnecessary since it does not change the type of the expression.
