@@ -22,7 +22,7 @@ import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
-        description: "Enforces not deleting computed expressions.",
+        description: "Bans usage of the delete operator with computed key expressions.",
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
