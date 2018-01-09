@@ -26,10 +26,11 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
+    IConfigurationFile,
     JSON_CONFIG_FILENAME,
 } from "./configuration";
 import { FatalError } from "./error";
-import { LintResult } from "./index";
+import { ILinterPlugin, LintResult } from "./index";
 import * as Linter from "./linter";
 import { flatMap } from "./utils";
 
@@ -235,6 +236,30 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
     return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
 }
 
+function createPluginInstances(configuration: IConfigurationFile | undefined): ILinterPlugin[] {
+    const plugins: ILinterPlugin[] = [];
+    if (configuration) {
+        for (const pluginName of configuration.plugins) {
+            const pluginModuleName = `tslint-plugin-${pluginName}`;
+            let pluginConstructor: (new() => ILinterPlugin) | undefined;
+            try {
+                pluginConstructor = require(pluginModuleName) as (new() => ILinterPlugin);
+            } catch (err) {
+                throw new FatalError(`'${pluginName}' plugin has failed to initialize because '${pluginModuleName}' can't be required.` +
+                    `Is the dependency installed ? (${err})`);
+            }
+            if (pluginConstructor) {
+                try {
+                    plugins.push(new pluginConstructor());
+                } catch (err) {
+                    throw new FatalError(`Àn error has occured while creating '${pluginName}' plugin instance. (${err})`);
+                }
+            }
+        }
+    }
+    return plugins;
+}
+
 async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
@@ -247,12 +272,14 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
 
     let lastFolder: string | undefined;
     let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
+    let plugins = createPluginInstances(configFile);
 
     for (const file of files) {
         if (options.config === undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
                 configFile = findConfiguration(null, folder).results;
+                plugins = createPluginInstances(configFile);
                 lastFolder = folder;
             }
         }
@@ -262,7 +289,16 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
 
         const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
         if (contents !== undefined) {
-            linter.lint(file, contents, configFile);
+            let lintBy: ILinterPlugin | undefined;
+            for (const plugin of plugins) {
+                if (plugin.lint(linter, file, contents, configFile)) {
+                    lintBy = plugin;
+                    break;
+                }
+            }
+            if (!lintBy) {
+                linter.lint(file, contents, configFile);
+            }
         }
     }
 

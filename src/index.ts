@@ -49,3 +49,7 @@ export interface ILinterOptions {
     formattersDirectory?: string;
     rulesDirectory?: string | string[];
 }
+
+export interface ILinterPlugin {
+    lint(linter: Linter, fileName: string, source: string, configFile: Configuration.IConfigurationFile | undefined): boolean;
+}

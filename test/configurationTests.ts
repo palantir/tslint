@@ -461,6 +461,7 @@ function getEmptyConfig(): IConfigurationFile {
         extends: [],
         jsRules: new Map<string, Partial<IOptions>>(),
         linterOptions: {},
+        plugins: [],
         rules: new Map<string, Partial<IOptions>>(),
         rulesDirectory: [],
     };

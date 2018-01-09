@@ -50,6 +50,11 @@ export interface IConfigurationFile {
     }>;
 
     /**
+     * An array of plugins to use.
+     */
+    plugins: string[];
+
+    /**
      * Directories containing custom rules. Resolved using node module semantics.
      */
     rulesDirectory: string[];
@@ -76,6 +81,7 @@ export const DEFAULT_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
     extends: ["tslint:recommended"],
     jsRules: new Map<string, Partial<IOptions>>(),
+    plugins: [],
     rules: new Map<string, Partial<IOptions>>(),
     rulesDirectory: [],
 };
@@ -84,6 +90,7 @@ export const EMPTY_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
     extends: [],
     jsRules: new Map<string, Partial<IOptions>>(),
+    plugins: [],
     rules: new Map<string, Partial<IOptions>>(),
     rulesDirectory: [],
 };
@@ -329,10 +336,14 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     const combinedRulesDirs = targetConfig.rulesDirectory.concat(nextConfigSource.rulesDirectory);
     const dedupedRulesDirs = Array.from(new Set(combinedRulesDirs));
 
+    const combinedPlugins = targetConfig.plugins.concat(nextConfigSource.plugins);
+    const dedupedPlugins = Array.from(new Set(combinedPlugins));
+
     return {
         extends: [],
         jsRules: combineMaps(targetConfig.jsRules, nextConfigSource.jsRules),
         linterOptions: combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions),
+        plugins: dedupedPlugins,
         rules: combineMaps(targetConfig.rules, nextConfigSource.rules),
         rulesDirectory: dedupedRulesDirs,
     };
@@ -455,6 +466,7 @@ function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity
 }
 
 export interface RawConfigFile {
+    plugins?: string | string[];
     extends?: string | string[];
     linterOptions?: IConfigurationFile["linterOptions"];
     rulesDirectory?: string | string[];
@@ -481,6 +493,7 @@ export function parseConfigFile(configFile: RawConfigFile, configFileDir?: strin
         extends: arrayify(configFile.extends),
         jsRules: parseRules(configFile.jsRules),
         linterOptions: parseLinterOptions(configFile.linterOptions),
+        plugins: arrayify(configFile.plugins),
         rules: parseRules(configFile.rules),
         rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
     };
