@@ -136,3 +136,16 @@ if (true) {
 } else {
     false;
 }
+
+// don't crash on parse error
+interface InvalidInterface = {
+  foo: string,
+}
+
+class InvalidClass = {
+  foo: string,
+}
+
+foo = class InvalidClassExpression = {
+  foo: string,
+}
