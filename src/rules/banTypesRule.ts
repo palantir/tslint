@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isTypeReferenceNode } from "tsutils";
+import { isJsxOpeningElement, isJsxSelfClosingElement, isTypeReferenceNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -65,8 +65,17 @@ function parseOption([pattern, message]: [string, string | undefined]): Option {
 
 function walk(ctx: Lint.WalkContext<Option[]>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+
+        let typeName: string | null =  null;
         if (isTypeReferenceNode(node)) {
-            const typeName = node.getText(ctx.sourceFile);
+            typeName = node.getText(ctx.sourceFile);
+        }
+
+        if (isJsxOpeningElement(node) || isJsxSelfClosingElement(node)) {
+            typeName = node.tagName.getText();
+        }
+
+        if (typeName !== null) {
             for (const ban of ctx.options) {
                 if (ban.pattern.test(typeName)) {
                     ctx.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(typeName, ban.message));
