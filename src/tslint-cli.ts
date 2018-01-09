@@ -20,7 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
-import { VERSION } from "./linter";
+import { Linter } from "./linter";
 import { run } from "./runner";
 import { arrayify, dedent } from "./utils";
 
@@ -205,7 +205,7 @@ const builtinOptions: Option[] = [
     },
 ];
 
-commander.version(VERSION, "-v, --version");
+commander.version(Linter.VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);

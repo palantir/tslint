@@ -30,7 +30,7 @@ import {
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
-import * as Linter from "./linter";
+import { Linter } from "./linter";
 import { flatMap } from "./utils";
 
 export interface Options {
