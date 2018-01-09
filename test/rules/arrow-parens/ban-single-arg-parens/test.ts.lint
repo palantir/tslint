@@ -22,6 +22,8 @@ const validAsync = async (param: any) => {};
 var e = (a => {})(1);
 var f = ab => {};
 
+arr.map(a => b);
+
 // invalid case
 var a = (a) => {};
          ~         [0]
@@ -51,4 +53,18 @@ let foo = async (
     ~~~ [0]
 ) => bar;
 
+arr.map((a) => b);
+         ~ [0]
+
+foo(async (a) => b);
+           ~ [0]
+
+function *gen() { yield (a) => b; }
+                         ~ [0]
+
+export default (a) => b;
+                ~ [0]
+
+throw (a) => b;
+       ~ [0]
 [0]: Parentheses are prohibited around the parameter in this single parameter arrow function

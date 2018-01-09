@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isIdentifier, isReturnStatement, isTypeReference, isUnionType } from "tsutils";
+import { hasModifier, isIdentifier, isReturnStatement, isTypeFlagSet, isTypeReference, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -113,10 +113,10 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
         : undefined;
     const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node), checker);
 
-    if (returnType === undefined || Lint.isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
+    if (returnType === undefined || isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
         return undefined;
     }
-    if ((Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? isEffectivelyVoidPromise : isEffectivelyVoid)(returnType)) {
+    if ((hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? isEffectivelyVoidPromise : isEffectivelyVoid)(returnType)) {
         return ReturnKind.Void;
     }
     return ReturnKind.Value;
@@ -128,7 +128,7 @@ function isEffectivelyVoidPromise(type: ts.Type): boolean {
     // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
 
     // tslint:disable-next-line no-bitwise
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
         isUnionType(type) && type.types.every(isEffectivelyVoidPromise) ||
         isTypeReference(type) && type.typeArguments !== undefined && type.typeArguments.length === 1 &&
             isEffectivelyVoidPromise(type.typeArguments[0]);
@@ -137,7 +137,7 @@ function isEffectivelyVoidPromise(type: ts.Type): boolean {
 /** True for `void`, `undefined`, or `void | undefined`. */
 function isEffectivelyVoid(type: ts.Type): boolean {
     // tslint:disable-next-line no-bitwise
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
         isUnionType(type) && type.types.every(isEffectivelyVoid);
 }
 

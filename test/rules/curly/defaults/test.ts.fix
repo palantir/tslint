@@ -96,3 +96,8 @@ if (true) { /* some
              comment */
     console.log(z);
 }
+
+if (foo === "bar") { throw new Error(
+  "baz"
+)
+}

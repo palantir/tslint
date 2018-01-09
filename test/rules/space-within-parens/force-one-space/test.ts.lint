@@ -14,5 +14,8 @@ foo(/*no param*/);
     ~nil [0]
                 ~nil [0]
 
+// empty parens are always allowed
+foo();
+
 [0]: Needs 1 whitespace within parentheses
 [1]: No more than 1 whitespace within parentheses allowed
