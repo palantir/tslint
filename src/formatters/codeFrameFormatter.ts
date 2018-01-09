@@ -20,7 +20,7 @@ import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import codeFrame = require("babel-code-frame");
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as Utils from "../utils";
 

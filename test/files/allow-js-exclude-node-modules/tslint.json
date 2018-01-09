@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "semicolon": [
+      true, "always"
+    ]
+  },
+  "jsRules": {
+    "semicolon": [
+      true, "always"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+// no errors in declaration files
+declare type T = any;
+declare class C<T> {}
+declare namespace ns {
+    type T = C;
+    class C<T = any> {}
+}

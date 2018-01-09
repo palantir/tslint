@@ -19,7 +19,7 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -62,11 +62,13 @@ export class Formatter extends AbstractFormatter {
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
 
             // Output the name of each file once
             if (currentFile !== fileName) {
                 outputLines.push("");
-                outputLines.push(fileName);
+                outputLines.push(`${fileName}${chalk.hidden(`:${positionTuple}`)}`);
                 currentFile = fileName;
             }
 
@@ -79,9 +81,6 @@ export class Formatter extends AbstractFormatter {
             ruleName     = chalk.grey(ruleName);
 
             // Lines
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             positionTuple = failure.getRuleSeverity() === "warning"

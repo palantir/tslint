@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTokenKind, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
     }
 
@@ -57,7 +57,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
     }
 
     /** Wraps `visitNode` with the correct `this` binding and discards the return value to prevent `forEachChild` from returning early */
-    private visitNodeCallback = (node: ts.Node) => void this.visitNode(node);
+    private readonly visitNodeCallback = (node: ts.Node) => void this.visitNode(node);
 
     private visitNode(node: ts.Node, anyOk?: boolean): boolean | undefined {
         switch (node.kind) {
@@ -119,6 +119,12 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return initializer !== undefined &&
                     this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
+            case ts.SyntaxKind.SpreadAssignment:
+                return this.visitNode(
+                    (node as ts.SpreadAssignment).expression,
+                    // allow any in object spread, but not in object rest
+                    !isReassignmentTarget(node.parent as ts.ObjectLiteralExpression),
+                );
             case ts.SyntaxKind.ComputedPropertyName:
                 return this.visitNode((node as ts.ComputedPropertyName).expression, true);
             case ts.SyntaxKind.TaggedTemplateExpression: {
@@ -363,9 +369,9 @@ function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
-    return Lint.isTypeFlagSet(checker.getTypeAtLocation(expr), ts.TypeFlags.StringLike);
+    return isTypeFlagSet(checker.getTypeAtLocation(expr), ts.TypeFlags.StringLike);
 }
 
 function isAny(type: ts.Type | undefined): boolean {
-    return type !== undefined && Lint.isTypeFlagSet(type, ts.TypeFlags.Any);
+    return type !== undefined && isTypeFlagSet(type, ts.TypeFlags.Any);
 }
