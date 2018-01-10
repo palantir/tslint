@@ -289,7 +289,7 @@ describe("Configuration", () => {
         });
 
         it("applies defaultSeverity to preceding base configs", () => {
-            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-precendence.json");
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-precedence.json");
             assert.equal<RuleSeverity | undefined>(
                 config.rules.get("default-severity-unspecified")!.ruleSeverity,
                 "off",
