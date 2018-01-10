@@ -181,7 +181,7 @@ export const rules = {
             },
         ],
     },
-    "typeof-compare": true,
+    "typeof-compare": false, // deprecated in TSLint 5.9.0
     "unified-signatures": true,
     "use-isnan": true,
     "variable-name": {
