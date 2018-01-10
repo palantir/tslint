@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "space-within-parens",
-        description: "Enforces spaces within parentheses or disallow them.",
+        description: "Enforces spaces within parentheses or disallow them.  Empty parentheses () are always allowed.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             You may enforce the amount of whitespace within parentheses.
@@ -73,9 +73,13 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         forEachToken(sourceFile, (token: ts.Node) => {
             if (token.kind === ts.SyntaxKind.OpenParenToken) {
-                this.checkOpenParenToken(token);
+                if (sourceFile.text.charAt(token.end) !== ")") {
+                    this.checkOpenParenToken(token);
+                }
             } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
-                this.checkCloseParenToken(token);
+                if (sourceFile.text.charAt(token.end - 2) !== "(") {
+                    this.checkCloseParenToken(token);
+                }
             }
         });
     }
