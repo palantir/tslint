@@ -81,6 +81,7 @@ export function loadRules(ruleOptionsList: IOptions[],
     return rules;
 }
 
+/** @internal private API */
 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
     const camelizedName = transformName(name);
     // first check for core rules
@@ -123,12 +124,12 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath?: bool
         return cachedRule === "not-found" ? undefined : cachedRule;
     }
 
-    // resolve directory as an absolute path if it's a custom rule directory
+    // treat directory as a relative path (which needs to be resolved) if it's a custom rule directory
     let absolutePath: string = directory;
     if (isCustomPath) {
         absolutePath = path.resolve(directory);
         if (!fs.existsSync(absolutePath)) {
-            throw new FatalError(`Could not find custom rule directory: ${directory}`);
+            throw new FatalError(`Could not find custom rule directory: ${absolutePath}`);
         }
     }
 
