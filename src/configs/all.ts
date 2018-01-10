@@ -198,6 +198,7 @@ export const rules = {
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
+    "newline-per-chained-call": true,
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
