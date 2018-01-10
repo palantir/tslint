@@ -4,12 +4,12 @@ title: Configuring TSLint
 permalink: /usage/configuration/
 ---
 
-### tslint.json
+### TSLint Configuration
 
-When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` is used to
-configure which rules get run and each of their options. This configuration file may be comp
+When using [the CLI][0] or many [third-party tools][1], a file named `tslint.json` or `tslint.yaml` is used to
+configure which rules get run and each of their options.
 
-`tslint.json` files can have the following fields specified:
+`tslint.json` or `tslint.yaml` files can have the following fields specified:
 
 * `extends?: string | string[]`:
 The name of a built-in configuration preset (see built-in presets below), or a path or
@@ -30,7 +30,7 @@ A path to a directory or an array of paths to directories of [custom rules][2]. 
   - Any rules specified in this block will override those configured in any base configuration being extended.
   - [Check out the full rules list here][3].
 * `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files.
-* `defaultSeverity?: "error" | "warning" | "off"`: The severity level used when a rule specifies a default warning level. If undefined, "error" is used. This value is not inherited and is only applied to rules in this file.
+* `defaultSeverity?: "error" | "warning" | "off"`: The severity level that is applied to rules in this config file as well as rules in any inherited config files which have their severity set to "default". If undefined, "error" is used as the defaultSeverity.
 * `linterOptions?: { exclude?: string[] }`:
   - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
 
@@ -69,6 +69,37 @@ An example `tslint.json` file might look like this:
         }
     }
 }
+```
+
+The corresponding YAML file looks like this:
+
+```yaml
+---
+extends: "tslint:recommended"
+rulesDirectory:
+    - path/to/custom/rules/directory/
+    - another/path/
+rules:
+    max-line-length:
+        options: [120]
+    new-parens: true
+    no-arg: true
+    no-bitwise: true
+    no-conditional-assignment: true
+    no-consecutive-blank-lines: false
+    no-console:
+        severity: warning
+        options:
+            - debug
+            - info
+            - log
+            - time
+            - timeEnd
+            - trace
+jsRules:
+    max-line-length:
+        options: [120]
+...
 ```
 
 ### Rule severity

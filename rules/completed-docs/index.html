@@ -25,7 +25,7 @@ optionsDescription: |-
       * All types may also provide `"tags"`
         with members specifying tags that allow the docs to not have a body.
           * `"content"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.
-          * `"exists"`: Array of tags that must only exist to count as complete docs.
+          * `"existence"`: Array of tags that must only exist to count as complete docs.
 
   Types that may be enabled are:
 
@@ -64,7 +64,7 @@ options:
                     items:
                       type: string
                     type: object
-                  exists:
+                  existence:
                     items:
                       type: string
                     type: array
@@ -87,7 +87,7 @@ options:
                     items:
                       type: string
                     type: object
-                  exists:
+                  existence:
                     items:
                       type: string
                     type: array
@@ -119,7 +119,9 @@ optionExamples:
         "enums": true,
         "functions": {"visibilities": ["exported"]},
         "methods": {"locations": "instance", "privacies": ["public", "protected"]},
-        "tags": {"content": {"see": ["#.*"]}, "exists": ["inheritdoc"]}
+        "properties": {
+          "tags": {"content": {"see": ["#.*"]}, "existence": ["inheritdoc"]}
+        }
       }
     ]
 type: style
@@ -159,7 +161,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -188,7 +190,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -217,7 +219,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -246,7 +248,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -275,7 +277,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -304,7 +306,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -342,7 +344,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -371,7 +373,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -409,7 +411,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },
@@ -438,7 +440,7 @@ optionsJSON: |-
                       },
                       "type": "object"
                     },
-                    "exists": {
+                    "existence": {
                       "items": {
                         "type": "string"
                       },

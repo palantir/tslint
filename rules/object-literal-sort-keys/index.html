@@ -13,21 +13,25 @@ optionsDescription: |
   By default, this rule checks that keys are in alphabetical order.
   The following may optionally be passed:
 
-  * "ignore-case" will to compare keys in a case insensitive way.
+  * "ignore-case" will compare keys in a case insensitive way.
   * "match-declaration-order" will prefer to use the key ordering of the contextual type of the object literal, as in:
 
       interface I { foo: number; bar: number; }
       const obj: I = { foo: 1, bar: 2 };
 
   If a contextual type is not found, alphabetical ordering will be used instead.
+  * "shorthand-first" will enforce shorthand properties to appear first, as in:
+
+      const obj = { a, c, b: true };
 options:
   type: string
   enum:
     - ignore-case
     - match-declaration-order
+    - shorthand-first
 optionExamples:
   - 'true'
-  - '[true, "ignore-case", "match-declaration-order"]'
+  - '[true, "ignore-case", "match-declaration-order", "shorthand-first"]'
 type: maintainability
 typescriptOnly: false
 layout: rule
@@ -37,7 +41,8 @@ optionsJSON: |-
     "type": "string",
     "enum": [
       "ignore-case",
-      "match-declaration-order"
+      "match-declaration-order",
+      "shorthand-first"
     ]
   }
 ---

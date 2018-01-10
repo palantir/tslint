@@ -6,19 +6,64 @@ rationale: |-
   Limiting the length of a line of code improves code readability.
   It also makes comparing code side-by-side easier and improves compatibility with
   various editors, IDEs, and diff viewers.
-optionsDescription: An integer indicating the max length of lines.
+optionsDescription: |-
+
+  It can take one argument, which can be any of the following:
+  * integer indicating maximum length of lines.
+  * object with keys:
+    * `limit` - number < 0 defining max line length
+    * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.
+      For example:
+       * `// ` pattern will ignore all in-line comments.
+       * `^import ` pattern will ignore all import statements.
+       * `^export {(.*?)}` pattern will ignore all multiple export statements.
+       * `class [a-zA-Z] implements ` pattern will ignore all class declarations implementing interfaces.
+       * `^import |^export {(.*?)}|class [a-zA-Z] implements |// ` pattern will ignore all the cases listed above.
+   
 options:
-  type: number
-  minimum: '1'
+  type: array
+  items:
+    oneOf:
+      - type: number
+      - type: object
+        properties:
+          limit:
+            type: number
+          ignore-pattern:
+            type: string
+        additionalProperties: false
+  minLength: 1
+  maxLength: 2
 optionExamples:
   - '[true, 120]'
+  - '[true, {"limit": 120, "ignore-pattern": "^import |^export {(.*?)}"}]'
 type: maintainability
 typescriptOnly: false
 layout: rule
 title: 'Rule: max-line-length'
 optionsJSON: |-
   {
-    "type": "number",
-    "minimum": "1"
+    "type": "array",
+    "items": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "number"
+            },
+            "ignore-pattern": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "minLength": 1,
+    "maxLength": 2
   }
 ---

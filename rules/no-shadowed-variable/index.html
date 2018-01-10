@@ -9,6 +9,27 @@ optionsDescription: |-
   and `"typeParameter"`. Just set the value to `false` for the check you want to disable.
   All checks default to `true`, i.e. are enabled by default.
   Note that you cannot disable variables and parameters.
+
+  The option `"temporalDeadZone"` defaults to `true` which shows errors when shadowing block scoped declarations in their
+  temporal dead zone. When set to `false` parameters, classes, enums and variables declared
+  with `let` or `const` are not considered shadowed if the shadowing occurs within their
+  [temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).
+
+  The following example shows how the `"temporalDeadZone"` option changes the linting result:
+
+  ```ts
+  function fn(value) {
+      if (value) {
+          const tmp = value; // no error on this line if "temporalDeadZone" is false
+          return tmp;
+      }
+      let tmp = undefined;
+      if (!value) {
+          const tmp = value; // this line always contains an error
+          return tmp;
+      }
+  }
+  ```
           
 options:
   type: object
@@ -28,6 +49,8 @@ options:
     typeAlias:
       type: boolean
     typeParameter:
+      type: boolean
+    temporalDeadZone:
       type: boolean
 optionExamples:
   - 'true'
@@ -74,6 +97,9 @@ optionsJSON: |-
         "type": "boolean"
       },
       "typeParameter": {
+        "type": "boolean"
+      },
+      "temporalDeadZone": {
         "type": "boolean"
       }
     }
