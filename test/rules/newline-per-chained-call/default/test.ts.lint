@@ -85,6 +85,28 @@ SomeClass.propA.propB.methodB(() => {
     return a + 1;
 });
 
+SomeClass.propA.propB.methodB(() => {
+    return "hello Yay!";
+})
+.helloYay((a: number) => {
+    return obj.method()
+                .chainedButOkay(
+                    objB.nested().superNestedCall()
+                                 ~~~~~~~~~~~~~~~~ [ERROR]
+                )
+});
+
+SomeClass.propA.propB.methodB(() => {
+    return "hello Yay!";
+})
+.helloYay((a: number) => {
+    return obj.method()
+                .chainedButOkay(
+                    objB.nested()
+                        .superNestedCall()
+                )
+});
+
 SomeClass
     .propA
     .propB
