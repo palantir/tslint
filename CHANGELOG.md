@@ -1,6 +1,14 @@
 Change Log
 ===
 
+v5.9.1
+---
+
+## :hammer_and_wrench: Bugfixes
+
+- [bugfix] Removed extraneous deprecation warning produced when using `tslint:recommended` or `tslint:latest` by disabling `typeof-compare` in these rulesets. (#3639)
+- [bugfix] Resolve directories as absolute paths when validating custom `rulesDirectory` paths, which fixes usage with tslint-loader. (#3640)
+
 v5.9.0
 ---
 
