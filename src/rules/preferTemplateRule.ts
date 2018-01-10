@@ -27,6 +27,14 @@ interface Options {
     allowSingleConcat: boolean;
 }
 
+interface EvaluatedExpression {
+    exp: ts.Expression;
+    line: number;
+    char: number;
+    isStringLike: boolean;
+    hasNewLine: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -67,52 +75,88 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return ts.forEachChild(node, cb);
         }
 
-        const expressions = extractAllExpressions(node);
+        const expressions = extractExpressions(node);
 
-        if (!expressions.some(isStringLike)) {
-            // No strings/templates so nothing to do
-            return;
-        }
-
-        if (expressions.every(isStringLike)) {
-            // All expressions are strings/templates
-            const stringLikeExp = expressions as StringLike[];
-
-            if (stringLikeExp.some(containsNewline)) {
-                // If they're joined by a newline, recommend a template expression instead.
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING_MULTILINE);
-            } else if (
-                stringLikeExp.reduce(containsStringLiteralsOnSameLine(ctx.sourceFile), []) ===
-                undefined
-            ) {
-                // If multiple literals are on the same line, recommend a template expession
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-            // Otherwise ignore.
-            return;
-        }
-
-        if (
-            ctx.options.allowSingleConcat &&
-            expressions.length === 2 &&
-            (expressions[0].kind === ts.SyntaxKind.StringLiteral ||
-                expressions[1].kind === ts.SyntaxKind.StringLiteral)
-        ) {
+        if (// No strings/templates so nothing to do
+            !expressions.some(isStringLike)
             // Special case allowed by option
+            || (ctx.options.allowSingleConcat && isSingleConcat(expressions))) {
             return;
         }
-        ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+
+        const evalExpressions = evaluateExpressions(expressions, ctx.sourceFile);
+        const groupedExpressions = groupBy(evalExpressions, el => el.line);
+
+        if (evalExpressions.some(exp => exp.isStringLike && exp.hasNewLine)) {
+            // Multiline template
+        } else {
+            // (Concatenated) single line stinglikes
+            groupedExpressions.forEach(exps => {
+                if (exps.length <= 1) return;
+
+                let fix: Lint.Replacement[] = [];
+                if (exps.every(exp => exp.exp.kind == ts.SyntaxKind.StringLiteral)) {
+                    fix = concatStrings(exps);
+                } else {
+                    fix = concatMixed(exps);
+                }
+                ctx.addFailure(exps[0].exp.getStart(), exps[exps.length-1].exp.end, Rule.FAILURE_STRING, fix);
+            });
+        }
+        //     && evalExpressions.every(exp => !exp.hasNewLine)) {
+        //     return;
+        // }
+
+        // if (expressions.every(isStringLike)) {
+        //     // All expressions are strings/templates
+        //     const stringLikeExp = expressions as StringLike[];
+
+        //     if (stringLikeExp.some(containsNewline)) {
+        //         // If they're joined by a newline, recommend a template expression instead.
+        //         ctx.addFailureAtNode(node, Rule.FAILURE_STRING_MULTILINE);
+        //         return;
+        //     }
+            
+        //     const stringLikeExp.map();
+        //     if (stringLikeExp.reduce(containsStringLiteralsOnSameLine(ctx.sourceFile), []) === undefined) {
+        //         // If multiple literals are on the same line, recommend a template expression
+        //         ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        //     }
+        //     // Otherwise ignore.
+        //     return;
+        // }
+
+        // ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
     });
 }
 
-function extractAllExpressions(node: ts.Expression): ts.Expression[] {
+function isSingleConcat(expressions: ts.Expression[]) {
+    return expressions.length === 2
+        && ((expressions[0].kind === ts.SyntaxKind.StringLiteral && !isStringLike(expressions[1]))
+            || (!isStringLike(expressions[0]) && expressions[1].kind === ts.SyntaxKind.StringLiteral));
+}
+
+function evaluateExpressions(expressions: ts.Expression[], sourceFile: ts.SourceFile): EvaluatedExpression[] {
+    return expressions.map(exp => {
+        const lineAndChar = sourceFile.getLineAndCharacterOfPosition(exp.getStart());
+        return {
+            exp: exp,
+            line: lineAndChar.line,
+            char: lineAndChar.character,
+            isStringLike: isStringLike(exp),
+            hasNewLine: isStringLike(exp) ? containsNewline(exp) : false,
+        };
+    });
+}
+
+function extractExpressions(node: ts.Expression): ts.Expression[] {
     if (!isPlusExpression(node)) {
         return [node];
     }
 
     const { left, right } = node;
 
-    return Array.prototype.concat(extractAllExpressions(left), extractAllExpressions(right));
+    return Array.prototype.concat(extractExpressions(left), extractExpressions(right));
 }
 
 type StringLike = ts.StringLiteral | ts.TemplateLiteral;
@@ -125,23 +169,22 @@ function containsNewline(node: StringLike): boolean {
     }
 }
 
-function containsStringLiteralsOnSameLine(sourceFile: ts.SourceFile) {
-    return (lineNumbers: number[] | undefined, literal: StringLike) => {
-        // skip check if undefined
-        if (lineNumbers === undefined) {
-            return undefined;
-        }
+// function containsStringLiteralsOnSameLine(sourceFile: ts.SourceFile) {
 
-        // use literal.end because pos may include leading newlines
-        const lineNumber = sourceFile.getLineAndCharacterOfPosition(literal.end).line;
-        if (lineNumbers.some(el => el === lineNumber)) {
-            // lineNumber collision therefore all further checks can be skipped
-            return undefined;
-        }
-        lineNumbers.push(lineNumber);
-        return lineNumbers;
-    };
-}
+//     return (lineNumbers: number[] | undefined, literal: StringLike)  => {
+//         // skip check if undefined
+//         if (lineNumbers === undefined) { return undefined; }
+
+//         // use literal.end because pos may include leading newlines
+//         const lineNumber = sourceFile.getLineAndCharacterOfPosition(literal.end).line;
+//         if (lineNumbers.some((el) => el === lineNumber)) {
+//             // lineNumber collision therefore all further checks can be skipped
+//             return undefined;
+//         }
+//         lineNumbers.push(lineNumber);
+//         return lineNumbers;
+//     };
+// }
 
 function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {
     return isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken;
@@ -156,4 +199,70 @@ function isStringLike(node: ts.Node): node is StringLike {
         default:
             return false;
     }
+}
+
+type Key = string | number | symbol;
+function groupBy<T, U extends Key>(array: T[], accessor: (el: T) => U): Map<U, T[]> {
+    return array.reduce(
+        (prev, cur) => {
+            const key = accessor(cur);
+            const elements = prev.get(key);
+            if (elements == undefined) {
+                prev.set(key,[cur]);
+            } else {
+                elements.push(cur);
+            }
+            return prev;
+        },
+        new Map<U, T[]>());
+}
+
+function concatStrings(evaluateExpressions: EvaluatedExpression[]) {
+    const exps = evaluateExpressions.sort((e1,e2) => e1.char - e2.char);
+
+    const fixes: Lint.Replacement[] = [];
+    for (let i = 0; i < exps.length-1; i++) {
+        const start = exps[i].exp.end - 1;
+        const end = exps[i+1].exp.getStart() + 1;
+        fixes.push(Lint.Replacement.replaceFromTo(start, end, ""));
+    }
+    return fixes;
+}
+
+function concatMixed(evaluateExpressions: EvaluatedExpression[]) {
+    const exps = evaluateExpressions.sort((e1,e2) => e1.char - e2.char);
+
+    const fixes: Lint.Replacement[] = [];
+
+    if (!exps[0].isStringLike) {
+        fixes.push(Lint.Replacement.appendText(exps[0].exp.getStart(), "`${"));
+    } else if (exps[0].exp.kind == ts.SyntaxKind.StringLiteral) {
+        fixes.push(new Lint.Replacement(exps[0].exp.getStart(), 1, "`"));
+    }
+
+    for (let i = 0; i < exps.length-1; i++) {
+        const eval1 = exps[i];
+        const exp1 = eval1.exp;
+        const eval2 = exps[i+1];
+        const exp2 = eval2.exp;
+
+        if (!eval1.isStringLike && !eval2.isStringLike) { continue; }
+        if (!eval1.isStringLike) {
+            fixes.push(Lint.Replacement.replaceFromTo(exp1.end, exp2.getStart() + 1, "}"));
+            continue;
+        }
+        if (!eval2.isStringLike) {
+            fixes.push(Lint.Replacement.replaceFromTo(exp1.end - 1, exp2.getStart(), "${"));
+            continue;
+        }
+        fixes.push(Lint.Replacement.deleteFromTo(exp1.end - 1, exp2.getStart() + 1));    
+    }
+
+    if (!exps[exps.length - 1].isStringLike) {
+        fixes.push(Lint.Replacement.appendText(exps[exps.length - 1].exp.end, "}`"));
+    } else if (exps[exps.length - 1].exp.kind == ts.SyntaxKind.StringLiteral) {
+        fixes.push(new Lint.Replacement(exps[exps.length - 1].exp.end - 1, 1, "`"));
+    }
+    
+    return fixes;
 }

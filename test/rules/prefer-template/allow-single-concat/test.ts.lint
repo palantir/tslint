@@ -71,7 +71,7 @@ b` +
 1 + 1 + "a";
 ~~~~~~~~~~~ [0]
 
-1 + "a" + "b" + "c"
+1 + "a" + "b" + "c";
 ~~~~~~~~~~~~~~~~~~~ [0]
 
 [0]: Use a template literal instead of concatenating with a string literal.

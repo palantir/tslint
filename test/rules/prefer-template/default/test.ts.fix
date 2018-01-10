@@ -1,0 +1,61 @@
+// Passing testcases
+
+// OK to concatenate strings without newlines on different lines.
+"a" +
+"b" +
+"c";
+
+// See above but with mixed strings
+"a" +
+`${b}` +
+"c";
+
+x`a` + y; // OK, can't simplify something with a tag
+
+1 + 1;
+x + y;
+
+// Failing testcases
+
+`a${x}`;
+`${x}a`;
+
+`${a}${x}`;
+`${x}${a}`;
+
+`a${x}b`;
+
+`${x}a${y}`;
+
+`a${x + y}`;
+
+`a${x}b${y}c`;
+
+`a${x}b${y}c`;
+
+"abc"; // Not OK, because strings are on the same line
+
+`a${b}c`; // Same for mixed string concatenation
+
+"ab";
+
+`${hello} ${world}`;
+
+`hello ${world}`;
+
+`a
+b`;
+
+`a
+b`;
+
+`a
+bc`
+
+`${1 + 1}a`;
+
+`${1}abc`;
+
+"ab" +
+"c";
+

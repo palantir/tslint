@@ -73,8 +73,13 @@ b` +
 1 + 1 + "a";
 ~~~~~~~~~~~ [0]
 
-1 + "a" + "b" + "c"
+1 + "a" + "b" + "c";
 ~~~~~~~~~~~~~~~~~~~ [0]
+
+"a" + "b" +
+~~~~~~~~~ [0]
+"c";
+
 
 [0]: Use a template literal instead of concatenating with a string literal.
 [1]: Use a multiline template literal instead of concatenating string literals with newlines.
