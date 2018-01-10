@@ -106,6 +106,7 @@ export const rules = {
         true,
         "check-parameters",
     ],
+    "no-dynamic-delete": true,
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
