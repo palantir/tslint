@@ -1,6 +1,120 @@
 Change Log
 ===
 
+v5.9.0
+---
+
+## :warning: Deprecations
+
+- [deprecation] Several utility functions from `src/language/utils.ts` have been deprecated (#3476)
+- [deprecation] Linting non-existent files now outputs a warning. This will be an error in TSLint 6. (#3313)
+
+## Updates to `tslint:latest` configuration
+
+_None!_
+
+## Configuration inheritance changes
+
+Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defualtSeverity`: #2569.
+
+`defaultSeverity` defined in a `tslint.json` file will now override the `defaultSeverity` value defined in any configurations you are extending.
+This means that any rules specified in the base configurations can now take on a new `defaultSeverity` if you so choose. If you extend multiple
+configuration files, the `defaultSeverity` defined in the last one wins.
+
+In practice, this allows users to, for example, more easily use the built-in TSLint configurations (`tslint:recommended`, `tslint:latest`, `tslint:all`)
+and treat all errors as warnings instead of errors.
+
+For more details, see the relevant PRs:
+
+- Override `defaultSeverity` defined in extended configs (#3449)
+- Inherit defaultSeverity and apply it to preceding base configs (#3530)
+
+## :tada: Features
+
+- [feature] Support yaml configuration files (#1598) (#3433)
+- [new-fixer] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) (#3475)
+- [new-rule] [`no-dynamic-delete`](https://palantir.github.io/tslint/rules/no-dynamic-delete/) (#3573)
+- [new-rule] [`prefer-readonly`](https://palantir.github.io/tslint/rules/prefer-readonly/) (#2896)
+- [new-rule] [`newline-per-chained-call`](https://palantir.github.io/tslint/rules/newline-per-chained-call/) (#3278)
+- [new-rule-option] `"temporalDeadZone"` for [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) to ignore shadowing in the temporal dead zone of classes, parameters, enums and variables declared with `let` or `const`
+(#3389)
+- [new-rule-option] `"shorthand-first"` for [`object-literal-sort-key`](https://palantir.github.io/tslint/rules/object-literal-sort-key) (#3607)
+- [new-rule-option] Add support for an ignore pattern for [`max-line-length`](https://palantir.github.io/tslint/rules/max-line-length/) (#3099)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] Update commander.js dependency to prevent users from transitively installing a buggy 2.12.0 release (#3510)
+- [bugfix] `--project` excludes all files of external dependencies (#3320)
+- [bugfix] Show errors when `tsconfig.json` is invalid (#3410)
+- [bugfix] [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) don't crash on malformed package.json (#3373)
+- [bugfix] [`strict-type-predicates`](https://palantir.github.io/tslint/rules/strict-type-predicates/) allows comparing typeof result with non-literals (#3542)
+- [bugfix] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) fixed crash on unhandled tag (#3414)
+- [bugfix] [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) fixed regression that effectively disabled the rule with `\r\n` line breaks (#3427)
+- [bugfix] [`curly`](https://palantir.github.io/tslint/rules/curly/) fixer now correctly handles comments (#3473)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) fixed false-positive with namespaced types (#3487)
+- [bugfix] Removed potentailly dangerous fixer for [`no-any`](https://palantir.github.io/tslint/rules/no-any/) (#3486)
+- [bugfix] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) fixed false negatives for types with numeric keys (#3468)
+- [bugfix] [`callable-types`](https://palantir.github.io/tslint/rules/callable-types/) adds parentheses when fixing a type literal inside an array type (#3440)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) allows spreading an `any` value into an object (#3439)
+- [bugfix] no unnecessary whitespace before argument in callback functions fixed with [`arrow-parens`](https://palantir.github.io/tslint/rules/arrow-parens) fixer (#3618)
+- [bugfix] [`prefer-const`](https://palantir.github.io/tslint/rules/prefer-const/) false negative with index signature named like a variable (#3385)
+- [bugfix] [`whitespace`](https://palantir.github.io/tslint/rules/whitespace) rule checks property declarations if `"check-decl"` is enabled (#3546)
+- [bugfix] Using ternary operator for calling super() now passes [`no-duplicate-super`](https://palantir.github.io/tslint/rules/no-duplicate-super) rule. (#3544)
+- [bugfix] [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) now excludes declaration files and ambient modules (#3387)
+- [bugfix] [`no-duplicate-imports`](https://palantir.github.io/tslint/rules/no-duplicate-imports) Allow duplicate imports from separate ambient module declarations (#3398)
+- [bugfix] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) correctly recognises classes extending Promise (#3383)
+- [bugfix] [`prefer-conditional-expression`](https://palantir.github.io/tslint/rules/prefer-conditional-expression/): don't repeat error on nested if statements (#3528)
+- [bugfix] [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/): don't require documentation on methods in object literals (#3532)
+- [bugfix] [`one-line`](https://palantir.github.io/tslint/rules/one-line/) fixed crash on syntax error in class or interface (#3538)
+- [bugfix] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) allow `@template` tag if it has a description (#3415)
+- [bugfix] Fix condition for deprecation of [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare) (#3429)
+- [enhancement] Better error message for files not contained in the project (#3313)
+- [enhancement] `"properties"` option for [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) rule now checks getter and setter accessors. (#3497)
+- [enhancement]: [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers) ignores parseInt radix parameter (#3536)
+- [enhancement] Avoid duplicate I/O when using `--project` option (#3313)
+- [enhancement] clicking the filename in `stylish`-formatter's output jumps to the first failure in that file. (#3491)
+- [enhancement] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) ignores comma operator inside for-loop incrementor (#3485)
+- [enhancement] [`space-within-parens`](https://palantir.github.io/tslint/rules/space-within-parens/) updated to always allow empty parentheses `()`. (#3513)
+- [enhancement] Better error message syntax for [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) modifier lists (#3379)
+- [enhancement] Improve failure message & docs for [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) (#3384)
+- [enhancement] Output code warnings in yellow instead of red for codeFrame formatter (#3402)
+- [enhancement] Converted [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs) rule to use a function instead of a walker (#3466)
+- [docs] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/): fix metadata, list as "functionality" rule (#3612)
+- [docs] Enhance [`no-use-before-declare`](https://palantir.github.io/tslint/rules/no-use-before-declare/) documentation to clarify the rule's status (#3520)
+- [docs] Enhance [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) options documentation (#3519)
+- [docs] Add `hasFix` metadata for the [`indent`](https://palantir.github.io/tslint/rules/indent) rule (#3529)
+- [docs] Clearer rule description for [`no-irregular-whitespace`](https://palantir.github.io/tslint/rules/no-irregular-whitespace) (#3627)
+
+## Dev-centric
+
+- Refactor executableTests to use runner.ts where possible (#3374)
+- Remove test for plain test output (#3407)
+- Cleanup and refactoring of (rule|formatter)Loader (#3412)
+
+Thanks to our contributors!
+
+- Klaus Meinhardt
+- Josh Goldberg
+- Chris Barr
+- Nathan Shively-Sanders
+- Jeremy Morton
+- Sergey Koshechkin
+- Daniel Kucal
+- Eric Smekens
+- Johannes Choo
+- Elena Vilchik
+- Eugene Timokhov
+- Carlo Bottiglieri
+- reduckted
+- Glavin Wiechert
+- jbsingh
+- Mateusz Witkowski
+- HideDev
+- Bruno Lemos
+- aervin_
+- Roman
+- Ryan Waskiewicz
+
 v5.8.0
 ---
 
