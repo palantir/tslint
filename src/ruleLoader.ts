@@ -123,13 +123,13 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath?: bool
         return cachedRule === "not-found" ? undefined : cachedRule;
     }
 
-    // get absolute path
+    // resolve directory as an absolute path if it's a custom rule directory
     let absolutePath: string = directory;
     if (isCustomPath) {
-        if (!fs.existsSync(directory)) {
+        absolutePath = path.resolve(directory);
+        if (!fs.existsSync(absolutePath)) {
             throw new FatalError(`Could not find custom rule directory: ${directory}`);
         }
-        absolutePath = path.resolve(directory);
     }
 
     const Rule = loadRule(absolutePath, ruleName);
