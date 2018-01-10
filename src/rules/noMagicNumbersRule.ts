@@ -111,19 +111,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options: Options =
             args !== undefined
                 ? {
-                    allowElementAccess:
-                        typeof (args as {[key: string]: boolean})["allow-element-access"] === "boolean"
-                            ? args["allow-element-access"]
-                            : false,
-                    allowedNumbers:
-                        (args as {[key: string]: Set<string>})["allowed-numbers"] !== undefined
-                            ? args["allowed-numbers"]
-                            : Rule.DEFAULT_ALLOWED,
+                    allowElementAccess: (args as {[key: string]: boolean})["allow-element-access"],
+                    /* tslint:disable-next-line strict-boolean-expressions */
+                    allowedNumbers: args["allowed-numbers"] || Rule.DEFAULT_ALLOWED,
                 }
                 : {
                     allowElementAccess: false,
                     allowedNumbers: Rule.DEFAULT_ALLOWED,
                 };
+
         options.allowedNumbers =
             new Set((options.allowedNumbers as number[]).map(String));
 
@@ -136,9 +132,8 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (
-                commentPositions(this.sourceFile).some(
-                    (pos: number) => isSameLine(this.sourceFile, node.pos, pos),
-                )
+                commentPositions(this.sourceFile)
+                    .some((pos: number) => isSameLine(this.sourceFile, node.pos, pos))
             ) {
                 /* This node is documented so let's ignore it */
                 return;

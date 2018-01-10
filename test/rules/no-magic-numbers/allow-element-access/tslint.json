@@ -3,7 +3,8 @@
     "no-magic-numbers": [
       true,
       {
-        "allow-element-access": true
+        "allow-element-access": true,
+        "allowed-numbers": [-1, 0, 1]
       }
     ]
   }
