@@ -118,7 +118,7 @@
   {
     "ruleName": "await-promise",
     "description": "Warns for an awaited value that is not a Promise.",
-    "optionsDescription": "\nA list of 'string' names of any additional classes that should also be handled as Promises.\n        ",
+    "optionsDescription": "\nA list of 'string' names of any additional classes that should also be treated as Promises.\nFor example, if you are using a class called 'Future' that implements the Thenable interface,\nyou might tell the rule to consider type references with the name 'Future' as valid Promise-like\ntypes. Note that this rule doesn't check for type assignability or compatibility; it just checks\ntype reference names.\n        ",
     "options": {
       "type": "list",
       "listType": {
@@ -135,20 +135,23 @@
         "Thenable"
       ]
     ],
+    "rationale": "\nWhile it is valid TypeScript to await a non-Promise-like value (it will resolve immediately),\nthis pattern is often a programmer error and the resulting semantics can be unintuitive.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true
   },
   {
     "ruleName": "ban-comma-operator",
-    "description": "Bans the comma operator.",
+    "description": "Disallows the comma operator to be used.",
+    "descriptionDetails": "[Read more about the comma operator here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator).",
+    "rationale": "\nUsing the comma operator can create a potential for many non-obvious bugs or lead to misunderstanding of code.\n\n### Examples\n```\nfoo((bar, baz)); // evaluates to 'foo(baz)' because of the extra parens - confusing and not obvious\n```\n\n```\nswitch (foo) {\n    case 1, 2: // equals 'case 2' - probably intended 'case 1: case2:'\n        return true;\n    case 3:\n        return false;\n}\n```\n\n```\nlet x = (y = 1, z = 2); // x is equal to 2 - this may not be immediately obvious.\n```\n        ",
     "options": null,
     "optionsDescription": "",
     "optionExamples": [
       true
     ],
-    "type": "typescript",
-    "typescriptOnly": true
+    "type": "functionality",
+    "typescriptOnly": false
   },
   {
     "ruleName": "ban",
@@ -367,7 +370,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces documentation for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for [classes, functions, methods, properties]],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"exists\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for [classes, functions, methods, properties]],\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"existence\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -399,7 +402,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -428,7 +431,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -457,7 +460,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -486,7 +489,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -515,7 +518,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -544,7 +547,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -582,7 +585,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -611,7 +614,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -649,7 +652,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -678,7 +681,7 @@
                         },
                         "type": "object"
                       },
-                      "exists": {
+                      "existence": {
                         "items": {
                           "type": "string"
                         },
@@ -726,15 +729,17 @@
               "protected"
             ]
           },
-          "tags": {
-            "content": {
-              "see": [
-                "#.*"
+          "properties": {
+            "tags": {
+              "content": {
+                "see": [
+                  "#.*"
+                ]
+              },
+              "existence": [
+                "inheritdoc"
               ]
-            },
-            "exists": [
-              "inheritdoc"
-            ]
+            }
           }
         }
       ]
@@ -833,16 +838,29 @@
   {
     "ruleName": "file-header",
     "description": "Enforces a certain header comment for all files, matched by a regular expression.",
-    "optionsDescription": "Regular expression to match the header.",
+    "optionsDescription": "\nThe first option, which is mandatory, is a regular expression that all headers should match.\nThe second argument, which is optional, is a string that should be inserted as a header comment\nif fixing is enabled and no header that matches the first argument is found.",
     "options": {
-      "type": "string"
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "additionalItems": false,
+      "minLength": 1,
+      "maxLength": 2
     },
     "optionExamples": [
       [
         true,
-        "Copyright \\d{4}"
+        "Copyright \\d{4}",
+        "Copyright 2017"
       ]
     ],
+    "hasFix": true,
     "type": "style",
     "typescriptOnly": false
   },
@@ -896,7 +914,7 @@
     "ruleName": "indent",
     "description": "Enforces indentation with tabs or spaces.",
     "rationale": "\nUsing only one of tabs or spaces for indentation leads to more consistent editor behavior,\ncleaner diffs in version control, and easier programmatic manipulation.",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `spaces` enforces consistent spaces.\n* `tabs` enforces consistent tabs.\n\nA second optional argument specifies indentation size:\n\n* `2` enforces 2 space indentation.\n* `4` enforces 4 space indentation.\n\nIndentation size is required for auto-fixing, but not for rule checking.\n",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `spaces` enforces consistent spaces.\n* `tabs` enforces consistent tabs.\n\nA second optional argument specifies indentation size:\n\n* `2` enforces 2 space indentation.\n* `4` enforces 4 space indentation.\n\nIndentation size is **required** for auto-fixing, but not for rule checking.\n\n**NOTE**: auto-fixing will only convert invalid indent whitespace to the desired type, it will not fix invalid whitespace sizes.\n",
     "options": {
       "type": "array",
       "items": [
@@ -934,6 +952,7 @@
         2
       ]
     ],
+    "hasFix": true,
     "type": "maintainability",
     "typescriptOnly": false
   },
@@ -1111,15 +1130,42 @@
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
     "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
-    "optionsDescription": "An integer indicating the max length of lines.",
+    "optionsDescription": "\nIt can take one argument, which can be any of the following:\n* integer indicating maximum length of lines.\n* object with keys:\n  * `limit` - number < 0 defining max line length\n  * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.\n    For example:\n     * `// ` pattern will ignore all in-line comments.\n     * `^import ` pattern will ignore all import statements.\n     * `^export {(.*?)}` pattern will ignore all multiple export statements.\n     * `class [a-zA-Z] implements ` pattern will ignore all class declarations implementing interfaces.\n     * `^import |^export {(.*?)}|class [a-zA-Z] implements |// ` pattern will ignore all the cases listed above.\n ",
     "options": {
-      "type": "number",
-      "minimum": "1"
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "limit": {
+                "type": "number"
+              },
+              "ignore-pattern": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "minLength": 1,
+      "maxLength": 2
     },
     "optionExamples": [
       [
         true,
         120
+      ],
+      [
+        true,
+        {
+          "limit": 120,
+          "ignore-pattern": "^import |^export {(.*?)}"
+        }
       ]
     ],
     "type": "maintainability",
@@ -1259,6 +1305,15 @@
     "optionExamples": [
       true
     ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "ruleName": "newline-per-chained-call",
+    "description": "\nRequires that chained method calls be broken apart onto separate lines.",
+    "rationale": "\nThis style helps to keep code 'vertical', avoiding the need for side-scrolling in IDEs or text editors.",
+    "optionsDescription": "Not configurable",
+    "options": null,
     "type": "style",
     "typescriptOnly": false
   },
@@ -1470,7 +1525,7 @@
     "description": "Disallows duplicate variable declarations in the same block scope.",
     "descriptionDetails": "\nThis rule is only useful when using the `var` keyword -\nthe compiler will detect redeclarations of `let` and `const` variables.",
     "rationale": "\nA variable can be reassigned if necessary -\nthere's no good reason to have a duplicate variable declaration.",
-    "optionsDescription": "You can specify `\"check-parameters\"` to check for variables with the same name as a paramter.",
+    "optionsDescription": "You can specify `\"check-parameters\"` to check for variables with the same name as a parameter.",
     "options": {
       "type": "string",
       "enum": [
@@ -1484,6 +1539,18 @@
         "check-parameters"
       ]
     ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "description": "Bans usage of the delete operator with computed key expressions.",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "Deleting dynamically computed keys is dangerous and not well optimized.",
+    "ruleName": "no-dynamic-delete",
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -1727,7 +1794,7 @@
   },
   {
     "ruleName": "no-irregular-whitespace",
-    "description": "Disallow irregular whitespace outside of strings and comments",
+    "description": "Disallow irregular whitespace within a file, including strings and comments.",
     "hasFix": true,
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -1930,7 +1997,7 @@
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
     "rationale": "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
-    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n        ",
+    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n\nThe option `\"temporalDeadZone\"` defaults to `true` which shows errors when shadowing block scoped declarations in their\ntemporal dead zone. When set to `false` parameters, classes, enums and variables declared\nwith `let` or `const` are not considered shadowed if the shadowing occurs within their\n[temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).\n\nThe following example shows how the `\"temporalDeadZone\"` option changes the linting result:\n\n```ts\nfunction fn(value) {\n    if (value) {\n        const tmp = value; // no error on this line if \"temporalDeadZone\" is false\n        return tmp;\n    }\n    let tmp = undefined;\n    if (!value) {\n        const tmp = value; // this line always contains an error\n        return tmp;\n    }\n}\n```\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -1956,6 +2023,9 @@
           "type": "boolean"
         },
         "typeParameter": {
+          "type": "boolean"
+        },
+        "temporalDeadZone": {
           "type": "boolean"
         }
       }
@@ -2311,7 +2381,7 @@
   {
     "ruleName": "no-use-before-declare",
     "description": "Disallows usage of variables before their declaration.",
-    "descriptionDetails": "\nThis rule is primarily useful when using the `var` keyword -\nthe compiler will detect if a `let` and `const` variable is used before it is declared.",
+    "descriptionDetails": "\nThis rule is primarily useful when using the `var` keyword since the compiler will\nautomatically detect if a block-scoped `let` and `const` variable is used before\ndeclaration. Since most modern TypeScript doesn't use `var`, this rule is generally\ndiscouraged and is kept around for legacy purposes. It is slow to compute, is not\nenabled in the built-in configuration presets, and should not be used to inform TSLint\ndesign decisions.\n        ",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -2429,12 +2499,13 @@
     "ruleName": "object-literal-sort-keys",
     "description": "\nChecks ordering of keys in object literals.\n\nWhen using the default alphabetical ordering, additional blank lines may be used to group\nobject properties together while keeping the elements within each group in alphabetical order.\n        ",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will to compare keys in a case insensitive way.\n* \"match-declaration-order\" will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n",
+    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will compare keys in a case insensitive way.\n* \"match-declaration-order\" will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n* \"shorthand-first\" will enforce shorthand properties to appear first, as in:\n\n    const obj = { a, c, b: true };\n",
     "options": {
       "type": "string",
       "enum": [
         "ignore-case",
-        "match-declaration-order"
+        "match-declaration-order",
+        "shorthand-first"
       ]
     },
     "optionExamples": [
@@ -2442,7 +2513,8 @@
       [
         true,
         "ignore-case",
-        "match-declaration-order"
+        "match-declaration-order",
+        "shorthand-first"
       ]
     ],
     "type": "maintainability",
@@ -2696,6 +2768,29 @@
     "hasFix": true
   },
   {
+    "description": "Requires that private variables are marked as `readonly` if they're never modified outside of the constructor.",
+    "descriptionDetails": "\nIf a private variable is only assigned to in the constructor, it should be declared as `readonly`.\n        ",
+    "optionExamples": [
+      true,
+      [
+        true,
+        "only-inline-lambdas"
+      ]
+    ],
+    "options": {
+      "enum": [
+        "only-inline-lambdas"
+      ],
+      "type": "string"
+    },
+    "optionsDescription": "\nIf `only-inline-lambdas` is specified, only immediately-declared arrow functions are checked.",
+    "rationale": "\nMarking never-modified variables as readonly helps enforce the code's intent of keeping them as never-modified.\nIt can also help prevent accidental changes of members not meant to be changed.",
+    "requiresTypeInfo": true,
+    "ruleName": "prefer-readonly",
+    "type": "maintainability",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "prefer-switch",
     "description": "Prefer a `switch` statement to an `if` statement with simple `===` comparisons.",
     "optionsDescription": "\nAn optional object with the property 'min-cases'.\nThis is the number cases needed before a switch statement is recommended.\nDefaults to 3.",
@@ -2941,7 +3036,7 @@
   },
   {
     "ruleName": "space-within-parens",
-    "description": "Enforces spaces within parentheses or disallow them.",
+    "description": "Enforces spaces within parentheses or disallow them.  Empty parentheses () are always allowed.",
     "hasFix": true,
     "optionsDescription": "\nYou may enforce the amount of whitespace within parentheses.\n        ",
     "options": {
@@ -3408,7 +3503,7 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "deprecationMessage": ""
+    "deprecationMessage": "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
   },
   {
     "ruleName": "unified-signatures",

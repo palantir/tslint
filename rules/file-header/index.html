@@ -1,17 +1,39 @@
 ---
 ruleName: file-header
 description: 'Enforces a certain header comment for all files, matched by a regular expression.'
-optionsDescription: Regular expression to match the header.
+optionsDescription: |-
+
+  The first option, which is mandatory, is a regular expression that all headers should match.
+  The second argument, which is optional, is a string that should be inserted as a header comment
+  if fixing is enabled and no header that matches the first argument is found.
 options:
-  type: string
+  type: array
+  items:
+    - type: string
+    - type: string
+  additionalItems: false
+  minLength: 1
+  maxLength: 2
 optionExamples:
-  - '[true, "Copyright \\d{4}"]'
+  - '[true, "Copyright \\d{4}", "Copyright 2017"]'
+hasFix: true
 type: style
 typescriptOnly: false
 layout: rule
 title: 'Rule: file-header'
 optionsJSON: |-
   {
-    "type": "string"
+    "type": "array",
+    "items": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "string"
+      }
+    ],
+    "additionalItems": false,
+    "minLength": 1,
+    "maxLength": 2
   }
 ---
