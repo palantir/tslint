@@ -9,10 +9,6 @@ v5.9.0
 - [deprecation] Several utility functions from `src/language/utils.ts` have been deprecated (#3476)
 - [deprecation] Linting non-existent files now outputs a warning. This will be an error in TSLint 6. (#3313)
 
-## Updates to `tslint:latest` configuration
-
-_None!_
-
 ## Configuration inheritance changes
 
 Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defualtSeverity`: #2569.
@@ -84,12 +80,6 @@ For more details, see the relevant PRs:
 - [docs] Enhance [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) options documentation (#3519)
 - [docs] Add `hasFix` metadata for the [`indent`](https://palantir.github.io/tslint/rules/indent) rule (#3529)
 - [docs] Clearer rule description for [`no-irregular-whitespace`](https://palantir.github.io/tslint/rules/no-irregular-whitespace) (#3627)
-
-## Dev-centric
-
-- Refactor executableTests to use runner.ts where possible (#3374)
-- Remove test for plain test output (#3407)
-- Cleanup and refactoring of (rule|formatter)Loader (#3412)
 
 Thanks to our contributors!
 
