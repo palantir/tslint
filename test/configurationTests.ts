@@ -251,6 +251,26 @@ describe("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
+
+        it("overrides defaultSeverity of base configs", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-only-in-extended.json");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-unspecified")!.ruleSeverity,
+                "should apply defaultSeverity to base config with no defaultSeverity");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-error")!.ruleSeverity,
+                "should override defaultSeverity defined in base config");
+            assert.equal<RuleSeverity | undefined>(
+                "warning",
+                config.rules.get("default-severity-warning")!.ruleSeverity,
+                "should apply defaultSeverity to extending config");
+            assert.equal<RuleSeverity | undefined>(
+                "error",
+                config.rules.get("default-severity-only-in-extended")!.ruleSeverity,
+                "should not inherit defaultSeverity from base configs");
+        });
     });
 
     describe("findConfigurationPath", () => {
@@ -293,11 +313,11 @@ describe("Configuration", () => {
             assert.equal<RuleSeverity | undefined>(
                 "error",
                 config.rules.get("no-fail")!.ruleSeverity,
-                "did not pick up 'no-fail' in base config");
+                "should pick up 'no-fail' in base config");
             assert.equal<RuleSeverity | undefined>(
                 "off",
                 config.rules.get("always-fail")!.ruleSeverity,
-                "did not set 'always-fail' in top config");
+                "should set 'always-fail' in top config");
             assert.equal<RuleSeverity | undefined>("error", config.jsRules.get("no-fail")!.ruleSeverity);
             assert.equal<RuleSeverity | undefined>("off", config.jsRules.get("always-fail")!.ruleSeverity);
         });

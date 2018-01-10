@@ -1,0 +1,7 @@
+{
+  "extends": [ "./tslint-default-severity-unspecified.json", "./tslint-default-severity-error.json" ],
+  "defaultSeverity": "warning",
+  "rules": {
+    "default-severity-warning": { "severity": "default" }
+  }
+}
