@@ -17,9 +17,19 @@
 
 import * as ts from "typescript";
 
-import { isCallExpression, isIdentifier } from "tsutils";
+import {
+    forEachComment,
+    isCallExpression,
+    isElementAccessExpression,
+    isIdentifier,
+    isSameLine } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
+
+interface Options {
+    allowedNumbers: number[] | Set<string>;
+    allowElementAccess: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,15 +41,32 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Magic numbers should be avoided as they often lack documentation, forcing
             them to be stored in variables gives them implicit documentation.`,
-        optionsDescription: "A list of allowed numbers.",
+        optionsDescription: Lint.Utils.dedent`
+            An optional config object may be provided with one or both of the following properties:
+                * \`"ignore-element-access": boolean\`
+                    * Ignores cases such as \`argv[4]\`
+                * \`"allowed-numbers": number[]\`
+                    * List of numbers the rule should ignore
+            `,
         options: {
-            type: "array",
-            items: {
-                type: "number",
+            type: "object",
+            properties: {
+                "allowed-numbers": {
+                    type: "array",
+                    items: {
+                        type: "number",
+                    },
+                    minLength: 1,
+                },
+                "allow-element-access": {
+                    type: "boolean",
+                },
             },
-            minLength: 1,
         },
-        optionExamples: [true, [true, 1, 2, 3]],
+        optionExamples: [true, [true, 1, 2, 3], [true, {
+            "allow-element-access": true,
+            "allowed-numbers": [4, 5, 6],
+        }]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -62,15 +89,55 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
+    /* tslint:disable no-unsafe-any */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
+        return this.applyWithWalker(
+            new NoMagicNumbersWalker(
+                sourceFile, this.ruleName,
+                this.parseOptions(this.ruleArguments[0]),
+            ),
+        );
     }
+
+    private parseOptions(args: any): Options {
+        /* For legacy config support */
+        if (args !== undefined && args.length && typeof args[0] === "number") {
+            return {
+                allowElementAccess: false,
+                allowedNumbers: new Set((args as number[]).map(String)),
+            };
+        }
+
+        const options: Options =
+            args !== undefined
+                ? {
+                    allowElementAccess: (args as {[key: string]: boolean})["allow-element-access"],
+                    /* tslint:disable-next-line strict-boolean-expressions */
+                    allowedNumbers: args["allowed-numbers"] || Rule.DEFAULT_ALLOWED,
+                }
+                : {
+                    allowElementAccess: false,
+                    allowedNumbers: Rule.DEFAULT_ALLOWED,
+                };
+
+        options.allowedNumbers =
+            new Set((options.allowedNumbers as number[]).map(String));
+
+        return options;
+    }
+    /* tslint:enable no-unsafe-any */
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
+            if (
+                commentPositions(this.sourceFile)
+                    .some((pos: number) => isSameLine(this.sourceFile, node.pos, pos))
+            ) {
+                /* This node is documented so let's ignore it */
+                return;
+            }
             if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
                 return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
             }
@@ -87,8 +154,35 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     }
 
     private checkNumericLiteral(node: ts.Node, num: string) {
-        if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
+        if (
+            /* "allow-element-access" logic */
+            !(
+                node.parent !== undefined &&
+                isElementAccessExpression(node.parent) &&
+                this.options.allowElementAccess
+            ) &&
+            !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
+            !(this.options.allowedNumbers as Set<string>).has(num)
+        ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }
+}
+
+/**
+ * Used for checking when a magic number is on the same line as
+ * a comment. In such a case, the magic number should be ignored.
+ */
+function commentPositions(sourceFile: ts.SourceFile): number[] {
+    const positions: number[] = [];
+    for (const statement of sourceFile.statements) {
+        forEachComment(
+            statement,
+            (_fullText: string, comment: ts.CommentRange) => {
+                positions.push(comment.pos);
+            },
+            sourceFile,
+        );
+    }
+    return positions;
 }

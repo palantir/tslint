@@ -1,8 +1,3 @@
-/* Ignore magic numbers with trailing comments */
-console.log(1340); /* explains the magic */
-for(let i = 0;i>1341;++i) { /* pulls back the curtain */
-}
-
 console.log(-1, 0, 1);
 console.log(42.42);
             ~~~~~ [ERROR]
@@ -20,20 +15,7 @@ for(let i = 0;i>1341;++i) {
                 ~~~~ [ERROR]
 }
 
-/* A comment that does no good as far as this rule is concerned */
-throw 1342;
-      ~~~~ [ERROR]
-
-class A {
-    static test = 1337;
-
-    constructor (private a = 1337) {
-    }
-}
-
-enum Test {
-    key = 1337,
-}
+throw 1342; /* test trailing comment */
 
 it('should provide a link to the landing page', () => {
   expect($ctrl.actions[0]).toEqual({ label: 'Landing page', state: 'core-landingPage' });
@@ -45,7 +27,9 @@ it('should provide a link to the person summary', () => {
 
 it('should provide a link to create a new person', () => {
   expect($ctrl.actions[2]).toEqual({ label: 'Create a new person', state: 'hrm-person-details', params: { personId: 'new' } });
-                       ~ [ERROR]
 });
+
+const stringA = ['oh', 'hello', 'mom'];
+stringA[2] = 'there';
 
 [ERROR]: 'magic numbers' are not allowed
