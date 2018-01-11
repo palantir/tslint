@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import forOwn = require('lodash');
-                         ~~~~~~ [1]
+                         ~~~~~~ [0]
 import forOwn = require('lodash/forOwn');
 
 // non-static imports cannot be checked
@@ -13,11 +13,14 @@ import forOwn = require(lodash);
 import * as notBlacklisted from "not-blacklisted";
 
 export * from 'lodash';
-               ~~~~~~ [1]
+               ~~~~~~ [0]
 
 import {myFunc} from './my.temp';
-                      ~~~~~~~~~ [2]
+                      ~~~~~~~~~ [1]
 
-[0]: This import is blacklisted by /^rxjs$/
-[1]: This import is blacklisted by /^lodash$/
-[2]: This import is blacklisted by /.*\.temp$/
+import {myFunc} from './my.tmp';
+                      ~~~~~~~~ [2]
+
+[0]: This import is blacklisted, import a submodule instead
+[1]: This import is blacklisted by /.*\.temp$/
+[2]: This import is blacklisted by /.*\.tmp$/

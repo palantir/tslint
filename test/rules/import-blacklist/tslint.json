@@ -1,5 +1,5 @@
 {
   "rules": {
-    "import-blacklist": [true, "^lodash$", "^rxjs$", ".*\\.temp$"]
+    "import-blacklist": [true, "lodash", "rxjs", [".*\\.temp$", ".*\\.tmp$"]]
   }
 }

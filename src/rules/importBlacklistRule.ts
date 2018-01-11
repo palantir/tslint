@@ -26,30 +26,59 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: Lint.Utils.dedent`
             Disallows importing the specified modules directly via \`import\` and \`require\`.`,
         rationale: Lint.Utils.dedent`
-            Some projects may wish to exclude imports matching certain patterns.
-
-            Examples:
-            ^lodash$ Blacklist any import of the entire lodash module.
-            Since lodash allows importing submodules, a better practice
-            would be to import the desired submodule instead.
-
-            .*\\.temp$ Blacklist any imports ending in .temp`,
+            Some libraries allow importing their submodules instead of the entire module.
+            This is good practise as it avoids loading unused modules.
+            Some projects may simply wish to exclude imports matching certain patterns.`,
         optionsDescription: Lint.Utils.dedent`
-            A list of blacklist pattern strings to be compiled to regular expressions.
-            The corresponding regular expressions will be tested against the imports.`,
+            A list of blacklisted modules and/or regular expression patterns.`,
         options: {
             type: "array",
             items: {
-                type: "string",
+                anyOf: [
+                    {
+                        type: "string",
+                    },
+                    {
+                        type: "array",
+                        items: {
+                            type: "string",
+                        },
+                        minLength: 1,
+                    },
+                ],
             },
             minLength: 1,
         },
-        optionExamples: [true, [true, "^rxjs$", "^lodash$", ".*\\.temp$"]],
+        optionExamples: [
+            true,
+            [
+                true,
+                "rxjs",
+                "lodash",
+            ],
+            [
+                true,
+                [
+                    ".*\\.temp$",
+                    ".*\\.tmp$",
+                ],
+            ],
+            [
+                true,
+                "rxjs",
+                "lodash",
+                [
+                    ".*\\.temp$",
+                    ".*\\.tmp$",
+                ],
+            ],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "This import is blacklisted by ";
+    public static FAILURE_STRING_MODULE = "This import is blacklisted, import a submodule instead";
+    public static FAILURE_STRING_REGEX = "This import is blacklisted by ";
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
@@ -60,17 +89,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<string[]>) {
+function walk(ctx: Lint.WalkContext<string[] | string[][]>) {
+    const moduleOptions = [];
     const regexOptions = [];
     for (const option of ctx.options) {
         if (typeof option === "string") {
-            regexOptions.push(RegExp(option));
+            moduleOptions.push(option);
+        } else if (Array.isArray(option)) {
+            for (const pattern of option) {
+                regexOptions.push(RegExp(pattern));
+            }
         }
     }
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
-        for (const regex of regexOptions) {
-            if (regex.test(name.text)) {
-                ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING + regex.toString());
+        if (moduleOptions.indexOf(name.text) !== -1) {
+            ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING_MODULE);
+        } else {
+            for (const regex of regexOptions) {
+                if (regex.test(name.text)) {
+                    ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING_REGEX + regex.toString());
+                }
             }
         }
     }
