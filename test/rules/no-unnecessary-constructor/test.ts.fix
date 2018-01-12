@@ -1,0 +1,40 @@
+export class ExportedClass {
+}
+
+class PublicConstructor {
+}
+
+class ProtectedConstructor {
+}
+
+class PrivateConstructor {
+}
+
+class SameLine { }
+
+class WithPrecedingMember {
+    public member: string;
+}
+
+class WithFollowingMethod {
+    public method() {}
+}
+
+const classExpression = class {
+}
+
+class ContainsContents {
+    constructor() {
+        console.log("Hello!");
+    }
+}
+
+class CallsSuper extends PublicConstructor {
+    constructor() {
+        super();
+    }
+}
+
+class ContainsParameter {
+    constructor(x: number) { }
+}

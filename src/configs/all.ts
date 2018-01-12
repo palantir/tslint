@@ -125,6 +125,7 @@ export const rules = {
     "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unnecessary-class": [true, "allow-empty-class"],
+    "no-unnecessary-constructor": [true],
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
