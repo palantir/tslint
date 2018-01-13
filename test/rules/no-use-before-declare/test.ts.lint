@@ -94,3 +94,14 @@ class Greeter {
 }
 
 undefined;
+
+class A { b: B = new B(); }
+class B { }
+
+class Foo {
+  test() {
+      const bar = new Bar();
+  }
+}
+
+class Bar {}

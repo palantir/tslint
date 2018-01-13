@@ -79,7 +79,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         const declaredBefore = declarations.some((decl) => {
             switch (decl.kind) {
                 case ts.SyntaxKind.FunctionDeclaration:
-                    // Functions may be declared later.
+                case ts.SyntaxKind.ClassDeclaration:
+                    // Functions and classes may be declared later.
                     return true;
                 default:
                     // Use `<=` in case this *is* the declaration.
