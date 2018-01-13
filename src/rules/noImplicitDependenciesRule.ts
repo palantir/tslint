@@ -59,8 +59,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY(module: string) {
-        return `Module '${module}' is not listed as dependency in package.json`;
+    public static FAILURE_STRING_FACTORY(module: string, isThereSimilarPackage: boolean) {
+        return isThereSimilarPackage
+            ? `Module '${module}' is not listed as dependency in package.json. Did you mean '${module.toLocaleLowerCase()}'?`
+            : `Module '${module}' is not listed as dependency in package.json`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -78,7 +80,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
             if (builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
+                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName, isThereSimilarPackage(packageName)));
             }
         }
     }
@@ -88,6 +90,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
             dependencies = getDependencies(ctx.sourceFile.fileName, options);
         }
         return dependencies.has(module);
+    }
+
+    function isThereSimilarPackage(module: string): boolean {
+        if (dependencies === undefined) {
+            dependencies = getDependencies(ctx.sourceFile.fileName, options);
+        }
+        return dependencies.has(module.toLowerCase());
     }
 }
 

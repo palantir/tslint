@@ -9,6 +9,9 @@ if (foo) {
 
 export * from "@angular/core";
 
+export * from "@Angular/core";
+              ~~~~~~~~~~~~~~~ [err1 % ('@Angular/core', '@angular/core')]
+
 export * from "@angular/common/http";
 
 import * as ts from "typescript";
@@ -22,3 +25,4 @@ import * as fsevents from "fsevents";
                           ~~~~~~~~~~ [err % ('fsevents')]
 
 [err]: Module '%s' is not listed as dependency in package.json
+[err1]: Module '%s' is not listed as dependency in package.json. Did you mean '%s'?
