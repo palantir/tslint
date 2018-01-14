@@ -81,15 +81,15 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 
 function isRedundantCallback(
-    parameters: ts.NodeArray<ts.ParameterDeclaration>,
-    args: ts.NodeArray<ts.Node>,
-    expression: ts.Identifier,
-): boolean {
+        parameters: ts.NodeArray<ts.ParameterDeclaration>,
+        args: ts.NodeArray<ts.Node>,
+        expression: ts.Identifier,
+        ): boolean {
     if (parameters.length !== args.length) {
         return false;
     }
     for (let i = 0; i < parameters.length; ++i) {
-        const { dotDotDotToken, name } = parameters[i];
+        const {dotDotDotToken, name} = parameters[i];
         let arg = args[i];
         if (dotDotDotToken !== undefined) {
             if (!isSpreadElement(arg)) {
@@ -98,8 +98,8 @@ function isRedundantCallback(
             arg = arg.expression;
         }
         if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text
-            // If the invoked expression is one of the parameters, bail.
-            || expression.text === name.text) {
+                // If the invoked expression is one of the parameters, bail.
+                || expression.text === name.text) {
             return false;
         }
     }
