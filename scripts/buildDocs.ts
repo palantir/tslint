@@ -33,19 +33,19 @@
 
 import * as fs from "fs";
 import * as glob from "glob";
-import stringify = require("json-stringify-pretty-compact");
 import * as yaml from "js-yaml";
+import stringify = require("json-stringify-pretty-compact");
 import * as path from "path";
 import * as rimraf from "rimraf";
 
-import {IFormatterMetadata} from "../lib/language/formatter/formatter";
-import {IRuleMetadata} from "../lib/language/rule/rule";
+import { IFormatterMetadata } from "../lib/language/formatter/formatter";
+import { ICodeExample, IRuleMetadata } from "../lib/language/rule/rule";
 
 type Metadata = IRuleMetadata | IFormatterMetadata;
 
 interface Documented {
     metadata: Metadata;
-};
+}
 
 interface IDocumentation {
     /**
@@ -71,7 +71,7 @@ interface IDocumentation {
     /**
      * Function to generate individual documentation pages.
      */
-    pageGenerator: (metadata: any) => string;
+    pageGenerator(metadata: any): string;
 
     /**
      * Documentation subdirectory to output to.
@@ -148,7 +148,7 @@ function buildSingleModuleDocumentation(documentation: IDocumentation, modulePat
     // tslint:disable-next-line:no-var-requires
     const module = require(modulePath);
     const DocumentedItem = module[documentation.exportName] as Documented;
-    if (DocumentedItem != null && DocumentedItem.metadata != null) {
+    if (DocumentedItem !== null && DocumentedItem.metadata !== null) {
         // Build the module's page.
         const { metadata } = DocumentedItem;
         const fileData = documentation.pageGenerator(metadata);
@@ -195,10 +195,15 @@ function generateRuleFile(metadata: IRuleMetadata): string {
             typeof example === "string" ? example : stringify(example));
     }
 
-    /* Prep code examples for markdownify */
     if (metadata.codeExamples) {
-        metadata.codeExamples.pass = `\`\`\`${metadata.codeExamples.pass}\`\`\``;
-        metadata.codeExamples.fail = `\`\`\`${metadata.codeExamples.fail}\`\`\``;
+        metadata.codeExamples = metadata.codeExamples.map((example: ICodeExample) => {
+            example.pass = `\`\`\`ts\n${example.pass.trim()}\n\`\`\``;
+            if (example.fail) {
+                example.fail = `\`\`\`ts\n${example.fail.trim()}\n\`\`\``;
+            }
+            example.config = `\`\`\`json\n${example.config.trim()}\n\`\`\``;
+            return example;
+        });
     }
 
     const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);

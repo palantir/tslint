@@ -93,15 +93,19 @@ export interface IRuleMetadata {
     /**
      * Examples demonstrating what the lint rule will pass and fail
      */
-    codeExamples?: {
-        pass: string;
-        fail: string;
-    };
+    codeExamples?: ICodeExample[];
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export type RuleSeverity = "warning" | "error" | "off";
+
+export interface ICodeExample {
+    config: any;
+    description: string;
+    pass: string;
+    fail?: string;
+}
 
 export interface IOptions {
     ruleArguments: any[];

@@ -69,17 +69,47 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "functionality",
         typescriptOnly: false,
         hasFix: true,
-        codeExamples: {
-            pass: `
-                if (x > 0) {
-                    doStuff();
-                }
-            `,
-            fail: Lint.Utils.dedent`
-                if (x > 0)
-                    doStuff();
-            `,
-        },
+        codeExamples: [
+            {
+                description: "Require curly braces whenever possible (default)",
+                config: Lint.Utils.dedent`
+                    "rules": { "curly": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    if (x > 0) {
+                        doStuff();
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    if (x > 0)
+                        doStuff();
+                `,
+            },
+            {
+                description: "Make an exception for single-line instances",
+                config: Lint.Utils.dedent`
+                    "rules": { "curly": [true, "ignore-same-line"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    if (x > 0) doStuff();
+                `,
+            },
+            {
+                description: "Error on unnecessary curly braces",
+                config: Lint.Utils.dedent`
+                    "rules": { "curly": [true, "as-needed"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    if (x > 0)
+                        doStuff();
+                `,
+                fail: Lint.Utils.dedent`
+                    if (x > 0) {
+                        doStuff();
+                    }
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
