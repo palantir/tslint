@@ -17,7 +17,7 @@ export * from "@angular/common/http";
 import * as ts from "typescript";
 
 import "baz/foo";
-       ~~~~~~~~~ [err % ('baz')]
+       ~~~~~~~~~ [err1 % ('baz', 'bar')]
 
 const http = require('http');
 

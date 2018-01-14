@@ -12,17 +12,32 @@ export * from "@angular/core";
 export * from "@Angular/core";
               ~~~~~~~~~~~~~~~ [err1 % ('@Angular/core', '@angular/core')]
 
+export * from "@ngular/core";
+              ~~~~~~~~~~~~~~ [err1 % ('@ngular/core', '@angular/core')]
+
+export * from "@nglar/core";
+              ~~~~~~~~~~~~~~ [err % ('@nglar/core')]
+
 export * from "@angular/common/http";
 
 import * as ts from "typescript";
 
+import * as ts from "tepscript";
+                    ~~~~~~~~~~~ [err1 % ('tepscript', 'typescript')]
+
+import * as ts from "ypescript";
+                    ~~~~~~~~~~~ [err1 % ('ypescript', 'typescript')]
+
+import * as ts from "terscript";
+                    ~~~~~~~~~~~ [err % ('terscript')]
+
 import "baz";
-       ~~~~~ [err % ('baz')]
+       ~~~~~ [err1 % ('baz', 'bar')]
 
 const http = require('http');
 
 import * as fsevents from "fsevents";
                           ~~~~~~~~~~ [err % ('fsevents')]
-
+                          
 [err]: Module '%s' is not listed as dependency in package.json
 [err1]: Module '%s' is not listed as dependency in package.json. Did you mean '%s'?

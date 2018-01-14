@@ -59,9 +59,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY(module: string, isThereSimilarPackage: boolean) {
-        return isThereSimilarPackage
-            ? `Module '${module}' is not listed as dependency in package.json. Did you mean '${module.toLocaleLowerCase()}'?`
+    public static FAILURE_STRING_FACTORY(module: string, similarPackage: string | boolean) {
+        return similarPackage
+            ? `Module '${module}' is not listed as dependency in package.json. Did you mean '${similarPackage}'?`
             : `Module '${module}' is not listed as dependency in package.json`;
     }
 
@@ -74,13 +74,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    const {options} = ctx;
+    const { options } = ctx;
     let dependencies: Set<string> | undefined;
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
             if (builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName, isThereSimilarPackage(packageName)));
+                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName, findSimilarPackage(packageName)));
             }
         }
     }
@@ -92,11 +92,59 @@ function walk(ctx: Lint.WalkContext<Options>) {
         return dependencies.has(module);
     }
 
-    function isThereSimilarPackage(module: string): boolean {
-        if (dependencies === undefined) {
-            dependencies = getDependencies(ctx.sourceFile.fileName, options);
+    function findSimilarPackage(module: string): string | boolean {
+        let minDifference = 2;
+        let similarPackageName;
+        dependencies!.forEach((dependency) => {
+            const difference = sift4(module.toLowerCase(), dependency);
+            if (difference <= minDifference) {
+                minDifference = difference;
+                similarPackageName = dependency;
+            }
+        });
+
+        return similarPackageName ? similarPackageName : false;
+    }
+
+    // Shift4 algorithm (common version) by Costin Manda (siderite)
+    // for implementation details see: https://siderite.blogspot.com/2014/11/super-fast-and-accurate-string-distance.html
+    function sift4(s1: string, s2: string) {
+        const maxOffset = 2;
+        const l1 = s1.length;
+        const l2 = s2.length;
+
+        let c1 = 0;
+        let c2 = 0;
+        let lcss = 0;
+        let localCs = 0;
+
+        while ((c1 < l1) && (c2 < l2)) {
+            if (s1.charAt(c1) === s2.charAt(c2)) {
+                localCs++;
+            } else {
+                lcss += localCs;
+                localCs = 0;
+                if (c1 !== c2) {
+                    c1 = c2 = Math.max(c1, c2);
+                }
+                for (let i = 0; i < maxOffset && (c1 + i < l1 || c2 + i < l2); i++) {
+                    if ((c1 + i < l1) && (s1.charAt(c1 + i) === s2.charAt(c2))) {
+                        c1 += i;
+                        localCs++;
+                        break;
+                    }
+                    if ((c2 + i < l2) && (s1.charAt(c1) === s2.charAt(c2 + i))) {
+                        c2 += i;
+                        localCs++;
+                        break;
+                    }
+                }
+            }
+            c1++;
+            c2++;
         }
-        return dependencies.has(module.toLowerCase());
+        lcss += localCs;
+        return Math.round(Math.max(l1, l2) - lcss);
     }
 }
 
