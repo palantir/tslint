@@ -40,6 +40,41 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Forces to use template-strings",
+                config: Lint.Utils.dedent`
+                    "rules": { "prefer-template": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const x: number = 1;
+                    const y: number = 1;
+                    const myString: string = \`\${x} is equals \${y}\`;
+                `,
+                fail: Lint.Utils.dedent`
+                    const x: number = 1;
+                    const y: number = 1;
+                    const myString: string = x + ' is equals ' + y;
+                `,
+            },
+            {
+                description: "Forces to use template-strings but allows up to one concatenation",
+                config: Lint.Utils.dedent`
+                    "rules": { "prefer-template": [true, "allow-single-concat"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    const x: number = 1;
+                    const y: number = 1;
+                    const myString: string = x + ' is equals 1';
+                    const myString: string = \`\${x} is equals \${y}\`;
+                `,
+                fail: Lint.Utils.dedent`
+                    const x: number = 1;
+                    const y: number = 1;
+                    const myString: string = x + ' is equals ' + y;
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

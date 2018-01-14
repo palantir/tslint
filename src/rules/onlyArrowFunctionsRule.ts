@@ -47,6 +47,28 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS]],
         type: "typescript",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Disallow functions with the function keyword",
+                config: Lint.Utils.dedent`
+                    "rules": { "only-arrow-functions": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const myFunc = () => {
+                        // do something ...
+                    };
+                `,
+                fail: Lint.Utils.dedent`
+                    function myFunc() {
+                        // do something ...
+                    };
+
+                    const myFunc = function() {
+                        // do something ...
+                    };
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -80,7 +102,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 if (allowDeclarations) {
                     break;
                 }
-                // falls through
+            // falls through
             case ts.SyntaxKind.FunctionExpression: {
                 const f = node as ts.FunctionLikeDeclaration;
                 if (!(allowNamedFunctions && f.name !== undefined) && !functionIsExempt(f)) {

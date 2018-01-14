@@ -90,6 +90,146 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples: [
+            {
+                description: "Requires type definitions for call-signature",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "call-signature"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    function add(x, y): number {
+                        return x + y;
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    function add(x, y) {
+                        return x + y;
+                    }
+                `,
+            },
+            {
+                description: "Requires type definitions for arrow-call-signature",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "arrow-call-signature"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    const add = (x, y): number => x + y;
+                `,
+                fail: Lint.Utils.dedent`
+                    const add = (x, y) => x + y;
+                `,
+            },
+            {
+                description: "Requires type definitions for parameter",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "parameter"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    function add(x: number, y: number) {
+                        return x + y;
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    function add(x, y) {
+                        return x + y;
+                    }
+                `,
+            },
+            {
+                description: "Requires type definitions for arrow-parameter",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "arrow-parameter"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    const add = (x: number, y: number) => x + y;
+                `,
+                fail: Lint.Utils.dedent`
+                    const add = (x, y) => x + y;
+                `,
+            },
+            {
+                description: "Requires type definitions for property-declaration",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "property-declaration"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    interface I {
+                        foo: number;
+                        bar: string;
+                    }
+            `,
+                fail: Lint.Utils.dedent`
+                    interface I {
+                        foo;
+                        bar;
+                    }
+                `,
+            },
+            {
+                description: "Requires type definitions for variable-declaration",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "variable-declaration"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    let x: number;
+                `,
+                fail: Lint.Utils.dedent`
+                    let x;
+                `,
+            },
+            {
+                description: "Requires type definitions for member-variable-declaration",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "member-variable-declaration"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    class MyClass {
+                        x: number;
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    class MyClass {
+                        x;
+                    }
+                `,
+            },
+            {
+                description: "Requires type definitions for object-destructuring",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "object-destructuring"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    interface FooBar {
+                        foo: number;
+                        bar: string;
+                    }
+                    const foobar = { foo: 1, bar: '2' };
+                    const { foo, bar }: FooBar = foobar;
+                `,
+                fail: Lint.Utils.dedent`
+                    interface FooBar {
+                        foo: number;
+                        bar: string;
+                    }
+                    const foobar = { foo: 1, bar: '2' };
+                    const { foo, bar } = foobar;
+                `,
+            },
+            {
+                description: "Requires type definitions for array-destructuring",
+                config: Lint.Utils.dedent`
+                    "rules": { "typedef": [true, "array-destructuring"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    const foobar = [1, '2'];
+                    const [foo, bar]: Array<number | string> = foobar;
+                `,
+                fail: Lint.Utils.dedent`
+                    const foobar = [1, '2'];
+                    const [foo, bar] = foobar;
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -174,8 +314,8 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (parent!.kind === ts.SyntaxKind.CatchClause
-                || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
-                || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
+            || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
+            || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
             return;
         }
 
@@ -194,10 +334,10 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkTypeAnnotation(
-            option: Option,
-            location: ts.Node | ts.NodeArray<ts.Node>,
-            typeAnnotation: ts.TypeNode | undefined,
-            name?: ts.Node): void {
+        option: Option,
+        location: ts.Node | ts.NodeArray<ts.Node>,
+        typeAnnotation: ts.TypeNode | undefined,
+        name?: ts.Node): void {
         if (this.options[option] === true && typeAnnotation === undefined) {
             const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
             if (isNodeArray(location)) {
