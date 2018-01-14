@@ -173,3 +173,24 @@ figcaption {
         }
     }
  }
+
+ .wrapper__code-examples {
+     & .wrapper__code-example {
+        margin-bottom: 64px;
+        &:last-of-type {
+            margin-bottom: 24px;
+        }
+     }
+    /* Overwrite default code-block styling */
+    & .code-example {
+        & pre, & .highlight {
+            background: transparent;
+        }
+    }
+    & .code-example.pass {
+        background-color: #f1fff1 !important;
+    }
+    & .code-example.fail {
+        background-color: #fff5f5 !important;
+    }
+ }
