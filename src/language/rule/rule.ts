@@ -101,7 +101,7 @@ export type RuleType = "functionality" | "maintainability" | "style" | "typescri
 export type RuleSeverity = "warning" | "error" | "off";
 
 export interface ICodeExample {
-    config: any;
+    config: string;
     description: string;
     pass: string;
     fail?: string;
