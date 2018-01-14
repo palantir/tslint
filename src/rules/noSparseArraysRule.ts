@@ -31,6 +31,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Disallow sparse arrays",
+                config: Lint.Utils.dedent`
+                    "rules": { "no-sparse-arrays": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const arr: string[] = ['elemenet1', 'element2'];
+                `,
+                fail: Lint.Utils.dedent`
+                    const arr: string[] = ['elemenet1',, 'element2'];
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

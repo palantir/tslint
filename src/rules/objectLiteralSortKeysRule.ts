@@ -61,6 +61,58 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         ],
         type: "maintainability",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Forces to sort keys in an object by alphabetical order",
+                config: Lint.Utils.dedent`
+                    "rules": { "object-literal-sort-keys": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    let o = {
+                        bar: 2,
+                        foo: 1
+                    };
+                `,
+                fail: Lint.Utils.dedent`
+                    let o = {
+                        foo: 1,
+                        bar: 2
+                    };
+                `,
+            },
+            {
+                description: "Forces to sort keys in an object by alphabetical order",
+                config: Lint.Utils.dedent`
+                    "rules": {
+                        "object-literal-sort-keys": {
+                            "options": "match-declaration-order"
+                        }
+                    }
+                `,
+                pass: Lint.Utils.dedent`
+                    interface I {
+                        foo: number;
+                        bar: number;
+                    }
+
+                    let o: I = {
+                        foo: 1,
+                        bar: 2
+                    };
+                `,
+                fail: Lint.Utils.dedent`
+                    interface I {
+                        foo: number;
+                        bar: number;
+                    }
+
+                    let o: I = {
+                        bar: 2,
+                        foo: 1
+                    };
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

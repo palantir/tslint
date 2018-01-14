@@ -32,6 +32,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Disallow unnecessary callback wrappers",
+                config: Lint.Utils.dedent`
+                    "rules": { "no-unnecessary-callback-wrapper": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const handleContent = (content) => console.log('Handle content:', content);
+                    const handleError = (error) => console.log('Handle error:', error);
+                    promise.then(handleContent).catch(handleError);
+                `,
+                fail: Lint.Utils.dedent`
+                    const handleContent = (content) => console.log('Handle content:', content);
+                    const handleError = (error) => console.log('Handle error:', error);
+                    promise.then((content) => handleContent(content)).catch((error) => handleError(error));
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -63,15 +81,15 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 
 function isRedundantCallback(
-        parameters: ts.NodeArray<ts.ParameterDeclaration>,
-        args: ts.NodeArray<ts.Node>,
-        expression: ts.Identifier,
-        ): boolean {
+    parameters: ts.NodeArray<ts.ParameterDeclaration>,
+    args: ts.NodeArray<ts.Node>,
+    expression: ts.Identifier,
+): boolean {
     if (parameters.length !== args.length) {
         return false;
     }
     for (let i = 0; i < parameters.length; ++i) {
-        const {dotDotDotToken, name} = parameters[i];
+        const { dotDotDotToken, name } = parameters[i];
         let arg = args[i];
         if (dotDotDotToken !== undefined) {
             if (!isSpreadElement(arg)) {
@@ -80,8 +98,8 @@ function isRedundantCallback(
             arg = arg.expression;
         }
         if (!isIdentifier(name) || !isIdentifier(arg) || name.text !== arg.text
-                // If the invoked expression is one of the parameters, bail.
-                || expression.text === name.text) {
+            // If the invoked expression is one of the parameters, bail.
+            || expression.text === name.text) {
             return false;
         }
     }
