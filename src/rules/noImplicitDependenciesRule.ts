@@ -59,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY(module: string, similarPackage: string | boolean) {
+    public static FAILURE_STRING_FACTORY(module: string, similarPackage?: string) {
         return similarPackage
             ? `Module '${module}' is not listed as dependency in package.json. Did you mean '${similarPackage}'?`
             : `Module '${module}' is not listed as dependency in package.json`;
@@ -92,7 +92,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         return dependencies.has(module);
     }
 
-    function findSimilarPackage(module: string): string | boolean {
+    function findSimilarPackage(module: string): string | undefined {
         let minDifference = 2;
         let similarPackageName;
         dependencies!.forEach((dependency) => {
@@ -103,7 +103,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             }
         });
 
-        return similarPackageName ? similarPackageName : false;
+        return similarPackageName;
     }
 
     // Shift4 algorithm (common version) by Costin Manda (siderite)

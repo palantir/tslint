@@ -16,7 +16,7 @@ export * from "@ngular/core";
               ~~~~~~~~~~~~~~ [err1 % ('@ngular/core', '@angular/core')]
 
 export * from "@nglar/core";
-              ~~~~~~~~~~~~~~ [err % ('@nglar/core')]
+              ~~~~~~~~~~~~~ [err % ('@nglar/core')]
 
 export * from "@angular/common/http";
 
