@@ -60,9 +60,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(module: string, similarPackage?: string) {
-        return similarPackage
-            ? `Module '${module}' is not listed as dependency in package.json. Did you mean '${similarPackage}'?`
-            : `Module '${module}' is not listed as dependency in package.json`;
+        if (similarPackage === undefined) {
+            return `Module '${module}' is not listed as dependency in package.json`;
+        } else {
+            return `Module '${module}' is not listed as dependency in package.json. Did you mean '${similarPackage}'?`;
+        }
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -108,7 +110,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     // Shift4 algorithm (common version) by Costin Manda (siderite)
     // for implementation details see: https://siderite.blogspot.com/2014/11/super-fast-and-accurate-string-distance.html
-    function sift4(s1: string, s2: string) {
+    function sift4(s1: string, s2: string): number {
         const maxOffset = 2;
         const l1 = s1.length;
         const l2 = s2.length;
