@@ -314,8 +314,8 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (parent!.kind === ts.SyntaxKind.CatchClause
-            || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
-            || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
+                || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
+                || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
             return;
         }
 
@@ -334,10 +334,10 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkTypeAnnotation(
-        option: Option,
-        location: ts.Node | ts.NodeArray<ts.Node>,
-        typeAnnotation: ts.TypeNode | undefined,
-        name?: ts.Node): void {
+            option: Option,
+            location: ts.Node | ts.NodeArray<ts.Node>,
+            typeAnnotation: ts.TypeNode | undefined,
+            name?: ts.Node): void {
         if (this.options[option] === true && typeAnnotation === undefined) {
             const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
             if (isNodeArray(location)) {

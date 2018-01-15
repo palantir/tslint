@@ -32,6 +32,22 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Enforces PascalCased class and interface names.",
+                config: Lint.Utils.dedent`
+                    "rules": { "class-name": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    class MyClass { }
+                    interface MyInterface { }
+                `,
+                fail: Lint.Utils.dedent`
+                    class myClass { }
+                    interface myInterface { }
+               `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

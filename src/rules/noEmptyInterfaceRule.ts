@@ -30,6 +30,22 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         type: "typescript",
         typescriptOnly: true,
+        codeExamples: [
+            {
+                description: "Disallows an empty interface.",
+                config: Lint.Utils.dedent`
+                    "rules": { "no-empty-interface": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    interface I {
+                        foo: string;
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    interface I { }
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

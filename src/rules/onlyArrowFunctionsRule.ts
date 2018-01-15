@@ -102,7 +102,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 if (allowDeclarations) {
                     break;
                 }
-            // falls through
+                // falls through
             case ts.SyntaxKind.FunctionExpression: {
                 const f = node as ts.FunctionLikeDeclaration;
                 if (!(allowNamedFunctions && f.name !== undefined) && !functionIsExempt(f)) {

@@ -34,6 +34,26 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Requires the radix parameter to be specified when calling `parseInt`.",
+                config: Lint.Utils.dedent`
+                    "rules": { "radix": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const x: string = '11';
+                    const dec: number = parseInt(x, 10);
+                    const bin: number = parseInt(x, 2);
+                    const hex: number = parseInt(x, 16);
+                `,
+                fail: Lint.Utils.dedent`
+                    const x: string = '11';
+                    const dec: number = parseInt(x);
+                    const bin: number = parseInt(x, 2);
+                    const hex: number = parseInt(x, 16);
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

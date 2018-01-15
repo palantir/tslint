@@ -33,6 +33,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Enforces use of the `isNaN()`.",
+                config: Lint.Utils.dedent`
+                    "rules": { "use-isnan": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    if (isNaN(parseInt('_4711'))) {
+                        doSomething();
+                    }
+                `,
+                fail: Lint.Utils.dedent`
+                    if (parseInt('_4711') === NaN) {
+                        doSomething();
+                    }
+               `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

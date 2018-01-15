@@ -41,6 +41,40 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Enforces to use shorthand for return.",
+                config: Lint.Utils.dedent`
+                    "rules": { "arrow-return-shorthand": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
+                    const calc2 = (x: number, y: number) => {
+                        return { add: x + y, sub: x - y, mul: x * y }
+                    };
+                `,
+                fail: Lint.Utils.dedent`
+                    const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
+               `,
+            },
+            {
+                description: "Enforces to use shorthand for return also for multiline.",
+                config: Lint.Utils.dedent`
+                    "rules": { "arrow-return-shorthand": [true, "multiline"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
+                    const calc2 = (x: number, y: number) =>
+                        ({ add: x + y, sub: x - y, mul: x * y });
+                `,
+                fail: Lint.Utils.dedent`
+                    const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
+                    const calc = (x: number, y: number) => {
+                        return { add: x + y, sub: x - y, mul: x * y }
+                    };
+               `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -31,6 +31,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples: [
+            {
+                description: "Disallows usages of `any` as a type declaration.",
+                config: Lint.Utils.dedent`
+                    "rules": { "no-any": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    let foo: object;
+                `,
+                fail: Lint.Utils.dedent`
+                    let foo: any;
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 

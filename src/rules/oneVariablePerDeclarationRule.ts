@@ -43,6 +43,32 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_IGNORE_FOR_LOOP]],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Disallows multiple variable definitions in the same declaration statement.",
+                config: Lint.Utils.dedent`
+                    "rules": { "one-variable-per-declaration": true }
+                `,
+                pass: Lint.Utils.dedent`
+                    const foo = 1;
+                    const bar = '2';
+                `,
+                fail: Lint.Utils.dedent`
+                    const foo = 1, bar = '2';
+               `,
+            },
+            {
+                description: "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+                config: Lint.Utils.dedent`
+                    "rules": { "one-variable-per-declaration": [true, "ignore-for-loop"] }
+                `,
+                pass: Lint.Utils.dedent`
+                    for (let i = 0, j = 10; i < 10; i++) {
+                        doSomething(j, i);
+                    }
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
