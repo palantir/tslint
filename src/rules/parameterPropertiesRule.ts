@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Allows or disallows the use of parameter properties.",
         rationale: "Brings consistency to class definitions.",
         optionsDescription:
-            "One of two enum options is allowed: `always` or `never`. If no option is provided, `always` is used.",
+            'One of two string options is allowed: `"always"` or `"never"`. If no option is provided, `"always"` is used.',
         options: {
             type: "array",
             items: {
@@ -65,23 +65,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_MISSING_PARAM_PROP = "Use parameter properties instead of assigning to members in the constructor body.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.parseOptions(this.ruleArguments[0]));
-    }
-
-    private parseOptions(args: any): Options {
-        if (args && typeof args === "string" && (args === OPTION_ALWAYS || args === OPTION_NEVER)) {
-            return { never: args === OPTION_NEVER };
-        }
-        return { never: false };
+        return this.applyWithFunction(sourceFile, walk, {
+            never: this.ruleArguments[0] === OPTION_NEVER,
+        });
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
     const checkConstructors = (node: ts.Node): void => {
         if (isConstructorDeclaration(node) && node.parameters.length > 0) {
-            const params: NamedNode[] = node.parameters.map((p: ts.ParameterDeclaration) => ({
-                name: (p.name as ts.Identifier).text,
-                node: p,
+            const params: NamedNode[] = node.parameters.map((param: ts.ParameterDeclaration) => ({
+                name: (param.name as ts.Identifier).text,
+                node: param,
             }));
 
             if (ctx.options.never) {
@@ -109,15 +104,15 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }));
 
             for (const assignment of assignments) {
-                if (params.some((p: NamedNode) => p.name === assignment.name)) {
+                const param = params.find((_param: NamedNode) => _param.name === assignment.name);
+                if (param !== undefined) {
                     ctx.addFailureAtNode(
                         assignment.node,
                         Rule.FAILURE_MISSING_PARAM_PROP,
                         getFix(
-                            params.find((p: NamedNode) => p.name === assignment.name)!
-                                .node as ts.ParameterDeclaration,
+                            param.node as ts.ParameterDeclaration,
                             assignment.node as ts.ExpressionStatement,
-                            node.parent,
+                            node.parent as ts.ClassLikeDeclaration,
                         ),
                     );
                 }
@@ -131,33 +126,30 @@ function walk(ctx: Lint.WalkContext<Options>) {
 function getFix(
     param: ts.ParameterDeclaration,
     assignment: ts.ExpressionStatement,
-    classNode: ts.ClassDeclaration | ts.ClassExpression | undefined,
-): Lint.Replacement[] | undefined {
+    classNode: ts.ClassLikeDeclaration,
+): Lint.Replacement[] {
     const fixes: Lint.Replacement[] = [];
     const memberName = ((assignment.expression as ts.BinaryExpression)
         .left as ts.PropertyAccessExpression).name.text;
-    const member = classNode!.members.filter(
+    const member = classNode.members.find(
         (_member: ts.Node) =>
             isPropertyDeclaration(_member) && (_member.name as ts.Identifier).text === memberName,
-    )[0];
+    );
     if (member !== undefined) {
-        const paramReplacement = Lint.Replacement.appendText(
-            param.getStart(),
-            member.modifiers !== undefined
-                ? `${parseModifiers(member.modifiers)} ` /* Trailing space! */
-                : "public ",
+        fixes.push(
+            /* Prepend modifiers to constructor param */
+            Lint.Replacement.appendText(
+                param.getStart(),
+                member.modifiers !== undefined
+                    ? `${parseModifiers(member.modifiers)} ` /* Trailing space! */
+                    : "public ",
+            ),
+            /* Remove prop declaration */
+            Lint.Replacement.replaceFromTo(member.getFullStart(), member.end, ""),
+            /* Remove assignment in constructor body */
+            Lint.Replacement.replaceFromTo(assignment.getFullStart(), assignment.end, ""),
         );
-        const propReplacement = Lint.Replacement.replaceFromTo(
-            member.getFullStart(),
-            member.end,
-            "",
-        );
-        const assignmentReplacement = Lint.Replacement.replaceFromTo(
-            assignment.getFullStart(),
-            assignment.end,
-            "",
-        );
-        fixes.push(paramReplacement, propReplacement, assignmentReplacement);
+        /* Check for default value on member that is being transformed into param prop */
         if ((member as ts.PropertyDeclaration).initializer !== undefined) {
             fixes.push(
                 Lint.Replacement.appendText(
@@ -166,15 +158,13 @@ function getFix(
                 ),
             );
         }
-        return fixes;
-    } else {
-        return [];
     }
+    return fixes;
 }
 
-function parseModifiers(modifiers: ts.NodeArray<ts.Modifier> | undefined): string {
+function parseModifiers(modifiers: ts.NodeArray<ts.Modifier>): string {
     let replacement = "";
-    for (const mod of modifiers!) {
+    for (const mod of modifiers) {
         switch (mod.kind) {
             case 112:
                 replacement += "private";
