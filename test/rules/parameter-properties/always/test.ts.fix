@@ -22,3 +22,8 @@ class ByeBot {
     constructor(public lang: string = "en", private readonly locale: string = "USA") {
     }
 }
+
+class ByeBot {
+    constructor(public lang: string = "en") {
+    }
+}

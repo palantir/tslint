@@ -41,4 +41,12 @@ class ByeBot {
     }
 }
 
+class ByeBot {
+    lang: string = "en";
+    constructor(language: string) {
+        this.lang = language;
+        ~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
 [ERROR]: Use parameter properties instead of assigning to members in the constructor body.

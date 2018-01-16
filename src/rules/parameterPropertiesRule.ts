@@ -138,11 +138,11 @@ function getFix(
     if (member !== undefined) {
         fixes.push(
             /* Prepend modifiers to constructor param */
-            Lint.Replacement.appendText(
-                param.getStart(),
-                member.modifiers !== undefined
+            Lint.Replacement.replaceNode(
+                param.name,
+                (member.modifiers !== undefined
                     ? `${parseModifiers(member.modifiers)} ` /* Trailing space! */
-                    : "public ",
+                    : "public ") + member.name!.getText(),
             ),
             /* Remove prop declaration */
             Lint.Replacement.replaceFromTo(member.getFullStart(), member.end, ""),
