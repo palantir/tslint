@@ -1,0 +1,17 @@
+class HiBot {
+    private lang: string;
+    constructor(lang: string) {
+        this.lang = lang;
+        ~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
+class HiBot {
+    private readonly lang: string;
+    constructor(lang: string) {
+        this.lang = lang;
+        ~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
+[ERROR]: Use parameter properties instead of assigning to members in the constructor body.

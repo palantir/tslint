@@ -54,6 +54,7 @@ export const rules = {
     "no-this-assignment": true,
     "no-var-requires": true,
     "only-arrow-functions": true,
+    "parameter-properties": false,
     "prefer-for-of": true,
     "prefer-readonly": true,
     "promise-function-async": true,

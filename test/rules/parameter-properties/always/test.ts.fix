@@ -1,0 +1,9 @@
+class HiBot {
+    constructor(private lang: string) {
+    }
+}
+
+class HiBot {
+    constructor(private readonly lang: string) {
+    }
+}

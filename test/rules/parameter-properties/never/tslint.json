@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "parameter-properties": [true, "never"]
+    }
+}
