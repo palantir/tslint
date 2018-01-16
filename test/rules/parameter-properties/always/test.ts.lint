@@ -49,4 +49,13 @@ class ByeBot {
     }
 }
 
+class ByeBot {
+    lang: string = "en";
+    constructor(language: string, private gender: "Male" | "Female") {
+        this.lang = language;
+        ~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+        this.isFemale = this.gender === "Female";
+    }
+}
+
 [ERROR]: Use parameter properties instead of assigning to members in the constructor body.

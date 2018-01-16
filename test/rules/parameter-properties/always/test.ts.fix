@@ -24,6 +24,16 @@ class ByeBot {
 }
 
 class ByeBot {
-    constructor(public lang: string = "en") {
+    lang: string = "en";
+    constructor(language: string) {
+        this.lang = language;
+    }
+}
+
+class ByeBot {
+    lang: string = "en";
+    constructor(language: string, private gender: "Male" | "Female") {
+        this.lang = language;
+        this.isFemale = this.gender === "Female";
     }
 }

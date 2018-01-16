@@ -135,9 +135,10 @@ function getFix(
         (_member: ts.Node) =>
             isPropertyDeclaration(_member) && (_member.name as ts.Identifier).text === memberName,
     );
-    if (member !== undefined) {
+
+    if (member !== undefined && member.name!.getText() === param.name.getText()) {
         fixes.push(
-            /* Prepend modifiers to constructor param */
+            /* Replace param name w/ modifiers + member name */
             Lint.Replacement.replaceNode(
                 param.name,
                 (member.modifiers !== undefined
@@ -159,6 +160,7 @@ function getFix(
             );
         }
     }
+
     return fixes;
 }
 
