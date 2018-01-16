@@ -133,6 +133,7 @@ function getFix(
     assignment: ts.ExpressionStatement,
     classNode: ts.ClassDeclaration | ts.ClassExpression | undefined,
 ): Lint.Replacement[] | undefined {
+    const fixes: Lint.Replacement[] = [];
     const memberName = ((assignment.expression as ts.BinaryExpression)
         .left as ts.PropertyAccessExpression).name.text;
     const member = classNode!.members.filter(
@@ -141,7 +142,7 @@ function getFix(
     )[0];
     if (member !== undefined) {
         const paramReplacement = Lint.Replacement.appendText(
-            param.getFullStart(),
+            param.getStart(),
             member.modifiers !== undefined
                 ? `${parseModifiers(member.modifiers)} ` /* Trailing space! */
                 : "public ",
@@ -156,7 +157,16 @@ function getFix(
             assignment.end,
             "",
         );
-        return [paramReplacement, propReplacement, assignmentReplacement];
+        fixes.push(paramReplacement, propReplacement, assignmentReplacement);
+        if ((member as ts.PropertyDeclaration).initializer !== undefined) {
+            fixes.push(
+                Lint.Replacement.appendText(
+                    param.end,
+                    ` = ${(member as ts.PropertyDeclaration).initializer!.getText()}`,
+                ),
+            );
+        }
+        return fixes;
     } else {
         return [];
     }
@@ -167,10 +177,10 @@ function parseModifiers(modifiers: ts.NodeArray<ts.Modifier> | undefined): strin
     for (const mod of modifiers!) {
         switch (mod.kind) {
             case 112:
-                replacement += replacement === "" ? "private" : " private";
+                replacement += "private";
                 break;
             case 114:
-                replacement += replacement === "" ? "public" : " public";
+                replacement += "public";
                 break;
             case 131:
                 replacement += replacement === "" ? "readonly" : " readonly";

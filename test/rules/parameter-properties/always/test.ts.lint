@@ -14,4 +14,31 @@ class HiBot {
     }
 }
 
+class ByeBot {
+    lang: string;
+    constructor(lang: string) {
+        this.lang = lang;
+        ~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
+class ByeBot {
+    lang: string = "en";
+    constructor(lang: string) {
+        this.lang = lang;
+        ~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
+class ByeBot {
+    lang: string = "en";
+    private readonly locale: string = "USA";
+    constructor(lang: string, locale: string) {
+        this.lang = lang;
+        ~~~~~~~~~~~~~~~~~ [ERROR]
+        this.locale = locale;
+        ~~~~~~~~~~~~~~~~~~~~~ [ERROR]
+    }
+}
+
 [ERROR]: Use parameter properties instead of assigning to members in the constructor body.

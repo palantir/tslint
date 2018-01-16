@@ -7,3 +7,18 @@ class HiBot {
     constructor(private readonly lang: string) {
     }
 }
+
+class ByeBot {
+    constructor(public lang: string) {
+    }
+}
+
+class ByeBot {
+    constructor(public lang: string = "en") {
+    }
+}
+
+class ByeBot {
+    constructor(public lang: string = "en", private readonly locale: string = "USA") {
+    }
+}
