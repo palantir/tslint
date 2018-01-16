@@ -86,6 +86,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 fail: Lint.Utils.dedent`
                     if (x > 0)
                         doStuff();
+
+                    if (x > 0) doStuff();
                 `,
             },
             {
@@ -96,6 +98,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                 pass: Lint.Utils.dedent`
                     if (x > 0) doStuff();
                 `,
+                fail: Lint.Utils.dedent`
+                    if (x > 0)
+                        doStuff()
+                `,
             },
             {
                 description: "Error on unnecessary curly braces",
@@ -105,6 +111,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 pass: Lint.Utils.dedent`
                     if (x > 0)
                         doStuff();
+
+                    if (x > 0) {
+                        customerUpdates.push(getInfo(customerId));
+                        return customerUpdates;
+                    }
                 `,
                 fail: Lint.Utils.dedent`
                     if (x > 0) {

@@ -46,14 +46,14 @@ layout: page
     <h3>Code examples: </h3>
     {% for codeExample in page.codeExamples %}
     <div class="wrapper__code-example">
-        <h4>{{ codeExample.description }}</h4>
+        <h5>{{ codeExample.description }}</h5>
         {{ codeExample.config | markdownify }}
-        <h5>Passes</h5>
+        <h6>Passes</h6>
         <div class="code-example pass">
             {{ codeExample.pass | markdownify }}
         </div>
         {% if codeExample.fail %}
-        <h5 style="color: #d14;">Fails</h5>
+        <h6 style="color: #d14;">Fails</h6>
         <div class="code-example fail">
             {{ codeExample.fail | markdownify }}
         </div>
