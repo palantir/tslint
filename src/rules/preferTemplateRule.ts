@@ -39,7 +39,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-template",
-        description: "Prefer a template expression over string literal concatenation.",
+        description: Lint.Utils.dedent`
+            Prefer a template expression over string literal concatenation.
+
+            There is one expection for this rule regarding long strings. It is allowed
+            to concatenate stings and template expressions if they do not contain a
+            newline character and there is exactly one expression per line.`,
         optionsDescription: Lint.Utils.dedent`
             If \`${OPTION_SINGLE_CONCAT}\` is specified, then a single concatenation (\`x + y\`) is allowed, but not more (\`x + y + z\`).`,
         options: {
@@ -85,48 +90,23 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         const evalExpressions = evaluateExpressions(expressions, ctx.sourceFile);
-        const groupedExpressions = groupBy(evalExpressions, el => el.line);
 
-        if (evalExpressions.some(exp => exp.isStringLike && exp.hasNewLine)) {
+        if (evalExpressions.some((exp) => exp.isStringLike && exp.hasNewLine)) {
             // Multiline template
+            // Currently no fixer available
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_MULTILINE);
         } else {
             // (Concatenated) single line stinglikes
-            groupedExpressions.forEach(exps => {
-                if (exps.length <= 1) return;
+            const groupedExpressions = groupBy(evalExpressions, (el) => el.line);
+            groupedExpressions.forEach((exps) => {
+                if (exps.length <= 1) { return; }
 
-                let fix: Lint.Replacement[] = [];
-                if (exps.every(exp => exp.exp.kind == ts.SyntaxKind.StringLiteral)) {
-                    fix = concatStrings(exps);
-                } else {
-                    fix = concatMixed(exps);
-                }
-                ctx.addFailure(exps[0].exp.getStart(), exps[exps.length-1].exp.end, Rule.FAILURE_STRING, fix);
+                const fix = exps.every((exp) => exp.exp.kind === ts.SyntaxKind.StringLiteral)
+                    ? concatStrings(exps)
+                    : concatMixed(exps);
+                ctx.addFailure(exps[0].exp.getStart(), exps[exps.length - 1].exp.end, Rule.FAILURE_STRING, fix);
             });
         }
-        //     && evalExpressions.every(exp => !exp.hasNewLine)) {
-        //     return;
-        // }
-
-        // if (expressions.every(isStringLike)) {
-        //     // All expressions are strings/templates
-        //     const stringLikeExp = expressions as StringLike[];
-
-        //     if (stringLikeExp.some(containsNewline)) {
-        //         // If they're joined by a newline, recommend a template expression instead.
-        //         ctx.addFailureAtNode(node, Rule.FAILURE_STRING_MULTILINE);
-        //         return;
-        //     }
-            
-        //     const stringLikeExp.map();
-        //     if (stringLikeExp.reduce(containsStringLiteralsOnSameLine(ctx.sourceFile), []) === undefined) {
-        //         // If multiple literals are on the same line, recommend a template expression
-        //         ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-        //     }
-        //     // Otherwise ignore.
-        //     return;
-        // }
-
-        // ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
     });
 }
 
@@ -137,14 +117,14 @@ function isSingleConcat(expressions: ts.Expression[]) {
 }
 
 function evaluateExpressions(expressions: ts.Expression[], sourceFile: ts.SourceFile): EvaluatedExpression[] {
-    return expressions.map(exp => {
+    return expressions.map((exp) => {
         const lineAndChar = sourceFile.getLineAndCharacterOfPosition(exp.getStart());
         return {
-            exp: exp,
-            line: lineAndChar.line,
             char: lineAndChar.character,
-            isStringLike: isStringLike(exp),
+            exp,
             hasNewLine: isStringLike(exp) ? containsNewline(exp) : false,
+            isStringLike: isStringLike(exp),
+            line: lineAndChar.line,
         };
     });
 }
@@ -169,23 +149,6 @@ function containsNewline(node: StringLike): boolean {
     }
 }
 
-// function containsStringLiteralsOnSameLine(sourceFile: ts.SourceFile) {
-
-//     return (lineNumbers: number[] | undefined, literal: StringLike)  => {
-//         // skip check if undefined
-//         if (lineNumbers === undefined) { return undefined; }
-
-//         // use literal.end because pos may include leading newlines
-//         const lineNumber = sourceFile.getLineAndCharacterOfPosition(literal.end).line;
-//         if (lineNumbers.some((el) => el === lineNumber)) {
-//             // lineNumber collision therefore all further checks can be skipped
-//             return undefined;
-//         }
-//         lineNumbers.push(lineNumber);
-//         return lineNumbers;
-//     };
-// }
-
 function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {
     return isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken;
 }
@@ -208,7 +171,7 @@ function groupBy<T, U extends Key>(array: T[], accessor: (el: T) => U): Map<U, T
             const key = accessor(cur);
             const elements = prev.get(key);
             if (elements == undefined) {
-                prev.set(key,[cur]);
+                prev.set(key, [cur]);
             } else {
                 elements.push(cur);
             }
@@ -217,33 +180,34 @@ function groupBy<T, U extends Key>(array: T[], accessor: (el: T) => U): Map<U, T
         new Map<U, T[]>());
 }
 
-function concatStrings(evaluateExpressions: EvaluatedExpression[]) {
-    const exps = evaluateExpressions.sort((e1,e2) => e1.char - e2.char);
+function concatStrings(evalExp: EvaluatedExpression[]) {
+    const exps = evalExp.sort((e1, e2) => e1.char - e2.char);
 
     const fixes: Lint.Replacement[] = [];
-    for (let i = 0; i < exps.length-1; i++) {
+    for (let i = 0; i < exps.length - 1; i++) {
         const start = exps[i].exp.end - 1;
-        const end = exps[i+1].exp.getStart() + 1;
-        fixes.push(Lint.Replacement.replaceFromTo(start, end, ""));
+        const end = exps[i + 1].exp.getStart() + 1;
+        fixes.push(Lint.Replacement.deleteFromTo(start, end));
     }
     return fixes;
 }
 
-function concatMixed(evaluateExpressions: EvaluatedExpression[]) {
-    const exps = evaluateExpressions.sort((e1,e2) => e1.char - e2.char);
+function concatMixed(evalExp: EvaluatedExpression[]) {
+    const exps = evalExp.sort((e1, e2) => e1.char - e2.char);
 
     const fixes: Lint.Replacement[] = [];
 
     if (!exps[0].isStringLike) {
+        // tslint:disable-next-line:no-invalid-template-strings
         fixes.push(Lint.Replacement.appendText(exps[0].exp.getStart(), "`${"));
-    } else if (exps[0].exp.kind == ts.SyntaxKind.StringLiteral) {
+    } else if (exps[0].exp.kind === ts.SyntaxKind.StringLiteral) {
         fixes.push(new Lint.Replacement(exps[0].exp.getStart(), 1, "`"));
     }
 
-    for (let i = 0; i < exps.length-1; i++) {
+    for (let i = 0; i < exps.length - 1; i++) {
         const eval1 = exps[i];
         const exp1 = eval1.exp;
-        const eval2 = exps[i+1];
+        const eval2 = exps[i + 1];
         const exp2 = eval2.exp;
 
         if (!eval1.isStringLike && !eval2.isStringLike) { continue; }
@@ -252,17 +216,18 @@ function concatMixed(evaluateExpressions: EvaluatedExpression[]) {
             continue;
         }
         if (!eval2.isStringLike) {
+            // tslint:disable-next-line:no-invalid-template-strings
             fixes.push(Lint.Replacement.replaceFromTo(exp1.end - 1, exp2.getStart(), "${"));
             continue;
         }
-        fixes.push(Lint.Replacement.deleteFromTo(exp1.end - 1, exp2.getStart() + 1));    
+        fixes.push(Lint.Replacement.deleteFromTo(exp1.end - 1, exp2.getStart() + 1));
     }
 
     if (!exps[exps.length - 1].isStringLike) {
         fixes.push(Lint.Replacement.appendText(exps[exps.length - 1].exp.end, "}`"));
-    } else if (exps[exps.length - 1].exp.kind == ts.SyntaxKind.StringLiteral) {
+    } else if (exps[exps.length - 1].exp.kind === ts.SyntaxKind.StringLiteral) {
         fixes.push(new Lint.Replacement(exps[exps.length - 1].exp.end - 1, 1, "`"));
     }
-    
+
     return fixes;
 }
