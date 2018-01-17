@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Disallow sparse arrays",
+                description: "Disallows sparse arrays",
                 config: Lint.Utils.dedent`
                     "rules": { "no-sparse-arrays": true }
                 `,

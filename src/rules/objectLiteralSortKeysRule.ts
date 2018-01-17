@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Forces to sort keys in an object by alphabetical order",
+                description: "Requires that an object literal's keys be sorted alphabetically.",
                 config: Lint.Utils.dedent`
                     "rules": { "object-literal-sort-keys": true }
                 `,
@@ -81,7 +81,8 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
                 `,
             },
             {
-                description: "Forces to sort keys in an object by alphabetical order",
+                description: Lint.Utils.dedent`Requires that an object literal's keys be sorted by interface-definition.
+                    If there is no interface fallback to alphabetically.`,
                 config: Lint.Utils.dedent`
                     "rules": {
                         "object-literal-sort-keys": {

@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Enforces to use shorthand for return.",
+                description: "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
                 config: Lint.Utils.dedent`
                     "rules": { "arrow-return-shorthand": true }
                 `,
@@ -55,10 +55,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
                 fail: Lint.Utils.dedent`
                     const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
+                    const calc2 = (x: number, y: number) => {
+                        return { add: x + y, sub: x - y, mul: x * y }
+                    };
                `,
             },
             {
-                description: "Enforces to use shorthand for return also for multiline.",
+                description: "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
                 config: Lint.Utils.dedent`
                     "rules": { "arrow-return-shorthand": [true, "multiline"] }
                 `,
@@ -69,7 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
                 fail: Lint.Utils.dedent`
                     const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
-                    const calc = (x: number, y: number) => {
+                    const calc2 = (x: number, y: number) => {
                         return { add: x + y, sub: x - y, mul: x * y }
                     };
                `,

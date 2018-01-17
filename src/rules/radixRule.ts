@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Requires the radix parameter to be specified when calling `parseInt`.",
+                description: "Requires the inclusion of the radix parameter when calling `parseInt`.",
                 config: Lint.Utils.dedent`
                     "rules": { "radix": true }
                 `,

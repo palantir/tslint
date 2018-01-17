@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Enforces use of the `isNaN()`.",
+                description: "Enforces usage of `isNan()`.",
                 config: Lint.Utils.dedent`
                     "rules": { "use-isnan": true }
                 `,

@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Disallow functions with the function keyword",
+                description: "Disallows functions with the function keyword",
                 config: Lint.Utils.dedent`
                     "rules": { "only-arrow-functions": true }
                 `,

@@ -92,7 +92,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: true,
         codeExamples: [
             {
-                description: "Requires type definitions for call-signature",
+                description: "Requires type definitions for call signatures",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "call-signature"] }
                 `,
@@ -108,7 +108,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for arrow-call-signature",
+                description: "Requires type definitions for arrow call signatures",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "arrow-call-signature"] }
                 `,
@@ -120,7 +120,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for parameter",
+                description: "Requires type definitions for parameters",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "parameter"] }
                 `,
@@ -136,7 +136,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for arrow-parameter",
+                description: "Requires type definitions for arrow function parameters",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "arrow-parameter"] }
                 `,
@@ -148,7 +148,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for property-declaration",
+                description: "Requires type definitions for property declarations",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "property-declaration"] }
                 `,
@@ -166,7 +166,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for variable-declaration",
+                description: "Requires type definitions for variable declarations",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "variable-declaration"] }
                 `,
@@ -178,7 +178,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for member-variable-declaration",
+                description: "Requires type definitions for member variable declarations",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "member-variable-declaration"] }
                 `,
@@ -194,7 +194,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for object-destructuring",
+                description: "Requires type definitions when destructuring objects.",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "object-destructuring"] }
                 `,
@@ -216,7 +216,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Requires type definitions for array-destructuring",
+                description: "Requires type definitions when destructuring arrays.",
                 config: Lint.Utils.dedent`
                     "rules": { "typedef": [true, "array-destructuring"] }
                 `,

@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Disallow unnecessary callback wrappers",
+                description: "Disallows unnecessary callback wrappers",
                 config: Lint.Utils.dedent`
                     "rules": { "no-unnecessary-callback-wrapper": true }
                 `,

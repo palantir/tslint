@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: true,
         codeExamples: [
             {
-                description: "Disallows an empty interface.",
+                description: "Disallows empty interfaces.",
                 config: Lint.Utils.dedent`
                     "rules": { "no-empty-interface": true }
                 `,

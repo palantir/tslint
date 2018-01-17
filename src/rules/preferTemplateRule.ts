@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Forces to use template-strings",
+                description: "Enforces the use of template strings whenever possible.",
                 config: Lint.Utils.dedent`
                     "rules": { "prefer-template": true }
                 `,
@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 `,
             },
             {
-                description: "Forces to use template-strings but allows up to one concatenation",
+                description: "Enforces the use of template strings, but allows up to one concatenation.",
                 config: Lint.Utils.dedent`
                     "rules": { "prefer-template": [true, "allow-single-concat"] }
                 `,

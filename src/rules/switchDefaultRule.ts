@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         codeExamples: [
             {
-                description: "Require a `default` case in `switch` statements.",
+                description: "Requires a `default` case in `switch` statements.",
                 config: Lint.Utils.dedent`
                     "rules": { "switch-default": true }
                 `,
