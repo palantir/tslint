@@ -17,7 +17,7 @@
 
 import * as ts from "typescript";
 
-import { isCallExpression, isIdentifier } from "tsutils";
+import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ts.SyntaxKind.Parameter,
     ]);
 
-    public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
+    public static DEFAULT_ALLOWED = [-1, 0, 1];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
@@ -71,8 +71,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
-                return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
+            if (isCallExpression(node)) {
+                if (isIdentifier(node.expression) && node.expression.text === "parseInt") {
+                    return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
+                }
+
+                if (isPropertyAccessExpression(node.expression) && this.isNumberPrototypeMethod(node.expression.name.text)) {
+                    return;
+                }
             }
 
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
@@ -90,5 +96,10 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
         if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
+    }
+
+    private isNumberPrototypeMethod(methodName: string): boolean {
+        const numberMethods = ["toExponential", "toFixed", "toPrecision", "toString"];
+        return numberMethods.indexOf(methodName) > -1;
     }
 }
