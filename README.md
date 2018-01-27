@@ -48,6 +48,7 @@ If we don't have all the rules you're looking for, you can either write your own
 - [tslint-sonarts](https://github.com/SonarSource/SonarTS) - Bug-finding rules based on advanced code models to spot hard to find errors in TypeScript
 - [tslint-clean-code](https://github.com/Glavin001/tslint-clean-code) - A set of TSLint rules inspired by the Clean Code handbook
 - [rxjs-tslint-rules](https://github.com/cartant/rxjs-tslint-rules) - TSLint rules for RxJS 
+- [typestrict](https://github.com/krzkaczor/TypeStrict) - TSLint rules for enforcing maximum type safety and catching bugs early
 
 Development
 -----------
