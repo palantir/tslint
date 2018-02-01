@@ -1,0 +1,22 @@
+name: tslint
+version: git
+summary: An extensible linter for the TypeScript language
+description: |
+  TSLint is an extensible static analysis tool that checks TypeScript code for
+  readability, maintainability, and functionality errors. It is widely
+  supported across modern editors & build systems and can be customized with
+  your own lint rules, configurations, and formatters.
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+apps:
+  tslint:
+    command: tslint
+
+parts:
+  tslint:
+    source: .
+    plugin: nodejs
+    node-package-manager: yarn
+    npm-run: [compile]
