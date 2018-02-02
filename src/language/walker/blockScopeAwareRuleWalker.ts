@@ -32,7 +32,7 @@ import { ScopeAwareRuleWalker } from "./scopeAwareRuleWalker";
 export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalker<T> {
     private readonly blockScopeStack: U[];
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions) {
+    public constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module

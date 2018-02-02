@@ -16,13 +16,13 @@
 
 // Use classes here instead of interfaces because we want runtime type data
 export class Line { }
-export class CodeLine extends Line { constructor(public contents: string) { super(); } }
-export class MessageSubstitutionLine extends Line { constructor(public key: string, public message: string) { super(); } }
+export class CodeLine extends Line { public constructor(public contents: string) { super(); } }
+export class MessageSubstitutionLine extends Line { public constructor(public key: string, public message: string) { super(); } }
 
-export class ErrorLine extends Line { constructor(public startCol: number) { super(); } }
-export class MultilineErrorLine extends ErrorLine { constructor(startCol: number) { super(startCol); } }
+export class ErrorLine extends Line { public constructor(public startCol: number) { super(); } }
+export class MultilineErrorLine extends ErrorLine { public constructor(startCol: number) { super(startCol); } }
 export class EndErrorLine extends ErrorLine {
-    constructor(startCol: number, public endCol: number, public message: string) { super(startCol); }
+    public constructor(startCol: number, public endCol: number, public message: string) { super(startCol); }
 }
 
 // example matches (between the quotes):

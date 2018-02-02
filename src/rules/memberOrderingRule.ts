@@ -364,7 +364,7 @@ function getMemberKind(member: Member): MemberKind | undefined {
 
 type MemberCategoryJson = { name: string; kinds: string[] } | string;
 class MemberCategory {
-    constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
+    public constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
     public has(kind: MemberKind) { return this.kinds.has(kind); }
 }
 

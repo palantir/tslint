@@ -202,6 +202,7 @@ export const rules = {
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
+    "no-implicit-constructor-visibility": true,
     "no-parameter-properties": true,
     "no-redundant-jsdoc": true,
     "no-reference-import": true,

@@ -1,0 +1,40 @@
+class Constructor {
+    constructor(anotherConstructorParameter: string) { }
+    ~~~~~~~~~~~      [Constructor visibility must be specified]
+}
+
+class ConstructorContainsContents {
+    constructor() {
+    ~~~~~~~~~~~      [Constructor visibility must be specified]
+        console.log("Hello!");
+    }
+}
+
+class ConstructorWithParametersInitialisedManually {
+    private parameter: string;
+
+    constructor(parameter: string) {
+    ~~~~~~~~~~~      [Constructor visibility must be specified]
+        this.parameter = parameter;
+    }
+}
+
+class ConstructorWithParametersInitialisedByCompiler {
+    private parameter: string;
+
+    constructor(parameter: string) {
+    ~~~~~~~~~~~      [Constructor visibility must be specified]
+    }
+}
+
+class PublicConstructor {
+    public constructor(anotherConstructorParameter: string) { }
+}
+
+class PrivateConstructor {
+    private constructor(anotherConstructorParameter: string) { }
+}
+
+class ProtectedConstructor {
+    protected constructor(anotherConstructorParameter: string) { }
+}

@@ -183,7 +183,8 @@ export class Replacement {
         return new Replacement(start, 0, text);
     }
 
-    constructor(readonly start: number, readonly length: number, readonly text: string) {}
+    public constructor(readonly start: number, readonly length: number, readonly text: string) {
+    }
 
     get end() {
         return this.start + this.length;
@@ -205,7 +206,7 @@ export class Replacement {
 }
 
 export class RuleFailurePosition {
-    constructor(private readonly position: number, private readonly lineAndCharacter: ts.LineAndCharacter) {
+    public constructor(private readonly position: number, private readonly lineAndCharacter: ts.LineAndCharacter) {
     }
 
     public getPosition() {
@@ -251,12 +252,12 @@ export class RuleFailure {
         return a.startPosition.getPosition() - b.startPosition.getPosition();
     }
 
-    constructor(private readonly sourceFile: ts.SourceFile,
-                start: number,
-                end: number,
-                private readonly failure: string,
-                private readonly ruleName: string,
-                private readonly fix?: Fix) {
+    public constructor(private readonly sourceFile: ts.SourceFile,
+                       start: number,
+                       end: number,
+                       private readonly failure: string,
+                       private readonly ruleName: string,
+                       private readonly fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);

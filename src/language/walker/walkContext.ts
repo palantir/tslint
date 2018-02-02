@@ -22,7 +22,7 @@ import { Fix, RuleFailure } from "../rule/rule";
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];
 
-    constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {}
+    public constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {}
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
     public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {

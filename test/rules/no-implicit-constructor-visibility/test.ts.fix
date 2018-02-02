@@ -1,0 +1,36 @@
+class Constructor {
+    public constructor(anotherConstructorParameter: string) { }
+}
+
+class ConstructorContainsContents {
+    public constructor() {
+        console.log("Hello!");
+    }
+}
+
+class ConstructorWithParametersInitialisedManually {
+    private parameter: string;
+
+    public constructor(parameter: string) {
+        this.parameter = parameter;
+    }
+}
+
+class ConstructorWithParametersInitialisedByCompiler {
+    private parameter: string;
+
+    public constructor(parameter: string) {
+    }
+}
+
+class PublicConstructor {
+    public constructor(anotherConstructorParameter: string) { }
+}
+
+class PrivateConstructor {
+    private constructor(anotherConstructorParameter: string) { }
+}
+
+class ProtectedConstructor {
+    protected constructor(anotherConstructorParameter: string) { }
+}

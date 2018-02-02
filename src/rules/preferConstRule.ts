@@ -76,7 +76,7 @@ class Scope {
     public functionScope: Scope;
     public variables = new Map<string, VariableInfo>();
     public reassigned = new Set<string>();
-    constructor(functionScope?: Scope) {
+    public constructor(functionScope?: Scope) {
         // if no functionScope is provided we are in the process of creating a new function scope, which for consistency links to itself
         this.functionScope = functionScope === undefined ? this : functionScope;
     }
