@@ -7,4 +7,4 @@ import storageHelper from 'storage-helper';
                           ~~~~~~~~~~~~~~~~ [err % ('storage-helper')]
 const myModule = require('./myModule');
 
-[err]: Module '%s' is not listed as dependency in package.json
+[err]: Module '%s' is not listed as dependency in relevant section(s) of package.json

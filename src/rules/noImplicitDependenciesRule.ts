@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(module: string) {
-        return `Module '${module}' is not listed as dependency in package.json`;
+        return `Module '${module}' is not listed as dependency in relevant section(s) of package.json`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
