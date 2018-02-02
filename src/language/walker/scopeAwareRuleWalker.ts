@@ -58,7 +58,7 @@ import { RuleWalker } from "./ruleWalker";
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     private readonly scopeStack: T[];
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions) {
+    public constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module

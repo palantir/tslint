@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class Walker extends Lint.AbstractWalker<string[]> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
+    public constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, options);
     }
 
