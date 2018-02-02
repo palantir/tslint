@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
+import * as utils from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -44,7 +44,7 @@ const createFix = (node: ts.ConstructorDeclaration): Lint.Replacement =>
 
 function walk(context: Lint.WalkContext<void>) {
     const callback = (node: ts.Node): void => {
-        if (ts.isConstructorDeclaration(node) && !isConstructorVisibilityDefined(node)) {
+        if (utils.isConstructorDeclaration(node) && !isConstructorVisibilityDefined(node)) {
             context.addFailureAtNode(node.getFirstToken(), Rule.FAILURE_STRING, createFix(node));
         } else {
             ts.forEachChild(node, callback);
