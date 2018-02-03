@@ -24,11 +24,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-throw",
-        description: "Flags throwing plain strings or concatenations of strings " +
-            "because only Errors produce proper stack traces.",
+        description: "Flags throwing plain strings or concatenations of strings.",
         hasFix: true,
         options: null,
         optionsDescription: "Not configurable.",
+        rationale: Lint.Utils.dedent`
+            Only Error objects contain a \`.stack\` member equivalent to the current stack trace.
+            Primitives such as strings do not.
+        `,
         type: "functionality",
         typescriptOnly: false,
     };
