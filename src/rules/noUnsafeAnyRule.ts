@@ -18,7 +18,7 @@
 import { isIdentifier, isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isLowerCase } from '../utils';
+import { isLowerCase } from "../utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
