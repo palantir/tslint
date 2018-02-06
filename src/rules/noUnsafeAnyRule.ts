@@ -395,14 +395,10 @@ const jsxElementTypes = new Set<ts.SyntaxKind>([
 ]);
 
 function isJsxNativeElement(node: ts.Node): boolean {
-    if (!isIdentifier(node)) {
-        return false;
-    }
-
     return isIdentifier(node)
         && node.parent !== undefined
         && jsxElementTypes.has(node.parent.kind)
-        && isLowerCase(node.text);
+        && isLowerCase(node.text[0]);
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {

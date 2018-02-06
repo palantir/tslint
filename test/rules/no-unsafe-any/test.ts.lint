@@ -345,15 +345,15 @@ namespace TestNS2 {
     class Test6 implements NS.ITest {}
 }
 
+deckare const AnyComponent: any;
+
 const nativeJsxFull = <span></span>;
 const nativeJsxShort = <span />;
 
-function render(AnyComponent: any) {
-    const componentJsxFull = <AnyComponent></AnyComponent>;
-                              ~~~~~~~~~~~~ [0]
-                                             ~~~~~~~~~~~~ [0]
-    const componentJsxShort = <AnyComponent />;
-                              ~~~~~~~~~~~~ [0]
-}
+const componentJsxFull = <AnyComponent></AnyComponent>;
+                          ~~~~~~~~~~~~ [0]
+                                         ~~~~~~~~~~~~ [0]
+const componentJsxShort = <AnyComponent />;
+                           ~~~~~~~~~~~~ [0]
 
 [0]: Unsafe use of expression of type 'any'.
