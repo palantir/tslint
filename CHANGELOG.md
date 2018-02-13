@@ -42,7 +42,7 @@ For more details, see the relevant PRs:
 - [new-rule] [`newline-per-chained-call`](https://palantir.github.io/tslint/rules/newline-per-chained-call/) (#3278)
 - [new-rule-option] `"temporalDeadZone"` for [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) to ignore shadowing in the temporal dead zone of classes, parameters, enums and variables declared with `let` or `const`
 (#3389)
-- [new-rule-option] `"shorthand-first"` for [`object-literal-sort-key`](https://palantir.github.io/tslint/rules/object-literal-sort-key) (#3607)
+- [new-rule-option] `"shorthand-first"` for [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) (#3607)
 - [new-rule-option] Add support for an ignore pattern for [`max-line-length`](https://palantir.github.io/tslint/rules/max-line-length/) (#3099)
 
 ## :hammer_and_wrench: Bugfixes & enhancements
