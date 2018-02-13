@@ -492,29 +492,26 @@ export function isWhiteSpace(ch: number): boolean {
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
 
-export function convertModifiersToText(modifiers: ts.ModifiersArray | undefined, sourceFile?: ts.SourceFile): string {
-    if (modifiers === undefined || modifiers.length === 0) {
-        return "";
-    }
-
-    let text = "";
-
-    for (const modifier of modifiers) {
-        text += modifier.getText(sourceFile);
-    }
-
-    return `${text} `;
+function convertNodeArrayToText(modifiers: ts.NodeArray<ts.Node> | undefined, sourceFile: ts.SourceFile): string {
+    return modifiers === undefined || modifiers.length === 0
+        ? ""
+        : sourceFile.text.substring(modifiers[0].pos, modifiers[modifiers.length - 1].end).trim();
 }
 
 export function convertFunctionToArrowText(node: ts.FunctionExpression, sourceFile: ts.SourceFile): string {
-    const parenthesisIndex = sourceFile.text.indexOf("(", node.pos);
-    const functionIndex = sourceFile.text.lastIndexOf("function", parenthesisIndex);
+    const modifiers = convertNodeArrayToText(node.modifiers, sourceFile);
+    const parameters = convertNodeArrayToText(node.parameters, sourceFile);
+    let start = "";
 
-    const body = sourceFile.text.substring(node.body.pos, node.body.end);
-    const modifiers = functionIndex <= node.pos + 1
-        ? ""
-        : `${sourceFile.text.substring(node.pos, functionIndex).trim()} `;
-    const parametersAndReturn = sourceFile.text.substring(parenthesisIndex, node.body.pos);
+    if (modifiers !== "") {
+        start += `${modifiers} `;
+    }
 
-    return `${modifiers}${parametersAndReturn} =>${body}`;
+    start += `(${parameters})`;
+
+    if (node.type !== undefined) {
+        start += `: ${node.type.getText(sourceFile)}`;
+    }
+
+    return `${start} =>${sourceFile.text.substring(node.body.pos, node.body.end)}`;
 }

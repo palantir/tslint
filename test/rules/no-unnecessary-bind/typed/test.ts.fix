@@ -1,6 +1,8 @@
 const arrowLambda = () => {};
 const functionVar = function () {};
 
+declare const stubDecorator: any;
+
 class Class {
     public constructor() { }
 
@@ -11,6 +13,9 @@ class Class {
     public boundFunction = () => {}
 
     public boundAsyncFunction = async () => {}
+
+    @stubDecorator
+    public decorated = function () {}.bind(this)
 }
 
 const instance = new Class();

@@ -50,6 +50,8 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 }
 
 function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
+    const variableUsage = tsutils.collectVariableUsage(context.sourceFile);
+
     function checkArrowFunction(node: ts.CallExpression, boundExpression: ts.Node): void {
         if (node.arguments.length !== 1) {
             return;
@@ -60,6 +62,23 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
             boundExpression.getText(context.sourceFile));
 
         context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW, replacement);
+    }
+
+    function canFunctionExpressionBeFixed(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): boolean {
+        if (callExpression.arguments.length !== 1
+            || callExpression.arguments[0].kind !== ts.SyntaxKind.ThisKeyword
+            || valueDeclaration.asteriskToken !== undefined
+            || valueDeclaration.decorators !== undefined) {
+            return false;
+        }
+
+        const { name } = valueDeclaration;
+        if (name === undefined) {
+            return true;
+        }
+
+        const nameInfo = variableUsage.get(name);
+        return nameInfo === undefined || nameInfo.uses.length === 0;
     }
 
     function checkFunctionExpression(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): void {
@@ -96,7 +115,17 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
         return valueDeclaration;
     }
 
+    function isDecoratedPropertyMember(node: ts.CallExpression): boolean {
+        return node.parent !== undefined
+            && tsutils.isPropertyDeclaration(node.parent)
+            && node.parent.decorators !== undefined;
+    }
+
     function checkCallExpression(node: ts.CallExpression): void {
+        if (isDecoratedPropertyMember(node)) {
+            return;
+        }
+
         const bindExpression = node.expression;
         if (!isBindPropertyAccess(bindExpression)) {
             return;
@@ -125,27 +154,4 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
 
 function isBindPropertyAccess(node: ts.LeftHandSideExpression): node is ts.PropertyAccessExpression {
     return ts.isPropertyAccessExpression(node) && node.name.text === "bind";
-}
-
-function canFunctionExpressionBeFixed(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): boolean {
-    if (callExpression.arguments.length !== 1
-        || callExpression.arguments[0].kind !== ts.SyntaxKind.ThisKeyword
-        || valueDeclaration.asteriskToken !== undefined) {
-        return false;
-    }
-
-    const { name } = valueDeclaration;
-    if (name === undefined) {
-        return true;
-    }
-
-    return !ts.forEachChild(
-        valueDeclaration.body,
-        function search(node: ts.Node): boolean {
-            if (tsutils.isIdentifier(node)) {
-                return node.text === name.text;
-            }
-
-            return !!ts.forEachChild(node, search);
-        });
 }
