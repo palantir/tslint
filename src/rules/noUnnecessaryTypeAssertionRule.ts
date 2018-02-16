@@ -42,12 +42,18 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker()));
+        return this.applyWithWalker(new Walker(
+            sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker(), !!program.getCompilerOptions().strictNullChecks));
     }
 }
 
 class Walker extends Lint.AbstractWalker<string[]> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
+    constructor(
+        sourceFile: ts.SourceFile,
+        ruleName: string,
+        options: string[],
+        private readonly checker: ts.TypeChecker,
+        private readonly strictNullChecks: boolean) {
         super(sourceFile, ruleName, options);
     }
 
@@ -55,7 +61,9 @@ class Walker extends Lint.AbstractWalker<string[]> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.NonNullExpression:
-                    this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    if (this.strictNullChecks) {
+                        this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    }
                     break;
                 case ts.SyntaxKind.TypeAssertionExpression:
                 case ts.SyntaxKind.AsExpression:
