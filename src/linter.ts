@@ -20,14 +20,15 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import {
-    convertRuleOptions,
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
     getRulesDirectories,
     IConfigurationFile,
     loadConfigurationFromPath,
+    parseConfigFile,
 } from "./configuration";
+import { rulesForFile } from "./configuration/rulesForFile";
 import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
@@ -111,10 +112,9 @@ export class Linter {
         }
     }
 
-    public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+    public lint(fileName: string, source: string, configuration: IConfigurationFile = parseConfigFile(DEFAULT_CONFIG)): void {
         const sourceFile = this.getSourceFile(fileName, source);
-        const isJs = /\.jsx?$/i.test(fileName);
-        const enabledRules = this.getEnabledRules(configuration, isJs);
+        const enabledRules = this.getEnabledRules(configuration, fileName);
 
         let fileFailures = this.getAllFailures(sourceFile, enabledRules);
         if (fileFailures.length === 0) {
@@ -233,8 +233,9 @@ export class Linter {
         }
     }
 
-    private getEnabledRules(configuration: IConfigurationFile = DEFAULT_CONFIG, isJs: boolean): IRule[] {
-        const ruleOptionsList = convertRuleOptions(isJs ? configuration.jsRules : configuration.rules);
+    private getEnabledRules(configuration: IConfigurationFile = parseConfigFile(DEFAULT_CONFIG), fileName: string): IRule[] {
+        const isJs = /\.jsx?$/i.test(fileName);
+        const ruleOptionsList = rulesForFile(configuration, fileName);
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));
         return loadRules(ruleOptionsList, rulesDirectories, isJs);
