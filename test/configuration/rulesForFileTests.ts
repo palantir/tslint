@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+import * as path from "path";
 import { rulesForFile } from "../../src/configuration/rulesForFile";
 import { IOptions, RuleSeverity } from "../lint";
 import { buildConfig, buildRuleOptions } from "./utils";
@@ -116,5 +117,121 @@ describe("rulesForFile", () => {
             buildRuleOptions({ ruleName: "c", ruleSeverity: "off" }),
             buildRuleOptions({ ruleName: "d", ruleSeverity: "warning" }),
         ]);
+    });
+
+    describe("overrides", () => {
+        it("overrides the ruleSeverity when the file name matches", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleArguments: ["arg"], ruleName: "ruleName", ruleSeverity: "warning" }),
+            ]);
+        });
+
+        it("overrides the ruleArguments when the file name matches", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleArguments: ["overrideArg"] }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["overrideArg"] }),
+            ]);
+        });
+
+        it("applies overrides in order", () => {
+            const config = buildConfig({
+                overrides: [
+                    {
+                        excludedFiles: [],
+                        files: [path.resolve("file-name")],
+                        rules: new Map([
+                            ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                        ]),
+                    },
+                    {
+                        excludedFiles: [],
+                        files: [path.resolve("file-name")],
+                        rules: new Map([
+                            ["ruleName", { ruleSeverity: "off" as RuleSeverity }],
+                        ]),
+                    },
+                ],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "off" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
+
+        it("does not override when the file name does not match", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "no-match");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
+
+        it("excludedFiles overrides files matching", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [path.resolve("file-name")],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
     });
 });

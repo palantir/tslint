@@ -88,6 +88,24 @@ describe("parseConfigFile", () => {
             },
         );
     });
+
+    it("resolves overrides files and excludedFiles relative to the config file", () => {
+        const config: RawConfigFile = {
+            overrides: [{
+                excludedFiles: ["foo.ts", "**/*foo.d.ts"],
+                files: ["bar.ts", "**/*bar.d.ts"],
+                rules: {},
+            }],
+        };
+        assert.deepEqual(
+            parseConfigFile(config, "/path").overrides,
+            [{
+                excludedFiles: ["/path/foo.ts", "/path/**/*foo.d.ts"],
+                files: ["/path/bar.ts", "/path/**/*bar.d.ts"],
+                rules: new Map(),
+            }],
+        );
+    });
 });
 
 describe("parseConfigList", () => {

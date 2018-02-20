@@ -23,6 +23,7 @@ export function buildConfig(overrides: Partial<IConfigurationFile> = {}): IConfi
         extends: [],
         jsRules: new Map(),
         linterOptions: {},
+        overrides: [],
         rules: new Map(),
         rulesDirectory: [],
         ...overrides,

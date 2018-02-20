@@ -36,6 +36,11 @@ export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.ym
 export interface RawConfigFile {
     extends?: string | string[];
     linterOptions?: IConfigurationFile["linterOptions"];
+    overrides?: Array<{
+        files?: string | string[];
+        excludedFiles?: string | string[];
+        rules: RawRulesConfig;
+    }>;
     rulesDirectory?: string | string[];
     defaultSeverity?: string;
     rules?: RawRulesConfig;

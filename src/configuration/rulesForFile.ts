@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import * as minimatch from "minimatch";
+import * as path from "path";
 import { IOptions, RuleSeverity } from "../index";
-import { IConfigurationFile } from "./configurationFile";
+import { IConfigurationFile, RuleMap } from "./configurationFile";
+
 const IS_JS = /\.jsx?$/i;
 
 /**
@@ -47,18 +50,31 @@ function reduceRules(
     });
 
     const rules = file.isJS ? config.jsRules : config.rules;
+    assignRules(accumulator, rules, defaultSeverity);
 
-    rules.forEach((nextRuleOptions, ruleName) => {
-        let ruleOptions = accumulator.get(ruleName);
-        if (ruleOptions !== undefined) {
+    if (config.overrides !== undefined) {
+        const fullPath = path.resolve(file.path);
+
+        for (const override of config.overrides) {
+            if (pathMatchesGlobs(fullPath, override.files, override.excludedFiles)) {
+                assignRules(accumulator, override.rules, defaultSeverity);
+            }
+        }
+    }
+
+    return accumulator;
+}
+
+function assignRules(rules: RuleMap, nextRules: RuleMap, defaultSeverity: RuleSeverity) {
+    nextRules.forEach((nextRuleOptions, ruleName) => {
+        let ruleOptions = rules.get(ruleName);
+        if (ruleOptions === undefined) {
             ruleOptions = getEmptyInitialRuleOptions(ruleName, defaultSeverity);
-            accumulator.set(ruleName, ruleOptions);
+            rules.set(ruleName, ruleOptions);
         }
 
         Object.assign(ruleOptions, nextRuleOptions);
     });
-
-    return accumulator;
 }
 
 function getEmptyInitialRuleOptions(ruleName: string, ruleSeverity: RuleSeverity) {
@@ -68,4 +84,15 @@ function getEmptyInitialRuleOptions(ruleName: string, ruleSeverity: RuleSeverity
         ruleName,
         ruleSeverity,
     };
+}
+
+/**
+ * Checks that the specified file path matches all of the supplied glob patterns.
+ * @param filePath - The file path to test
+ * @param includePatterns - glob patterns to match
+ * @param excludedPatterns - glob patterns to avoid matching
+ */
+function pathMatchesGlobs(filePath: string, includedPatterns: string[], excludedPatterns: string[]): boolean {
+    return includedPatterns.some((p) => minimatch(filePath, p)) &&
+        !excludedPatterns.some((p) => minimatch(filePath, p));
 }

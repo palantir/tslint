@@ -16,6 +16,7 @@
  */
 
 import * as path from "path";
+import * as toAbsoluteGlob from "to-absolute-glob";
 import { IOptions, RuleSeverity } from "../index";
 import { arrayify, hasOwnProperty } from "../utils";
 import { IConfigurationFile } from "./configurationFile";
@@ -112,6 +113,7 @@ export function parseConfigList(
             }),
             jsRules: parseRules(raw.jsRules),
             linterOptions: {},
+            overrides: parseOverrides(raw.overrides),
             rules: parseRules(raw.rules),
             rulesDirectory: [],
         };
@@ -161,6 +163,7 @@ function parseWithoutExtends(config: RawConfigFile, dir?: string): IConfiguratio
         extends: [],
         jsRules: parseRules(config.jsRules),
         linterOptions: parseLinterOptions(config.linterOptions, dir),
+        overrides: parseOverrides(config.overrides, dir),
         rules: parseRules(config.rules),
         rulesDirectory: getRulesDirectories(arrayify(config.rulesDirectory), dir),
     };
@@ -211,4 +214,24 @@ function parseRuleSeverity(raw?: string, fallback?: RuleSeverity): RuleSeverity 
             console.warn(`Invalid severity level: ${raw}`);
             return defaultSeverity;
     }
+}
+
+function parseOverrides(raw: RawConfigFile["overrides"], dir?: string): IConfigurationFile["overrides"] {
+    if (raw === undefined) {
+        return [];
+    }
+
+    if (!Array.isArray(raw)) {
+        throw new Error("key 'overrides' should be an array of objects");
+    }
+
+    return raw.map((override) => ({
+        excludedFiles: parsePatterns(override.excludedFiles, dir),
+        files: parsePatterns(override.files, dir),
+        rules: parseRules(override.rules),
+    }));
+}
+
+function parsePatterns(patterns?: string | string[], dir?: string): string[] {
+    return arrayify(patterns).map((pattern) => toAbsoluteGlob(pattern, { cwd: dir }));
 }

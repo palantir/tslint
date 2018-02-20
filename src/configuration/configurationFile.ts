@@ -46,6 +46,17 @@ export interface IConfigurationFile {
     }>;
 
     /**
+     * Rules override configuration that is applied based on file paths. Only
+     * the `rule` key (not `jsRules`) can be overridden. Use an appropriate
+     * `file` regex to target JS files.
+     */
+    overrides?: Array<{
+        files: string[];
+        excludedFiles: string[];
+        rules: Map<string, Partial<IOptions>>;
+    }>;
+
+    /**
      * Directories containing custom rules. Resolved using node module semantics.
      */
     rulesDirectory: string[];
