@@ -36,6 +36,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
+    "ban-ts-ignore": true,
     "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [true, {
         "order": "statics-first",
