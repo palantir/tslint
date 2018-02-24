@@ -116,6 +116,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Import sources of different groups must be sorted by: libraries, parent directories, current directory.";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
+    public static IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP = "Import sources of the same type must be grouped together.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
@@ -300,7 +301,27 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkBlocksGrouping(): void {
+        this.checkBlocksUniqueness();
         this.importsBlocks.some(this.checkBlockGroups, this);
+    }
+
+    private checkBlocksUniqueness(): void {
+        const typesEncountered = new Map<ImportType, boolean>([
+            [ImportType.LIBRARY_IMPORT, false],
+            [ImportType.PARENT_DIRECTORY_IMPORT, false],
+            [ImportType.CURRENT_DIRECTORY_IMPORT, false],
+        ]);
+
+        const nonEmptyBlocks = this.importsBlocks.filter((block) => block.getImportDeclarations().length > 0);
+        nonEmptyBlocks.forEach((block) => {
+            // assume the whole block is of the same type, hence use the first one as the representing one
+            const firstInBlock = block.getImportDeclarations()[0];
+            if (typesEncountered.get(firstInBlock.type)) {
+                this.addFailureAtNode(firstInBlock.node, Rule.IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP);
+            } else {
+                typesEncountered.set(firstInBlock.type, true);
+            }
+        });
     }
 
     private checkBlockGroups(importsBlock: ImportsBlock): boolean {
