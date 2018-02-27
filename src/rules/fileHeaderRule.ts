@@ -96,9 +96,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             offset,
             (pos, end) => text.substring(pos, end + 2));
 
-        if (entireComment) {
-            violationExists = !(entireComment.match(/^.*((\r)?\n){2,}$/mg));
-        }
+        violationExists = entireComment !== undefined && entireComment.match(/^.*((\r)?\n){2,}$/mg) !== null;
 
         return violationExists;
     }
