@@ -18,6 +18,8 @@
 import * as ts from "typescript";
 import * as Lint from "../index";
 
+const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -26,7 +28,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             The first option, which is mandatory, is a regular expression that all headers should match.
             The second argument, which is optional, is a string that should be inserted as a header comment
-            if fixing is enabled and no header that matches the first argument is found.`,
+            if fixing is enabled and no header that matches the first argument is found.
+            The third argument, which is optional, is a string that denotes whether or not a newline should
+            exist on the header.`,
         options: {
             type: "array",
             items: [
@@ -36,12 +40,15 @@ export class Rule extends Lint.Rules.AbstractRule {
                 {
                     type: "string",
                 },
+                {
+                    type: "string",
+                },
             ],
             additionalItems: false,
             minLength: 1,
-            maxLength: 2,
+            maxLength: 3,
         },
-        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2017"]],
+        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE]],
         hasFix: true,
         type: "style",
         typescriptOnly: false,
@@ -54,6 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const { text } = sourceFile;
         const headerFormat = new RegExp(this.ruleArguments[0] as string);
         const textToInsert = this.ruleArguments[1] as string | undefined;
+        const enforceExtraTrailingLine = (this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1) || false;
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
@@ -63,7 +71,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             offset,
             (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));
 
-        if (commentText === undefined || !headerFormat.test(commentText)) {
+        const trailingNewLineViolation = enforceExtraTrailingLine ? this.doesNewLineEndingViolationExist(text, offset) : false;
+
+        if (commentText === undefined || !headerFormat.test(commentText) || trailingNewLineViolation) {
             const isErrorAtStart = offset === 0;
             if (!isErrorAtStart) {
                 ++offset; // show warning in next line after shebang
@@ -77,6 +87,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [new Lint.RuleFailure(sourceFile, offset, offset, Rule.FAILURE_STRING, this.ruleName, fix)];
         }
         return [];
+    }
+
+    private doesNewLineEndingViolationExist(text: string, offset: number): boolean {
+        let violationExists = false;
+        const entireComment = ts.forEachLeadingCommentRange(
+            text,
+            offset,
+            (pos, end) => text.substring(pos, end + 2));
+
+        if (entireComment) {
+            violationExists = !(entireComment.match(/^.*((\r)?\n){2,}$/mg));
+        }
+
+        return violationExists;
     }
 
     private createComment(sourceFile: ts.SourceFile, commentText: string, leadingNewlines = 1, trailingNewlines = 1) {
