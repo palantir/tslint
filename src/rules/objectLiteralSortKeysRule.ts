@@ -23,11 +23,13 @@ import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
+const OPTION_MATCH_DECLARATION_ORDER_ONLY = "match-declaration-order-only";
 const OPTION_SHORTHAND_FIRST = "shorthand-first";
 
 interface Options {
     ignoreCase: boolean;
     matchDeclarationOrder: boolean;
+    matchDeclarationOrderOnly: boolean;
     shorthandFirst: boolean;
 }
 
@@ -53,17 +55,24 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
                 const obj: I = { foo: 1, bar: 2 };
 
             If a contextual type is not found, alphabetical ordering will be used instead.
+            * "${OPTION_MATCH_DECLARATION_ORDER_ONLY}" exactly like "${OPTION_MATCH_DECLARATION_ORDER}",
+                but don't fall back to alphabetical if a contextual type is not found.
+
+                Note: If both ${OPTION_MATCH_DECLARATION_ORDER_ONLY} and ${OPTION_MATCH_DECLARATION_ORDER} options are present,
+                      ${OPTION_MATCH_DECLARATION_ORDER_ONLY} will take precedence and alphabetical fallback will not occur.
+
             * "${OPTION_SHORTHAND_FIRST}" will enforce shorthand properties to appear first, as in:
 
                 const obj = { a, c, b: true };
             `,
         options: {
             type: "string",
-            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
+            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_MATCH_DECLARATION_ORDER_ONLY, OPTION_SHORTHAND_FIRST],
         },
         optionExamples: [
             true,
             [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
+            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER_ONLY, OPTION_SHORTHAND_FIRST],
         ],
         type: "maintainability",
         typescriptOnly: false,
@@ -89,6 +98,9 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         if (options.matchDeclarationOrder) {
             throw new Error(`${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}".`);
         }
+        if (options.matchDeclarationOrderOnly) {
+            throw new Error(`${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER_ONLY}".`);
+        }
         return this.applyWithFunction(sourceFile, walk, options);
     }
 
@@ -106,6 +118,7 @@ function parseOptions(ruleArguments: any[]): Options {
     return {
         ignoreCase: has(OPTION_IGNORE_CASE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
+        matchDeclarationOrderOnly: has(OPTION_MATCH_DECLARATION_ORDER_ONLY),
         shorthandFirst: has(OPTION_SHORTHAND_FIRST),
     };
 
@@ -117,7 +130,7 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, matchDeclarationOrder, shorthandFirst },
+        options: { ignoreCase, matchDeclarationOrder, matchDeclarationOrderOnly, shorthandFirst },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -128,7 +141,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     });
 
     function check(node: ts.ObjectLiteralExpression): void {
-        if (matchDeclarationOrder) {
+        if (matchDeclarationOrder || matchDeclarationOrderOnly) {
             const type = getContextualType(node, checker!);
             // If type has an index signature, we can't check ordering.
             // If type has call/construct signatures, it can't be satisfied by an object literal anyway.
@@ -138,7 +151,9 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                 return;
             }
         }
-        checkAlphabetical(node);
+        if (!matchDeclarationOrderOnly) {
+            checkAlphabetical(node);
+        }
     }
 
     function checkAlphabetical(node: ts.ObjectLiteralExpression): void {
