@@ -1,0 +1,4 @@
+for(;;) {
+~~~~~~~   [prefer while]
+    console.log(x);
+}

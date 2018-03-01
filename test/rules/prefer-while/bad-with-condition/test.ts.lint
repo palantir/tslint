@@ -1,0 +1,4 @@
+for(;true===true;) {
+~~~~~~~~~~~~~~~~~~   [prefer while]
+    console.log(x);
+}
