@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         const cb = (node: ts.Node): void => {
             if (node.kind === ts.SyntaxKind.ForStatement && this.doesNodeViolateRule(node as ts.ForStatement)) {
-                failures.push(this.validateForLoop(sourceFile, node as ts.ForStatement));
+                failures.push(this.createFailure(sourceFile, node as ts.ForStatement));
             }
             return ts.forEachChild(node, cb);
         };
@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return (node.initializer === undefined && node.incrementor === undefined);
     }
 
-    private validateForLoop(sourceFile: ts.SourceFile, node: ts.ForStatement): Lint.RuleFailure {
+    private createFailure(sourceFile: ts.SourceFile, node: ts.ForStatement): Lint.RuleFailure {
         const start = node.getStart(sourceFile);
         const end = node.statement.pos;
 
