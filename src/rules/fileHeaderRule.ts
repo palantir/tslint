@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const { text } = sourceFile;
         const headerFormat = new RegExp(this.ruleArguments[0] as string);
         const textToInsert = this.ruleArguments[1] as string | undefined;
-        const enforceExtraTrailingLine = (this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1) || false;
+        const enforceExtraTrailingLine = (this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1);
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
