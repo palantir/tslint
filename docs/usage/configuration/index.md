@@ -59,7 +59,7 @@ An example `tslint.json` file might look like this:
                 "log",
                 "time",
                 "timeEnd",
-                "trace",
+                "trace"
             ]
         }
     },
