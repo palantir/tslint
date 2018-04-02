@@ -21,4 +21,10 @@ import lib8 = require('lib8'); // failure
 
 import lib9 = lib2.anotherSubImport;
 
+import lib10 = require('lib.css'); // failure
+               ~~~~~~~~~~~~~~~~~~             [no-require]
+
+let lib11 = require('./allow-require'); // failure
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~             [no-require]
+
 [no-require]: require() style import is forbidden

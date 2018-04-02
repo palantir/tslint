@@ -1,0 +1,13 @@
+{
+    "rules": {
+        "no-require-imports": [
+        true,
+        {
+            "ignore-module": [
+                "allow-require$",
+                "\\.css$"
+            ]
+        }
+        ]
+    }
+}
