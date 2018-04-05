@@ -38,6 +38,20 @@ export class Rule extends Lint.Rules.TypedRule {
             minLength: 0,
             maxLength: 1,
         },
+        rationale: Lint.Utils.dedent`
+            It's misleading returning the results of an expression whose type is \`void\`.
+            Attempting to do so is likely a symptom of expecting a different return type from a function.
+            For example, the following code will log \`undefined\` but looks like it logs a value:
+
+            \`\`\`
+            const performWork = (): void => {
+                workFirst();
+                workSecond();
+            };
+
+            console.log(performWork());
+            \`\`\`
+        `,
         requiresTypeInfo: true,
         type: "functionality",
         typescriptOnly: false,

@@ -29,8 +29,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             Disallows the use constant number values outside of variable assignments.
             When no list of allowed values is specified, -1, 0 and 1 are allowed by default.`,
         rationale: Lint.Utils.dedent`
-            Magic numbers should be avoided as they often lack documentation, forcing
-            them to be stored in variables gives them implicit documentation.`,
+            Magic numbers should be avoided as they often lack documentation.
+            Forcing them to be stored in variables gives them implicit documentation.
+        `,
         optionsDescription: "A list of allowed numbers.",
         options: {
             type: "array",

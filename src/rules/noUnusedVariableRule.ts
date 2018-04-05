@@ -27,7 +27,8 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
+        description: Lint.Utils.dedent`
+            Disallows unused imports, variables, functions and
             private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
             options, but does not interrupt code compilation.`,
         descriptionDetails: Lint.Utils.dedent`
@@ -64,6 +65,10 @@ export class Rule extends Lint.Rules.TypedRule {
             maxLength: 3,
         },
         optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
+        rationale: Lint.Utils.dedent`
+            Variables that are declared and not used anywhere in code are likely an error due to incomplete refactoring.
+            Such variables take up space in the code, are mild performance pains, and can lead to confusion by readers.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
