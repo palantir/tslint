@@ -59,7 +59,7 @@ An example `tslint.json` file might look like this:
                 "log",
                 "time",
                 "timeEnd",
-                "trace",
+                "trace"
             ]
         }
     },
@@ -104,7 +104,7 @@ jsRules:
 
 ### Rule severity
 
-The severity level of each rule can can be configured to `default`, `error`, `warning`/`warn`, or `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` top-level option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
+The severity level of each rule can be configured to `default`, `error`, `warning`/`warn`, or `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` top-level option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
 ### Configuration presets
 

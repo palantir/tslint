@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unbound-method",
-        description: "Warns when a method is used as outside of a method call.",
+        description: "Warns when a method is used outside of a method call.",
         optionsDescription: `You may optionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods.`,
         options: {
             type: "string",
