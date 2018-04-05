@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
         description: "Disallows non-null assertions using the `!` postfix operator.",
-        rationale: `
+        rationale: Lint.Utils.dedent`
             Using non-null assertion cancels the benefits of the strict null checking mode.
 
             Instead of assuming objects exist:
