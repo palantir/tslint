@@ -36,6 +36,44 @@ export class Rule extends Lint.Rules.TypedRule {
             enum: [OPTION_IGNORE_STATIC],
         },
         optionExamples: [true, [true, OPTION_IGNORE_STATIC]],
+        rationale: Lint.Utils.dedent`
+            Class functions don't preserve the class scope when passed as standalone variables.
+            For example, this code will log the global scope (\`window\`/\`global\`), not the class instance:
+
+            \`\`\`
+            class MyClass {
+                public log(): void {
+                    console.log(this);
+                }
+            }
+
+            const instance = new MyClass();
+            const log = instance.log;
+
+            log();
+            \`\`\`
+
+            You need to either use an arrow lambda (\`() => {...}\`) or call the function with the correct scope.
+
+            \`\`\`
+            class MyClass {
+                public logArrowBound = (): void => {
+                    console.log(bound);
+                };
+
+                public logManualBind(): void {
+                    console.log(this);
+                }
+            }
+
+            const instance = new MyClass();
+            const logArrowBound = instance.logArrowBound;
+            const logManualBind = instance.logManualBind.bind(instance);
+
+            logArrowBound();
+            logManualBind();
+            \`\`\`
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
