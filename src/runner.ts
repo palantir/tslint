@@ -260,7 +260,15 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             continue;
         }
 
-        const contents = program !== undefined ? program.getSourceFile(file)!.text : await tryReadFile(file, logger);
+        let contents: string | undefined;
+        if (program !== undefined) {
+            const sourceFile = program.getSourceFile(file);
+            if (sourceFile !== undefined) {
+                contents = sourceFile.text;
+            }
+        } else {
+            contents = await tryReadFile(file, logger);
+        }
         if (contents !== undefined) {
             linter.lint(file, contents, configFile);
         }
