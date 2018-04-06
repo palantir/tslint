@@ -95,6 +95,16 @@ export interface Options {
     rulesDirectory?: string | string[];
 
     /**
+     * Check files via stdin.
+     */
+    stdin?: boolean;
+
+    /**
+     * Tell TSLint where the actual file being linted through stdin is, if any.
+     */
+    stdinFilename?: string;
+
+    /**
      * Run the tests in the given directories to ensure a (custom) TSLint rule's output matches the expected output.
      * When this property is `true` the `files` property is used to specify the directories from which the tests should be executed.
      */
@@ -157,7 +167,9 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 }
 
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
-    const { files, program } = resolveFilesAndProgram(options, logger);
+    const program = resolveProgram(options);
+    const files = resolveFiles(options, program, logger);
+
     // if type checking, run the type checker
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
@@ -173,25 +185,80 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram(
-    { files, project, exclude, outputAbsolutePaths }: Options,
+/** Read the stdin stream into a string with all of the contents. */
+async function readStdin(): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+        let fileData = "";
+
+        process.stdin.setEncoding("utf8");
+
+        process.stdin.on("readable", () => {
+            let chunk: string | Buffer | null = null;
+
+            // tslint:disable-next-line: no-conditional-assignment
+            while ((chunk = process.stdin.read()) !== null) {
+                fileData += chunk;
+            }
+        });
+
+        process.stdin.on("end", () => {
+            resolve(fileData);
+        });
+
+        process.stdin.on("error", (error: Error) => {
+            reject(error);
+        });
+    });
+}
+
+interface ResolvedFile {
+  filename: string;
+  isStdin: boolean;
+}
+
+function resolveProgram(
+    { project }: Options,
+): ts.Program | undefined {
+    if (project !== undefined) {
+        const projectPath = findTsconfig(project);
+
+        if (projectPath === undefined) {
+            throw new FatalError(`Invalid option for project: ${project}`);
+        }
+
+        return Linter.createProgram(projectPath);
+    }
+
+    return undefined;
+}
+
+function resolveFiles(
+    { files, stdin, stdinFilename, exclude, outputAbsolutePaths }: Options,
+    program: ts.Program | undefined,
     logger: Logger,
-): { files: string[]; program?: ts.Program } {
+): ResolvedFile[] {
+    // Return stdin files if we're reading from stdin.
+    if (stdin) {
+        if (stdinFilename) {
+            // Use a filename for shadowing stdin, if the option is set.
+            return [{filename: path.resolve(stdinFilename), isStdin: true}];
+        } else {
+            return [{filename: "", isStdin: true}];
+        }
+    }
+
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     exclude = exclude.map(trimSingleQuotes);
 
-    if (project === undefined) {
-        return { files: resolveGlobs(files, exclude, outputAbsolutePaths, logger) };
-    }
-
-    const projectPath = findTsconfig(project);
-    if (projectPath === undefined) {
-        throw new FatalError(`Invalid option for project: ${project}`);
+    if (program === undefined) {
+        return resolveGlobs(files, exclude, outputAbsolutePaths, logger)
+            .map((filename) => ({filename, isStdin: false}));
     }
 
     exclude = exclude.map((pattern) => path.resolve(pattern));
-    const program = Linter.createProgram(projectPath);
+
     let filesFound: string[];
+
     if (files.length === 0) {
         filesFound = filterFiles(Linter.getFileNames(program), exclude, false);
     } else {
@@ -209,7 +276,8 @@ function resolveFilesAndProgram(
             }
         }
     }
-    return { files: filesFound, program };
+
+    return filesFound.map((filename) => ({filename, isStdin: false}));
 }
 
 function filterFiles(files: string[], patterns: string[], include: boolean): string[] {
@@ -235,7 +303,7 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
     return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
 }
 
-async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
+async function doLinting(options: Options, files: ResolvedFile[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
             fix: !!options.fix,
@@ -248,7 +316,9 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     let lastFolder: string | undefined;
     let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
-    for (const file of files) {
+    for (const resolvedFile of files) {
+        const file = resolvedFile.filename;
+
         if (options.config === undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
@@ -261,7 +331,10 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
         }
 
         let contents: string | undefined;
-        if (program !== undefined) {
+
+        if (resolvedFile.isStdin) {
+            contents = await readStdin();
+        } else if (program !== undefined) {
             const sourceFile = program.getSourceFile(file);
             if (sourceFile !== undefined) {
                 contents = sourceFile.text;

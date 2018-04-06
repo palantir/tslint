@@ -35,6 +35,8 @@ interface Argv {
     outputAbsolutePaths: boolean;
     project?: string;
     rulesDir?: string;
+    stdin?: boolean;
+    stdinFilename?: string;
     formattersDir: string;
     format?: string;
     typeCheck?: boolean;
@@ -45,7 +47,11 @@ interface Argv {
 interface Option {
     short?: string;
     // Commander will camelCase option names.
-    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
+    name: keyof Argv
+      | "rules-dir"
+      | "stdin-filename"
+      | "formatters-dir"
+      | "type-check";
     type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
@@ -129,6 +135,23 @@ const options: Option[] = [
             node_modules/tslint/lib/rules, before checking the user-provided
             rules directory, so rules in the user-provided rules directory
             with the same name as the base rules will not be loaded.`,
+    },
+    {
+        name: "stdin",
+        type: "string",
+        describe: "stdin input",
+        description: dedent`
+            Read and check a file via stdin.`,
+    },
+    {
+        name: "stdin-filename",
+        type: "string",
+        describe: "stdin filename",
+        description: dedent`
+            When reading a file with --stdin, tell TSLint where the file
+            being checked resides on the filesystem. This option allows TSLint
+            to be used for checking for problems on the fly, and also support
+            loading project configuration files, etc.`,
     },
     {
         short: "s",
@@ -232,8 +255,19 @@ if (parsed.unknown.length !== 0) {
 }
 const argv = commander.opts() as any as Argv;
 
-if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (!(
+  argv.init
+  || argv.test !== undefined
+  || argv.project !== undefined
+  || commander.args.length > 0
+  || argv.stdin
+)) {
     console.error("No files specified. Use --project to lint a project folder.");
+    process.exit(1);
+}
+
+if (argv.stdin && argv.stdinFilename === undefined) {
+    console.error("--stdin-filename must be used with --stdin.");
     process.exit(1);
 }
 
@@ -263,6 +297,8 @@ run(
         outputAbsolutePaths: argv.outputAbsolutePaths,
         project: argv.project,
         rulesDirectory: argv.rulesDir,
+        stdin: argv.stdin,
+        stdinFilename: argv.stdinFilename,
         test: argv.test,
         typeCheck: argv.typeCheck,
     },
