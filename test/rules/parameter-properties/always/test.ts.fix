@@ -1,0 +1,39 @@
+class HiBot {
+    constructor(private lang: string) {
+    }
+}
+
+class HiBot {
+    constructor(private readonly lang: string) {
+    }
+}
+
+class ByeBot {
+    constructor(public lang: string) {
+    }
+}
+
+class ByeBot {
+    constructor(public lang: string = "en") {
+    }
+}
+
+class ByeBot {
+    constructor(public lang: string = "en", private readonly locale: string = "USA") {
+    }
+}
+
+class ByeBot {
+    lang: string = "en";
+    constructor(language: string) {
+        this.lang = language;
+    }
+}
+
+class ByeBot {
+    lang: string = "en";
+    constructor(language: string, private gender: "Male" | "Female") {
+        this.lang = language;
+        this.isFemale = this.gender === "Female";
+    }
+}
