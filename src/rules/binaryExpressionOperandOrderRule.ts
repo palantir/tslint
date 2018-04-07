@@ -31,6 +31,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Expressions like \`1 + x\` are sometimes referred to as "Yoda" expressions because they read
+            opposite to how we would normally speak the expression.
+
+            Sticking to a consistent grammar for conditions helps keep code readable and understandable.
+        `,
         type: "style",
         typescriptOnly: false,
     };

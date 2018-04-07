@@ -86,7 +86,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             "/*",
             // split on both types of line endings in case users just typed "\n" in their configs
             // but are working in files with \r\n line endings
-            ...commentText.split(/\r?\n/g).map((line) => ` * ${line}`),
+            // Trim trailing spaces to play nice with `no-trailing-whitespace` rule
+            ...commentText.split(/\r?\n/g).map((line) => ` * ${line}`.replace(/\s+$/, "")),
             " */",
         ].join(lineEnding) + lineEnding.repeat(trailingNewlines);
     }

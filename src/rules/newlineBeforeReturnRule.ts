@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getLineBreakStyle, getPreviousStatement, isSameLine } from "tsutils";
+import { getPreviousStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -23,7 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "newline-before-return",
-        description: "Enforces blank line before return when not the only line in the block.",
+        description:
+            "Enforces blank line before return when not the only line in the block.",
         rationale: "Helps maintain a readable style in your codebase.",
         optionsDescription: "Not configurable.",
         options: {},
@@ -37,7 +38,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Missing blank line before return";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 
@@ -66,7 +69,10 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         if (comments !== undefined) {
             // check for blank lines between comments
             for (let i = comments.length - 1; i >= 0; --i) {
-                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end).line;
+                const endLine = ts.getLineAndCharacterOfPosition(
+                    this.sourceFile,
+                    comments[i].end,
+                ).line;
                 if (endLine < line - 1) {
                     return;
                 }
@@ -78,11 +84,29 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         if (prevLine >= line - 1) {
             // Previous statement is on the same or previous line
             this.addFailure(
-                start, start, Rule.FAILURE_STRING,
+                start,
+                start,
+                Rule.FAILURE_STRING,
                 isSameLine(this.sourceFile, prev.end, node.getStart())
                     ? undefined
-                    : Lint.Replacement.appendText(node.pos, getLineBreakStyle(this.sourceFile)),
+                    : Lint.Replacement.appendText(
+                          node.pos,
+                          getLineBreakStyle(this.sourceFile),
+                      ),
             );
         }
     }
+}
+
+/**
+ * This is already part of the most recent tsutils and should be phased out once
+ * this repo is using tsutils 2.14+.
+ */
+function getLineBreakStyle(sourceFile: ts.SourceFile) {
+    const lineStarts = sourceFile.getLineStarts();
+    return lineStarts.length === 1 ||
+        lineStarts[1] < 2 ||
+        sourceFile.text[lineStarts[1] - 2] !== "\r"
+        ? "\n"
+        : "\r\n";
 }

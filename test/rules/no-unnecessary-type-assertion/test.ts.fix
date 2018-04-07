@@ -3,11 +3,13 @@ const nonNullString: string;
 const nullableString: string|undefined;
 let anyType: any;
 type AnyDuringMigration = any;
+let tuple: [number, number] = [1, 2];
 
 // non-null
 let a = nonNullStringLiteral;
 let b = nonNullString;
 let c = nullableString!;
+tuple;
 
 // as
 let d = nonNullStringLiteral as string;
@@ -83,3 +85,22 @@ const data = {
 
 [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
 let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+
+interface NotATuple {
+    0: number,
+    0.5: number,
+    2: number,
+}
+
+declare const notATuple: NotATuple;
+notATuple;
+
+unknownName;
+
+function foo() {
+    let xx: 1 | 2 = 1;
+    const f = () => xx = 2;
+    f();
+    xx as 1 | 2 === 2; // xx is inferred as 1, assertion is necessary to avoid compile error
+}
+
