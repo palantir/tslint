@@ -2938,7 +2938,8 @@
         {
           "type": "string",
           "enum": [
-            "ignore-interfaces"
+            "ignore-interfaces",
+            "ignore-bound-class-methods"
           ]
         }
       ],
