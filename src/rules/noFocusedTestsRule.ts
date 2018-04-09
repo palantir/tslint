@@ -22,10 +22,10 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const forbiddenFocusFunctions: string[] = [
-  'fdescribe',
-  'fit',
-  'ddescribe',
-  'iit',
+  "fdescribe",
+  "fit",
+  "ddescribe",
+  "iit",
 ];
 
 export class Rule extends Lint.Rules.AbstractRule {
