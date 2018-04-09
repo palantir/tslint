@@ -59,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isCallExpression(node) &&
           node.expression.kind === ts.SyntaxKind.Identifier &&
-          forbiddenFocusFunctions.indexOf((node.expression as ts.Identifier).text) === -1) {
+          forbiddenFocusFunctions.indexOf((node.expression as ts.Identifier).text) !== -1) {
           ctx.addFailureAtNode(
             node.expression,
             Rule.FAILURE_STRING_FACTORY((node.expression as ts.Identifier).text),
