@@ -1,0 +1,15 @@
+ddescribe('myClass',() => {
+~~~~~~~~~                   [Forbidden focused test ddescribe]
+  iit('should do myMethod', () => {
+  ~~~                               [Forbidden focused test iit]
+    // run my test
+  });
+});
+
+fdescribe('myClass',() => {
+~~~~~~~~~                   [Forbidden focused test fdescribe]
+  fit('should do myMethod', () => {
+  ~~~                               [Forbidden focused test fit]
+    // run my test
+  });
+});
