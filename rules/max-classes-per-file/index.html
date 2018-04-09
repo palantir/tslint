@@ -8,18 +8,23 @@ rationale: |-
   Ensures that files have a single responsibility so that that classes each exist in their own files
 optionsDescription: |-
 
-  The one required argument is an integer indicating the maximum number of classes that can appear in a file.
+  The one required argument is an integer indicating the maximum number of classes that can appear in a
+  file. An optional argument `"exclude-class-expressions"` can be provided to exclude class expressions
+  from the overall class count.
 options:
   type: array
   items:
     - type: number
       minimum: 1
+    - type: string
+      enum:
+        - exclude-class-expressions
   additionalItems: false
   minLength: 1
   maxLength: 2
 optionExamples:
   - '[true, 1]'
-  - '[true, 5]'
+  - '[true, 5, "exclude-class-expressions"]'
 type: maintainability
 typescriptOnly: false
 layout: rule
@@ -31,6 +36,12 @@ optionsJSON: |-
       {
         "type": "number",
         "minimum": 1
+      },
+      {
+        "type": "string",
+        "enum": [
+          "exclude-class-expressions"
+        ]
       }
     ],
     "additionalItems": false,

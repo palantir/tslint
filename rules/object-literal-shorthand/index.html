@@ -1,14 +1,26 @@
 ---
 ruleName: object-literal-shorthand
-description: Enforces use of ES6 object literal shorthand when possible.
+description: Enforces/disallows use of ES6 object literal shorthand.
 hasFix: true
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If the 'never' option is provided, any shorthand object literal syntax will cause a failure.
+options:
+  type: string
+  enum:
+    - never
 optionExamples:
   - 'true'
+  - '[true, "never"]'
 type: style
 typescriptOnly: false
 layout: rule
 title: 'Rule: object-literal-shorthand'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "string",
+    "enum": [
+      "never"
+    ]
+  }
 ---

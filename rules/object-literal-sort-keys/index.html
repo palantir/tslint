@@ -1,15 +1,37 @@
 ---
 ruleName: object-literal-sort-keys
-description: Requires keys in object literals to be sorted alphabetically
+description: |-
+
+  Checks ordering of keys in object literals.
+
+  When using the default alphabetical ordering, additional blank lines may be used to group
+  object properties together while keeping the elements within each group in alphabetical order.
+          
 rationale: Useful in preventing merge conflicts
-optionsDescription: You may optionally pass "ignore-case" to compare keys case insensitive.
+optionsDescription: |
+
+  By default, this rule checks that keys are in alphabetical order.
+  The following may optionally be passed:
+
+  * "ignore-case" will compare keys in a case insensitive way.
+  * "match-declaration-order" will prefer to use the key ordering of the contextual type of the object literal, as in:
+
+      interface I { foo: number; bar: number; }
+      const obj: I = { foo: 1, bar: 2 };
+
+  If a contextual type is not found, alphabetical ordering will be used instead.
+  * "shorthand-first" will enforce shorthand properties to appear first, as in:
+
+      const obj = { a, c, b: true };
 options:
   type: string
   enum:
     - ignore-case
+    - match-declaration-order
+    - shorthand-first
 optionExamples:
   - 'true'
-  - '[true, "ignore-case"]'
+  - '[true, "ignore-case", "match-declaration-order", "shorthand-first"]'
 type: maintainability
 typescriptOnly: false
 layout: rule
@@ -18,7 +40,9 @@ optionsJSON: |-
   {
     "type": "string",
     "enum": [
-      "ignore-case"
+      "ignore-case",
+      "match-declaration-order",
+      "shorthand-first"
     ]
   }
 ---
