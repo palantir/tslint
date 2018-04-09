@@ -1,0 +1,15 @@
+function foo(evt: Event) {
+    let length: number = 1;
+    console.log(length);
+
+    Event.target;
+
+    event.target;
+    ~~~~~ [variable 'event' is defined in lib.dom.d.ts.]
+}
+
+console.log(length);
+            ~~~~~~  [variable 'length' is defined in lib.dom.d.ts.]
+
+import { name } from "./foo";
+console.log(name);

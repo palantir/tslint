@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "ban-dom-global": [
+      true,
+      "name",
+      "length",
+      "event"
+    ]
+  }
+}
