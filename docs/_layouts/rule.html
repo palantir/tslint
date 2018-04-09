@@ -42,23 +42,21 @@ layout: page
 </pre>
 
 {% if page.codeExamples %}
-<div class="wrapper__code-examples">
     <h3>Code examples: </h3>
     {% for codeExample in page.codeExamples %}
     <div class="wrapper__code-example">
         <h5>{{ codeExample.description }}</h5>
         {{ codeExample.config | markdownify }}
         <h6>Passes</h6>
-        <div class="code-example pass">
+        <div class="code-example code-example-pass">
             {{ codeExample.pass | markdownify }}
         </div>
         {% if codeExample.fail %}
-        <h6 style="color: #d14;">Fails</h6>
-        <div class="code-example fail">
+        <h6 class="heading-fail">Fails</h6>
+        <div class="code-example code-example-fail">
             {{ codeExample.fail | markdownify }}
         </div>
         {% endif %}
     </div>
     {% endfor %}
-</div>
 {% endif %}

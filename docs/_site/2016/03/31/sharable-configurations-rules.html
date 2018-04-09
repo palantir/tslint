@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Sharable Configurations and Rules</title>
+    <meta name="description" content="TSLint documentation. A linter for the TypeScript language.
+">
+
+    <link rel="stylesheet" href="/tslint/css/main.css">
+    <link rel="canonical" href="http://localhost:4000/tslint/2016/03/31/sharable-configurations-rules.html">
+</head>
+
+
+  <body>
+
+    
+
+<header class="header">
+  <section class="site-header">
+      <a class="site-title" href="/tslint/">TSLint</a>
+      <nav class="site-nav">
+        <a class="page-link" href="/tslint/usage/cli">Usage</a>
+        <a class="page-link" href="/tslint/rules">Rules</a>
+        <a class="page-link" href="/tslint/formatters">Formatters</a>
+        <a class="page-link" href="/tslint/develop/custom-rules">Develop</a>
+        <a class="page-link" href="/tslint/news">News</a>
+      </nav>
+  </section>
+  
+</header>
+
+
+    <div class="main-content">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Sharable Configurations and Rules</h1>
+    <p class="post-meta">Mar 31, 2016</p>
+  </header>
+
+  <article class="post-content">
+    <p>With the release of <a href="https://github.com/palantir/tslint/releases">TSLint v3.7.0</a> comes a few new features that will make configuration files (aka <a href="/tslint/usage/tslint-json"><code class="highlighter-rouge">tslint.json</code> files</a>)
+easier to maintain and share. The crux of the changes is a new <code class="highlighter-rouge">extends</code> field,  which when provided indicates that a configuration
+file augments another configuration file.</p>
+
+<h3 id="example">Example</h3>
+
+<p>Let’s imagine you’ve created some custom rules and want to share them with others.
+You also have a couple of configurations for them you want to share.</p>
+
+<p>Here’s the layout of our NPM package, which we’ll call <code class="highlighter-rouge">shared-tslint-rules</code>. We have a directory with rules,
+as well as a few different config files for TSLint.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>shared-tslint-rules
+├── package.json
+├── rules
+│   ├── noAdditionRule.js
+│   ├── noErrorsRule.js
+│   └── noExcessiveCommentingRule.js
+├── tslint-base.json
+├── tslint-config.json
+└── tslint-crazy-config.js
+</code></pre></div></div>
+
+<p>Our starting-point config file just references the directory the custom rules are in
+but doesn’t enable any of them:</p>
+
+<p><strong>tslint-base.json</strong>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"rulesDirectory"</span><span class="p">:</span><span class="w"> </span><span class="s2">"./rules"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>We also want to provide a sane default config for our rules.
+Notice how it extends our base config, so we don’t have to redeclare <code class="highlighter-rouge">rulesDirectory</code> here:</p>
+
+<p><strong>tslint-config.json</strong>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="s2">"extends"</span><span class="p">:</span><span class="w"> </span><span class="s2">"./tslint-base.json"</span><span class="p">,</span><span class="w">
+    </span><span class="s2">"rules"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="s2">"no-errors"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+        </span><span class="s2">"no-addition"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Finally, we can even make a crazy config file for fun that gives you back a different config
+each time you run TSLint. Notice how this is a <code class="highlighter-rouge">.js</code> file that exports an object:</p>
+
+<p><strong>tslint-crazy-config.js</strong></p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">extends</span><span class="p">:</span> <span class="s2">"./tslint-base.json"</span><span class="p">,</span>
+    <span class="na">rules</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"no-excessive-commenting"</span><span class="p">:</span> <span class="p">[</span><span class="kc">true</span><span class="p">,</span> <span class="p">{</span><span class="na">maxComments</span><span class="p">:</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">10</span><span class="p">}]</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>Finally, we have our <code class="highlighter-rouge">package.json</code> file which references our base config file through its <code class="highlighter-rouge">main</code> field:</p>
+
+<p><strong>package.json</strong>:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"shared-tslint-rules"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Some TSLint rules that are great!"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"main"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tslint-base.json"</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"scripts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"test"</span><span class="p">:</span><span class="w"> </span><span class="s2">"echo </span><span class="se">\"</span><span class="s2">Error: no test specified</span><span class="se">\"</span><span class="s2"> &amp;&amp; exit 1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="s2">"author"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+  </span><span class="s2">"license"</span><span class="p">:</span><span class="w"> </span><span class="s2">"MIT"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>We can publish our package on NPM to let the world use it!</p>
+
+<hr />
+
+<p>Now let’s say we’re a user, and we want to use the custom rules above to lint our code.
+First, we’ll make sure we have the necessary npm packages installed:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install -g tslint shared-tslint-rules
+</code></pre></div></div>
+
+<p>Then, in our <code class="highlighter-rouge">tslint.json</code> file for our project, we can reference the package of custom rules with <code class="highlighter-rouge">extends</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+    "extends": "shared-tslint-rules/tslint-config",
+    "rules": {
+        "no-addition": true
+    }
+}
+</code></pre></div></div>
+
+<p>and that’s all we have to do to use the custom rules!
+We can now run TSLint as we would normally and see any lint errors produced by the custom rules:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tslint -c path/to/tslint.json my/files/**/to/lint.ts
+</code></pre></div></div>
+
+
+  </article>
+
+</div>
+
+        <footer class="site-footer">
+  <div class="footer-col-wrapper">
+    <div class="footer-col  footer-col-1">
+      <ul class="contact-list">
+        <li>©2016 Palantir Technologies under <a href="https://github.com/palantir/tslint/blob/master/LICENSE">Apache 2.0</a></li>
+        <li>Styles based off of the <a href="https://github.com/jasonlong/cayman-theme">Cayman Theme</a> by Jason Long.
+        <li>Issues? <a href="https://github.com/palantir/tslint">Let us know on GitHub.</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col  footer-col-2">
+      <ul class="social-media-list">
+        
+        <li>
+          <a href="https://github.com/palantir/tslint">
+            <span class="icon  icon--github">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+
+            <span class="username">palantir/tslint</span>
+          </a>
+        </li>
+        
+
+        
+        <li>
+          <a href="https://twitter.com/PalantirTech">
+            <span class="icon  icon--twitter">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+
+            <span class="username">PalantirTech</span>
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+</footer>
+
+    </div>
+
+  </body>
+
+</html>

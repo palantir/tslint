@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>TSLint</title>
+    <description>TSLint documentation. A linter for the TypeScript language.
+</description>
+    <link>http://localhost:4000/tslint/</link>
+    <atom:link href="http://localhost:4000/tslint/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Mon, 09 Apr 2018 09:06:25 -0400</pubDate>
+    <lastBuildDate>Mon, 09 Apr 2018 09:06:25 -0400</lastBuildDate>
+    <generator>Jekyll v3.6.2</generator>
+    
+      <item>
+        <title>TSLint 4.0 Released</title>
+        <description>&lt;p&gt;TSLint 4.0 has been released! With this release comes a few exciting &lt;a href=&quot;https://github.com/palantir/tslint/releases&quot;&gt;changes&lt;/a&gt;. Some of the highlights:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;Fixers&lt;/strong&gt;. Do you dread turning on a new rule because of all of the new errors? For some of the most common issues, we’ll fix them for you. To use this feature, run &lt;code class=&quot;highlighter-rouge&quot;&gt;tslint&lt;/code&gt; with the &lt;code class=&quot;highlighter-rouge&quot;&gt;--fix&lt;/code&gt; option. Rules that support the &lt;code class=&quot;highlighter-rouge&quot;&gt;--fix&lt;/code&gt; feature:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/array-type&quot;&gt;array-type&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/arrow-parens&quot;&gt;arrow-parens&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/no-unused-variable&quot;&gt;no-unused-variable&lt;/a&gt; (for imports)&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/no-var-keyword&quot;&gt;no-var-keyword&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/ordered-imports&quot;&gt;ordered-imports&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/semicolon&quot;&gt;semicolon&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/trailing-comma&quot;&gt;trailing-comma&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Linting &lt;code class=&quot;highlighter-rouge&quot;&gt;.js&lt;/code&gt; files&lt;/strong&gt;. &lt;em&gt;A much-requested feature from our community&lt;/em&gt;. Simplify your toolset by running the same rules you know and love on your .js and .jsx files. Just add a &lt;code class=&quot;highlighter-rouge&quot;&gt;jsRules&lt;/code&gt; &lt;a href=&quot;https://raw.githubusercontent.com/palantir/tslint/master/src/configs/recommended.ts&quot;&gt;section&lt;/a&gt; to your &lt;code class=&quot;highlighter-rouge&quot;&gt;tslint.json&lt;/code&gt; file, and TSLint will lint your JavaScript files.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;TypeScript 2.0+ required&lt;/strong&gt;. This lets us deprecate/remove rules that are checked by the compiler. Problematic code that once violated these rules now cause compilation errors in &lt;code class=&quot;highlighter-rouge&quot;&gt;tsc&lt;/code&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;no-duplicate-key&lt;/li&gt;
+      &lt;li&gt;no-unreachable&lt;/li&gt;
+      &lt;li&gt;no-unused-variable&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Node.js API Change&lt;/strong&gt;. &lt;a href=&quot;https://github.com/palantir/tslint/pull/1720&quot;&gt;Moved and renamed&lt;/a&gt; some things to make more sense. Get it all when you use &lt;code class=&quot;highlighter-rouge&quot;&gt;import * as TSLint from &quot;tslint&quot;&lt;/code&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;&lt;a href=&quot;https://github.com/palantir/tslint/pull/1717/files#diff-6e3940e8ec3d59837c4435f32975ed2c&quot;&gt;Recommended Rules Updated&lt;/a&gt;&lt;/strong&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/adjacent-overload-signatures&quot;&gt;adjacent-overload-signatures&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/array-type&quot;&gt;array-type&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/arrow-parens&quot;&gt;arrow-parens&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/max-classes-per-file&quot;&gt;max-classes-per-file&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/no-unsafe-finally&quot;&gt;no-unsafe-finally&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/object-literal-key-quotes&quot;&gt;object-literal-key-quotes&lt;/a&gt; (as needed)&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/object-literal-shorthand&quot;&gt;object-literal-shorthand&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/only-arrow-functions&quot;&gt;only-arrow-functions&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/ordered-imports&quot;&gt;ordered-imports&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/prefer-for-of&quot;&gt;prefer-for-of&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Other rules you might find handy&lt;/strong&gt;:
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/completed-docs&quot;&gt;completed-docs&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;/tslint/rules/cyclomatic-complexity&quot;&gt;cyclomatic-complexity&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;create-your-own-fixer&quot;&gt;Create your own fixer&lt;/h2&gt;
+&lt;p&gt;To create your own fixer, instantiate a &lt;code class=&quot;highlighter-rouge&quot;&gt;Fix&lt;/code&gt; object and pass it in as an argument to &lt;code class=&quot;highlighter-rouge&quot;&gt;addFailure&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;This snippet updates the &lt;a href=&quot;/tslint/develop/custom-rules&quot;&gt;sample custom rule&lt;/a&gt; by adding a fixer which replaces the offending import statement with an empty string:&lt;/p&gt;
+
+&lt;div class=&quot;language-typescript highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;// create a fixer for this failure&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;replacement&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Lint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Replacement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getStart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getWidth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Lint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Fix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;no-imports&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;replacement&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;addFailure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createFailure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getStart&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;node&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getWidth&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Rule&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;FAILURE_STRING&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</description>
+        <pubDate>Thu, 17 Nov 2016 10:19:00 -0500</pubDate>
+        <link>http://localhost:4000/tslint/2016/11/17/new-for-4.0.html</link>
+        <guid isPermaLink="true">http://localhost:4000/tslint/2016/11/17/new-for-4.0.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Sharable Configurations and Rules</title>
+        <description>&lt;p&gt;With the release of &lt;a href=&quot;https://github.com/palantir/tslint/releases&quot;&gt;TSLint v3.7.0&lt;/a&gt; comes a few new features that will make configuration files (aka &lt;a href=&quot;/tslint/usage/tslint-json&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;tslint.json&lt;/code&gt; files&lt;/a&gt;)
+easier to maintain and share. The crux of the changes is a new &lt;code class=&quot;highlighter-rouge&quot;&gt;extends&lt;/code&gt; field,  which when provided indicates that a configuration
+file augments another configuration file.&lt;/p&gt;
+
+&lt;h3 id=&quot;example&quot;&gt;Example&lt;/h3&gt;
+
+&lt;p&gt;Let’s imagine you’ve created some custom rules and want to share them with others.
+You also have a couple of configurations for them you want to share.&lt;/p&gt;
+
+&lt;p&gt;Here’s the layout of our NPM package, which we’ll call &lt;code class=&quot;highlighter-rouge&quot;&gt;shared-tslint-rules&lt;/code&gt;. We have a directory with rules,
+as well as a few different config files for TSLint.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;shared-tslint-rules
+├── package.json
+├── rules
+│   ├── noAdditionRule.js
+│   ├── noErrorsRule.js
+│   └── noExcessiveCommentingRule.js
+├── tslint-base.json
+├── tslint-config.json
+└── tslint-crazy-config.js
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Our starting-point config file just references the directory the custom rules are in
+but doesn’t enable any of them:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;tslint-base.json&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;rulesDirectory&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;./rules&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We also want to provide a sane default config for our rules.
+Notice how it extends our base config, so we don’t have to redeclare &lt;code class=&quot;highlighter-rouge&quot;&gt;rulesDirectory&lt;/code&gt; here:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;tslint-config.json&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;extends&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;./tslint-base.json&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;rules&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;no-errors&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+        &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;no-addition&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, we can even make a crazy config file for fun that gives you back a different config
+each time you run TSLint. Notice how this is a &lt;code class=&quot;highlighter-rouge&quot;&gt;.js&lt;/code&gt; file that exports an object:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;tslint-crazy-config.js&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-js highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;extends&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;./tslint-base.json&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;rules&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;s2&quot;&gt;&quot;no-excessive-commenting&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;maxComments&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, we have our &lt;code class=&quot;highlighter-rouge&quot;&gt;package.json&lt;/code&gt; file which references our base config file through its &lt;code class=&quot;highlighter-rouge&quot;&gt;main&lt;/code&gt; field:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;package.json&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;shared-tslint-rules&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;version&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;1.0.0&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;description&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Some TSLint rules that are great!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;main&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;tslint-base.json&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;test&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;echo &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Error: no test specified&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; &amp;amp;&amp;amp; exit 1&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;author&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+  &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;license&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;MIT&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;We can publish our package on NPM to let the world use it!&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Now let’s say we’re a user, and we want to use the custom rules above to lint our code.
+First, we’ll make sure we have the necessary npm packages installed:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;npm install -g tslint shared-tslint-rules
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, in our &lt;code class=&quot;highlighter-rouge&quot;&gt;tslint.json&lt;/code&gt; file for our project, we can reference the package of custom rules with &lt;code class=&quot;highlighter-rouge&quot;&gt;extends&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;{
+    &quot;extends&quot;: &quot;shared-tslint-rules/tslint-config&quot;,
+    &quot;rules&quot;: {
+        &quot;no-addition&quot;: true
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;and that’s all we have to do to use the custom rules!
+We can now run TSLint as we would normally and see any lint errors produced by the custom rules:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;tslint -c path/to/tslint.json my/files/**/to/lint.ts
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+</description>
+        <pubDate>Thu, 31 Mar 2016 11:19:00 -0400</pubDate>
+        <link>http://localhost:4000/tslint/2016/03/31/sharable-configurations-rules.html</link>
+        <guid isPermaLink="true">http://localhost:4000/tslint/2016/03/31/sharable-configurations-rules.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>A New TSLint Website</title>
+        <description>&lt;p&gt;As TSLint has grown in usage and popularity alongside of TypeScript, it also has
+evolved in terms of functionality and complexity. Today, all sorts of projects and products,
+from &lt;a href=&quot;https://angular.io/&quot;&gt;Angular 2&lt;/a&gt; to the &lt;a href=&quot;https://github.com/Microsoft/TypeScript&quot;&gt;TypeScript compiler itself&lt;/a&gt; use TSLint
+to help keep their code high-quality.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, we’ve done a poor job of scaling the documentation and guides for TSLint as it has grown.
+For example, the only good way to see the possible rules TSLint can enforce and what they can do is to scroll through the quite-long &lt;a href=&quot;https://github.com/palantir/tslint/blob/409aa6e4aa4b63da11fd61e15b26b0100cf1e845/README.md&quot;&gt;TSLint README&lt;/a&gt;.
+Each rule is accompanied by a short description of its functionality, but nowhere does it explain why the rule is actually useful.
+There’s also a short description of the rule’s options, but the syntax for specifying these options is often unclear.&lt;/p&gt;
+
+&lt;p&gt;This website, in its current, very simple form, marks the beginning of a renewed focus on developer and user experience. But it’s just the tip of the iceberg in changes to come - other things in progress include:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/palantir/tslint/issues/830&quot;&gt;A documentation overhaul&lt;/a&gt; that will provide
+more comprehensive and clear documentation on TSLint and will make it easier to navigate that documentation.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/palantir/tslint/pull/871&quot;&gt;A new &lt;code class=&quot;highlighter-rouge&quot;&gt;--init&lt;/code&gt; feature&lt;/a&gt; in the TSLint CLI that will make it easier to
+generate a sensible initial &lt;code class=&quot;highlighter-rouge&quot;&gt;tslint.json&lt;/code&gt; config file.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/palantir/tslint/issues/831&quot;&gt;An improved contributor experience&lt;/a&gt; that will make things easier for those who want to contribute code to TSLint.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Feedback is always great, so please comment on any of the above GitHub issues and let us know what you would like to see to make TSLint user experience even better!&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 10 Dec 2015 15:15:21 -0500</pubDate>
+        <link>http://localhost:4000/tslint/2015/12/10/a-new-tslint-website.html</link>
+        <guid isPermaLink="true">http://localhost:4000/tslint/2015/12/10/a-new-tslint-website.html</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

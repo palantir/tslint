@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Developing TSLint rules</title>
+    <meta name="description" content="TSLint documentation. A linter for the TypeScript language.
+">
+
+    <link rel="stylesheet" href="/tslint/css/main.css">
+    <link rel="canonical" href="http://localhost:4000/tslint/develop/custom-rules/">
+</head>
+
+
+  <body>
+
+    
+
+<header class="header">
+  <section class="site-header">
+      <a class="site-title" href="/tslint/">TSLint</a>
+      <nav class="site-nav">
+        <a class="page-link" href="/tslint/usage/cli">Usage</a>
+        <a class="page-link" href="/tslint/rules">Rules</a>
+        <a class="page-link" href="/tslint/formatters">Formatters</a>
+        <a class="page-link" href="/tslint/develop/custom-rules">Develop</a>
+        <a class="page-link" href="/tslint/news">News</a>
+      </nav>
+  </section>
+  
+</header>
+
+
+    <div class="main-content">
+        <div class="page">
+   <article class="page-content">
+      
+      <header class="post-header">
+         <h1 class="post-title">Developing TSLint rules</h1>
+         <p></p>
+      </header>
+      
+
+      <p>TSLint ships with a set of core rules that can be configured. However, users are also allowed to write their own rules, which allows them to enforce specific behavior not covered by the core of TSLint. TSLint’s internal rules are itself written to be pluggable, so adding a new rule is as simple as creating a new rule file named by convention. New rules can be written in either TypeScript or JavaScript; if written in TypeScript, the code must be compiled to JavaScript before invoking TSLint.</p>
+
+<p>Let us take the example of how to write a new rule to forbid all import statements (you know, <em>for science</em>). Let us name the rule file <code class="highlighter-rouge">noImportsRule.ts</code>. Rules are referenced in <code class="highlighter-rouge">tslint.json</code> with their kebab-cased identifer, so <code class="highlighter-rouge">"no-imports": true</code> would configure the rule.</p>
+
+<p><strong>Important conventions</strong>:</p>
+
+<ul>
+  <li>Rule identifiers are always kebab-cased.</li>
+  <li>Rule files are always camel-cased (<code class="highlighter-rouge">camelCasedRule.ts</code>).</li>
+  <li>Rule files <em>must</em> contain the suffix <code class="highlighter-rouge">Rule</code>.</li>
+  <li>The exported class must always be named <code class="highlighter-rouge">Rule</code> and extend from <code class="highlighter-rouge">Lint.Rules.AbstractRule</code>.</li>
+</ul>
+
+<p>Now, let us first write the rule in TypeScript:</p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">ts</span> <span class="k">from</span> <span class="s2">"typescript"</span><span class="p">;</span>
+<span class="k">import</span> <span class="o">*</span> <span class="k">as</span> <span class="nx">Lint</span> <span class="k">from</span> <span class="s2">"tslint"</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="kd">class</span> <span class="nx">Rule</span> <span class="kd">extends</span> <span class="nx">Lint</span><span class="p">.</span><span class="nx">Rules</span><span class="p">.</span><span class="nx">AbstractRule</span> <span class="p">{</span>
+    <span class="kr">public</span> <span class="kr">static</span> <span class="nx">FAILURE_STRING</span> <span class="o">=</span> <span class="s2">"import statement forbidden"</span><span class="p">;</span>
+
+    <span class="kr">public</span> <span class="nx">apply</span><span class="p">(</span><span class="nx">sourceFile</span><span class="p">:</span> <span class="nx">ts</span><span class="p">.</span><span class="nx">SourceFile</span><span class="p">):</span> <span class="nx">Lint</span><span class="p">.</span><span class="nx">RuleFailure</span><span class="p">[]</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">applyWithWalker</span><span class="p">(</span><span class="k">new</span> <span class="nx">NoImportsWalker</span><span class="p">(</span><span class="nx">sourceFile</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">getOptions</span><span class="p">()));</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// The walker takes care of all the work.</span>
+<span class="kd">class</span> <span class="nx">NoImportsWalker</span> <span class="kd">extends</span> <span class="nx">Lint</span><span class="p">.</span><span class="nx">RuleWalker</span> <span class="p">{</span>
+    <span class="kr">public</span> <span class="nx">visitImportDeclaration</span><span class="p">(</span><span class="nx">node</span><span class="p">:</span> <span class="nx">ts</span><span class="p">.</span><span class="nx">ImportDeclaration</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// create a failure at the current position</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">addFailure</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">createFailure</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">getStart</span><span class="p">(),</span> <span class="nx">node</span><span class="p">.</span><span class="nx">getWidth</span><span class="p">(),</span> <span class="nx">Rule</span><span class="p">.</span><span class="nx">FAILURE_STRING</span><span class="p">));</span>
+
+        <span class="c1">// call the base version of this visitor to actually parse this node</span>
+        <span class="k">super</span><span class="p">.</span><span class="nx">visitImportDeclaration</span><span class="p">(</span><span class="nx">node</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Given a walker, TypeScript’s parser visits the AST using the visitor pattern. So the rule walkers only need to override the appropriate visitor methods to enforce its checks. For reference, the base walker can be found in <a href="https://github.com/palantir/tslint/blob/master/src/language/walker/syntaxWalker.ts">syntaxWalker.ts</a>. To see what your Typescript file or snippet looks like as an AST, visit <a href="http://astexplorer.net/">astexplorer.net</a> (<strong>note</strong>: current version of TypeScript may not be supported, yet).</p>
+
+<p>We still need to hook up this new rule to TSLint. First make sure to compile <code class="highlighter-rouge">noImportsRule.ts</code>:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tsc noImportsRule.ts
+</code></pre></div></div>
+
+<p>Then, if using the CLI, provide the directory that contains this rule as an option to <code class="highlighter-rouge">--rules-dir</code>. If using TSLint as a library or via <code class="highlighter-rouge">grunt-tslint</code>, the <code class="highlighter-rouge">options</code> hash must contain <code class="highlighter-rouge">"rulesDirectory": "..."</code>. If you run the linter, you’ll see that we have now successfully banned all import statements via TSLint!</p>
+
+<p>Finally, add a line to your <a href="/tslint/usage/tslint-json/"><code class="highlighter-rouge">tslint.json</code> config file</a> for each of your custom rules.</p>
+
+<hr />
+
+<p>Now that you’re written a rule to detect problems, let’s modify it to <em>fix</em> them.</p>
+
+<p>Instantiate a <code class="highlighter-rouge">Fix</code> object and pass it in as an argument to <code class="highlighter-rouge">addFailure</code>. This snippet replaces the offending import statement with an empty string:</p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// create a fixer for this failure</span>
+<span class="kd">const</span> <span class="nx">fix</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Lint</span><span class="p">.</span><span class="nx">Replacement</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">getStart</span><span class="p">(),</span> <span class="nx">node</span><span class="p">.</span><span class="nx">getWidth</span><span class="p">(),</span> <span class="s2">""</span><span class="p">);</span>
+
+<span class="c1">// create a failure at the current position</span>
+<span class="k">this</span><span class="p">.</span><span class="nx">addFailure</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">createFailure</span><span class="p">(</span><span class="nx">node</span><span class="p">.</span><span class="nx">getStart</span><span class="p">(),</span> <span class="nx">node</span><span class="p">.</span><span class="nx">getWidth</span><span class="p">(),</span> <span class="nx">Rule</span><span class="p">.</span><span class="nx">FAILURE_STRING</span><span class="p">,</span> <span class="nx">fix</span><span class="p">));</span>
+</code></pre></div></div>
+<hr />
+<p>Final notes:</p>
+
+<ul>
+  <li>Core rules cannot be overwritten with a custom implementation.</li>
+  <li>Custom rules can also take in options just like core rules (retrieved via <code class="highlighter-rouge">this.getOptions()</code>).</li>
+  <li>As of TSLint v5.7.0 you no longer need to compile your custom rules before using them. You need to tell node.js how to load <code class="highlighter-rouge">.ts</code> files for example by using <code class="highlighter-rouge">ts-node</code>:</li>
+</ul>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ts-node node_modules/.bin/tslint &lt;your options&gt;
+<span class="c"># or</span>
+node <span class="nt">-r</span> ts-node/register node_modules/.bin/tslint &lt;your options&gt;
+<span class="c"># or</span>
+<span class="nv">NODE_OPTIONS</span><span class="o">=</span><span class="s2">"-r ts-node/register"</span> tslint &lt;your options&gt;
+</code></pre></div></div>
+
+
+   </article>
+   <section class="page-sidebar">
+      
+
+      
+      
+
+      
+      
+
+      
+         
+<h4 class="sidebar-title">Develop</h4>
+<ul class="sidebar-links">
+   
+      
+      
+      <li><h6 class="active"><a href="/tslint/develop/custom-rules/">Custom Rules</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/custom-rules/performance-tips.html">Performance Tips</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/custom-rules/walker-design.html">Walker Design</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/custom-formatters/">Custom Formatters</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/contributing/">Contributing</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/docs/">Docs Development</a></h6></li>
+   
+      
+      
+      <li><h6 class=""><a href="/tslint/develop/testing-rules">Testing Rules</a></h6></li>
+   
+</ul>
+
+      
+   </section>
+
+</div>
+
+        <footer class="site-footer">
+  <div class="footer-col-wrapper">
+    <div class="footer-col  footer-col-1">
+      <ul class="contact-list">
+        <li>©2016 Palantir Technologies under <a href="https://github.com/palantir/tslint/blob/master/LICENSE">Apache 2.0</a></li>
+        <li>Styles based off of the <a href="https://github.com/jasonlong/cayman-theme">Cayman Theme</a> by Jason Long.
+        <li>Issues? <a href="https://github.com/palantir/tslint">Let us know on GitHub.</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col  footer-col-2">
+      <ul class="social-media-list">
+        
+        <li>
+          <a href="https://github.com/palantir/tslint">
+            <span class="icon  icon--github">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+
+            <span class="username">palantir/tslint</span>
+          </a>
+        </li>
+        
+
+        
+        <li>
+          <a href="https://twitter.com/PalantirTech">
+            <span class="icon  icon--twitter">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+
+            <span class="username">PalantirTech</span>
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+</footer>
+
+    </div>
+
+  </body>
+
+</html>

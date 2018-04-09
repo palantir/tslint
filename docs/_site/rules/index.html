@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>TSLint core rules</title>
+    <meta name="description" content="TSLint documentation. A linter for the TypeScript language.
+">
+
+    <link rel="stylesheet" href="/tslint/css/main.css">
+    <link rel="canonical" href="http://localhost:4000/tslint/rules/">
+</head>
+
+
+  <body>
+
+    
+
+<header class="header">
+  <section class="site-header">
+      <a class="site-title" href="/tslint/">TSLint</a>
+      <nav class="site-nav">
+        <a class="page-link" href="/tslint/usage/cli">Usage</a>
+        <a class="page-link" href="/tslint/rules">Rules</a>
+        <a class="page-link" href="/tslint/formatters">Formatters</a>
+        <a class="page-link" href="/tslint/develop/custom-rules">Develop</a>
+        <a class="page-link" href="/tslint/news">News</a>
+      </nav>
+  </section>
+  
+</header>
+
+
+    <div class="main-content">
+        <div class="page">
+   <article class="page-content">
+      
+      <header class="post-header">
+         <h1 class="post-title">TSLint core rules</h1>
+         <p></p>
+      </header>
+      
+
+      <p>Lint <em>rules</em> encode logic for syntactic &amp; semantic checks of TypeScript source code.</p>
+
+<h3 id="typescript-specific">TypeScript-specific</h3>
+
+<p><em>These rules find errors related to TypeScript features</em>:</p>
+
+<ul class="rules-list">
+ 
+ 
+  <li>
+      <a href="adjacent-overload-signatures">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>adjacent-overload-signatures</strong> - Enforces function overloads to be consecutive.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="ban-comma-operator">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>ban-comma-operator</strong> - Disallows the comma operator to be used.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="ban-types">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>ban-types</strong> - 
+Bans specific types from being used. Does not ban the
+corresponding runtime objects from being used.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="member-access">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>member-access</strong> - Requires explicit visibility declarations for class members.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="member-ordering">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>member-ordering</strong> - Enforces member ordering.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-any">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-any</strong> - Disallows usages of <code class="highlighter-rouge">any</code> as a type declaration.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-empty-interface">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-empty-interface</strong> - Forbids empty interfaces.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-import-side-effect">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-import-side-effect</strong> - Avoid import statements with side-effect.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-inferrable-types">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-inferrable-types</strong> - Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-internal-module">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-internal-module</strong> - Disallows internal <code class="highlighter-rouge">module</code>
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-magic-numbers">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-magic-numbers</strong> - 
+Disallows the use constant number values outside of variable assignments.
+When no list of allowed values is specified, -1, 0 and 1 are allowed by default.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-namespace">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-namespace</strong> - Disallows use of internal <code class="highlighter-rouge">module</code>s and <code class="highlighter-rouge">namespace</code>s.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-non-null-assertion">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-non-null-assertion</strong> - Disallows non-null assertions using the <code class="highlighter-rouge">!</code> postfix operator.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-parameter-reassignment">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-parameter-reassignment</strong> - Disallows reassigning parameters.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-reference">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-reference</strong> - Disallows <code class="highlighter-rouge">/// &lt;reference path=&gt;</code> imports (use ES6-style imports instead).
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unnecessary-type-assertion">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-unnecessary-type-assertion</strong> - Warns if a type assertion does not change the type of an expression.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-var-requires">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-var-requires</strong> - Disallows the use of require statements except in import statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="only-arrow-functions">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>only-arrow-functions</strong> - Disallows traditional (non-arrow) function expressions.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-for-of">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>prefer-for-of</strong> - Recommends a ‘for-of’ loop over a standard ‘for’ loop if the index is only used to access the array being iterated.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="promise-function-async">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>promise-function-async</strong> - Requires any function or method that returns a promise to be marked async.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="typedef">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>typedef</strong> - Requires type definitions to exist.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="typedef-whitespace">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>typedef-whitespace</strong> - Requires or disallows whitespace for type definitions.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="unified-signatures">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>unified-signatures</strong> - Warns for any two overloads that could be unified into one by using a union or an optional/rest parameter.
+
+      </a>
+  </li>
+ 
+</ul>
+
+<h3 id="functionality">Functionality</h3>
+
+<p><em>These rules catch common errors in JS programming or otherwise confusing constructs that are prone to producing bugs</em>:</p>
+
+<ul class="rules-list">
+ 
+ 
+  <li>
+      <a href="await-promise">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>await-promise</strong> - Warns for an awaited value that is not a Promise.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="ban">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>ban</strong> - Bans the use of specific functions or global methods.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="curly">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>curly</strong> - Enforces braces for <code class="highlighter-rouge">if</code>/<code class="highlighter-rouge">for</code>/<code class="highlighter-rouge">do</code>/<code class="highlighter-rouge">while</code> statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="forin">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>forin</strong> - Requires a <code class="highlighter-rouge">for ... in</code> statement to be filtered with an <code class="highlighter-rouge">if</code> statement.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="import-blacklist">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>import-blacklist</strong> - 
+Disallows importing the specified modules directly via <code class="highlighter-rouge">import</code> and <code class="highlighter-rouge">require</code>.
+Instead only sub modules may be imported from that module.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="label-position">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>label-position</strong> - Only allows labels in sensible locations.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-arg">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-arg</strong> - Disallows use of <code class="highlighter-rouge">arguments.callee</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-bitwise">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-bitwise</strong> - Disallows bitwise operators.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-conditional-assignment">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-conditional-assignment</strong> - Disallows any type of assignment in conditionals.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-console">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-console</strong> - Bans the use of specified <code class="highlighter-rouge">console</code> methods.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-construct">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-construct</strong> - Disallows access to the constructors of <code class="highlighter-rouge">String</code>, <code class="highlighter-rouge">Number</code>, and <code class="highlighter-rouge">Boolean</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-debugger">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-debugger</strong> - Disallows <code class="highlighter-rouge">debugger</code> statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-duplicate-super">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-duplicate-super</strong> - Warns if ‘super()’ appears twice in a constructor.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-duplicate-switch-case">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-duplicate-switch-case</strong> - Prevents duplicate cases in switch statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-duplicate-variable">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-duplicate-variable</strong> - Disallows duplicate variable declarations in the same block scope.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-dynamic-delete">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-dynamic-delete</strong> - Bans usage of the delete operator with computed key expressions.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-empty">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-empty</strong> - Disallows empty blocks.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-eval">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-eval</strong> - Disallows <code class="highlighter-rouge">eval</code> function invocations.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-floating-promises">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-floating-promises</strong> - Promises returned by functions must be handled appropriately.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-for-in-array">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-for-in-array</strong> - Disallows iterating over an array with a for-in loop.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-implicit-dependencies">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-implicit-dependencies</strong> - Disallows importing modules that are not listed as dependency in the project’s package.json
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-inferred-empty-object-type">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-inferred-empty-object-type</strong> - Disallow type inference of {} (empty object type) at function and constructor call sites
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-invalid-template-strings">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-invalid-template-strings</strong> - Warns on use of <code class="highlighter-rouge">${</code> in non-template strings.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-invalid-this">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-invalid-this</strong> - Disallows using the <code class="highlighter-rouge">this</code> keyword outside of classes.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-misused-new">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-misused-new</strong> - Warns on apparent attempts to define constructors for interfaces or <code class="highlighter-rouge">new</code> for classes.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-null-keyword">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-null-keyword</strong> - Disallows use of the <code class="highlighter-rouge">null</code> keyword literal.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-object-literal-type-assertion">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-object-literal-type-assertion</strong> - 
+Forbids an object literal to appear in a type assertion expression.
+Casting to <code class="highlighter-rouge">any</code> is still allowed.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-return-await">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-return-await</strong> - Disallows unnecessary <code class="highlighter-rouge">return await</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-shadowed-variable">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-shadowed-variable</strong> - Disallows shadowing variable declarations.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-sparse-arrays">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-sparse-arrays</strong> - Forbids array literals to contain missing elements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-string-literal">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-string-literal</strong> - 
+Forbids unnecessary string literal property access.
+Allows <code class="highlighter-rouge">obj["prop-erty"]</code> (can’t be a regular property access).
+Disallows <code class="highlighter-rouge">obj["property"]</code> (should be <code class="highlighter-rouge">obj.property</code>).
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-string-throw">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-string-throw</strong> - Flags throwing plain strings or concatenations of strings because only Errors produce proper stack traces.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-submodule-imports">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-submodule-imports</strong> - 
+Disallows importing any submodule.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-switch-case-fall-through">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-switch-case-fall-through</strong> - Disallows falling through case statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-this-assignment">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-this-assignment</strong> - Disallows unnecessary references to <code class="highlighter-rouge">this</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unbound-method">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-unbound-method</strong> - Warns when a method is used as outside of a method call.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unnecessary-class">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-unnecessary-class</strong> - 
+Disallows classes that are not strictly necessary.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unsafe-any">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-unsafe-any</strong> - 
+Warns when using an expression of type ‘any’ in a dynamic way.
+Uses are only allowed if they would work for <code class="highlighter-rouge">{} | null | undefined</code>.
+Type casts and tests are allowed.
+Expressions that work on all values (such as <code class="highlighter-rouge">"" + x</code>) are allowed.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unsafe-finally">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-unsafe-finally</strong> - 
+Disallows control flow statements, such as <code class="highlighter-rouge">return</code>, <code class="highlighter-rouge">continue</code>,
+<code class="highlighter-rouge">break</code> and <code class="highlighter-rouge">throws</code> in finally blocks.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unused-expression">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-unused-expression</strong> - Disallows unused expression statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unused-variable">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-unused-variable</strong> - Disallows unused imports, variables, functions and
+            private class members. Similar to tsc’s –noUnusedParameters and –noUnusedLocals
+            options, but does not interrupt code compilation.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-use-before-declare">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-use-before-declare</strong> - Disallows usage of variables before their declaration.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-var-keyword">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-var-keyword</strong> - Disallows usage of the <code class="highlighter-rouge">var</code> keyword.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-void-expression">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-void-expression</strong> - Requires expressions of type <code class="highlighter-rouge">void</code> to appear in statement position.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-conditional-expression">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>prefer-conditional-expression</strong> - 
+Recommends to use a conditional expression instead of assigning to the same thing in each branch of an if statement.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-object-spread">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>prefer-object-spread</strong> - Enforces the use of the ES2015 object spread operator over <code class="highlighter-rouge">Object.assign()</code> where appropriate.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="radix">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>radix</strong> - Requires the radix parameter to be specified when calling <code class="highlighter-rouge">parseInt</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="restrict-plus-operands">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>restrict-plus-operands</strong> - When adding two variables, operands must both be of type number or of type string.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="strict-boolean-expressions">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>strict-boolean-expressions</strong> - 
+Restricts the types allowed in boolean expressions. By default only booleans are allowed.
+
+The following nodes are checked:
+
+<ul>
+  <li>Arguments to the <code class="highlighter-rouge">!</code>, <code class="highlighter-rouge">&amp;&amp;</code>, and <code class="highlighter-rouge">||</code> operators</li>
+  <li>The condition in a conditional expression (<code class="highlighter-rouge">cond ? x : y</code>)</li>
+  <li>Conditions for <code class="highlighter-rouge">if</code>, <code class="highlighter-rouge">for</code>, <code class="highlighter-rouge">while</code>, and <code class="highlighter-rouge">do-while</code> statements.</li>
+</ul>
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="strict-type-predicates">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>strict-type-predicates</strong> - 
+Warns for type predicates that are always true or always false.
+Works for ‘typeof’ comparisons to constants (e.g. ‘typeof foo === “string”’), and equality comparison to ‘null’/’undefined’.
+(TypeScript won’t let you compare ‘1 === 2’, but it has an exception for ‘1 === undefined’.)
+Does not yet work for ‘instanceof’.
+Does <em>not</em> warn for ‘if (x.y)’ where ‘x.y’ is always truthy. For that, see strict-boolean-expressions.
+
+This rule requires <code class="highlighter-rouge">strictNullChecks</code> to work properly.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="switch-default">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>switch-default</strong> - Require a <code class="highlighter-rouge">default</code> case in all <code class="highlighter-rouge">switch</code> statements.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="triple-equals">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>triple-equals</strong> - Requires <code class="highlighter-rouge">===</code> and <code class="highlighter-rouge">!==</code> in place of <code class="highlighter-rouge">==</code> and <code class="highlighter-rouge">!=</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="typeof-compare">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>typeof-compare</strong> - Makes sure result of <code class="highlighter-rouge">typeof</code> is compared to correct string values
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="use-default-type-parameter">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>use-default-type-parameter</strong> - Warns if an explicitly specified type argument is the default for that type parameter.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="use-isnan">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>use-isnan</strong> - Enforces use of the <code class="highlighter-rouge">isNaN()</code> function to check for NaN references instead of a comparison to the <code class="highlighter-rouge">NaN</code> constant.
+
+      </a>
+  </li>
+ 
+</ul>
+
+<h3 id="maintainability">Maintainability</h3>
+
+<p><em>These rules make code maintenance easier</em>:</p>
+
+<ul class="rules-list">
+ 
+ 
+  <li>
+      <a href="cyclomatic-complexity">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>cyclomatic-complexity</strong> - Enforces a threshold of cyclomatic complexity.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="deprecation">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>deprecation</strong> - Warns when deprecated APIs are used.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="eofline">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>eofline</strong> - Ensures the file ends with a newline.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="indent">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>indent</strong> - Enforces indentation with tabs or spaces.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="linebreak-style">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>linebreak-style</strong> - Enforces a consistent linebreak style.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="max-classes-per-file">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>max-classes-per-file</strong> - 
+A file may not contain more than the specified number of classes
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="max-file-line-count">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>max-file-line-count</strong> - Requires files to remain under a certain number of lines
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="max-line-length">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>max-line-length</strong> - Requires lines to be under a certain max length.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-default-export">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-default-export</strong> - Disallows default exports in ES6-style modules.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-duplicate-imports">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-duplicate-imports</strong> - 
+Disallows multiple import statements from the same module.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-mergeable-namespace">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-mergeable-namespace</strong> - Disallows mergeable namespaces in the same file.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-require-imports">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-require-imports</strong> - Disallows invocation of <code class="highlighter-rouge">require()</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="object-literal-sort-keys">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>object-literal-sort-keys</strong> - 
+Checks ordering of keys in object literals.
+
+When using the default alphabetical ordering, additional blank lines may be used to group
+object properties together while keeping the elements within each group in alphabetical order.
+
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-const">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>prefer-const</strong> - Requires that variable declarations use <code class="highlighter-rouge">const</code> instead of <code class="highlighter-rouge">let</code> and <code class="highlighter-rouge">var</code> if possible.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-readonly">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>prefer-readonly</strong> - Requires that private variables are marked as <code class="highlighter-rouge">readonly</code> if they’re never modified outside of the constructor.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="trailing-comma">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>trailing-comma</strong> - 
+Requires or disallows trailing commas in array and object literals, destructuring assignments, function typings,
+named imports and exports and function parameters.
+
+      </a>
+  </li>
+ 
+</ul>
+
+<h3 id="style">Style</h3>
+
+<p><em>These rules enforce consistent style across your codebase</em>:</p>
+
+<ul class="rules-list">
+ 
+ 
+  <li>
+      <a href="align">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>align</strong> - Enforces vertical alignment.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="array-type">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>array-type</strong> - Requires using either ‘T[]’ or ‘Array<T>' for arrays.</T>
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="arrow-parens">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>arrow-parens</strong> - Requires parentheses around the parameters of arrow function definitions.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="arrow-return-shorthand">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>arrow-return-shorthand</strong> - Suggests to convert <code class="highlighter-rouge">() =&gt; { return x; }</code> to <code class="highlighter-rouge">() =&gt; x</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="binary-expression-operand-order">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>binary-expression-operand-order</strong> - 
+In a binary expression, a literal should always be on the right-hand side if possible.
+For example, prefer ‘x + 1’ over ‘1 + x’.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="callable-types">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>callable-types</strong> - An interface or literal type with just a call signature can be written as a function type.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="class-name">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>class-name</strong> - Enforces PascalCased class and interface names.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="comment-format">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>comment-format</strong> - Enforces formatting rules for single-line comments.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="completed-docs">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>completed-docs</strong> - Enforces documentation for important items be filled out.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="encoding">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>encoding</strong> - Enforces UTF-8 file encoding.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="file-header">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>file-header</strong> - Enforces a certain header comment for all files, matched by a regular expression.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="import-spacing">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>import-spacing</strong> - Ensures proper spacing between import statement keywords
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="interface-name">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>interface-name</strong> - Requires interface names to begin with a capital ‘I’
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="interface-over-type-literal">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>interface-over-type-literal</strong> - Prefer an interface declaration over a type literal (<code class="highlighter-rouge">type T = { ... }</code>)
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="jsdoc-format">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>jsdoc-format</strong> - Enforces basic format rules for JSDoc comments.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="match-default-export-name">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>match-default-export-name</strong> - 
+Requires that a default import have the same name as the declaration it imports.
+Does nothing for anonymous default exports.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="newline-before-return">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>newline-before-return</strong> - Enforces blank line before return when not the only line in the block.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="newline-per-chained-call">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>newline-per-chained-call</strong> - 
+Requires that chained method calls be broken apart onto separate lines.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="new-parens">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>new-parens</strong> - Requires parentheses when invoking a constructor via the <code class="highlighter-rouge">new</code> keyword.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-angle-bracket-type-assertion">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-angle-bracket-type-assertion</strong> - Requires the use of <code class="highlighter-rouge">as Type</code> for type assertions instead of <code class="highlighter-rouge">&lt;Type&gt;</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-boolean-literal-compare">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-boolean-literal-compare</strong> - Warns on comparison to a boolean literal, as in <code class="highlighter-rouge">x === true</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-consecutive-blank-lines">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-consecutive-blank-lines</strong> - Disallows one or more blank lines in a row.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-irregular-whitespace">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-irregular-whitespace</strong> - Disallow irregular whitespace outside of strings and comments
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-parameter-properties">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-parameter-properties</strong> - Disallows parameter properties in class constructors.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-redundant-jsdoc">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-redundant-jsdoc</strong> - Forbids JSDoc which duplicates TypeScript functionality.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-reference-import">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>no-reference-import</strong> - Don’t <code class="highlighter-rouge">&lt;reference types="foo" /&gt;</code> if you import <code class="highlighter-rouge">foo</code> anyway.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-trailing-whitespace">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-trailing-whitespace</strong> - Disallows trailing whitespace at the end of a line.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unnecessary-callback-wrapper">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>no-unnecessary-callback-wrapper</strong> - 
+Replaces <code class="highlighter-rouge">x =&gt; f(x)</code> with just <code class="highlighter-rouge">f</code>.
+To catch more cases, enable <code class="highlighter-rouge">only-arrow-functions</code> and <code class="highlighter-rouge">arrow-return-shorthand</code> too.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unnecessary-initializer">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>no-unnecessary-initializer</strong> - Forbids a ‘var’/’let’ statement or destructuring initializer to be initialized to ‘undefined’.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="no-unnecessary-qualifier">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>no-unnecessary-qualifier</strong> - Warns when a namespace qualifier (<code class="highlighter-rouge">A.x</code>) is unnecessary.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="number-literal-format">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>number-literal-format</strong> - Checks that decimal literals should begin with ‘0.’ instead of just ‘.’, and should not end with a trailing ‘0’.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="object-literal-key-quotes">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>object-literal-key-quotes</strong> - Enforces consistent object literal property quote style.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="object-literal-shorthand">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>object-literal-shorthand</strong> - Enforces/disallows use of ES6 object literal shorthand.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="one-line">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>one-line</strong> - Requires the specified tokens to be on the same line as the expression preceding them.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="one-variable-per-declaration">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>one-variable-per-declaration</strong> - Disallows multiple variable definitions in the same declaration statement.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="ordered-imports">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>ordered-imports</strong> - Requires that import statements be alphabetized and grouped.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-function-over-method">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>prefer-function-over-method</strong> - Warns for class methods that do not use ‘this’.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-method-signature">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>prefer-method-signature</strong> - Prefer <code class="highlighter-rouge">foo(): void</code> over <code class="highlighter-rouge">foo: () =&gt; void</code> in interfaces and types.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-switch">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>prefer-switch</strong> - Prefer a <code class="highlighter-rouge">switch</code> statement to an <code class="highlighter-rouge">if</code> statement with simple <code class="highlighter-rouge">===</code> comparisons.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="prefer-template">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>prefer-template</strong> - Prefer a template expression over string literal concatenation.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="quotemark">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>quotemark</strong> - Requires single or double quotes for string literals.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="return-undefined">
+        <div class="rule-features">
+            
+            
+            
+                <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
+            
+        </div>
+        <strong>return-undefined</strong> - Prefer <code class="highlighter-rouge">return;</code> in void functions and <code class="highlighter-rouge">return undefined;</code> in value-returning functions.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="semicolon">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>semicolon</strong> - Enforces consistent semicolon usage at the end of every statement.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="space-before-function-paren">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>space-before-function-paren</strong> - Require or disallow a space before function parenthesis
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="space-within-parens">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>space-within-parens</strong> - Enforces spaces within parentheses or disallow them.  Empty parentheses () are always allowed.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="switch-final-break">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>switch-final-break</strong> - Checks whether the final clause of a switch statement ends in <code class="highlighter-rouge">break;</code>.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="type-literal-delimiter">
+        <div class="rule-features">
+            
+                <span class="feature feature-sm feature-ts-only" title="This rule cannot be run against JavaScript files">TS Only</span>
+            
+            
+            
+        </div>
+        <strong>type-literal-delimiter</strong> - 
+Checks that type literal members are separated by semicolons.
+Enforces a trailing semicolon for multiline type literals.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="variable-name">
+        <div class="rule-features">
+            
+            
+            
+        </div>
+        <strong>variable-name</strong> - Checks variable names for various errors.
+
+      </a>
+  </li>
+ 
+  <li>
+      <a href="whitespace">
+        <div class="rule-features">
+            
+            
+                <span class="feature feature-sm feature-fixer" title="This rule has the ability to auto-fix violations">Has Fixer</span>
+            
+            
+        </div>
+        <strong>whitespace</strong> - Enforces whitespace style conventions.
+
+      </a>
+  </li>
+ 
+</ul>
+
+   </article>
+   <section class="page-sidebar">
+      
+
+      
+      
+
+      
+      
+
+      
+   </section>
+
+</div>
+
+        <footer class="site-footer">
+  <div class="footer-col-wrapper">
+    <div class="footer-col  footer-col-1">
+      <ul class="contact-list">
+        <li>©2016 Palantir Technologies under <a href="https://github.com/palantir/tslint/blob/master/LICENSE">Apache 2.0</a></li>
+        <li>Styles based off of the <a href="https://github.com/jasonlong/cayman-theme">Cayman Theme</a> by Jason Long.
+        <li>Issues? <a href="https://github.com/palantir/tslint">Let us know on GitHub.</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col  footer-col-2">
+      <ul class="social-media-list">
+        
+        <li>
+          <a href="https://github.com/palantir/tslint">
+            <span class="icon  icon--github">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+              </svg>
+            </span>
+
+            <span class="username">palantir/tslint</span>
+          </a>
+        </li>
+        
+
+        
+        <li>
+          <a href="https://twitter.com/PalantirTech">
+            <span class="icon  icon--twitter">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+
+            <span class="username">PalantirTech</span>
+          </a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+</footer>
+
+    </div>
+
+  </body>
+
+</html>
