@@ -53,6 +53,7 @@ export const rules = {
     "no-reference": true,
     "no-this-assignment": true,
     "no-var-requires": true,
+    "no-focused-tests": true,
     "only-arrow-functions": true,
     "prefer-for-of": true,
     "prefer-readonly": true,
