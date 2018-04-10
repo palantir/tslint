@@ -22,12 +22,17 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "ban-dom-global",
-        description: "Ban specific refrences to DOM globals.",
+        ruleName: "no-restricted-globals",
+        description: "Disallow specific global variables.",
         descriptionDetails: Lint.Utils.dedent`
-            For example, \`self\`, \`name\`
+            Disallowing usage of specific global variables can be useful if you want to allow
+            a set of global variables by enabling an environment, but still want to disallow
+            some of those. For instance, early Internet Explorer versions exposed the current
+            DOM event as a global variable event, but using this variable has been considered
+            as a bad practice for a long time. Restricting this will make sure this variable
+            isn’t used in browser code.
         `,
-        optionsDescription: "Not configurable.",
+        optionsDescription: "This rule takes a list of strings, where each string is a global to be restricted.",
         options: {
             type: "list",
             items: {type: "string"},

@@ -26,7 +26,6 @@ export const rules = {
     // TypeScript Specific
 
     "adjacent-overload-signatures": true,
-    "ban-dom-global": [true],
     "ban-types": {
         options: [
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
@@ -52,6 +51,7 @@ export const rules = {
     "no-namespace": true,
     "no-non-null-assertion": true,
     "no-reference": true,
+    "no-restricted-globals": true,
     "no-this-assignment": true,
     "no-var-requires": true,
     "only-arrow-functions": true,

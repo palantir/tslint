@@ -1,6 +1,6 @@
 {
   "rules": {
-    "ban-dom-global": [
+    "no-restricted-globals": [
       true,
       "name",
       "length",
