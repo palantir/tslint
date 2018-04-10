@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { isObjectFlagSet, isObjectType, isTypeReference } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -47,6 +46,8 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
+    private scanner: ts.Scanner | undefined = undefined;
+
     constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
     }
@@ -54,49 +55,119 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (node.kind === ts.SyntaxKind.CallExpression) {
-                this.checkCallExpression(node as ts.CallExpression);
+                this.checkExpression(node as ts.CallExpression, shouldCheckCall, Rule.EMPTY_INTERFACE_FUNCTION);
             } else if (node.kind === ts.SyntaxKind.NewExpression) {
-                this.checkNewExpression(node as ts.NewExpression);
+                this.checkExpression(node as ts.NewExpression, shouldCheckNew, Rule.EMPTY_INTERFACE_INSTANCE);
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkNewExpression(node: ts.NewExpression): void {
-        if (node.typeArguments === undefined) {
-            const type = this.checker.getTypeAtLocation(node);
-            if (isTypeReference(type) && type.typeArguments !== undefined &&
-                type.typeArguments.some((a) => isObjectType(a) && this.isEmptyObjectInterface(a))) {
-                this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_INSTANCE);
-            }
-        }
-    }
-
-    private checkCallExpression(node: ts.CallExpression): void {
+    private checkExpression<T extends ts.CallExpression | ts.NewExpression>(
+        node: T,
+        shouldCheck: (signature: ts.Signature, checker: ts.TypeChecker, node: T) => boolean,
+        failure: string,
+    ) {
         if (node.typeArguments !== undefined) {
             return;
         }
 
-        const callSig = this.checker.getResolvedSignature(node);
-        if (callSig === undefined) {
-            return;
-        }
-
-        const retType = this.checker.getReturnTypeOfSignature(callSig);
-        if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
-            this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
+        const signature = this.checker.getResolvedSignature(node);
+        if (signature !== undefined && shouldCheck(signature, this.checker, node) && this.hasInferredEmptyObject(signature)) {
+            this.addFailureAtNode(node, failure);
         }
     }
 
-    private isEmptyObjectInterface(objType: ts.ObjectType): boolean {
-        return isObjectFlagSet(objType, ts.ObjectFlags.Anonymous) &&
-            objType.getProperties().length === 0 &&
-            objType.getNumberIndexType() === undefined &&
-            objType.getStringIndexType() === undefined &&
-            objType.getCallSignatures().every((signature) => {
-                const type = this.checker.getReturnTypeOfSignature(signature);
-                return isObjectType(type) && this.isEmptyObjectInterface(type);
-            });
+    private hasInferredEmptyObject(signature: ts.Signature): boolean {
+        const str = this.signatureToString(signature);
+        if (str[0] !== "<") {
+            return false;
+        }
+        const scanner = this.scanner !== undefined
+            ? this.scanner
+            : this.scanner = ts.createScanner(ts.ScriptTarget.Latest, true, ts.LanguageVariant.Standard);
+        scanner.setText(str, 1); // start at 1 because we know 0 is '<'
+        let token = scanner.scan();
+        if (token === ts.SyntaxKind.OpenBraceToken && scanner.scan() === ts.SyntaxKind.CloseBraceToken) {
+            return true;
+        }
+        let level = 0;
+        /* Scan every token until we get to the closing '>'.
+           We need to keep track of nested type arguments, because we are only interested in the top level. */
+        while (true) {
+            switch (token) {
+                case ts.SyntaxKind.CommaToken:
+                    if (level === 0) {
+                        token = scanner.scan();
+                        if (token === ts.SyntaxKind.OpenBraceToken && scanner.scan() === ts.SyntaxKind.CloseBraceToken) {
+                            return true;
+                        }
+                        continue;
+                    }
+                    break;
+                case ts.SyntaxKind.LessThanToken:
+                    ++level;
+                    break;
+                case ts.SyntaxKind.GreaterThanToken:
+                    if (level === 0) {
+                        return false;
+                    }
+                    --level;
+            }
+            token = scanner.scan();
+        }
+    }
+
+    /** Compatibility wrapper for typescript@2.1 */
+    private signatureToString(signature: ts.Signature): string {
+        if (this.checker.signatureToString !== undefined) {
+            return this.checker.signatureToString(signature, undefined, ts.TypeFormatFlags.WriteTypeArgumentsOfSignature);
+        }
+        let result = "";
+        function addText(text: string) {
+            result += text;
+        }
+        function noop() { /* intentionally empty */ }
+        // tslint:disable-next-line:deprecation
+        this.checker.getSymbolDisplayBuilder().buildSignatureDisplay(
+            signature,
+            {
+                clear: noop,
+                decreaseIndent: noop,
+                increaseIndent: noop,
+                reportInaccessibleThisError: noop,
+                reportPrivateInBaseOfClassExpression: noop,
+                trackSymbol: noop,
+                writeKeyword: addText,
+                writeLine: noop,
+                writeOperator: addText,
+                writeParameter: addText,
+                writeProperty: addText,
+                writePunctuation: addText,
+                writeSpace: noop,
+                writeStringLiteral: addText,
+                writeSymbol: addText,
+            },
+            undefined,
+            ts.TypeFormatFlags.WriteTypeArgumentsOfSignature,
+        );
+        return result;
+    }
+}
+
+function shouldCheckCall(signature: ts.Signature): boolean {
+    return signature.declaration !== undefined && signature.declaration.typeParameters !== undefined;
+}
+
+function shouldCheckNew(signature: ts.Signature, checker: ts.TypeChecker, node: ts.NewExpression): boolean {
+    if (signature.declaration !== undefined) {
+        // There is an explicitly declared construct signature, only check if it has type parameters
+        return signature.declaration.typeParameters !== undefined;
+    } else {
+        // only check if the class has type parameters
+        const symbol = checker.getSymbolAtLocation(node.expression);
+        return symbol !== undefined && symbol.declarations !== undefined &&
+            (symbol.declarations[0] as ts.DeclarationWithTypeParameters).typeParameters !== undefined;
     }
 }

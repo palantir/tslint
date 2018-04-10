@@ -27,15 +27,15 @@ class MultiParamsClass<U, T> {
 
 /* Bad */
 WrapperFunc();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~  [fn]
 CurriedFunc();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~  [fn]
 MultiParamFunction();
-~~~~~~~~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the function call]
+~~~~~~~~~~~~~~~~~~~~  [fn]
 new Wrapper();
-~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the constructor]
+~~~~~~~~~~~~~  [new]
 new MultiParamsClass();
-~~~~~~~~~~~~~~~~~~~~~~  [Explicit type parameter needs to be provided to the constructor]
+~~~~~~~~~~~~~~~~~~~~~~  [new]
 
 /* Good */
 WrapperFunc<Object>();
@@ -49,11 +49,40 @@ WrapperFunc(t);
 WrapperFunc(p);
 WrapperFunc(f);
 WrapperFunc<() => {}>();
+WrapperFunc({"foo-bar": {}});
+WrapperFunc(new Wrapper("foo"));
+WrapperFunc(new Wrapper<{}>());
 
 WrapperFunc<() => void>();
 WrapperFunc<{ a: number }>();
 WrapperFunc<{ [x: number]: string }>();
 WrapperFunc<{ [x: string]: string }>();
+WrapperFunc<{ (): string }>();
+
+// check behavior with contextual type
+{
+    let wrap: Wrapper<string> = new Wrapper();
+#if typescript < 2.4.0
+                                ~~~~~~~~~~~~~ [new]
+#endif
+    let take = <T>(param: T) => {};
+    take<any>(new Wrapper());
+              ~~~~~~~~~~~~~ [new]
+    take<{}>(new Wrapper());
+             ~~~~~~~~~~~~~ [new]
+    take<Object>(new Wrapper());
+                 ~~~~~~~~~~~~~ [new]
+    take<Wrapper<{}>(new Wrapper());
+                     ~~~~~~~~~~~~~ [new]
+    take<Wrapper<any>>(new Wrapper());
+#if typescript < 2.4.0
+                       ~~~~~~~~~~~~~ [new]
+#endif
+    take<Wrapper<string>>(new Wrapper());
+#if typescript < 2.4.0
+                          ~~~~~~~~~~~~~ [new]
+#endif
+}
 
 CurriedFunc(voidFunc);
 CurriedFunc(stringFunc);
@@ -85,6 +114,48 @@ new MultiParamsClass<() => void, () => void>();
 new MultiParamsClass<{ [x: number]: string }, () => void>();
 new MultiParamsClass<{ [x: string]: string }, number>();
 
-// don't crash with stack overflow
-import {expect} from "chai";
-expect(1).to.eq(1);
+{
+    const wrapper = <L, A>(l: L) => ({ l });
+    const x = wrapper(1); // The second generic, A, is inferred as an empty object
+              ~~~~~~~~~~  [fn]
+}
+{
+    const wrapper = <L, A>(l: A): L => ({ l });
+    const x = wrapper(1);
+              ~~~~~~~~~~  [fn]
+}
+{
+    const wrapper = <L, A>(l: L): [L, A] => ({ l } as any);
+    const x = wrapper(1);
+              ~~~~~~~~~~  [fn]
+}
+{
+    let fn = <T>(obj?: T, cb?: (obj: T) => void) => {};
+    fn();
+    ~~~~ [fn]
+}
+
+{
+    // found in our code
+    abstract class Base<T> {}
+    class Child extends Base<{}> {}
+    let foo = new Child(); // quickinfo shows 'constructor Child<{}>(): Child' - but this is not an inferred type parameter
+}
+
+{
+    interface I {
+        new<T>(obj?: T, cb?: (obj: T) => void): any;
+    }
+    let C: I = null as any;
+    new C();
+    ~~~~~~~ [new]
+}
+
+{
+    let demap = <T>(map: Map<string, T>): {[key: string]: T} {}
+    demap(null as any);
+    ~~~~~~~~~~~~~~~~~~ [fn]
+}
+
+[fn]: Explicit type parameter needs to be provided to the function call
+[new]: Explicit type parameter needs to be provided to the constructor

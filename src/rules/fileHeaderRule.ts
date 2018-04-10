@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
         // returns the text of the first comment or undefined
-        const commentText = ts.forEachLeadingCommentRange(
+        const commentText = ts.forEachLeadingCommentRange<void, string>(
             text,
             offset,
             (pos, end, kind) => text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2));

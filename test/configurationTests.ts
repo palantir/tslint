@@ -522,15 +522,10 @@ function getEmptyConfig(): IConfigurationFile {
     };
 }
 
-function demap<T>(map: Map<string, T>) {
-    if (map == undefined) {
-        return map;
-    }
-    const output: { [key: string]: T } = {};
-    map.forEach((value, key) => {
-        output[key] = value;
-    });
-    return output;
+function demap(map: Map<string, any>) {
+    const result: {[key: string]: any} = {};
+    map.forEach((value, key) => { result[key] = value; });
+    return result;
 }
 
 // this is needed since `assertConfigEquals` doesn't go into Map object
@@ -541,5 +536,5 @@ function assertConfigEquals(actual: any, expected: any) {
         assert.deepEqual(demap(actual.jsRules), demap(expected.jsRules));
         assert.deepEqual(demap(actual.rules), demap(expected.rules));
     }
-    // tslint:enable no-unsafe-any
+    // tslint:enable no-unsafe-any strict-boolean-expressions
 }
