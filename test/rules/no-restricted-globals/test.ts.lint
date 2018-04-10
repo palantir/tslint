@@ -5,11 +5,11 @@ function foo(evt: Event) {
     Event.target;
 
     event.target;
-    ~~~~~ [variable 'event' is defined in lib.dom.d.ts.]
+    ~~~~~ [Unexpected global variable 'event'. Use local parameter instead.]
 }
 
 console.log(length);
-            ~~~~~~  [variable 'length' is defined in lib.dom.d.ts.]
+            ~~~~~~  [Unexpected global variable 'length'. Use local parameter instead.]
 
 import { name } from "./foo";
 console.log(name);

@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string) {
-        return `variable '${name}' is defined in lib.dom.d.ts.`;
+        return `Unexpected global variable '${name}'. Use local parameter instead.`;
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -88,7 +88,7 @@ function walk(ctx: Lint.WalkContext<Set<string>>, checker: ts.TypeChecker): void
             return;
         }
 
-        const declaredInLibDom = declarations.some((decl) => decl.getSourceFile().fileName.endsWith("lib.dom.d.ts"));
+        const declaredInLibDom = declarations.some((decl) => decl.getSourceFile().fileName.endsWith(".d.ts"));
 
         if (declaredInLibDom) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
