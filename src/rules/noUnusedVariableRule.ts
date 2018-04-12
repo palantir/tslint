@@ -181,7 +181,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
 
         if ((defaultName === undefined || failures.has(defaultName)) && allNamedBindingsAreFailures) {
             if (defaultName !== undefined) { failures.delete(defaultName); }
-            removeAll(importNode, "All imports are unused.");
+            removeAll(importNode, "All imports on this line are unused.");
             return;
         }
 
