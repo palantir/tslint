@@ -47,8 +47,8 @@ layout: page
     <div class="wrapper__code-example">
         <h5>{{ codeExample.description }}</h5>
         {{ codeExample.config | markdownify }}
-        <h6>Passes</h6>
-        <div class="code-example code-example-pass">
+        <h6 class="feature">Passes</h6>
+        <div class="code-example">
             {{ codeExample.pass | markdownify }}
         </div>
         {% if codeExample.fail %}

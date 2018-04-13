@@ -22,8 +22,8 @@ import {
     isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/curly.examples";
 
 const OPTION_AS_NEEDED = "as-needed";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
@@ -72,58 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "functionality",
         typescriptOnly: false,
         hasFix: true,
-        codeExamples: [
-            {
-                description: "Require curly braces whenever possible (default)",
-                config: Lint.Utils.dedent`
-                    "rules": { "curly": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    if (x > 0) {
-                        doStuff();
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    if (x > 0)
-                        doStuff();
-
-                    if (x > 0) doStuff();
-                `,
-            },
-            {
-                description: "Make an exception for single-line instances",
-                config: Lint.Utils.dedent`
-                    "rules": { "curly": [true, "ignore-same-line"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    if (x > 0) doStuff();
-                `,
-                fail: Lint.Utils.dedent`
-                    if (x > 0)
-                        doStuff()
-                `,
-            },
-            {
-                description: "Error on unnecessary curly braces",
-                config: Lint.Utils.dedent`
-                    "rules": { "curly": [true, "as-needed"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    if (x > 0)
-                        doStuff();
-
-                    if (x > 0) {
-                        customerUpdates.push(getInfo(customerId));
-                        return customerUpdates;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    if (x > 0) {
-                        doStuff();
-                    }
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
