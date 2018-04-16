@@ -53,3 +53,7 @@ export function showWarningOnce(message: string) {
         shownWarnings.add(message);
     }
 }
+
+export function showRuleCrashWarningOnce(message: string, ruleName: string, fileName: string) {
+    showWarningOnce(`The '${ruleName}' rule threw an error in '${fileName}': ${message}`);
+}
