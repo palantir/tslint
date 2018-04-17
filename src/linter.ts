@@ -51,6 +51,7 @@ export class Linter {
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private readonly fileNames: string[] = [];
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -136,6 +137,7 @@ export class Linter {
         if (isFileExcluded(fileName, configuration)) {
             return;
         }
+        this.fileNames.push(fileName);
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
@@ -183,7 +185,7 @@ export class Linter {
         }
         const formatter = new Formatter();
 
-        const output = formatter.format(failures, this.fixes);
+        const output = formatter.format(failures, this.fixes, this.fileNames);
 
         const errorCount = errors.length;
         return {
