@@ -75,10 +75,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
                  node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
                 !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
-                ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                ctx.addFailureAtNode(node.operatorToken,
+                                     node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
                                                          ? Rule.EQ_FAILURE_STRING
                                                          : Rule.NEQ_FAILURE_STRING,
-                                                         [ Lint.Replacement.appendText(node.operatorToken.end, "=") ]);
+                                     [ Lint.Replacement.appendText(node.operatorToken.end, "=") ]);
             }
         }
         return ts.forEachChild(node, cb);
