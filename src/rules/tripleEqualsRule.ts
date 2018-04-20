@@ -54,6 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "functionality",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -76,7 +77,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
                 ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
                                                          ? Rule.EQ_FAILURE_STRING
-                                                         : Rule.NEQ_FAILURE_STRING);
+                                                         : Rule.NEQ_FAILURE_STRING,
+                                                         [ Lint.Replacement.appendText(node.operatorToken.end, "=") ]);
             }
         }
         return ts.forEachChild(node, cb);
