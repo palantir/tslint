@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "no-restricted-globals": [
+      true,
+      "name",
+      "length",
+      "event",
+      "myGlobal"
+    ]
+  }
+}

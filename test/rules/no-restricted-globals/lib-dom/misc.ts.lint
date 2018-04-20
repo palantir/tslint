@@ -1,0 +1,15 @@
+type name = any;
+
+{
+    function name () {
+
+    }
+}
+
+{
+    interface name {}
+}
+
+{
+    class name {}
+}

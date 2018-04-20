@@ -1,0 +1,18 @@
+function foo(evt: Event) {
+    let length: number = 1;
+    console.log(length);
+
+    Event.target;
+
+    event.target;
+    ~~~~~ [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+}
+
+console.log(length);
+            ~~~~~~  [Unexpected global variable 'length'. Use a local parameter or variable instead.]
+
+import { name } from "./foo";
+console.log(name);
+
+console.log(myGlobal);
+            ~~~~~~~~  [Unexpected global variable 'myGlobal'. Use a local parameter or variable instead.]

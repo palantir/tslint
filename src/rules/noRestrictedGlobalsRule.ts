@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+// TODO: add a default list
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -28,8 +29,8 @@ export class Rule extends Lint.Rules.TypedRule {
             Disallowing usage of specific global variables can be useful if you want to allow
             a set of global variables by enabling an environment, but still want to disallow
             some of those. For instance, early Internet Explorer versions exposed the current
-            DOM event as a global variable event, but using this variable has been considered
-            as a bad practice for a long time. Restricting this will make sure this variable
+            DOM event as a global variable 'event', but using this variable has been considered
+            a bad practice for a long time. Restricting this will make sure this variable
             isn’t used in browser code.
         `,
         optionsDescription: "This rule takes a list of strings, where each string is a global to be restricted.",
@@ -52,12 +53,16 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string) {
-        return `Unexpected global variable '${name}'. Use local parameter instead.`;
+        return `Unexpected global variable '${name}'. Use a local parameter or variable instead.`;
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const bannedGlobals = new Set(this.ruleArguments as string[]);
-        return this.applyWithFunction(sourceFile, walk, bannedGlobals, program.getTypeChecker());
+        if (sourceFile.isDeclarationFile) {
+            return [];
+        } else {
+            return this.applyWithFunction(sourceFile, walk, bannedGlobals, program.getTypeChecker());
+        }
     }
 }
 
@@ -88,9 +93,9 @@ function walk(ctx: Lint.WalkContext<Set<string>>, checker: ts.TypeChecker): void
             return;
         }
 
-        const declaredInLibDom = declarations.some((decl) => decl.getSourceFile().fileName.endsWith(".d.ts"));
+        const isAmbientGlobal = declarations.some((decl) => decl.getSourceFile().isDeclarationFile);
 
-        if (declaredInLibDom) {
+        if (isAmbientGlobal) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
         }
     }
