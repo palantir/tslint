@@ -1,4 +1,4 @@
 for(;;) {
-~~~~~~~   [prefer while]
+~~~~~~~   [Expected a 'while' loop instead of a 'for' loop without an initializer and incrementor]
     console.log(x);
 }

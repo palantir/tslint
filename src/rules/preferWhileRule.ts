@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isForStatement } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -32,13 +33,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "prefer while";
+    public static FAILURE_STRING = "Expected a 'while' loop instead of a 'for' loop without an initializer and incrementor";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const failures: Lint.RuleFailure[] = [];
 
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.ForStatement && this.doesNodeViolateRule(node as ts.ForStatement)) {
+            if (isForStatement(node) && this.doesNodeViolateRule(node)) {
                 failures.push(this.createFailure(sourceFile, node as ts.ForStatement));
             }
             return ts.forEachChild(node, cb);
