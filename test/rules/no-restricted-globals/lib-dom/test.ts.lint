@@ -12,6 +12,7 @@ console.log(length);
             ~~~~~~  [Unexpected global variable 'length'. Use a local parameter or variable instead.]
 
 import { name } from "./foo";
+import "./custom-global"
 console.log(name);
 
 console.log(myGlobal);

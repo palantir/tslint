@@ -1,3 +1,3 @@
-namespace A {
+declare namespace A {
     export var name: string;
 }
