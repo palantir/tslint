@@ -1,5 +1,5 @@
 {
-    "rules": {
-      "prefer-while": true
-    }
+  "rules": {
+    "prefer-while": true
   }
+}
