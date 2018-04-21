@@ -19,6 +19,7 @@ import { isThrowStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noStringThrowRule.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -51,6 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Only Error objects contain a \`.stack\` member equivalent to the current stack trace.
             Primitives such as strings do not.
         `,
+        codeExamples,
         type: "functionality",
         typescriptOnly: false,
     };
