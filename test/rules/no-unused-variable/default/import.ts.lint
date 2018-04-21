@@ -14,9 +14,9 @@ import {a3 as aa3, a4 as aa4} from "a";
 aa3;
 // This import statement is unused and will be deleted along with this comment.
 import {a5, a6} from "a";
-~~~~~~~~~~~~~~~~~~~~~~~~~  [All imports are unused.]
+~~~~~~~~~~~~~~~~~~~~~~~~~  [All imports on this line are unused.]
 import {a7} from "a";
-~~~~~~~~~~~~~~~~~~~~~      [All imports are unused.]
+~~~~~~~~~~~~~~~~~~~~~      [All imports on this line are unused.]
 import {a8, a9, a10} from "a";
             ~~                [err % ('a9')]
                 ~~~           [err % ('a10')]
@@ -32,7 +32,7 @@ a16;
 
 // Leading comment will not be deleted
 import {unusedFunction} from "legacyDependency"; // Import unusedFunction because ....
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                       [All imports are unused.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                                       [All imports on this line are unused.]
 // Next comment will not be deleted
 
 export import a = require("a");
@@ -54,17 +54,17 @@ import baz from "a";
 import defaultExport, { namedExport } from "a";
        ~~~~~~~~~~~~~                               [err % ('defaultExport')]
 import d1, { d2 } from "a";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports are unused.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~                     [All imports on this line are unused.]
 import d3, { d4 } from "a";
            ~~~~~~                                  [All named bindings are unused.]
 d3;
 
 d3;import d5 from "a";
-   ~~~~~~~~~~~~~~~~~~~                          [All imports are unused.]
+   ~~~~~~~~~~~~~~~~~~~                          [All imports on this line are unused.]
 import d6 from "a";d3;
-~~~~~~~~~~~~~~~~~~~                             [All imports are unused.]
+~~~~~~~~~~~~~~~~~~~                             [All imports on this line are unused.]
 d3;import d7 from "a";d3;
-   ~~~~~~~~~~~~~~~~~~~                          [All imports are unused.]
+   ~~~~~~~~~~~~~~~~~~~                          [All imports on this line are unused.]
 
 bar.someFunc();
 baz();

@@ -39,6 +39,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             true,
             [true, OPTION_MULTILINE],
         ],
+        rationale: Lint.Utils.dedent`
+            It's unnecessary to include \`return\` and \`{}\` brackets in arrow lambdas.
+            Leaving them out results in simpler and easier to read code.
+        `,
         type: "style",
         typescriptOnly: false,
     };

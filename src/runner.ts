@@ -260,7 +260,15 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             continue;
         }
 
-        const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
+        let contents: string | undefined;
+        if (program !== undefined) {
+            const sourceFile = program.getSourceFile(file);
+            if (sourceFile !== undefined) {
+                contents = sourceFile.text;
+            }
+        } else {
+            contents = await tryReadFile(file, logger);
+        }
         if (contents !== undefined) {
             linter.lint(file, contents, configFile);
         }
@@ -286,7 +294,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);
-        if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
+        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.
