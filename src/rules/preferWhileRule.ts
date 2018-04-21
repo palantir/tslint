@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         const cb = (node: ts.Node): void => {
             if (isForStatement(node) && this.doesNodeViolateRule(node)) {
-                failures.push(this.createFailure(sourceFile, node as ts.ForStatement));
+                failures.push(this.createFailure(sourceFile, node));
             }
             return ts.forEachChild(node, cb);
         };
