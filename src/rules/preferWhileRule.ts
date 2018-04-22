@@ -23,7 +23,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-while",
-        description: "Prefer while loops when instead of a for loop without an initializer and incrementor",
+        description: "Prefer while loops when instead of a for loop without an initializer and incrementor.",
+        rationale: "Simplifies the readability of the loop statement, while maintaining the same functionality.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
