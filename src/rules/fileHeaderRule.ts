@@ -90,15 +90,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private doesNewLineEndingViolationExist(text: string, offset: number): boolean {
-        let violationExists = false;
         const entireComment = ts.forEachLeadingCommentRange(
             text,
             offset,
             (pos, end) => text.substring(pos, end + 2));
 
-        violationExists = entireComment !== undefined && entireComment.match(/^.*((\r)?\n){2,}$/mg) !== null;
-
-        return violationExists;
+        const NEW_LINE_FOLLOWING_HEADER = /^.*((\r)?\n){2,}$/mg;
+        return (entireComment !== undefined && NEW_LINE_FOLLOWING_HEADER.test(entireComment) !== null);
     }
 
     private createComment(sourceFile: ts.SourceFile, commentText: string, leadingNewlines = 1, trailingNewlines = 1) {
