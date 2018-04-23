@@ -25,7 +25,10 @@ export const codeExamples = [
             "rules": { "ban-ts-ignore": true }
         `,
         pass: Lint.Utils.dedent`
-            console.log("hello");
+            if (false) {
+                // Compiler warns about unreachable code error
+                console.log("hello");
+            }
         `,
         fail: Lint.Utils.dedent`
             if (false) {
