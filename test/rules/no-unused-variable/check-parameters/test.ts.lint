@@ -65,10 +65,13 @@ export class DestructuringTests {
     }
 }
 
+// Could be a bug with 2.9-dev but getPreEmitDiagnostics isn't
+// emitting any diagnostics for classes.
 abstract class AbstractTest {
-#if typescript >= 2.8.0
+#if typescript >= 2.8.0 < 2.9.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('AbstractTest')]
-#else
+#endif
+#if typescript < 2.8.0
                ~~~~~~~~~~~~ [err % ('AbstractTest')]
 #endif
     abstract foo(x);
