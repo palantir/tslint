@@ -340,7 +340,7 @@ function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | u
 }
 
 function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): ReadonlyArray<ts.Identifier> {
-    return forEachImport(sourceFile, (i) => {
+    const imports = forEachImport(sourceFile, (i) => {
         if (!isInRange(i, pos)) {
             return undefined;
         }
@@ -399,7 +399,8 @@ function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): 
             }
         }
         return undefined;
-    }) || [];
+    });
+    return imports !== undefined ? imports : [];
 }
 
 function isInRange(range: ts.TextRange, pos: number): boolean {
