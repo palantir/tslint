@@ -66,7 +66,11 @@ export class DestructuringTests {
 }
 
 abstract class AbstractTest {
+#if typescript >= 2.8.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('AbstractTest')]
+#else
                ~~~~~~~~~~~~ [err % ('AbstractTest')]
+#endif
     abstract foo(x);
 }
 

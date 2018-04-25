@@ -3,12 +3,16 @@ function func1(x: number, y: number) {
 }
 
 var func2 = () => {
-    ~~~~~           [err % ('func2')]
+    ~~~~~ [err % ('func2')]
     //
 };
 
 function func3() {
-         ~~~~~     [err % ('func3')]
+#if typescript >= 2.8.0
+~~~~~~~~~~~~~~ [err % ('func3')]
+#else
+         ~~~~~ [err % ('func3')]
+#endif
     return func1(1, 2);
 }
 
@@ -17,7 +21,11 @@ export function func4() {
 }
 
 declare function func5(): any;
+#if typescript >= 2.8.0
+~~~~~~~~~~~~~~~~~~~~~~ [err % ('func5')]
+#else
                  ~~~~~ [err % ('func5')]
+#endif
 
 export default function () {
     return 0;
