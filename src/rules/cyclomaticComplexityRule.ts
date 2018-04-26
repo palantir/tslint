@@ -42,7 +42,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a
             function. High cyclomatic complexity indicates confusing code which may be prone to
-            errors or difficult to modify.`,
+            errors or difficult to modify.
+
+            It's better to have smaller, single-purpose functions with self-documenting names.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
             is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,

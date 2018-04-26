@@ -40,7 +40,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "align",
         description: "Enforces vertical alignment.",
         hasFix: true,
-        rationale: "Helps maintain a readable, consistent style in your codebase.",
+        rationale: Lint.Utils.dedent`
+            Helps maintain a readable, consistent style in your codebase.
+
+            Consistent alignment for code statements helps keep code readable and clear.
+            Statements misaligned from the standard can be harder to read and understand.`,
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 

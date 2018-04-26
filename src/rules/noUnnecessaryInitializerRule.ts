@@ -29,6 +29,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Values in JavaScript default to \`undefined\`.
+            There's no need to do so manually.
+        `,
         type: "style",
         typescriptOnly: false,
     };
