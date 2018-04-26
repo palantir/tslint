@@ -114,9 +114,6 @@ declare const notATuple: NotATuple;
 <NotATuple>notATuple;
 ~~~~~~~~~~~~~~~~~~~~ [0]
 
-unknownName!;
-~~~~~~~~~~~~ [0]
-
 function foo() {
     let xx: 1 | 2 = 1;
     const f = () => xx = 2;
