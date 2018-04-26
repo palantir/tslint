@@ -108,7 +108,7 @@ function couldBeTupleType(type: ts.ObjectType): boolean {
         return false;
     }
     let i = 0;
-    for (; i < properties.length; ++i) {
+    for (; i < properties.length; i += 1) {
         const name = properties[i].name;
         if (String(i) !== name) {
             if (i === 0) {
@@ -118,7 +118,7 @@ function couldBeTupleType(type: ts.ObjectType): boolean {
             break;
         }
     }
-    for (; i < properties.length; ++i) {
+    for (; i < properties.length; i += 1) {
         if (String(+properties[i].name) === properties[i].name) {
             return false; // if there are any other numeric properties, this is not a tuple
         }
