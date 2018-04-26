@@ -35,7 +35,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`\`\`
             Prevents accidental iteration over properties inherited from an object's prototype.
             See [MDN's \`for...in\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)
-            documentation for more information about \`for...in\` loops.`,
+            documentation for more information about \`for...in\` loops.
+
+            Also consider using a [\`Map\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
+            or [\`Set\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)
+            if you're storing collections of objects.
+            Using \`Object\`s can cause occasional edge case bugs, such as if a key is named "hasOwnProperty".
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],

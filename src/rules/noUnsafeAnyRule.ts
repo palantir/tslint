@@ -32,6 +32,15 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            If you're dealing with data of unknown or "any" types, you shouldn't be accessing members of it.
+            Either add type annotations for properties that may exist or change the data type to the empty object type \`{}\`.
+
+            Alternately, if you're creating storage or handling for consistent but unknown types, such as in data structures
+            or serialization, use \`<T>\` template types for generic type handling.
+
+            Also see the \`no-any\` rule.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

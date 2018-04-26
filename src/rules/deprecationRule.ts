@@ -166,7 +166,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
 function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
     for (const tag of tags) {
         if (tag.name === "deprecated") {
-            return tag.text;
+            return tag.text === undefined ? "" : tag.text;
         }
     }
     return undefined;
