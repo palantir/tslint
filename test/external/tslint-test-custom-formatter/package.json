@@ -1,0 +1,7 @@
+{
+  "name": "tslint-test-custom-formatter",
+  "version": "0.0.1",
+  "private": true,
+  "main": "formatter.js",
+  "scripts": {}
+}

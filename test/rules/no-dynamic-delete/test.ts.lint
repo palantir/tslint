@@ -1,0 +1,29 @@
+const container: { [i: string]: 0 } = {};
+
+const getName = () => "";
+
+delete container.aaa;
+delete container["bb" + "b"];
+                ~~~~~~~~~~~~       [0]
+delete container["ccc"];
+                ~~~~~~~       [0]
+delete container.delete;
+delete container["delete"];
+                ~~~~~~~~~~       [0]
+delete container[7];
+delete container[-7];
+delete container[+7];
+                ~~~~       [0]
+delete container[-Infinity];
+                ~~~~~~~~~~~       [0]
+delete container["-Infinity"];
+delete container[+Infinity];
+                ~~~~~~~~~~~       [0]
+delete container["+Infinity"];
+delete container[NaN];
+                ~~~~~       [0]
+delete container["NaN"];
+                ~~~~~~~       [0]
+delete container[getName()];
+                ~~~~~~~~~~~       [0]
+[0]: Do not delete dynamically computed property keys.

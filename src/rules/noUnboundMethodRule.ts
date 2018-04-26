@@ -29,13 +29,51 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unbound-method",
-        description: "Warns when a method is used as outside of a method call.",
+        description: "Warns when a method is used outside of a method call.",
         optionsDescription: `You may optionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods.`,
         options: {
             type: "string",
             enum: [OPTION_IGNORE_STATIC],
         },
         optionExamples: [true, [true, OPTION_IGNORE_STATIC]],
+        rationale: Lint.Utils.dedent`
+            Class functions don't preserve the class scope when passed as standalone variables.
+            For example, this code will log the global scope (\`window\`/\`global\`), not the class instance:
+
+            \`\`\`
+            class MyClass {
+                public log(): void {
+                    console.log(this);
+                }
+            }
+
+            const instance = new MyClass();
+            const log = instance.log;
+
+            log();
+            \`\`\`
+
+            You need to either use an arrow lambda (\`() => {...}\`) or call the function with the correct scope.
+
+            \`\`\`
+            class MyClass {
+                public logArrowBound = (): void => {
+                    console.log(bound);
+                };
+
+                public logManualBind(): void {
+                    console.log(this);
+                }
+            }
+
+            const instance = new MyClass();
+            const logArrowBound = instance.logArrowBound;
+            const logManualBind = instance.logManualBind.bind(instance);
+
+            logArrowBound();
+            logManualBind();
+            \`\`\`
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
