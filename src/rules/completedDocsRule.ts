@@ -270,16 +270,23 @@ export class Rule extends Lint.Rules.AbstractRule {
                         [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
                         [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
                     },
-                    [DESCRIPTOR_TAGS]: {
-                        [TAGS_FOR_CONTENT]: {
-                            see: ["#.*"],
+                    [ARGUMENT_PROPERTIES]: {
+                        [DESCRIPTOR_TAGS]: {
+                            [TAGS_FOR_CONTENT]: {
+                                see: ["#.*"],
+                            },
+                            [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                         },
-                        [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                     },
                 },
             ],
         ],
+        rationale: Lint.Utils.dedent`
+            Helps ensure important components are documented.
 
+            Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+            Comments that only restate the names of variables add nothing to code, and can easily become outdated.
+        `,
         type: "style",
         typescriptOnly: false,
     };

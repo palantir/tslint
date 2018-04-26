@@ -10,7 +10,15 @@ var z;
 export var abcd = 3;
 
 class ABCD {
+#if typescript >= 2.9.0
+~~~~~~~~~~ ['ABCD' is declared but never used.]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+~~~~~~~~~~ [err % ('ABCD')]
+#endif
+#if typescript < 2.8.0
       ~~~~ [err % ('ABCD')]
+#endif
     constructor() {
         z = 3;
     }
@@ -59,7 +67,11 @@ for(let e of [1,2,3]) {
 export function testRenamingDestructure() {
   var a = 2;
   let {a: b} = {a: 4};
+#if typescript >= 2.8.0
+       ~~~~            [err % ('b')]
+#else
           ~            [err % ('b')]
+#endif
   let {x: y} = {x: 7}; // false positive
   return a + y;
 }

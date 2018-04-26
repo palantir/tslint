@@ -22,8 +22,8 @@ import {
     isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/curly.examples";
 
 const OPTION_AS_NEEDED = "as-needed";
 const OPTION_IGNORE_SAME_LINE = "ignore-same-line";
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`\`\`
 
             In the code above, the author almost certainly meant for both \`foo++\` and \`bar++\`
-            to be executed only if \`foo === bar\`. However, he forgot braces and \`bar++\` will be executed
+            to be executed only if \`foo === bar\`. However, they forgot braces and \`bar++\` will be executed
             no matter what. This rule could prevent such a mistake.`,
         optionsDescription: Lint.Utils.dedent`
             One of the following options may be provided:
@@ -72,6 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "functionality",
         typescriptOnly: false,
         hasFix: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

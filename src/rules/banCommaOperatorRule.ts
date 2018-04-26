@@ -50,8 +50,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionsDescription: "",
         optionExamples: [true],
-        type: "typescript",
-        typescriptOnly: true,
+        type: "functionality",
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys max-line-length */
 

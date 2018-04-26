@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
+import { isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -31,6 +31,15 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            If you're dealing with data of unknown or "any" types, you shouldn't be accessing members of it.
+            Either add type annotations for properties that may exist or change the data type to the empty object type \`{}\`.
+
+            Alternately, if you're creating storage or handling for consistent but unknown types, such as in data structures
+            or serialization, use \`<T>\` template types for generic type handling.
+
+            Also see the \`no-any\` rule.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -119,6 +128,12 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return initializer !== undefined &&
                     this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
+            case ts.SyntaxKind.SpreadAssignment:
+                return this.visitNode(
+                    (node as ts.SpreadAssignment).expression,
+                    // allow any in object spread, but not in object rest
+                    !isReassignmentTarget(node.parent as ts.ObjectLiteralExpression),
+                );
             case ts.SyntaxKind.ComputedPropertyName:
                 return this.visitNode((node as ts.ComputedPropertyName).expression, true);
             case ts.SyntaxKind.TaggedTemplateExpression: {
@@ -359,6 +374,19 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+        symbol = checker.getAliasedSymbol(symbol);
+    }
+    if (symbol !== undefined) {
+        // NamespaceModule is a type-only namespace without runtime value, its type is 'any' when used as 'ns.Type' -> avoid error
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.NamespaceModule)) {
+            return false;
+        }
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+            return isAny(checker.getDeclaredTypeOfSymbol(symbol));
+        }
+    }
     return isAny(checker.getTypeAtLocation(node));
 }
 

@@ -43,8 +43,8 @@ export class Rule extends Lint.Rules.AbstractRule {
              * \`\/\/ \` pattern will ignore all in-line comments.
              * \`^import \` pattern will ignore all import statements.
              * \`^export \{(.*?)\}\` pattern will ignore all multiple export statements.
-             * \`class [a-zA-Z] implements \` pattern will ignore all class declarations implementing interfaces.
-             * \`^import |^export \{(.*?)\}|class [a-zA-Z] implements |// \` pattern will ignore all the cases listed above.
+             * \`class [a-zA-Z]+ implements \` pattern will ignore all class declarations implementing interfaces.
+             * \`^import |^export \{(.*?)\}|class [a-zA-Z]+ implements |// \` pattern will ignore all the cases listed above.
          `,
         options: {
             type: "array",
