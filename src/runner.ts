@@ -269,6 +269,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
         } else {
             contents = await tryReadFile(file, logger);
         }
+
         if (contents !== undefined) {
             linter.lint(file, contents, configFile);
         }
