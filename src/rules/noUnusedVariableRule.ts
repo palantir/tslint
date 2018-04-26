@@ -413,9 +413,12 @@ const enum UnusedKind {
     DECLARATION, // Introduced in TS 2.8
 }
 function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
+    // https://github.com/Microsoft/TypeScript/blob/master/src/compiler/diagnosticMessages.json
     switch (diag.code) {
-        case 6133:
-            return UnusedKind.VARIABLE_OR_PARAMETER; // "'{0}' is declared but never used.
+        case 6133: // Pre TS 2.9 "'{0}' is declared but never used.
+                   // TS 2.9+ "'{0}' is declared but its value is never read."
+        case 6196: // TS 2.9+ "'{0}' is declared but never used."
+            return UnusedKind.VARIABLE_OR_PARAMETER;
         case 6138:
             return UnusedKind.PROPERTY; // "Property '{0}' is declared but never used."
         case 6192:

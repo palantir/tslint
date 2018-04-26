@@ -9,9 +9,10 @@ var z;
 
 export var abcd = 3;
 
-// Could be a bug with 2.9-dev but getPreEmitDiagnostics isn't
-// emitting any diagnostics for classes.
 class ABCD {
+#if typescript >= 2.9.0
+~~~~~~~~~~ ['ABCD' is declared but never used.]
+#endif
 #if typescript >= 2.8.0 < 2.9.0
 ~~~~~~~~~~ [err % ('ABCD')]
 #endif
