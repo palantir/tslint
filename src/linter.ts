@@ -29,7 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showRuleCrashWarningOnce } from "./error";
+import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
@@ -225,9 +225,9 @@ export class Linter {
             }
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
-                showRuleCrashWarningOnce(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
+                showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
             } else {
-                showRuleCrashWarningOnce(String(error), rule.getOptions().ruleName, sourceFile.fileName);
+                showRuleCrashWarning(String(error), rule.getOptions().ruleName, sourceFile.fileName);
             }
             return [];
         }
