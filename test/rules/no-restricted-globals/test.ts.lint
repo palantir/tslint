@@ -15,5 +15,7 @@ import { name } from "./foo";
 import "./custom-global"
 console.log(name);
 
-console.log(myGlobal);
-            ~~~~~~~~  [Unexpected global variable 'myGlobal'. Use a local parameter or variable instead.]
+console.log(badGlobal);
+            ~~~~~~~~~  [Unexpected global variable 'badGlobal'. Use a local parameter or variable instead.]
+
+console.log(goodGlobal);

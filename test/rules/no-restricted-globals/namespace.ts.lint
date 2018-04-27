@@ -1,8 +1,10 @@
-import "./core"
-
 console.log(name);
             ~~~~  [Unexpected global variable 'name'. Use a local parameter or variable instead.]
 
 namespace A {
     const foo = name;
+}
+
+namespace A {
+    export var name = 23;
 }
