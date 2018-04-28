@@ -43,7 +43,10 @@ export class Rule extends Lint.Rules.TypedRule {
             a set of global variables by enabling an environment, but still want to disallow
             some of those.
         `,
-        optionsDescription: "This rule takes a list of strings, where each string is a global to be restricted.",
+        optionsDescription: Lint.Utils.dedent`
+            This rule takes a list of strings, where each string is a global to be restricted.
+            \`event\`, \`name\` and \`length\` are restricted by default.
+        `,
         options: {
             type: "list",
             items: {type: "string"},
@@ -67,7 +70,8 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const bannedGlobals = new Set(this.ruleArguments as string[]);
+        const bannedList = this.ruleArguments.length ? this.ruleArguments : ["event", "name", "length"];
+        const bannedGlobals = new Set(bannedList);
         if (sourceFile.isDeclarationFile) {
             return [];
         } else {
