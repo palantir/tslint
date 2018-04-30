@@ -1,0 +1,15 @@
+# pre-commit hook definition
+# See http://pre-commit.com/ for more info
+#
+# To use, add the following to .pre-commit-config.yaml in your repo:
+# -   repo: git@github.com:palantir/tslint.git
+#     sha: 7418afaf5fa511bfbe00fb2615f7ca015ab099d9
+#     hooks:
+#     -   id: tslint
+
+-   id: tslint
+    name: TSLint
+    description: Linting for TypeScript files.
+    entry: tslint
+    language: system
+    files: \.ts$
