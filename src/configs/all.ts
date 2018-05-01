@@ -91,6 +91,7 @@ export const rules = {
     // "ban": no sensible default
     "ban-comma-operator": true,
     "curly": true,
+    "dead-type-branch": true,
     "forin": true,
     // "import-blacklist": no sensible default
     "label-position": true,

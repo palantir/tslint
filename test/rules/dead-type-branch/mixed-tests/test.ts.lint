@@ -1,0 +1,49 @@
+
+class A {private a(){}};
+class B {private b(){}};
+
+function isA(x:any): x is A { return Math.random() > .5; }
+function isB(x:any): x is B { return  Math.random() > .5; }
+
+const sna: string|number|A =
+  Math.random() > .5 ? (Math.random() > .5 ? "a" : new A()) : 1;
+
+let getSNA = ():string|number|A => {
+  return Math.random() > .5 ? (Math.random() > .5 ? "a" : new A()) : 1;
+}
+let sna2 = getSNA();
+
+
+if (sna instanceof A) {
+  if (typeof sna === "object") { sna; }
+  else {
+       ~
+    if (typeof sna === "number") { sna; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    else { if (typeof sna === "string") { sna; } }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [This block is unreachable: TypeScript infers the type of 'sna' as 'never' at this location, which means the previous type guard is always false.]
+}
+
+
+if (sna2 instanceof A) {
+  if (typeof sna2 === "object") { sna2; }
+  else {
+       ~
+    if (typeof sna2 === "number") { sna2; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    else { if (typeof sna2 === "string") { sna2; } }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [This block is unreachable: TypeScript infers the type of 'sna2' as 'never' at this location, which means the previous type guard is always false.]
+}
+
+// Not tagged, since not deterministic
+if (getSNA() instanceof A) {
+  if (typeof getSNA() === "object") { getSNA(); }
+  else {
+    if (typeof getSNA() === "number") { getSNA(); }
+    else { if (typeof getSNA() === "string") { getSNA(); } }
+  }
+}

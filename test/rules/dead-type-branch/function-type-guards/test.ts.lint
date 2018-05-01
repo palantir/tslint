@@ -1,0 +1,40 @@
+class A {private a(){}};  // implicitly declares a type, and methods for
+class B {private b(){}};  // incompatibility. This behaves weirdly when types
+class C {private c(){}};  // are compatible.
+
+const ab: A|B = Math.random() > .5 ? new A() : new B();
+
+function isA(x:any): x is A { return Math.random() > .5; }
+function isB(x:any): x is B { return  Math.random() > .5; }
+function isC(x:any): x is C { return  Math.random() > .5; }
+
+
+if (isA(ab)) { ab; }
+
+
+if (isA(ab) || isB(ab)) { ab; }
+
+
+if (isC(ab)) { ab; } // Could be A & C | B & C
+
+
+if (isA(ab) || isB(ab)) { ab; }
+else { ab; }
+     ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+
+
+// Interesting case: the first condition leaves B & !A, which gets rounded
+// up into B for the next condition since TS doesn't subtract. We lost the !A
+// along the way, which then gets turned into B & !A, and so on.
+if (isA(ab)) { ab; }
+else if (isA(ab)) { ab; }
+else if (isA(ab)) { ab; }
+
+
+if (isA(ab)) { ab; }
+else if (isB(ab)) { ab; }
+else if (isC(ab)) { ab; }
+                  ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+else { ab; }
+     ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+

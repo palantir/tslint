@@ -1,0 +1,40 @@
+const sn: string|number = Math.random() > .5 ? "a" : 1;
+
+
+if (typeof sn === 'string') { sn; }
+
+
+if (typeof sn === 'string' || typeof sn === 'number') { sn; }
+
+
+if (typeof sn === 'object') { sn; }
+                            ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+
+
+if ('object' === typeof sn) { sn; }
+                            ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+
+
+if (typeof sn === 'foo') { sn; }
+                         ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+
+
+if (typeof sn === 'string' || typeof sn === 'number') { sn; }
+else { sn; }
+     ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+
+
+// There's no structural typing there, so this behaves as intuitively expected.
+if (typeof sn === 'string') { sn; }
+else if (typeof sn === 'string') { sn; }
+                                 ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+
+// Slightly tricky error message positioning, since we locate expressions typed
+// as never.
+if (typeof sn === 'foo') {
+                         ~
+    if (sn) { 0; }
+~~~~~~~~~~~~~~~~~~
+}
+~ [This block is unreachable: TypeScript infers the type of 'sn' as 'never' at this location, which means the previous type guard is always false.]
+

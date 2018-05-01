@@ -1,0 +1,5 @@
+{
+    "rules": {
+      "dead-type-branch": true
+    }
+  }

@@ -1,0 +1,57 @@
+class A {private a(){}};
+class B {private b(){}};
+class C {private c(){}};
+
+const ab: A|B = Math.random() > .5 ? new A() : new B();
+
+
+if (ab instanceof A) {
+  if (ab instanceof B) { ab; }
+}
+
+
+if (ab instanceof A) {
+  if (!(ab instanceof A)) { ab; }
+                          ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+}
+
+
+// more complex structure to smoke test
+if (ab instanceof A) {
+  if (ab instanceof B) {
+    ab;
+    if (!(ab instanceof A)) { ab; }
+                            ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+    ab;
+  }
+  if (ab instanceof C || !(ab instanceof A)) {
+    ab; // A & C here
+    if (!(ab instanceof C && ab instanceof A)) { ab; }
+                                               ~~~~~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+  }
+}
+
+// Check that we never double-flag the same code
+if (ab instanceof A) {
+  if (!(ab instanceof A)) {
+                          ~
+    ab;
+~~~~~~~
+  }
+~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+  if (!(ab instanceof A)) {
+                          ~
+    ab;
+~~~~~~~
+  }
+~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+  if (!(ab instanceof A)) {
+                          ~
+    if (!(ab instanceof A))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      if (!(ab instanceof A)) { ab; }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [This block is unreachable: TypeScript infers the type of 'ab' as 'never' at this location, which means the previous type guard is always false.]
+  ab;
+}
