@@ -45,28 +45,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require statement not part of an import statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const requiresWalker = new NoVarRequiresWalker(sourceFile, this.getOptions());
-        return this.applyWithWalker(requiresWalker);
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-// tslint:disable-next-line:deprecation
-class NoVarRequiresWalker extends Lint.ScopeAwareRuleWalker<{}> {
-    public createScope(): {} {
-        return {};
-    }
+function walk(ctx: Lint.WalkContext<void>) {
+    return ts.forEachChild(ctx.sourceFile, cb);
 
-    public visitCallExpression(node: ts.CallExpression) {
-        const expression = node.expression;
+    function cb(node: ts.Node): void {
+        if (ts.isCallExpression(node)) {
+            const expression = node.expression;
 
-        if (this.getCurrentDepth() <= 1 && expression.kind === ts.SyntaxKind.Identifier) {
-            const identifierName = (expression as ts.Identifier).text;
-            if (identifierName === "require") {
-                // if we're calling (invoking) require, then it's not part of an import statement
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (expression.kind === ts.SyntaxKind.Identifier) {
+                const identifierName = (expression as ts.Identifier).text;
+                if (identifierName === "require") {
+                    // if we're calling (invoking) require, then it's not part of an import statement
+                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+                }
             }
         }
 
-        super.visitCallExpression(node);
+        return ts.forEachChild(node, cb);
     }
 }
