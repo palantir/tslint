@@ -64,4 +64,16 @@ describe("Linter", () => {
         assert.equal(fs.readFileSync(templateFile, "utf-8"), templateDeclarationFixed);
     });
 
+    it("dry run does not write files to disk", () => {
+        const linter = new TestLinter({ fix: true, dryRun: true });
+        const templateFile = createTempFile("ts");
+        fs.writeFileSync(templateFile, templateDeclaration);
+        const sourceFile = createSourceFile(templateFile, `${templateDeclaration}`, ScriptTarget.ES2015);
+        const replacement = new Replacement(6, 9, "");
+        const failure = new RuleFailure(sourceFile, 6, 15, "Declaration doesn't exist", "foo-bar", replacement);
+        const result = linter.applyFixesHelper(templateFile, templateDeclaration, [failure]);
+        assert.equal(fs.readFileSync(templateFile, "utf-8"), templateDeclaration);
+        assert.equal(result, templateDeclarationFixed);
+    });
+
 });

@@ -238,6 +238,7 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
 async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
+            dryRun: false,
             fix: !!options.fix,
             formatter: options.format,
             formattersDirectory: options.formattersDirectory,
