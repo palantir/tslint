@@ -18,6 +18,9 @@ for(let i = 0;i>1341;++i) {
 throw 1342;
       ~~~~                          ['magic numbers' are not allowed]
 
+const c = ['a', 'b', 'c'];
+console.log(c[2]);
+
 class A {
     static test = 1337;
 

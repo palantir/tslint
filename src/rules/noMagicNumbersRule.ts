@@ -49,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "'magic numbers' are not allowed";
 
     public static ALLOWED_NODES = new Set<ts.SyntaxKind>([
+        ts.SyntaxKind.ElementAccessExpression,
         ts.SyntaxKind.ExportAssignment,
         ts.SyntaxKind.FirstAssignment,
         ts.SyntaxKind.LastAssignment,
