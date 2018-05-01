@@ -19,7 +19,7 @@ v5.9.0
 
 ## Configuration inheritance changes
 
-Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defualtSeverity`: #2569.
+Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defaultSeverity`: #2569.
 
 `defaultSeverity` defined in a `tslint.json` file will now override the `defaultSeverity` value defined in any configurations you are extending.
 This means that any rules specified in the base configurations can now take on a new `defaultSeverity` if you so choose. If you extend multiple
@@ -1888,7 +1888,7 @@ v0.4.6
 v0.4.5
 ---
 
-* [feature] `no-unused-variable` no longer checks parameters by defualt. Parameters are now only checked if the `check-parameters` option is set.
+* [feature] `no-unused-variable` no longer checks parameters by default. Parameters are now only checked if the `check-parameters` option is set.
 * [bug] `no-unused-variable` parameter check no longer fails on variable argument parameters (like ...args) and on cases where the parameters are broken up by newlines.
 
 v0.4.4

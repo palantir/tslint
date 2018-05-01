@@ -181,9 +181,9 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "completed-docs",
-        description: "Enforces documentation for important items be filled out.",
+        description: "Enforces JSDoc comments for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for [${Object.keys(Rule.defaultArguments).join(", ")}]],
+            \`true\` to enable for `[${Object.keys(Rule.defaultArguments).join(", ")}]`,
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
@@ -280,7 +280,12 @@ export class Rule extends Lint.Rules.TypedRule {
                 },
             ],
         ],
+        rationale: Lint.Utils.dedent`
+            Helps ensure important components are documented.
 
+            Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+            Comments that only restate the names of variables add nothing to code, and can easily become outdated.
+        `,
         type: "style",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -397,7 +402,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             return;
         }
 
-        const comments = symbol.getDocumentationComment();
+        const comments = symbol.getDocumentationComment(typeChecker);
         checkComments(node, describeNode(nodeType), comments, requirementNode);
     }
 
