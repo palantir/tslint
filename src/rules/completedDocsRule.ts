@@ -183,7 +183,7 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "completed-docs",
         description: "Enforces JSDoc comments for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for `[${Object.keys(Rule.defaultArguments).join(", ")}]`,
+            \`true\` to enable for \`[${Object.keys(Rule.defaultArguments).join(", ")}]\`,
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
