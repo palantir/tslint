@@ -23,7 +23,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-while",
-        description: "Prefer while loops when instead of a for loop without an initializer and incrementor.",
+        description: "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
         rationale: "Simplifies the readability of the loop statement, while maintaining the same functionality.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Expected a 'while' loop instead of a 'for' loop without an initializer and incrementor";
+    public static FAILURE_STRING = "Prefer `while` loops instead of `for` loops without an initializer and incrementor.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const failures: Lint.RuleFailure[] = [];

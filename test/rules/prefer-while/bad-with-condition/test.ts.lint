@@ -1,4 +1,4 @@
 for(;true===true;) {
-~~~~~~~~~~~~~~~~~~   [Expected a 'while' loop instead of a 'for' loop without an initializer and incrementor]
+~~~~~~~~~~~~~~~~~~   [Prefer `while` loops instead of `for` loops without an initializer and incrementor.]
     console.log(x);
 }
