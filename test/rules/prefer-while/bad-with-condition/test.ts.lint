@@ -1,4 +1,0 @@
-for(;true===true;) {
-~~~~~~~~~~~~~~~~~~   [Prefer `while` loops instead of `for` loops without an initializer and incrementor.]
-    console.log(x);
-}

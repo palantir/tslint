@@ -1,3 +1,0 @@
-while (true===true) {
-    console.log(x);
-}

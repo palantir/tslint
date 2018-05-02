@@ -1,0 +1,16 @@
+// for loops without an initializer, termination condition, and incrementor should be updated
+for(;;) {
+~~~~~~~   [Prefer `while` loops instead of `for` loops without an initializer and incrementor.]
+    console.log(x);
+}
+
+// for loops without an initializer and incrementor should be updated
+for(;true===true;) {
+~~~~~~~~~~~~~~~~~~   [Prefer `while` loops instead of `for` loops without an initializer and incrementor.]
+    console.log(x);
+}
+
+// for loops with an initializer, termination condition, and incrementor should remain untouched
+for(let x = 1; x < 10; x++) {
+    console.log(x);
+}
