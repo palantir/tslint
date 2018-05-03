@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noSparseArrays.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,20 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Disallows sparse arrays",
-                config: Lint.Utils.dedent`
-                    "rules": { "no-sparse-arrays": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const arr: string[] = ['elemenet1', 'element2'];
-                `,
-                fail: Lint.Utils.dedent`
-                    const arr: string[] = ['elemenet1',, 'element2'];
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

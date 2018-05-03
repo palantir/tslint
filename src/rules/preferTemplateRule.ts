@@ -19,6 +19,7 @@ import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/preferTemplate.examples";
 
 const OPTION_SINGLE_CONCAT = "allow-single-concat";
 
@@ -40,41 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Enforces the use of template strings whenever possible.",
-                config: Lint.Utils.dedent`
-                    "rules": { "prefer-template": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const x: number = 1;
-                    const y: number = 1;
-                    const myString: string = \`\${x} is equals \${y}\`;
-                `,
-                fail: Lint.Utils.dedent`
-                    const x: number = 1;
-                    const y: number = 1;
-                    const myString: string = x + ' is equals ' + y;
-                `,
-            },
-            {
-                description: "Enforces the use of template strings, but allows up to one concatenation.",
-                config: Lint.Utils.dedent`
-                    "rules": { "prefer-template": [true, "allow-single-concat"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    const x: number = 1;
-                    const y: number = 1;
-                    const myString: string = x + ' is equals 1';
-                    const myString: string = \`\${x} is equals \${y}\`;
-                `,
-                fail: Lint.Utils.dedent`
-                    const x: number = 1;
-                    const y: number = 1;
-                    const myString: string = x + ' is equals ' + y;
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

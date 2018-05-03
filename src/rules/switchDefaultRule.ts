@@ -19,6 +19,7 @@ import { isDefaultClause } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/switchDefault.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,39 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Requires a `default` case in `switch` statements.",
-                config: Lint.Utils.dedent`
-                    "rules": { "switch-default": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    let foo: number = 1;
-                    switch (foo) {
-                        case 1:
-                            doSomething();
-                            break;
-                        case 2:
-                            doSomething2();
-                            break;
-                        default:
-                            console.log('default');
-                            break;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    let foo: number = 1;
-                    switch (foo) {
-                        case 1:
-                            doSomething();
-                            break;
-                        case 2:
-                            doSomething2();
-                            break;
-                    }
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

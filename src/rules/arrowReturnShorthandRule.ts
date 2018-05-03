@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { hasCommentAfterPosition } from "../language/utils";
+import { codeExamples } from "./code-examples/arrowReturnShorthand.examples";
 
 const OPTION_MULTILINE = "multiline";
 
@@ -41,43 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "style",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
-                config: Lint.Utils.dedent`
-                    "rules": { "arrow-return-shorthand": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
-                    const calc2 = (x: number, y: number) => {
-                        return { add: x + y, sub: x - y, mul: x * y }
-                    };
-                `,
-                fail: Lint.Utils.dedent`
-                    const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
-                    const calc2 = (x: number, y: number) => {
-                        return { add: x + y, sub: x - y, mul: x * y }
-                    };
-               `,
-            },
-            {
-                description: "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
-                config: Lint.Utils.dedent`
-                    "rules": { "arrow-return-shorthand": [true, "multiline"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
-                    const calc2 = (x: number, y: number) =>
-                        ({ add: x + y, sub: x - y, mul: x * y });
-                `,
-                fail: Lint.Utils.dedent`
-                    const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
-                    const calc2 = (x: number, y: number) => {
-                        return { add: x + y, sub: x - y, mul: x * y }
-                    };
-               `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

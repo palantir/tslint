@@ -19,6 +19,7 @@ import { hasModifier, isArrowFunction, isCallExpression, isIdentifier, isSpreadE
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noUnnecessaryCallbackWrapper.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -32,24 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Disallows unnecessary callback wrappers",
-                config: Lint.Utils.dedent`
-                    "rules": { "no-unnecessary-callback-wrapper": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const handleContent = (content) => console.log('Handle content:', content);
-                    const handleError = (error) => console.log('Handle error:', error);
-                    promise.then(handleContent).catch(handleError);
-                `,
-                fail: Lint.Utils.dedent`
-                    const handleContent = (content) => console.log('Handle content:', content);
-                    const handleError = (error) => console.log('Handle error:', error);
-                    promise.then((content) => handleContent(content)).catch((error) => handleError(error));
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -19,6 +19,7 @@ import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/useIsnan.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -33,24 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Enforces usage of `isNan()`.",
-                config: Lint.Utils.dedent`
-                    "rules": { "use-isnan": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    if (isNaN(parseInt('_4711'))) {
-                        doSomething();
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    if (parseInt('_4711') === NaN) {
-                        doSomething();
-                    }
-               `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

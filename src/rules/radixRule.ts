@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsut
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/radix.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,26 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Requires the inclusion of the radix parameter when calling `parseInt`.",
-                config: Lint.Utils.dedent`
-                    "rules": { "radix": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const x: string = '11';
-                    const dec: number = parseInt(x, 10);
-                    const bin: number = parseInt(x, 2);
-                    const hex: number = parseInt(x, 16);
-                `,
-                fail: Lint.Utils.dedent`
-                    const x: string = '11';
-                    const dec: number = parseInt(x);
-                    const bin: number = parseInt(x, 2);
-                    const hex: number = parseInt(x, 16);
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

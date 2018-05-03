@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/onlyArrowFunctions.examples";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
 const OPTION_ALLOW_NAMED_FUNCTIONS = "allow-named-functions";
@@ -47,28 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS]],
         type: "typescript",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Disallows functions with the function keyword",
-                config: Lint.Utils.dedent`
-                    "rules": { "only-arrow-functions": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    const myFunc = () => {
-                        // do something ...
-                    };
-                `,
-                fail: Lint.Utils.dedent`
-                    function myFunc() {
-                        // do something ...
-                    };
-
-                    const myFunc = function() {
-                        // do something ...
-                    };
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

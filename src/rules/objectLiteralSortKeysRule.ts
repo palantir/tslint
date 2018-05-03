@@ -19,6 +19,7 @@ import { isInterfaceDeclaration, isObjectLiteralExpression, isSameLine, isTypeAl
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
@@ -61,59 +62,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         ],
         type: "maintainability",
         typescriptOnly: false,
-        codeExamples: [
-            {
-                description: "Requires that an object literal's keys be sorted alphabetically.",
-                config: Lint.Utils.dedent`
-                    "rules": { "object-literal-sort-keys": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    let o = {
-                        bar: 2,
-                        foo: 1
-                    };
-                `,
-                fail: Lint.Utils.dedent`
-                    let o = {
-                        foo: 1,
-                        bar: 2
-                    };
-                `,
-            },
-            {
-                description: Lint.Utils.dedent`Requires that an object literal's keys be sorted by interface-definition.
-                    If there is no interface fallback to alphabetically.`,
-                config: Lint.Utils.dedent`
-                    "rules": {
-                        "object-literal-sort-keys": {
-                            "options": "match-declaration-order"
-                        }
-                    }
-                `,
-                pass: Lint.Utils.dedent`
-                    interface I {
-                        foo: number;
-                        bar: number;
-                    }
-
-                    let o: I = {
-                        foo: 1,
-                        bar: 2
-                    };
-                `,
-                fail: Lint.Utils.dedent`
-                    interface I {
-                        foo: number;
-                        bar: number;
-                    }
-
-                    let o: I = {
-                        bar: 2,
-                        foo: 1
-                    };
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

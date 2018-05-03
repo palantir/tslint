@@ -19,6 +19,7 @@ import { isInterfaceDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noEmptyInterface.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,22 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         type: "typescript",
         typescriptOnly: true,
-        codeExamples: [
-            {
-                description: "Disallows empty interfaces.",
-                config: Lint.Utils.dedent`
-                    "rules": { "no-empty-interface": true }
-                `,
-                pass: Lint.Utils.dedent`
-                    interface I {
-                        foo: string;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    interface I { }
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

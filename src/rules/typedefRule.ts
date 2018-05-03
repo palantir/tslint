@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/typedef.examples";
 
 interface Options {
     "call-signature"?: boolean;
@@ -90,146 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
-        codeExamples: [
-            {
-                description: "Requires type definitions for call signatures",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "call-signature"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    function add(x, y): number {
-                        return x + y;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    function add(x, y) {
-                        return x + y;
-                    }
-                `,
-            },
-            {
-                description: "Requires type definitions for arrow call signatures",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "arrow-call-signature"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    const add = (x, y): number => x + y;
-                `,
-                fail: Lint.Utils.dedent`
-                    const add = (x, y) => x + y;
-                `,
-            },
-            {
-                description: "Requires type definitions for parameters",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "parameter"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    function add(x: number, y: number) {
-                        return x + y;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    function add(x, y) {
-                        return x + y;
-                    }
-                `,
-            },
-            {
-                description: "Requires type definitions for arrow function parameters",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "arrow-parameter"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    const add = (x: number, y: number) => x + y;
-                `,
-                fail: Lint.Utils.dedent`
-                    const add = (x, y) => x + y;
-                `,
-            },
-            {
-                description: "Requires type definitions for property declarations",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "property-declaration"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    interface I {
-                        foo: number;
-                        bar: string;
-                    }
-            `,
-                fail: Lint.Utils.dedent`
-                    interface I {
-                        foo;
-                        bar;
-                    }
-                `,
-            },
-            {
-                description: "Requires type definitions for variable declarations",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "variable-declaration"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    let x: number;
-                `,
-                fail: Lint.Utils.dedent`
-                    let x;
-                `,
-            },
-            {
-                description: "Requires type definitions for member variable declarations",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "member-variable-declaration"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    class MyClass {
-                        x: number;
-                    }
-                `,
-                fail: Lint.Utils.dedent`
-                    class MyClass {
-                        x;
-                    }
-                `,
-            },
-            {
-                description: "Requires type definitions when destructuring objects.",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "object-destructuring"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    interface FooBar {
-                        foo: number;
-                        bar: string;
-                    }
-                    const foobar = { foo: 1, bar: '2' };
-                    const { foo, bar }: FooBar = foobar;
-                `,
-                fail: Lint.Utils.dedent`
-                    interface FooBar {
-                        foo: number;
-                        bar: string;
-                    }
-                    const foobar = { foo: 1, bar: '2' };
-                    const { foo, bar } = foobar;
-                `,
-            },
-            {
-                description: "Requires type definitions when destructuring arrays.",
-                config: Lint.Utils.dedent`
-                    "rules": { "typedef": [true, "array-destructuring"] }
-                `,
-                pass: Lint.Utils.dedent`
-                    const foobar = [1, '2'];
-                    const [foo, bar]: Array<number | string> = foobar;
-                `,
-                fail: Lint.Utils.dedent`
-                    const foobar = [1, '2'];
-                    const [foo, bar] = foobar;
-                `,
-            },
-        ],
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
