@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
+import { isIdentifier, isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { isLowerCase } from "../utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -387,7 +388,32 @@ function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
             return isAny(checker.getDeclaredTypeOfSymbol(symbol));
         }
     }
+
+    // Lowercase JSX elements are assumed to be allowed by design
+    if (isJsxNativeElement(node)) {
+        return false;
+    }
+
     return isAny(checker.getTypeAtLocation(node));
+}
+
+const jsxElementTypes = new Set<ts.SyntaxKind>([
+    ts.SyntaxKind.JsxClosingElement,
+    ts.SyntaxKind.JsxOpeningElement,
+    ts.SyntaxKind.JsxSelfClosingElement,
+]);
+
+function isJsxNativeElement(node: ts.Node): boolean {
+    if (!isIdentifier(node) || node.parent === undefined) {
+        return false;
+    }
+
+    // TypeScript <=2.1 incorrectly parses JSX fragments
+    if (node.text === "") {
+        return true;
+    }
+
+    return jsxElementTypes.has(node.parent.kind) && isLowerCase(node.text[0]);
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
