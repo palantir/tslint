@@ -143,7 +143,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         return ts.forEachChild(node, cb);
     });
 
-    function handleDeclaredVariable(node: ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration): void {
+    function handleDeclaredVariable(node: ts.ParameterDeclaration | ts.PropertyDeclaration): void {
         const { name, initializer } = node;
 
         if (name.kind === ts.SyntaxKind.Identifier) {
