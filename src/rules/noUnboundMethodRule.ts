@@ -124,8 +124,9 @@ function isSafeUse(node: ts.Node): boolean {
             return (parent as ts.CallExpression).expression === node;
         case ts.SyntaxKind.TaggedTemplateExpression:
             return (parent as ts.TaggedTemplateExpression).tag === node;
-        // E.g. `obj.method.bind(obj)`.
+        // E.g. `obj.method.bind(obj) or obj.method["prop"]`.
         case ts.SyntaxKind.PropertyAccessExpression:
+        case ts.SyntaxKind.ElementAccessExpression:
             return true;
         // Allow most binary operators, but don't allow e.g. `myArray.forEach(obj.method || otherObj.otherMethod)`.
         case ts.SyntaxKind.BinaryExpression:
