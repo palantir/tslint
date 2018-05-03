@@ -95,8 +95,6 @@ interface NotATuple {
 declare const notATuple: NotATuple;
 notATuple;
 
-unknownName;
-
 function foo() {
     let xx: 1 | 2 = 1;
     const f = () => xx = 2;

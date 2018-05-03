@@ -231,6 +231,7 @@ export const rules = {
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
+    "prefer-while": true,
     "quotemark": [
         true,
         "double",
