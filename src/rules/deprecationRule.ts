@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
         rationale: "Deprecated APIs should be avoided, and usage updated.",
         optionsDescription: "",
         options: null,
-        optionExamples: [],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
         requiresTypeInfo: true,

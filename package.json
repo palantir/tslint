@@ -26,7 +26,7 @@
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
     "lint": "npm-run-all -p lint:global lint:from-bin",
-    "lint:global": "tslint --project test/tsconfig.json --format stylish # test includes 'src' too",
+    "lint:global": "tslint --project test/tsconfig.json --format stylish",
     "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
     "publish:local": "./scripts/npmPublish.sh",
     "test": "npm-run-all test:pre -p test:mocha test:rules",

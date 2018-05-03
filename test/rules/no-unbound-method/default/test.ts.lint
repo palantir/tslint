@@ -6,6 +6,7 @@ function f(i: I) {
     i.m ? 1 : 2;
     if (i.m) {}
     !i.m;
+    i.m["length"];
     return i.m!;
            ~~~ [0]
 }
