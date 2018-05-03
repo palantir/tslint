@@ -25,8 +25,8 @@ v5.10.0
 - [docs] Added optional capability to provide code examples in rules' metadata (#3602)
 - [docs] Many small docs fixes and tweaks from many great contributors!
 
----- thanks ----
 Thanks to our contributors!
+
 - Achim Weimert
 - BB9z
 - Blair Zajac
