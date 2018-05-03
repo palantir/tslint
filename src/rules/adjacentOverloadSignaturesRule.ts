@@ -33,10 +33,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces function overloads to be consecutive.",
         optionsDescription: Lint.Utils.dedent`
             If \`${IGNORE_ACCESSORS}\` is specified, then getters and setters are not considered to be overloads
-            of function with same signature.`,
+            of function with the same signature.`,
         options: {
-            type: "string",
-            enum: [IGNORE_ACCESSORS],
+            type: "array",
+            items: {
+                type: "string",
+                enum: [IGNORE_ACCESSORS],
+            },
+            minLength: 0,
+            maxLength: 1,
         },
         optionExamples: [true, [true, IGNORE_ACCESSORS]],
         rationale: "Improves readability and organization by grouping naturally related items together.",
