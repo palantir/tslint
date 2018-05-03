@@ -174,23 +174,29 @@ figcaption {
     }
  }
 
- .wrapper__code-examples {
-     & .wrapper__code-example {
-        margin-bottom: 64px;
-        &:last-of-type {
-            margin-bottom: 24px;
+.wrapper__code-example {
+    margin-bottom: 64px;
+
+    &:last-of-type {
+        margin-bottom: 24px;
+    }
+
+    h6.heading-fail {
+        // Strong red
+        color: #d14;
+    }
+
+    .code-example {
+        // Light green
+        background-color: #f1fff1;
+
+        &.code-example-fail {
+            // Light red
+            background-color: #fff5f5;
         }
-     }
-    /* Overwrite default code-block styling */
-    & .code-example {
-        & pre, & .highlight {
+
+        pre, .highlight {
             background: transparent;
         }
     }
-    & .code-example.pass {
-        background-color: #f1fff1 !important;
-    }
-    & .code-example.fail {
-        background-color: #fff5f5 !important;
-    }
- }
+}
