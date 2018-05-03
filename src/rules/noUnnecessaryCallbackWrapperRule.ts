@@ -30,6 +30,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            There's generally no reason to wrap a function with a callback wrapper if it's directly called anyway.
+            Doing so creates extra inline lambdas that slow the runtime down.
+        `,
         type: "style",
         typescriptOnly: false,
     };
