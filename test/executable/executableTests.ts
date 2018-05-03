@@ -133,6 +133,23 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    describe("Custom formatters", () => {
+        it("can be loaded from node_modules", (done) => {
+            execCli(
+                ["-c", "tslint-custom-rules-with-dir.json", "../../src/test.ts", "-t", "tslint-test-custom-formatter"],
+                {
+                    cwd: "./test/config",
+                },
+                (err, stdout) => {
+                    assert.isNotNull(err, "process should exit with error");
+                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    assert.include(stdout, "hello from custom formatter", "stdout should contain output of custom formatter");
+                    done();
+                },
+            );
+        });
+    });
+
     describe("Custom rules", () => {
         it("exits with code 1 if nonexisting custom rules directory is passed", async () => {
             const status = await execRunner(

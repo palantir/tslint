@@ -24,16 +24,14 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
-    getRelativePath,
     getRulesDirectories,
     IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showWarningOnce } from "./error";
+import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
-import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
@@ -42,8 +40,8 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 /**
  * Linter that can lint multiple files in consecutive runs.
  */
-class Linter {
-    public static VERSION = "5.8.0";
+export class Linter {
+    public static VERSION = "5.9.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -144,16 +142,12 @@ class Linter {
     }
 
     public getResult(): LintResult {
-        let formatter: IFormatter;
-        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
-
         const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
-        const Formatter = findFormatter(formatterName, formattersDirectory);
-        if (Formatter !== undefined) {
-            formatter = new Formatter();
-        } else {
+        const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
+        if (Formatter === undefined) {
             throw new Error(`formatter '${formatterName}' not found`);
         }
+        const formatter = new Formatter();
 
         const output = formatter.format(this.failures, this.fixes);
 
@@ -231,9 +225,9 @@ class Linter {
             }
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
-                showWarningOnce(error.stack);
+                showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
             } else {
-                showWarningOnce(String(error));
+                showRuleCrashWarning(String(error), rule.getOptions().ruleName, sourceFile.fileName);
             }
             return [];
         }
@@ -261,11 +255,6 @@ class Linter {
         }
     }
 }
-
-// tslint:disable-next-line:no-namespace
-namespace Linter { }
-
-export = Linter;
 
 function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
     const map = new Map<K, V[]>();

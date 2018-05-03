@@ -27,7 +27,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "class-name",
         description: "Enforces PascalCased class and interface names.",
-        rationale: "Makes it easy to differentiate classes from regular variables at a glance.",
+        rationale: Lint.Utils.dedent`
+            Makes it easy to differentiate classes from regular variables at a glance.
+
+            JavaScript and general programming convention is to refer to classes in PascalCase.
+            It's confusing to use camelCase or other conventions for class names.
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
