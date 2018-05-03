@@ -31,7 +31,7 @@ const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
 const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
-const OPTION_ALL_CAPS_FOR_CONST = "all-caps-for-const";
+const OPTION_CONST_ONLY_FOR_CAPS = "const-only-for-caps";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
 const OPTION_ALLOW_SNAKE_CASE = "allow-snake-case";
 
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALL_CAPS_FOR_CONST}"\`: enforces that all variables with UPPER_CASED names should be \`const\`.
+              * \`"${OPTION_CONST_ONLY_FOR_CAPS}"\`: enforces that all variables with UPPER_CASED names should be \`const\`.
               * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
               * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
@@ -97,7 +97,7 @@ function parseOptions(ruleArguments: string[]): Options {
         checkFormat: !banKeywords || hasOption(OPTION_CHECK_FORMAT),
         leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
         trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
-        allCapsForConst: hasOption(OPTION_ALL_CAPS_FOR_CONST),
+        allCapsForConst: hasOption(OPTION_CONST_ONLY_FOR_CAPS),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
         allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
     };

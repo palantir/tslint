@@ -254,7 +254,7 @@ export const rules = {
         true,
         "ban-keywords",
         "check-format",
-        "all-caps-for-const",
+        "const-only-for-caps",
     ],
     "whitespace": [
         true,

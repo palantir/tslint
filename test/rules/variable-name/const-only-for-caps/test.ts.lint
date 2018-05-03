@@ -30,5 +30,9 @@ const PascalCaseConst;
 
 const UPPER_CASE_CONST;
 
+class Test {
+    public static readonly MY_FIELD = 10;
+}
+
 [regular-case]: variable name must be in lowerCamelCase or UPPER_CASE
 [err]: Only `const` variables may be UPPER_CASE.
