@@ -404,10 +404,16 @@ const jsxElementTypes = new Set<ts.SyntaxKind>([
 ]);
 
 function isJsxNativeElement(node: ts.Node): boolean {
-    return isIdentifier(node)
-        && node.parent !== undefined
-        && jsxElementTypes.has(node.parent.kind)
-        && isLowerCase(node.text[0]);
+    if (!isIdentifier(node) || node.parent === undefined) {
+        return false;
+    }
+
+    // TypeScript <=2.1 incorrectly parses JSX fragments
+    if (node.text === "") {
+        return true;
+    }
+
+    return jsxElementTypes.has(node.parent.kind) && isLowerCase(node.text[0]);
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
