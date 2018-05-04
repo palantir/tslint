@@ -1,7 +1,17 @@
 ---
 ruleName: no-shadowed-variable
 description: Disallows shadowing variable declarations.
-rationale: Shadowing a variable masks access to it and obscures to what value an identifier actually refers.
+rationale: |-
+
+  Shadowing a variable masks access to it and obscures to what value an identifier actually refers.
+  For example, in the following code, it can be confusing why the filter is likely never true:
+
+  ```
+  const findNeighborsWithin = (instance: MyClass, instances: MyClass[]): MyClass[] => {
+      return instances.filter((instance) => instance.neighbors.includes(instance));
+  };
+  ```
+          
 optionsDescription: |-
 
   You can optionally pass an object to disable checking for certain kinds of declarations.

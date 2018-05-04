@@ -1,0 +1,45 @@
+---
+ruleName: prefer-while
+description: Prefer `while` loops instead of `for` loops without an initializer and incrementor.
+rationale: 'Simplifies the readability of the loop statement, while maintaining the same functionality.'
+optionsDescription: Not configurable.
+options: null
+optionExamples:
+  - 'true'
+hasFix: true
+type: style
+typescriptOnly: false
+codeExamples:
+  - description: Prefer `while` loops instead of `for` loops without an initializer and incrementor.
+    config: |-
+      ```json
+      "rules": { "prefer-while": true }
+      ```
+    pass: |-
+      ```ts
+      for(let x = 1; x < 10; x++) {
+          console.log(x);
+      }
+
+      for (let i = 0; i < 10; x+=1) {
+          console.log(x);
+      }
+
+      for (let i = 0; i < 10;) {
+          i += 1;
+      }
+      ```
+    fail: |-
+      ```ts
+      for(;;) {
+          console.log(x);
+      }
+
+      for(;true===true;) {
+          console.log(x);
+      }
+      ```
+layout: rule
+title: 'Rule: prefer-while'
+optionsJSON: 'null'
+---

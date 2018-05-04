@@ -10,7 +10,7 @@ rationale: |-
   ```
 
   In the code above, the author almost certainly meant for both `foo++` and `bar++`
-  to be executed only if `foo === bar`. However, he forgot braces and `bar++` will be executed
+  to be executed only if `foo === bar`. However, they forgot braces and `bar++` will be executed
   no matter what. This rule could prevent such a mistake.
 optionsDescription: |-
 
@@ -34,6 +34,60 @@ optionExamples:
 type: functionality
 typescriptOnly: false
 hasFix: true
+codeExamples:
+  - description: Require curly braces whenever possible (default)
+    config: |-
+      ```json
+      "rules": { "curly": true }
+      ```
+    pass: |-
+      ```ts
+      if (x > 0) {
+          doStuff();
+      }
+      ```
+    fail: |-
+      ```ts
+      if (x > 0)
+          doStuff();
+
+      if (x > 0) doStuff();
+      ```
+  - description: Make an exception for single-line instances
+    config: |-
+      ```json
+      "rules": { "curly": [true, "ignore-same-line"] }
+      ```
+    pass: |-
+      ```ts
+      if (x > 0) doStuff();
+      ```
+    fail: |-
+      ```ts
+      if (x > 0)
+          doStuff()
+      ```
+  - description: Error on unnecessary curly braces
+    config: |-
+      ```json
+      "rules": { "curly": [true, "as-needed"] }
+      ```
+    pass: |-
+      ```ts
+      if (x > 0)
+          doStuff();
+
+      if (x > 0) {
+          customerUpdates.push(getInfo(customerId));
+          return customerUpdates;
+      }
+      ```
+    fail: |-
+      ```ts
+      if (x > 0) {
+          doStuff();
+      }
+      ```
 layout: rule
 title: 'Rule: curly'
 optionsJSON: |-

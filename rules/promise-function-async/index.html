@@ -7,15 +7,48 @@ rationale: |-
   throwing an Error object. In contrast, non-`async` `Promise`-returning functions
   are technically capable of either. This practice removes a requirement for consuming
   code to handle both cases.
+
+  If no optional arguments are provided then all function types are checked,
+  otherwise the specific function types are checked:
+
+  * `"check-function-declaration"` check function declarations.
+  * `"check-function-expression"` check function expressions.
+  * `"check-arrow-function"` check arrow functions.
+  * `"check-method-declaration"` check method declarations.
           
 optionsDescription: Not configurable.
-options: null
+options:
+  type: array
+  items:
+    type: string
+    enum:
+      - check-function-declaration
+      - check-function-expression
+      - check-arrow-function
+      - check-method-declaration
+  minLength: 0
+  maxLength: 4
 optionExamples:
   - 'true'
+  - '[true, "check-function-declaration", "check-method-declaration"]'
 type: typescript
 typescriptOnly: false
 requiresTypeInfo: true
 layout: rule
 title: 'Rule: promise-function-async'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": [
+        "check-function-declaration",
+        "check-function-expression",
+        "check-arrow-function",
+        "check-method-declaration"
+      ]
+    },
+    "minLength": 0,
+    "maxLength": 4
+  }
 ---
