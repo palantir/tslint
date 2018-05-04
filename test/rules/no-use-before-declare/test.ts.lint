@@ -1,3 +1,7 @@
+subscribe(({ meta: newMeta }:  {meta: SessionMeta}) => {
+    this.setCount(newMeta.match_count);
+});
+
 $.x = 3;
 ~        [variable '$' used before declaration]
 import $ = require("./$");

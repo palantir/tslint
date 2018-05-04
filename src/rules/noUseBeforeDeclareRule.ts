@@ -17,6 +17,7 @@
 
 import * as ts from "typescript";
 
+import { isBindingElement } from "tsutils";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -60,6 +61,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 // Ignore `y` in `x.y`, but recurse to `x`.
                 return recur((node as ts.PropertyAccessExpression).expression);
             case ts.SyntaxKind.Identifier:
+                // Destructured params are declared later in the source.
+                if (node.parent !== undefined && isBindingElement(node.parent)) {
+                    return;
+                }
                 return checkIdentifier(node as ts.Identifier, checker.getSymbolAtLocation(node));
             case ts.SyntaxKind.ExportSpecifier:
                 return checkIdentifier(
