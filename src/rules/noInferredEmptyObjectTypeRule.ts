@@ -27,6 +27,11 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            When function or constructor may be called with a type parameter but one isn't supplied or inferrable,
+            TypeScript defaults to \`{}\`.
+            This is often undesirable as the call is meant to be of a more specific type.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,

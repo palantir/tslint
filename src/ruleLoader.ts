@@ -18,13 +18,11 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { getRelativePath } from "./configuration";
 import { FatalError, showWarningOnce } from "./error";
 import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
 
-const moduleDirectory = path.dirname(module.filename);
-const CORE_RULES_DIRECTORY = path.resolve(moduleDirectory, ".", "rules");
+const CORE_RULES_DIRECTORY = path.resolve(__dirname, "rules");
 const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
 export function loadRules(ruleOptionsList: IOptions[],
@@ -78,11 +76,13 @@ export function loadRules(ruleOptionsList: IOptions[],
         showWarningOnce(warning);
     }
     if (rules.length === 0) {
-        showWarningOnce("No valid rules have been specified");
+        const fileType = isJs ? "JavaScript" : "TypeScript";
+        showWarningOnce(`No valid rules have been specified for ${fileType} files`);
     }
     return rules;
 }
 
+/** @internal private API */
 export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
     const camelizedName = transformName(name);
     // first check for core rules
@@ -107,28 +107,14 @@ function transformName(name: string): string {
  * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
  */
 function loadRule(directory: string, ruleName: string): RuleConstructor | "not-found" {
-    const ruleFullPath = getRuleFullPath(directory, ruleName);
-    if (ruleFullPath !== undefined) {
-        const ruleModule = require(ruleFullPath) as { Rule: RuleConstructor } | undefined;
-        if (ruleModule !== undefined) {
-            return ruleModule.Rule;
-        }
-    }
-    return "not-found";
-}
-
-/**
- * Returns the full path to a rule file. Path to rules are resolved using nodes path resolution.
- * This allows developers to write custom rules in TypeScript, which then can be loaded by TS-Node.
- * @param directory - An absolute path to a directory of rules
- * @param ruleName - A name of a rule in filename format. ex) "someLintRule"
- */
-function getRuleFullPath(directory: string, ruleName: string): string | undefined {
+    let ruleFullPath: string;
     try {
-        return require.resolve(path.join(directory, ruleName));
-    } catch (e) {
-        return undefined;
+        // Resolve using node's path resolution to allow developers to write custom rules in TypeScript which can be loaded by TS-Node
+        ruleFullPath = require.resolve(path.join(directory, ruleName));
+    } catch {
+        return "not-found";
     }
+    return (require(ruleFullPath) as { Rule: RuleConstructor }).Rule;
 }
 
 function loadCachedRule(directory: string, ruleName: string, isCustomPath?: boolean): RuleConstructor | undefined {
@@ -139,16 +125,16 @@ function loadCachedRule(directory: string, ruleName: string, isCustomPath?: bool
         return cachedRule === "not-found" ? undefined : cachedRule;
     }
 
-    // get absolute path
-    let absolutePath: string | undefined = directory;
+    // treat directory as a relative path (which needs to be resolved) if it's a custom rule directory
+    let absolutePath: string = directory;
     if (isCustomPath) {
-        absolutePath = getRelativePath(directory);
-        if (absolutePath !== undefined && !fs.existsSync(absolutePath)) {
-            throw new FatalError(`Could not find custom rule directory: ${directory}`);
+        absolutePath = path.resolve(directory);
+        if (!fs.existsSync(absolutePath)) {
+            throw new FatalError(`Could not find custom rule directory: ${absolutePath}`);
         }
     }
 
-    const Rule = absolutePath === undefined ? "not-found" : loadRule(absolutePath, ruleName);
+    const Rule = loadRule(absolutePath, ruleName);
 
     cachedRules.set(fullPath, Rule);
     return Rule === "not-found" ? undefined : Rule;
