@@ -116,7 +116,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Import sources of different groups must be sorted by: libraries, parent directories, current directory.";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
-    public static IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP = "Import sources of the same type must be grouped together.";
+    public static IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP =
+        "Import sources of the same type (package, same folder, different folder) must be grouped together.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
