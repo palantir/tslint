@@ -6,22 +6,44 @@ rationale: Empty blocks are often indicators of missing code.
 optionsDescription: |-
 
   If `allow-empty-catch` is specified, then catch blocks are allowed to be empty.
+  If `allow-empty-functions` is specified, then function definitions are allowed to be empty.
 options:
-  type: string
-  enum:
-    - allow-empty-catch
+  type: array
+  items:
+    anyOf:
+      - type: string
+        enum:
+          - allow-empty-catch
+      - type: string
+        enum:
+          - allow-empty-functions
 optionExamples:
   - 'true'
   - '[true, "allow-empty-catch"]'
+  - '[true, "allow-empty-functions"]'
+  - '[true, "allow-empty-catch", "allow-empty-functions"]'
 type: functionality
 typescriptOnly: false
 layout: rule
 title: 'Rule: no-empty'
 optionsJSON: |-
   {
-    "type": "string",
-    "enum": [
-      "allow-empty-catch"
-    ]
+    "type": "array",
+    "items": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "allow-empty-catch"
+          ]
+        },
+        {
+          "type": "string",
+          "enum": [
+            "allow-empty-functions"
+          ]
+        }
+      ]
+    }
   }
 ---

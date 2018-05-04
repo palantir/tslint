@@ -1,9 +1,10 @@
 ---
 ruleName: no-unused-variable
 description: |-
+
   Disallows unused imports, variables, functions and
-              private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
-              options, but does not interrupt code compilation.
+  private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
+  options, but does not interrupt code compilation.
 descriptionDetails: |-
 
   In addition to avoiding compilation errors, this rule may still be useful if you
@@ -36,6 +37,11 @@ options:
 optionExamples:
   - 'true'
   - '[true, {"ignore-pattern": "^_"}]'
+rationale: |-
+
+  Variables that are declared and not used anywhere in code are likely an error due to incomplete refactoring.
+  Such variables take up space in the code, are mild performance pains, and can lead to confusion by readers.
+          
 type: functionality
 typescriptOnly: true
 requiresTypeInfo: true

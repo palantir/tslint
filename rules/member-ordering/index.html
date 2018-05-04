@@ -1,7 +1,14 @@
 ---
 ruleName: member-ordering
 description: Enforces member ordering.
-rationale: 'A consistent ordering for class members can make classes easier to read, navigate, and edit.'
+rationale: |-
+
+  A consistent ordering for class members can make classes easier to read, navigate, and edit.
+
+  A common opposite practice to `member-ordering` is to keep related groups of classes together.
+  Instead of creating clases with multiple separate groups, consider splitting class responsibilities
+  apart across multiple single-responsibility classes.
+          
 optionsDescription: |-
 
   One argument, which is an object, must be provided. It should contain an `order` property.

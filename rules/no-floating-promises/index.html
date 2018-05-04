@@ -1,7 +1,7 @@
 ---
 ruleName: no-floating-promises
 description: Promises returned by functions must be handled appropriately.
-descriptionDetails: Use `no-unused-expression` in addition to this rule to reveal even more floating promises.
+descriptionDetails: 'Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.'
 optionsDescription: |-
 
   A list of 'string' names of any additional classes that should also be handled as Promises.
@@ -15,7 +15,15 @@ options:
 optionExamples:
   - 'true'
   - '[true, "JQueryPromise"]'
-rationale: 'Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.'
+rationale: |-
+
+  Creating a Promise and not storing or returning may lets other code run independent of of its results.
+  This can cause unexpected and/or non-deterministic behavior depending on external timing factors.
+
+  It's typically better to return Promises from functions that start them, then handle them in calling code.
+
+  Use `no-unused-expression` in addition to this rule to reveal even more floating promises.
+          
 type: functionality
 typescriptOnly: true
 requiresTypeInfo: true

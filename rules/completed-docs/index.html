@@ -1,9 +1,9 @@
 ---
 ruleName: completed-docs
-description: Enforces documentation for important items be filled out.
+description: Enforces JSDoc comments for important items be filled out.
 optionsDescription: |-
 
-  `true` to enable for [classes, functions, methods, properties]],
+  `true` to enable for `[classes, functions, methods, properties]`,
   or an array with each item in one of two formats:
 
   * `string` to enable for that type
@@ -124,6 +124,13 @@ optionExamples:
         }
       }
     ]
+rationale: |-
+
+  Helps ensure important components are documented.
+
+  Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+  Comments that only restate the names of variables add nothing to code, and can easily become outdated.
+          
 type: style
 typescriptOnly: false
 requiresTypeInfo: true
