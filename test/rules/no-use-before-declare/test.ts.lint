@@ -76,6 +76,8 @@ export {
 var undeclaredA = 42;
 var { undeclaredB } = { undeclaredB: 43 };
 var { undeclaredB: undeclaredA } = { undeclaredB: 43 };
+var { undeclaredB: undeclaredA, undeclaredC } = { undeclaredB: 43, undeclaredC: 'hello' };
+var { undeclaredB: undeclaredA, undeclaredC: undeclaredD } = { undeclaredB: 43, undeclaredC: 'hello' };
 const [ undeclaredC, [undeclaredD] ] = [ 1, [2] ];
 
 // shouldn't crash tslint
