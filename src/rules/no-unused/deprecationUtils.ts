@@ -61,7 +61,7 @@ export function getDeprecationFromDeclaration(declaration: ts.Node): string | un
 }
 
 function findDeprecationTag(tags: ReadonlyArray<ts.JSDocTagInfo>): string | undefined {
-    return find(tags, (tag) => tag.name === "deprecated" ? tag.text : undefined);
+    return find(tags, (tag) => tag.name === "deprecated" ? (tag.text === undefined ? "" : tag.text) : undefined);
 }
 
 export function getSignatureDeprecation(signature: ts.Signature | undefined): string | undefined {

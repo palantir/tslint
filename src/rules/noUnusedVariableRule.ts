@@ -28,7 +28,8 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
-        description: Lint.Utils.dedent`Disallows unused imports, variables, functions and
+        description: Lint.Utils.dedent`
+            Disallows unused imports, variables, functions and
             private class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals
             options, but does not interrupt code compilation.`,
         descriptionDetails: Lint.Utils.dedent`
@@ -65,6 +66,10 @@ export class Rule extends Lint.Rules.TypedRule {
             maxLength: 3,
         },
         optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
+        rationale: Lint.Utils.dedent`
+            Variables that are declared and not used anywhere in code are likely an error due to incomplete refactoring.
+            Such variables take up space in the code, are mild performance pains, and can lead to confusion by readers.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -122,17 +127,19 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
             }
         }
 
-        if (kind === UnusedKind.VARIABLE_OR_PARAMETER) {
-            const importName = findImport(diag.start, sourceFile);
-            if (importName !== undefined) {
-                if (declaration && isImportUsed(importName, sourceFile, checker)) {
-                    continue;
-                }
+        if (kind === UnusedKind.VARIABLE_OR_PARAMETER || kind === UnusedKind.DECLARATION) {
+            const importNames = findImports(diag.start, sourceFile, kind);
+            if (importNames.length > 0) {
+                for (const importName of importNames) {
+                    if (declaration && isImportUsed(importName, sourceFile, checker)) {
+                        continue;
+                    }
 
-                if (importSpecifierFailures.has(importName)) {
-                    throw new Error("Should not get 2 errors for the same import.");
+                    if (importSpecifierFailures.has(importName)) {
+                        throw new Error("Should not get 2 errors for the same import.");
+                    }
+                    importSpecifierFailures.set(importName, failure);
                 }
-                importSpecifierFailures.set(importName, failure);
                 continue;
             }
         }
@@ -177,7 +184,7 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
 
         if ((defaultName === undefined || failures.has(defaultName)) && allNamedBindingsAreFailures) {
             if (defaultName !== undefined) { failures.delete(defaultName); }
-            removeAll(importNode, "All imports are unused.");
+            removeAll(importNode, "All imports on this line are unused.");
             return;
         }
 
@@ -285,12 +292,14 @@ function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | u
     });
 }
 
-function findImport(pos: number, sourceFile: ts.SourceFile): ts.Identifier | undefined {
-    return forEachImport(sourceFile, (i) => {
+function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): ReadonlyArray<ts.Identifier> {
+    const imports = forEachImport(sourceFile, (i) => {
+        if (!isInRange(i, pos)) {
+            return undefined;
+        }
+
         if (i.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
-            if (i.name.getStart() === pos) {
-                return i.name;
-            }
+            return [i.name];
         } else {
             if (i.importClause === undefined) {
                 // Error node
@@ -299,37 +308,74 @@ function findImport(pos: number, sourceFile: ts.SourceFile): ts.Identifier | und
 
             const { name: defaultName, namedBindings } = i.importClause;
             if (namedBindings !== undefined && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
-                const { name } = namedBindings;
-                if (name.getStart() === pos) {
-                    return name;
-                }
-                return undefined;
+                return [namedBindings.name];
             }
 
-            if (defaultName !== undefined && defaultName.getStart() === pos) {
-                return defaultName;
+            // Starting from TS2.8, when all imports in an import node are not used,
+            // TS emits only 1 diagnostic object for the whole line as opposed
+            // to the previous behavior of outputting a diagnostic with kind == 6192
+            // (UnusedKind.VARIABLE_OR_PARAMETER) for every unused import.
+            // From TS2.8, in the case of none of the imports in a line being used,
+            // the single diagnostic TS outputs are different between the 1 import
+            // and 2+ imports cases:
+            // - 1 import in node:
+            //   - diagnostic has kind == 6133 (UnusedKind.VARIABLE_OR_PARAMETER)
+            //   - the text range is the whole node (`import { ... } from "..."`)
+            //     whereas pre-TS2.8, the text range was for the import node. so
+            //     `name.getStart()` won't equal `pos` like in pre-TS2.8
+            // - 2+ imports in node:
+            //   - diagnostic has kind == 6192 (UnusedKind.DECLARATION)
+            //   - we know that all of these are unused
+            if (kind === UnusedKind.DECLARATION) {
+                const imp: ts.Identifier[] = [];
+                if (defaultName !== undefined) {
+                    imp.push(defaultName);
+                }
+                if (namedBindings !== undefined) {
+                    imp.push(...namedBindings.elements.map((el) => el.name));
+                }
+                return imp.length > 0 ? imp : undefined;
+            } else if (defaultName !== undefined && (
+                isInRange(defaultName, pos) || namedBindings === undefined // defaultName is the only option
+            )) {
+                return [defaultName];
             } else if (namedBindings !== undefined) {
-                for (const { name } of namedBindings.elements) {
-                    if (name.getStart() === pos) {
-                        return name;
+                if (namedBindings.elements.length === 1) {
+                    return [namedBindings.elements[0].name];
+                }
+
+                for (const element of namedBindings.elements) {
+                    if (isInRange(element, pos)) {
+                        return [element.name];
                     }
                 }
             }
         }
         return undefined;
     });
+    return imports !== undefined ? imports : [];
+}
+
+function isInRange(range: ts.TextRange, pos: number): boolean {
+    return range.pos <= pos && range.end >= pos;
 }
 
 const enum UnusedKind {
     VARIABLE_OR_PARAMETER,
     PROPERTY,
+    DECLARATION, // Introduced in TS 2.8
 }
 function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
+    // https://github.com/Microsoft/TypeScript/blob/master/src/compiler/diagnosticMessages.json
     switch (diag.code) {
-        case 6133:
-            return UnusedKind.VARIABLE_OR_PARAMETER; // "'{0}' is declared but never used.
+        case 6133: // Pre TS 2.9 "'{0}' is declared but never used.
+                   // TS 2.9+ "'{0}' is declared but its value is never read."
+        case 6196: // TS 2.9+ "'{0}' is declared but never used."
+            return UnusedKind.VARIABLE_OR_PARAMETER;
         case 6138:
             return UnusedKind.PROPERTY; // "Property '{0}' is declared but never used."
+        case 6192:
+            return UnusedKind.DECLARATION; // "All imports in import declaration are unused."
         default:
             return undefined;
     }

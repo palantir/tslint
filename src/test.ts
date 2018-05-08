@@ -24,7 +24,7 @@ import * as semver from "semver";
 import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
-import * as Linter from "./linter";
+import { Linter } from "./linter";
 import { createMultiMap } from "./rules/no-unused/utils";
 import { Logger } from "./runner";
 import { denormalizeWinPath, flatMap, mapDefined, readBufferWithDetectedEncoding } from "./utils";
@@ -93,10 +93,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     const parsedFiles = mapDefined(filesToLint, (fileToLint) => {
         const parsed = parseFile(isEncodingRule, fileToLint);
         if ("skipped" in parsed) {
-            results.results[fileToLint] = parsed as SkippedTest;
+            results.results[fileToLint] = parsed;
             return undefined;
         } else {
-            return parsed as ParsedFile;
+            return parsed;
         }
     });
 

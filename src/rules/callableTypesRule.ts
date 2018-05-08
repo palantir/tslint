@@ -104,6 +104,7 @@ function shouldWrapSuggestion(parent: ts.Node) {
     switch (parent.kind) {
         case ts.SyntaxKind.UnionType:
         case ts.SyntaxKind.IntersectionType:
+        case ts.SyntaxKind.ArrayType:
             return true;
         default:
             return false;

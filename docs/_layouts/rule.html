@@ -5,6 +5,7 @@ layout: page
 {% if page.descriptionDetails %}
    {{page.descriptionDetails | markdownify}}
 {% endif %}
+
 {% if page.rationale %}
    <h5>Rationale</h5>
    {{page.rationale | markdownify}}
@@ -28,7 +29,7 @@ layout: page
 <h3>Config</h3>
 {{page.optionsDescription | markdownify}}
 
-<h5>Examples</h5>
+<h5>Config examples</h5>
 {% for example in page.optionExamples %}
 <pre>
 "{{page.ruleName}}": {{example}}
@@ -39,3 +40,23 @@ layout: page
 <pre>
 {{page.optionsJSON}}
 </pre>
+
+{% if page.codeExamples %}
+    <h3>Code examples: </h3>
+    {% for codeExample in page.codeExamples %}
+    <div class="wrapper__code-example">
+        <h5>{{ codeExample.description }}</h5>
+        {{ codeExample.config | markdownify }}
+        <h6 class="feature">Passes</h6>
+        <div class="code-example">
+            {{ codeExample.pass | markdownify }}
+        </div>
+        {% if codeExample.fail %}
+        <h6 class="heading-fail">Fails</h6>
+        <div class="code-example code-example-fail">
+            {{ codeExample.fail | markdownify }}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% endif %}

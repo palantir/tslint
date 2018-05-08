@@ -50,3 +50,4 @@ import abc = require('a');
 import def = abc.someVar;
 console.log(def);
 
+

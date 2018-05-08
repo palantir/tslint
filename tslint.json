@@ -55,6 +55,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "newline-per-chained-call": false,
     "no-console": {
       "options": ["log"]
     },
