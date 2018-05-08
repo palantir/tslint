@@ -20,7 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
-import { VERSION } from "./linter";
+import { Linter } from "./linter";
 import { run } from "./runner";
 import { arrayify, dedent } from "./utils";
 
@@ -174,9 +174,10 @@ const options: Option[] = [
         type: "string",
         describe: "tsconfig.json file",
         description: dedent`
-            The path or directory containing a tsconfig.json file that will be
-            used to determine which files will be linted. This flag also enables
-            rules that require the type checker.`,
+            The path to the tsconfig.json file or to the directory containing
+            the tsconfig.json file. The file will be used to determine which
+            files will be linted. This flag also enables rules that require the
+            type checker.`,
     },
     {
         name: "type-check",
@@ -205,7 +206,7 @@ const builtinOptions: Option[] = [
     },
 ];
 
-commander.version(VERSION, "-v, --version");
+commander.version(Linter.VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);

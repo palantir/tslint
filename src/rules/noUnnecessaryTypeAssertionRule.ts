@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isAssertionExpression, isObjectFlagSet, isObjectType, isTypeFlagSet } from "tsutils";
+import { isObjectFlagSet, isObjectType, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -54,10 +54,12 @@ class Walker extends Lint.AbstractWalker<string[]> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
-                case ts.SyntaxKind.TypeAssertionExpression:
                 case ts.SyntaxKind.NonNullExpression:
+                    this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    break;
+                case ts.SyntaxKind.TypeAssertionExpression:
                 case ts.SyntaxKind.AsExpression:
-                    this.verifyCast(node as ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression);
+                    this.verifyCast(node as ts.AssertionExpression);
             }
 
             return ts.forEachChild(node, cb);
@@ -66,24 +68,21 @@ class Walker extends Lint.AbstractWalker<string[]> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private verifyCast(node: ts.TypeAssertion | ts.NonNullExpression | ts.AsExpression) {
-        if (isAssertionExpression(node) && this.options.indexOf(node.type.getText(this.sourceFile)) !== -1) {
+    private checkNonNullAssertion(node: ts.NonNullExpression) {
+        const type = this.checker.getTypeAtLocation(node.expression);
+        if (type === this.checker.getNonNullableType(type)) {
+            this.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.deleteFromTo(node.expression.end, node.end));
+        }
+    }
+
+    private verifyCast(node: ts.AssertionExpression) {
+        if (this.options.indexOf(node.type.getText(this.sourceFile)) !== -1) {
             return;
         }
         const castType = this.checker.getTypeAtLocation(node);
-        if (castType === undefined) {
-            return;
-        }
 
-        if (node.kind !== ts.SyntaxKind.NonNullExpression &&
-            (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
-                isObjectType(castType) &&
-                isObjectFlagSet(castType, ts.ObjectFlags.Tuple)) ||
-            // Sometimes tuple types don't have ObjectFlags.Tuple set, like when
-            // they're being matched against an inferred type. So, in addition,
-            // check if any properties are numbers, which implies that this is
-            // likely a tuple type.
-            (castType.getProperties().some((symbol) => !isNaN(Number(symbol.name))))) {
+        if (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
+            isObjectType(castType) && (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType))) {
 
             // It's not always safe to remove a cast to a literal type or tuple
             // type, as those types are sometimes widened without the cast.
@@ -94,7 +93,35 @@ class Walker extends Lint.AbstractWalker<string[]> {
         if (uncastType === castType) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
                 ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
-                : Lint.Replacement.deleteFromTo(node.expression.getEnd(), node.getEnd()));
+                : Lint.Replacement.deleteFromTo(node.expression.end, node.end));
         }
     }
+}
+
+/**
+ * Sometimes tuple types don't have ObjectFlags.Tuple set, like when they're being matched against an inferred type.
+ * So, in addition, check if there are integer properties 0..n and no other numeric keys
+ */
+function couldBeTupleType(type: ts.ObjectType): boolean {
+    const properties = type.getProperties();
+    if (properties.length === 0) {
+        return false;
+    }
+    let i = 0;
+    for (; i < properties.length; ++i) {
+        const name = properties[i].name;
+        if (String(i) !== name) {
+            if (i === 0) {
+                // if there are no integer properties, this is not a tuple
+                return false;
+            }
+            break;
+        }
+    }
+    for (; i < properties.length; ++i) {
+        if (String(+properties[i].name) === properties[i].name) {
+            return false; // if there are any other numeric properties, this is not a tuple
+        }
+    }
+    return true;
 }

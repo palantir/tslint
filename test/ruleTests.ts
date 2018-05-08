@@ -17,7 +17,7 @@
 import { assert } from "chai";
 
 import { parseConfigFile } from "../src/configuration";
-import * as Linter from "../src/linter";
+import { Linter } from "../src/linter";
 
 describe("no-implicit-dependencies", () => {
     it("assumes empty package.json if not found", () => {

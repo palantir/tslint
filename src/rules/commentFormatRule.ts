@@ -106,6 +106,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         type: "style",
         typescriptOnly: false,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -179,7 +180,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
 
         if (ctx.options.space && commentText[0] !== " ") {
-            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE);
+            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, [ Lint.Replacement.appendText(start, " ") ]);
         }
 
         if (ctx.options.case === Case.None ||

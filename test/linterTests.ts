@@ -21,7 +21,7 @@ import { createSourceFile, ScriptTarget } from "typescript";
 import { Replacement, RuleFailure } from "../src/language/rule/rule";
 import { createTempFile } from "./utils";
 
-import Linter = require("../src/linter");
+import { Linter } from "../src/linter";
 
 class TestLinter extends Linter {
     public applyFixesHelper(fileName: string, source: string, ruleFailures: RuleFailure[]) {

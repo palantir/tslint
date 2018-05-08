@@ -1,0 +1,6 @@
+{
+  "defaultSeverity": "error",
+  "rules": {
+    "default-severity-error": { "severity": "default" }
+  }
+}
