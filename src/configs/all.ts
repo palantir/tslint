@@ -36,7 +36,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
-    "member-access": [true, "check-accessor", "check-constructor"],
+    "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [true, {
         "order": "statics-first",
         "alphabetize": true,
@@ -51,9 +51,11 @@ export const rules = {
     "no-namespace": true,
     "no-non-null-assertion": true,
     "no-reference": true,
+    "no-this-assignment": true,
     "no-var-requires": true,
     "only-arrow-functions": true,
     "prefer-for-of": true,
+    "prefer-readonly": true,
     "promise-function-async": true,
     "typedef": [
         true,
@@ -65,24 +67,29 @@ export const rules = {
         "variable-declaration",
         "member-variable-declaration",
     ],
-    "typedef-whitespace": [true, {
-        "call-signature": "nospace",
-        "index-signature": "nospace",
-        "parameter": "nospace",
-        "property-declaration": "nospace",
-        "variable-declaration": "nospace",
-    }, {
-        "call-signature": "onespace",
-        "index-signature": "onespace",
-        "parameter": "onespace",
-        "property-declaration": "onespace",
-        "variable-declaration": "onespace",
-    }],
+    "typedef-whitespace": [
+        true,
+        {
+            "call-signature": "nospace",
+            "index-signature": "nospace",
+            "parameter": "nospace",
+            "property-declaration": "nospace",
+            "variable-declaration": "nospace",
+        },
+        {
+            "call-signature": "onespace",
+            "index-signature": "onespace",
+            "parameter": "onespace",
+            "property-declaration": "onespace",
+            "variable-declaration": "onespace",
+        },
+    ],
     "unified-signatures": true,
 
     // Functionality
     "await-promise": true,
     // "ban": no sensible default
+    "ban-comma-operator": true,
     "curly": true,
     "forin": true,
     // "import-blacklist": no sensible default
@@ -94,22 +101,31 @@ export const rules = {
     "no-construct": true,
     "no-debugger": true,
     "no-duplicate-super": true,
-    "no-duplicate-variable": true,
+    "no-duplicate-switch-case": true,
+    "no-duplicate-variable": [
+        true,
+        "check-parameters",
+    ],
+    "no-dynamic-delete": true,
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
     "no-for-in-array": true,
+    "no-implicit-dependencies": true,
     "no-inferred-empty-object-type": true,
     "no-invalid-template-strings": true,
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
     "no-object-literal-type-assertion": true,
+    "no-return-await": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
+    "no-submodule-imports": true,
     "no-unbound-method": true,
+    "no-unnecessary-class": [true, "allow-empty-class"],
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
@@ -117,12 +133,14 @@ export const rules = {
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
+    "prefer-conditional-expression": true,
     "radix": true,
     "restrict-plus-operands": true,
     "strict-boolean-expressions": true,
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,
+    "use-default-type-parameter": true,
     "use-isnan": true,
 
     // Maintainability
@@ -135,8 +153,10 @@ export const rules = {
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
     "no-default-export": true,
+    "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
+    "no-parameter-reassignment": true,
     "no-require-imports": true,
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,
@@ -148,14 +168,18 @@ export const rules = {
 
     // Style
 
-    "align": [true,
+    "align": [
+        true,
         "parameters",
         "arguments",
         "statements",
+        "elements",
+        "members",
     ],
     "array-type": [true, "array-simple"],
     "arrow-parens": true,
     "arrow-return-shorthand": [true, "multiline"],
+    "binary-expression-operand-order": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
@@ -166,17 +190,20 @@ export const rules = {
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
+    "encoding": true,
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
-    "jsdoc-format": true,
+    "jsdoc-format": [true, "check-multiline-start"],
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
+    "newline-per-chained-call": true,
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
     "no-parameter-properties": true,
+    "no-redundant-jsdoc": true,
     "no-reference-import": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
@@ -185,7 +212,8 @@ export const rules = {
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
-    "one-line": [true,
+    "one-line": [
+        true,
         "check-catch",
         "check-else",
         "check-finally",
@@ -196,12 +224,20 @@ export const rules = {
     "ordered-imports": [true, {
         "import-sources-order": "case-insensitive",
         "named-imports-order": "case-insensitive",
+        "module-source-path": "full",
     }],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
+    "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
-    "quotemark": [true, "double", "avoid-escape"],
+    "prefer-while": true,
+    "quotemark": [
+        true,
+        "double",
+        "avoid-escape",
+        "avoid-template",
+    ],
     "return-undefined": true,
     "semicolon": [true, "always"],
     "space-before-function-paren": [true, {
@@ -211,6 +247,9 @@ export const rules = {
         "method": "never",
         "named": "never",
     }],
+    "space-within-parens": [true, 0],
+    "switch-final-break": true,
+    "type-literal-delimiter": true,
     "variable-name": [
         true,
         "ban-keywords",
@@ -226,6 +265,8 @@ export const rules = {
         "check-type",
         "check-typecast",
         "check-preblock",
+        "check-type-operator",
+        "check-rest-spread",
     ],
 };
 
@@ -240,7 +281,7 @@ for (const key in rules) {
     }
 
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
-    if (Rule === "not-found") {
+    if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
     }
     if (!Rule.metadata.typescriptOnly) {

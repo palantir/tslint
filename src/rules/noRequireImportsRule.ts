@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -36,26 +37,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "require() style import is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoRequireImportsWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoRequireImportsWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        if (node.arguments != null && node.expression != null) {
-            const callExpressionText = node.expression.getText(this.getSourceFile());
-            if (callExpressionText === "require") {
-                this.addFailureAtNode(node, Rule.FAILURE_STRING);
-            }
-        }
-        super.visitCallExpression(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        const {moduleReference} = node;
-        if (moduleReference.kind === ts.SyntaxKind.ExternalModuleReference) {
-            this.addFailureAtNode(moduleReference, Rule.FAILURE_STRING);
-        }
-        super.visitImportEqualsDeclaration(node);
+function walk(ctx: Lint.WalkContext<void>) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.AllRequireLike)) {
+        ctx.addFailureAtNode(name.parent!, Rule.FAILURE_STRING);
     }
 }

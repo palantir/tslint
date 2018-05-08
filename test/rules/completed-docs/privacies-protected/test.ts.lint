@@ -1,0 +1,30 @@
+class Class {
+    badDefaultMethod() { }
+
+    /**
+     * ...
+     */
+    goodDefaultMethod() { }
+
+    public badPublicMethod() { }
+
+    /**
+     * ...
+     */
+    public goodPublicMethod() { }
+
+    protected badProtectedMethod() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for protected methods.]
+
+    /**
+     * ...
+     */
+    protected goodProtectedMethod() { }
+
+    private badPrivateMethod() { }
+
+    /**
+     * ...
+     */
+    private goodPrivateMethod() { }
+}

@@ -37,17 +37,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, undefined));
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        this.checkStatements(node.statements);
-        // All tree-walking handled by 'checkStatements'
+class Walker extends Lint.AbstractWalker<void> {
+    public walk(node: ts.SourceFile) {
+        return this.checkStatements(node.statements);
     }
 
-    private checkStatements(statements: ts.Statement[]): void {
+    private checkStatements(statements: ReadonlyArray<ts.Statement>): void {
         const seen = new Map<string, ts.NamespaceDeclaration>();
 
         for (const statement of statements) {
@@ -59,8 +58,8 @@ class Walker extends Lint.RuleWalker {
             if (name.kind === ts.SyntaxKind.Identifier) {
                 const { text } = name;
                 const prev = seen.get(text);
-                if (prev) {
-                    this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev)));
+                if (prev !== undefined) {
+                    this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev.name)));
                 }
                 seen.set(text, statement as ts.NamespaceDeclaration);
             }
@@ -72,7 +71,7 @@ class Walker extends Lint.RuleWalker {
 
     private checkModuleDeclaration(decl: ts.ModuleDeclaration): void {
         const { body } = decl;
-        if (!body) {
+        if (body === undefined) {
             return;
         }
 
@@ -82,13 +81,10 @@ class Walker extends Lint.RuleWalker {
                 break;
             case ts.SyntaxKind.ModuleDeclaration:
                 this.checkModuleDeclaration(body as ts.ModuleDeclaration);
-                break;
-            default:
-                break;
         }
     }
 
     private getLineOfNode(node: ts.Node): number {
-        return this.getLineAndCharacterOfPosition(node.pos).line;
+        return ts.getLineAndCharacterOfPosition(this.sourceFile, node.pos).line + 1;
     }
 }

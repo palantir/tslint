@@ -28,7 +28,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Helps keep a consistent style with numeric literals.
+            Non-standard literals are more difficult to scan through and can be a symptom of typos.
+        `,
         type: "style",
         typescriptOnly: false,
     };

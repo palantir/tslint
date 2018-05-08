@@ -1,0 +1,53 @@
+if (so) {
+        ~ [0]
+    foo();
+} else {
+       ~ [0]
+    foo();
+}
+
+while (true) {
+             ~ [0]
+    foo();
+}
+
+if (so) {
+        ~ [0]
+    if (also)
+        foo();
+}
+
+if (so) {
+        ~ [0]
+    if (also)
+        foo();
+    else
+        foo();
+} else
+    foo();
+
+if (so)
+    bar();
+else {
+     ~ [0]
+    if (also)
+        foo();
+}
+
+// Some blocks are necessary.
+
+if (so) {
+    if (also)
+        foo();
+} else
+    bar();
+
+function f() {
+    foo();
+}
+
+() => { foo(); };
+
+try { foo(); } catch (e) { foo(); } finally { foo(); }
+
+[0]: Block contains only one statement; remove the curly braces.

@@ -23,60 +23,132 @@ class BadClass {
 
     private badPrivateMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private methods.]
+
+    get badDefaultAccessor() { return this.badDefaultProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+    set badDefaultAccessor(value) { this.badDefaultProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for properties.]
+
+    public get badPublicAccessor() { return this.badPublicProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for public properties.]
+
+    public set badPublicAccessor(value) { this.badPublicProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for public properties.]
+
+    protected get badProtectedAccessor() { return this.badProtectedProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for protected properties.]
+
+    protected set badProtectedAccessor(value) { this.badProtectedProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for protected properties.]
+
+    private get badPrivateAccessor() { return this.badPrivateProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for private properties.]
+
+    private set badPrivateAccessor(value) { this.badPrivateProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for private properties.]
 }
 
 /**
- * 
+ *
  */
 class EmptyClass {
 ~~~~~~~~~~~~~~~~~~      [Documentation must exist for classes.]
     /**
-     * 
+     *
      */
     emptyDefaultProperty;
     ~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for properties.]
 
     /**
-     * 
+     *
      */
     public emptyPublicProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for public properties.]
 
     /**
-     * 
+     *
      */
     protected emptyProtectedProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for protected properties.]
 
     /**
-     * 
+     *
      */
     private emptyPrivateProperty;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private properties.]
 
     /**
-     * 
+     *
      */
     emptyDefaultMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for methods.]
 
     /**
-     * 
+     *
      */
     public emptyPublicMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for public methods.]
 
     /**
-     * 
+     *
      */
     protected emptyProtectedMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for protected methods.]
 
     /**
-     * 
+     *
      */
     private emptyPrivateMethod() { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private methods.]
+
+    /**
+     *
+     */
+    get emptyDefaultAccessor() { return this.emptyDefaultProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+    /**
+     *
+     */
+    set emptyDefaultAccessor(value) { this.emptyDefaultProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for properties.]
+
+    /**
+     *
+     */
+    public get emptyPublicAccessor() { return this.emptyPublicProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for public properties.]
+
+    /**
+     *
+     */
+    public set emptyPublicAccessor(value) { this.emptyPublicProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for public properties.]
+
+    /**
+     *
+     */
+    protected get emptyProtectedAccessor() { return this.emptyProtectedProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for protected properties.]
+
+    /**
+     *
+     */
+    protected set emptyProtectedAccessor(value) { this.emptyProtectedProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for protected properties.]
+
+    /**
+     *
+     */
+    private get emptyPrivateAccessor() { return this.emptyPrivateProperty; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for private properties.]
+
+    /**
+     *
+     */
+    private set emptyPrivateAccessor(value) { this.emptyPrivateProperty = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for private properties.]
 }
 
 /**
@@ -122,13 +194,53 @@ class GoodClass {
      * ...
      */
     private goodPrivateMethod() { }
+
+    /**
+     * ...
+     */
+    get goodDefaultAccessor() { return this.goodDefaultProperty; }
+
+    /**
+     * ...
+     */
+    set goodDefaultAccessor(value) { this.goodDefaultProperty = value; }
+
+    /**
+     * ...
+     */
+    public get goodPublicAccessor() { return this.goodPublicProperty; }
+
+    /**
+     * ...
+     */
+    public set goodPublicAccessor(value) { this.goodPublicProperty = value; }
+
+    /**
+     * ...
+     */
+    protected get goodProtectedAccessor() { return this.goodProtectedProperty; }
+
+    /**
+     * ...
+     */
+    protected set goodProtectedAccessor(value) { this.goodProtectedProperty = value; }
+
+    /**
+     * ...
+     */
+    private get goodPrivateAccessor() { return this.goodPrivateProperty; }
+
+    /**
+     * ...
+     */
+    private set goodPrivateAccessor(value) { this.goodPrivateProperty = value; }
 }
 
 enum BadEnum { }
 ~~~~~~~~~~~~~~~~      [Documentation must exist for enums.]
 
 /**
- * 
+ *
  */
 enum EmptyEnum { }
 ~~~~~~~~~~~~~~~~~~      [Documentation must exist for enums.]
@@ -138,11 +250,24 @@ enum EmptyEnum { }
  */
 enum GoodEnum { }
 
+/**
+ * ...
+ */
+enum EnumWithMembers {
+    BadEnumMember
+    ~~~~~~~~~~~~~       [Documentation must exist for enum members.]
+
+    /**
+     * ...
+     */
+    GoodEnumMember
+}
+
 function BadFunction() { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for functions.]
 
 /**
- * 
+ *
  */
 function EmptyFunction() { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for functions.]
@@ -156,7 +281,7 @@ interface BadInterface { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for interfaces.]
 
 /**
- * 
+ *
  */
 interface EmptyInterface { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for interfaces.]
@@ -170,7 +295,7 @@ namespace BadNamespace { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for namespaces.]
 
 /**
- * 
+ *
  */
 namespace EmptyNamespace { }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~      [Documentation must exist for namespaces.]
@@ -184,7 +309,7 @@ type BadType = 1;
 ~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
 
 /**
- * 
+ *
  */
 type EmptyType = 1;
 ~~~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
@@ -198,7 +323,7 @@ type BadType = 1;
 ~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
 
 /**
- * 
+ *
  */
 type EmptyType = 1;
 ~~~~~~~~~~~~~~~~~~~      [Documentation must exist for types.]
@@ -212,7 +337,7 @@ const BadVariable = 1;
       ~~~~~~~~~~~~~~~       [Documentation must exist for variables.]
 
 /**
- * 
+ *
  */
 const EmptyVariable = 1;
       ~~~~~~~~~~~~~~~~~       [Documentation must exist for variables.]
@@ -221,3 +346,13 @@ const EmptyVariable = 1;
  * ...
  */
 const GoodVariable = 1;
+
+/**
+ * Properties, methods and accessors in object literals should not require documentation.
+ */
+let literal = {
+    prop: 1,
+    get accessor() { return literal.prop; },
+    set accessor(value) { literal.prop = value; }
+    someMethod() {}
+}

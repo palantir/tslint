@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration } from "tsutils";
+import { isConstructorDeclaration, isIterationStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -44,14 +44,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-       if (isConstructorDeclaration(node) && node.body) {
+       if (isConstructorDeclaration(node) && node.body !== undefined) {
            getSuperForNode(node.body);
        }
        return ts.forEachChild(node, cb);
     });
 
     function getSuperForNode(node: ts.Node): Super {
-        if (Lint.isLoop(node)) {
+        if (isIterationStatement(node)) {
             const bodySuper = combineSequentialChildren(node);
             if (typeof bodySuper === "number") {
                 return Kind.NoSuper;
@@ -80,9 +80,19 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     ? { node: node.parent! as ts.CallExpression, break: false }
                     : Kind.NoSuper;
 
+            case ts.SyntaxKind.ConditionalExpression: {
+                const { condition, whenTrue, whenFalse } = node as ts.ConditionalExpression;
+                const inCondition = getSuperForNode(condition);
+                const inBranches = worse(getSuperForNode(whenTrue), getSuperForNode(whenFalse));
+                if (typeof inCondition !== "number" && typeof inBranches !== "number") {
+                    addDuplicateFailure(inCondition.node, inBranches.node);
+                }
+                return worse(inCondition, inBranches);
+            }
+
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
-                return worse(getSuperForNode(thenStatement), elseStatement ? getSuperForNode(elseStatement) : Kind.NoSuper);
+                return worse(getSuperForNode(thenStatement), elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper);
             }
 
             case ts.SyntaxKind.SwitchStatement:
@@ -112,18 +122,17 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     return Kind.NoSuper;
 
                 default:
-                    if (fallthroughSingle) {
+                    if (fallthroughSingle !== undefined) {
                         addDuplicateFailure(fallthroughSingle, clauseSuper.node);
                     }
                     if (!clauseSuper.break) {
                         fallthroughSingle = clauseSuper.node;
                     }
                     foundSingle = clauseSuper.node;
-                    break;
             }
         }
 
-        return foundSingle ? { node: foundSingle, break: false } : Kind.NoSuper;
+        return foundSingle !== undefined ? { node: foundSingle, break: false } : Kind.NoSuper;
     }
 
     /**
@@ -136,10 +145,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
             const childSuper = getSuperForNode(child);
             switch (childSuper) {
                 case Kind.NoSuper:
-                    return;
+                    return undefined;
 
                 case Kind.Break:
-                    if (seenSingle) {
+                    if (seenSingle !== undefined) {
                         return { ...seenSingle, break: true };
                     }
                     return childSuper;
@@ -148,14 +157,14 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     return childSuper;
 
                 default:
-                    if (seenSingle && !seenSingle.break) {
+                    if (seenSingle !== undefined && !seenSingle.break) {
                         addDuplicateFailure(seenSingle.node, childSuper.node);
                     }
                     seenSingle = childSuper;
-                    return;
+                    return undefined;
             }
         });
-        return res || seenSingle || Kind.NoSuper;
+        return res !== undefined ? res : seenSingle !== undefined ? seenSingle : Kind.NoSuper;
     }
 
     function addDuplicateFailure(a: ts.Node, b: ts.Node): void {

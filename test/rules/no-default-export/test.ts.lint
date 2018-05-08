@@ -19,6 +19,8 @@ export import ItemAlias = someNamespace.Item;
 
 export const default = 'VALID';
 
+export = 'VALID';
+
 export default 'INVALID';
        ~~~~~~~ [0]
 
@@ -29,6 +31,9 @@ export default class { }
        ~~~~~~~ [0]
 
 export default class Test { }
+       ~~~~~~~ [0]
+
+export default abstract class { }
        ~~~~~~~ [0]
 
 export default function() { }

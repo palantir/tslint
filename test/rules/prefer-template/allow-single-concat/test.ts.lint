@@ -16,6 +16,8 @@ x + "a" + y;
 `a` + x + `b${y}c`;
 ~~~~~~~~~~~~~~~~~~ [0]
 
+"a" + "b" + "c";
+
 x`a` + y; // OK, can't simplify something with a tag
 
 "a" + "b"; // OK to concatenate regular strings.

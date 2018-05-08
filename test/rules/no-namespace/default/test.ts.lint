@@ -19,3 +19,7 @@ declare namespace Foo {
 
 declare module 'foo' {
 }
+
+declare global {
+    interface Foo {}
+}

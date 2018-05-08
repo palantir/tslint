@@ -1,6 +1,6 @@
 class ABCD {
     private z2: number;
-            ~~          ['z2' is declared but never used.]
+            ~~          [err % ('z2')]
     constructor() {
     }
 
@@ -17,8 +17,14 @@ class ABCD {
     }
 
     private mfunc4() {
-            ~~~~~~     ['mfunc4' is declared but never used.]
+            ~~~~~~     [err % ('mfunc4')]
         //
     }
     static stillPublic: number;
 }
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+#endif

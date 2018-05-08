@@ -1,3 +1,4 @@
+
 // valid cases
 import {Injectable, Component, Directive} from '@angular/core';
 import {Inject} from '@angular/core';

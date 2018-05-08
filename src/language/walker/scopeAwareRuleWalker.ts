@@ -17,9 +17,9 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../rule/rule";
-import {isScopeBoundary} from "../utils";
-import {RuleWalker} from "./ruleWalker";
+import { IOptions } from "../rule/rule";
+import { isScopeBoundary } from "../utils";
+import { RuleWalker } from "./ruleWalker";
 
 /**
  * @deprecated Prefer to manually maintain any contextual information.
@@ -56,7 +56,7 @@ import {RuleWalker} from "./ruleWalker";
  * }
  */
 export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
-    private scopeStack: T[];
+    private readonly scopeStack: T[];
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
         super(sourceFile, options);
@@ -107,6 +107,6 @@ export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
     }
 
     protected isScopeBoundary(node: ts.Node): boolean {
-        return isScopeBoundary(node);
+        return isScopeBoundary(node); // tslint:disable-line:deprecation
     }
 }

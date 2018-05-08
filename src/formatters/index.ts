@@ -23,3 +23,4 @@ export { Formatter as StylishFormatter } from "./stylishFormatter";
 export { Formatter as FileslistFormatter } from "./fileslistFormatter";
 export { Formatter as CodeFrameFormatter } from "./codeFrameFormatter";
 export { Formatter as TapFormatter } from "./tapFormatter";
+export { Formatter as JUnitFormatter } from "./junitFormatter";

@@ -48,112 +48,141 @@ export class Rule extends Lint.Rules.AbstractRule {
     private static FAILURE_STRING_START(otherLine?: number): string {
         // For only 2 overloads we don't need to specify which is the other one.
         const overloads = otherLine === undefined ? "These overloads" : `This overload and the one on line ${otherLine}`;
-        return overloads + " can be combined into one signature";
+        return `${overloads} can be combined into one signature`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        this.checkStatements(node.statements);
-        super.visitSourceFile(node);
-    }
-
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        const { body } = node;
-        if (body && body.kind === ts.SyntaxKind.ModuleBlock) {
-            this.checkStatements((body as ts.ModuleBlock).statements);
+function walk(ctx: Lint.WalkContext<void>): void {
+    const { sourceFile } = ctx;
+    checkStatements(sourceFile.statements);
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ModuleBlock:
+                checkStatements((node as ts.ModuleBlock).statements);
+                break;
+            case ts.SyntaxKind.InterfaceDeclaration:
+            case ts.SyntaxKind.ClassDeclaration: {
+                const { members, typeParameters } = node as ts.ClassDeclaration | ts.InterfaceDeclaration;
+                checkMembers(members, typeParameters);
+                break;
+            }
+            case ts.SyntaxKind.TypeLiteral:
+                checkMembers((node as ts.TypeLiteralNode).members);
         }
-        super.visitModuleDeclaration(node);
+
+        return ts.forEachChild(node, cb);
+    });
+
+    function checkStatements(statements: ReadonlyArray<ts.Statement>): void {
+        addFailures(checkOverloads(statements, undefined, (statement) => {
+            if (utils.isFunctionDeclaration(statement)) {
+                const { body, name } = statement;
+                return body === undefined && name !== undefined ? { signature: statement, key: name.text } : undefined;
+            } else {
+                return undefined;
+            }
+        }));
     }
 
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration) {
-        this.checkMembers(node.members, node.typeParameters);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitClassDeclaration(node: ts.ClassDeclaration) {
-        this.checkMembers(node.members, node.typeParameters);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitTypeLiteral(node: ts.TypeLiteralNode) {
-        this.checkMembers(node.members);
-        super.visitTypeLiteral(node);
-    }
-
-    private checkStatements(statements: ts.Statement[]) {
-        this.checkOverloads(statements, (statement) => {
-            if (statement.kind === ts.SyntaxKind.FunctionDeclaration) {
-                const fn = statement as ts.FunctionDeclaration;
-                if (fn.body) {
+    function checkMembers(
+        members: ReadonlyArray<ts.TypeElement | ts.ClassElement>,
+        typeParameters?: ReadonlyArray<ts.TypeParameterDeclaration>): void {
+        addFailures(checkOverloads(members, typeParameters, (member) => {
+            switch (member.kind) {
+                case ts.SyntaxKind.CallSignature:
+                case ts.SyntaxKind.ConstructSignature:
+                case ts.SyntaxKind.MethodSignature:
+                    break;
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.Constructor:
+                    if ((member as ts.MethodDeclaration | ts.ConstructorDeclaration).body !== undefined) {
+                        return undefined;
+                    }
+                    break;
+                default:
                     return undefined;
+            }
+
+            const signature = member as ts.CallSignatureDeclaration | ts.ConstructSignatureDeclaration | ts.MethodSignature |
+                ts.MethodDeclaration | ts.ConstructorDeclaration;
+            const key = getOverloadKey(signature);
+            return key === undefined ? undefined : { signature, key };
+        }));
+    }
+
+    function addFailures(failures: Failure[]): void {
+        for (const failure of failures) {
+            const { unify, only2 } = failure;
+            switch (unify.kind) {
+                case "single-parameter-difference": {
+                    const { p0, p1 } = unify;
+                    const lineOfOtherOverload = only2 ? undefined : getLine(p0.getStart());
+                    ctx.addFailureAtNode(
+                        p1,
+                        Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
+                    break;
                 }
-                return fn.name && { signature: fn, key: fn.name.text };
-            } else {
-                return undefined;
-            }
-        });
-    }
-
-    private checkMembers(members: Array<ts.TypeElement | ts.ClassElement>, typeParameters?: ts.TypeParameterDeclaration[]) {
-        this.checkOverloads(members, getOverloadName, typeParameters);
-        function getOverloadName(member: ts.TypeElement | ts.ClassElement) {
-            if (!utils.isSignatureDeclaration(member) || (member as ts.MethodDeclaration).body) {
-                return undefined;
-            }
-            const key = getOverloadKey(member);
-            return key === undefined ? undefined : { signature: member, key };
-        }
-    }
-
-    private checkOverloads<T>(signatures: T[], getOverload: GetOverload<T>, typeParameters?: ts.TypeParameterDeclaration[]) {
-        const isTypeParameter = getIsTypeParameter(typeParameters);
-        for (const overloads of collectOverloads(signatures, getOverload)) {
-            if (overloads.length === 2) {
-                this.compareSignatures(overloads[0], overloads[1], isTypeParameter, /*only2*/ true);
-            } else {
-                forEachPair(overloads, (a, b) => {
-                    this.compareSignatures(a, b, isTypeParameter, /*only2*/ false);
-                });
+                case "extra-parameter": {
+                    const { extraParameter, otherSignature } = unify;
+                    const lineOfOtherOverload = only2 ? undefined : getLine(otherSignature.pos);
+                    ctx.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken !== undefined
+                        ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
+                        : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
+                }
             }
         }
+
     }
 
-    private compareSignatures(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter, only2: boolean) {
-        if (!signaturesCanBeUnified(a, b, isTypeParameter)) {
-            return;
-        }
+    function getLine(pos: number): number {
+        return ts.getLineAndCharacterOfPosition(sourceFile, pos).line + 1;
+    }
+}
 
-        if (a.parameters.length === b.parameters.length) {
-            const params = signaturesDifferBySingleParameter(a.parameters, b.parameters);
-            if (params) {
-                const [p0, p1] = params;
-                const lineOfOtherOverload = only2 ? undefined : this.getLine(p0);
-                this.addFailureAtNode(p1, Rule.FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(lineOfOtherOverload, typeText(p0), typeText(p1)));
+interface Failure {
+    unify: Unify;
+    only2: boolean;
+}
+type Unify =
+    | { kind: "single-parameter-difference"; p0: ts.ParameterDeclaration; p1: ts.ParameterDeclaration }
+    | { kind: "extra-parameter"; extraParameter: ts.ParameterDeclaration; otherSignature: ts.NodeArray<ts.ParameterDeclaration> };
+
+function checkOverloads<T>(
+        signatures: ReadonlyArray<T>,
+        typeParameters: ReadonlyArray<ts.TypeParameterDeclaration> | undefined,
+        getOverload: GetOverload<T>): Failure[] {
+    const result: Failure[] = [];
+    const isTypeParameter = getIsTypeParameter(typeParameters);
+    for (const overloads of collectOverloads(signatures, getOverload)) {
+        if (overloads.length === 2) {
+            const unify = compareSignatures(overloads[0], overloads[1], isTypeParameter);
+            if (unify !== undefined) {
+                result.push({ unify, only2: true });
             }
         } else {
-            const diff = signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
-            if (diff) {
-                const [extraParameter, signatureWithExtraParameter] = diff;
-                const lineOfOtherOverload = only2 ? undefined : this.getLine(signatureWithExtraParameter === a.parameters ? b : a);
-                this.addFailureAtNode(extraParameter, extraParameter.dotDotDotToken
-                    ? Rule.FAILURE_STRING_OMITTING_REST_PARAMETER(lineOfOtherOverload)
-                    : Rule.FAILURE_STRING_OMITTING_SINGLE_PARAMETER(lineOfOtherOverload));
-            }
+            forEachPair(overloads, (a, b) => {
+                const unify = compareSignatures(a, b, isTypeParameter);
+                if (unify !== undefined) {
+                    result.push({ unify, only2: false });
+                }
+            });
         }
     }
-
-    private getLine(node: ts.Node): number {
-        return this.getLineAndCharacterOfPosition(node.getStart()).line + 1;
-    }
+    return result;
 }
 
-function typeText({ type }: ts.ParameterDeclaration) {
-    return type === undefined ? "any" : type.getText();
+function compareSignatures(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): Unify | undefined {
+    if (!signaturesCanBeUnified(a, b, isTypeParameter)) {
+        return undefined;
+    }
+
+    return a.parameters.length === b.parameters.length
+        ? signaturesDifferBySingleParameter(a.parameters, b.parameters)
+        : signaturesDifferByOptionalOrRestParameter(a.parameters, b.parameters);
 }
 
 function signaturesCanBeUnified(a: ts.SignatureDeclaration, b: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
@@ -166,8 +195,8 @@ function signaturesCanBeUnified(a: ts.SignatureDeclaration, b: ts.SignatureDecla
 }
 
 /** Detect `a(x: number, y: number, z: number)` and `a(x: number, y: string, z: number)`. */
-function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
-    ): [ts.ParameterDeclaration, ts.ParameterDeclaration] | undefined {
+function signaturesDifferBySingleParameter(types1: ReadonlyArray<ts.ParameterDeclaration>, types2: ReadonlyArray<ts.ParameterDeclaration>,
+    ): Unify | undefined {
     const index = getIndexOfFirstDifference(types1, types2, parametersAreEqual);
     if (index === undefined) {
         return undefined;
@@ -180,18 +209,22 @@ function signaturesDifferBySingleParameter(types1: ts.ParameterDeclaration[], ty
 
     const a = types1[index];
     const b = types2[index];
-    return parametersHaveEqualSigils(a, b) ? [a, b] : undefined;
+    // Can unify `a?: string` and `b?: number`. Can't unify `...args: string[]` and `...args: number[]`.
+    // See https://github.com/Microsoft/TypeScript/issues/5077
+    return parametersHaveEqualSigils(a, b) && a.dotDotDotToken === undefined
+        ? { kind: "single-parameter-difference", p0: a, p1: b }
+        : undefined;
 }
 
 /**
  * Detect `a(): void` and `a(x: number): void`.
  * Returns the parameter declaration (`x: number` in this example) that should be optional/rest, and overload it's a part of.
  */
-function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclaration[], types2: ts.ParameterDeclaration[],
-    ): [ts.ParameterDeclaration, ts.ParameterDeclaration[]] | undefined {
-    const minLength = Math.min(types1.length, types2.length);
-    const longer = types1.length < types2.length ? types2 : types1;
-    const shorter = types1.length < types2.length ? types1 : types2;
+function signaturesDifferByOptionalOrRestParameter(sig1: ts.NodeArray<ts.ParameterDeclaration>, sig2: ts.NodeArray<ts.ParameterDeclaration>,
+    ): Unify | undefined {
+    const minLength = Math.min(sig1.length, sig2.length);
+    const longer = sig1.length < sig2.length ? sig2 : sig1;
+    const shorter = sig1.length < sig2.length ? sig1 : sig2;
 
     // If one is has 2+ parameters more than the other, they must all be optional/rest.
     // Differ by optional parameters: f() and f(x), f() and f(x, ?y, ...z)
@@ -203,23 +236,23 @@ function signaturesDifferByOptionalOrRestParameter(types1: ts.ParameterDeclarati
     }
 
     for (let i = 0; i < minLength; i++) {
-        if (!typesAreEqual(types1[i].type, types2[i].type)) {
+        if (!typesAreEqual(sig1[i].type, sig2[i].type)) {
             return undefined;
         }
     }
 
-    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken) {
+    if (minLength > 0 && shorter[minLength - 1].dotDotDotToken !== undefined) {
         return undefined;
     }
 
-    return [longer[longer.length - 1], longer];
+    return { kind: "extra-parameter", extraParameter: longer[longer.length - 1], otherSignature: shorter };
 }
 
 /**
  * Given a node, if it could potentially be an overload, return its signature and key.
  * All signatures which are overloads should have equal keys.
  */
-type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: string } | undefined;
+type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration; key: string } | undefined;
 
 /**
  * Returns true if typeName is the name of an *outer* type parameter.
@@ -228,8 +261,8 @@ type GetOverload<T> = (node: T) => { signature: ts.SignatureDeclaration, key: st
 type IsTypeParameter = (typeName: string) => boolean;
 
 /** Given type parameters, returns a function to test whether a type is one of those parameters. */
-function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsTypeParameter {
-    if (!typeParameters) {
+function getIsTypeParameter(typeParameters?: ReadonlyArray<ts.TypeParameterDeclaration>): IsTypeParameter {
+    if (typeParameters === undefined) {
         return () => false;
     }
 
@@ -242,16 +275,16 @@ function getIsTypeParameter(typeParameters?: ts.TypeParameterDeclaration[]): IsT
 
 /** True if any of the outer type parameters are used in a signature. */
 function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParameter: IsTypeParameter): boolean {
-    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type));
+    return sig.parameters.some((p) => p.type !== undefined && typeContainsTypeParameter(p.type) === true);
 
-    function typeContainsTypeParameter(type: ts.Node): boolean {
-        if (type.kind === ts.SyntaxKind.TypeReference) {
-            const name = (type as ts.TypeReferenceNode).typeName;
-            if (name.kind === ts.SyntaxKind.Identifier && isTypeParameter(name.text)) {
+    function typeContainsTypeParameter(type: ts.Node): boolean | undefined {
+        if (utils.isTypeReferenceNode(type)) {
+            const { typeName } = type;
+            if (typeName.kind === ts.SyntaxKind.Identifier && isTypeParameter(typeName.text)) {
                 return true;
             }
         }
-        return !!ts.forEachChild(type, typeContainsTypeParameter);
+        return ts.forEachChild(type, typeContainsTypeParameter);
     }
 }
 
@@ -259,17 +292,17 @@ function signatureUsesTypeParameter(sig: ts.SignatureDeclaration, isTypeParamete
  * Given all signatures, collects an array of arrays of signatures which are all overloads.
  * Does not rely on overloads being adjacent. This is similar to code in adjacentOverloadSignaturesRule.ts, but not the same.
  */
-function collectOverloads<T>(nodes: T[], getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
+function collectOverloads<T>(nodes: ReadonlyArray<T>, getOverload: GetOverload<T>): ts.SignatureDeclaration[][] {
     const map = new Map<string, ts.SignatureDeclaration[]>();
     for (const sig of nodes) {
         const overload = getOverload(sig);
-        if (!overload) {
+        if (overload === undefined) {
             continue;
         }
 
         const { signature, key } = overload;
         const overloads = map.get(key);
-        if (overloads) {
+        if (overloads !== undefined) {
             overloads.push(signature);
         } else {
             map.set(key, [signature]);
@@ -284,12 +317,13 @@ function parametersAreEqual(a: ts.ParameterDeclaration, b: ts.ParameterDeclarati
 
 /** True for optional/rest parameters. */
 function parameterMayBeMissing(p: ts.ParameterDeclaration): boolean {
-    return !!p.dotDotDotToken || !!p.questionToken;
+    return p.dotDotDotToken !== undefined || p.questionToken !== undefined;
 }
 
 /** False if one is optional and the other isn't, or one is a rest parameter and the other isn't. */
 function parametersHaveEqualSigils(a: ts.ParameterDeclaration, b: ts.ParameterDeclaration): boolean {
-    return !!a.dotDotDotToken === !!b.dotDotDotToken && !!a.questionToken === !!b.questionToken;
+    return (a.dotDotDotToken !== undefined) === (b.dotDotDotToken !== undefined) &&
+        (a.questionToken !== undefined) === (b.questionToken !== undefined);
 }
 
 function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParameterDeclaration): boolean {
@@ -298,11 +332,11 @@ function typeParametersAreEqual(a: ts.TypeParameterDeclaration, b: ts.TypeParame
 
 function typesAreEqual(a: ts.TypeNode | undefined, b: ts.TypeNode | undefined): boolean {
     // TODO: Could traverse AST so that formatting differences don't affect this.
-    return a === b || !!a && !!b && a.getText() === b.getText();
+    return a === b || a !== undefined && b !== undefined && a.getText() === b.getText();
 }
 
 /** Returns the first index where `a` and `b` differ. */
-function getIndexOfFirstDifference<T>(a: T[], b: T[], equal: Equal<T>): number | undefined {
+function getIndexOfFirstDifference<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>, equal: Equal<T>): number | undefined {
     for (let i = 0; i < a.length && i < b.length; i++) {
         if (!equal(a[i], b[i])) {
             return i;
@@ -312,10 +346,18 @@ function getIndexOfFirstDifference<T>(a: T[], b: T[], equal: Equal<T>): number |
 }
 
 /** Calls `action` for every pair of values in `values`. */
-function forEachPair<T>(values: T[], action: (a: T, b: T) => void): void {
+function forEachPair<T, Out>(values: ReadonlyArray<T>, action: (a: T, b: T) => Out | undefined): Out | undefined {
     for (let i = 0; i < values.length; i++) {
         for (let j = i + 1; j < values.length; j++) {
-            action(values[i], values[j]);
+            const result = action(values[i], values[j]);
+            if (result !== undefined) {
+                return result;
+            }
         }
     }
+    return undefined;
+}
+
+function typeText({ type }: ts.ParameterDeclaration) {
+    return type === undefined ? "any" : type.getText();
 }

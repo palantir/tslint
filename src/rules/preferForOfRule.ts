@@ -18,7 +18,7 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { isAssignment, unwrapParentheses } from "../language/utils";
+import { unwrapParentheses } from "../language/utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -41,78 +41,47 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-interface IncrementorState {
-    indexVariableName: string;
-    arrayExpr: ts.Expression;
-    onlyArrayReadAccess: boolean;
-}
-
 function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
-    const scopes: IncrementorState[] = [];
+    let variables: Map<ts.Identifier, utils.VariableInfo> | undefined;
 
-    return ts.forEachChild(sourceFile, cb);
-
-    function cb(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.ForStatement:
-                return visitForStatement(node as ts.ForStatement);
-            case ts.SyntaxKind.Identifier:
-                return visitIdentifier(node as ts.Identifier);
-            default:
-                return ts.forEachChild(node, cb);
+    return ts.forEachChild(sourceFile, function cb(node): void {
+        if (utils.isForStatement(node)) {
+            visitForStatement(node);
         }
-    }
+        return ts.forEachChild(node, cb);
+    });
 
     function visitForStatement(node: ts.ForStatement): void {
         const arrayNodeInfo = getForLoopHeaderInfo(node);
-        if (!arrayNodeInfo) {
-            return ts.forEachChild(node, cb);
+        if (arrayNodeInfo === undefined) {
+            return;
         }
 
         const { indexVariable, arrayExpr } = arrayNodeInfo;
-        const indexVariableName = indexVariable.text;
 
-        // store `for` loop state
-        const state: IncrementorState = { indexVariableName, arrayExpr, onlyArrayReadAccess: true };
-        scopes.push(state);
-        ts.forEachChild(node.statement, cb);
-        scopes.pop();
-
-        if (state.onlyArrayReadAccess) {
-            ctx.addFailure(node.getStart(), node.statement.getFullStart(), Rule.FAILURE_STRING);
+        if (variables === undefined) {
+            variables = utils.collectVariableUsage(sourceFile);
         }
-    }
-
-    function visitIdentifier(node: ts.Identifier): void {
-        const state = getStateForVariable(node.text);
-        if (state !== undefined && state.onlyArrayReadAccess && isNonSimpleIncrementorUse(node, state.arrayExpr, sourceFile)) {
-            state.onlyArrayReadAccess = false;
-        }
-    }
-
-    function getStateForVariable(name: string): IncrementorState | undefined {
-        for (let i = scopes.length - 1; i >= 0; i--) {
-            const scope = scopes[i];
-            if (scope.indexVariableName === name) {
-                return scope;
+        for (const {location} of variables.get(indexVariable)!.uses) {
+            if (location.pos < node.initializer!.end || location.pos >= node.end || // bail out on use outside of for loop
+                location.pos >= node.statement.pos && // only check uses in loop body
+                isNonSimpleIncrementorUse(location, arrayExpr, sourceFile)) {
+                return;
             }
         }
-        return undefined;
+        ctx.addFailure(node.getStart(sourceFile), node.statement.pos, Rule.FAILURE_STRING);
     }
 }
 
 function isNonSimpleIncrementorUse(node: ts.Identifier, arrayExpr: ts.Expression, sourceFile: ts.SourceFile): boolean {
     // check if iterator is used for something other than reading data from array
-    const elementAccess = node.parent!;
-    const accessParent = elementAccess.parent!;
-    return !utils.isElementAccessExpression(elementAccess)
-        // `a[i] = ...`
-        || isAssignment(accessParent)
-        // `delete a[i]`
-        || accessParent.kind === ts.SyntaxKind.DeleteExpression
+    const parent = node.parent!;
+    return !utils.isElementAccessExpression(parent)
+        // `a[i] = ...` or similar
+        || utils.isReassignmentTarget(parent)
         // `b[i]`
-        || !nodeEquals(arrayExpr, unwrapParentheses(elementAccess.expression), sourceFile);
+        || !nodeEquals(arrayExpr, unwrapParentheses(parent.expression), sourceFile);
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {
@@ -120,9 +89,9 @@ function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean 
 }
 
 // returns the iterator and array of a `for` loop if the `for` loop is basic.
-function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier, arrayExpr: ts.Expression } | undefined {
+function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier; arrayExpr: ts.Expression } | undefined {
     const { initializer, condition, incrementor } = forLoop;
-    if (!initializer || !condition || !incrementor) {
+    if (initializer === undefined || condition === undefined || incrementor === undefined) {
         return undefined;
     }
 

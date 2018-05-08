@@ -17,17 +17,17 @@
 
 import * as ts from "typescript";
 
-import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
-import {SyntaxWalker} from "./syntaxWalker";
-import {IWalker} from "./walker";
+import { Fix, IOptions, Replacement, RuleFailure } from "../rule/rule";
+import { SyntaxWalker } from "./syntaxWalker";
+import { IWalker } from "./walker";
 
 export class RuleWalker extends SyntaxWalker implements IWalker {
-    private limit: number;
-    private options?: any[];
-    private failures: RuleFailure[];
-    private ruleName: string;
+    private readonly limit: number;
+    private readonly options?: any[];
+    private readonly failures: RuleFailure[];
+    private readonly ruleName: string;
 
-    constructor(private sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(private readonly sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
         this.failures = [];
@@ -57,7 +57,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     }
 
     public hasOption(option: string): boolean {
-        if (this.options) {
+        if (this.options !== undefined) {
             return this.options.indexOf(option) !== -1;
         } else {
             return false;
@@ -78,6 +78,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
     public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        // tslint:disable-next-line deprecation
         this.addFailure(this.createFailure(start, width, failure, fix));
     }
 

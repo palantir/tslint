@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
-import {IFormatter, IFormatterMetadata} from "./formatter";
+import { RuleFailure } from "../rule/rule";
+import { IFormatter, IFormatterMetadata } from "./formatter";
 
 export abstract class AbstractFormatter implements IFormatter {
     public static metadata: IFormatterMetadata;
     public abstract format(failures: RuleFailure[]): string;
+
+    protected sortFailures(failures: RuleFailure[]): RuleFailure[] {
+        return failures.slice().sort(RuleFailure.compare);
+    }
 }

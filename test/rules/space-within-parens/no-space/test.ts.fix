@@ -1,0 +1,37 @@
+// simple call
+console.clear();
+
+// multiline call, this should be skipped
+foo(
+    first,
+    second,
+);
+
+// conditional
+if (process.env === 'production') {
+    console.log('start');
+}
+
+// conditional and nested
+if (x === 'string' &&
+        y === 'object') {
+
+    // skip this conditional
+    if (
+        true === true && false !=== false
+    ) {
+        // load
+        foo();
+    }
+    console.log('test');
+}
+
+// other expresions
+switch (typeof x) {
+    default:
+        break;
+}
+
+// empty parens are always allowed
+foo();
+

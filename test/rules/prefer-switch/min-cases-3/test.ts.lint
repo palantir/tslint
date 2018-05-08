@@ -1,6 +1,0 @@
-if (x === 1 || x === 2) {}
-
-if (x === 1 || x === 2 || x === 3) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-
-[0]: Use a switch statement instead of using multiple '===' checks.

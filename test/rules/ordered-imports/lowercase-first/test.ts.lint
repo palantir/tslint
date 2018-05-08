@@ -30,5 +30,11 @@ import someDefault from "module";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 import "something";
 
+// contains ImportEqualsDeclaration
+import c = require('./c');
+import * as a from './a';
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+import b from './b';
+
 [ordered-imports]: Named imports must be alphabetized.
 [ordered-sources]: Import sources within a group must be alphabetized.

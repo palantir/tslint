@@ -5,17 +5,12 @@
   "extends": "tslint:all",
   "rules": {
     // Don't want these
+    "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
-
     // TODO: Enable stricter options for these
-    "align": [
-        true,
-        "parameters",
-        "statements"
-    ],
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"
@@ -26,50 +21,26 @@
         "allow-declarations",
         "allow-named-functions"
     ],
-    "whitespace": {
-        "options": [
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-            "check-typecast"
-        ]
-    },
 
     // TODO: Enable these
     "completed-docs": false,
-    "cyclomatic-complexity": false,
-    "deprecation": false,
     "no-any": false,
-    "no-boolean-literal-compare": false,
-    "no-inferrable-types": false,
-    "no-inferred-empty-object-type": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
-    "no-object-literal-type-assertion": false,
     "no-require-imports": false,
     "no-unbound-method": false,
-    "no-unnecessary-callback-wrapper": false,
-    "no-unnecessary-type-assertion": false,
     "no-unnecessary-qualifier": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,
-    "prefer-switch": false,
-    "prefer-template": false,
-    "restrict-plus-operands": false,
-    "return-undefined": false,
-    "strict-boolean-expressions": false,
     "strict-type-predicates": false,
-    "triple-equals": false,
+    "triple-equals": [true, "allow-undefined-check"],
     "typedef": false,
 
     "ban": [true,
       ["describe", "only"],
-      ["it", "only"],
-      ["Object", "assign"]
+      ["it", "only"]
     ],
 
     "interface-name": false,
@@ -82,11 +53,13 @@
       "public-before-private",
       "static-before-instance",
       "variables-before-functions"
-    ],    
+    ],
+    "newline-per-chained-call": false,
     "no-console": {
       "options": ["log"]
     },
     "no-switch-case-fall-through": true,
+    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
     "switch-default": false,
     "variable-name": [true,
       "ban-keywords",

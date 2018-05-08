@@ -23,11 +23,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-irregular-whitespace",
-        description: "Disallow irregular whitespace outside of strings and comments",
+        description: "Disallow irregular whitespace within a file, including strings and comments.",
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
-        optionExamples: ["true"],
+        optionExamples: [true],
         type: "style",
         typescriptOnly: false,
     };

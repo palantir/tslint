@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration } from "tsutils";
+import { isImportDeclaration, isSymbolFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -52,9 +52,14 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
             continue;
         }
         const defaultImport = statement.importClause.name;
-        const {declarations} = tc.getAliasedSymbol(tc.getSymbolAtLocation(defaultImport));
+        const symbol = tc.getSymbolAtLocation(defaultImport);
+        if (symbol === undefined || !isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+            continue;
+        }
+
+        const {declarations} = tc.getAliasedSymbol(symbol);
         if (declarations !== undefined && declarations.length !== 0) {
-            const [{name}] = declarations;
+            const { name } = declarations[0] as ts.NamedDeclaration;
             if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && name.text !== defaultImport.text) {
                 ctx.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
             }

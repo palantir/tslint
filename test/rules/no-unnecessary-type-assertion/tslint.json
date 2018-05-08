@@ -1,8 +1,5 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
-    "no-unnecessary-type-assertion": true
+    "no-unnecessary-type-assertion": [true, "AnyDuringMigration"]
   }
 }

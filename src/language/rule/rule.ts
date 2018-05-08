@@ -17,8 +17,8 @@
 
 import * as ts from "typescript";
 
-import {arrayify, flatMap} from "../../utils";
-import {IWalker} from "../walker";
+import { arrayify, flatMap } from "../../utils";
+import { IWalker } from "../walker";
 
 export interface RuleConstructor {
     metadata: IRuleMetadata;
@@ -89,19 +89,40 @@ export interface IRuleMetadata {
      * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
      */
     typescriptOnly: boolean;
+
+    /**
+     * Examples demonstrating what the lint rule will pass and fail
+     */
+    codeExamples?: ICodeExample[];
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export type RuleSeverity = "warning" | "error" | "off";
 
+export interface ICodeExample {
+    config: string;
+    description: string;
+    pass: string;
+    fail?: string;
+}
+
 export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
-    disabledIntervals: IDisabledInterval[];
+    /**
+     * @deprecated
+     * Tslint now handles disables itself.
+     * This will be empty.
+     */
+    disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
 }
 
+/**
+ * @deprecated
+ * These are now handled internally.
+ */
 export interface IDisabledInterval {
     startPosition: number;
     endPosition: number;
@@ -150,7 +171,7 @@ export class Replacement {
 
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
-        replacements.sort((a, b) => b.end - a.end);
+        replacements.sort((a, b) => b.end !== a.end ? b.end - a.end : b.start - a.start);
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
@@ -196,7 +217,7 @@ export class Replacement {
 }
 
 export class RuleFailurePosition {
-    constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
+    constructor(private readonly position: number, private readonly lineAndCharacter: ts.LineAndCharacter) {
     }
 
     public getPosition() {
@@ -229,18 +250,25 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private fileName: string;
-    private startPosition: RuleFailurePosition;
-    private endPosition: RuleFailurePosition;
-    private rawLines: string;
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
-    constructor(private sourceFile: ts.SourceFile,
+    public static compare(a: RuleFailure, b: RuleFailure): number {
+        if (a.fileName !== b.fileName) {
+            return a.fileName < b.fileName ? -1 : 1;
+        }
+        return a.startPosition.getPosition() - b.startPosition.getPosition();
+    }
+
+    constructor(private readonly sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
-                private failure: string,
-                private ruleName: string,
-                private fix?: Fix) {
+                private readonly failure: string,
+                private readonly ruleName: string,
+                private readonly fix?: Fix) {
 
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);

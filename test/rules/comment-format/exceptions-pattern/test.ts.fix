@@ -1,0 +1,30 @@
+///<reference path="something.ts"/>
+class Clazz { // this comment is correct
+    /* block comment
+     * adada
+     */
+    public funcxion() { // This comment has a capital letter starting it
+        // This comment is on its own line, and starts with a capital _and_ no space
+        console.log("test"); // this comment has no space
+    }
+    /// <not a reference/>
+    //// foo
+}
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`
+
+//noinspection JSUnusedGlobalSymbols
+const unusedVar = 'unneeded value';
+
+// TODO: Write more tests
+// HACKING is not an exception
+
+// STDIN for input
+// STDOUT for output
+// stderr for errors
+
+
+

@@ -62,7 +62,7 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         let start = node.getStart(this.sourceFile);
         let line = ts.getLineAndCharacterOfPosition(this.sourceFile, start).line;
         const comments = ts.getLeadingCommentRanges(this.sourceFile.text, node.pos);
-        if (comments) {
+        if (comments !== undefined) {
             // check for blank lines between comments
             for (let i = comments.length - 1; i >= 0; --i) {
                 const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end).line;

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import * as Utils from "../utils";
@@ -42,28 +42,27 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
-        if (failures.length) {
-            const failuresSorted = failures.sort((a, b) => {
-                return a.getFileName().localeCompare(b.getFileName());
-            });
+        if (failures.length !== 0) {
+            const failuresSorted = failures.sort(
+                (a, b) => a.getFileName().localeCompare(b.getFileName()));
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const severity = failure.getRuleSeverity();
                 if (failure.getFileName() !== previousFilename) {
-                    if (previousFilename) {
+                    if (previousFilename !== null) {
                         output += "</file>";
                     }
                     previousFilename = failure.getFileName();
-                    output += "<file name=\"" + this.escapeXml(failure.getFileName()) + "\">";
+                    output += `<file name="${this.escapeXml(failure.getFileName())}">`;
                 }
-                output += "<error line=\"" + (failure.getStartPosition().getLineAndCharacter().line + 1) + "\" ";
-                output += "column=\"" + (failure.getStartPosition().getLineAndCharacter().character + 1) + "\" ";
-                output += "severity=\"" + severity + "\" ";
-                output += "message=\"" + this.escapeXml(failure.getFailure()) + "\" ";
+                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
+                output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
+                output += `severity="${severity}" `;
+                output += `message="${this.escapeXml(failure.getFailure())}" `;
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
-                output += "source=\"failure.tslint." + this.escapeXml(failure.getRuleName()) + "\" />";
+                output += `source="failure.tslint.${this.escapeXml(failure.getRuleName())}" />`;
             }
-            if (previousFilename) {
+            if (previousFilename !== null) {
                 output += "</file>";
             }
         }
