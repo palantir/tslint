@@ -33,6 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "triple-equals",
         description: "Requires `===` and `!==` in place of `==` and `!=`.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent `
             Two arguments may be optionally provided:
 
@@ -74,9 +75,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
                  node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
                 !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
-                ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
-                                                         ? Rule.EQ_FAILURE_STRING
-                                                         : Rule.NEQ_FAILURE_STRING);
+                const failure = node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                    ? Rule.EQ_FAILURE_STRING : Rule.NEQ_FAILURE_STRING;
+                const replacementText = `${node.operatorToken.getText()}=`;
+                const fix = Lint.Replacement.replaceNode(node.operatorToken, replacementText, ctx.sourceFile);
+                ctx.addFailureAtNode(node.operatorToken, failure, fix);
             }
         }
         return ts.forEachChild(node, cb);
