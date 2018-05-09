@@ -69,6 +69,12 @@ class PublicClassConstructor {
                          ~~ [block is empty]
 }
 
+class ClassMethod {
+    public methodWithoutResultTypehinting() {}
+
+    public methodWithResultTypehinting(): void {}
+}
+
 try {
     throw new Error();
 } catch (error) {}
