@@ -106,6 +106,7 @@ export const rules = {
         true,
         "check-parameters",
     ],
+    "no-dynamic-delete": true,
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
@@ -146,7 +147,7 @@ export const rules = {
 
     "cyclomatic-complexity": true,
     "eofline": true,
-    "indent": [true, "spaces"],
+    "indent": [true, "spaces", 4],
     "linebreak-style": [true, "LF"],
     "max-classes-per-file": [true, 1],
     "max-file-line-count": [true, 1000],
@@ -197,6 +198,7 @@ export const rules = {
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
+    "newline-per-chained-call": true,
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
@@ -229,6 +231,7 @@ export const rules = {
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
+    "prefer-while": true,
     "quotemark": [
         true,
         "double",
