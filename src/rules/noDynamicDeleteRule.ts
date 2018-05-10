@@ -26,7 +26,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
-        rationale: "Deleting dynamically computed keys is dangerous and not well optimized.",
+        rationale: Lint.Utils.dedent`
+            Deleting dynamically computed keys is dangerous and not well optimized.
+
+            Also consider using a [\`Map\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
+            or [\`Set\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)
+            if you're storing collections of objects.
+            Using \`Object\`s can cause occasional edge case bugs, such as if a key is named "hasOwnProperty".
+        `,
         ruleName: "no-dynamic-delete",
         type: "functionality",
         typescriptOnly: false,

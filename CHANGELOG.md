@@ -1,6 +1,57 @@
 Change Log
 ===
 
+v5.10.0
+---
+
+## :tada: Features
+
+- [new-rule] [`prefer-while`](https://palantir.github.io/tslint/rules/prefer-while/) (#3750)
+- [new-fixer] [`comment-format`](https://palantir.github.io/tslint/rules/comment-format/) (#3845)
+- [new-rule-option] `"allow-empty-functions"` for [`no-empty`](https://palantir.github.io/tslint/rules/no-empty/) rule (#3624)
+- [new-rule-option] New options for [`promise-function-async`](https://palantir.github.io/tslint/rules/promise-function-async/) specifying what kinds of functions to check (#3807)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) rule plays nice with [`no-trailing-whitespace`](https://palantir.github.io/tslint/rules/no-trailing-whitespace/) rule (#3802)
+- [bugfix] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/) rule allows square bracket property access (#3610)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) no longer marks native JSX elements as unsafe (#3699)
+- [enhancement] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) auto-fixes use '!' character to ensure header stays above imports (#3741)
+- [enhancement] Better error messages if a rule crashes (#3836)
+- [enhancement] Better error messages when no valid rules are specified (#3729)
+- [enhancement] Better lint messages for unused imports in [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) rule (#3831)
+- [docs] Improve documentation of cli flag --project (#3703)
+- [docs] Added short rationales for about thirty rules (#3734)
+- [docs] Added optional capability to provide code examples in rules' metadata (#3602)
+- [docs] Many small docs fixes and tweaks from many great contributors!
+
+Thanks to our contributors!
+
+- Achim Weimert
+- BB9z
+- Blair Zajac
+- Chia-Lun Wu (Leo)
+- Ethan
+- Janis Koehr
+- Josh Goldberg
+- Julian Verdurmen
+- Lucas Sloan
+- Mark Vincze
+- Martin Möhwald
+- Oliver Joseph Ash
+- Pichest Wongsiripiphat
+- Rafael Santana
+- Ruben Bridgewater
+- Ryan Waskiewicz
+- Sehrope Sarkuni
+- Suchan Lee
+- Victor Belozyorov
+- aervin_
+- cwgorman
+- felipeissa
+- jishi9
+
+
 v5.9.1
 ---
 
@@ -19,7 +70,7 @@ v5.9.0
 
 ## Configuration inheritance changes
 
-Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defualtSeverity`: #2569.
+Significant changes have been made to configuration inheritance to address a long-standing UX issue around `defaultSeverity`: #2569.
 
 `defaultSeverity` defined in a `tslint.json` file will now override the `defaultSeverity` value defined in any configurations you are extending.
 This means that any rules specified in the base configurations can now take on a new `defaultSeverity` if you so choose. If you extend multiple
@@ -42,7 +93,7 @@ For more details, see the relevant PRs:
 - [new-rule] [`newline-per-chained-call`](https://palantir.github.io/tslint/rules/newline-per-chained-call/) (#3278)
 - [new-rule-option] `"temporalDeadZone"` for [`no-shadowed-variable`](https://palantir.github.io/tslint/rules/no-shadowed-variable/) to ignore shadowing in the temporal dead zone of classes, parameters, enums and variables declared with `let` or `const`
 (#3389)
-- [new-rule-option] `"shorthand-first"` for [`object-literal-sort-key`](https://palantir.github.io/tslint/rules/object-literal-sort-key) (#3607)
+- [new-rule-option] `"shorthand-first"` for [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) (#3607)
 - [new-rule-option] Add support for an ignore pattern for [`max-line-length`](https://palantir.github.io/tslint/rules/max-line-length/) (#3099)
 
 ## :hammer_and_wrench: Bugfixes & enhancements
@@ -74,7 +125,7 @@ For more details, see the relevant PRs:
 - [bugfix] Fix condition for deprecation of [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare) (#3429)
 - [enhancement] Better error message for files not contained in the project (#3313)
 - [enhancement] `"properties"` option for [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) rule now checks getter and setter accessors. (#3497)
-- [enhancement]: [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers) ignores parseInt radix parameter (#3536)
+- [enhancement] [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers) ignores parseInt radix parameter (#3536)
 - [enhancement] Avoid duplicate I/O when using `--project` option (#3313)
 - [enhancement] clicking the filename in `stylish`-formatter's output jumps to the first failure in that file. (#3491)
 - [enhancement] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) ignores comma operator inside for-loop incrementor (#3485)
@@ -1888,7 +1939,7 @@ v0.4.6
 v0.4.5
 ---
 
-* [feature] `no-unused-variable` no longer checks parameters by defualt. Parameters are now only checked if the `check-parameters` option is set.
+* [feature] `no-unused-variable` no longer checks parameters by default. Parameters are now only checked if the `check-parameters` option is set.
 * [bug] `no-unused-variable` parameter check no longer fails on variable argument parameters (like ...args) and on cases where the parameters are broken up by newlines.
 
 v0.4.4
