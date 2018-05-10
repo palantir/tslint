@@ -22,6 +22,9 @@ const testFunction2 = () => { };
 const testFunction3 = function() {}
                                  ~~ [block is empty]
 
+const testFunction4 = function(): void {}
+                                       ~~ [block is empty]
+
 for (var x = 0; x < 1; ++x) { }
                             ~~~ [block is empty]
 
@@ -68,6 +71,14 @@ class ProtectedClassConstructor {
 class PublicClassConstructor {
     public constructor() {}
                          ~~ [block is empty]
+}
+
+class ClassMethod {
+    public methodWithoutResultTypehinting() {}
+                                            ~~ [block is empty]
+
+    public methodWithResultTypehinting(): void {}
+                                               ~~ [block is empty]
 }
 
 try {
