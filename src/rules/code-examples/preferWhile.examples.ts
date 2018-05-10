@@ -25,12 +25,12 @@ export const codeExamples = [
             "rules": { "prefer-while": true }
         `,
         pass: Lint.Utils.dedent`
-            for(let x = 1; x < 10; x++) {
-                console.log(x);
+            for(let i = 1; i < 10; i++) {
+                console.log(i);
             }
 
-            for (let i = 0; i < 10; x+=1) {
-                console.log(x);
+            for (let i = 0; i < 10; i+=1) {
+                console.log(i);
             }
 
             for (let i = 0; i < 10;) {
@@ -39,11 +39,11 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             for(;;) {
-                console.log(x);
+                console.log('Hello World');
             }
 
             for(;true===true;) {
-                console.log(x);
+                console.log('Hello World');
             }
         `,
     },
