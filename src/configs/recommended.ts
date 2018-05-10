@@ -157,6 +157,7 @@ export const rules = {
         options: {
             multiline: "always",
             singleline: "never",
+            esSpecCompliant: true,
         },
     },
     "triple-equals": {
