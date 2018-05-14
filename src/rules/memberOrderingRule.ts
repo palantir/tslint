@@ -136,7 +136,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             A consistent ordering for class members can make classes easier to read, navigate, and edit.
 
             A common opposite practice to \`member-ordering\` is to keep related groups of classes together.
-            Instead of creating clases with multiple separate groups, consider splitting class responsibilities
+            Instead of creating classes with multiple separate groups, consider splitting class responsibilities
             apart across multiple single-responsibility classes.
         `,
         optionsDescription,
