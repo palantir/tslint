@@ -119,7 +119,8 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
-        if (ignorePattern !== undefined) {
+        // BUG: this means imports / destructures with all (2+) unused variables don't respect ignore pattern
+        if (ignorePattern !== undefined && kind !== UnusedKind.DECLARATION && kind !== UnusedKind.ALL_DESTRUCTURES) {
             const varName = /'(.*)'/.exec(failure)![1];
             if (ignorePattern.test(varName)) {
                 continue;

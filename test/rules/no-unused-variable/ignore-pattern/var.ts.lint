@@ -44,8 +44,12 @@ export function testDestructuring() {
     var [c] = [3];
 
     var {d, e} = { d: 1, e: 2 };
+#if typescript >= 2.9.0
+        ~~~~~~                   [All destructured elements are unused.]
+#else
          ~                       [err % ('d')]
             ~                    [err % ('e')]
+#endif
     var {d: _d, e: _e} = { d: 1, e: 2 };
     var {f} = { f: 3 };
 
@@ -77,9 +81,13 @@ for(let _e of [1,2,3]) {
 export function testRenamingDestructure() {
   var a = 2;
   let {a: b} = {a: 4};
-#if typescript >= 2.8.0
+#if typescript >= 2.9.0
+      ~~~~~~           [err % ('b')]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
        ~~~~            [err % ('b')]
-#else
+#endif
+#if typescript < 2.8.0
           ~            [err % ('b')]
 #endif
   let {a: _b} = {a: 4};
