@@ -411,6 +411,7 @@ const enum UnusedKind {
     VARIABLE_OR_PARAMETER,
     PROPERTY,
     DECLARATION, // Introduced in TS 2.8
+    ALL_DESTRUCTURES, // introduced in TS 2.9
 }
 function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
     // https://github.com/Microsoft/TypeScript/blob/master/src/compiler/diagnosticMessages.json
@@ -423,6 +424,8 @@ function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
             return UnusedKind.PROPERTY; // "Property '{0}' is declared but never used."
         case 6192:
             return UnusedKind.DECLARATION; // "All imports in import declaration are unused."
+        case 6198:
+            return UnusedKind.ALL_DESTRUCTURES; // "All destructured elements are unused."
         default:
             return undefined;
     }
