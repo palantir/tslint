@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: "Interpolation will only work for template strings.",
         type: "functionality",
         typescriptOnly: false,
     };

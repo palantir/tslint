@@ -29,6 +29,10 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Comparing boolean values to boolean literals is unnecessary, as those expressions will result in booleans too.
+            Just use the boolean values directly or negate them.
+        `,
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,

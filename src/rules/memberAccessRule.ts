@@ -47,7 +47,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "member-access",
         description: "Requires explicit visibility declarations for class members.",
-        rationale: "Explicit visibility declarations can make code more readable and accessible for those new to TS.",
+        rationale: Lint.Utils.dedent`
+            Explicit visibility declarations can make code more readable and accessible for those new to TS.
+
+            Other languages such as C# default to \`private\`, unlike TypeScript's default of \`public\`.
+            Members lacking a visibility declaration may be an indication of an accidental leak of class internals.
+        `,
         optionsDescription: Lint.Utils.dedent`
             These arguments may be optionally provided:
 
