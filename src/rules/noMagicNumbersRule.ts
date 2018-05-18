@@ -21,6 +21,8 @@ import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsut
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
+const NUMBER_METHODS = ["toExponential", "toFixed", "toPrecision", "toString"];
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -77,7 +79,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
                     return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
                 }
 
-                if (isPropertyAccessExpression(node.expression) && this.isNumberPrototypeMethod(node.expression.name.text)) {
+                if (isPropertyAccessExpression(node.expression) && NUMBER_METHODS.indexOf(node.expression.name.text) >= 0) {
                     return;
                 }
             }
@@ -97,10 +99,5 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
         if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-    }
-
-    private isNumberPrototypeMethod(methodName: string): boolean {
-        const numberMethods = ["toExponential", "toFixed", "toPrecision", "toString"];
-        return numberMethods.indexOf(methodName) > -1;
     }
 }
