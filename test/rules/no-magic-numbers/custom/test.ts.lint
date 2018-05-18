@@ -4,22 +4,6 @@ parseInt('123', 8);
 parseInt('123', 10);
 parseInt('123', 16);
 
-const a = 0.1234567801234567890;
-a.toFixed(2);
-a.toFixed(5);
-a.toFixed(10);
-
-a.toString(10);
-a.toString(36);
-
-a.toPrecision(3)
-a.toPrecision(10)
-a.toPrecision(20)
-
-const b = 77.1234;
-b.toExponential(4);
-b.toExponential(2)
-
 console.log(1337);
 console.log(-1337);
 console.log(- 1337);
