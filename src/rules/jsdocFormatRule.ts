@@ -21,6 +21,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_CHECK_MULTILINE_START = "check-multiline-start";
+const OPTION_FORCE_SINGLELINE = "force-singleline";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -40,17 +41,25 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             You can optionally specify the option \`"${OPTION_CHECK_MULTILINE_START}"\` to enforce the first line of a
             multiline JSDoc comment to be empty.
+
+            You can optionally specify the option \`"${OPTION_FORCE_SINGLELINE}"\` to require JSDoc comments that can
+            fit on a single lin to do so.
         `,
         options: {
             type: "array",
             minItems: 0,
-            maxItems: 1,
+            maxItems: 2,
             items: {
                 type: "string",
-                enum: [OPTION_CHECK_MULTILINE_START],
+                enum: [OPTION_CHECK_MULTILINE_START, OPTION_FORCE_SINGLELINE],
             },
         },
-        optionExamples: [true, [true, OPTION_CHECK_MULTILINE_START]],
+        optionExamples: [
+            true,
+            [true, OPTION_CHECK_MULTILINE_START],
+            [true, OPTION_FORCE_SINGLELINE],
+            [true, OPTION_CHECK_MULTILINE_START, OPTION_FORCE_SINGLELINE],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -58,16 +67,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
+    public static FORCE_SINGLE_LINE_FALURE = "singleline jsdoc should use compact docblock form";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
             firstLineOfMultiline: this.ruleArguments.indexOf(OPTION_CHECK_MULTILINE_START) !== -1,
+            forceSingleline: this.ruleArguments.indexOf(OPTION_FORCE_SINGLELINE) !== -1,
         });
     }
 }
 
 interface Options {
     firstLineOfMultiline: boolean;
+    forceSingleline: boolean;
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
@@ -82,6 +94,19 @@ function walk(ctx: Lint.WalkContext<Options>) {
             if (firstLine[0] !== " " || !firstLine.endsWith(" ")) {
                 ctx.addFailure(pos, end, Rule.FORMAT_FAILURE_STRING);
             }
+            return;
+        }
+
+        // This is a single-line comment using the multiline format
+        if (ctx.options.forceSingleline && lines.length === 3) {
+            // Add 3 to account for the leading /**
+            const endOfFirstLine = pos + firstLine.length + 3;
+            const endOfSecondLine = endOfFirstLine + lines[1].length + 1;
+            const endOfThirdLine = endOfSecondLine + lines[2].length + 1;
+            ctx.addFailure(pos, endOfFirstLine, Rule.FORCE_SINGLE_LINE_FALURE);
+            ctx.addFailure(pos + endOfFirstLine + 1, endOfSecondLine, Rule.FORCE_SINGLE_LINE_FALURE);
+            // Add 2 to account for the trailing */
+            ctx.addFailure(pos + endOfSecondLine + 1, endOfThirdLine + 2, Rule.FORCE_SINGLE_LINE_FALURE);
             return;
         }
 
