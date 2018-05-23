@@ -104,7 +104,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
             const endOfSecondLine = endOfFirstLine + lines[1].length + 1;
             const endOfThirdLine = endOfSecondLine + lines[2].length + 1;
             ctx.addFailure(pos, endOfFirstLine, Rule.FORCE_SINGLE_LINE_FALURE);
-            ctx.addFailure(pos + endOfFirstLine + 1, endOfSecondLine, Rule.FORCE_SINGLE_LINE_FALURE);
+            ctx.addFailure(pos + endOfFirstLine + 1, endOfSecondLine, Rule.FORCE_SINGLE_LINE_FALURE, [
+                // substr(2) remove the leading "* "
+                Lint.Replacement.replaceFromTo(pos, end, `/** ${lines[1].trim().substr(2)} */`),
+            ]);
             // Add 2 to account for the trailing */
             ctx.addFailure(pos + endOfSecondLine + 1, endOfThirdLine + 2, Rule.FORCE_SINGLE_LINE_FALURE);
             return;
