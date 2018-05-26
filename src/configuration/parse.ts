@@ -19,14 +19,8 @@ import * as path from "path";
 import * as toAbsoluteGlob from "to-absolute-glob";
 import { IOptions, RuleSeverity } from "../index";
 import { arrayify, hasOwnProperty } from "../utils";
-import { IConfigurationFile } from "./configurationFile";
-import {
-    getRulesDirectories,
-    RawConfigFile,
-    RawRuleConfig,
-    RawRulesConfig,
-    resolveConfigurationPath,
-} from "./read";
+import { IConfigurationFile, RawConfigFile, RawRuleConfig, RawRulesConfig } from "./configurationFile";
+import { getRulesDirectories, resolveConfigurationPath } from "./read";
 
 /**
  * Parses the options of a single rule and upgrades legacy settings such as `true`, `[true, "option"]`

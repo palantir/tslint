@@ -18,7 +18,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
-
 import {
     DEFAULT_CONFIG,
     findConfiguration,
@@ -28,7 +27,7 @@ import {
     loadConfigurationFromPath,
     parseConfigFile,
 } from "./configuration";
-import { rulesForFile } from "./configuration/rulesForFile";
+import { IS_JS, rulesForFile } from "./configuration/rulesForFile";
 import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
@@ -234,7 +233,7 @@ export class Linter {
     }
 
     private getEnabledRules(configuration: IConfigurationFile = parseConfigFile(DEFAULT_CONFIG), fileName: string): IRule[] {
-        const isJs = /\.jsx?$/i.test(fileName);
+        const isJs = IS_JS.test(fileName);
         const ruleOptionsList = rulesForFile(configuration, fileName);
         const rulesDirectories = arrayify(this.options.rulesDirectory)
             .concat(arrayify(configuration.rulesDirectory));

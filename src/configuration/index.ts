@@ -24,7 +24,6 @@ import {
     getRelativePath,
     getRulesDirectories,
     JSON_CONFIG_FILENAME,
-    RawConfigFile,
     readConfigurationFile,
     resolveConfigurationPath,
 } from "./read";
@@ -38,7 +37,6 @@ export {
     parseConfigFile,
     getRulesDirectories,
     JSON_CONFIG_FILENAME,
-    RawConfigFile,
     parseConfigList,
 };
 

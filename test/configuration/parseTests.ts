@@ -16,7 +16,7 @@
 
 import { assert } from "chai";
 import * as path from "path";
-import { RawConfigFile } from "../../src/configuration/index";
+import { RawConfigFile } from "../../src/configuration/configurationFile";
 import { parseConfigFile, parseConfigList } from "../../src/configuration/parse";
 import { IOptions } from "../lint";
 import { assertConfigEquals, buildConfig } from "./utils";

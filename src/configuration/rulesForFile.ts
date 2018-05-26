@@ -19,7 +19,7 @@ import * as path from "path";
 import { IOptions, RuleSeverity } from "../index";
 import { IConfigurationFile, RuleMap } from "./configurationFile";
 
-const IS_JS = /\.jsx?$/i;
+export const IS_JS = /\.jsx?$/i;
 
 /**
  * A file to lint. Stores the isJS property to avoid extra regex tests.

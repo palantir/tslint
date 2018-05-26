@@ -16,7 +16,27 @@
  */
 
 import { IOptions, RuleSeverity } from "../index";
-import { RawConfigFile } from "./index";
+
+export interface RawConfigFile {
+    extends?: string | string[];
+    linterOptions?: IConfigurationFile["linterOptions"];
+    overrides?: Array<{
+        files?: string | string[];
+        excludedFiles?: string | string[];
+        rules: RawRulesConfig;
+    }>;
+    rulesDirectory?: string | string[];
+    defaultSeverity?: string;
+    rules?: RawRulesConfig;
+    jsRules?: RawRulesConfig;
+}
+export interface RawRulesConfig {
+    [key: string]: RawRuleConfig;
+}
+export type RawRuleConfig = null | undefined | boolean | any[] | {
+    severity?: string;
+    options?: any;
+};
 
 export type RuleMap = Map<string, Partial<IOptions>>;
 
@@ -47,13 +67,13 @@ export interface IConfigurationFile {
 
     /**
      * Rules override configuration that is applied based on file paths. Only
-     * the `rule` key (not `jsRules`) can be overridden. Use an appropriate
-     * `file` regex to target JS files.
+     * the `rules` key (not `jsRules`) can be overridden. Use an appropriate
+     * `files` regex to target JS files.
      */
     overrides?: Array<{
         files: string[];
         excludedFiles: string[];
-        rules: Map<string, Partial<IOptions>>;
+        rules: RuleMap;
     }>;
 
     /**

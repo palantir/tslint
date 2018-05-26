@@ -22,7 +22,7 @@ import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "../error";
 import { arrayify, stripComments } from "../utils";
-import { IConfigurationFile } from "./configurationFile";
+import { RawConfigFile } from "./configurationFile";
 
 const BUILT_IN_CONFIG = /^tslint:(.*)$/;
 
@@ -32,27 +32,6 @@ export const JSON_CONFIG_FILENAME = "tslint.json";
 /** @deprecated use `JSON_CONFIG_FILENAME` or `CONFIG_FILENAMES` instead. */
 export const CONFIG_FILENAME = JSON_CONFIG_FILENAME;
 export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.yml"];
-
-export interface RawConfigFile {
-    extends?: string | string[];
-    linterOptions?: IConfigurationFile["linterOptions"];
-    overrides?: Array<{
-        files?: string | string[];
-        excludedFiles?: string | string[];
-        rules: RawRulesConfig;
-    }>;
-    rulesDirectory?: string | string[];
-    defaultSeverity?: string;
-    rules?: RawRulesConfig;
-    jsRules?: RawRulesConfig;
-}
-export interface RawRulesConfig {
-    [key: string]: RawRuleConfig;
-}
-export type RawRuleConfig = null | undefined | boolean | any[] | {
-    severity?: string;
-    options?: any;
-};
 
 /**
  * Searches for a TSLint configuration and returns the path to it.
