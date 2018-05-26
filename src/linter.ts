@@ -24,10 +24,11 @@ import {
     findConfigurationPath,
     getRulesDirectories,
     IConfigurationFile,
+    IS_JS,
     loadConfigurationFromPath,
     parseConfigFile,
+    rulesForFile,
 } from "./configuration";
-import { IS_JS, rulesForFile } from "./configuration/rulesForFile";
 import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";

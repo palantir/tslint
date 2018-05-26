@@ -22,12 +22,102 @@ import {
     findConfigurationPath,
     IConfigurationFile,
     loadConfigurationFromPath,
+    parseConfigFile,
+    parseConfigList,
+    RawConfigFile,
+    rulesForFile,
 } from "../src/configuration";
 import { IOptions, RuleSeverity } from "./../src/language/rule/rule";
-import { assertConfigEquals, assertDeepMapEquals, buildConfig } from "./configuration/utils";
 import { createTempFile } from "./utils";
 
 describe("Configuration", () => {
+    describe("parseConfigFile", () => {
+        it("parses empty config", () => {
+            const rawConfig = {};
+            const expected = buildConfig();
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
+        });
+
+        it("parses different ways of storing options", () => {
+            const rawConfig: RawConfigFile = {
+                rules: {
+                    a: true,
+                    b: [true],
+                    c: false,
+                    d: [false],
+                    e: [true, 1],
+                    f: [false, 2, 3],
+                    g: { severity: "off"},
+                    h: { severity: "warn"},
+                    i: { severity: "warning"},
+                    j: { severity: "error"},
+                    k: { severity: "none" },
+                    l: { options: 1 },
+                    m: { options: [2] },
+                    n: { options: [{ no: false }] },
+                    o: { severity: "warn", options: 1 },
+                    p: null,
+                    q: {},
+                    r: "garbage" as any,
+                    s: { junk: 1 } as any,
+                },
+            };
+            const expected = buildConfig();
+            expected.rules.set("a", {});
+            expected.rules.set("b", {});
+            expected.rules.set("c", { ruleSeverity: "off" });
+            expected.rules.set("d", { ruleSeverity: "off" });
+            expected.rules.set("e", { ruleArguments: [1] });
+            expected.rules.set("f", { ruleArguments: [2, 3], ruleSeverity: "off" });
+            expected.rules.set("g", { ruleSeverity: "off" });
+            expected.rules.set("h", { ruleSeverity: "warning" });
+            expected.rules.set("i", { ruleSeverity: "warning" });
+            expected.rules.set("j", { ruleSeverity: "error" });
+            expected.rules.set("k", { ruleSeverity: "off" });
+            expected.rules.set("l", { ruleArguments: [1] });
+            expected.rules.set("m", { ruleArguments: [2] });
+            expected.rules.set("n", { ruleArguments: [{ no: false }] });
+            expected.rules.set("o", { ruleArguments: [1], ruleSeverity: "warning" });
+            expected.rules.set("p", { ruleSeverity: "off" });
+            expected.rules.set("q", {});
+            expected.rules.set("r", {});
+            expected.rules.set("s", {});
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
+        });
+
+        it("resolves exclude pattern relative to the configuration file", () => {
+            const config: RawConfigFile = {
+                linterOptions: {
+                    exclude: ["foo.ts", "**/*.d.ts"],
+                },
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").linterOptions,
+                {
+                    exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
+                },
+            );
+        });
+
+        it("resolves overrides files and excludedFiles relative to the config file", () => {
+            const config: RawConfigFile = {
+                overrides: [{
+                    excludedFiles: ["foo.ts", "**/*foo.d.ts"],
+                    files: ["bar.ts", "**/*bar.d.ts"],
+                    rules: {},
+                }],
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").overrides,
+                [{
+                    excludedFiles: ["/path/foo.ts", "/path/**/*foo.d.ts"],
+                    files: ["/path/bar.ts", "/path/**/*bar.d.ts"],
+                    rules: new Map(),
+                }],
+            );
+        });
+    });
+
     describe("findConfigurationPath", () => {
         it("finds the closest tslint.json", () => {
             assert.strictEqual(
@@ -332,6 +422,390 @@ describe("Configuration", () => {
     });
 });
 
+describe("parseConfigList", () => {
+    let availableConfig: { [name: string]: RawConfigFile };
+    const readConfig = (filePath: string, dir: string) => {
+        const foundConfig = availableConfig[`${dir}/${filePath}`];
+        if (foundConfig === undefined) {
+            throw new Error(`no config at: ${dir}/${filePath}`);
+        }
+
+        return { config: foundConfig, filePath };
+    };
+    const resolveRulesDirectories = (dirs: string[]) => dirs;
+
+    beforeEach(() => {
+        availableConfig = {};
+    });
+
+    it("links an extended config", () => {
+        availableConfig["./a"] = {
+            rules: {
+                ruleName: [true],
+            },
+        };
+        const rawConfig = {
+            extends: "a",
+        };
+
+        const config = parseConfigList(rawConfig, ".", readConfig);
+        const expected = buildConfig({
+            extends: [buildConfig({
+                rules: new Map<string, Partial<IOptions>>([
+                    ["ruleName", {}],
+                ]),
+            })],
+        });
+        expected.defaultSeverity = "error";
+
+        assertConfigEquals(config, expected);
+    });
+
+    it("accumulates and de-dups rulesDirectory in the base config", () => {
+        availableConfig["./a"] = {
+            rulesDirectory: "dir-1",
+        };
+        availableConfig["./b"] = {
+            rulesDirectory: ["dir-2", "dir-3"],
+        };
+        availableConfig["./c"] = {
+            rulesDirectory: ["dir-2"],
+        };
+        const rawConfig = {
+            extends: ["a", "b", "c"],
+        };
+
+        const config = parseConfigList(rawConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.deepEqual(config.rulesDirectory, ["dir-1", "dir-2", "dir-3"]);
+    });
+
+    it("backfills exclude options and the last extends wins", () => {
+        availableConfig["./a"] = {
+            linterOptions: {
+                exclude: ["src"],
+            },
+        };
+        availableConfig["./b"] = {
+            linterOptions: {
+                exclude: ["lib", "bin"],
+            },
+        };
+
+        const baseConfig = {
+            extends: ["a", "b"],
+        };
+
+        const config = parseConfigList(baseConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.deepEqual(config.linterOptions, {
+            exclude: [
+                path.resolve("lib"),
+                path.resolve("bin"),
+            ],
+        });
+    });
+
+    it("prefers the base config exclude option over the extended config", () => {
+        availableConfig["./a"] = {
+            linterOptions: {
+                exclude: ["bin"],
+            },
+        };
+
+        const baseConfig = {
+            extends: "a",
+            linterOptions: {
+                exclude: ["src"],
+            },
+        };
+        const config = parseConfigList(baseConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.deepEqual(config.linterOptions, {
+            exclude: [
+                path.resolve("src"),
+            ],
+        });
+    });
+
+    it("prefers a shallow config exclude option over a deep config", () => {
+        availableConfig["./a"] = {
+            extends: ["b"],
+            linterOptions: {
+                exclude: ["src"],
+            },
+        };
+        availableConfig["./b"] = {
+            linterOptions: {
+                exclude: ["lib", "bin"],
+            },
+        };
+
+        const baseConfig = {
+            extends: ["a"],
+        };
+
+        const config = parseConfigList(baseConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.deepEqual(config.linterOptions, {
+            exclude: [
+                path.resolve("src"),
+            ],
+        });
+    });
+
+    it("empty linter options does not replace exclude", () => {
+        availableConfig["./a"] = {
+            linterOptions: {
+                exclude: ["src"],
+            },
+        };
+
+        const baseConfig = {
+            extends: ["a"],
+            linterOptions: {},
+        };
+
+        const config = parseConfigList(baseConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.deepEqual(config.linterOptions, {
+            exclude: [
+                path.resolve("src"),
+            ],
+        });
+    });
+
+    it("extending sets the default severity", () => {
+        availableConfig["./a"] = {
+            defaultSeverity: "warning",
+        };
+
+        const baseConfig = {
+            extends: "a",
+        };
+
+        const config = parseConfigList(baseConfig, ".", readConfig, resolveRulesDirectories);
+
+        assert.equal(config.defaultSeverity, "warning");
+    });
+});
+
+describe("rulesForFile", () => {
+    it("gets base rules with default severity", () => {
+        const config = buildConfig({
+            rules: new Map<string, Partial<IOptions>>([
+                ["ruleName", {}],
+            ]),
+        });
+
+        const ruleOptions = rulesForFile(config, "file.ts");
+
+        assert.deepEqual(ruleOptions, [
+            buildRuleOptions({
+                ruleName: "ruleName",
+                ruleSeverity: "error",
+            }),
+        ]);
+    });
+
+    it("recursively builds rules with the base config taking precedence", () => {
+        const extended = buildConfig({
+            jsRules: new Map(),
+            rules: new Map([
+                ["ruleName", { ruleSeverity: "error" as RuleSeverity }],
+                ["fromExtended", { ruleSeverity: "error" as RuleSeverity }],
+            ]),
+        });
+
+        const config = buildConfig({
+            defaultSeverity: "error",
+            extends: [extended],
+            jsRules: new Map(),
+            rules: new Map([
+                ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+            ]),
+        });
+
+        const ruleOptions = rulesForFile(config, "file.ts");
+
+        assert.deepEqual(ruleOptions, [
+            buildRuleOptions({
+                ruleName: "ruleName",
+                ruleSeverity: "warning",
+            }),
+            buildRuleOptions({
+                ruleName: "fromExtended",
+                ruleSeverity: "error",
+            }),
+        ]);
+    });
+
+    it("recursively builds jsRules for JavaScript files", () => {
+        const extended = buildConfig({
+            jsRules: new Map([
+                ["jsRuleName", { ruleSeverity: "error" as RuleSeverity }],
+                ["jsFromExtended", { ruleSeverity: "error" as RuleSeverity }],
+            ]),
+        });
+
+        const config = buildConfig({
+            defaultSeverity: "error",
+            extends: [extended],
+            jsRules: new Map([
+                ["jsRuleName", { ruleSeverity: "warning" as RuleSeverity }],
+            ]),
+        });
+
+        const ruleOptions = rulesForFile(config, "file.js");
+
+        assert.deepEqual(ruleOptions, [
+            buildRuleOptions({
+                ruleName: "jsRuleName",
+                ruleSeverity: "warning",
+            }),
+            buildRuleOptions({
+                ruleName: "jsFromExtended",
+                ruleSeverity: "error",
+            }),
+        ]);
+    });
+
+    it("applies defaultSeverity if rule severity is default", () => {
+        const config = buildConfig({
+            defaultSeverity: "warning",
+            rules: new Map<string, Partial<IOptions>>([
+                ["a", { ruleSeverity: "error" }],
+                ["b", { ruleSeverity: "warning" }],
+                ["c", { ruleSeverity: "off" }],
+                ["d", {}],
+            ]),
+        });
+
+        assert.deepEqual(rulesForFile(config, "file.ts"), [
+            buildRuleOptions({ ruleName: "a", ruleSeverity: "error" }),
+            buildRuleOptions({ ruleName: "b", ruleSeverity: "warning" }),
+            buildRuleOptions({ ruleName: "c", ruleSeverity: "off" }),
+            buildRuleOptions({ ruleName: "d", ruleSeverity: "warning" }),
+        ]);
+    });
+
+    describe("overrides", () => {
+        it("overrides the ruleSeverity when the file name matches", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleArguments: ["arg"], ruleName: "ruleName", ruleSeverity: "warning" }),
+            ]);
+        });
+
+        it("overrides the ruleArguments when the file name matches", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleArguments: ["overrideArg"] }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["overrideArg"] }),
+            ]);
+        });
+
+        it("applies overrides in order", () => {
+            const config = buildConfig({
+                overrides: [
+                    {
+                        excludedFiles: [],
+                        files: [path.resolve("file-name")],
+                        rules: new Map([
+                            ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                        ]),
+                    },
+                    {
+                        excludedFiles: [],
+                        files: [path.resolve("file-name")],
+                        rules: new Map([
+                            ["ruleName", { ruleSeverity: "off" as RuleSeverity }],
+                        ]),
+                    },
+                ],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "off" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
+
+        it("does not override when the file name does not match", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "no-match");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
+
+        it("excludedFiles overrides files matching", () => {
+            const config = buildConfig({
+                overrides: [{
+                    excludedFiles: [path.resolve("file-name")],
+                    files: [path.resolve("file-name")],
+                    rules: new Map([
+                        ["ruleName", { ruleSeverity: "warning" as RuleSeverity }],
+                    ]),
+                }],
+                rules: new Map([
+                    ["ruleName", { ruleSeverity: "error" as RuleSeverity, ruleArguments: ["arg"] }],
+                ]),
+            });
+
+            const rules = rulesForFile(config, "file-name");
+
+            assert.deepEqual(rules, [
+                buildRuleOptions({ ruleSeverity: "error" as RuleSeverity, ruleName: "ruleName", ruleArguments: ["arg"] }),
+            ]);
+        });
+    });
+});
+
 function getEmptyConfig(): IConfigurationFile {
     return {
         extends: [],
@@ -340,4 +814,67 @@ function getEmptyConfig(): IConfigurationFile {
         rules: new Map<string, Partial<IOptions>>(),
         rulesDirectory: [],
     };
+}
+
+export function buildConfig(overrides: Partial<IConfigurationFile> = {}): IConfigurationFile {
+    return {
+        extends: [],
+        jsRules: new Map(),
+        linterOptions: {},
+        overrides: [],
+        rules: new Map(),
+        rulesDirectory: [],
+        ...overrides,
+    };
+}
+
+export function buildRuleOptions(overrides: Partial<IOptions> = {}): IOptions {
+    return {
+        disabledIntervals: [],
+        ruleArguments: [],
+        ruleName: "ruleName",
+        ruleSeverity: "error",
+        ...overrides,
+    };
+
+}
+
+function demap<T>(map: Map<string, T>) {
+    if (map == undefined) {
+        return map;
+    }
+    const output: { [key: string]: T } = {};
+    map.forEach((value, key) => {
+        output[key] = value;
+    });
+    return output;
+}
+
+// this is needed since `deepEqual` doesn't go into Map object
+export function assertConfigEquals(actual: IConfigurationFile, expected: IConfigurationFile) {
+    assert.deepEqual(demapConfig(actual), demapConfig(expected));
+}
+
+export function demapConfig(config: IConfigurationFile) {
+    // tslint:disable:no-unsafe-any
+    const copy: any = { ...config };
+
+    if (copy.jsRules) {
+        copy.jsRules = demap(copy.jsRules);
+    }
+
+    if (copy.rules) {
+        copy.rules = demap(copy.rules);
+    }
+
+    if (Array.isArray(copy.extends)) {
+        copy.extends = copy.extends.map(demapConfig);
+    }
+    // tslint:enable
+
+    return copy;
+}
+
+export function assertDeepMapEquals(actual: Map<any, any>, expected: Map<any, any>, message?: string) {
+    assert.deepEqual(demap(actual), demap(expected), message);
 }
