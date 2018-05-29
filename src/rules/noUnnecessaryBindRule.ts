@@ -86,11 +86,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
             return;
         }
 
-        const replacement = Lint.Replacement.replaceNode(
-            callExpression,
-            Lint.convertFunctionToArrowText(valueDeclaration, context.sourceFile));
-
-        context.addFailureAtNode(callExpression, Rule.FAILURE_STRING_FUNCTION, replacement);
+        context.addFailureAtNode(callExpression, Rule.FAILURE_STRING_FUNCTION);
     }
 
     function getArrowFunctionDeclaration(node: ts.Node): ts.ArrowFunction | undefined {

@@ -491,27 +491,3 @@ export function isWhiteSpace(ch: number): boolean {
     // tslint:disable-next-line
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
-
-function convertNodeArrayToText(modifiers: ts.NodeArray<ts.Node> | undefined, sourceFile: ts.SourceFile): string {
-    return modifiers === undefined || modifiers.length === 0
-        ? ""
-        : sourceFile.text.substring(modifiers[0].pos, modifiers[modifiers.length - 1].end).trim();
-}
-
-export function convertFunctionToArrowText(node: ts.FunctionExpression, sourceFile: ts.SourceFile): string {
-    const modifiers = convertNodeArrayToText(node.modifiers, sourceFile);
-    const parameters = convertNodeArrayToText(node.parameters, sourceFile);
-    let start = "";
-
-    if (modifiers !== "") {
-        start += `${modifiers} `;
-    }
-
-    start += `(${parameters})`;
-
-    if (node.type !== undefined) {
-        start += `: ${node.type.getText(sourceFile)}`;
-    }
-
-    return `${start} =>${sourceFile.text.substring(node.body.pos, node.body.end)}`;
-}
