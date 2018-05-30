@@ -52,5 +52,15 @@ class CallsSuper extends PublicConstructor {
 
 class ContainsParameter {
     constructor(x: number) { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
-[0]: There's no need to add an empty constructor to a class.
+
+class ContainsParameterDeclaration {
+    constructor(public x: number) { }
+}
+
+class ContainsParameterAndParameterDeclaration {
+    constructor(x: number, public y: number) { }
+}
+
+[0]: Remove unnecessary empty constructor.

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration } from "tsutils";
+import { isConstructorDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING = "There's no need to add an empty constructor to a class.";
+    public static FAILURE_STRING = "Remove unnecessary empty constructor.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -43,15 +43,22 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 const isEmptyConstructor = (node: ts.ConstructorDeclaration): boolean =>
-    node.parameters.length === 0 && node.body !== undefined && node.body.statements.length === 0;
+    node.body !== undefined && node.body.statements.length === 0;
 
-const createFix = (node: ts.ConstructorDeclaration): Lint.Replacement =>
-    Lint.Replacement.deleteFromTo(node.pos, node.end);
+const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean => {
+    for (const parameter of node.parameters) {
+        if (isParameterProperty(parameter)) {
+            return true;
+        }
+    }
+
+    return false;
+};
 
 function walk(context: Lint.WalkContext<void>) {
     const callback = (node: ts.Node): void => {
-        if (isConstructorDeclaration(node) && isEmptyConstructor(node)) {
-            context.addFailureAtNode(node, Rule.FAILURE_STRING, createFix(node));
+        if (isConstructorDeclaration(node) && isEmptyConstructor(node) && !containsConstructorParameter(node)) {
+            context.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else {
             ts.forEachChild(node, callback);
         }
