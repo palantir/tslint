@@ -18,7 +18,7 @@
 import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
-import { codeExamples } from "./code-examples/preferWhile.examples";
+import { codeExamples } from "./code-examples/no-console.examples";
 
 interface Config {
     "banned-methods": string[] | undefined;
