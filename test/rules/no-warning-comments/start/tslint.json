@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-warning-comments": [true, {"location": "start", "terms": ["todo", "fixme", "xxx"]}]
+  }
+}

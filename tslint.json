@@ -66,6 +66,7 @@
       "check-format",
       "allow-leading-underscore",
       "allow-pascal-case"
-    ]
+    ],
+    "no-warning-comments": false
   }
 }

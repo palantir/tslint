@@ -1,0 +1,42 @@
+///<reference path="TODO.ts"/> (reference is OK)
+class Clazz { // this comment is OK because FIXME isn't at the start
+    /*XxX: block comment
+      ~~~                [Warning term 'XxX' found at start of comment]
+     * adada
+     * another XxX which should not be matched because of the first 'XxX'
+     */
+    /******
+     * XxX: starts on second line of block comment which should still match
+       ~~~                                                                  [Warning term 'XxX' found at start of comment]
+     * another XxX which should not be matched either
+     */
+    /******
+    hello world
+     * XxX: starts on line of block comment after other text which should NOT match
+     * another XxX which should not be matched either
+     */
+    public funcxion() { // This comment has a capital letter starting it
+        //This comment is on its own line, and starts with a capital _and_ no space
+        console.log("test"); //this comment has no space
+    }
+    /// <not a reference/>
+    ////foo
+}//
+
+//#region test // Todo: not at start of comment; doesn't count
+#region test
+#endregion /***** ToDo: end region! *****/
+                  ~~~~                     [Warning term 'ToDo' found at start of comment]
+
+`${location.protocol}//${location.hostname}`/**/
+
+//noinspection JSUnusedGlobalSymbols
+const unusedVar = 'unneeded value';
+//////////FIXME: unused variable above!
+          ~~~~~                         [Warning term 'FIXME' found at start of comment]
+
+// TODO: write more code...
+   ~~~~                      [Warning term 'TODO' found at start of comment]
+
+//TODO: write even more code...
+  ~~~~                           [Warning term 'TODO' found at start of comment]
