@@ -51,6 +51,10 @@ export function testDestructuring() {
             ~                    [err % ('e')]
 #endif
     var {d: _d, e: _e} = { d: 1, e: 2 };
+#if typescript >= 2.9.0
+        ~~~~~~~~~~~~~~           [All destructured elements are unused.]
+#endif
+    // this above is incorrect, unfortunately w/ TS 2.9+, ignore pattern doesn't work for this sort of error
     var {f} = { f: 3 };
 
     return c * f;
