@@ -66,7 +66,16 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             ],
         },
-        optionExamples: [[true, "log", "error"], [true, [], "Instead of using console, try importing LogService."]],
+        optionExamples: [
+            [true, "log", "error"],
+            [
+                true,
+                {
+                    "banned-methods": ["error", "warn"],
+                    "failure-string": "Instead of using console, try importing LogService."
+                },
+            ],
+        ],
         type: "functionality",
         typescriptOnly: false,
         codeExamples,
