@@ -72,7 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     "banned-methods": ["error", "warn"],
-                    "failure-string": "Instead of using console, try importing LogService."
+                    "failure-string": "Instead of using console, try importing LogService.",
                 },
             ],
         ],
@@ -90,10 +90,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         return this.applyWithFunction(sourceFile, walk, this.parseOptions(this.ruleArguments));
     }
 
-    private parseOptions(ruleArguments: any[]): Options {
+    private parseOptions(ruleArguments: [Config] | string[]): Options {
         if (ruleArguments.length === 0 || typeof ruleArguments[0] === "string") {
             return {
-                bannedMethods: [...ruleArguments],
+                bannedMethods: [...ruleArguments as string[]],
                 customFailureString: undefined,
             };
         } else if (typeof ruleArguments[0] === "object") {
