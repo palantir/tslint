@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as semver from "semver";
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
@@ -72,7 +73,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
-        deprecationMessage: !/^2\.[0-8]\./.test(ts.version)
+        deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
             ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
             : undefined,
     };
