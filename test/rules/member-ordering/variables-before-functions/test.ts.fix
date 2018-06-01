@@ -1,0 +1,63 @@
+// ensure that Bar and Baz do not get conflated
+interface Bar {
+    x(): void;
+}
+
+interface Baz {
+    y: number;
+}
+
+interface BarBaz {
+    y: number;
+    x(): void;
+}
+
+class Foo {
+    y: number;
+    x(): void {}
+}
+
+interface IArrowMethods {
+    a: number;
+    d: () => void;
+    b(): void;
+}
+
+class ArrowMethods {
+    public a = 5;
+    private callback: () => void
+    public b = "foo";
+    public c() {}
+    public d = () => {};
+    public e = function() {};
+}
+
+class OutOfOrder {
+    b = 5;
+    a = () => {};
+}
+
+class Constructor1 {
+    blah: number = 0;
+    constructor() {}
+}
+
+class Constructor2 {
+    blah: number = 0;
+    constructor() {}
+}
+
+// Works for type literal, just like interface
+type T = {
+    y: number;
+    x(): void;
+}
+
+// Works for class inside object literal
+const o = {
+    foo: class C {
+        y: number;
+        x(): void;
+    }
+}
+

@@ -7,13 +7,13 @@ class Good {
     private f = foo();
     constructor() {}
     j = () => {};
-    protected k() {};
+    protected k() {}
     private l = () => {};
     public static g() {}
     protected static h() {}
     private static i = () => {};
 }
-    
+
 interface IGood {
     foo: number;
     arrowsAreFields: () => void;
@@ -30,7 +30,7 @@ class Bad {
     protected e: number = 5;
     private f = foo();
     j = () => {};
-    protected k() {};
+    protected k() {}
     private l = () => {};
     public static g() {}
     protected static h() {}

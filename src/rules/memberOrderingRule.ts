@@ -132,6 +132,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "member-ordering",
         description: "Enforces member ordering.",
+        hasFix: true,
         rationale: Lint.Utils.dedent`
             A consistent ordering for class members can make classes easier to read, navigate, and edit.
 
@@ -217,8 +218,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
+
+    private readonly fixes: Array<[Lint.RuleFailure, Lint.Replacement]> = [];
+
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
+            // NB: iterate through children first!
+            ts.forEachChild(node, cb);
+
             switch (node.kind) {
                 case ts.SyntaxKind.ClassDeclaration:
                 case ts.SyntaxKind.ClassExpression:
@@ -226,14 +233,27 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.TypeLiteral:
                     this.checkMembers((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members);
             }
-            return ts.forEachChild(node, cb);
         };
-        return ts.forEachChild(sourceFile, cb);
+        ts.forEachChild(sourceFile, cb);
+
+        // assign Replacements which have not been merged into surrounding ones to their RuleFailures.
+        this.fixes.forEach(([failure, replacement]) => {
+            (failure.getFix() as Lint.Replacement[]).push(replacement);
+        });
     }
 
+    /**
+     * Check wether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
+     * Lint.Replacement is generated, which replaces the entire NodeArray with a correctly sorted one. The Replacement
+     * is not immediately added to a RuleFailure, as incorrectly sorted nodes can be nested (e.g. a class declaration
+     * in a method implementation), but instead temporarily stored in `this.fixes`. Nested Replacements are manually
+     * merged, as TSLint doesn't handle overlapping ones. For this reason it is important that the recursion happens
+     * before the checkMembers call in this.walk().
+     */
     private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
+        let failureExists = false;
         for (const member of members) {
             const rank = this.memberRank(member);
             if (rank === -1) {
@@ -250,7 +270,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     : "at the beginning of the class/interface";
                 const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
                     `Instead, this should come ${locationHint}.`;
-                this.addFailureAtNode(member, errorLine1);
+                this.addFailureAtNode(member, errorLine1, []);
+                failureExists = true;
             } else {
                 if (this.options.alphabetize && member.name !== undefined) {
                     if (rank !== prevRank) {
@@ -262,7 +283,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
                         this.addFailureAtNode(
                             member.name,
-                            Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
+                            Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
+                        failureExists = true;
                     } else {
                         prevName = curName;
                     }
@@ -271,6 +293,52 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 // keep track of last good node
                 prevRank = rank;
             }
+        }
+        if (failureExists) {
+            // const info = (x: Node)=>[x.name && nameString(x.name), this.memberRank(x), members.indexOf(x)]
+            const sortedMembers = members.slice().sort((a, b) => {
+                // first, sort by member rank
+                // const ai = info(a);
+                // const bi = info(b);
+                const rankDiff = this.memberRank(a) - this.memberRank(b);
+                if (rankDiff !== 0) { return rankDiff; }
+                // then lexicographically if alphabetize == true
+                if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
+                    const aName = nameString(a.name);
+                    const bName = nameString(b.name);
+                    const nameDiff = aName.localeCompare(bName);
+                    if (nameDiff !== 0) { return nameDiff; }
+                }
+                // finally, sort by position in original NodeArray so the sort remains stable.
+                return members.indexOf(a) - members.indexOf(b);
+            });
+            const sortedMembersText = sortedMembers.map((node) => {
+                const start = node.getFullStart();
+                const end = node.getEnd();
+                let nodeText = this.sourceFile.text.substring(start, end);
+                while (true) {
+                    // check if there are previous fixes which we need to merge into this one
+                    // if yes, remove it from the list so that we do not return overlapping Replacements
+                    const fixIndex = arrayFindLastIndex(
+                        this.fixes,
+                        ([, r]) => r.start >= start && r.start + r.length <= end,
+                    );
+                    if (fixIndex === -1) {
+                        break;
+                    }
+                    const fix = this.fixes.splice(fixIndex, 1)[0];
+                    const [, replacement] = fix;
+                    nodeText = applyReplacementOffset(nodeText, replacement, start);
+                }
+                return nodeText;
+            });
+            // instead of assigning the fix immediately to the last failure, we temporarily store it in `this.fixes`,
+            // in case a containing node needs to be fixed too. We only "add" the fix to the last failure, although
+            // it fixes all failures in this NodeArray, as TSLint doesn't handle duplicate Replacements.
+            this.fixes.push([
+                arrayLast(this.failures),
+                Lint.Replacement.replaceFromTo(members.pos, members.end, sortedMembersText.join("")),
+            ]);
         }
     }
 
@@ -486,4 +554,35 @@ function nameString(name: ts.PropertyName): string {
         default:
             return "";
     }
+}
+/**
+ * Returns the last element of an array. (Or undefined).
+ */
+function arrayLast<T>(array: ArrayLike<T>): T {
+    return array[array.length - 1];
+}
+
+/**
+ * Array.prototype.findIndex, but the last index.
+ */
+function arrayFindLastIndex<T>(
+    array: ArrayLike<T>,
+    predicate: (el: T, elIndex: number, array: ArrayLike<T>) => boolean,
+): number {
+    for (let i = array.length; i-- > 0;) {
+        if (predicate(array[i], i, array)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Applies a Replacement to a part of the text which starts at offset.
+ * See also Replacement.apply
+ */
+function applyReplacementOffset(content: string, replacement: Lint.Replacement, offset: number) {
+    return content.substring(0, replacement.start - offset)
+        + replacement.text
+        + content.substring(replacement.start - offset + replacement.length);
 }
