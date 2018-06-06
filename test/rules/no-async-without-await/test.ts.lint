@@ -1,0 +1,74 @@
+async function a(){
+~~~~~ [0]
+    let b = 1;
+    console.log(b);
+}
+
+async function a(){
+   let b = 1;
+   await console.log(b);
+}
+
+async function a(){
+   let b = 1;
+   console.log(await b());
+}
+
+async function a(){
+~~~~~ [0]
+   let b = 1;
+   let c = async () => {
+        await fetch();
+   };
+}
+
+async function a(){
+~~~~~ [Async functions with no await are not allowed.]
+   let b = 1;
+   async function f() {
+        await fetch();
+   };
+}
+
+function a(){
+   let b = 1;
+   async function f() {
+   ~~~~~ [Async functions with no await are not allowed.]
+        fetch();
+   };
+}
+
+const a = async () => {
+          ~~~~~ [Async functions with no await are not allowed.]
+   let b = 1;
+   console.log(b);
+}
+
+
+const a = async () => 1;
+          ~~~~~ [Async functions with no await are not allowed.]
+
+class A {
+    async b() {
+    ~~~~~ [Async functions with no await are not allowed.]
+        console.log(1);
+    }
+}
+
+class A {
+    async b() {
+        await b();
+    }
+}
+
+async () => {
+    await a();
+    class A {
+        async b() {
+        ~~~~~ [Async functions with no await are not allowed.]
+            console.log(1);
+        }
+    }
+};
+
+[0]: Async functions with no await are not allowed.
