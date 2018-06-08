@@ -156,6 +156,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
+// tslint:disable-next-line:no-async-without-await
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
@@ -287,6 +288,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
+// tslint:disable-next-line:no-async-without-await
 async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);

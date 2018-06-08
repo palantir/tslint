@@ -61,7 +61,11 @@ class Walk extends Lint.RuleWalker {
     }
 
     private getAsyncModifier(node: ts.Node) {
-        return node.modifiers && node.modifiers.find((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+        if (node.modifiers !== undefined) {
+            return node.modifiers.find((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+        }
+
+        return undefined;
     }
 
     private isAwait(node: ts.Node): boolean {
@@ -73,18 +77,21 @@ class Walk extends Lint.RuleWalker {
             return true;
         }
 
-        if (node.kind === ts.SyntaxKind.ArrowFunction || node.kind === ts.SyntaxKind.FunctionDeclaration) {
+        // tslint:disable-next-line:no-unsafe-any
+        if (node.kind === ts.SyntaxKind.ArrowFunction
+            || node.kind === ts.SyntaxKind.FunctionDeclaration) {
             return false;
         }
 
-        const awaitInChildren: boolean[] = node.getChildren().map(this.functionBlockHasAwait.bind(this));
+        const awaitInChildren: boolean[] = node.getChildren()
+            .map((functionBlockNode: ts.Node) => this.functionBlockHasAwait(functionBlockNode));
         return awaitInChildren.some(Boolean);
     }
 
     private addFailureIfAsyncFunctionHasNoAwait(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
         if (this.isAsyncFunction(node) && !this.functionBlockHasAwait(node.body as ts.Node)) {
             const asyncModifier = this.getAsyncModifier(node);
-            if (asyncModifier) {
+            if (asyncModifier !== undefined) {
                 this.addFailureAt(asyncModifier.getStart(), asyncModifier.getEnd() - asyncModifier.getStart(), Rule.FAILURE_STRING);
             }
         }
