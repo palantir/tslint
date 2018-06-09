@@ -15,16 +15,18 @@
  * limitations under the License.
  */
 
+import * as path from "path";
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+// tslint:disable object-literal-sort-keys
+
 const OPTION_CHECK_PARAMETERS = "check-parameters";
 const OPTION_IGNORE_PATTERN = "ignore-pattern";
 
 export class Rule extends Lint.Rules.TypedRule {
-    /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unused-variable",
         description: Lint.Utils.dedent`
@@ -73,7 +75,6 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: true,
         requiresTypeInfo: true,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program);
@@ -104,9 +105,9 @@ function parseOptions(options: any[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
     const { sourceFile, options: { checkParameters, ignorePattern } } = ctx;
-    const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
-    const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
-    const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
+    const {program: unusedCheckedProgram, sourceFile: checkedSourceFile} = getUnusedCheckedProgram(program, sourceFile, checkParameters);
+    const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, checkedSourceFile);
+    const checker = program.getTypeChecker(); // Doesn't matter which program is used for this.
     const declaration = program.getCompilerOptions().declaration;
 
     // If all specifiers in an import are unused, we elide the entire import.
@@ -428,21 +429,7 @@ function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
     }
 }
 
-const programToUnusedCheckedProgram = new WeakMap<ts.Program, ts.Program>();
-
-function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
-    // Assuming checkParameters will always have the same value, so only lookup by program.
-    let checkedProgram = programToUnusedCheckedProgram.get(program);
-    if (checkedProgram !== undefined) {
-        return checkedProgram;
-    }
-
-    checkedProgram = makeUnusedCheckedProgram(program, checkParameters);
-    programToUnusedCheckedProgram.set(program, checkedProgram);
-    return checkedProgram;
-}
-
-function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
+function getUnusedCheckedProgram(program: ts.Program, sourceFile: ts.SourceFile, checkParameters: boolean) {
     const originalOptions = program.getCompilerOptions();
     const options = {
         ...originalOptions,
@@ -450,14 +437,21 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
         noUnusedLocals: true,
         noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
     };
-    const sourceFilesByName = new Map<string, ts.SourceFile>(
+    const sourceFilesByName = new Map(
         program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
 
     // tslint:disable object-literal-sort-keys
-    return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
+    const newProgram = ts.createProgram([sourceFile.fileName], options, {
         fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
         readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
-        getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
+        getSourceFile(f) {
+            let exisiting = sourceFilesByName.get(getCanonicalFileName(f));
+            if (exisiting === undefined) {
+                // if file is not found, it must be one of lib.XXX.d.ts -> need to resolve the path first
+                exisiting = sourceFilesByName.get(getCanonicalFileName(path.join(path.dirname(ts.getDefaultLibFilePath(options)), f)))!;
+            }
+            return ts.createSourceFile(f, exisiting.text, exisiting.languageVersion);
+        },
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => undefined,
         getCurrentDirectory: () => "",
@@ -466,7 +460,8 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
         useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
         getNewLine: () => "\n",
     });
-    // tslint:enable object-literal-sort-keys
+
+    return {program: newProgram, sourceFile: newProgram.getSourceFile(getCanonicalFileName(sourceFile.fileName))};
 
     // We need to be careful with file system case sensitivity
     function getCanonicalFileName(fileName: string): string {
