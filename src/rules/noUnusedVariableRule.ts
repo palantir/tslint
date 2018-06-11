@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as semver from "semver";
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
@@ -72,6 +73,9 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
+        deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
+            ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
+            : undefined,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -119,7 +123,8 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
-        if (ignorePattern !== undefined) {
+        // BUG: this means imports / destructures with all (2+) unused variables don't respect ignore pattern
+        if (ignorePattern !== undefined && kind !== UnusedKind.DECLARATION && kind !== UnusedKind.ALL_DESTRUCTURES) {
             const varName = /'(.*)'/.exec(failure)![1];
             if (ignorePattern.test(varName)) {
                 continue;
@@ -411,6 +416,7 @@ const enum UnusedKind {
     VARIABLE_OR_PARAMETER,
     PROPERTY,
     DECLARATION, // Introduced in TS 2.8
+    ALL_DESTRUCTURES, // introduced in TS 2.9
 }
 function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
     // https://github.com/Microsoft/TypeScript/blob/master/src/compiler/diagnosticMessages.json
@@ -423,6 +429,8 @@ function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
             return UnusedKind.PROPERTY; // "Property '{0}' is declared but never used."
         case 6192:
             return UnusedKind.DECLARATION; // "All imports in import declaration are unused."
+        case 6198:
+            return UnusedKind.ALL_DESTRUCTURES; // "All destructured elements are unused."
         default:
             return undefined;
     }
