@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "no-console": [
+      true,
+      {
+        "banned-methods": ["dir", "error", "log", "warn"],
+        "failure-string": "Use the project's logging service, please."
+      }
+    ]
+  }
+}
