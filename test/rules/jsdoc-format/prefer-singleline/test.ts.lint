@@ -1,0 +1,14 @@
+    /**
+    ~~~
+     * Bad singleline
+~~~~~~~~~~~~~~~~~~~~~
+     */
+~~~~~~~ [short jsdoc block should be on single line]
+
+    /** Good singleline */
+
+    /** bad singleline. this is a very long block of text that should be split on multiple lines using the standard docblock */
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [singleline jsdoc block should fit within maxWidth characters]
+
+    /** this is a bad single line with a reallylongwordmaybeitsalinkorsomesuchthatcannotpossiblyfitwithinthesinglelinemaxwidthsoweneedthistoprovethefixerdoesnotgointoaloop */
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [singleline jsdoc block should fit within maxWidth characters]

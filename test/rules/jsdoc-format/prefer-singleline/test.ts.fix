@@ -1,0 +1,13 @@
+    /** Bad singleline */
+
+    /** Good singleline */
+
+    /**
+     * bad singleline. this is a very long block of text that should be split on
+     * multiple lines using the standard docblock
+     */
+
+    /**
+     * this is a bad single line with a
+     * reallylongwordmaybeitsalinkorsomesuchthatcannotpossiblyfitwithinthesinglelinemaxwidthsoweneedthistoprovethefixerdoesnotgointoaloop
+     */

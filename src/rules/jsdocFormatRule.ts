@@ -21,7 +21,8 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_CHECK_MULTILINE_START = "check-multiline-start";
-const OPTION_FORCE_SINGLELINE = "force-singleline";
+const OPTION_PREFER_SINGLELINE = "prefer-singleline";
+const OPTION_MAX_WIDTH = "max-width";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -42,74 +43,175 @@ export class Rule extends Lint.Rules.AbstractRule {
             You can optionally specify the option \`"${OPTION_CHECK_MULTILINE_START}"\` to enforce the first line of a
             multiline JSDoc comment to be empty.
 
-            You can optionally specify the option \`"${OPTION_FORCE_SINGLELINE}"\` to require JSDoc comments that can
-            fit on a single lin to do so.
+            You can optionally specify the option \`"${OPTION_PREFER_SINGLELINE}"\` and \`"${OPTION_MAX_WIDTH}"\`to require JSDoc comments
+            that can fit on a single line to do so.
         `,
         options: {
             type: "array",
             minItems: 0,
-            maxItems: 2,
+            maxItems: 3,
             items: {
                 type: "string",
-                enum: [OPTION_CHECK_MULTILINE_START, OPTION_FORCE_SINGLELINE],
+                enum: [OPTION_CHECK_MULTILINE_START, OPTION_PREFER_SINGLELINE],
             },
         },
         optionExamples: [
             true,
             [true, OPTION_CHECK_MULTILINE_START],
-            [true, OPTION_FORCE_SINGLELINE],
-            [true, OPTION_CHECK_MULTILINE_START, OPTION_FORCE_SINGLELINE],
+            [true, OPTION_PREFER_SINGLELINE, { OPTION_MAX_WIDTH: 80}],
+            [true, OPTION_CHECK_MULTILINE_START, OPTION_PREFER_SINGLELINE, { OPTION_MAX_WIDTH: 80 }],
         ],
         type: "style",
         typescriptOnly: false,
+        codeExamples: [
+            {
+                description: "Keep short jsdoc comments to a single line",
+                config: Lint.Utils.dedent`
+                    "rules": { "jsdoc-format": [true, "prefer-singleline", {"max-width": 80}] }
+                `,
+                pass: Lint.Utils.dedent`
+                    /**
+                     * good multline
+                     * jsdoc docblock
+                     */
+
+                    /** good singleline jsdoc dockblock */
+                `,
+                fail: Lint.Utils.dedent`
+                    /** bad single line jsdock block because it's way too long to fit on a single line */
+
+                    /**
+                     * bad multiline jsdoc docblock
+                     */
+                `,
+            },
+        ],
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
-    public static FORCE_SINGLE_LINE_FALURE = "singleline jsdoc should use compact docblock form";
+    public static PREFER_SINGLE_LINE_FAILURE = "short jsdoc block should be on single line";
+    public static SINGLE_LINE_MAX_WIDTH_FAILURE = "singleline jsdoc block should fit within maxWidth characters";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const maxWidthOption = this.ruleArguments.find((arg) => typeof arg === "object" && typeof arg[OPTION_MAX_WIDTH] === "number");
+        let maxWidth;
+        if (maxWidthOption) {
+            maxWidth = maxWidthOption[OPTION_MAX_WIDTH];
+        }
+
         return this.applyWithFunction(sourceFile, walk, {
             firstLineOfMultiline: this.ruleArguments.indexOf(OPTION_CHECK_MULTILINE_START) !== -1,
-            forceSingleline: this.ruleArguments.indexOf(OPTION_FORCE_SINGLELINE) !== -1,
+            maxWidth,
+            preferSingleline: this.ruleArguments.indexOf(OPTION_PREFER_SINGLELINE) !== -1,
         });
     }
 }
 
 interface Options {
     firstLineOfMultiline: boolean;
-    forceSingleline: boolean;
+    preferSingleline: boolean;
+    maxWidth: number;
+}
+
+function shouldBeSingleline(ctx: Lint.WalkContext<Options>, lines: string[], {pos, end}: ts.CommentRange): boolean {
+    if (!ctx.options.preferSingleline) {
+        return false;
+    }
+
+    if (lines.length === 3) {
+        ctx.addFailure(pos, end, Rule.PREFER_SINGLE_LINE_FAILURE, [
+            Lint.Replacement.replaceFromTo(pos, end, `/** ${lines[1].trim().substr(1).trim()} */`),
+        ]);
+    }
+
+    return false;
+}
+
+function shouldBeMultiline(ctx: Lint.WalkContext<Options>, lines: string[], fullText: string, { pos, end }: ts.CommentRange): boolean {
+    if (!ctx.options.preferSingleline && !ctx.options.maxWidth) {
+        return false;
+    }
+
+    if (lines.length !== 1) {
+        return false;
+    }
+
+    if (lines[0].length <= ctx.options.maxWidth) {
+        return false;
+    }
+
+    // Find the start of the first line
+    const lb = utils.getLineBreakStyle(ctx.sourceFile);
+    let startPos = pos;
+    while (startPos > 0 && fullText[startPos - 1] !== lb) {
+        startPos--;
+    }
+
+    const fullWidthLines = fullText.slice(startPos, end).split(lb);
+    const indentLength = fullWidthLines[0].indexOf("/") + 1;
+    const indent = Array(indentLength).join(" ");
+
+    const rawComment = lines[0]
+        .trim()
+        .replace(/\/\*\*\s*/, "")
+        .replace(/\*\/\s*$/, "");
+
+    const newLines = rawComment
+        // Split lines into words
+        .split(/\s+/)
+        // Make sure we don't have gaps because of double spaces
+        .filter(Boolean)
+        // Assemble the lines bottom to top so we don't have to figure out the
+        // last line's index on each iteration; we can just use [0]
+        .reduce(
+            (acc, word) => {
+                const newLine = `${acc[0]} ${word}`;
+                if (newLine.length <= ctx.options.maxWidth) {
+                    acc[0] = newLine;
+                } else {
+                    acc.unshift(`${indent} * ${word}`);
+                }
+                return acc;
+            },
+            [`${indent} *`],
+    )
+    // Flip the list so it's in top-to-bottom order
+    .reverse();
+
+    newLines.unshift(`${indent}/**`);
+    newLines.push(`${indent} */`);
+
+    ctx.addFailure(pos, end, Rule.SINGLE_LINE_MAX_WIDTH_FAILURE, [
+        Lint.Replacement.replaceFromTo(startPos, end, newLines.join(lb)),
+    ]);
+
+    return true;
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
+    return utils.forEachComment(ctx.sourceFile, (fullText, range) => {
+        const { kind, pos, end } = range;
         if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
             fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
-            return;
-        }
+                return;
+            }
         const lines = fullText.slice(pos + 3, end - 2).split("\n");
         const firstLine = lines[0];
+
+        if (shouldBeSingleline(ctx, lines, range)) {
+            return;
+        }
+
+        if (shouldBeMultiline(ctx, lines, fullText, range)) {
+            return;
+        }
+
         if (lines.length === 1) {
             if (firstLine[0] !== " " || !firstLine.endsWith(" ")) {
                 ctx.addFailure(pos, end, Rule.FORMAT_FAILURE_STRING);
             }
-            return;
-        }
-
-        // This is a single-line comment using the multiline format
-        if (ctx.options.forceSingleline && lines.length === 3) {
-            // Add 3 to account for the leading /**
-            const endOfFirstLine = pos + firstLine.length + 3;
-            const endOfSecondLine = endOfFirstLine + lines[1].length + 1;
-            const endOfThirdLine = endOfSecondLine + lines[2].length + 1;
-            ctx.addFailure(pos, endOfFirstLine, Rule.FORCE_SINGLE_LINE_FALURE);
-            ctx.addFailure(pos + endOfFirstLine + 1, endOfSecondLine, Rule.FORCE_SINGLE_LINE_FALURE, [
-                // substr(2) remove the leading "* "
-                Lint.Replacement.replaceFromTo(pos, end, `/** ${lines[1].trim().substr(2)} */`),
-            ]);
-            // Add 2 to account for the trailing */
-            ctx.addFailure(pos + endOfSecondLine + 1, endOfThirdLine + 2, Rule.FORCE_SINGLE_LINE_FALURE);
             return;
         }
 

@@ -1,8 +1,0 @@
-    /**
-    ~~~ [singleline jsdoc should use compact docblock form]
-     * Bad singleline
-    ~~~~~~~~~~~~~~~~~ [singleline jsdoc should use compact docblock form]
-     */
-    ~~~ [singleline jsdoc should use compact docblock form]
-
-    /** Good singleline */
