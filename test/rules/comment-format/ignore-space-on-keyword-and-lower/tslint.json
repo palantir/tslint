@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "comment-format": [true, "check-space", {"no-space-keywords": ["TODO", "FIXME"]}, "check-lowercase"]
+  }
+}

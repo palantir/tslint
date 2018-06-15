@@ -1,0 +1,34 @@
+class Clazz { // this comment is correct
+    /* block comment
+     * adada
+     */
+    public funcxion() { // This comment has a capital letter starting it
+        //This comment is on its own line, and starts with a capital _and_ no space
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+        console.log("test"); //this comment has no space
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+        console.log("test2"); //TODO: this comment has no space but TODO
+    }
+    /// <not a reference>
+    ////foo
+        ~~~ [space]
+}
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`
+
+//normal comment
+  ~~~~~~~~~~~~~~ [space]
+
+// normal comment
+
+//TODO: todo description
+
+//FIXME: todo description
+
+//HACK: unknown keyword
+  ~~~~~~~~~~~~~~~~~~~~~ [space]
+
+[space]: comment must start with a space

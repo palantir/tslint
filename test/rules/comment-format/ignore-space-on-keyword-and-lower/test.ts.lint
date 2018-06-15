@@ -1,0 +1,50 @@
+class Clazz { // this comment is correct
+    /* block comment
+     * adada
+     */
+    public funcxion() { // This comment has a capital letter starting it
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+        //This comment is on its own line, and starts with a capital _and_ no space
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+        console.log("test"); //this comment has no space
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+        console.log("test2"); //TODO: this comment has no space but TODO
+    }
+    /// <not a reference>
+    ////foo
+        ~~~ [space]
+}
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`
+
+//noinspection JSUnusedGlobalSymbols
+const unusedVar = 'unneeded value';
+
+//normal comment
+  ~~~~~~~~~~~~~~ [space]
+
+// normal comment
+
+//TODO: todo description
+
+//TODO: Todo description
+        ~~~~~~~~~~~~~~~~ [lower]
+
+//FIXME: todo description
+
+//FIXME:todo description
+        ~~~~~~~~~~~~~~~~ [space]
+
+//HACK: unknown keyword
+  ~~~~~~~~~~~~~~~~~~~~~ [space]
+
+//HACK: Unknown keyword
+        ~~~~~~~~~~~~~~~ [lower]
+  ~~~~~~~~~~~~~~~~~~~~~ [space]
+
+[lower]: comment must start with lowercase letter
+[space]: comment must start with a space
