@@ -296,10 +296,11 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         }
         if (failureExists) {
             // const info = (x: Node)=>[x.name && nameString(x.name), this.memberRank(x), members.indexOf(x)]
-            const sortedMembers = members.slice().sort((a, b) => {
+            const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
+                const a = members[ai];
+                const b = members[bi];
+
                 // first, sort by member rank
-                // const ai = info(a);
-                // const bi = info(b);
                 const rankDiff = this.memberRank(a) - this.memberRank(b);
                 if (rankDiff !== 0) { return rankDiff; }
                 // then lexicographically if alphabetize == true
@@ -310,11 +311,12 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     if (nameDiff !== 0) { return nameDiff; }
                 }
                 // finally, sort by position in original NodeArray so the sort remains stable.
-                return members.indexOf(a) - members.indexOf(b);
+                return ai - bi;
             });
-            const sortedMembersText = sortedMembers.map((node) => {
-                const start = node.getFullStart();
-                const end = node.getEnd();
+            const splits = getSplitIndexes(members, this.sourceFile.text);
+            const sortedMembersText = sortedMemberIndexes.map((i) => {
+                const start = splits[i];
+                const end = splits[i + 1];
                 let nodeText = this.sourceFile.text.substring(start, end);
                 while (true) {
                     // check if there are previous fixes which we need to merge into this one
@@ -337,7 +339,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             // it fixes all failures in this NodeArray, as TSLint doesn't handle duplicate Replacements.
             this.fixes.push([
                 arrayLast(this.failures),
-                Lint.Replacement.replaceFromTo(members.pos, members.end, sortedMembersText.join("")),
+                Lint.Replacement.replaceFromTo(splits[0], arrayLast(splits), sortedMembersText.join("")),
             ]);
         }
     }
@@ -585,4 +587,97 @@ function applyReplacementOffset(content: string, replacement: Lint.Replacement, 
     return content.substring(0, replacement.start - offset)
         + replacement.text
         + content.substring(replacement.start - offset + replacement.length);
+}
+
+/**
+ * Get the indexes of the boundaries between nodes in the node array. The following points must be taken into account:
+ * - Trivia should stay with its corresponding node (comments on the same line following the token belong to the
+ *   previous token, the rest to the next).
+ * - Reordering the subtexts should not result in code being commented out due to being moved between a "//" and
+ *   the following newline.
+ * - The end of one node must be the start of the next, otherwise the intravening whitespace will be lost when
+ *   reordering.
+ *
+ * Hence, the boundaries are chosen to be _after_ the newline following the node, or the beginning of the next token,
+ * if that comes first.
+ */
+function getSplitIndexes(members: ts.NodeArray<Member>, text: string) {
+    const result = members.map((member) => getNextSplitIndex(text, member.getFullStart()));
+    result.push(getNextSplitIndex(text, arrayLast(members).getEnd()));
+    return result;
+}
+
+/**
+ * Calculates the index after the newline following pos, or the beginning of the next token, whichever comes first.
+ * See also getSplitIndexes.
+ * This method is a modified version of TypeScript's internal iterateCommentRanges function.
+ */
+function getNextSplitIndex(text: string, pos: number) {
+    const enum CharacterCodes {
+        lineFeed = 0x0A,              // \n
+        carriageReturn = 0x0D,        // \r
+        formFeed = 0x0C,              // \f
+        tab = 0x09,                   // \t
+        verticalTab = 0x0B,           // \v
+        slash = 0x2F,                 // /
+        asterisk = 0x2A,              // *
+        space = 0x0020,   // " "
+        maxAsciiCharacter = 0x7F,
+    }
+    scan: while (pos >= 0 && pos < text.length) {
+        const ch = text.charCodeAt(pos);
+        switch (ch) {
+            case CharacterCodes.carriageReturn:
+                if (text.charCodeAt(pos + 1) === CharacterCodes.lineFeed) {
+                    pos++;
+                }
+            // falls through
+            case CharacterCodes.lineFeed:
+                pos++;
+                // split is after new line
+                return pos;
+            case CharacterCodes.tab:
+            case CharacterCodes.verticalTab:
+            case CharacterCodes.formFeed:
+            case CharacterCodes.space:
+                // skip whitespace
+                pos++;
+                continue;
+            case CharacterCodes.slash:
+                const nextChar = text.charCodeAt(pos + 1);
+                if (nextChar === CharacterCodes.slash || nextChar === CharacterCodes.asterisk) {
+                    const isSingleLineComment = nextChar === CharacterCodes.slash;
+                    pos += 2;
+                    if (isSingleLineComment) {
+                        while (pos < text.length) {
+                            if (ts.isLineBreak(text.charCodeAt(pos))) {
+                                // the comment ends here, go back to default logic to handle parsing new line and result
+                                continue scan;
+                            }
+                            pos++;
+                        }
+                    } else {
+                        while (pos < text.length) {
+                            if (text.charCodeAt(pos) === CharacterCodes.asterisk && text.charCodeAt(pos + 1) === CharacterCodes.slash) {
+                                pos += 2;
+                                continue scan;
+                            }
+                            pos++;
+                        }
+                    }
+
+                    // if we arrive here, it's because pos == text.length
+                    return pos;
+                }
+                break scan;
+            default:
+                // skip whitespace:
+                if (ch > CharacterCodes.maxAsciiCharacter && (ts.isWhiteSpaceLike(ch))) {
+                    pos++;
+                    continue;
+                }
+                break scan;
+        }
+    }
+    return pos;
 }

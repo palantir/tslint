@@ -1,9 +1,9 @@
 class Foo {
     public static x: number;
     private static y: number;
+    public x: number;
 
     z: number;
-    public x: number;
     private y: number;
 
     public static m() {}
