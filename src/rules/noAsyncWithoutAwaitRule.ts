@@ -20,9 +20,11 @@ import * as Lint from "../index";
 import { codeExamples } from "./code-examples/noAsyncWithoutAwait.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    public static FAILURE_STRING = "Functions marked async must contain an await statement.";
+
     public static metadata: Lint.IRuleMetadata = {
         codeExamples,
-        description: "Do not write async functions that do not have an await statement in them",
+        description: Rule.FAILURE_STRING,
         hasFix: false,
         optionExamples: [true],
         options: null,
@@ -32,8 +34,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "functionality",
         typescriptOnly: false,
     };
-
-    public static FAILURE_STRING = "Async functions with no await are not allowed.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new Walk(sourceFile, this.getOptions()));
@@ -57,7 +57,7 @@ class Walk extends Lint.RuleWalker {
     }
 
     private isAsyncFunction(node: ts.Node): boolean {
-        return Boolean(this.getAsyncModifier(node));
+        return this.getAsyncModifier(node) !== undefined;
     }
 
     private getAsyncModifier(node: ts.Node) {
@@ -72,7 +72,7 @@ class Walk extends Lint.RuleWalker {
         return node.kind === ts.SyntaxKind.AwaitKeyword;
     }
 
-    private functionBlockHasAwait(node: ts.Node) {
+    private functionBlockHasAwait(node: ts.Node): boolean {
         if (this.isAwait(node)) {
             return true;
         }
@@ -83,7 +83,7 @@ class Walk extends Lint.RuleWalker {
             return false;
         }
 
-        const awaitInChildren: boolean[] = node.getChildren()
+        const awaitInChildren = node.getChildren()
             .map((functionBlockNode: ts.Node) => this.functionBlockHasAwait(functionBlockNode));
         return awaitInChildren.some(Boolean);
     }

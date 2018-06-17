@@ -22,7 +22,7 @@ export const codeExamples = [
         config: Lint.Utils.dedent`
             "rules": { "no-async-without-await": true }
         `,
-        description: "Do not use the async in case it is not actually needed",
+        description: "Do not use the async keyword in case it is not actually needed",
         fail: Lint.Utils.dedent`
             async function f() {
                 fetch();

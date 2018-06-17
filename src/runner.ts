@@ -156,8 +156,8 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
-// tslint:disable-next-line:no-async-without-await
-async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
+// tslint:disable-next-line:promise-function-async
+function runLinter(options: Options, logger: Logger): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
     if (program && options.typeCheck) {
