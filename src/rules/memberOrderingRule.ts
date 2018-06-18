@@ -270,6 +270,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     : "at the beginning of the class/interface";
                 const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
                     `Instead, this should come ${locationHint}.`;
+                // add empty array as fix so we can add a replacement later. (fix itself is readonly)
                 this.addFailureAtNode(member, errorLine1, []);
                 failureExists = true;
             } else {
@@ -295,7 +296,6 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             }
         }
         if (failureExists) {
-            // const info = (x: Node)=>[x.name && nameString(x.name), this.memberRank(x), members.indexOf(x)]
             const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
                 const a = members[ai];
                 const b = members[bi];
