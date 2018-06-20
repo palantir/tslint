@@ -26,6 +26,7 @@ import * as Lint from "../index";
 interface Options {
     dev: boolean;
     optional: boolean;
+    whitelist: string[];
 }
 
 const OPTION_DEV = "dev";
@@ -43,17 +44,28 @@ export class Rule extends Lint.Rules.AbstractRule {
             By default the rule looks at \`"dependencies"\` and \`"peerDependencies"\`.
             By adding the \`"${OPTION_DEV}"\` option the rule looks at \`"devDependencies"\` instead of \`"peerDependencies"\`.
             By adding the \`"${OPTION_OPTIONAL}"\` option the rule also looks at \`"optionalDependencies"\`.
+            An array of whitelisted modules can be added to skip checking their existence in package.json.
         `,
         options: {
             type: "array",
-            items: {
-                type: "string",
-                enum: [OPTION_DEV, OPTION_OPTIONAL],
-            },
+            items: [
+                {
+                    type: "string",
+                    enum: [OPTION_DEV, OPTION_OPTIONAL],
+                },
+                {
+                    type: "array",
+                },
+            ],
             minItems: 0,
-            maxItems: 2,
+            maxItems: 3,
         },
-        optionExamples: [true, [true, OPTION_DEV], [true, OPTION_OPTIONAL]],
+        optionExamples: [
+          true,
+          [true, OPTION_DEV],
+          [true, OPTION_OPTIONAL],
+          [true, ["src", "app"]],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -64,9 +76,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        let whitelist = this.ruleArguments.find((arg) => Array.isArray(arg)) as string[];
+        if (whitelist === null || whitelist === undefined) {
+          whitelist = [];
+        }
+
         return this.applyWithFunction(sourceFile, walk, {
             dev: this.ruleArguments.indexOf(OPTION_DEV) !== - 1,
             optional: this.ruleArguments.indexOf(OPTION_OPTIONAL) !== -1,
+            whitelist,
         });
     }
 }
@@ -77,7 +95,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
-            if (builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
+            if (options.whitelist.indexOf(packageName) === -1 && builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
             }
         }
