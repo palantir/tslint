@@ -112,26 +112,21 @@ interface PackageJson {
 
 function getDependencies(fileName: string, options: Options): Set<string> {
     const result = new Set<string>();
-    const packageJsonPath = findPackageJson(path.resolve(path.dirname(fileName)));
-    if (packageJsonPath !== undefined) {
-        try {
-            // don't use require here to avoid caching
-            // remove BOM from file content before parsing
-            const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
-            if (content.dependencies !== undefined) {
-                addDependencies(result, content.dependencies);
-            }
-            if (!options.dev && content.peerDependencies !== undefined) {
-                addDependencies(result, content.peerDependencies);
-            }
-            if (options.dev && content.devDependencies !== undefined) {
-                addDependencies(result, content.devDependencies);
-            }
-            if (options.optional && content.optionalDependencies !== undefined) {
-                addDependencies(result, content.optionalDependencies);
-            }
-        } catch {
-            // treat malformed package.json files as empty
+    const content = getPackageJsonContent(path.resolve(path.dirname(fileName)));
+    if (content !== undefined) {
+        // don't use require here to avoid caching
+        // remove BOM from file content before parsing
+        if (content.dependencies !== undefined) {
+            addDependencies(result, content.dependencies);
+        }
+        if (!options.dev && content.peerDependencies !== undefined) {
+            addDependencies(result, content.peerDependencies);
+        }
+        if (options.dev && content.devDependencies !== undefined) {
+            addDependencies(result, content.devDependencies);
+        }
+        if (options.optional && content.optionalDependencies !== undefined) {
+            addDependencies(result, content.optionalDependencies);
         }
     }
 
@@ -146,12 +141,23 @@ function addDependencies(result: Set<string>, dependencies: Dependencies) {
     }
 }
 
-function findPackageJson(current: string): string | undefined {
+function getPackageJsonContent(current: string): PackageJson | undefined {
     let prev: string;
     do {
         const fileName = path.join(current, "package.json");
         if (fs.existsSync(fileName)) {
-            return fileName;
+            // don't use require here to avoid caching
+            // remove BOM from file content before parsing
+            try {
+              const content = JSON.parse(fs.readFileSync(fileName, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
+              if (content.dependencies !== undefined || content.peerDependencies !== undefined ||
+                content.devDependencies !== undefined || content.optionalDependencies !== undefined) {
+                return content;
+              }
+            } catch {
+              // treat malformed package.json files as having empty dependencies
+              return undefined;
+            }
         }
         prev = current;
         current = path.dirname(current);
