@@ -27,20 +27,32 @@ const OPTION_ALPHABETIZE = "alphabetize";
 
 enum MemberKind {
     publicStaticField,
-    publicStaticMethod,
     protectedStaticField,
-    protectedStaticMethod,
     privateStaticField,
+
+    protectedStaticMethod,
     privateStaticMethod,
+    publicStaticMethod,
+
     publicInstanceField,
     protectedInstanceField,
     privateInstanceField,
+
     publicConstructor,
     protectedConstructor,
     privateConstructor,
+
     publicInstanceMethod,
     protectedInstanceMethod,
     privateInstanceMethod,
+
+    publicStaticAccessor,
+    protectedStaticAccessor,
+    privateStaticAccessor,
+
+    publicInstanceAccessor,
+    protectedInstanceAccessor,
+    privateInstanceAccessor,
 }
 
 const PRESETS = new Map<string, MemberCategoryJson[]>([
@@ -48,13 +60,25 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "public-static-field",
         "protected-static-field",
         "private-static-field",
+
         "public-instance-field",
         "protected-instance-field",
         "private-instance-field",
+
         "constructor",
+
+        "public-static-accessor",
+        "protected-static-accessor",
+        "private-static-accessor",
+
         "public-static-method",
         "protected-static-method",
         "private-static-method",
+
+        "public-instance-accessor",
+        "protected-instance-accessor",
+        "private-instance-accessor",
+
         "public-instance-method",
         "protected-instance-method",
         "private-instance-method",
@@ -63,28 +87,52 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "public-static-field",
         "protected-static-field",
         "private-static-field",
+
         "public-instance-field",
         "protected-instance-field",
         "private-instance-field",
+
         "constructor",
+
+        "public-instance-accessor",
+        "protected-instance-accessor",
+        "private-instance-accessor",
+
         "public-instance-method",
         "protected-instance-method",
         "private-instance-method",
+
+        "public-static-accessor",
+        "protected-static-accessor",
+        "private-static-accessor",
+
         "public-static-method",
         "protected-static-method",
         "private-static-method",
     ]],
     ["statics-first", [
         "public-static-field",
+        "public-static-accessor",
         "public-static-method",
+
         "protected-static-field",
+        "protected-static-accessor",
         "protected-static-method",
+
         "private-static-field",
+        "private-static-accessor",
         "private-static-method",
+
         "public-instance-field",
         "protected-instance-field",
         "private-instance-field",
+
         "constructor",
+
+        "public-instance-accessor",
+        "protected-instance-accessor",
+        "private-instance-accessor",
+
         "public-instance-method",
         "protected-instance-method",
         "private-instance-method",
@@ -387,14 +435,6 @@ function caseInsensitiveLess(a: string, b: string) {
     return a.toLowerCase() < b.toLowerCase();
 }
 
-function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[`${access}Constructor`] as MemberKind;
-}
-
-function memberKindForMethodOrField(access: Access, membership: "Static" | "Instance", kind: "Method" | "Field"): MemberKind {
-    return (MemberKind as any)[access + membership + kind] as MemberKind;
-}
-
 const allAccess: Access[] = ["public", "protected", "private"];
 
 function memberKindFromName(name: string): MemberKind[] {
@@ -414,27 +454,32 @@ function getMemberKind(member: Member): MemberKind | undefined {
     const accessLevel =  hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword) ? "private"
         : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword) ? "protected"
         : "public";
+    const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
 
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
         case ts.SyntaxKind.ConstructSignature:
-            return memberKindForConstructor(accessLevel);
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + "Constructor"] as MemberKind;
+
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + "Accessor"] as MemberKind;
 
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertySignature:
-            return methodOrField(isFunctionLiteral((member as ts.PropertyDeclaration).initializer));
+            const type = isFunctionLiteral((member as ts.PropertyDeclaration).initializer) ? "Method" : "Field";
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + type] as MemberKind;
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
-            return methodOrField(true);
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + "Method"] as MemberKind;
 
         default:
             return undefined;
-    }
-
-    function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
-        return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
     }
 }
 
