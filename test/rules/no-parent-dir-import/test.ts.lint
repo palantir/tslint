@@ -1,0 +1,14 @@
+// ok 
+import { Foo } from "some/dir/file";
+
+import content = require("@common/some/dir/file");
+
+import * as fs from "fs";
+
+// fail
+import { Foo } from "../../some/dir";
+                     ~~~~~~~~~~~~~~  [Import from parent directory]
+
+// fail
+import content = require("../../some/dir");
+                          ~~~~~~~~~~~~~~  [Import from parent directory]
