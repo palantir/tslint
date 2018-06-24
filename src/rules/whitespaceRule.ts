@@ -296,6 +296,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
             case ts.SyntaxKind.ImportKeyword:
+                if ((ts.SyntaxKind as any).ImportType !== undefined && parent.kind === (ts.SyntaxKind as any).ImportType) {
+                    return; // Don't check ImportType
+                }
+
                 if (parent.kind === ts.SyntaxKind.CallExpression &&
                     (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword) {
                     return; // Don't check ImportCall
