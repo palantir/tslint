@@ -1,0 +1,65 @@
+var a = a;
+a = b;
+a += a;
+a = +a;
+a = [a];
+let a = a;
+const a = a;
+[a] = a;
+[a = 1] = [a];
+[a, b] = [b, a];
+[a,, b] = [, b, a];
+[x, a] = [...x, a];
+[a, b] = {a, b};
+({a} = a);
+({a = 1} = {a});
+({a: b} = {a});
+({a} = {a: b});
+({a} = {a() {}});
+({a} = {[a]: a});
+({a, ...b} = {a, ...b});
+a.b = a.c;
+a.b = c.b;
+a.b = a[b];
+a[b] = a.b;
+a.b().c = a.b().c;
+b().c = b().c;
+// it ignores non-simple computed properties.
+a[b + 1] = a[b + 1];
+
+class A {
+  b = this.a;
+}
+
+a = a;
+    ~   [variable 'a' is assigned to itself.]
+[a] = [a];
+       ~   [variable 'a' is assigned to itself.]
+[a, b] = [a, b];
+          ~   [variable 'a' is assigned to itself.]
+             ~   [variable 'b' is assigned to itself.]
+[a, b] = [a, c];
+          ~   [variable 'a' is assigned to itself.]
+[a, b] = [, b];
+            ~   [variable 'b' is assigned to itself.]
+[a, ...b] = [a, ...b];
+             ~   [variable 'a' is assigned to itself.]
+[[a], {b}] = [[a], {b}];
+               ~   [variable 'a' is assigned to itself.]
+                    ~   [variable 'b' is assigned to itself.]
+({a} = {a});
+        ~   [variable 'a' is assigned to itself.]
+a.b = a.b;
+      ~~~ [variable 'a.b' is assigned to itself.]
+a.b.c = a.b.c;
+        ~~~~~ [variable 'a.b.c' is assigned to itself.]
+a[b] = a[b];
+       ~~~~ [variable 'a[b]' is assigned to itself.]
+a['b'] = a['b'];
+         ~~~~~~ [variable 'a['b']' is assigned to itself.]
+
+
+class A {
+  b = this.b;
+      ~~~~~~ [variable 'this.b' is assigned to itself.]
+}
