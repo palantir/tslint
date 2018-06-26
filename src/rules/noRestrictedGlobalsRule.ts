@@ -70,7 +70,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const bannedList = this.ruleArguments.length ? this.ruleArguments : ["event", "name", "length"];
+        const bannedList = this.ruleArguments.length > 0 ? this.ruleArguments : ["event", "name", "length"];
         const bannedGlobals = new Set(bannedList);
         if (sourceFile.isDeclarationFile) {
             return [];
@@ -83,8 +83,8 @@ export class Rule extends Lint.Rules.TypedRule {
 function walk(ctx: Lint.WalkContext<Set<string>>, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         switch (node.kind) {
+            case ts.SyntaxKind.ObjectBindingPattern:
             case ts.SyntaxKind.TypeReference:
-                // Ignore types.
                 return;
             case ts.SyntaxKind.PropertyAccessExpression:
                 // Ignore `y` in `x.y`, but recurse to `x`.
