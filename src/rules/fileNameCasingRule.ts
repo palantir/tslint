@@ -59,8 +59,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING(expectedCasing: string): string {
-        return `File name must be ${expectedCasing}`;
+    private static FAILURE_STRING(expectedCasing: Casing): string {
+        return `File name must be ${Rule.stylizedNameForCasing(expectedCasing)}`;
+    }
+
+    private static stylizedNameForCasing(casing: Casing): string {
+        switch (casing) {
+            case Casing.CamelCase:
+                return "camelCase";
+            case Casing.PascalCase:
+                return "PascalCase";
+            case Casing.KebabCase:
+                return "kebab-case";
+        }
     }
 
     private static isCorrectCasing(fileName: string, casing: Casing): boolean {
@@ -73,6 +84,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 return isKebabCased(fileName);
         }
     }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (this.ruleArguments.length !== 1) {
             return [];
