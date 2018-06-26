@@ -1,0 +1,17 @@
+class X {
+    b() {
+        class B {
+            d() {}
+            c() {}
+            ~      ['c' should come alphabetically before 'd']
+        }
+    }
+    a() {
+    ~     ['a' should come alphabetically before 'b']
+        class A {
+            f() {}
+            e() {}
+            ~      ['e' should come alphabetically before 'f']
+        }
+    }
+}
