@@ -49,3 +49,5 @@ export interface ILinterOptions {
     formattersDirectory?: string;
     rulesDirectory?: string | string[];
 }
+
+console.log("Hello!");
