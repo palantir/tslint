@@ -63,27 +63,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `File name must be ${expectedCasing}`;
     }
 
+    private static isCorrectCasing(fileName: string, casing: Casing): boolean {
+        switch (casing) {
+            case Casing.CamelCase:
+                return isCamelCased(fileName);
+            case Casing.PascalCase:
+                return isPascalCased(fileName);
+            case Casing.KebabCase:
+                return isKebabCased(fileName);
+        }
+    }
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (this.ruleArguments.length !== 1) {
             return [];
         }
 
         const casing = this.ruleArguments[0] as Casing;
-
-        let isCorrectCasing = true;
         const fileName = path.parse(sourceFile.fileName).name;
-        switch (casing) {
-            case Casing.CamelCase:
-                isCorrectCasing = isCamelCased(fileName);
-                break;
-            case Casing.PascalCase:
-                isCorrectCasing = isPascalCased(fileName);
-                break;
-            case Casing.KebabCase:
-                isCorrectCasing = isKebabCased(fileName);
-        }
-
-        if (!isCorrectCasing) {
+        if (!Rule.isCorrectCasing(fileName, casing)) {
             return [new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)];
         }
 
