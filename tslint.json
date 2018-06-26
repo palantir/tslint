@@ -50,11 +50,7 @@
     ],
     "max-classes-per-file": false,
     "max-line-length": [true, 140],
-    "member-ordering": [true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
-    ],
+    "member-ordering": [true, { "order": "fields-first" }],
     "newline-per-chained-call": false,
     "no-console": {
       "options": ["log"]

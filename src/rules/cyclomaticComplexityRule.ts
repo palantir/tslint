@@ -63,6 +63,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             `${actual} which is higher than the threshold of ${expected}`;
     }
 
+    private get threshold(): number {
+        if (this.ruleArguments[0] !== undefined) {
+            return this.ruleArguments[0] as number;
+        }
+        return Rule.DEFAULT_THRESHOLD;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
     }
@@ -71,13 +78,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
         const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
-    }
-
-    private get threshold(): number {
-        if (this.ruleArguments[0] !== undefined) {
-            return this.ruleArguments[0] as number;
-        }
-        return Rule.DEFAULT_THRESHOLD;
     }
 }
 

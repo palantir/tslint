@@ -165,6 +165,8 @@ export interface ReplacementJson {
     innerText: string;
 }
 export class Replacement {
+    constructor(readonly start: number, readonly length: number, readonly text: string) {}
+
     public static applyFixes(content: string, fixes: Fix[]): string {
         return this.applyAll(content, flatMap(fixes, arrayify));
     }
@@ -194,8 +196,6 @@ export class Replacement {
     public static appendText(start: number, text: string) {
         return new Replacement(start, 0, text);
     }
-
-    constructor(readonly start: number, readonly length: number, readonly text: string) {}
 
     get end() {
         return this.start + this.length;
@@ -256,13 +256,6 @@ export class RuleFailure {
     private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
-    public static compare(a: RuleFailure, b: RuleFailure): number {
-        if (a.fileName !== b.fileName) {
-            return a.fileName < b.fileName ? -1 : 1;
-        }
-        return a.startPosition.getPosition() - b.startPosition.getPosition();
-    }
-
     constructor(private readonly sourceFile: ts.SourceFile,
                 start: number,
                 end: number,
@@ -275,6 +268,13 @@ export class RuleFailure {
         this.endPosition = this.createFailurePosition(end);
         this.rawLines = sourceFile.text;
         this.ruleSeverity = "error";
+    }
+
+    public static compare(a: RuleFailure, b: RuleFailure): number {
+        if (a.fileName !== b.fileName) {
+            return a.fileName < b.fileName ? -1 : 1;
+        }
+        return a.startPosition.getPosition() - b.startPosition.getPosition();
     }
 
     public getFileName() {

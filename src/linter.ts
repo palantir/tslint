@@ -51,6 +51,16 @@ export class Linter {
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
 
+    constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
+        if (typeof options !== "object") {
+            throw new Error(`Unknown Linter options type: ${typeof options}`);
+        }
+        if ((options as any).configuration != undefined) {
+            throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
+                "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
+        }
+    }
+
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
@@ -99,16 +109,6 @@ export class Linter {
                     ? undefined
                     : file.fileName,
         );
-    }
-
-    constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
-        if (typeof options !== "object") {
-            throw new Error(`Unknown Linter options type: ${typeof options}`);
-        }
-        if ((options as any).configuration != undefined) {
-            throw new Error("ILinterOptions does not contain the property `configuration` as of version 4. " +
-                "Did you mean to pass the `IConfigurationFile` object to lint() ? ");
-        }
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
