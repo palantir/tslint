@@ -1,3 +1,5 @@
+a = a;
+    ~   [variable 'a' is assigned to itself.]
 a.b = a.b;
 a.b.c = a.b.c;
 a[b] = a[b];

@@ -29,11 +29,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-self-assign",
         description: "This rule is aimed at eliminating self assignments.",
         optionsDescription: Lint.Utils.dedent`
-        Self assignments have no effect, so probably those are an error due to incomplete refactoring.
-        Those indicate that what you should do is still remaining.
+            This rule has the option to check properties as well, which is turned on by default.
+            You can turn it off manually.
+            {
+                "no-self-assign": ["error", {"props": false}]
+            }
+        `,
+        rationale: Lint.Utils.dedent`
+            Self assignments have no effect, so probably those are an error due to incomplete refactoring.
+            Those indicate that what you should do is still remaining.
 
-            \`foo = foo;\`
-            \`[bar, baz] = [bar, qiz];\`
+                \`foo = foo;\`
+                \`[bar, baz] = [bar, qiz];\`
             `,
         options: {
             type: "object",
@@ -44,9 +51,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [[true, { props: false }]],
-        type: "style",
+        type: "maintainability",
         typescriptOnly: false,
-        hasFix: true,
     };
 
     public static FAILURE_STRING(name: string) {
