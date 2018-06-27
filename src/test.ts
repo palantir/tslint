@@ -75,7 +75,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
-            throw new Error(JSON.stringify(error));
+            throw new Error(ts.formatDiagnostics([error], ts.createCompilerHost({})));
         }
 
         const parseConfigHost = {

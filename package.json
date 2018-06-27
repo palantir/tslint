@@ -1,6 +1,6 @@
 {
   "name": "tslint",
-  "version": "5.9.1",
+  "version": "5.10.0",
   "description": "An extensible static analysis linter for the TypeScript language",
   "bin": {
     "tslint": "./bin/tslint"
@@ -26,7 +26,7 @@
     "compile:scripts": "tsc -p scripts",
     "compile:test": "tsc -p test",
     "lint": "npm-run-all -p lint:global lint:from-bin",
-    "lint:global": "tslint --project test/tsconfig.json --format stylish # test includes 'src' too",
+    "lint:global": "tslint --project test/tsconfig.json --format stylish",
     "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
     "publish:local": "./scripts/npmPublish.sh",
     "test": "npm-run-all test:pre -p test:mocha test:rules",
@@ -51,7 +51,7 @@
     "tsutils": "^2.12.1"
   },
   "peerDependencies": {
-    "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev"
+    "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev"
   },
   "devDependencies": {
     "@types/babel-code-frame": "^6.20.0",
@@ -75,7 +75,7 @@
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "~2.7.2"
+    "typescript": "~2.8.3"
   },
   "license": "Apache-2.0",
   "engines": {

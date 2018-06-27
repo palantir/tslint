@@ -1,3 +1,4 @@
+[typescript]: < 2.9.0
 var x = 3;
 
 var y = x;
@@ -10,7 +11,15 @@ var z;
 export var abcd = 3;
 
 class ABCD {
+#if typescript >= 2.9.0
+~~~~~~~~~~ ['ABCD' is declared but never used.]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+~~~~~~~~~~ [err % ('ABCD')]
+#endif
+#if typescript < 2.8.0
       ~~~~ [err % ('ABCD')]
+#endif
     constructor() {
         z = 3;
     }
@@ -32,8 +41,12 @@ export function testDestructuring() {
     var [c] = [3];
 
     var {d, e} = { d: 1, e: 2 };
+#if typescript >= 2.9.0
+        ~~~~~~                   [All destructured elements are unused.]
+#else
          ~                       [err % ('d')]
             ~                    [err % ('e')]
+#endif
     var {f} = { f: 3 };
 
     return c * f;
@@ -59,7 +72,15 @@ for(let e of [1,2,3]) {
 export function testRenamingDestructure() {
   var a = 2;
   let {a: b} = {a: 4};
+#if typescript >= 2.9.0
+      ~~~~~~           [err % ('b')]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+       ~~~~            [err % ('b')]
+#endif
+#if typescript < 2.8.0
           ~            [err % ('b')]
+#endif
   let {x: y} = {x: 7}; // false positive
   return a + y;
 }

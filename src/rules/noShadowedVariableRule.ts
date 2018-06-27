@@ -150,7 +150,7 @@ class Scope {
 }
 
 class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
-    private scope: Scope;
+    private scope: Scope = new Scope();
     public walk(sourceFile: ts.SourceFile) {
         if (sourceFile.isDeclarationFile) {
             return;

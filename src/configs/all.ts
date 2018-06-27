@@ -192,6 +192,7 @@ export const rules = {
     // "file-header": No sensible default
     "deprecation": true,
     "encoding": true,
+    "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -232,6 +233,7 @@ export const rules = {
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
+    "prefer-while": true,
     "quotemark": [
         true,
         "double",

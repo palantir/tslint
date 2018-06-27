@@ -1,0 +1,26 @@
+class A {
+
+    /**
+     * foo() JSDoc.
+     */
+    foo(x: string): number
+    // an overload taking a string
+    foo(x: number): number // comment after foo(x: number)
+    foo(x: string | number): number {
+        return 1;
+    } // foo trailing comment
+
+    /**
+     * bar() JSDoc.
+     */
+    bar() {
+    ~~~     ['bar' should come alphabetically before 'foo']
+        return 2;
+    } // bar trailing comment
+}
+
+class B {
+    /* 1 */ single() {} /* 2 */ line() {} /* 3 */ declaration() {} // 4
+                                ~~~~                                    ['line' should come alphabetically before 'single']
+                                                  ~~~~~~~~~~~           ['declaration' should come alphabetically before 'single']
+}
