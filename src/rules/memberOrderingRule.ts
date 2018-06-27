@@ -30,9 +30,9 @@ enum MemberKind {
     protectedStaticField,
     privateStaticField,
 
-    protectedStaticMethod,
-    privateStaticMethod,
     publicStaticMethod,
+    privateStaticMethod,
+    protectedStaticMethod,
 
     publicInstanceField,
     protectedInstanceField,
