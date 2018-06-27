@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-import { isArrayLiteralExpression, isBinaryExpression, isObjectLiteralExpression } from "tsutils";
+import { isArrayLiteralExpression, isBinaryExpression, isElementAccessExpression, isIdentifier,
+    isLiteralExpression, isObjectLiteralExpression, isPropertyAccessExpression, isPropertyDeclaration,
+    isShorthandPropertyAssignment, isSpreadAssignment, isSpreadElement } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -60,7 +62,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const opt: Option = this.ruleArguments[0] || { props: true };
+        // tslint:disable-next-line:no-unsafe-any
+        const opt: Option = this.ruleArguments.length > 0 ? this.ruleArguments[0] : { props: true };
 
         return this.applyWithFunction(sourceFile, walk, opt);
     }
@@ -68,15 +71,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<Option>) {
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
-        if (ts.isTypeNode(node)) {
-            return ;
-        }
-
         if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
             doCheck(node.left, node.right);
         }
 
-        if (ts.isPropertyDeclaration(node) && isPropertySelfAssigned(node)) {
+        if (isPropertyDeclaration(node) && isPropertySelfAssigned(node)) {
             report(node.initializer!);
         }
 
@@ -89,16 +88,16 @@ function walk(ctx: Lint.WalkContext<Option>) {
 
     function isPropertySelfAssigned(prop: ts.PropertyDeclaration) {
         const {name, initializer} = prop;
-        if (ts.isIdentifier(name) && initializer && ts.isPropertyAccessExpression(initializer)) {
+        if (isIdentifier(name) && initializer != undefined && isPropertyAccessExpression(initializer)) {
             const { name: initializerName, expression } = initializer;
-            return expression.kind === ts.SyntaxKind.ThisKeyword && ts.isIdentifier(initializerName) && name.text === initializerName.text;
+            return expression.kind === ts.SyntaxKind.ThisKeyword && isIdentifier(initializerName) && name.text === initializerName.text;
         }
 
         return false;
     }
 
     function doCheck(left: ts.Node | undefined, right: ts.Node | undefined) {
-        if (!left || !right) {
+        if (left == undefined || right == undefined) {
             return;
         }
 
@@ -112,7 +111,7 @@ function walk(ctx: Lint.WalkContext<Option>) {
             for (let i = 0; i < end; i++) {
                 doCheck(left.elements[i], right.elements[i]);
 
-                if (ts.isSpreadElement(right.elements[i])) {
+                if (isSpreadElement(right.elements[i])) {
                     break;
                 }
             }
@@ -128,7 +127,7 @@ function walk(ctx: Lint.WalkContext<Option>) {
             let startRight = 0;
 
             for (let i = right.properties.length - 1; i >= 0; i--) {
-                if (ts.isSpreadAssignment(right.properties[i])) {
+                if (isSpreadAssignment(right.properties[i])) {
                     startRight = i + 1;
                     break;
                 }
@@ -142,18 +141,19 @@ function walk(ctx: Lint.WalkContext<Option>) {
         }
 
         // ({a} = {a});
-        if (ts.isShorthandPropertyAssignment(left) && !left.objectAssignmentInitializer && ts.isShorthandPropertyAssignment(right)) {
+        if (isShorthandPropertyAssignment(left) && left.objectAssignmentInitializer == undefined
+            && isShorthandPropertyAssignment(right)) {
             doCheck(left.name, right.name);
         }
 
         // a.b = a.b
-        if (ctx.options.props && ts.isPropertyAccessExpression(left) && ts.isPropertyAccessExpression(right) && isSameMember(left, right)) {
+        if (ctx.options.props && isPropertyAccessExpression(left) && isPropertyAccessExpression(right) && isSameMember(left, right)) {
             report(right);
             return;
         }
 
         // a["b"] = a["b"]
-        if (ctx.options.props && ts.isElementAccessExpression(left) && ts.isElementAccessExpression(right)
+        if (ctx.options.props && isElementAccessExpression(left) && isElementAccessExpression(right)
             && isSameElementAccess(left, right)) {
             report(right);
         }
@@ -167,12 +167,12 @@ function isSameElementAccess(left: ts.ElementAccessExpression, right: ts.Element
         const leftArg = left.argumentExpression;
         const rightArg = right.argumentExpression;
 
-        if (leftArg && rightArg) {
-            if (ts.isIdentifier(leftArg) && ts.isIdentifier(rightArg)) {
+        if (leftArg != undefined && rightArg != undefined) {
+            if (isIdentifier(leftArg) && isIdentifier(rightArg)) {
                 return leftArg.text === rightArg.text;
             }
 
-            if (ts.isLiteralExpression(leftArg) && ts.isLiteralExpression(rightArg)) {
+            if (isLiteralExpression(leftArg) && isLiteralExpression(rightArg)) {
                 return leftArg.text === rightArg.text;
             }
         }
@@ -182,7 +182,7 @@ function isSameElementAccess(left: ts.ElementAccessExpression, right: ts.Element
 }
 
 function isSameIdentifier(left: ts.Node, right: ts.Node) {
-    return ts.isIdentifier(left) && ts.isIdentifier(right) && left.text === right.text;
+    return isIdentifier(left) && isIdentifier(right) && left.text === right.text;
 }
 
 function isSameMember(left: ts.PropertyAccessExpression, right: ts.PropertyAccessExpression): boolean {
@@ -193,15 +193,15 @@ function isSameMember(left: ts.PropertyAccessExpression, right: ts.PropertyAcces
     const leftExp = left.expression;
     const rightExp = right.expression;
 
-    if (ts.isPropertyAccessExpression(leftExp) && ts.isPropertyAccessExpression(rightExp)) {
+    if (isPropertyAccessExpression(leftExp) && isPropertyAccessExpression(rightExp)) {
         return isSameMember(leftExp, rightExp);
     }
 
-    return ts.isIdentifier(leftExp) && ts.isIdentifier(rightExp) && leftExp.text === rightExp.text;
+    return isIdentifier(leftExp) && isIdentifier(rightExp) && leftExp.text === rightExp.text;
 }
 
 function isSameProperty(left: ts.Node, right: ts.Node) {
-    if (ts.isPropertyAccessExpression(left) && ts.isPropertyAccessExpression(right)
+    if (isPropertyAccessExpression(left) && isPropertyAccessExpression(right)
         && left.name.text === right.name.text) {
         return true;
     }
