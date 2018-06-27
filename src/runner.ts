@@ -269,6 +269,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
         } else {
             contents = await tryReadFile(file, logger);
         }
+
         if (contents !== undefined) {
             linter.lint(file, contents, configFile);
         }
@@ -290,7 +291,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);
     }
-    const buffer = new Buffer(256);
+    const buffer = Buffer.allocUnsafe(256);
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);

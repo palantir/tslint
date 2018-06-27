@@ -29,7 +29,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showWarningOnce } from "./error";
+import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
@@ -41,7 +41,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 export class Linter {
-    public static VERSION = "5.9.1";
+    public static VERSION = "5.10.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -225,9 +225,9 @@ export class Linter {
             }
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
-                showWarningOnce(error.stack);
+                showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
             } else {
-                showWarningOnce(String(error));
+                showRuleCrashWarning(String(error), rule.getOptions().ruleName, sourceFile.fileName);
             }
             return [];
         }

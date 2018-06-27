@@ -1,0 +1,49 @@
+switch (x) {
+    case 0:
+        foo();
+        break;
+}
+
+switch (x) {
+    case 0: {
+        foo();
+        break;
+    }
+}
+
+switch (x) {
+    case 0:
+        foo();
+        break;
+}
+
+switch (x) {
+    case 0: {
+        foo();
+        break;
+    }
+}
+
+switch (x) {
+    default:
+        foo();
+        break;
+}
+
+switch (x) {
+    default:
+        foo();
+        break;
+}
+
+switch (x) {
+    default: {
+        foo();
+        break;
+    }
+}
+
+switch (x) {
+    case 0: break;
+}
+

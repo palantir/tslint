@@ -11,3 +11,18 @@ global.parseInt("123");
 global.global.parseInt("123");
 window.parseInt("123");
 ~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]
+
+Number.parseInt("123", 10);
+Number.parseInt("123");
+~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]
+other.Number.parseInt("123");
+
+global.Number.parseInt("123", 10);
+global.Number.parseInt("123");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]
+other.global.Number.parseInt("123");
+
+window.Number.parseInt("123", 10);
+window.Number.parseInt("123");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Missing radix parameter]
+other.window.Number.parseInt("123");
