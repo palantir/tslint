@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import { flatMap, mapDefined } from "../utils";
+import { dedent, flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -173,7 +173,9 @@ const optionsDescription = Lint.Utils.dedent`
             ]
         }
 
-    The '${OPTION_ALPHABETIZE}' option will enforce that members within the same category should be alphabetically sorted by name.`;
+    The '${OPTION_ALPHABETIZE}' option will enforce that members within the same category should be alphabetically sorted by name.
+    Computed property names are sorted before others but not sorted amongst each other.
+    Additionally getters will be sorted before setters (after alphabetization).`;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -301,6 +303,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
+        let prevKind: ts.SyntaxKind | undefined;
         let failureExists = false;
         for (const member of members) {
             const rank = this.memberRank(member);
@@ -329,12 +332,23 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     }
 
                     const curName = nameString(member.name);
-                    if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
+                    const alphaDiff = prevName !== undefined && prevName.toLowerCase().localeCompare(curName.toLowerCase());
+                    if (prevName !== undefined && alphaDiff > 0) {
                         this.addFailureAtNode(
                             member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
                         failureExists = true;
                     } else {
+                        if (alphaDiff === 0 &&
+                            curName !== "" && // do not enforce get < set for computed properties
+                            member.kind === ts.SyntaxKind.GetAccessor &&
+                            prevKind === ts.SyntaxKind.SetAccessor
+                        ) {
+                            this.addFailureAtNode(member.name, `Getter for '${curName}' should appear before setter.`, []);
+                            failureExists = true;
+                        } else {
+                            prevKind = member.kind;
+                        }
                         prevName = curName;
                     }
                 }
@@ -357,6 +371,10 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     const bName = nameString(b.name);
                     const nameDiff = aName.localeCompare(bName);
                     if (nameDiff !== 0) { return nameDiff; }
+                    const getSetDiff = a.kind === ts.SyntaxKind.GetAccessor && b.kind === ts.SyntaxKind.SetAccessor ? -1
+                        : a.kind === ts.SyntaxKind.SetAccessor && b.kind === ts.SyntaxKind.GetAccessor ? 1
+                        : 0;
+                    if (aName !== "" && getSetDiff !== 0) { return getSetDiff; }
                 }
                 // finally, sort by position in original NodeArray so the sort remains stable.
                 return ai - bi;

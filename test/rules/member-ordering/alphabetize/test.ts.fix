@@ -7,11 +7,11 @@ class X {
         return 0;
     }
     set y(x: number) {}
-
-    set z(x: number) {}
     get z() {
         return 0;
     }
+
+    set z(x: number) {}
 
     [Symbol.iterator]() {}
     // No ordering among computed properties

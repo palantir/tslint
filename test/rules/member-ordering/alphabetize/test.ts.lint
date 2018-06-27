@@ -5,6 +5,7 @@ class X {
 
     set z(x: number) {}
     get z() {
+        ~     [Getter for 'z' should appear before setter.]
         return 0;
     }
 
