@@ -9,12 +9,21 @@ if (x === 2) {
 }
 ~ [block is empty]
 
-function testFunction() {
-                        ~
+function testFunction1() {
+                         ~
 
 ~nil
 }
 ~ [block is empty]
+
+const testFunction2 = () => { };
+                            ~~~  [block is empty]
+
+const testFunction3 = function() {}
+                                 ~~ [block is empty]
+
+const testFunction4 = function(): void {}
+                                       ~~ [block is empty]
 
 for (var x = 0; x < 1; ++x) { }
                             ~~~ [block is empty]
@@ -62,6 +71,14 @@ class ProtectedClassConstructor {
 class PublicClassConstructor {
     public constructor() {}
                          ~~ [block is empty]
+}
+
+class ClassMethod {
+    public methodWithoutResultTypehinting() {}
+                                            ~~ [block is empty]
+
+    public methodWithResultTypehinting(): void {}
+                                               ~~ [block is empty]
 }
 
 try {

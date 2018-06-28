@@ -40,8 +40,11 @@ export class Rule extends Lint.Rules.TypedRule {
         },
         optionExamples: [true, [true, "Thenable"]],
         rationale: Lint.Utils.dedent`
-            While it is valid TypeScript to await a non-Promise-like value (it will resolve immediately),
+            While it is valid JavaScript to await a non-Promise-like value (it will resolve immediately),
             this pattern is often a programmer error and the resulting semantics can be unintuitive.
+
+            Awaiting non-Promise-like values often is an indication of programmer error, such as
+            forgetting to add parenthesis to call a function that returns a Promise.
         `,
         type: "functionality",
         typescriptOnly: true,

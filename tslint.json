@@ -54,6 +54,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "newline-per-chained-call": false,
     "no-console": {
       "options": ["log"]
     },
@@ -65,6 +66,7 @@
       "check-format",
       "allow-leading-underscore",
       "allow-pascal-case"
-    ]
+    ],
+    "linebreak-style": false
   }
 }

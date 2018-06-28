@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         `,
         optionsDescription: Lint.Utils.dedent`
             By default the rule looks at \`"dependencies"\` and \`"peerDependencies"\`.
-            By adding the \`"${OPTION_DEV}"\` option the rule looks at \`"devDependencies"\` instead of \`"peerDependencies"\`.
+            By adding the \`"${OPTION_DEV}"\` option the rule also looks at \`"devDependencies"\`.
             By adding the \`"${OPTION_OPTIONAL}"\` option the rule also looks at \`"optionalDependencies"\`.
         `,
         options: {
@@ -121,7 +121,7 @@ function getDependencies(fileName: string, options: Options): Set<string> {
             if (content.dependencies !== undefined) {
                 addDependencies(result, content.dependencies);
             }
-            if (!options.dev && content.peerDependencies !== undefined) {
+            if (content.peerDependencies !== undefined) {
                 addDependencies(result, content.peerDependencies);
             }
             if (options.dev && content.devDependencies !== undefined) {

@@ -6,7 +6,7 @@ permalink: /usage/rule-flags/
 
 ### Comment flags in source code
 
-In addition to [global configuration][0], you may also enable/disable linting or a subset of lint rules within a file with the following comment rule flags:
+In addition to [global configuration][0], you may also enable/disable linting for a subset of lint rules within a file with the following comment rule flags:
 
 * `/* tslint:disable */` - Disable all rules for the rest of the file
 * `/* tslint:enable */` - Enable all rules for the rest of the file
