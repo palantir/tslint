@@ -3,7 +3,7 @@ import {assert} from 'chai';
 import foo from 'foo';
 
 import Foo from 'Foo';
-                ~~~~~ [err % ('Foo')]
+                ~~~~~ [err1 % ('Foo', 'foo')]
 
 if (foo) {
     const common = require('common');
@@ -17,10 +17,11 @@ export * from "@angular/common/http";
 import * as ts from "typescript";
 
 import "baz/foo";
-       ~~~~~~~~~ [err % ('baz')]
+       ~~~~~~~~~ [err1 % ('baz', 'bar')]
 
 const http = require('http');
 
 import test from '../test.ts';
 
 [err]: Module '%s' is not listed as dependency in package.json
+[err1]: Module '%s' is not listed as dependency in package.json. Did you mean '%s'?
