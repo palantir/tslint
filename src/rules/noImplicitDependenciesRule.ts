@@ -92,10 +92,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<Options>) {
     const {options} = ctx;
     let dependencies: Set<string> | undefined;
+    const whitelist = new Set(options.whitelist);
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
             const packageName = getPackageName(name.text);
-            if (options.whitelist.indexOf(packageName) === -1 && builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
+            if (!whitelist.has(packageName) && builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
             }
         }
