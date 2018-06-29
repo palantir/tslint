@@ -532,7 +532,14 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
     const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string; alphabetize?: boolean } | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
-        return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
+        const order = convertFromOldStyleOptions(allOptions);
+        showWarningOnce(dedent`
+            Warning: member-ordering - Direct string option is deprecated and does not support accessors.
+            See also https://palantir.github.io/tslint/rules/member-ordering/
+            You should replace ${allOptions.map((o) => JSON.stringify(o)).join()}
+            with the following equivalent options and add -accessor categories as appropriate:\n` +
+            JSON.stringify(order, undefined, "  "));
+        return { order, alphabetize: false }; // presume allOptions to be string[]
     }
 
     return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: firstOption[OPTION_ALPHABETIZE] === true };
