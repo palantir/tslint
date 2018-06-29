@@ -75,7 +75,7 @@
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-    "typescript": "~2.8.3"
+    "typescript": "^2.9.1"
   },
   "license": "Apache-2.0",
   "engines": {

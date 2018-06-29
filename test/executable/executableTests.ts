@@ -454,6 +454,11 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             assert.equal(status, Status.LintError, "exit code should be 2");
         });
 
+        it("does not try to parse JSON files with --resolveJsonModule", async () => {
+            const status = await execRunner({project: "test/files/tsconfig-resolve-json-module/tsconfig.json"});
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
         it("doesn't lint external dependencies with 'allowJs'", async () => {
             const status = await execRunner({project: "test/files/allow-js-exclude-node-modules/tsconfig.json"});
             assert.equal(status, Status.Ok, "process should exit without error");

@@ -89,13 +89,16 @@ export class Linter {
 
     /**
      * Returns a list of source file names from a TypeScript program. This includes all referenced
-     * files and excludes declaration (".d.ts") files.
+     * files and excludes declaration (".d.ts") files, as well as JSON files, to avoid problems with
+     * `resolveJsonModule`.
      */
     public static getFileNames(program: ts.Program): string[] {
         return mapDefined(
             program.getSourceFiles(),
             (file) =>
-                file.fileName.endsWith(".d.ts") || program.isSourceFileFromExternalLibrary(file)
+                file.fileName.endsWith(".d.ts") ||
+                file.fileName.endsWith(".json") ||
+                program.isSourceFileFromExternalLibrary(file)
                     ? undefined
                     : file.fileName,
         );
