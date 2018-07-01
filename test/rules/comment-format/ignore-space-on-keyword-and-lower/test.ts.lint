@@ -32,7 +32,7 @@ const unusedVar = 'unneeded value';
 //TODO: todo description
 
 //TODO: Todo description
-        ~~~~~~~~~~~~~~~~ [lower]
+       ~~~~~~~~~~~~~~~~~ [lower]
 
 //FIXME: todo description
 
@@ -40,10 +40,11 @@ const unusedVar = 'unneeded value';
         ~~~~~~~~~~~~~~~~ [space]
 
 //HACK: unknown keyword
+  ~~~~~~~~~~~~~~~~~~~~~ [lower]
   ~~~~~~~~~~~~~~~~~~~~~ [space]
 
 //HACK: Unknown keyword
-        ~~~~~~~~~~~~~~~ [lower]
+  ~~~~~~~~~~~~~~~~~~~~~ [lower]
   ~~~~~~~~~~~~~~~~~~~~~ [space]
 
 [lower]: comment must start with lowercase letter

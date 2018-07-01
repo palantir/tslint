@@ -22,6 +22,10 @@ import { ENABLE_DISABLE_REGEX } from "../enableDisableRules";
 import * as Lint from "../index";
 import { escapeRegExp, isLowerCase, isUpperCase } from "../utils";
 
+interface NoSpaceKeywordsObject {
+    "no-space-keywords": string[];
+}
+
 interface IExceptionsObject {
     "ignore-words"?: string[];
     "ignore-pattern"?: string;
@@ -29,6 +33,7 @@ interface IExceptionsObject {
 
 interface Options {
     space: boolean;
+    noSpaceExceptions?: RegExp;
     case: Case;
     exceptions?: RegExp;
     failureSuffix: string;
@@ -81,6 +86,19 @@ export class Rule extends Lint.Rules.AbstractRule {
                     {
                         type: "object",
                         properties: {
+                            "no-space-keywords": {
+                                type: "array",
+                                items: {
+                                    type: "string",
+                                },
+                            },
+                        },
+                        minProperties: 1,
+                        maxProperties: 1,
+                    },
+                    {
+                        type: "object",
+                        properties: {
                             "ignore-words": {
                                 type: "array",
                                 items: {
@@ -97,10 +115,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
             minLength: 1,
-            maxLength: 4,
+            maxLength: 5,
         },
         optionExamples: [
             [true, "check-space", "check-uppercase"],
+            [true, "check-space", {"no-space-keywords": ["TODO", "FIXME"]}],
             [true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}],
             [true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}],
         ],
@@ -113,6 +132,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
+    public static NO_SPACE_KEYWORDS_FACTORY = (keywords: string[]): string => ` or the keyword(s): ${keywords.join(", ")}`;
     public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string => ` or the word(s): ${words.join(", ")}`;
     public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string => ` or its start must match the regex pattern "${pattern}"`;
 
@@ -121,7 +141,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function parseOptions(options: Array<string | IExceptionsObject>): Options {
+function parseOptions(options: Array<string | NoSpaceKeywordsObject | IExceptionsObject>): Options {
     return {
         case: options.indexOf(OPTION_LOWERCASE) !== -1
                 ? Case.Lower
@@ -129,13 +149,49 @@ function parseOptions(options: Array<string | IExceptionsObject>): Options {
                     ? Case.Upper
                     : Case.None,
         failureSuffix: "",
+        noSpaceExceptions: parseNoSpaceKeywords(options[1]),
         space: options.indexOf(OPTION_SPACE) !== -1,
         ...composeExceptions(options[options.length - 1]),
     };
 }
 
-function composeExceptions(option?: string | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
+function isNoSpaceKeywordsObject(option?: string | NoSpaceKeywordsObject | IExceptionsObject): option is NoSpaceKeywordsObject {
     if (typeof option !== "object") {
+        return false;
+    }
+    if (!("no-space-keywords" in option)) {
+        return false;
+    }
+    if (!Array.isArray(option["no-space-keywords"])) {
+        return false;
+    }
+    return true;
+}
+
+function parseNoSpaceKeywords(option?: string | NoSpaceKeywordsObject | IExceptionsObject): RegExp | undefined {
+    if (!isNoSpaceKeywordsObject(option)) {
+        return undefined;
+    }
+    const keywords = option["no-space-keywords"];
+    return new RegExp(`^(${keywords.map((keyword) => escapeRegExp(keyword.trim())).join("|")})\\b`);
+}
+
+function isIExceptionsObject(option?: string | NoSpaceKeywordsObject | IExceptionsObject): option is IExceptionsObject {
+    if (typeof option !== "object") {
+        return false;
+    }
+    if (!("ignore-pattern" in option) && !("ignore-words" in option)) {
+        return false;
+    }
+    if (!(typeof option["ignore-pattern"] === "string") && !Array.isArray(option["ignore-words"])) {
+        return false;
+    }
+    return true;
+}
+
+function composeExceptions(
+    option?: string | NoSpaceKeywordsObject | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
+    if (!isIExceptionsObject(option)) {
         return undefined;
     }
     const ignorePattern = option["ignore-pattern"];
@@ -173,10 +229,24 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (start === end) {
             return;
         }
-        const commentText = fullText.slice(start, end);
+        let commentText = fullText.slice(start, end);
         // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
         if (/^(?:#(?:end)?region|noinspection\s)/.test(commentText)) {
             return;
+        }
+
+        if (ctx.options.noSpaceExceptions !== undefined) {
+            const match = ctx.options.noSpaceExceptions.exec(commentText);
+            if (match !== null) {
+                const lengthOfMatch = match[0].length;
+                commentText = commentText.substring(lengthOfMatch);
+                // Check optional colon after keyword
+                if (commentText[0] === ":") {
+                    commentText = commentText.substring(1);
+                    ++start;
+                }
+                start += lengthOfMatch;
+            }
         }
 
         if (ctx.options.space && commentText[0] !== " ") {
