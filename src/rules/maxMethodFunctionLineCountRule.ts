@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "tslint";
+import * as Lint from "../index";
 import { isFunctionDeclaration, isFunctionWithBody } from "tsutils";
-import * as ts from "../index";
+import * as ts from "typescript";
 
 const OPTION_INCLUDE = "include-nested-functions";
 
