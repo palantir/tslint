@@ -53,7 +53,8 @@ function walk(ctx: Lint.WalkContext<void>) {
             const argument = node.argumentExpression;
             if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
                 // for compatibility with typescript@<2.5.0 to avoid fixing expr['__foo'] to expr.___foo
-                const propertyName = ts.unescapeIdentifier(argument.text); // tslint:disable-line:deprecation
+                // tslint:disable-next-line:deprecation strict-boolean-expressions
+                const propertyName = ts.unescapeIdentifier ? ts.unescapeIdentifier(argument.text) : argument.text;
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
