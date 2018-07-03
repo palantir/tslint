@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import * as Lint from "../index";
 import { isFunctionDeclaration, isFunctionWithBody } from "tsutils";
 import * as ts from "typescript";
+import * as Lint from "../index";
 
 const OPTION_INCLUDE = "include-nested-functions";
 
@@ -108,11 +108,17 @@ class MaxMethodLine extends Lint.AbstractWalker<MaxMethodLineOptions> {
 
     private countLines(node: ts.Node): number {
         const nodeText = node.getText();
-        const lineCountIsCached = this.cache.has(nodeText);
+        const cachedLineCount = this.cache.get(nodeText);
+        let lineCount: number;
 
-        return lineCountIsCached
-            ? this.cache.get(nodeText)
-            : this.computeLineCount(node);
+        if (cachedLineCount) {
+            lineCount = cachedLineCount;
+        } else {
+            lineCount = this.computeLineCount(node);
+            this.cache.set(nodeText, lineCount);
+        }
+
+        return lineCount;
     }
 
     private computeLineCount(node: ts.Node) {
@@ -122,7 +128,6 @@ class MaxMethodLine extends Lint.AbstractWalker<MaxMethodLineOptions> {
             lineCount -= this.countNestedFunctionLines(node);
         }
 
-        this.cache.set(node.getText(), lineCount); // Cache result
         return lineCount;
     }
 
