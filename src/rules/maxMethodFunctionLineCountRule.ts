@@ -85,7 +85,7 @@ interface MaxMethodLineOptions {
 class MaxMethodLine extends Lint.AbstractWalker<MaxMethodLineOptions> {
 
     // cache for line count
-    private cache = new Map<string, number>();
+    private readonly cache = new Map<string, number>();
 
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
@@ -111,7 +111,7 @@ class MaxMethodLine extends Lint.AbstractWalker<MaxMethodLineOptions> {
         const cachedLineCount = this.cache.get(nodeText);
         let lineCount: number;
 
-        if (cachedLineCount) {
+        if (cachedLineCount !== undefined) {
             lineCount = cachedLineCount;
         } else {
             lineCount = this.computeLineCount(node);
