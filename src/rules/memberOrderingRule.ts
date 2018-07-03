@@ -254,6 +254,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
+    public static stringCompare(a: string, b: string) {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        return (aLower < bLower ? -1 : (aLower > bLower ? 1 : 0));
+    }
+
     /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         let options: Options;
@@ -332,7 +338,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     }
 
                     const curName = nameString(member.name);
-                    const alphaDiff = prevName !== undefined && prevName.toLowerCase().localeCompare(curName.toLowerCase());
+                    const alphaDiff = prevName !== undefined && Rule.stringCompare(prevName, curName);
                     if (prevName !== undefined && alphaDiff > 0) {
                         this.addFailureAtNode(
                             member.name,
@@ -369,7 +375,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
                     const aName = nameString(a.name);
                     const bName = nameString(b.name);
-                    const nameDiff = aName.localeCompare(bName);
+                    const nameDiff = Rule.stringCompare(aName, bName);
                     if (nameDiff !== 0) { return nameDiff; }
                     const getSetDiff = a.kind === ts.SyntaxKind.GetAccessor && b.kind === ts.SyntaxKind.SetAccessor ? -1
                         : a.kind === ts.SyntaxKind.SetAccessor && b.kind === ts.SyntaxKind.GetAccessor ? 1
