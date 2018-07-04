@@ -191,6 +191,7 @@ export const rules = {
     // "file-header": No sensible default
     "deprecation": true,
     "encoding": true,
+    "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
