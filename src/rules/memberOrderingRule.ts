@@ -260,7 +260,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         return (aLower < bLower ? -1 : (aLower > bLower ? 1 : 0));
     }
 
-    /* tslint:enable:object-literal-sort-keys */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         let options: Options;
         try {
@@ -307,17 +306,18 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
      * before the checkMembers call in this.walk().
      */
     private checkMembers(members: ts.NodeArray<Member>) {
-        let prevRank = -1;
-        let prevName: string | undefined;
-        let prevKind: ts.SyntaxKind | undefined;
+        let prevMember = members[0];
         let failureExists = false;
-        for (const member of members) {
+        for (let i = 1; i < members.length; i++) {
+            const member = members[i];
+
             const rank = this.memberRank(member);
             if (rank === -1) {
                 // no explicit ordering for this kind of node specified, so continue
                 continue;
             }
 
+            const prevRank = this.memberRank(prevMember);
             if (rank < prevRank) {
                 const nodeType = this.rankName(rank);
                 const prevNodeType = this.rankName(prevRank);
@@ -330,38 +330,33 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 // add empty array as fix so we can add a replacement later. (fix itself is readonly)
                 this.addFailureAtNode(member, errorLine1, []);
                 failureExists = true;
-            } else {
-                if (this.options.alphabetize && member.name !== undefined) {
-                    if (rank !== prevRank) {
-                        // No alphabetical ordering between different ranks
-                        prevName = undefined;
-                    }
-
-                    const curName = nameString(member.name);
-                    const alphaDiff = prevName !== undefined && Rule.stringCompare(prevName, curName);
-                    if (prevName !== undefined && alphaDiff > 0) {
-                        this.addFailureAtNode(
-                            member.name,
-                            Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
-                        failureExists = true;
-                    } else {
-                        if (alphaDiff === 0 &&
-                            curName !== "" && // do not enforce get < set for computed properties
-                            member.kind === ts.SyntaxKind.GetAccessor &&
-                            prevKind === ts.SyntaxKind.SetAccessor
-                        ) {
-                            this.addFailureAtNode(member.name, `Getter for '${curName}' should appear before setter.`, []);
-                            failureExists = true;
-                        } else {
-                            prevKind = member.kind;
-                        }
-                        prevName = curName;
-                    }
+                continue; // avoid updating prevMember at end of loop
+            } else if (
+                prevRank === rank &&
+                this.options.alphabetize &&
+                member.name !== undefined &&
+                prevMember.name !== undefined
+            ) {
+                const curName = nameString(member.name);
+                const prevName = nameString(prevMember.name);
+                const alphaDiff = Rule.stringCompare(prevName, curName);
+                if (alphaDiff > 0) {
+                    this.addFailureAtNode(
+                        member.name,
+                        Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
+                    failureExists = true;
+                    continue;
+                } else if (alphaDiff === 0 &&
+                    curName !== "" && // do not enforce get < set for computed properties
+                    member.kind === ts.SyntaxKind.GetAccessor &&
+                    prevMember.kind === ts.SyntaxKind.SetAccessor
+                ) {
+                    this.addFailureAtNode(member.name, `Getter for '${curName}' should appear before setter.`, []);
+                    failureExists = true;
+                    continue;
                 }
-
-                // keep track of last good node
-                prevRank = rank;
             }
+            prevMember = member;
         }
         if (failureExists) {
             const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
