@@ -287,12 +287,11 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
-// tslint:disable-next-line:no-async-without-await
 async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);
     }
-    const buffer = new Buffer(256);
+    const buffer = Buffer.allocUnsafe(256);
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);
