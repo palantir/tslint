@@ -23,7 +23,7 @@ async function a(){
 }
 
 async function a(){
-~~~~~ [Functions marked async must contain an await statement.]
+~~~~~ [Functions marked async must contain an await or return statement.]
    let b = 1;
    async function f() {
         await fetch();
@@ -33,24 +33,20 @@ async function a(){
 function a(){
    let b = 1;
    async function f() {
-   ~~~~~ [Functions marked async must contain an await statement.]
+   ~~~~~ [Functions marked async must contain an await or return statement.]
         fetch();
    };
 }
 
 const a = async () => {
-          ~~~~~ [Functions marked async must contain an await statement.]
+          ~~~~~ [Functions marked async must contain an await or return statement.]
    let b = 1;
    console.log(b);
 }
 
-
-const a = async () => 1;
-          ~~~~~ [Functions marked async must contain an await statement.]
-
 class A {
     async b() {
-    ~~~~~ [Functions marked async must contain an await statement.]
+    ~~~~~ [Functions marked async must contain an await or return statement.]
         console.log(1);
     }
 }
@@ -65,10 +61,25 @@ async () => {
     await a();
     class A {
         async b() {
-        ~~~~~ [Functions marked async must contain an await statement.]
+        ~~~~~ [Functions marked async must contain an await or return statement.]
             console.log(1);
         }
     }
 };
 
-[0]: Functions marked async must contain an await statement.
+async function a() {
+   let b = 1;
+   return b;
+}
+
+let a = async () => 1;
+
+async function a() {
+~~~~~ [Functions marked async must contain an await or return statement.]
+   let b = 1;
+   let a = () => {
+      return 1;
+   }
+}
+
+[0]: Functions marked async must contain an await or return statement.

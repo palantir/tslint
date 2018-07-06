@@ -42,6 +42,10 @@ export const codeExamples = [
             const f = async () => {
                 await fetch();
             };
+
+            const f = async () => {
+                return 'value';
+            };
         `,
     },
 ];
