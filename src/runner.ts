@@ -243,7 +243,7 @@ function resolveFiles(
             // Use a filename for shadowing stdin, if the option is set.
             return [{filename: path.resolve(stdinFilename), isStdin: true}];
         } else {
-            return [{filename: "", isStdin: true}];
+            throw new Error("--stdin-filename must be provided with --stdin.");
         }
     }
 

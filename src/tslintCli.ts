@@ -141,7 +141,8 @@ const options: Option[] = [
         type: "string",
         describe: "stdin input",
         description: dedent`
-            Read and check a file via stdin.`,
+            Read and check a file via stdin. The --stdin-filename option must
+            also be given.`,
     },
     {
         name: "stdin-filename",
@@ -256,13 +257,16 @@ if (parsed.unknown.length !== 0) {
 const argv = commander.opts() as any as Argv;
 
 if (!(
-  argv.init
-  || argv.test !== undefined
-  || argv.project !== undefined
-  || commander.args.length > 0
-  || argv.stdin
+    argv.init
+    || argv.test !== undefined
+    || argv.project !== undefined
+    || commander.args.length > 0
+    || argv.stdin
 )) {
-    console.error("No files specified. Use --project to lint a project folder.");
+    console.error(
+        "No files specified. Use --project to lint a project folder "
+        + "or use --stdin and --stdin-filename.",
+    );
     process.exit(1);
 }
 
