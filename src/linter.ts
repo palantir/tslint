@@ -142,6 +142,9 @@ export class Linter {
     }
 
     public getResult(): LintResult {
+        const errors = this.failures.filter((failure) => failure.getRuleSeverity() === "error");
+        const failures = this.options.quiet ? errors : this.failures;
+
         const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
         const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
         if (Formatter === undefined) {
@@ -149,16 +152,16 @@ export class Linter {
         }
         const formatter = new Formatter();
 
-        const output = formatter.format(this.failures, this.fixes);
+        const output = formatter.format(failures, this.fixes);
 
-        const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
+        const errorCount = errors.length;
         return {
             errorCount,
-            failures: this.failures,
+            failures,
             fixes: this.fixes,
             format: formatterName,
             output,
-            warningCount: this.failures.length - errorCount,
+            warningCount: failures.length - errorCount,
         };
     }
 
