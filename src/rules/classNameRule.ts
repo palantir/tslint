@@ -19,7 +19,7 @@ import { isClassLikeDeclaration, isInterfaceDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "../utils";
+import { isPascalCased } from "../utils";
 import { codeExamples } from "./code-examples/className.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
