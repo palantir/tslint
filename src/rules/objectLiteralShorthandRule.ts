@@ -88,7 +88,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                 node.name.text === node.initializer.text) {
                 ctx.addFailureAtNode(
                     node,
-                    `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
+                    `${Rule.LONGHAND_PROPERTY}('{..., ${node.name.text}, ...}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
             } else if (isFunctionExpression(node.initializer) &&
@@ -98,7 +98,7 @@ function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
                 ctx.addFailure(
                     node.getStart(ctx.sourceFile),
                     getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
-                    `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
+                    `${Rule.LONGHAND_METHOD}('{..., ${name}() {...}, ...}').`,
                     fix,
                 );
             }
