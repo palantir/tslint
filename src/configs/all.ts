@@ -137,6 +137,7 @@ export const rules = {
     "radix": true,
     "restrict-plus-operands": true,
     "strict-boolean-expressions": true,
+    "strict-error-throw": true,
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,

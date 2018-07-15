@@ -1,0 +1,43 @@
+import {AppError} from './other.test';
+
+class Exception extends AppError {}
+throw new Exception();
+
+const ex = new Exception();
+throw ex;
+
+throw new Error('error');
+
+const err = new Error();
+throw err;
+
+try {
+  throw new Error("error");
+} catch(e) {
+  throw e;
+}
+
+throw "error";
+~~~~~~~~~~~~~~    [0]
+
+throw ('message');
+~~~~~~~~~~~~~~~~~~ [0]
+
+throw {message: 'error'};
+~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+class MyError {}
+throw new MyError();
+~~~~~~~~~~~~~~~~~~~~  [0]
+
+const code = 1;
+throw code;
+~~~~~~~~~~~  [0]
+
+const foo: { bar: string } = {
+    bar: "error"
+};
+throw foo.bar;
+~~~~~~~~~~~~~~    [0]
+
+[0]: Expected an instance of 'Error' or its subclass to throw
