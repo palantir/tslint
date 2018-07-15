@@ -90,7 +90,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 
     function isInstanceOfClass(type: ts.Type, className: string) {
         if (isTypeFlagSet(type, ts.TypeFlags.Object)) {
-            if (checker.getFullyQualifiedName(type.symbol!) === className) {
+            if (ts.symbolName(type.symbol!) === className) {
                 return true;
             } else {
                 const baseTypes = type.getBaseTypes();
