@@ -80,7 +80,7 @@ export class Rule extends Lint.Rules.TypedRule {
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isThrowStatement(node)) {
-            const type = checker.getTypeAtLocation((node as ts.ThrowStatement).expression);
+            const type = checker.getTypeAtLocation(node.expression);
             if (!isTypeFlagSet(type, ts.TypeFlags.Any) && !isInstanceOfClass(type, "Error")) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -94,7 +94,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
                 return true;
             } else {
                 const baseTypes = type.getBaseTypes();
-                if (baseTypes) {
+                if (baseTypes !== undefined) {
                     for (const baseType of baseTypes) {
                         if (isInstanceOfClass(baseType, className)) {
                             return true;
