@@ -891,6 +891,42 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "file-name-casing",
+    "description": "Enforces a consistent file naming convention",
+    "rationale": "Helps maintain a consistent style across a file hierarchy",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.",
+    "options": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string",
+          "enum": [
+            "camel-case",
+            "pascal-case",
+            "kebab-case"
+          ]
+        }
+      ]
+    },
+    "optionExamples": [
+      [
+        true,
+        "camel-case"
+      ],
+      [
+        true,
+        "pascal-case"
+      ],
+      [
+        true,
+        "kebab-case"
+      ]
+    ],
+    "hasFix": false,
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "forin",
     "description": "Requires a `for ... in` statement to be filtered with an `if` statement.",
     "rationale": "\n```ts\nfor (let key in someObject) {\n    if (someObject.hasOwnProperty(key)) {\n        // code here\n    }\n}\n```\nPrevents accidental iteration over properties inherited from an object's prototype.\nSee [MDN's `for...in`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)\ndocumentation for more information about `for...in` loops.\n\nAlso consider using a [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)\nor [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)\nif you're storing collections of objects.\nUsing `Object`s can cause occasional edge case bugs, such as if a key is named \"hasOwnProperty\".\n        ",
@@ -1234,7 +1270,8 @@
   {
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
-    "rationale": "\nA consistent ordering for class members can make classes easier to read, navigate, and edit.\n\nA common opposite practice to `member-ordering` is to keep related groups of classes together.\nInstead of creating clases with multiple separate groups, consider splitting class responsibilities\napart across multiple single-responsibility classes.\n        ",
+    "hasFix": true,
+    "rationale": "\nA consistent ordering for class members can make classes easier to read, navigate, and edit.\n\nA common opposite practice to `member-ordering` is to keep related groups of classes together.\nInstead of creating classes with multiple separate groups, consider splitting class responsibilities\napart across multiple single-responsibility classes.\n        ",
     "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
     "options": {
       "type": "object",
@@ -1667,7 +1704,7 @@
         "JQueryPromise"
       ]
     ],
-    "rationale": "\nCreating a Promise and not storing or returning may lets other code run independent of of its results.\nThis can cause unexpected and/or non-deterministic behavior depending on external timing factors.\n\nIt's typically better to return Promises from functions that start them, then handle them in calling code.\n\nUse `no-unused-expression` in addition to this rule to reveal even more floating promises.\n        ",
+    "rationale": "\nCreating a Promise and not storing or returning it may let other code run independently of its result.\nThis can cause unexpected and/or non-deterministic behavior depending on external timing factors.\n\nIt's typically better to return Promises from functions that start them, then handle them in calling code.\n\nUse `no-unused-expression` in addition to this rule to reveal even more floating promises.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true
@@ -1689,18 +1726,23 @@
     "ruleName": "no-implicit-dependencies",
     "description": "Disallows importing modules that are not listed as dependency in the project's package.json",
     "descriptionDetails": "\nDisallows importing transient dependencies and modules installed above your package's root directory.\n        ",
-    "optionsDescription": "\nBy default the rule looks at `\"dependencies\"` and `\"peerDependencies\"`.\nBy adding the `\"dev\"` option the rule looks at `\"devDependencies\"` instead of `\"peerDependencies\"`.\nBy adding the `\"optional\"` option the rule also looks at `\"optionalDependencies\"`.\n        ",
+    "optionsDescription": "\nBy default the rule looks at `\"dependencies\"` and `\"peerDependencies\"`.\nBy adding the `\"dev\"` option the rule also looks at `\"devDependencies\"`.\nBy adding the `\"optional\"` option the rule also looks at `\"optionalDependencies\"`.\nAn array of whitelisted modules can be added to skip checking their existence in package.json.\n        ",
     "options": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "dev",
-          "optional"
-        ]
-      },
+      "items": [
+        {
+          "type": "string",
+          "enum": [
+            "dev",
+            "optional"
+          ]
+        },
+        {
+          "type": "array"
+        }
+      ],
       "minItems": 0,
-      "maxItems": 2
+      "maxItems": 3
     },
     "optionExamples": [
       true,
@@ -1711,6 +1753,13 @@
       [
         true,
         "optional"
+      ],
+      [
+        true,
+        [
+          "src",
+          "app"
+        ]
       ]
     ],
     "type": "functionality",
@@ -2445,7 +2494,8 @@
     "rationale": "\nVariables that are declared and not used anywhere in code are likely an error due to incomplete refactoring.\nSuch variables take up space in the code, are mild performance pains, and can lead to confusion by readers.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "deprecationMessage": "Since TypeScript 2.9. Please use the built-in compiler checks instead."
   },
   {
     "ruleName": "no-use-before-declare",
@@ -2458,7 +2508,15 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "codeExamples": [
+      {
+        "description": "Check that referenced variables are declared beforehand (default)",
+        "config": "```json\n\"rules\": { \"no-use-before-declare\": true }\n```",
+        "pass": "```ts\nvar hello = 'world';\nvar foo;\n\nconsole.log(hello, foo, capitalize(hello));\n// 'world', undefined, 'WORLD'\n\nfunction capitalize(val) {\n    return val.toUpperCase();\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n\nfunction declaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n```",
+        "fail": "```ts\nconsole.log(hello, foo);\n\nvar hello = 'world';\nvar foo;\n\nfunction undeclaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-var-keyword",
@@ -2923,8 +2981,8 @@
       {
         "description": "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
         "config": "```json\n\"rules\": { \"prefer-while\": true }\n```",
-        "pass": "```ts\nfor(let x = 1; x < 10; x++) {\n    console.log(x);\n}\n\nfor (let i = 0; i < 10; x+=1) {\n    console.log(x);\n}\n\nfor (let i = 0; i < 10;) {\n    i += 1;\n}\n```",
-        "fail": "```ts\nfor(;;) {\n    console.log(x);\n}\n\nfor(;true===true;) {\n    console.log(x);\n}\n```"
+        "pass": "```ts\nfor(let i = 1; i < 10; i++) {\n    console.log(i);\n}\n\nfor (let i = 0; i < 10; i+=1) {\n    console.log(i);\n}\n\nfor (let i = 0; i < 10;) {\n    i += 1;\n}\n```",
+        "fail": "```ts\nfor(;;) {\n    console.log('Hello World');\n}\n\nfor(;true===true;) {\n    console.log('Hello World');\n}\n```"
       }
     ]
   },
@@ -3221,6 +3279,7 @@
   {
     "ruleName": "switch-final-break",
     "description": "Checks whether the final clause of a switch statement ends in `break;`.",
+    "hasFix": true,
     "optionsDescription": "\nIf no options are passed, a final 'break;' is forbidden.\nIf the \"always\" option is passed this will require a 'break;' to always be present\nunless control flow is escaped in some other way.",
     "options": {
       "type": "string",

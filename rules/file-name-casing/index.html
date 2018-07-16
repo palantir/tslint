@@ -1,0 +1,43 @@
+---
+ruleName: file-name-casing
+description: Enforces a consistent file naming convention
+rationale: Helps maintain a consistent style across a file hierarchy
+optionsDescription: |-
+
+  One of the following arguments must be provided:
+
+  * `camel-case`: File names must be camel-cased: `fileName.ts`.
+  * `pascal-case`: File names must be Pascal-cased: `FileName.ts`.
+  * `kebab-case`: File names must be kebab-cased: `file-name.ts`.
+options:
+  type: array
+  items:
+    - type: string
+      enum:
+        - camel-case
+        - pascal-case
+        - kebab-case
+optionExamples:
+  - '[true, "camel-case"]'
+  - '[true, "pascal-case"]'
+  - '[true, "kebab-case"]'
+hasFix: false
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: file-name-casing'
+optionsJSON: |-
+  {
+    "type": "array",
+    "items": [
+      {
+        "type": "string",
+        "enum": [
+          "camel-case",
+          "pascal-case",
+          "kebab-case"
+        ]
+      }
+    ]
+  }
+---

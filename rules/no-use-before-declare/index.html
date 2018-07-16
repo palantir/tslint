@@ -17,6 +17,57 @@ optionExamples:
 type: functionality
 typescriptOnly: false
 requiresTypeInfo: true
+codeExamples:
+  - description: Check that referenced variables are declared beforehand (default)
+    config: |-
+      ```json
+      "rules": { "no-use-before-declare": true }
+      ```
+    pass: |-
+      ```ts
+      var hello = 'world';
+      var foo;
+
+      console.log(hello, foo, capitalize(hello));
+      // 'world', undefined, 'WORLD'
+
+      function capitalize(val) {
+          return val.toUpperCase();
+      }
+
+      import { default as foo1 } from "./lib";
+      import foo2 from "./lib";
+      import _, { map, foldl } from "./underscore";
+      import * as foo3 from "./lib";
+      import "./lib";
+
+      function declaredImports() {
+          console.log(foo1);
+          console.log(foo2);
+          console.log(foo3);
+          map([], (x) => x);
+      }
+      ```
+    fail: |-
+      ```ts
+      console.log(hello, foo);
+
+      var hello = 'world';
+      var foo;
+
+      function undeclaredImports() {
+          console.log(foo1);
+          console.log(foo2);
+          console.log(foo3);
+          map([], (x) => x);
+      }
+
+      import { default as foo1 } from "./lib";
+      import foo2 from "./lib";
+      import _, { map, foldl } from "./underscore";
+      import * as foo3 from "./lib";
+      import "./lib";
+      ```
 layout: rule
 title: 'Rule: no-use-before-declare'
 optionsJSON: 'null'
