@@ -20,23 +20,15 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Disallows sparse arrays",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "no-sparse-arrays": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
-            }
+            const arr: string[] = ['elemenet1', 'element2'];
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
-            }
+            const arr: string[] = ['elemenet1',, 'element2'];
         `,
     },
 ];

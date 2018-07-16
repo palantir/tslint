@@ -20,53 +20,54 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Require curly braces whenever possible (default)",
+        description: "Requires that an object literal's keys be sorted alphabetically.",
         config: Lint.Utils.dedent`
-            "rules": { "curly": true }
+            "rules": { "object-literal-sort-keys": true }
         `,
         pass: Lint.Utils.dedent`
-            if (x > 0) {
-                doStuff();
-            }
+            let o = {
+                bar: 2,
+                foo: 1
+            };
         `,
         fail: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff();
-
-            if (x > 0) doStuff();
+            let o = {
+                foo: 1,
+                bar: 2
+            };
         `,
     },
     {
-        description: "Make an exception for single-line instances",
+        description: Lint.Utils.dedent`Requires that an object literal's keys be sorted by interface-definition.
+            If there is no interface fallback to alphabetically.`,
         config: Lint.Utils.dedent`
-            "rules": { "curly": [true, "ignore-same-line"] }
+            "rules": {
+                "object-literal-sort-keys": {
+                    "options": "match-declaration-order"
+                }
+            }
         `,
         pass: Lint.Utils.dedent`
-            if (x > 0) doStuff();
-        `,
-        fail: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff()
-        `,
-    },
-    {
-        description: "Error on unnecessary curly braces",
-        config: Lint.Utils.dedent`
-            "rules": { "curly": [true, "as-needed"] }
-        `,
-        pass: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff();
+            interface I {
+                foo: number;
+                bar: number;
+            }
 
-            if (x > 0) {
-                customerUpdates.push(getInfo(customerId));
-                return customerUpdates;
-            }
+            let o: I = {
+                foo: 1,
+                bar: 2
+            };
         `,
         fail: Lint.Utils.dedent`
-            if (x > 0) {
-                doStuff();
+            interface I {
+                foo: number;
+                bar: number;
             }
+
+            let o: I = {
+                bar: 2,
+                foo: 1
+            };
         `,
     },
 ];

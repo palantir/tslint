@@ -20,23 +20,21 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Requires the inclusion of the radix parameter when calling `parseInt`.",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "radix": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
-            }
+            const x: string = '11';
+            const dec: number = parseInt(x, 10);
+            const bin: number = parseInt(x, 2);
+            const hex: number = parseInt(x, 16);
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
-            }
+            const x: string = '11';
+            const dec: number = parseInt(x);
+            const bin: number = parseInt(x, 2);
+            const hex: number = parseInt(x, 16);
         `,
     },
 ];

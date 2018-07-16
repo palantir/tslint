@@ -20,23 +20,23 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Disallows functions with the function keyword",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "only-arrow-functions": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
-            }
+            const myFunc = () => {
+                // do something ...
+            };
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
-            }
+            function myFunc() {
+                // do something ...
+            };
+
+            const myFunc = function() {
+                // do something ...
+            };
         `,
     },
 ];

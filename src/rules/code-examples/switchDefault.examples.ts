@@ -20,22 +20,33 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Requires a `default` case in `switch` statements.",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "switch-default": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
+            let foo: number = 1;
+            switch (foo) {
+                case 1:
+                    doSomething();
+                    break;
+                case 2:
+                    doSomething2();
+                    break;
+                default:
+                    console.log('default');
+                    break;
             }
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
+            let foo: number = 1;
+            switch (foo) {
+                case 1:
+                    doSomething();
+                    break;
+                case 2:
+                    doSomething2();
+                    break;
             }
         `,
     },

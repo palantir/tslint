@@ -20,23 +20,17 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Disallows empty interfaces.",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "no-empty-interface": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
+            interface I {
+                foo: string;
             }
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
-            }
+            interface I { }
         `,
     },
 ];

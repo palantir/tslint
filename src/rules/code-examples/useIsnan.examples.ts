@@ -20,23 +20,19 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Enforces usage of `isNan()`.",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "use-isnan": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
+            if (isNaN(parseInt('_4711'))) {
+                doSomething();
             }
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
+            if (parseInt('_4711') === NaN) {
+                doSomething();
             }
-        `,
+       `,
     },
 ];

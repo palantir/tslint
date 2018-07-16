@@ -20,22 +20,26 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Disallows multiple variable definitions in the same declaration statement.",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "one-variable-per-declaration": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
-            }
+            const foo = 1;
+            const bar = '2';
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
+            const foo = 1, bar = '2';
+       `,
+    },
+    {
+        description: "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+        config: Lint.Utils.dedent`
+            "rules": { "one-variable-per-declaration": [true, "ignore-for-loop"] }
+        `,
+        pass: Lint.Utils.dedent`
+            for (let i = 0, j = 10; i < 10; i++) {
+                doSomething(j, i);
             }
         `,
     },
