@@ -8,22 +8,25 @@ descriptionDetails: |-
 optionsDescription: |-
 
   By default the rule looks at `"dependencies"` and `"peerDependencies"`.
-  By adding the `"dev"` option the rule looks at `"devDependencies"` instead of `"peerDependencies"`.
+  By adding the `"dev"` option the rule also looks at `"devDependencies"`.
   By adding the `"optional"` option the rule also looks at `"optionalDependencies"`.
+  An array of whitelisted modules can be added to skip checking their existence in package.json.
           
 options:
   type: array
   items:
-    type: string
-    enum:
-      - dev
-      - optional
+    - type: string
+      enum:
+        - dev
+        - optional
+    - type: array
   minItems: 0
-  maxItems: 2
+  maxItems: 3
 optionExamples:
   - 'true'
   - '[true, "dev"]'
   - '[true, "optional"]'
+  - '[true, ["src", "app"]]'
 type: functionality
 typescriptOnly: false
 layout: rule
@@ -31,14 +34,19 @@ title: 'Rule: no-implicit-dependencies'
 optionsJSON: |-
   {
     "type": "array",
-    "items": {
-      "type": "string",
-      "enum": [
-        "dev",
-        "optional"
-      ]
-    },
+    "items": [
+      {
+        "type": "string",
+        "enum": [
+          "dev",
+          "optional"
+        ]
+      },
+      {
+        "type": "array"
+      }
+    ],
     "minItems": 0,
-    "maxItems": 2
+    "maxItems": 3
   }
 ---
