@@ -107,7 +107,7 @@ const optionsDescription = Lint.Utils.dedent`
 
     ${namesMarkdown(PRESET_NAMES)}
 
-    Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
+    Alternatively, the value for \`order\` may be an array consisting of the following strings:
 
     ${namesMarkdown(allMemberKindNames)}
 
