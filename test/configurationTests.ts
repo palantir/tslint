@@ -116,6 +116,21 @@ describe("Configuration", () => {
                 parseConfigFile(config, "/path").linterOptions,
                 {
                     exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
+                    include: [],
+                },
+            );
+        });
+        it("resolves include pattern relative to the configuration file", () => {
+            const config: RawConfigFile = {
+                linterOptions: {
+                    include: ["foo.ts", "**/*.d.ts"],
+                },
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").linterOptions,
+                {
+                    exclude: [],
+                    include: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
                 },
             );
         });
