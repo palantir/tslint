@@ -106,16 +106,18 @@ describe("Configuration", () => {
             });
         });
 
-        it("resolves exclude pattern relative to the configuration file", () => {
+        it("resolves exclude and include pattern relative to the configuration file", () => {
             const config: RawConfigFile = {
                 linterOptions: {
                     exclude: ["foo.ts", "**/*.d.ts"],
+                    include: ["foo.ts", "**/*.d.ts"],
                 },
             };
             assert.deepEqual(
                 parseConfigFile(config, "/path").linterOptions,
                 {
                     exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
+                    include: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
                 },
             );
         });
@@ -208,10 +210,11 @@ describe("Configuration", () => {
             assertConfigEquals(actualConfig, expectedConfig);
         });
 
-        it("replaces exclude option", () => {
+        it("replaces exclude and include option", () => {
             const baseConfig = getEmptyConfig();
             baseConfig.linterOptions = {
                 exclude: ["src"],
+                include: ["src_ts"],
             };
 
             const extendingConfig = getEmptyConfig();
@@ -220,6 +223,7 @@ describe("Configuration", () => {
                     "lib",
                     "bin",
                 ],
+                include: ["src"],
             };
 
             const expectedConfig = getEmptyConfig();
@@ -228,16 +232,18 @@ describe("Configuration", () => {
                     "lib",
                     "bin",
                 ],
+                include: ["src"],
             };
 
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
 
-        it("empty linter options does not replace exclude", () => {
+        it("empty linter options does not replace exclude and include", () => {
             const baseConfig = getEmptyConfig();
             baseConfig.linterOptions = {
                 exclude: ["src"],
+                include: ["src_ts"],
             };
 
             const extendingConfig = getEmptyConfig();
@@ -246,6 +252,7 @@ describe("Configuration", () => {
             const expectedConfig = getEmptyConfig();
             expectedConfig.linterOptions = {
                 exclude: ["src"],
+                include: ["src_ts"],
             };
 
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);

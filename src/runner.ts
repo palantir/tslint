@@ -263,7 +263,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (isFileExcluded(file)) {
+        if (!isFileIncluded(file)) {
             continue;
         }
 
@@ -284,12 +284,26 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
 
     return linter.getResult();
 
-    function isFileExcluded(filepath: string) {
-        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
-            return false;
+    function isFileIncluded(filepath: string) {
+        if (configFile === undefined || configFile.linterOptions == undefined) {
+            return true;
         }
+
         const fullPath = path.resolve(filepath);
-        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+        const matchFn = (pattern: string) => new Minimatch(pattern).match(fullPath);
+
+        let isIncluded = true;
+
+        if (configFile.linterOptions.include !== undefined) {
+            isIncluded = configFile.linterOptions.include.some(matchFn);
+        }
+
+        if (configFile.linterOptions.exclude !== undefined) {
+            isIncluded = isIncluded &&
+                         !configFile.linterOptions.exclude.some(matchFn);
+        }
+
+        return isIncluded;
     }
 }
 

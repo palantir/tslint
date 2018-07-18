@@ -203,14 +203,20 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     describe("Config with excluded files", () => {
         it("exits with code 2 if linter options doesn't exclude file with lint errors", async () => {
             const status = await execRunner(
-                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/included.ts"]},
+                {
+                  config: "./test/files/config-exclude-include/tslint-exclude-one.json",
+                  files: ["./test/files/config-exclude-include/included.ts"],
+                },
             );
             assert.equal(status, Status.LintError, "error code should be 2");
         });
 
         it("exits with code 0 if linter options exclude one file with lint errors", async () => {
             const status = await execRunner(
-                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/excluded.ts"]},
+                {
+                  config: "./test/files/config-exclude-include/tslint-exclude-one.json",
+                  files: ["./test/files/config-exclude-include/excluded.ts"],
+                },
             );
             assert.equal(status, Status.Ok, "process should exit without an error");
         });
@@ -218,8 +224,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("exits with code 0 if linter options excludes many files with lint errors", async () => {
             const status = await execRunner(
                 {
-                    config: "./test/files/config-exclude/tslint-exclude-many.json",
-                    files: ["./test/rules/config-exclude/excluded1.ts", "./test/rules/config-exclude/subdir/excluded2.ts"],
+                    config: "./test/files/config-exclude-include/tslint-exclude-many.json",
+                    files: ["./test/rules/config-exclude-include/excluded1.ts", "./test/rules/config-exclude-include/subdir/excluded2.ts"],
                 },
             );
             assert.strictEqual(status, Status.Ok, "process should exit without an error");
@@ -227,7 +233,10 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("excludes files relative to tslint.json", async () => {
             const status = await execRunner(
-                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/subdir/excluded.ts"]},
+                {
+                  config: "./test/files/config-exclude-include/tslint-exclude-one.json",
+                  files: ["./test/files/config-exclude-include/subdir/excluded.ts"],
+                },
             );
             assert.equal(status, Status.LintError, "exit code should be 2");
         });
@@ -235,13 +244,77 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("excludes files relative to tslint.json they were declared in", async () => {
             const status = await execRunner(
                 {
-                    config: "./test/files/config-exclude/subdir/tslint-extending.json",
-                    files: ["./test/files/config-exclude/subdir/excluded.ts"],
+                    config: "./test/files/config-exclude-include/subdir/tslint-exclude-extending.json",
+                    files: ["./test/files/config-exclude-include/subdir/excluded.ts"],
                 },
             );
             assert.equal(status, Status.LintError, "exit code should be 2");
         });
     });
+
+    describe("Config with included files", () => {
+      it("exits with code 2 if linter options include file with lint errors", async () => {
+          const status = await execRunner(
+              {
+                config: "./test/files/config-exclude-include/tslint-include-one.json",
+                files: ["./test/files/config-exclude-include/included.ts"],
+              },
+          );
+          assert.equal(status, Status.LintError, "error code should be 2");
+      });
+
+      it("exits with code 0 if linter options does not include one file with lint errors", async () => {
+          const status = await execRunner(
+              {
+                config: "./test/files/config-exclude-include/tslint-include-many.json",
+                files: ["./test/files/config-exclude-include/excluded.ts"],
+              },
+          );
+          assert.equal(status, Status.Ok, "process should exit without an error");
+      });
+
+      it("exits with code 0 if linter options do not include many files with lint errors", async () => {
+          const status = await execRunner(
+              {
+                  config: "./test/files/config-exclude-include/tslint-include-one.json",
+                  files: ["./test/rules/config-exclude-include/excluded1.ts", "./test/rules/config-exclude-include/subdir/excluded2.ts"],
+              },
+          );
+          assert.strictEqual(status, Status.Ok, "process should exit without an error");
+      });
+
+      it("includes files relative to tslint.json", async () => {
+          const status = await execRunner(
+              {
+                config: "./test/files/config-exclude-include/tslint-include-one.json",
+                files: ["./test/files/config-exclude-include/subdir/included.ts"],
+              },
+          );
+          assert.equal(status, Status.Ok, "process should exit without an error");
+      });
+
+      it("includes files relative to tslint.json they were declared in", async () => {
+          const status = await execRunner(
+              {
+                  config: "./test/files/config-exclude-include/subdir/tslint-include-extending.json",
+                  files: ["./test/files/config-exclude-include/subdir/included.ts"],
+              },
+          );
+          assert.equal(status, Status.Ok, "process should exit without an error");
+      });
+  });
+
+    describe("Config with excluded and included files", () => {
+      it("exits with code 0 if exclude option overrides include to exclude one file with lint errors", async () => {
+        const status = await execRunner(
+            {
+              config: "./test/files/config-exclude-include/tslint-exclude-and-include.json",
+              files: ["./test/files/config-exclude-include/excluded.ts"],
+            },
+        );
+        assert.equal(status, Status.Ok, "process should exit without an error");
+    });
+  });
 
     it("finds configuration above current directory", (done) => {
         execCli(
