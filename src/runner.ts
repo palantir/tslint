@@ -263,7 +263,8 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (isFileExcluded(file)) {
+
+        if (!isFileIncluded(file) || isFileExcluded(file)) {
             continue;
         }
 
@@ -290,6 +291,16 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
         }
         const fullPath = path.resolve(filepath);
         return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
+    }
+
+    /** Ignore if include array is empty */
+    function isFileIncluded(filepath: string) {
+        if (configFile === undefined || configFile.linterOptions == undefined ||
+            configFile.linterOptions.include == undefined || !configFile.linterOptions.include.length) {
+            return false;
+        }
+        const fullPath = path.resolve(filepath);
+        return configFile.linterOptions.include.some((pattern) => new Minimatch(pattern).match(fullPath));
     }
 }
 

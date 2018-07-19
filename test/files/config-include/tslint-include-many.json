@@ -1,0 +1,14 @@
+{
+    "rules": {
+        "semicolon": [
+            true,
+            "always"
+        ]
+    },
+    "linterOptions": {
+        "include": [
+            "**/*/included1.ts",
+            "included2.ts"
+        ]
+    }
+}

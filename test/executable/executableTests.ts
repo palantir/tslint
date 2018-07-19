@@ -200,6 +200,35 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    describe("Config with included files", () => {
+        it("exits with code 2 if linter options include file with lint errors", async () => {
+            const status = await execRunner(
+                {config: "./test/files/config-include/tslint-include-one.json", files: ["./test/files/config-include/included.ts"]},
+            );
+            assert.equal(status, Status.LintError, "error code should be 2");
+        });
+
+        it("exits with code 0 if file not matching included pattern", async () => {
+            const status = await execRunner(
+                {config: "./test/files/config-include/tslint-include-one.json", files: [
+                    "./test/files/config-include/excluded.ts"]},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
+        it("exits with code 2 if linter options includes many files with lint errors", async () => {
+            const status = await execRunner(
+                {
+                    config: "./test/files/config-include/tslint-include-many.json",
+                    files: ["./test/files/config-include/subdir/included2.ts",
+                            "./test/files/config-include/subdir/included1.ts"],
+                },
+            );
+            assert.strictEqual(status, Status.LintError, "process should exit without an error");
+        });
+
+    });
+
     describe("Config with excluded files", () => {
         it("exits with code 2 if linter options doesn't exclude file with lint errors", async () => {
             const status = await execRunner(
