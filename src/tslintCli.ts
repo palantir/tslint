@@ -40,6 +40,7 @@ interface Argv {
     typeCheck?: boolean;
     test?: boolean;
     version?: boolean;
+    quiet?: boolean;
 }
 
 interface Option {
@@ -180,6 +181,13 @@ const options: Option[] = [
             type checker.`,
     },
     {
+        short: "q",
+        name: "quiet",
+        type: "boolean",
+        describe: "hide errors on lint",
+        description: "If true, hides warnings from linting output.",
+    },
+    {
         name: "type-check",
         type: "boolean",
         describe: "(deprecated) check for type errors before linting the project",
@@ -262,6 +270,7 @@ run(
         out: argv.out,
         outputAbsolutePaths: argv.outputAbsolutePaths,
         project: argv.project,
+        quiet: argv.quiet,
         rulesDirectory: argv.rulesDir,
         test: argv.test,
         typeCheck: argv.typeCheck,

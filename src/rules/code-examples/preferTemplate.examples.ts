@@ -20,53 +20,36 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Require curly braces whenever possible (default)",
+        description: "Enforces the use of template strings whenever possible.",
         config: Lint.Utils.dedent`
-            "rules": { "curly": true }
+            "rules": { "prefer-template": true }
         `,
         pass: Lint.Utils.dedent`
-            if (x > 0) {
-                doStuff();
-            }
+            const x: number = 1;
+            const y: number = 1;
+            const myString: string = \`\${x} is equals \${y}\`;
         `,
         fail: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff();
-
-            if (x > 0) doStuff();
+            const x: number = 1;
+            const y: number = 1;
+            const myString: string = x + ' is equals ' + y;
         `,
     },
     {
-        description: "Make an exception for single-line instances",
+        description: "Enforces the use of template strings, but allows up to one concatenation.",
         config: Lint.Utils.dedent`
-            "rules": { "curly": [true, "ignore-same-line"] }
+            "rules": { "prefer-template": [true, "allow-single-concat"] }
         `,
         pass: Lint.Utils.dedent`
-            if (x > 0) doStuff();
+            const x: number = 1;
+            const y: number = 1;
+            const myString: string = x + ' is equals 1';
+            const myString: string = \`\${x} is equals \${y}\`;
         `,
         fail: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff()
-        `,
-    },
-    {
-        description: "Error on unnecessary curly braces",
-        config: Lint.Utils.dedent`
-            "rules": { "curly": [true, "as-needed"] }
-        `,
-        pass: Lint.Utils.dedent`
-            if (x > 0)
-                doStuff();
-
-            if (x > 0) {
-                customerUpdates.push(getInfo(customerId));
-                return customerUpdates;
-            }
-        `,
-        fail: Lint.Utils.dedent`
-            if (x > 0) {
-                doStuff();
-            }
+            const x: number = 1;
+            const y: number = 1;
+            const myString: string = x + ' is equals ' + y;
         `,
     },
 ];

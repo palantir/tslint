@@ -20,23 +20,19 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Flags throwing plain strings or concatenations of strings.",
+        description: "Disallows unnecessary callback wrappers",
         config: Lint.Utils.dedent`
-            "rules": { "no-string-throw": true }
+            "rules": { "no-unnecessary-callback-wrapper": true }
         `,
         pass: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch (e) {
-                throw e;
-            }
+            const handleContent = (content) => console.log('Handle content:', content);
+            const handleError = (error) => console.log('Handle error:', error);
+            promise.then(handleContent).catch(handleError);
         `,
         fail: Lint.Utils.dedent`
-            try {
-                // ...
-            } catch {
-                throw 'There was a problem.';
-            }
+            const handleContent = (content) => console.log('Handle content:', content);
+            const handleError = (error) => console.log('Handle error:', error);
+            promise.then((content) => handleContent(content)).catch((error) => handleError(error));
         `,
     },
 ];
