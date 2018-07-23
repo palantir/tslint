@@ -6,6 +6,10 @@ import {A, B} from 'foo'; // failure
 import {A, bz, C} from 'foo'; // failure
 import {A, b, C} from 'zfoo';
 
+// Underscores come last.
+import {A, C, _b} from 'zfoo'; // failure
+import {A, C, _b} from 'zfoo';
+
 import {g} from "y"; // failure
 import {
     a as d,

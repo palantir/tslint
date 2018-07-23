@@ -24,7 +24,6 @@ import {
     isStringLiteral,
 } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -135,7 +134,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 type Transform = (x: string) => string;
 const TRANSFORMS = new Map<string, Transform>([
     ["any", () => ""],
-    ["case-insensitive", x => x.toLowerCase()],
+    ["case-insensitive", x => x.toUpperCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", x => x],
     ["full", x => x],
