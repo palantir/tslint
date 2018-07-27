@@ -188,6 +188,7 @@ export const rules = {
         "check-space",
         "check-uppercase",
     ],
+    "comment-type": [true, "singleline", "multiline", "doc", "directive"],
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
