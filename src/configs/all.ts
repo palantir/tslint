@@ -162,6 +162,7 @@ export const rules = {
     "object-literal-sort-keys": true,
     "prefer-const": true,
     "trailing-comma": [true, {
+        "esSpecCompliant": true,
         "multiline": "always",
         "singleline": "never",
     }],
