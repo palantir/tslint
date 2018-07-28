@@ -229,6 +229,7 @@ export const rules = {
         "named-imports-order": "case-insensitive",
         "module-source-path": "full",
     }],
+    "prefer-empty-constructor": true,
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
     "prefer-object-spread": true,

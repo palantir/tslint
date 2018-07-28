@@ -1,0 +1,57 @@
+class ManuallyAssignedConstructor {
+    private firstName: string;
+    private lastName: string;
+
+    public constructor(firstName: string, lastName: string) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        this.firstName = firstName;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        this.lastName = lastName;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~  [This constructor is only initialising properties with parameters, leave it empty instead]
+}
+
+class GoodConstructor {
+    private goodConstructorParameter: string;
+
+    public constructor(goodConstructorParameter: string) {}
+}
+
+class SimplifiedConstructor {
+    public constructor(private readonly goodConstructorParameter: string) {}
+}
+
+class InterestingConstructor {
+    public constructor(private readonly goodConstructorParameter: string) {
+        const variable: number = 0;
+    }
+}
+
+class PartialManuallyAssignedConstructor {
+    private firstName: string;
+    private lastName: string;
+    private age: number;
+
+    public constructor(firstName: string, lastName: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = 0;
+    }
+}
+
+class ManuallyAssignedConstructorWithInterestingStuff {
+    private firstName: string;
+    private lastName: string;
+
+    public constructor(firstName: string, lastName: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+
+        const age: number = 0;
+    }
+}
+
+class EmptyConstructor {
+    private constructor() {}
+}
