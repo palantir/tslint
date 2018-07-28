@@ -42,7 +42,7 @@ interface Options {
 const enum Case {
     None,
     Lower,
-    Upper,
+    Upper
 }
 
 const OPTION_SPACE = "check-space";
@@ -77,11 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 anyOf: [
                     {
                         type: "string",
-                        enum: [
-                            "check-space",
-                            "check-lowercase",
-                            "check-uppercase",
-                        ],
+                        enum: ["check-space", "check-lowercase", "check-uppercase"]
                     },
                     {
                         type: "object",
@@ -89,12 +85,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                             "no-space-keywords": {
                                 type: "array",
                                 items: {
-                                    type: "string",
-                                },
-                            },
+                                    type: "string"
+                                }
+                            }
                         },
                         minProperties: 1,
-                        maxProperties: 1,
+                        maxProperties: 1
                     },
                     {
                         type: "object",
@@ -102,39 +98,40 @@ export class Rule extends Lint.Rules.AbstractRule {
                             "ignore-words": {
                                 type: "array",
                                 items: {
-                                    type: "string",
-                                },
+                                    type: "string"
+                                }
                             },
                             "ignore-pattern": {
-                                type: "string",
-                            },
+                                type: "string"
+                            }
                         },
                         minProperties: 1,
-                        maxProperties: 1,
-                    },
-                ],
+                        maxProperties: 1
+                    }
+                ]
             },
             minLength: 1,
-            maxLength: 5,
+            maxLength: 5
         },
         optionExamples: [
             [true, "check-space", "check-uppercase"],
-            [true, "check-space", {"no-space-keywords": ["TODO", "FIXME"]}],
-            [true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}],
-            [true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}],
+            [true, "check-space", { "no-space-keywords": ["TODO", "FIXME"] }],
+            [true, "check-lowercase", { "ignore-words": ["TODO", "HACK"] }],
+            [true, "check-lowercase", { "ignore-pattern": "STD\\w{2,3}\\b" }]
         ],
         type: "style",
         typescriptOnly: false,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static LOWERCASE_FAILURE = "comment must start with lowercase letter";
     public static UPPERCASE_FAILURE = "comment must start with uppercase letter";
     public static LEADING_SPACE_FAILURE = "comment must start with a space";
-    public static NO_SPACE_KEYWORDS_FACTORY = (keywords: string[]): string => ` or the keyword(s): ${keywords.join(", ")}`;
-    public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string => ` or the word(s): ${words.join(", ")}`;
-    public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string => ` or its start must match the regex pattern "${pattern}"`;
+    public static IGNORE_WORDS_FAILURE_FACTORY = (words: string[]): string =>
+        ` or the word(s): ${words.join(", ")}`;
+    public static IGNORE_PATTERN_FAILURE_FACTORY = (pattern: string): string =>
+        ` or its start must match the regex pattern "${pattern}"`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
@@ -143,7 +140,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function parseOptions(options: Array<string | NoSpaceKeywordsObject | IExceptionsObject>): Options {
     return {
-        case: options.indexOf(OPTION_LOWERCASE) !== -1
+        case:
+            options.indexOf(OPTION_LOWERCASE) !== -1
                 ? Case.Lower
                 : options.indexOf(OPTION_UPPERCASE) !== -1
                     ? Case.Upper
@@ -151,11 +149,13 @@ function parseOptions(options: Array<string | NoSpaceKeywordsObject | IException
         failureSuffix: "",
         noSpaceExceptions: parseNoSpaceKeywords(options[1]),
         space: options.indexOf(OPTION_SPACE) !== -1,
-        ...composeExceptions(options[options.length - 1]),
+        ...composeExceptions(options[options.length - 1])
     };
 }
 
-function isNoSpaceKeywordsObject(option?: string | NoSpaceKeywordsObject | IExceptionsObject): option is NoSpaceKeywordsObject {
+function isNoSpaceKeywordsObject(
+    option?: string | NoSpaceKeywordsObject | IExceptionsObject
+): option is NoSpaceKeywordsObject {
     if (typeof option !== "object") {
         return false;
     }
@@ -168,15 +168,19 @@ function isNoSpaceKeywordsObject(option?: string | NoSpaceKeywordsObject | IExce
     return true;
 }
 
-function parseNoSpaceKeywords(option?: string | NoSpaceKeywordsObject | IExceptionsObject): RegExp | undefined {
+function parseNoSpaceKeywords(
+    option?: string | NoSpaceKeywordsObject | IExceptionsObject
+): RegExp | undefined {
     if (!isNoSpaceKeywordsObject(option)) {
         return undefined;
     }
     const keywords = option["no-space-keywords"];
-    return new RegExp(`^(${keywords.map((keyword) => escapeRegExp(keyword.trim())).join("|")})\\b`);
+    return new RegExp(`^(${keywords.map(keyword => escapeRegExp(keyword.trim())).join("|")})\\b`);
 }
 
-function isIExceptionsObject(option?: string | NoSpaceKeywordsObject | IExceptionsObject): option is IExceptionsObject {
+function isIExceptionsObject(
+    option?: string | NoSpaceKeywordsObject | IExceptionsObject
+): option is IExceptionsObject {
     if (typeof option !== "object") {
         return false;
     }
@@ -190,7 +194,8 @@ function isIExceptionsObject(option?: string | NoSpaceKeywordsObject | IExceptio
 }
 
 function composeExceptions(
-    option?: string | NoSpaceKeywordsObject | IExceptionsObject): undefined | {exceptions: RegExp; failureSuffix: string} {
+    option?: string | NoSpaceKeywordsObject | IExceptionsObject
+): undefined | { exceptions: RegExp; failureSuffix: string } {
     if (!isIExceptionsObject(option)) {
         return undefined;
     }
@@ -198,28 +203,33 @@ function composeExceptions(
     if (ignorePattern !== undefined) {
         return {
             exceptions: new RegExp(`^\\s*(${ignorePattern})`),
-            failureSuffix: Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern),
+            failureSuffix: Rule.IGNORE_PATTERN_FAILURE_FACTORY(ignorePattern)
         };
     }
 
     const ignoreWords = option["ignore-words"];
     if (ignoreWords !== undefined && ignoreWords.length !== 0) {
         return {
-            exceptions: new RegExp(`^\\s*(?:${ignoreWords.map((word) => escapeRegExp(word.trim())).join("|")})\\b`),
-            failureSuffix: Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords),
+            exceptions: new RegExp(
+                `^\\s*(?:${ignoreWords.map(word => escapeRegExp(word.trim())).join("|")})\\b`
+            ),
+            failureSuffix: Rule.IGNORE_WORDS_FAILURE_FACTORY(ignoreWords)
         };
     }
     return undefined;
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
+    utils.forEachComment(ctx.sourceFile, (fullText, { kind, pos, end }) => {
         let start = pos + 2;
-        if (kind !== ts.SyntaxKind.SingleLineCommentTrivia ||
+        if (
+            kind !== ts.SyntaxKind.SingleLineCommentTrivia ||
             // exclude empty comments
             start === end ||
             // exclude /// <reference path="...">
-            fullText[start] === "/" && ctx.sourceFile.referencedFiles.some((ref) => ref.pos >= pos && ref.end <= end)) {
+            (fullText[start] === "/" &&
+                ctx.sourceFile.referencedFiles.some(ref => ref.pos >= pos && ref.end <= end))
+        ) {
             return;
         }
         // skip all leading slashes
@@ -250,12 +260,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
 
         if (ctx.options.space && commentText[0] !== " ") {
-            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, [ Lint.Replacement.appendText(start, " ") ]);
+            ctx.addFailure(start, end, Rule.LEADING_SPACE_FAILURE, [
+                Lint.Replacement.appendText(start, " ")
+            ]);
         }
 
-        if (ctx.options.case === Case.None ||
-            ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText) ||
-            ENABLE_DISABLE_REGEX.test(commentText)) {
+        if (
+            ctx.options.case === Case.None ||
+            (ctx.options.exceptions !== undefined && ctx.options.exceptions.test(commentText)) ||
+            ENABLE_DISABLE_REGEX.test(commentText)
+        ) {
             return;
         }
 
