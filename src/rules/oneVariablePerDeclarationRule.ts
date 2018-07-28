@@ -19,6 +19,7 @@ import { isForStatement, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/oneVariablePerDeclaration.examples";
 
 const OPTION_IGNORE_FOR_LOOP = "ignore-for-loop";
 
@@ -43,6 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_IGNORE_FOR_LOOP]],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

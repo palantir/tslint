@@ -49,8 +49,11 @@ switch(y)
 {
 ~ [misplaced opening brace]
     case 0:
+    {
+    ~ [misplaced opening brace]
         x--;
         break;
+    }
     default:
         x++;
         break;
