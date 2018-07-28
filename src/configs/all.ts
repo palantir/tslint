@@ -20,8 +20,7 @@ import { join as joinPaths } from "path";
 import { findRule } from "../ruleLoader";
 import { hasOwnProperty } from "../utils";
 
-// tslint:disable object-literal-sort-keys
-// tslint:disable object-literal-key-quotes
+// tslint:disable object-literal-sort-keys object-literal-key-quotes object-literal-contextual-type
 export const rules = {
     // TypeScript Specific
 
@@ -133,6 +132,7 @@ export const rules = {
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
+    "object-literal-contextual-type": true,
     "prefer-conditional-expression": true,
     "radix": true,
     "restrict-plus-operands": true,

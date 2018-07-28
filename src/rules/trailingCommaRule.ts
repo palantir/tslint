@@ -51,7 +51,7 @@ function normalize(value: OptionsJson["multiline"]): CustomOptionValue {
     return typeof value === "string" ? fillOptions(value) : { ...defaultOptions, ...value };
 }
 
-/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:object-literal-sort-keys object-literal-contextual-type */
 const metadataOptionShape = {
     anyOf: [
         {
@@ -67,7 +67,7 @@ const metadataOptionShape = {
         },
     ],
 };
-/* tslint:enable:object-literal-sort-keys */
+/* tslint:enable:object-literal-sort-keys object-literal-contextual-type */
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */

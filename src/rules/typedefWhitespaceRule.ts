@@ -25,7 +25,7 @@ type OptionType = "call-signature" | "index-signature" | "parameter" | "property
 type OptionInput = Partial<Record<OptionType, Option>>;
 type Options = Partial<Record<"left" | "right", OptionInput>>;
 
-/* tslint:disable:object-literal-sort-keys */
+// tslint:disable:object-literal-sort-keys object-literal-contextual-type (https://github.com/palantir/tslint/issues/2428)
 const SPACE_OPTIONS = {
     type: "string",
     enum: ["nospace", "onespace", "space"],

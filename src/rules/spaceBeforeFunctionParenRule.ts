@@ -19,6 +19,7 @@ import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
+// tslint:disable-next-line object-literal-contextual-type (https://github.com/palantir/tslint/issues/2428)
 const ALWAYS_OR_NEVER = {
     enum: ["always", "never"],
     type: "string",

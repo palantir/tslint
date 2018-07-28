@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-// tslint:disable object-literal-sort-keys
-// tslint:disable:object-literal-key-quotes
+// tslint:disable object-literal-sort-keys object-literal-key-quotes object-literal-contextual-type
 export const rules = {
     // added in v5.1
     "align": {

@@ -23,6 +23,7 @@ import * as path from "path";
 import * as semver from "semver";
 import * as ts from "typescript";
 
+import { ILinterOptions } from "./index";
 import { Replacement } from "./language/rule/rule";
 import { Linter } from "./linter";
 import { Logger } from "./runner";
@@ -78,7 +79,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             throw new Error(ts.formatDiagnostics([error], ts.createCompilerHost({})));
         }
 
-        const parseConfigHost = {
+        const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
             readFile: (file: string) => fs.readFileSync(file, "utf8"),
@@ -139,7 +140,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
         }
 
-        const lintOptions = {
+        const lintOptions: ILinterOptions = {
             fix: false,
             formatter: "prose",
             formattersDirectory: "",

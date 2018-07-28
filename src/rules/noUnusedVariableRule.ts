@@ -452,7 +452,7 @@ function getUnusedCheckedProgram(program: ts.Program, checkParameters: boolean):
 
 function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean): ts.Program {
     const originalOptions = program.getCompilerOptions();
-    const options = {
+    const options: ts.CompilerOptions = {
         ...originalOptions,
         noEmit: true,
         noUnusedLocals: true,

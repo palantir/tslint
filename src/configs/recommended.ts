@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// tslint:disable object-literal-contextual-type
 export const rules = {
     "adjacent-overload-signatures": true,
     "align": {

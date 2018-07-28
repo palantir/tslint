@@ -109,7 +109,7 @@ export class Rule extends Lint.Rules.TypedRule {
         },
     };
 
-    public static ARGUMENT_DESCRIPTOR_BLOCK = {
+    public static ARGUMENT_DESCRIPTOR_BLOCK: {} = {
         properties: {
             [DESCRIPTOR_TAGS]: {
                 properties: {
@@ -139,7 +139,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "object",
     };
 
-    public static ARGUMENT_DESCRIPTOR_CLASS = {
+    public static ARGUMENT_DESCRIPTOR_CLASS: {} = {
         properties: {
             [DESCRIPTOR_TAGS]: {
                 properties: {
@@ -290,7 +290,7 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: false,
         requiresTypeInfo: true,
     };
-    /* tslint:enable:object-literal-sort-keys */
+    /* tslint:enable:object-literal-sort-keys object-literal-contextual-type */
 
     private readonly exclusionFactory = new ExclusionFactory();
 

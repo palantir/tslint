@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.TypedRule {
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const options = {
+        const options: Options = {
             onlyInlineLambdas: this.ruleArguments.indexOf(OPTION_ONLY_INLINE_LAMBDAS) !== -1,
         };
 

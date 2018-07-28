@@ -30,7 +30,7 @@ import {
     parseLine,
     printLine,
 } from "./lines";
-import { errorComparator, LintError, lintSyntaxError } from "./lintError";
+import { errorComparator, LintError, lintSyntaxError, PositionInFile } from "./lintError";
 
 let scanner: ts.Scanner | undefined;
 
@@ -128,7 +128,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
-    function addError(errorLine: EndErrorLine, errorStartPos: { line: number; col: number }, lineNo: number) {
+    function addError(errorLine: EndErrorLine, errorStartPos: PositionInFile, lineNo: number) {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
@@ -141,7 +141,7 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         // for each error marking on that line...
         while (errorLinesForLineOfCode.length > 0) {
             const errorLine = errorLinesForLineOfCode.shift();
-            const errorStartPos = { line: lineNo, col: errorLine!.startCol };
+            const errorStartPos: PositionInFile = { line: lineNo, col: errorLine!.startCol };
 
             // if the error starts and ends on this line, add it now to list of errors
             if (errorLine instanceof EndErrorLine) {

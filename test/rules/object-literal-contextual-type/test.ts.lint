@@ -1,0 +1,25 @@
+const ok: { x: 0 } = { x: 0 };
+
+const notOk = { x: 0 };
+              ~~~~~~~~ [0]
+
+// `{}` OK.
+const empty = {};
+
+declare function f(obj: { x: number }): void;
+f({ x: 0 });
+
+// Allow any literal of type 'any',
+// or nested inside an array or object literal in something else of type 'any'.
+const isAny: any = {
+    a: { x: 0 },
+    b: [
+        { x: 0 },
+    ],
+    c() {
+        return { x: 0 };
+               ~~~~~~~~ [0]
+    },
+};
+
+[0]: Object literal has no contextual type.
