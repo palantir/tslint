@@ -20,18 +20,27 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const OPTION_BRACE = "check-open-brace";
-const OPTION_CATCH = "check-catch";
-const OPTION_ELSE = "check-else";
-const OPTION_FINALLY = "check-finally";
+const OPTION_BRACE = "open-brace";
+const OPTION_CATCH = "catch";
+const OPTION_ELSE = "else";
+const OPTION_FINALLY = "finally";
 const OPTION_WHITESPACE = "check-whitespace";
 
+type BraceSetting = "same-line" | "next-line";
+const OPTION_SAME_LINE: BraceSetting = "same-line";
+const OPTION_NEXT_LINE: BraceSetting = "next-line";
+
+const optionSchema = {
+    enum: [OPTION_SAME_LINE, OPTION_NEXT_LINE],
+    type: "string",
+};
+
 interface Options {
-    brace: boolean;
-    catch: boolean;
-    else: boolean;
-    finally: boolean;
-    whitespace: boolean;
+    catch?: BraceSetting;
+    finally?: BraceSetting;
+    else?: BraceSetting;
+    "open-brace"?: BraceSetting;
+    "check-whitespace"?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -40,40 +49,88 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "one-line",
         description: "Requires the specified tokens to be on the same line as the expression preceding them.",
         optionsDescription: Lint.Utils.dedent`
-            Five arguments may be optionally provided:
+            The options should be an object with the following keys (all optional):
 
-            * \`"${OPTION_CATCH}"\` checks that \`catch\` is on the same line as the closing brace for \`try\`.
-            * \`"${OPTION_FINALLY}"\` checks that \`finally\` is on the same line as the closing brace for \`catch\`.
-            * \`"${OPTION_ELSE}"\` checks that \`else\` is on the same line as the closing brace for \`if\`.
-            * \`"${OPTION_BRACE}"\` checks that an open brace falls on the same line as its preceding expression.
-            * \`"${OPTION_WHITESPACE}"\` checks preceding whitespace for the specified tokens.`,
+            * \`"${OPTION_CATCH}"\` for the \`catch\` keyword.
+            * \`"${OPTION_FINALLY}"\` for the \`finally\` keyword.
+            * \`"${OPTION_ELSE}"\` for the \`else\` keyword.
+            * \`"${OPTION_BRACE}"\` for any open brace.
+
+            The value for each option may be one of:
+
+            * \`"${OPTION_SAME_LINE}"\`: The token must be on the same line as the preceding token.
+            * \`"${OPTION_NEXT_LINE}"\`: The token must be on a different line than the preceding token.
+
+            Also, you may specify \`"${OPTION_WHITESPACE}": true\` to check for a space between a token and the preceding token.
+            (This is ignored in the case of \`"${OPTION_NEXT_LINE}"\`.)`,
         options: {
-            type: "array",
-            items: {
-                type: "string",
-                enum: [OPTION_CATCH, OPTION_FINALLY, OPTION_ELSE, OPTION_BRACE, OPTION_WHITESPACE],
+            type: "object",
+            properties: {
+                [OPTION_CATCH]: optionSchema,
+                [OPTION_FINALLY]: optionSchema,
+                [OPTION_ELSE]: optionSchema,
+                [OPTION_BRACE]: optionSchema,
+                [OPTION_WHITESPACE]: { type: "boolean" },
             },
-            minLength: 0,
-            maxLength: 5,
+            additionalProperties: false,
         },
-        optionExamples: [[true, OPTION_CATCH, OPTION_FINALLY, OPTION_ELSE]],
+        optionExamples: [
+            [
+                true,
+                {
+                    [OPTION_BRACE]: OPTION_SAME_LINE,
+                    [OPTION_CATCH]: OPTION_NEXT_LINE,
+                    [OPTION_ELSE]: OPTION_NEXT_LINE,
+                    [OPTION_FINALLY]: OPTION_NEXT_LINE,
+                    [OPTION_WHITESPACE]: true,
+                },
+            ],
+        ],
         type: "style",
         typescriptOnly: false,
         hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static WHITESPACE_FAILURE_STRING = "missing whitespace";
+    public static WHITESPACE_FAILURE_STRING = "Expected a space.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new OneLineWalker(sourceFile, this.ruleName, {
-            brace: this.ruleArguments.indexOf(OPTION_BRACE) !== -1,
-            catch: this.ruleArguments.indexOf(OPTION_CATCH) !== -1,
-            else: this.ruleArguments.indexOf(OPTION_ELSE) !== -1,
-            finally: this.ruleArguments.indexOf(OPTION_FINALLY) !== -1,
-            whitespace: this.ruleArguments.indexOf(OPTION_WHITESPACE) !== -1,
-        }));
+        return this.applyWithWalker(new OneLineWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
     }
+}
+
+function parseOptions(ruleArguments: any[]): Options {
+    if (ruleArguments.length === 0) {
+        throw new Error("'one-line' rule expects options");
+    }
+
+    if (typeof ruleArguments[0] === "object") {
+        return ruleArguments[0] as Options;
+    }
+
+    const options: Options = {};
+    for (const arg of ruleArguments) {
+        switch (arg) {
+            case "check-catch":
+                options.catch = "same-line";
+                break;
+            case "check-finally":
+                options.finally = "same-line";
+                break;
+            case "check-else":
+                options.else = "same-line";
+                break;
+            case "check-open-brace":
+                options[OPTION_BRACE] = "same-line";
+                break;
+            case "check-whitespace":
+                options[OPTION_WHITESPACE] = true;
+                break;
+            default:
+                throw new Error(`bad option: ${arg}`);
+        }
+    }
+    return options;
 }
 
 class OneLineWalker extends Lint.AbstractWalker<Options> {
@@ -149,15 +206,21 @@ class OneLineWalker extends Lint.AbstractWalker<Options> {
     }
 
     private check(range: ts.TextRange, kind?: "catch" | "else" | "finally") {
+        const option = this.options[kind === undefined ? OPTION_BRACE : kind];
+        if (option === undefined) {
+            return;
+        }
+
         const tokenStart = range.end - (kind === undefined ? 1 : kind.length);
-        if (this.options[kind === undefined ? "brace" : kind] && !isSameLine(this.sourceFile, range.pos, tokenStart)) {
+        if (isSameLine(this.sourceFile, range.pos, tokenStart) !== (option === "same-line")) {
+            const expected = option === "next-line" ? "line after" : "same line as";
             this.addFailure(
                 tokenStart,
                 range.end,
-                `misplaced ${kind === undefined ? "opening brace" : `'${kind}'`}`,
-                Lint.Replacement.replaceFromTo(range.pos, tokenStart, this.options.whitespace ? " " : ""),
+                `Expected '${kind === undefined ? "{" : kind}' to go on the ${expected} the preceding token.`,
+                Lint.Replacement.replaceFromTo(range.pos, tokenStart, this.options[OPTION_WHITESPACE] ? " " : ""),
             );
-        } else if (this.options.whitespace && range.pos === tokenStart) {
+        } else if (this.options[OPTION_WHITESPACE] && range.pos === tokenStart) {
             this.addFailure(tokenStart, range.end, Rule.WHITESPACE_FAILURE_STRING, Lint.Replacement.appendText(range.pos, " "));
         }
     }

@@ -1,9 +1,9 @@
 module Module
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     export enum Enumeration
     {
-    ~ [misplaced opening brace]
+    ~ [0 % ('{')]
         A,
         B,
         C,
@@ -12,14 +12,14 @@ module Module
 
     export function Call()
     {
-    ~ [misplaced opening brace]
+    ~ [0 % ('{')]
         if (x == 3)
         {
-        ~ [misplaced opening brace]
+        ~ [0 % ('{')]
             x = 4;
         }
         else {
-        ~~~~   [misplaced 'else']
+        ~~~~ [0 % ('else')]
             x = 5;
         }
         return "called";
@@ -28,26 +28,26 @@ module Module
 
 interface Class
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     variable: string;
 }
 
 var object =
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     a: 1,
     b: 2
 };
 
 for(var x= 0; x < 1; ++x)
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     ++i;
 }
 
 switch(y)
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     case 0:
         x--;
         break;
@@ -58,19 +58,19 @@ switch(y)
 
 try
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     throw new Error("hi");
 }
 catch (e)
-~~~~~     [misplaced 'catch']
+~~~~~ [0 % ('catch')]
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     throw(e);
 }
 finally
-~~~~~~~ [misplaced 'finally']
+~~~~~~~ [0 % ('finally')]
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     // do something
 }
 
@@ -78,9 +78,9 @@ try {
     foo();
 }
 finally
-~~~~~~~ [misplaced 'finally']
+~~~~~~~ [0 % ('finally')]
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
     bar();
 }
 
@@ -104,7 +104,7 @@ function f():
 
 class BarBooBaz
 {
-~ [misplaced opening brace]
+~ [0 % ('{')]
 
 }
 
@@ -159,12 +159,15 @@ type Foo = {
 };
 type Bar =
 { bar };
-~ [misplaced opening brace]
+~ [0 % ('{')]
 type Baz<T> =
 { [K in T]: T };
-~ [misplaced opening brace]
+~ [0 % ('{')]
 type Bas = "a";
 
 {
     {}{}{} // just some random blocks
 }
+
+[0]: Expected '%s' to go on the same line as the preceding token.
+[SPACE]: Expected a space.

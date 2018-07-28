@@ -1,0 +1,22 @@
+function f() {
+             ~ [0 % ('{')]
+}
+
+try
+{
+} catch ()
+  ~~~~~ [0 % ('catch')]
+{
+} finally
+  ~~~~~~~ [0 % ('finally')]
+{
+}
+
+if (so)
+{
+} else
+  ~~~~ [0 % ('else')]
+{
+}
+
+[0]: Expected '%s' to go on the line after the preceding token.

@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "one-line": [true, {
+      "open-brace": "same-line",
+      "catch": "same-line",
+      "else": "same-line",
+      "finally": "same-line",
+      "check-whitespace": true
+    }]
+  },
+  "jsRules": {
+    "one-line": [true, {
+      "open-brace": "same-line",
+      "catch": "same-line",
+      "else": "same-line",
+      "finally": "same-line",
+      "check-whitespace": true
+    }]
+  }
+}

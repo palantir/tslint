@@ -108,13 +108,13 @@ export const rules = {
     "object-literal-shorthand": true,
     "object-literal-sort-keys": true,
     "one-line": {
-        options: [
-            "check-catch",
-            "check-else",
-            "check-finally",
-            "check-open-brace",
-            "check-whitespace",
-        ],
+        options: {
+            "catch": "same-line",
+            "check-whitespace": true,
+            "else": "same-line",
+            "finally": "same-line",
+            "open-brace": "same-line",
+        },
     },
     "one-variable-per-declaration": {
         options: ["ignore-for-loop"],
