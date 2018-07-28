@@ -10,4 +10,4 @@ import {baz} from 'baz';
 
 import * as fsevents from "fsevents";
 
-[err]: Module '%s' is not listed as dependency in package.json
+[err]: Module '%s' is not listed as dependency in relevant section(s) of package.json

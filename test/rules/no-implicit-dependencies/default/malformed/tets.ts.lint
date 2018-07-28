@@ -1,2 +1,2 @@
 import foo from 'foo';
-                ~~~~~ [Module 'foo' is not listed as dependency in package.json]
+                ~~~~~ [Module 'foo' is not listed as dependency in relevant section(s) of package.json]
