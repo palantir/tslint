@@ -35,10 +35,7 @@ export function getFormatter(formatterName: string): Lint.FormatterConstructor {
 
 export function createTempFile(extension: string) {
     for (let i = 0; i < 5; i++) {
-        const attempt = path.join(
-            os.tmpdir(),
-            `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`
-        );
+        const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`);
         if (!fs.existsSync(attempt)) {
             return attempt;
         }
