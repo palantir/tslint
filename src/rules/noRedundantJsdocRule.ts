@@ -95,7 +95,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 if (typeExpression !== undefined) {
                     ctx.addFailureAtNode(typeExpression, Rule.FAILURE_STRING_REDUNDANT_TYPE);
                 }
-                if (comment === "") {
+                if (comment === undefined || comment === "") {
                     // Redundant if no documentation
                     ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text));
                 }

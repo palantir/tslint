@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "tslint-test-config": "../external/tslint-test-config",
-    "tslint-test-custom-rules": "../external/tslint-test-custom-rules"
+    "tslint-test-custom-rules": "../external/tslint-test-custom-rules",
+    "tslint-test-custom-formatter": "../external/tslint-test-custom-formatter"
   }
 }

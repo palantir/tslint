@@ -81,4 +81,4 @@ node -r ts-node/register node_modules/.bin/tslint <your options>
 NODE_OPTIONS="-r ts-node/register" tslint <your options>
 ```
 
-[0]: {{site.baseurl | append: "/usage/tslint-json/"}}
+[0]: {{site.baseurl | append: "/usage/configuration/"}}
