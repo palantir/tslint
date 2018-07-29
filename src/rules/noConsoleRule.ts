@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
+import { isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -48,13 +48,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<string[]>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isCallExpression(node) &&
-            isPropertyAccessExpression(node.expression) &&
-            isIdentifier(node.expression.expression) &&
-            node.expression.expression.text === "console" &&
-            (ctx.options.length === 0 || ctx.options.indexOf(node.expression.name.text) !== -1)) {
+        if (isPropertyAccessExpression(node) &&
+            isIdentifier(node.expression) &&
+            node.expression.text === "console" &&
+            (ctx.options.length === 0 || ctx.options.indexOf(node.name.text) !== -1)) {
 
-            ctx.addFailureAtNode(node.expression, Rule.FAILURE_STRING_FACTORY(node.expression.name.text));
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(node.name.text));
         }
         return ts.forEachChild(node, cb);
     });

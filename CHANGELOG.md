@@ -1,6 +1,114 @@
 Change Log
 ===
 
+v5.11.0
+---
+
+## :warning: Deprecations
+
+- [deprecation] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) is deprecated because typescript now covers most of its functionality (#3919)
+
+## :tada: Features
+- [new-rule] [`file-name-casing`](https://palantir.github.io/tslint/rules/file-name-casing/) (#3978)
+- [new-fixer] Add fixer for [`switch-final-break`](https://palantir.github.io/tslint/rules/switch-final-break/) (#3615)
+- [new-fixer] Implemented fixer for [`member-ordering`](https://palantir.github.io/tslint/rules/member-ordering/) and added corresponding tests. (#3935)
+- [new-rule-option] Add whitelist for [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) (#3979)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`no-use-before-declare`](https://palantir.github.io/tslint/rules/no-use-before-declare/) Fixes false positives when using the destructuring syntax (#3761)  (#3876)
+- [bugfix] Fix Copyright: @license JSDoc tag was missing (#3879)
+- [bugfix] Fix missing newline at end of file (#3896)
+- [bugfix] allow-empty-functions option of [`no-empty`](https://palantir.github.io/tslint/rules/no-empty/) rule is now properly respecting empty methods (#3897)
+- [bugfix] [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers/) - support for negative zero (#3903)
+- [bugfix] Handle tsconfig.json errors without using JSON.stringify (#3908)
+- [bugfix] Fix CI: [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) test failure; typescript@next failure (#4019)
+- [bugfix] Fix edge case in [`no-console`](https://palantir.github.io/tslint/rules/no-console/) rule (#4041)
+- [docs] Fix typos in the [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/) rule docs. (#3886)
+- [docs] Updated [`prefer-while`](https://palantir.github.io/tslint/rules/prefer-while/) docs to be semantically correct (#3888)
+- [docs] Fix link to configuration page (#3891)
+- [docs] Fix docs typo (#3898)
+- [docs] Fix docs typo (#3910)
+- [enhancement] Turn on strictPropertyInitialization for src/ and test/ (#3924)
+- [enhancement] Use Buffer.allocUnsafe instead of the deprecated new Buffer() (#3985)
+- [enhancement] Improve [`radix`](https://palantir.github.io/tslint/rules/radix/) rule checks (#3901)
+- [enhancement] Output +/- on diff so added/removed empty lines are visible. (#3973)
+- [rule-change] [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) now always considers peer dependencies (#3875)
+
+Thanks to our contributors!
+
+- Bowen Ni
+- Peter Safranek
+- Saugat Acharya
+- Jason Mendes
+- Ryan Waskiewicz
+- Dariusz Rumiński
+- Xinhu Liu
+- Rado Kirov
+- aervin_
+- Josh Goldberg
+- mertdeg2
+- Jason Killian
+- Adrian Leonhard
+- david-cannady
+- Andy Russell
+- Tibor Blenessy
+- Andrew Crites
+- Pavel Birukov
+- shalomdotnet
+
+
+v5.10.0
+---
+
+## :tada: Features
+
+- [new-rule] [`prefer-while`](https://palantir.github.io/tslint/rules/prefer-while/) (#3750)
+- [new-fixer] [`comment-format`](https://palantir.github.io/tslint/rules/comment-format/) (#3845)
+- [new-rule-option] `"allow-empty-functions"` for [`no-empty`](https://palantir.github.io/tslint/rules/no-empty/) rule (#3624)
+- [new-rule-option] New options for [`promise-function-async`](https://palantir.github.io/tslint/rules/promise-function-async/) specifying what kinds of functions to check (#3807)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) rule plays nice with [`no-trailing-whitespace`](https://palantir.github.io/tslint/rules/no-trailing-whitespace/) rule (#3802)
+- [bugfix] [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/) rule allows square bracket property access (#3610)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/) no longer marks native JSX elements as unsafe (#3699)
+- [enhancement] [`file-header`](https://palantir.github.io/tslint/rules/file-header/) auto-fixes use '!' character to ensure header stays above imports (#3741)
+- [enhancement] Better error messages if a rule crashes (#3836)
+- [enhancement] Better error messages when no valid rules are specified (#3729)
+- [enhancement] Better lint messages for unused imports in [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) rule (#3831)
+- [docs] Improve documentation of cli flag --project (#3703)
+- [docs] Added short rationales for about thirty rules (#3734)
+- [docs] Added optional capability to provide code examples in rules' metadata (#3602)
+- [docs] Many small docs fixes and tweaks from many great contributors!
+
+Thanks to our contributors!
+
+- Achim Weimert
+- BB9z
+- Blair Zajac
+- Chia-Lun Wu (Leo)
+- Ethan
+- Janis Koehr
+- Josh Goldberg
+- Julian Verdurmen
+- Lucas Sloan
+- Mark Vincze
+- Martin Möhwald
+- Oliver Joseph Ash
+- Pichest Wongsiripiphat
+- Rafael Santana
+- Ruben Bridgewater
+- Ryan Waskiewicz
+- Sehrope Sarkuni
+- Suchan Lee
+- Victor Belozyorov
+- aervin_
+- cwgorman
+- felipeissa
+- jishi9
+
+
 v5.9.1
 ---
 
@@ -74,7 +182,7 @@ For more details, see the relevant PRs:
 - [bugfix] Fix condition for deprecation of [`typeof-compare`](https://palantir.github.io/tslint/rules/typeof-compare) (#3429)
 - [enhancement] Better error message for files not contained in the project (#3313)
 - [enhancement] `"properties"` option for [`completed-docs`](https://palantir.github.io/tslint/rules/completed-docs/) rule now checks getter and setter accessors. (#3497)
-- [enhancement]: [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers) ignores parseInt radix parameter (#3536)
+- [enhancement] [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers) ignores parseInt radix parameter (#3536)
 - [enhancement] Avoid duplicate I/O when using `--project` option (#3313)
 - [enhancement] clicking the filename in `stylish`-formatter's output jumps to the first failure in that file. (#3491)
 - [enhancement] [`ban-comma-operator`](https://palantir.github.io/tslint/rules/ban-comma-operator/) ignores comma operator inside for-loop incrementor (#3485)

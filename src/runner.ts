@@ -90,6 +90,11 @@ export interface Options {
     project?: string;
 
     /**
+     * Whether to hide warnings
+     */
+    quiet?: boolean;
+
+    /**
      * Rules directory paths.
      */
     rulesDirectory?: string | string[];
@@ -241,9 +246,11 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             fix: !!options.fix,
             formatter: options.format,
             formattersDirectory: options.formattersDirectory,
+            quiet: !!options.quiet,
             rulesDirectory: options.rulesDirectory,
         },
-        program);
+        program,
+    );
 
     let lastFolder: string | undefined;
     let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
@@ -291,7 +298,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);
     }
-    const buffer = new Buffer(256);
+    const buffer = Buffer.allocUnsafe(256);
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);
