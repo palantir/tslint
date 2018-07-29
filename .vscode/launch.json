@@ -18,6 +18,7 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -38,6 +39,7 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -58,6 +60,7 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -78,6 +81,7 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*/js"]
         }

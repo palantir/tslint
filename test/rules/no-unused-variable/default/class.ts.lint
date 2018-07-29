@@ -1,3 +1,4 @@
+[typescript]: < 2.9.0
 class ABCD {
     private z2: number;
             ~~          [err % ('z2')]
