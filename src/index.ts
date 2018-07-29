@@ -47,6 +47,7 @@ export interface ILinterOptions {
     fix: boolean;
     formatter?: string | FormatterConstructor;
     formattersDirectory?: string;
+    quiet?: boolean;
     rulesDirectory?: string | string[];
 }
 

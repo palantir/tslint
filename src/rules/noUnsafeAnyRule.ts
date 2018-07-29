@@ -365,7 +365,7 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
     if (!isNodeAny(node.name, checker) || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
         return false;
     }
-    for (const base of checker.getBaseTypes(checker.getTypeAtLocation(node.parent!) as ts.InterfaceType)) {
+    for (const base of checker.getBaseTypes(checker.getTypeAtLocation(node.parent) as ts.InterfaceType)) {
         const prop = base.getProperty(node.name.text);
         if (prop !== undefined && prop.declarations !== undefined) {
             return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]));
