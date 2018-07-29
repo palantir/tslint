@@ -213,3 +213,21 @@ export function detectBufferEncoding(buffer: Buffer, length = buffer.length): En
 export function denormalizeWinPath(path: string): string {
     return path.replace(/\\/g, "/");
 }
+
+export function isPascalCased(name: string): boolean {
+    return isUpperCase(name[0]) && !name.includes("_") && !name.includes("-");
+}
+
+export function isCamelCased(name: string): boolean {
+    return isLowerCase(name[0]) && !name.includes("_") && !name.includes("-");
+}
+
+export function isKebabCased(name: string): boolean {
+    for (let i = 0; i < name.length; i++) {
+        const c = name.charAt(i);
+        if (c === "_" || !isLowerCase(c)) {
+            return false;
+        }
+    }
+    return true;
+}

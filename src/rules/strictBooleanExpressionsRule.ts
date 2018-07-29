@@ -22,6 +22,7 @@ import * as Lint from "../index";
 const OPTION_ALLOW_NULL_UNION = "allow-null-union";
 const OPTION_ALLOW_UNDEFINED_UNION = "allow-undefined-union";
 const OPTION_ALLOW_STRING = "allow-string";
+const OPTION_ALLOW_ENUM = "allow-enum";
 const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
@@ -51,6 +52,8 @@ export class Rule extends Lint.Rules.TypedRule {
             * \`${OPTION_ALLOW_STRING}\` allows strings.
               - It does *not* allow unions containing \`string\`.
               - It does *not* allow string literal types.
+            * \`${OPTION_ALLOW_ENUM}\` allows enums.
+              - It does *not* allow unions containing \`enum\`.
             * \`${OPTION_ALLOW_NUMBER}\` allows numbers.
               - It does *not* allow unions containing \`number\`.
               - It does *not* allow enums or number literal types.
@@ -70,6 +73,7 @@ export class Rule extends Lint.Rules.TypedRule {
                     OPTION_ALLOW_NULL_UNION,
                     OPTION_ALLOW_UNDEFINED_UNION,
                     OPTION_ALLOW_STRING,
+                    OPTION_ALLOW_ENUM,
                     OPTION_ALLOW_NUMBER,
                     OPTION_ALLOW_BOOLEAN_OR_UNDEFINED,
                 ],
@@ -79,7 +83,7 @@ export class Rule extends Lint.Rules.TypedRule {
         },
         optionExamples: [
             true,
-            [true, OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_NUMBER],
+            [true, OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_ENUM, OPTION_ALLOW_NUMBER],
             [true, OPTION_ALLOW_BOOLEAN_OR_UNDEFINED],
         ],
         type: "functionality",
@@ -98,6 +102,7 @@ interface Options {
     allowNullUnion: boolean;
     allowUndefinedUnion: boolean;
     allowString: boolean;
+    allowEnum: boolean;
     allowNumber: boolean;
     allowMix: boolean;
     allowBooleanOrUndefined: boolean;
@@ -109,6 +114,7 @@ function parseOptions(ruleArguments: string[], strictNullChecks: boolean): Optio
         allowNullUnion: has(OPTION_ALLOW_NULL_UNION),
         allowUndefinedUnion: has(OPTION_ALLOW_UNDEFINED_UNION),
         allowString: has(OPTION_ALLOW_STRING),
+        allowEnum: has(OPTION_ALLOW_ENUM),
         allowNumber: has(OPTION_ALLOW_NUMBER),
         allowMix: has(OPTION_ALLOW_MIX),
         allowBooleanOrUndefined: has(OPTION_ALLOW_BOOLEAN_OR_UNDEFINED),
@@ -278,7 +284,7 @@ function failureForKind(kind: TypeKind, isInUnion: boolean, options: Options): T
         case TypeKind.FalseNumberLiteral:
             return options.allowNumber ? undefined : TypeFailure.Number;
         case TypeKind.Enum:
-            return TypeFailure.Enum;
+            return options.allowEnum ? undefined : TypeFailure.Enum;
         case TypeKind.Null:
             return isInUnion && !options.allowNullUnion ? TypeFailure.Null : undefined;
         case TypeKind.Undefined:
@@ -439,6 +445,7 @@ function showExpectedTypes(options: Options): string[] {
     if (options.allowNullUnion) { parts.push("null-union"); }
     if (options.allowUndefinedUnion) { parts.push("undefined-union"); }
     if (options.allowString) { parts.push("string"); }
+    if (options.allowEnum) { parts.push("enum"); }
     if (options.allowNumber) { parts.push("number"); }
     if (options.allowBooleanOrUndefined) { parts.push("boolean-or-undefined"); }
     return parts;

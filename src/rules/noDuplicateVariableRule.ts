@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
-    private scope: Set<string>;
+    private scope: Set<string> = new Set();
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
         const cb = (node: ts.Node): void => {

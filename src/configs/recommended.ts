@@ -155,6 +155,7 @@ export const rules = {
     },
     "trailing-comma": {
         options: {
+            esSpecCompliant: true,
             multiline: "always",
             singleline: "never",
         },

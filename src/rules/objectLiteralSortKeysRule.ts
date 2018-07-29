@@ -19,6 +19,7 @@ import { isInterfaceDeclaration, isObjectLiteralExpression, isSameLine, isTypeAl
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
@@ -66,6 +67,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         ],
         type: "maintainability",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

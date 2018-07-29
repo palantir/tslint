@@ -19,6 +19,7 @@ import { hasModifier, isArrowFunction, isCallExpression, isIdentifier, isSpreadE
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noUnnecessaryCallbackWrapper.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -36,6 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         `,
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

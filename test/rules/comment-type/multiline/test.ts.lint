@@ -1,0 +1,25 @@
+/// <reference path=".." />
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [directive]
+
+// single comment
+~~~~~~~~~~~~~~~~~ [singleline]
+
+/* multiline comment */
+
+/** doc comment */
+~~~~~~~~~~~~~~~~~~ [doc]
+
+  /** indented doc comment */
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [doc]
+
+const x = /** inline doc comment */ 3;
+          ~~~~~~~~~~~~~~~~~~~~~~~~~ [doc]
+
+/*
+actually
+multiline
+*/
+
+[singleline]: singleline comments are not allowed
+[doc]: doc comments are not allowed
+[directive]: triple-slash directives are not allowed
