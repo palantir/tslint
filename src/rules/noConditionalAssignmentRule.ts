@@ -25,8 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-conditional-assignment",
         description: "Disallows any type of assignment in conditionals.",
-        descriptionDetails:
-            "This applies to `do-while`, `for`, `if`, and `while` statements and conditional (ternary) expressions.",
+        descriptionDetails: "This applies to `do-while`, `for`, `if`, and `while` statements and conditional (ternary) expressions.",
         rationale: Lint.Utils.dedent`
             Assignments in conditionals are often typos:
             for example \`if (var1 = var2)\` instead of \`if (var1 == var2)\`.
@@ -35,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -91,12 +90,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.NonNullExpression:
                 case ts.SyntaxKind.AsExpression:
                 case ts.SyntaxKind.TypeAssertionExpression:
-                    return cb(
-                        (node as
-                            | ts.AssertionExpression
-                            | ts.NonNullExpression
-                            | ts.ParenthesizedExpression).expression
-                    );
+                    return cb((node as ts.AssertionExpression | ts.NonNullExpression | ts.ParenthesizedExpression).expression);
                 case ts.SyntaxKind.PrefixUnaryExpression:
                     return cb((node as ts.PrefixUnaryExpression).operand);
                 default:

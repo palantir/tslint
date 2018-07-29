@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
+
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
 
@@ -49,19 +50,17 @@ export class Rule extends Lint.Rules.AbstractRule {
             is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,
         options: {
             type: "number",
-            minimum: Rule.MINIMUM_THRESHOLD
+            minimum: Rule.MINIMUM_THRESHOLD,
         },
         optionExamples: [true, [true, 20]],
         type: "maintainability",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
-        return (
-            `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
-            `${actual} which is higher than the threshold of ${expected}`
-        );
+        return `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
+            `${actual} which is higher than the threshold of ${expected}`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -70,8 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
-        const isThresholdValid =
-            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+        const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
     }
 
@@ -84,9 +82,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-    const {
-        options: { threshold }
-    } = ctx;
+    const { options: { threshold } } = ctx;
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
