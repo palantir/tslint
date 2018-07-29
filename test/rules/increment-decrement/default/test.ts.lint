@@ -26,5 +26,15 @@ x - --x;
     ~~~       [minus]
 x - x--;
     ~~~       [minus]
+
+++x + x;
+~~~       [plus]
+x++ + x;
+~~~       [plus]
+
+--x - x;
+~~~       [minus]
+x-- - x;
+~~~       [minus]
 [plus]:       Use an explicit += 1 operator.
 [minus]:       Use an explicit -= 1 operator.

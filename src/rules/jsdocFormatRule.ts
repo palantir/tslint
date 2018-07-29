@@ -47,12 +47,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxItems: 1,
             items: {
                 type: "string",
-                enum: [OPTION_CHECK_MULTILINE_START],
-            },
+                enum: [OPTION_CHECK_MULTILINE_START]
+            }
         },
         optionExamples: [true, [true, OPTION_CHECK_MULTILINE_START]],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
-            firstLineOfMultiline: this.ruleArguments.indexOf(OPTION_CHECK_MULTILINE_START) !== -1,
+            firstLineOfMultiline: this.ruleArguments.indexOf(OPTION_CHECK_MULTILINE_START) !== -1
         });
     }
 }
@@ -71,9 +71,13 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
-            fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
+    return utils.forEachComment(ctx.sourceFile, (fullText, { kind, pos, end }) => {
+        if (
+            kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
+            fullText[pos + 2] !== "*" ||
+            fullText[pos + 3] === "*" ||
+            fullText[pos + 3] === "/"
+        ) {
             return;
         }
         const lines = fullText.slice(pos + 3, end - 2).split("\n");
@@ -92,7 +96,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         }
         let lineStart = pos + firstLine.length + 4; // +3 for the comment start "/**" and +1 for the newline
         const endIndex = lines.length - 1;
-        for (let i = 1; i < endIndex; i += 1) {
+        for (let i = 1; i < endIndex; ++i) {
             const line = lines[i].endsWith("\r") ? lines[i].slice(0, -1) : lines[i];
             // regex is: start of string, followed by any amount of whitespace, followed by *,
             // followed by either a space or the end of the string
@@ -112,7 +116,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (lastLine.length !== alignColumn) {
             ctx.addFailure(lineStart, end, Rule.ALIGNMENT_FAILURE_STRING);
         }
-
     });
 }
 

@@ -50,5 +50,3 @@ export interface ILinterOptions {
     quiet?: boolean;
     rulesDirectory?: string | string[];
 }
-
-console.log("Hello!");

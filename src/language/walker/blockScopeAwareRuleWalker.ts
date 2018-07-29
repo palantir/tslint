@@ -36,7 +36,9 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module
-        this.blockScopeStack = ts.isExternalModule(sourceFile) ? [] : [this.createBlockScope(sourceFile)];
+        this.blockScopeStack = ts.isExternalModule(sourceFile)
+            ? []
+            : [this.createBlockScope(sourceFile)];
     }
 
     public abstract createBlockScope(node: ts.Node): U;
@@ -66,7 +68,7 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
 
     public findBlockScope(predicate: (scope: U) => boolean) {
         // look through block scopes from local -> global
-        for (let i = this.blockScopeStack.length - 1; i >= 0; i -= 1) {
+        for (let i = this.blockScopeStack.length - 1; i >= 0; i--) {
             if (predicate(this.blockScopeStack[i])) {
                 return this.blockScopeStack[i];
             }
