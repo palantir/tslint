@@ -89,11 +89,23 @@ export interface IRuleMetadata {
      * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
      */
     typescriptOnly: boolean;
+
+    /**
+     * Examples demonstrating what the lint rule will pass and fail
+     */
+    codeExamples?: ICodeExample[];
 }
 
 export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
 
 export type RuleSeverity = "warning" | "error" | "off";
+
+export interface ICodeExample {
+    config: string;
+    description: string;
+    pass: string;
+    fail?: string;
+}
 
 export interface IOptions {
     ruleArguments: any[];
