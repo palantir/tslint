@@ -43,8 +43,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
         },
         optionsDescription: Lint.Utils.dedent`
-            If no arguments are provided, both pre- and post- unary operators are banned.
-            If \`"${OPTION_ALLOW_POST}"\` is provided, post- unary operators will be allowed.
+            If no arguments are provided, both pre- and post-unary operators are banned.
+            If \`"${OPTION_ALLOW_POST}"\` is provided, post-unary operators will be allowed.
         `,
         rationale: Lint.Utils.dedent`
             It's easy to type +i or -i instead of --i or ++i, and won't always result in invalid code.
