@@ -1,0 +1,3 @@
+import { file1 } from "@src/folder/file1";
+import * as _ from "lodash";
+                   ~~~~~~~~  [Module 'lodash' is not listed as dependency in package.json]
