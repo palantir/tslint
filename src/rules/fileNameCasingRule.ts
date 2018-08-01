@@ -19,12 +19,13 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isCamelCased, isKebabCased, isPascalCased } from "../utils";
+import { isCamelCased, isKebabCased, isPascalCased, isSnakeCased } from "../utils";
 
 enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
     KebabCase = "kebab-case",
+    SnakeCase = "snake-case",
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -38,13 +39,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
             * \`${Casing.PascalCase}\`: File names must be Pascal-cased: \`FileName.ts\`.
-            * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.`,
+            * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
+            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
         options: {
             type: "array",
             items: [
                 {
                     type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase],
+                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
                 },
             ],
         },
@@ -52,6 +54,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, Casing.CamelCase],
             [true, Casing.PascalCase],
             [true, Casing.KebabCase],
+            [true, Casing.SnakeCase],
         ],
         hasFix: false,
         type: "style",
@@ -71,6 +74,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 return "PascalCase";
             case Casing.KebabCase:
                 return "kebab-case";
+            case Casing.SnakeCase:
+                return "snake_case";
         }
     }
 
@@ -82,6 +87,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 return isPascalCased(fileName);
             case Casing.KebabCase:
                 return isKebabCased(fileName);
+            case Casing.SnakeCase:
+                return isSnakeCased(fileName);
         }
     }
 
