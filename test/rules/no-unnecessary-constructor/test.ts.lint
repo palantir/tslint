@@ -63,4 +63,14 @@ class ContainsParameterAndParameterDeclaration {
     constructor(x: number, public y: number) { }
 }
 
+class ConstructorOverload {
+  constructor(x: number);
+  constructor(x: number, y?: number) { }
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
+
+interface IConstructorSignature {
+    new(): {};
+}
+
 [0]: Remove unnecessary empty constructor.
