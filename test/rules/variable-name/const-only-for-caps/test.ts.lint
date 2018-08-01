@@ -7,7 +7,7 @@ var PascalCaseVar;
     ~~~~~~~~~~~~~  [regular-case]
 
 var UPPER_CASE_VAR;
-    ~~~~~~~~~~~~~~  [err]
+    ~~~~~~~~~~~~~~  [const]
 
 let snake_case_let;
     ~~~~~~~~~~~~~~  [regular-case]
@@ -18,7 +18,7 @@ let PascalCaseLet;
     ~~~~~~~~~~~~~  [regular-case]
 
 let UPPER_CASE_LET;
-    ~~~~~~~~~~~~~~  [err]
+    ~~~~~~~~~~~~~~  [const]
 
 const snake_case_const;
       ~~~~~~~~~~~~~~~~  [regular-case]
@@ -34,5 +34,5 @@ class Test {
     public static readonly MY_FIELD = 10;
 }
 
+[const]: Only `const` variables may be UPPER_CASE.
 [regular-case]: variable name must be in lowerCamelCase or UPPER_CASE
-[err]: Only `const` variables may be UPPER_CASE.
