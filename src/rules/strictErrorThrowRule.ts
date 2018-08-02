@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2017 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,12 @@ import { isThrowStatement, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
-// tslint:disable:no-bitwise
-
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "strict-error-throw",
         description: Lint.Utils.dedent`
-            Restricts that only instances of \`Error\` or its subclass be thrown.`,
+            Restricts that only instances or subclasses of \`Error\` be thrown.`,
         descriptionDetails: Lint.Utils.dedent`
             Example – Doing it right
 
