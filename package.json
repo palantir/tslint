@@ -16,6 +16,7 @@
     "typescript",
     "linter"
   ],
+  "homepage": "https://palantir.github.io/tslint",
   "scripts": {
     "clean": "npm-run-all -p clean:core clean:test",
     "clean:core": "rimraf lib",
