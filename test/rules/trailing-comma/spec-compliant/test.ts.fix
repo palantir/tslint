@@ -59,7 +59,11 @@ function foo(...z) {}
     ...x,
     y,
 })
-foo(...y,);
+foo(...y);
+foo(
+    a,
+    ...b
+);
 
 function combined([a, ...arr], {b, ...obj}, regular,) {}
 

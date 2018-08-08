@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, isReassignmentTarget, isSameLine } from "tsutils";
+import { getChildOfKind, isReassignmentTarget, isSameLine, isSpreadElement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -207,7 +207,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                         (node as ts.CallExpression | ts.NewExpression).arguments!,
                         node.end,
                         "functions",
-                        noRest
+                        isSpreadParameter
                     );
                     break;
                 case ts.SyntaxKind.ArrowFunction:
@@ -333,6 +333,10 @@ function isObjectRest(node: ts.ObjectLiteralElementLike) {
 
 function isArrayRest(node: ts.Expression) {
     return node.kind === ts.SyntaxKind.SpreadElement && isReassignmentTarget(node);
+}
+
+function isSpreadParameter(node: ts.Node) {
+    return isSpreadElement(node);
 }
 
 function noRest() {
