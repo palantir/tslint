@@ -50,6 +50,7 @@ export interface IConfigurationFile {
      */
     linterOptions?: Partial<{
         exclude: string[];
+        include: string[];
     }>;
 
     /**
@@ -532,14 +533,22 @@ export function parseConfigFile(
     }
 
     function parseLinterOptions(raw: RawConfigFile["linterOptions"], dir?: string): IConfigurationFile["linterOptions"] {
-        if (raw === undefined || raw.exclude === undefined) {
+        if (raw === undefined || (raw.exclude === undefined && raw.include === undefined)) {
             return {};
         }
-        return {
-            exclude: arrayify(raw.exclude).map(
-                (pattern) => dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
-            ),
-        };
+
+        const resolveFn = (pattern: string) => dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern);
+        const options: IConfigurationFile["linterOptions"] = {};
+
+        if (raw.exclude !== undefined) {
+          options.exclude = arrayify(raw.exclude).map(resolveFn);
+        }
+
+        if (raw.include !== undefined) {
+          options.include = arrayify(raw.include).map(resolveFn);
+        }
+
+        return options;
     }
 }
 
