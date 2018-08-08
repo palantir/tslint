@@ -33,7 +33,7 @@ export class Formatter extends AbstractFormatter {
             Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
-        1:14  semicolon  Missing semicolon`,
+        Error: 1:14  semicolon  Missing semicolon`,
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
