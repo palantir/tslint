@@ -38,14 +38,21 @@ function fillOptions<T>(value: T): Record<OptionName, T> {
         functions: value,
         imports: value,
         objects: value,
-        typeLiterals: value,
+        typeLiterals: value
     };
 }
 
-type OptionsJson = Partial<Record<"multiline" | "singleline", Partial<CustomOptionValue> | OptionValue> & {esSpecCompliant: boolean}>;
+type OptionsJson = Partial<
+    Record<"multiline" | "singleline", Partial<CustomOptionValue> | OptionValue> & {
+        esSpecCompliant: boolean;
+    }
+>;
 function normalizeOptions(options: OptionsJson): Options {
-    return { multiline: normalize(options.multiline), singleline: normalize(options.singleline), specCompliant: !!options.esSpecCompliant};
-
+    return {
+        multiline: normalize(options.multiline),
+        singleline: normalize(options.singleline),
+        specCompliant: !!options.esSpecCompliant
+    };
 }
 function normalize(value: OptionsJson["multiline"]): CustomOptionValue {
     return typeof value === "string" ? fillOptions(value) : { ...defaultOptions, ...value };
@@ -56,16 +63,16 @@ const metadataOptionShape = {
     anyOf: [
         {
             type: "string",
-            enum: ["always", "never"],
+            enum: ["always", "never"]
         },
         {
             type: "object",
             properties: fillOptions({
                 type: "string",
-                enum: ["always", "never", "ignore"],
-            }),
-        },
-    ],
+                enum: ["always", "never", "ignore"]
+            })
+        }
+    ]
 };
 /* tslint:enable:object-literal-sort-keys */
 
@@ -102,12 +109,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             properties: {
                 multiline: metadataOptionShape,
                 singleline: metadataOptionShape,
-                esSpecCompliant: {type: "boolean"},
+                esSpecCompliant: { type: "boolean" }
             },
-            additionalProperties: false,
+            additionalProperties: false
         },
         optionExamples: [
-            [true, {multiline: "always", singleline: "never"}],
+            [true, { multiline: "always", singleline: "never" }],
             [
                 true,
                 {
@@ -115,14 +122,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                         objects: "always",
                         arrays: "always",
                         functions: "never",
-                        typeLiterals: "ignore",
+                        typeLiterals: "ignore"
                     },
-                    esSpecCompliant: true,
-                },
-            ],
+                    esSpecCompliant: true
+                }
+            ]
         ],
         type: "maintainability",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -145,13 +152,28 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.ArrayLiteralExpression:
-                    this.checkList((node as ts.ArrayLiteralExpression).elements, node.end, "arrays", isArrayRest);
+                    this.checkList(
+                        (node as ts.ArrayLiteralExpression).elements,
+                        node.end,
+                        "arrays",
+                        isArrayRest
+                    );
                     break;
                 case ts.SyntaxKind.ArrayBindingPattern:
-                    this.checkList((node as ts.BindingPattern).elements, node.end, "arrays", isDestructuringRest);
+                    this.checkList(
+                        (node as ts.BindingPattern).elements,
+                        node.end,
+                        "arrays",
+                        isDestructuringRest
+                    );
                     break;
                 case ts.SyntaxKind.ObjectBindingPattern:
-                    this.checkList((node as ts.BindingPattern).elements, node.end, "objects", isDestructuringRest);
+                    this.checkList(
+                        (node as ts.BindingPattern).elements,
+                        node.end,
+                        "objects",
+                        isDestructuringRest
+                    );
                     break;
                 case ts.SyntaxKind.NamedImports:
                     this.checkList((node as ts.NamedImports).elements, node.end, "imports", noRest);
@@ -160,25 +182,43 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                     this.checkList((node as ts.NamedExports).elements, node.end, "exports", noRest);
                     break;
                 case ts.SyntaxKind.ObjectLiteralExpression:
-                    this.checkList((node as ts.ObjectLiteralExpression).properties, node.end, "objects", isObjectRest);
+                    this.checkList(
+                        (node as ts.ObjectLiteralExpression).properties,
+                        node.end,
+                        "objects",
+                        isObjectRest
+                    );
                     break;
                 case ts.SyntaxKind.EnumDeclaration:
-                    this.checkList((node as ts.EnumDeclaration).members, node.end, "objects", noRest);
+                    this.checkList(
+                        (node as ts.EnumDeclaration).members,
+                        node.end,
+                        "objects",
+                        noRest
+                    );
                     break;
                 case ts.SyntaxKind.NewExpression:
                     if ((node as ts.NewExpression).arguments === undefined) {
                         break;
                     }
-                    // falls through
+                // falls through
                 case ts.SyntaxKind.CallExpression:
-                    this.checkList((node as ts.CallExpression | ts.NewExpression).arguments!, node.end, "functions", noRest);
+                    this.checkList(
+                        (node as ts.CallExpression | ts.NewExpression).arguments!,
+                        node.end,
+                        "functions",
+                        noRest
+                    );
                     break;
                 case ts.SyntaxKind.ArrowFunction:
                     // don't check arrow functions without parens around the parameter
-                    if (getChildOfKind(node, ts.SyntaxKind.OpenParenToken, this.sourceFile) === undefined) {
+                    if (
+                        getChildOfKind(node, ts.SyntaxKind.OpenParenToken, this.sourceFile) ===
+                        undefined
+                    ) {
                         break;
                     }
-                    // falls through
+                // falls through
                 case ts.SyntaxKind.Constructor:
                 case ts.SyntaxKind.FunctionDeclaration:
                 case ts.SyntaxKind.FunctionExpression:
@@ -193,7 +233,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                         (node as ts.SignatureDeclaration).parameters,
                         getChildOfKind(node, ts.SyntaxKind.CloseParenToken, this.sourceFile)!.end,
                         "functions",
-                        isRestParameter,
+                        isRestParameter
                     );
                     break;
                 case ts.SyntaxKind.TypeLiteral:
@@ -223,7 +263,12 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         return this.checkComma(hasTrailingComma, members, node.end, "typeLiterals", noRest);
     }
 
-    private checkList<T extends ts.Node>(list: ts.NodeArray<T>, closeElementPos: number, optionKey: OptionName, isRest: (n: T) => boolean) {
+    private checkList<T extends ts.Node>(
+        list: ts.NodeArray<T>,
+        closeElementPos: number,
+        optionKey: OptionName,
+        isRest: (n: T) => boolean
+    ) {
         if (list.length === 0) {
             return;
         }
@@ -236,12 +281,17 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         list: ts.NodeArray<T>,
         closeTokenPos: number,
         optionKey: OptionName,
-        isRest: (node: T) => boolean,
+        isRest: (node: T) => boolean
     ) {
         const last = list[list.length - 1];
         if (this.options.specCompliant && isRest(last)) {
             if (hasTrailingComma) {
-                this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_FORBIDDEN, Lint.Replacement.deleteText(list.end - 1, 1));
+                this.addFailureAt(
+                    list.end - 1,
+                    1,
+                    Rule.FAILURE_STRING_FORBIDDEN,
+                    Lint.Replacement.deleteText(list.end - 1, 1)
+                );
             }
             return;
         }
@@ -252,9 +302,19 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
         const option = options[optionKey];
 
         if (option === "always" && !hasTrailingComma) {
-            this.addFailureAt(list.end, 0, Rule.FAILURE_STRING_ALWAYS, Lint.Replacement.appendText(list.end, ","));
+            this.addFailureAt(
+                list.end,
+                0,
+                Rule.FAILURE_STRING_ALWAYS,
+                Lint.Replacement.appendText(list.end, ",")
+            );
         } else if (option === "never" && hasTrailingComma) {
-            this.addFailureAt(list.end - 1, 1, Rule.FAILURE_STRING_NEVER, Lint.Replacement.deleteText(list.end - 1, 1));
+            this.addFailureAt(
+                list.end - 1,
+                1,
+                Rule.FAILURE_STRING_NEVER,
+                Lint.Replacement.deleteText(list.end - 1, 1)
+            );
         }
     }
 }
