@@ -7,6 +7,8 @@
         "noUnusedParameters": true,
         "noUnusedLocals": true,
         "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
         "importHelpers": true,
         "declaration": true,
         "sourceMap": false,

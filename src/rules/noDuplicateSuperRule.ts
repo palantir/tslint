@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration } from "tsutils";
+import { isConstructorDeclaration, isIterationStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -51,7 +51,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     });
 
     function getSuperForNode(node: ts.Node): Super {
-        if (Lint.isLoop(node)) {
+        if (isIterationStatement(node)) {
             const bodySuper = combineSequentialChildren(node);
             if (typeof bodySuper === "number") {
                 return Kind.NoSuper;
@@ -79,6 +79,16 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 return node.parent!.kind === ts.SyntaxKind.CallExpression && (node.parent as ts.CallExpression).expression === node
                     ? { node: node.parent! as ts.CallExpression, break: false }
                     : Kind.NoSuper;
+
+            case ts.SyntaxKind.ConditionalExpression: {
+                const { condition, whenTrue, whenFalse } = node as ts.ConditionalExpression;
+                const inCondition = getSuperForNode(condition);
+                const inBranches = worse(getSuperForNode(whenTrue), getSuperForNode(whenFalse));
+                if (typeof inCondition !== "number" && typeof inBranches !== "number") {
+                    addDuplicateFailure(inCondition.node, inBranches.node);
+                }
+                return worse(inCondition, inBranches);
+            }
 
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;

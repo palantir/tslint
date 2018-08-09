@@ -2,25 +2,15 @@
   "lintOptions": {
     "typeCheck": true
   },
-  "extends": "tslint:all",
+  "extends": ["tslint:all", "tslint-config-prettier"],
   "rules": {
-    // TODO: remove this when tslint 5.3 released
-    "prefer-switch": [true, { "min-cases": 3 }],
-
     // Don't want these
+    "cyclomatic-complexity": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
     "no-unused-variable": false,
     // TODO: Enable stricter options for these
-    "align": {
-        "options": [
-            "parameters",
-            "statements",
-            "members",
-            "elements"
-        ]
-    },
-    "arrow-return-shorthand": true,
     "comment-format": [
         true,
         "check-space"
@@ -34,20 +24,18 @@
 
     // TODO: Enable these
     "completed-docs": false,
-    "cyclomatic-complexity": false,
     "no-any": false,
     "no-magic-numbers": false,
     "no-non-null-assertion": false,
     "no-null-keyword": false,
     "no-require-imports": false,
     "no-unbound-method": false,
-    "no-unnecessary-type-assertion": false,
     "no-unnecessary-qualifier": false,
     "no-use-before-declare": false,
     "no-void-expression": false,
     "prefer-function-over-method": false,
     "strict-type-predicates": false,
-    "triple-equals": false,
+    "triple-equals": [true, "allow-undefined-check"],
     "typedef": false,
 
     "ban": [true,
@@ -66,6 +54,7 @@
       "static-before-instance",
       "variables-before-functions"
     ],
+    "newline-per-chained-call": false,
     "no-console": {
       "options": ["log"]
     },
@@ -77,6 +66,7 @@
       "check-format",
       "allow-leading-underscore",
       "allow-pascal-case"
-    ]
+    ],
+    "linebreak-style": false
   }
 }

@@ -29,6 +29,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Helps keep a consistent style with numeric literals.
+            Non-standard literals are more difficult to scan through and can be a symptom of typos.
+        `,
         type: "format",
         typescriptOnly: false,
     };

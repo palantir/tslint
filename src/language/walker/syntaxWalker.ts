@@ -126,6 +126,10 @@ export class SyntaxWalker {
         this.walkChildren(node);
     }
 
+    protected visitEnumMember(node: ts.EnumMember) {
+        this.walkChildren(node);
+    }
+
     protected visitExportAssignment(node: ts.ExportAssignment) {
         this.walkChildren(node);
     }
@@ -454,6 +458,10 @@ export class SyntaxWalker {
 
             case ts.SyntaxKind.EnumDeclaration:
                 this.visitEnumDeclaration(node as ts.EnumDeclaration);
+                break;
+
+            case ts.SyntaxKind.EnumMember:
+                this.visitEnumMember(node as ts.EnumMember);
                 break;
 
             case ts.SyntaxKind.ExportAssignment:

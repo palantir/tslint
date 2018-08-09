@@ -1,0 +1,118 @@
+export class Bad {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get myAccessor(): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+
+    set myAccessor(value: string) { this.myField = value; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for properties.]
+
+}
+
+export class Good {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * The get accessor.
+     */
+    get myAccessor(): string { return this.myField; }
+
+    /**
+     * The set accessor.
+     */
+    set myAccessor(value: string) { this.myField = value; }
+
+}
+
+export class CommentsOnGetOnly {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * The get accessor.
+     */
+    get myAccessor(): string { return this.myField; }
+
+    set myAccessor(value: string) { this.myField = value; } // Comments for the setter are inherited from the getter.
+
+}
+
+export class CommentsOnSetOnly {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get myAccessor(): string { return this.myField; }   // Comments from the getter are inherited from the setter.
+
+    /**
+     * The set accessor.
+     */
+    set myAccessor(value: string) { this.myField = value; }
+
+}
+
+export class OnlyHasGetAccessorWithComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * The get accessor.
+     */
+    get myAccessor(): string { return this.myField; }
+
+}
+
+export class OnlyHasGetAccessorWithNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    get myAccessor(): string { return this.myField; }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}
+
+export class OnlyHasSetAccessorWithComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+    /**
+     * The set accessor.
+     */
+    set myAccessor(value: string) { this.myField = value; }
+
+}
+
+export class OnlyHasSetAccessorWithNoComments {
+
+    /**
+     * ...
+     */
+    private myField: string;
+
+     set myAccessor(value: string) { this.myField = value; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        [Documentation must exist for properties.]
+
+}

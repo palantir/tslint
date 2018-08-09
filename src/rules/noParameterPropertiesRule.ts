@@ -27,7 +27,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows parameter properties in class constructors.",
         rationale: Lint.Utils.dedent`
             Parameter properties can be confusing to those new to TS as they are less explicit
-            than other ways of declaring and initializing class members.`,
+            than other ways of declaring and initializing class members.
+
+            It can be cleaner to keep member variable declarations in one list directly only the class
+            (instead of mixed between direct class members and constructor parameter properties).
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],

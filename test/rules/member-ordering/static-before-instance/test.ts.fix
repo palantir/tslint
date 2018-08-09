@@ -1,0 +1,8 @@
+class Foo {
+    static y: number;
+    x: number;
+    constructor() {
+        // nothing to do
+    }
+}
+

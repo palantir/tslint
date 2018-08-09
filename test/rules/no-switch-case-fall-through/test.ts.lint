@@ -125,7 +125,20 @@ switch (foo) {
                 foobar(); // this case clause falls through and returns in the default clause
             default:
             ~~~~~~~    [expected a 'break' before 'default']
-                return; 
+                return;
         }
     case 2:
+}
+
+switch (foo) {
+    case 1:
+        foo;
+        // Falls through
+    case 2:
+        foo;
+        // Falls through.
+    case 3:
+        foo;
+        // Falls through -- for reasons
+    default:
 }

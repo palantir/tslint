@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
@@ -31,6 +31,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
+        failures = this.sortFailures(failures);
         return `${this.mapToMessages(failures).join("\n")}\n`;
     }
 

@@ -18,10 +18,10 @@
 import { assert } from "chai";
 import * as fs from "fs";
 import { createSourceFile, ScriptTarget } from "typescript";
+import { DEFAULT_CONFIG } from "../src/configuration";
 import { Replacement, RuleFailure } from "../src/language/rule/rule";
+import { Linter } from "../src/linter";
 import { createTempFile } from "./utils";
-
-import Linter = require("../src/linter");
 
 class TestLinter extends Linter {
     public applyFixesHelper(fileName: string, source: string, ruleFailures: RuleFailure[]) {
@@ -49,6 +49,11 @@ const templateDeclarationFixed =
 <div></div>
 `;
 
+const withWarningDeclaration =
+`
+  console.log("This line will not pass linting with the default rule set");
+`;
+
 describe("Linter", () => {
 
     it("apply fixes to correct files", () => {
@@ -64,4 +69,39 @@ describe("Linter", () => {
         assert.equal(fs.readFileSync(templateFile, "utf-8"), templateDeclarationFixed);
     });
 
+    it("shows warnings", () => {
+        const config = DEFAULT_CONFIG;
+        config.rules.set("no-console", {
+            ruleArguments: ["log"],
+            ruleName: "no-console",
+            ruleSeverity: "warning",
+        });
+
+        const linter = new TestLinter({ fix: false });
+        const fileToLint = createTempFile("ts");
+        fs.writeFileSync(fileToLint, withWarningDeclaration);
+        linter.lint(fileToLint, withWarningDeclaration, config);
+        const result = linter.getResult();
+
+        assert.equal(result.warningCount, 1);
+        assert.equal(result.errorCount, 0);
+    });
+
+    it("does not show warnings when `quiet` is `true`", () => {
+        const config = DEFAULT_CONFIG;
+        config.rules.set("no-console", {
+            ruleArguments: ["log"],
+            ruleName: "no-console",
+            ruleSeverity: "warning",
+        });
+
+        const linter = new TestLinter({ fix: false, quiet: true });
+        const fileToLint = createTempFile("ts");
+        fs.writeFileSync(fileToLint, withWarningDeclaration);
+        linter.lint(fileToLint, withWarningDeclaration, config);
+        const result = linter.getResult();
+
+        assert.equal(result.warningCount, 0);
+        assert.equal(result.errorCount, 0);
+    });
 });

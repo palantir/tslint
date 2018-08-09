@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { endsControlFlow, isBlock, isCaseBlock } from "tsutils";
+import { endsControlFlow, isBlock, isBreakStatement, isLabeledStatement, isSwitchStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -27,6 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-final-break",
         description: "Checks whether the final clause of a switch statement ends in \`break;\`.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             If no options are passed, a final 'break;' is forbidden.
             If the "always" option is passed this will require a 'break;' to always be present
@@ -58,31 +59,66 @@ interface Options {
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { always } } = ctx;
     ts.forEachChild(sourceFile, function cb(node) {
-        if (isCaseBlock(node)) {
+        if (isSwitchStatement(node)) {
             check(node);
         }
         ts.forEachChild(node, cb);
     });
 
-    function check(node: ts.CaseBlock): void {
-        const clause = last(node.clauses);
+    function check(node: ts.SwitchStatement): void {
+        const clause = last(node.caseBlock.clauses);
         if (clause === undefined) { return; }
 
         if (always) {
             if (!endsControlFlow(clause)) {
-                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS);
+                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS, createAddFix(clause));
             }
             return;
         }
 
-        if (clause.statements.length === 0) { return; }
-        const block = clause.statements[0];
-        const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
-        const lastStatement = last(statements);
-        if (lastStatement !== undefined && lastStatement.kind === ts.SyntaxKind.BreakStatement) {
-            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER);
+        const lastStatement = getLastStatement(clause);
+        if (lastStatement === undefined || !isBreakStatement(lastStatement)) {
+            return;
         }
+
+        if (lastStatement.label !== undefined) {
+            const parent = node.parent!;
+            if (!isLabeledStatement(parent) || parent.label === lastStatement.label) {
+                // break jumps somewhere else, don't complain
+                return;
+            }
+        }
+
+        ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER, createRemoveFix(lastStatement));
     }
+
+    function createAddFix(clause: ts.CaseClause | ts.DefaultClause) {
+        const lastStatement = getLastStatement(clause);
+        if (lastStatement === undefined) {
+            return Lint.Replacement.appendText(clause.end, " break;");
+        }
+
+        const fullText = lastStatement.getFullText(ctx.sourceFile);
+        const indentation = fullText.slice(0, fullText.search(/\S+/));
+
+        return Lint.Replacement.appendText(lastStatement.end, `${indentation}break;`);
+    }
+
+    function createRemoveFix(lastStatement: ts.BreakStatement) {
+        return Lint.Replacement.replaceFromTo(lastStatement.getFullStart(), lastStatement.end, "");
+    }
+
+}
+
+function getLastStatement(clause: ts.CaseClause | ts.DefaultClause): ts.Statement | undefined {
+    if (clause.statements.length === 0) {
+        return undefined;
+    }
+
+    const block = clause.statements[0];
+    const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
+
+    return last(statements);
 }
 
 function last<T>(arr: ReadonlyArray<T>): T | undefined {

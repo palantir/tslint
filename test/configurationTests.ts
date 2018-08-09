@@ -68,7 +68,7 @@ describe("Configuration", () => {
                     o: { severity: "warn", options: 1 },
                     p: null,
                     q: {},
-                    r: "garbage",
+                    r: "garbage" as any,
                     s: { junk: 1 } as any,
                 },
             };
@@ -105,6 +105,20 @@ describe("Configuration", () => {
                 ruleSeverity: "error",
             });
         });
+
+        it("resolves exclude pattern relative to the configuration file", () => {
+            const config: RawConfigFile = {
+                linterOptions: {
+                    exclude: ["foo.ts", "**/*.d.ts"],
+                },
+            };
+            assert.deepEqual(
+                parseConfigFile(config, "/path").linterOptions,
+                {
+                    exclude: [path.resolve("/path", "foo.ts"), path.resolve("/path", "**/*.d.ts")],
+                },
+            );
+        });
     });
 
     describe("defaultSeverity", () => {
@@ -140,7 +154,7 @@ describe("Configuration", () => {
             config.jsRules.set("row", { ruleArguments: ["oar", "column"], ruleSeverity: "error" });
             config.rules.set("foo", { ruleArguments: ["bar"], ruleSeverity: "off" });
             config.rulesDirectory = ["foo"];
-            config.linterOptions = { typeCheck: true };
+            config.linterOptions = { exclude: ["foo"] };
             assertConfigEquals(extendConfigurationFile(EMPTY_CONFIG, config), config);
         });
 
@@ -193,6 +207,106 @@ describe("Configuration", () => {
             const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
             assertConfigEquals(actualConfig, expectedConfig);
         });
+
+        it("replaces exclude option", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: [
+                    "lib",
+                    "bin",
+                ],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
+
+        it("empty linter options does not replace exclude", () => {
+            const baseConfig = getEmptyConfig();
+            baseConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const extendingConfig = getEmptyConfig();
+            extendingConfig.linterOptions = {};
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.linterOptions = {
+                exclude: ["src"],
+            };
+
+            const actualConfig = extendConfigurationFile(baseConfig, extendingConfig);
+            assertConfigEquals(actualConfig, expectedConfig);
+        });
+
+        it("overrides defaultSeverity of base configs", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity.json");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-unspecified")!.ruleSeverity,
+                "warning",
+                "should apply defaultSeverity to base config with no defaultSeverity");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-error")!.ruleSeverity,
+                "warning",
+                "should override defaultSeverity defined in base config");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-warning")!.ruleSeverity,
+                "warning",
+                "should apply defaultSeverity to extending config");
+        });
+
+        it("inherits defaultSeverity from base config if not specified", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-only-in-extended.json");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-unspecified")!.ruleSeverity,
+                "warning",
+                "should apply defaultSeverity to base config with no defaultSeverity");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-error")!.ruleSeverity,
+                "warning",
+                "should override defaultSeverity defined in base config");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-warning")!.ruleSeverity,
+                "warning",
+                "should apply defaultSeverity to extending config");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-only-in-extended")!.ruleSeverity,
+                "warning",
+                "should inherit defaultSeverity from base configs");
+        });
+
+        it("applies defaultSeverity to preceding base configs", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-extends-default-severity-precedence.json");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-unspecified")!.ruleSeverity,
+                "off",
+                "should apply defaultSeverity to base config with no defaultSeverity");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-error")!.ruleSeverity,
+                "off",
+                "should override defaultSeverity defined in preceding base config");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-warning")!.ruleSeverity,
+                "off",
+                "should override defaultSeverity defined in preceding base config");
+            assert.equal<RuleSeverity | undefined>(
+                config.rules.get("default-severity-off")!.ruleSeverity,
+                "off",
+                "should not override last declared defaultSeverity");
+        });
     });
 
     describe("findConfigurationPath", () => {
@@ -216,6 +330,16 @@ describe("Configuration", () => {
                 path.resolve("./test/files/config-findup/tslint.json"),
             );
         });
+        it("prefers json over yaml over yml configuration files", () => {
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yaml-config"),
+                path.resolve("test/files/config-findup/yaml-config/tslint.json"),
+            );
+            assert.strictEqual(
+                findConfigurationPath(null, "./test/files/config-findup/yml-config"),
+                path.resolve("test/files/config-findup/yml-config/tslint.yaml"),
+            );
+        });
     });
 
     describe("loadConfigurationFromPath", () => {
@@ -225,11 +349,11 @@ describe("Configuration", () => {
             assert.equal<RuleSeverity | undefined>(
                 "error",
                 config.rules.get("no-fail")!.ruleSeverity,
-                "did not pick up 'no-fail' in base config");
+                "should pick up 'no-fail' in base config");
             assert.equal<RuleSeverity | undefined>(
                 "off",
                 config.rules.get("always-fail")!.ruleSeverity,
-                "did not set 'always-fail' in top config");
+                "should set 'always-fail' in top config");
             assert.equal<RuleSeverity | undefined>("error", config.jsRules.get("no-fail")!.ruleSeverity);
             assert.equal<RuleSeverity | undefined>("off", config.jsRules.get("always-fail")!.ruleSeverity);
         });
@@ -295,14 +419,14 @@ describe("Configuration", () => {
         });
 
         describe("with config not relative to tslint", () => {
-            let tmpfile: string | null;
+            let tmpfile: string | undefined;
 
             beforeEach(() => {
                 tmpfile = createTempFile("json");
             });
 
             afterEach(() => {
-                if (tmpfile != null) {
+                if (tmpfile !== undefined) {
                     fs.unlinkSync(tmpfile);
                 }
             });
@@ -321,8 +445,8 @@ describe("Configuration", () => {
             const config = loadConfigurationFromPath("./test/config/tslint-extends-package-two-levels.json");
 
             assert.lengthOf(config.rulesDirectory, 2);
-            assert.isTrue(fs.existsSync(config.rulesDirectory![0]));
-            assert.isTrue(fs.existsSync(config.rulesDirectory![1]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[0]));
+            assert.isTrue(fs.existsSync(config.rulesDirectory[1]));
 
             const expectedConfig = getEmptyConfig();
             expectedConfig.rules.set("always-fail", { ruleSeverity: "off" });
@@ -363,6 +487,17 @@ describe("Configuration", () => {
             assert.doesNotThrow(() => loadConfigurationFromPath("./test/config/tslint-with-bom.json"));
         });
 
+        it("can load .yaml files with comments", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-with-comments.yaml");
+
+            const expectedConfig = getEmptyConfig();
+            expectedConfig.rules.set("rule-two", { ruleSeverity: "error" });
+            expectedConfig.rules.set("rule-three", { ruleSeverity: "error", ruleArguments: ["#not a comment"] });
+
+            assertConfigEquals(config.rules, expectedConfig.rules);
+            assertConfigEquals(config.jsRules, expectedConfig.rules);
+        });
+
         it("can load a built-in configuration", () => {
             const config = loadConfigurationFromPath("tslint:recommended");
             assert.strictEqual<RuleSeverity | undefined>("error", config.jsRules.get("no-eval")!.ruleSeverity);
@@ -388,7 +523,7 @@ function getEmptyConfig(): IConfigurationFile {
 }
 
 function demap<T>(map: Map<string, T>) {
-    if (map == null) {
+    if (map == undefined) {
         return map;
     }
     const output: { [key: string]: T } = {};

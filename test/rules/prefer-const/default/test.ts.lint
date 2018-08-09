@@ -68,8 +68,7 @@ for (let n of [1, 1]) { // failure for 'n'
          ~                                 [let % ('n')]
     console.log(n);
 }
-for (let {o, p} of [{1, 1}, {1, 1}]) { // failure for 'o'
-          ~                                               [let % ('o')]
+for (let {o, p} of [{1, 1}, {1, 1}]) {
     console.log(o);
     p = 2;
 }
@@ -248,6 +247,22 @@ declare namespace ambient {
         ~~~~~~~ [let % ('someVar')]
                          ~~~~~~~ [let % ('someObj')]
     for ({someVar: someObj.val} of someArr) {}
+}
+for (let [var1, var2] of someArr) {
+    var1 = null;
+}
+for (let [var1, var2] of someArr) {}
+          ~~~~ [let % ('var1')]
+                ~~~~ [let % ('var2')]
+for (let {var1, var2} of someArr) {
+    var2 = null;
+}
+
+{
+    let k: any = 0;
+    function foo(param: {[k: string]: string}) {
+        k = param;
+    }
 }
 
 [_base]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.

@@ -19,8 +19,13 @@ import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/preferTemplate.examples";
 
 const OPTION_SINGLE_CONCAT = "allow-single-concat";
+
+interface Options {
+    allowSingleConcat: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -36,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -48,11 +54,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const allowSingleConcat = this.ruleArguments.indexOf(OPTION_SINGLE_CONCAT) !== -1;
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, allowSingleConcat));
+        return this.applyWithFunction(sourceFile, walk, {allowSingleConcat});
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const allowSingleConcat = ctx.options.allowSingleConcat;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const failure = getError(node, allowSingleConcat);
         if (failure !== undefined) {

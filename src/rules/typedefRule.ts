@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/typedef.examples";
 
 interface Options {
     "call-signature"?: boolean;
@@ -90,6 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -200,7 +202,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
             name?: ts.Node): void {
         if (this.options[option] === true && typeAnnotation === undefined) {
             const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
-            if (Array.isArray(location)) {
+            if (isNodeArray(location)) {
                 this.addFailure(location.pos - 1, location.end + 1, failure);
             } else {
                 this.addFailureAtNode(location, failure);
@@ -211,4 +213,8 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {
     return utils.isPropertyDeclaration(node) && node.type !== undefined;
+}
+
+export function isNodeArray(nodeOrArray: ts.Node | ts.NodeArray<ts.Node>): nodeOrArray is ts.NodeArray<ts.Node> {
+    return Array.isArray(nodeOrArray);
 }

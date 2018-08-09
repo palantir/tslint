@@ -17,19 +17,22 @@
 
 import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 const OPTION_SINGLE = "single";
 const OPTION_DOUBLE = "double";
+const OPTION_BACKTICK = "backtick";
 const OPTION_JSX_SINGLE = "jsx-single";
 const OPTION_JSX_DOUBLE = "jsx-double";
 const OPTION_AVOID_TEMPLATE = "avoid-template";
 const OPTION_AVOID_ESCAPE = "avoid-escape";
 
+type QUOTE_MARK = "'" | '"' | "`";
+type JSX_QUOTE_MARK = "'" | '"';
+
 interface Options {
-    quoteMark: '"' | "'";
-    jsxQuoteMark: '"' | "'";
+    quoteMark: QUOTE_MARK;
+    jsxQuoteMark: JSX_QUOTE_MARK;
     avoidEscape: boolean;
     avoidTemplate: boolean;
 }
@@ -38,13 +41,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "quotemark",
-        description: "Requires single or double quotes for string literals.",
+        description: "Enforces quote character for string literals.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
             * \`"${OPTION_SINGLE}"\` enforces single quotes.
             * \`"${OPTION_DOUBLE}"\` enforces double quotes.
+            * \`"${OPTION_BACKTICK}"\` enforces backticks.
             * \`"${OPTION_JSX_SINGLE}"\` enforces single quotes for JSX attributes.
             * \`"${OPTION_JSX_DOUBLE}"\` enforces double quotes for JSX attributes.
             * \`"${OPTION_AVOID_TEMPLATE}"\` forbids single-line untagged template strings that do not contain string interpolations.
@@ -55,7 +59,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_SINGLE, OPTION_DOUBLE, OPTION_JSX_SINGLE, OPTION_JSX_DOUBLE, OPTION_AVOID_ESCAPE],
+                enum: [
+                    OPTION_SINGLE,
+                    OPTION_DOUBLE,
+                    OPTION_BACKTICK,
+                    OPTION_JSX_SINGLE,
+                    OPTION_JSX_DOUBLE,
+                    OPTION_AVOID_ESCAPE,
+                    OPTION_AVOID_TEMPLATE,
+                ],
             },
             minLength: 0,
             maxLength: 5,
@@ -73,22 +85,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `${actual} should be ${expected}`;
     }
 
-    public isEnabled(): boolean {
-        return super.isEnabled() && (this.ruleArguments[0] === OPTION_SINGLE || this.ruleArguments[0] === OPTION_DOUBLE);
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const args = this.ruleArguments;
-        if (args.length > 0) {
-            if (args[0] !== OPTION_SINGLE && args[0] !== OPTION_DOUBLE) {
-                throw new Error(`First argument to 'quotemark' rule should be "${OPTION_SINGLE}" or "${OPTION_DOUBLE}"`);
-            }
-        }
-        const quoteMark = args[0] === OPTION_SINGLE ? "'" : '"';
+
+        const quoteMark = getQuotemarkPreference(args) ;
+        const jsxQuoteMark = getJSXQuotemarkPreference(args);
+
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
             avoidTemplate: hasArg(OPTION_AVOID_TEMPLATE),
-            jsxQuoteMark: hasArg(OPTION_JSX_SINGLE) ? "'" : hasArg(OPTION_JSX_DOUBLE) ? '"' : quoteMark,
+            jsxQuoteMark,
             quoteMark,
         });
 
@@ -107,6 +113,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 && isSameLine(sourceFile, node.getStart(sourceFile), node.end)) {
             const expectedQuoteMark = node.parent!.kind === ts.SyntaxKind.JsxAttribute ? options.jsxQuoteMark : options.quoteMark;
             const actualQuoteMark = sourceFile.text[node.end - 1];
+
             if (actualQuoteMark === expectedQuoteMark) {
                 return;
             }
@@ -114,28 +121,95 @@ function walk(ctx: Lint.WalkContext<Options>) {
             let fixQuoteMark = expectedQuoteMark;
 
             const needsQuoteEscapes = node.text.includes(expectedQuoteMark);
+
+            // This string requires escapes to use the expected quote mark, but `avoid-escape` was passed
             if (needsQuoteEscapes && options.avoidEscape) {
                 if (node.kind === ts.SyntaxKind.StringLiteral) {
                     return;
                 }
 
-                // If expecting double quotes, fix a template `a "quote"` to `a 'quote'` anyway,
-                // always preferring *some* quote mark over a template.
-                fixQuoteMark = expectedQuoteMark === '"' ? "'" : '"';
+                // If we are expecting double quotes, use single quotes to avoid
+                //   escaping. Otherwise, just use double quotes.
+                fixQuoteMark = expectedQuoteMark === '"' ?
+                    "'" :
+                    '"';
+
+                // It also includes the fixQuoteMark. Let's try to use single
+                //   quotes instead, unless we originally expected single
+                //   quotes, in which case we will try to use backticks. This
+                //   means that we may use backtick even with avoid-template
+                //   in trying to avoid escaping. What is the desired priority
+                //   here?
                 if (node.text.includes(fixQuoteMark)) {
-                    return;
+                    fixQuoteMark = expectedQuoteMark === "'" ?
+                        "`" :
+                        "'";
+
+                    // It contains all of the other kinds of quotes. Escaping is
+                    //   unavoidable, sadly.
+                    if (node.text.includes(fixQuoteMark)) {
+                        return;
+                    }
                 }
             }
 
             const start = node.getStart(sourceFile);
             let text = sourceFile.text.substring(start + 1, node.end - 1);
+
             if (needsQuoteEscapes) {
                 text = text.replace(new RegExp(fixQuoteMark, "g"), `\\${fixQuoteMark}`);
             }
+
             text = text.replace(new RegExp(`\\\\${actualQuoteMark}`, "g"), actualQuoteMark);
+
             return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, fixQuoteMark),
-                new Lint.Replacement(start, node.end - start, fixQuoteMark + text + fixQuoteMark));
+                                  new Lint.Replacement(start, node.end - start, fixQuoteMark + text + fixQuoteMark));
         }
         ts.forEachChild(node, cb);
     });
+}
+
+function getQuotemarkPreference(args: any[]): QUOTE_MARK {
+    type QUOTE_PREF = typeof OPTION_SINGLE | typeof OPTION_DOUBLE | typeof OPTION_BACKTICK;
+
+    const quoteFromOption = {
+        [OPTION_SINGLE]: "'",
+        [OPTION_DOUBLE]: '"',
+        [OPTION_BACKTICK]: "`",
+    };
+
+    for (const arg of args) {
+        switch (arg) {
+            case OPTION_SINGLE:
+            case OPTION_DOUBLE:
+            case OPTION_BACKTICK:
+                return quoteFromOption[arg as QUOTE_PREF] as QUOTE_MARK;
+        }
+    }
+
+    // Default to double quotes if no pref is found.
+    return '"';
+}
+
+function getJSXQuotemarkPreference(args: any[]): JSX_QUOTE_MARK {
+    type JSX_QUOTE_PREF = typeof OPTION_JSX_SINGLE | typeof OPTION_JSX_DOUBLE;
+
+    const jsxQuoteFromOption = {
+        [OPTION_JSX_SINGLE]: "'",
+        [OPTION_JSX_DOUBLE]: '"',
+    };
+
+    for (const arg of args) {
+        switch (arg) {
+            case OPTION_JSX_SINGLE:
+            case OPTION_JSX_DOUBLE:
+                return jsxQuoteFromOption[arg as JSX_QUOTE_PREF] as JSX_QUOTE_MARK;
+        }
+    }
+
+    // The JSX preference was not found, so try to use the regular preference.
+    //   If the regular pref is backtick, use double quotes instead.
+    const regularQuotemark = getQuotemarkPreference(args);
+
+    return regularQuotemark !== "`" ? regularQuotemark : '"';
 }

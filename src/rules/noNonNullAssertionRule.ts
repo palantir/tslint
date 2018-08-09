@@ -23,8 +23,36 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
-        description: "Disallows non-null assertions.",
-        rationale: "Using non-null assertion cancels the benefits of the strict null checking mode.",
+        description: "Disallows non-null assertions using the `!` postfix operator.",
+        rationale: Lint.Utils.dedent`
+            Using non-null assertion cancels the benefits of the strict null checking mode.
+
+            Instead of assuming objects exist:
+
+            \`\`\`
+            function foo(instance: MyClass | undefined) {
+                instance!.doWork();
+            }
+            \`\`\`
+
+            Either inform the strict type system that the object must exist:
+
+            \`\`\`
+            function foo(instance: MyClass) {
+                instance.doWork();
+            }
+            \`\`\`
+
+            Or verify that the instance exists, which will inform the type checker:
+
+            \`\`\`
+            function foo(instance: MyClass | undefined) {
+                if (instance !== undefined) {
+                    instance.doWork();
+                }
+            }
+            \`\`\`
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],

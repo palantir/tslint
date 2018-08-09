@@ -1,0 +1,10 @@
+const foo = require('foo');
+const bar = require('bar');
+const baz = require('baz');
+                    ~~~~~ [err % ('baz')]
+
+import storageHelper from 'storage-helper';
+                          ~~~~~~~~~~~~~~~~ [err % ('storage-helper')]
+const myModule = require('./myModule');
+
+[err]: Module '%s' is not listed as dependency in package.json

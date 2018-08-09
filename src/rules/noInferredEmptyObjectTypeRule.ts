@@ -27,6 +27,11 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            When function or constructor may be called with a type parameter but one isn't supplied or inferrable,
+            TypeScript defaults to \`{}\`.
+            This is often undesirable as the call is meant to be of a more specific type.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -42,7 +47,7 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, private checker: ts.TypeChecker) {
+    constructor(sourceFile: ts.SourceFile, ruleName: string, private readonly checker: ts.TypeChecker) {
         super(sourceFile, ruleName, undefined);
     }
 

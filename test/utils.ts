@@ -29,21 +29,16 @@ export function getSourceFile(fileName: string): ts.SourceFile {
 }
 
 export function getFormatter(formatterName: string): Lint.FormatterConstructor {
-    const formattersDirectory = path.join(path.dirname(module.filename), "../src/formatters");
+    const formattersDirectory = path.join(__dirname, "../src/formatters");
     return Lint.findFormatter(formatterName, formattersDirectory)!;
 }
 
 export function createTempFile(extension: string) {
-    let tmpfile: string | null = null;
     for (let i = 0; i < 5; i++) {
         const attempt = path.join(os.tmpdir(), `tslint.test${Math.round(Date.now() * Math.random())}.${extension}`);
-        if (tmpfile === null || !fs.existsSync(tmpfile)) {
-            tmpfile = attempt;
-            break;
+        if (!fs.existsSync(attempt)) {
+            return attempt;
         }
     }
-    if (tmpfile == null) {
-        throw new Error("Couldn't create temp file");
-    }
-    return tmpfile;
+    throw new Error("Couldn't create temp file");
 }
