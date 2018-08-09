@@ -28,6 +28,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Interfaces in TypeScript aren't meant to describe constructors on their implementations.
+            The \`new\` descriptor is primarily for describing JavaScript libraries.
+            If you're trying to describe a function known to be a class, it's typically better to \`declare class\`.
+        `,
         type: "functionality",
         typescriptOnly: true,
     };

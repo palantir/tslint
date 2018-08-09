@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isTypeAliasDeclaration } from "tsutils";
+import { getChildOfKind, isTypeAliasDeclaration, isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -24,12 +24,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-over-type-literal",
         description: "Prefer an interface declaration over a type literal (`type T = { ... }`)",
-        rationale: `Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.`,
+        rationale: "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "style",
         typescriptOnly: true,
+        hasFix: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -42,8 +43,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isTypeAliasDeclaration(node) && node.type.kind === ts.SyntaxKind.TypeLiteral) {
-            ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING);
+        if (isTypeAliasDeclaration(node) && isTypeLiteralNode(node.type)) {
+            const typeKeyword = getChildOfKind(node, ts.SyntaxKind.TypeKeyword, ctx.sourceFile)!;
+            const fix = [
+                // "type" -> "interface"
+                new Lint.Replacement(typeKeyword.end - 4, 4, "interface"),
+                // remove "=" and trivia up to the open curly brace of the type literal
+                Lint.Replacement.deleteFromTo(node.type.pos - 1, node.type.members.pos - 1),
+            ];
+            // remove trailing semicolon if exists
+            if (ctx.sourceFile.text[node.end - 1] === ";") {
+                fix.push(Lint.Replacement.deleteText(node.end - 1, 1));
+            }
+            ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, fix);
         }
         return ts.forEachChild(node, cb);
     });

@@ -24,8 +24,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-literal",
-        description: "Disallows object access via string literals.",
-        rationale: "Encourages using strongly-typed property access.",
+        description: Lint.Utils.dedent`
+            Forbids unnecessary string literal property access.
+            Allows \`obj["prop-erty"]\` (can't be a regular property access).
+            Disallows \`obj["property"]\` (should be \`obj.property\`).`,
+        rationale: Lint.Utils.dedent`
+            If \`--noImplicitAny\` is turned off,
+            property access via a string literal will be 'any' if the property does not exist.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -37,6 +42,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING = "object access via string literals is disallowed";
 
+    public static id(input: string) {
+        return input;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
     }
@@ -47,11 +56,17 @@ function walk(ctx: Lint.WalkContext) {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
             if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
+                // typescript@<2.5.0 has an extra underscore in escaped identifier text content,
+                // to avoid fixing issue `expr['__foo'] → expr.___foo`, unescapeIdentifier() is to be used
+                // As of typescript@3, unescapeIdentifier() removed, thus check in runtime, if the method exists
+                // tslint:disable-next-line no-unsafe-any strict-boolean-expressions
+                const unescapeIdentifier: typeof Rule["id"] = (ts as any).unescapeIdentifier || Rule.id;
+                const propertyName = unescapeIdentifier(argument.text);
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
                     // expr['foo'] -> expr.foo
-                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, "." + argument.text),
+                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${propertyName}`),
                 );
             }
         }

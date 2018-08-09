@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as u from "tsutils";
+import { hasModifier, isIdentifier, isReturnStatement, isTypeFlagSet, isTypeReference, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,13 +40,13 @@ export class Rule extends Lint.Rules.TypedRule {
         "`void` function should use `return;`, not `return undefined;`.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
 function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (u.isReturnStatement(node)) {
+        if (isReturnStatement(node)) {
             check(node);
         }
         return ts.forEachChild(node, cb);
@@ -58,24 +58,27 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
             return;
         }
 
-        const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike) as FunctionLike | undefined;
-        if (!functionReturningFrom) {
+        const functionReturningFrom = Lint.ancestorWhere(node, isFunctionLike);
+        if (functionReturningFrom === undefined) {
             // Return outside of function is invalid
             return;
         }
 
         const returnKindFromType = getReturnKind(functionReturningFrom, checker);
         if (returnKindFromType !== undefined && returnKindFromType !== actualReturnKind) {
-            ctx.addFailureAtNode(node,
-                returnKindFromType === ReturnKind.Void ? Rule.FAILURE_STRING_VOID_RETURN : Rule.FAILURE_STRING_VALUE_RETURN);
+            ctx.addFailureAtNode(
+                node,
+                returnKindFromType === ReturnKind.Void
+                    ? Rule.FAILURE_STRING_VOID_RETURN
+                    : Rule.FAILURE_STRING_VALUE_RETURN);
         }
     }
 }
 
 function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
-    if (!node.expression) {
+    if (node.expression === undefined) {
         return ReturnKind.Void;
-    } else if (u.isIdentifier(node.expression) && node.expression.text === "undefined") {
+    } else if (isIdentifier(node.expression) && node.expression.text === "undefined") {
         return ReturnKind.Value;
     } else {
         return undefined;
@@ -105,36 +108,50 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Value;
     }
 
-    const contextual = isFunctionExpressionLike(node) ? tryGetReturnType(checker.getContextualType(node)) : undefined;
-    const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node));
+    const contextual = isFunctionExpressionLike(node) && node.type === undefined
+        ? tryGetReturnType(checker.getContextualType(node), checker)
+        : undefined;
+    const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node), checker);
 
-    if (returnType === undefined) {
+    if (returnType === undefined || isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
         return undefined;
-    } else if (Lint.isTypeFlagSet(returnType, ts.TypeFlags.Void)) {
+    }
+    if ((hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? isEffectivelyVoidPromise : isEffectivelyVoid)(returnType)) {
         return ReturnKind.Void;
-    } else if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)) {
-        // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
-        // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
-        const typeArguments = (returnType as ts.GenericType).typeArguments;
-        if (typeArguments !== undefined && typeArguments.length === 1) {
-            return Lint.isTypeFlagSet(typeArguments[0], ts.TypeFlags.Void) ? ReturnKind.Void : ReturnKind.Value;
-        }
     }
     return ReturnKind.Value;
+}
 
-    function tryGetReturnType(fnType: ts.Type | undefined): ts.Type | undefined {
-        if (fnType === undefined) {
-            return undefined;
-        }
+/** True for `void`, `undefined`, Promise<void>, or `void | undefined | Promise<void>`. */
+function isEffectivelyVoidPromise(type: ts.Type): boolean {
+    // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
+    // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
 
-        const sigs = checker.getSignaturesOfType(fnType, ts.SignatureKind.Call);
-        if (sigs.length !== 1) {
-            return undefined;
-        }
+    // tslint:disable-next-line no-bitwise
+    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+        isUnionType(type) && type.types.every(isEffectivelyVoidPromise) ||
+        isTypeReference(type) && type.typeArguments !== undefined && type.typeArguments.length === 1 &&
+            isEffectivelyVoidPromise(type.typeArguments[0]);
+}
 
-        const ret = checker.getReturnTypeOfSignature(sigs[0]);
-        return Lint.isTypeFlagSet(ret, ts.TypeFlags.Any) ? undefined : ret;
+/** True for `void`, `undefined`, or `void | undefined`. */
+function isEffectivelyVoid(type: ts.Type): boolean {
+    // tslint:disable-next-line no-bitwise
+    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+        isUnionType(type) && type.types.every(isEffectivelyVoid);
+}
+
+function tryGetReturnType(fnType: ts.Type | undefined, checker: ts.TypeChecker): ts.Type | undefined {
+    if (fnType === undefined) {
+        return undefined;
     }
+
+    const sigs = checker.getSignaturesOfType(fnType, ts.SignatureKind.Call);
+    if (sigs.length !== 1) {
+        return undefined;
+    }
+
+    return checker.getReturnTypeOfSignature(sigs[0]);
 }
 
 function isFunctionLike(node: ts.Node): node is FunctionLike {

@@ -1,0 +1,381 @@
+import { Foo } from './foo';
+import * as Bar from '.bar';
+import Baz from './baz';
+import Bas = require('./bas');
+{
+    const Foo = 'bar';
+          ~~~ [err % ('Foo')]
+    const Bar = Foo;
+          ~~~ [err % ('Bar')]
+    const Baz = Bar;
+          ~~~ [err % ('Baz')]
+    const Bas = Baz;
+          ~~~ [err % ('Bas')]
+}
+function letTesting() {
+    var a = 1;
+        ~ [err % ('a')]
+    let b = 1;
+
+    if (true) {
+        let a = 2; // failure
+            ~                 [err % ('a')]
+        let b = 2; // failure
+            ~                 [err % ('b')]
+        let c = 2;
+        var e = 2;
+    } else {
+        let b = 3; // failure
+            ~                 [err % ('b')]
+        let c = 3;
+        let e = 3; // failure
+            ~                 [err % ('e')]
+        let f = 3;
+            ~ [err % ('f')]
+    }
+
+    var f = 4;
+        ~ [err % ('f')]
+}
+
+let a = 1;
+if (true) {
+    let a = 2; // failure
+        ~                 [err % ('a')]
+}
+
+var g = 1;
+for (var index in [0, 1, 2]) {
+    let g = 2; // failure
+        ~                 [err % ('g')]
+}
+
+function constTesting() {
+    var h = 1;
+    const i = 1;
+
+    if (true) {
+        const h = 2; // failure
+              ~                 [err % ('h')]
+        const i = 2; // failure
+              ~                 [err % ('i')]
+    }
+}
+
+function testArguments(x: number, y: number): void {
+    var x = 1; // failure
+    let y = 2; // tsc error
+}
+
+let j = 1;
+for (var index in [0, 1, 2]) {
+    let j = 2; // failure
+        ~                 [err % ('j')]
+}
+
+function testTryStatement() {
+    try {
+        let foo = 1;
+        throw new Error();
+    } catch (e) {
+        let foo = 2;
+        var bar = 2;
+    } finally {
+        let foo = 3;
+        let bar = 3; // failure
+            ~~~                 [err % ('bar')]
+    }
+}
+
+function testWhileStatement() {
+    let foo = 1;
+
+    while (true) {
+        let foo = 2; // failure
+            ~~~                 [err % ('foo')]
+    }
+}
+
+function testDoStatement() {
+    let foo = 1;
+
+    do {
+        let foo = 2; // failure
+            ~~~                 [err % ('foo')]
+    } while (true);
+}
+
+function testDestructuring(x: number) {
+    var {y, z} = {y: 2, z: 3};
+
+    function myFunc() {
+        return [1];
+    }
+
+    function innerFunc() {
+        var [foo] = myFunc();
+        var [x] = myFunc();   // failure
+             ~                           [err % ('x')]
+        let [y] = myFunc();   // failure
+             ~                           [err % ('y')]
+        const [z] = myFunc(); // failure
+               ~                         [err % ('z')]
+    }
+
+    function anotherInnerFunc() {
+        var [{x}] = [{x: 1}];   // failure
+              ~                            [err % ('x')]
+        let [[y]] = [[2]];      // failure
+              ~                            [err % ('y')]
+        var [foo, ...bar] = [1, 2, 3, 4];
+        var [...z] = [1, 2, 3, 4]; // failure
+                ~                             [err % ('z')]
+    }
+}
+
+function falsePositive1(bar: (okay1: any) => void) {
+    let okay1 = 1;
+}
+
+function falsePositive2(okay2: any, done: (okay2: any) => void) { }
+
+interface FalsePositive3 {
+    diffuse: (pos: number) => number;
+    specular: (pos: number) => number;
+    pos: number;
+}
+
+interface FalsePositive4<T, TResult> {
+    (parameters: T, runSynchonous: boolean): TResult;
+    (parameters: T, callback: (error: Error, result: TResult) => void): void;
+}
+
+let p = 1;
+function testParameterDestructuring(
+    { pos: p }: FalsePositive3, // failure
+           ~                               [err % ('p')]
+    { pos: q, specular: r }: FalsePositive3,
+    { pos }: FalsePositive3
+) {
+    p = 2;
+    var q = 1; // merges with parameter, should use no-duplicate-variable to catch this
+
+    function someInnerFunc() {
+        let pos = 3; // failure
+            ~~~                 [err % ('pos')]
+    }
+}
+
+
+{
+    const simpleBlockVar = 3
+}
+
+function testSimpleBlockVar() {
+    const simpleBlockVar = 4
+}
+
+interface SeparateIndexeSighatures1 {
+    [separate: string]: any;
+}
+interface SeparateIndexeSighatures2 {
+    [separate: number]: any;
+}
+
+const external = 1;
+interface ExternalIndexSignature1 {
+    [external: string]: any;
+}
+interface ExternalIndexSignature2 {
+    [external: number]: any;
+}
+
+interface CombinedIndexeSighatures {
+    [i: string]: any;
+    [i: number]: any;
+}
+
+function constructorsWithArgs(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>): void {
+    // ...
+}
+
+function constructorsWithArgsConst(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>): void {
+    const args = [];
+}
+
+function constructorsWithArgsParamConst(
+    derivedCtor: new (...args: any[]) => any,
+    baseCtors: Array<new (...args: any[]) => any>,
+    args: any[]): void {
+    {
+        const args = [];
+              ~~~~       [err % ('args')]
+    }
+}
+
+class MyClass { };
+
+declare type MyConstructor = new (myVariable: any) => MyClass;
+declare type MyFunction = (myParameter: any) => boolean;
+
+function creatorFunction(constructor: MyConstructor, filter: MyFunction): void {
+    const myVariable = 1;
+    const myParameter = 1;
+    console.log(myVariable);
+}
+
+for (let i = 0; i < 3; i++) {
+    let i = 34;
+        ~       [err % ('i')]
+}
+
+(function f1() {
+    let f1;
+        ~~ [err % ('f1')]
+})();
+function f2() {
+    const f2 = 0;
+          ~~ [err % ('f2')]
+}
+(function f3() {
+    var f3;
+        ~~ [err % ('f3')]
+})();
+(function f4(f4) {
+             ~~ [err % ('f4')]
+})();
+let f5;
+(function f5(){})()
+          ~~ [err % ('f5')]
+
+class C<C> {
+        ~ [err % ('C')]
+    C<C>(C: C): C {
+      ~ [err % ('C')]
+         ~ [err % ('C')]
+        type C = C;
+             ~ [err % ('C')]
+        namespace C {
+                  ~ [err % ('C')]
+            interface C<C> {}
+                      ~ [err % ('C')]
+                        ~ [err % ('C')]
+        }
+    }
+}
+
+// allow nested namespaces
+namespace ns.C {}
+namespace ns {
+    export namespace C {}
+                     ~ [err % ('C')]
+}
+namespace ns {
+    namespace C {}
+              ~ [err % ('C')]
+}
+
+type Mapped<K, T> = {
+    [K in T]: K
+     ~ [err % ('K')]
+}
+
+// Allow parameters in signatures
+{
+    let param;
+    class TestClass {
+        myMethod(param): void;
+        myMethod(): void;
+        myMethod(param): void {}
+                 ~~~~~ [err % ('param')]
+    }
+    interface TestInterface {
+        (param): void;
+        myMethod(param): void
+        myMethod<param>(): void;
+                 ~~~~~ [err % ('param')]
+    }
+}
+
+// Handle variables in multiple child scopes
+{
+    {
+        {
+            let test;
+                ~~~~ [err % ('test')]
+        }
+        let test;
+            ~~~~ [err % ('test')]
+        {
+            let test;
+                ~~~~ [err % ('test')]
+        }
+    }
+    {
+        let test;
+            ~~~~ [err % ('test')]
+    }
+    let test;
+}
+
+// Allow mergeable declarations.
+interface I {}
+interface I {}
+
+// Exempt 'this'
+function f(this): void {
+    function inner(this): void {}
+}
+
+@decorator((param) => param)
+function funxion(param) {}
+
+class Clazz<T> {
+    static method<T>() {}
+    static prop = <T>() => {}
+    method<T>() {}
+           ~ [err % ('T')]
+    prop = <T>() => {}
+            ~ [err % ('T')]
+    constructor() {
+        class Inner<T> {
+                    ~ [err % ('T')]
+            static method<T>() {}
+                          ~ [err % ('T')]
+            static prop = <T>() => {}
+                           ~ [err % ('T')]
+        }
+    }
+}
+
+export default function (
+    paramA = function() {let paramB},
+                             ~~~~~~ [err % ('paramB')]
+    paramB,
+) {}
+
+// allow IndexSignature names
+function baz(param: {[baz: string]: string}) {}
+
+// no error INSIDE ambient namespaces and module
+declare global {
+    function baz(): void;
+}
+declare module "foo" {
+    class Clazz {}
+}
+declare namespace MyNamespaceName {
+    interface I {}
+}
+
+{
+    let MyNamespaceName; // still check names of declare namespace
+        ~~~~~~~~~~~~~~~ [err % ('MyNamespaceName')]
+    let global; // don't treat `declare global` as variable
+}
+
+[err]: Shadowed name: '%s'

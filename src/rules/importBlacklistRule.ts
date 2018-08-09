@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -49,43 +49,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ImportBlacklistWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
     }
 }
 
-class ImportBlacklistWalker extends Lint.RuleWalker {
-    public visitCallExpression(node: ts.CallExpression) {
-        if (node.expression.kind === ts.SyntaxKind.Identifier &&
-            (node.expression as ts.Identifier).text === "require" &&
-            node.arguments !== undefined &&
-            node.arguments.length === 1) {
-
-            this.checkForBannedImport(node.arguments[0]);
-        }
-        super.visitCallExpression(node);
-    }
-
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        if (utils.isExternalModuleReference(node.moduleReference) &&
-            node.moduleReference.expression !== undefined) {
-            // If it's an import require and not an import alias
-            this.checkForBannedImport(node.moduleReference.expression);
-        }
-        super.visitImportEqualsDeclaration(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        this.checkForBannedImport(node.moduleSpecifier);
-        super.visitImportDeclaration(node);
-    }
-
-    private checkForBannedImport(expression: ts.Expression) {
-        if (utils.isTextualLiteral(expression) && this.hasOption(expression.text)) {
-            this.addFailureFromStartToEnd(
-                expression.getStart(this.getSourceFile()) + 1,
-                expression.getEnd() - 1,
-                Rule.FAILURE_STRING,
-            );
+function walk(ctx: Lint.WalkContext<string[]>) {
+    for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
+        if (ctx.options.indexOf(name.text) !== -1) {
+            ctx.addFailure(name.getStart(ctx.sourceFile) + 1, name.end - 1, Rule.FAILURE_STRING);
         }
     }
 }

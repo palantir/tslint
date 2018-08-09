@@ -17,6 +17,7 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
+import { dedent } from "../../src/utils";
 import { IFormatter, TestUtils } from "../lint";
 import { createFailure } from "./utils";
 
@@ -45,11 +46,13 @@ describe("Stylish Formatter", () => {
 
         const maxPositionTuple = `${maxPositionObj.line + 1}:${maxPositionObj.character + 1}`;
 
-        const expectedResult = "formatters/stylishFormatter.test.ts" + "\n" +
-            "\u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[33mfirst failure\u001b[39m" + "\n" +
-            "\u001b[31mERROR: 1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[33m&<>'\" should be escaped\u001b[39m" + "\n" +
-            `\u001b[31mERROR: ${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m` + "\n" +
-            "\u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[33mfull failure\u001b[39m" + "\n";
+        const expectedResult = dedent`
+            formatters/stylishFormatter.test.ts\u001b[8m:1:1\u001b[28m
+            \u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[33mfirst failure\u001b[39m
+            \u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[33mfull failure\u001b[39m
+            \u001b[31mERROR: 1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[33m&<>'\" should be escaped\u001b[39m
+            \u001b[31mERROR: ${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m\n`
+            .slice(1); // remove leading newline
 
         assert.equal(formatter.format(failures), expectedResult);
     });

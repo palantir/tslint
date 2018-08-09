@@ -17,13 +17,13 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../rule/rule";
-import {RuleWalker} from "./ruleWalker";
+import { IOptions } from "../rule/rule";
+import { RuleWalker } from "./ruleWalker";
 
 export class ProgramAwareRuleWalker extends RuleWalker {
-    private typeChecker: ts.TypeChecker;
+    private readonly typeChecker: ts.TypeChecker;
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions, private program: ts.Program) {
+    constructor(sourceFile: ts.SourceFile, options: IOptions, private readonly program: ts.Program) {
         super(sourceFile, options);
 
         this.typeChecker = program.getTypeChecker();

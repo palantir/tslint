@@ -3,8 +3,17 @@ class {
     ~~~~~~ [0]
     public constructor() {}
     ~~~~~~ [0]
-    public get y() {}
+    public/*some comment*/ get y() {}
     ~~~~~~ [0]
+    public() {}
+    constructor(public readonly param : number) {}
+                ~~~~~~ [0]
+    public constructor(public readonly param : number) {}
+    ~~~~~~ [0]         
+                       ~~~~~~ [0]
+    constructor(private readonly paramPrivate : number, protected readonly paramProtected : number, readonly paramReadonly : number) {}
+
+    constructor(public necessaryPublic : number) {}
 }
 
 [0]: 'public' is implicit.

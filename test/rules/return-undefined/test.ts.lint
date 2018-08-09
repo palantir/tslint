@@ -1,3 +1,6 @@
+class Promise<T> {
+    then(): Promise<T>;
+}
 function valueWrong(): number | undefined {
     return;
     ~~~~~~~ [UNDEFINED]
@@ -39,12 +42,16 @@ takesAnyCb(() => { return; });
 takesAnyCb(() => { return undefined; });
 takesAnyCb(() => {
     if (1 === 2) return;
-                 ~~~~~~~ [UNDEFINED]
     else return 1;
 });
 takesAnyCb(() => {
     if (1 === 2) return;
     else return undefined;
+});
+takesAnyCb((): void => {
+    if (1 === 2) return;
+    else return undefined;
+         ~~~~~~~~~~~~~~~~~ [VOID]
 });
 
 async function promiseVoid(): Promise<void> {
@@ -58,6 +65,18 @@ async function promiseValue(): Promise<number | undefined> {
     else return;
          ~~~~~~~ [UNDEFINED]
 }
+
+declare function f<T>(action: () => T | undefined): void;
+f(() => { return undefined; });
+          ~~~~~~~~~~~~~~~~~ [VOID]
+
+declare function test(cb: () => Promise<void> | void): void;
+
+test(async () => {
+    if (1 === 2) return;
+    else return undefined;
+         ~~~~~~~~~~~~~~~~~ [VOID]
+});
 
 [VOID]: `void` function should use `return;`, not `return undefined;`.
 [UNDEFINED]: Value-returning function should use `return undefined;`, not just `return;`.

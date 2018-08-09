@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "type-literal-delimiter": [
+      true,
+      {
+        "singleLine": "always"
+      }
+    ]
+  }
+}

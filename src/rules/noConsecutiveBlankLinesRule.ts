@@ -28,13 +28,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-consecutive-blank-lines",
         description: "Disallows one or more blank lines in a row.",
         hasFix: true,
-        rationale: "Helps maintain a readable style in your codebase.",
+        rationale: Lint.Utils.dedent`
+            Helps maintain a readable style in your codebase.
+
+            Extra blank lines take up extra space and add little to a semantic understanding of the code.
+            It can be harder to read through files when fewer components can fit into the screen.
+            If you find a file is so large you feel a need to split them up with extra blank lines or comments,
+            consider splitting your file into smaller files.
+        `,
         optionsDescription: Lint.Utils.dedent`
             An optional number of maximum allowed sequential blanks can be specified. If no value
-            is provided, a default of $(Rule.DEFAULT_ALLOWED_BLANKS) will be used.`,
+            is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_ALLOWED_BLANKS)",
+            minimum: "1",
         },
         optionExamples: [true, [true, 2]],
         type: "style",
@@ -53,12 +60,12 @@ export class Rule extends Lint.Rules.AbstractRule {
      */
     public isEnabled(): boolean {
         const option = this.ruleArguments[0] as number | undefined;
-        return super.isEnabled() && (!option || option > 0);
+        return super.isEnabled() && (option === undefined || option > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit = this.ruleArguments[0] as number | undefined || Rule.DEFAULT_ALLOWED_BLANKS;
-        return this.applyWithFunction(sourceFile, walk, limit);
+        const limit = this.ruleArguments[0] as number | undefined;
+        return this.applyWithFunction(sourceFile, walk, limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS);
     }
 }
 

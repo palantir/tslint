@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {AbstractFormatter} from "../language/formatter/abstractFormatter";
-import {IFormatterMetadata} from "../language/formatter/formatter";
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 export class Formatter extends AbstractFormatter {
@@ -31,9 +31,8 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-
-        return this.mapToMessages(failures)
-            .join("\n") + "\n";
+        failures = this.sortFailures(failures);
+        return `${this.mapToMessages(failures).join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
@@ -43,7 +42,7 @@ export class Formatter extends AbstractFormatter {
             const ruleName = failure.getRuleName();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const positionTuple = "[" + (lineAndCharacter.line + 1) + ", " + (lineAndCharacter.character + 1) + "]";
+            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
 
             return `${failure.getRuleSeverity().toUpperCase()}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });

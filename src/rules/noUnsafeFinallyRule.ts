@@ -101,7 +101,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
                 break;
 
             case ts.SyntaxKind.SwitchStatement:
-                if (jump.kind === ts.SyntaxKind.BreakStatement && !label) {
+                if (jump.kind === ts.SyntaxKind.BreakStatement && label === undefined) {
                     return true;
                 }
                 break;
@@ -111,14 +111,14 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
             case ts.SyntaxKind.ForStatement:
             case ts.SyntaxKind.WhileStatement:
             case ts.SyntaxKind.DoStatement:
-                if (isBreakOrContinue && !label) {
+                if (isBreakOrContinue && label === undefined) {
                     return true;
                 }
                 break;
 
             case ts.SyntaxKind.LabeledStatement: {
                 const { text } = (parent as ts.LabeledStatement).label;
-                if (label && label.text === text) {
+                if (label !== undefined && label.text === text) {
                     return true;
                 }
                 break;

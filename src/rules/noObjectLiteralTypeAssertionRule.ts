@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isAssertionExpression, isObjectLiteralExpression, isParenthesizedExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,11 +24,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-object-literal-type-assertion",
-        description: "Forbids an object literal to appear in a type assertion expression.",
+        description: Lint.Utils.dedent`
+            Forbids an object literal to appear in a type assertion expression.
+            Casting to \`any\` is still allowed.`,
         rationale: Lint.Utils.dedent`
             Always prefer \`const x: T = { ... };\` to \`const x = { ... } as T;\`.
             The type assertion in the latter case is either unnecessary or hides an error.
-            \`const x: { foo: number } = {}\` will fail, but \`const x = {} as { foo: number }\` succeeds.`,
+            The compiler will warn for excess properties with this syntax, but not missing required fields.
+            For example: \`const x: { foo: number } = {}\` will fail to compile, but
+            \`const x = {} as { foo: number }\` will succeed.`,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -36,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type assertion applied to object literal.";
+    public static FAILURE_STRING = "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -45,30 +50,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isTypeAssertionLike(node) && isObjectLiteral(node.expression)) {
+        if (isAssertionExpression(node) && node.type.kind !== ts.SyntaxKind.AnyKeyword &&
+            isObjectLiteralExpression(isParenthesizedExpression(node.expression) ? node.expression.expression : node.expression)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function isTypeAssertionLike(node: ts.Node): node is ts.TypeAssertion | ts.AsExpression {
-    switch (node.kind) {
-        case ts.SyntaxKind.TypeAssertionExpression:
-        case ts.SyntaxKind.AsExpression:
-            return true;
-        default:
-            return false;
-    }
-}
-
-function isObjectLiteral(node: ts.Expression): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.ParenthesizedExpression:
-            return isObjectLiteral((node as ts.ParenthesizedExpression).expression);
-        case ts.SyntaxKind.ObjectLiteralExpression:
-            return true;
-        default:
-            return false;
-    }
 }

@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// tslint:disable object-literal-sort-keys
+
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
@@ -25,238 +27,326 @@ const OPTION_DECL = "check-decl";
 const OPTION_OPERATOR = "check-operator";
 const OPTION_MODULE = "check-module";
 const OPTION_SEPARATOR = "check-separator";
+const OPTION_REST_SPREAD = "check-rest-spread";
 const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
+const OPTION_TYPE_OPERATOR = "check-type-operator";
 const OPTION_PREBLOCK = "check-preblock";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "whitespace",
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Eight arguments may be optionally provided:
+            Ten arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
             * \`"check-operator"\` checks for whitespace around operator tokens.
             * \`"check-module"\` checks for whitespace in import & export statements.
             * \`"check-separator"\` checks for whitespace after separator tokens (\`,\`/\`;\`).
+            * \`"check-rest-spread"\` checks that there is no whitespace after rest/spread operator (\`...\`).
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
+            * \`"check-type-operator"\` checks for whitespace between type operators \`|\` and \`&\`.
             * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
         options: {
             type: "array",
             items: {
                 type: "string",
-                enum: ["check-branch", "check-decl", "check-operator", "check-module",
-                       "check-separator", "check-type", "check-typecast", "check-preblock"],
+                enum: [
+                    "check-branch", "check-decl", "check-operator", "check-module", "check-separator",
+                    "check-rest-spread", "check-type", "check-typecast", "check-type-operator", "check-preblock",
+                ],
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 10,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
         typescriptOnly: false,
+        hasFix: true,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "missing whitespace";
+    public static FAILURE_STRING_MISSING = "missing whitespace";
+    public static FAILURE_STRING_INVALID = "invalid whitespace";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new WhitespaceWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-class WhitespaceWalker extends Lint.RuleWalker {
-    private scanner: ts.Scanner;
+type Options = Record<
+    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
+    boolean>;
 
-    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
-        super(sourceFile, options);
-        this.scanner = ts.createScanner(ts.ScriptTarget.ES5, false, ts.LanguageVariant.Standard, sourceFile.text);
+function parseOptions(ruleArguments: string[]): Options {
+    return {
+        branch: has(OPTION_BRANCH),
+        decl: has(OPTION_DECL),
+        operator: has(OPTION_OPERATOR),
+        module: has(OPTION_MODULE),
+        separator: has(OPTION_SEPARATOR),
+        restSpread: has(OPTION_REST_SPREAD),
+        type: has(OPTION_TYPE),
+        typecast: has(OPTION_TYPECAST),
+        typeOperator: has(OPTION_TYPE_OPERATOR),
+        preblock: has(OPTION_PREBLOCK),
+    };
+
+    function has(option: string): boolean {
+        return ruleArguments.indexOf(option) !== -1;
     }
+}
 
-    public visitSourceFile(node: ts.SourceFile) {
-        super.visitSourceFile(node);
+function walk(ctx: Lint.WalkContext<Options>) {
+    const { sourceFile, options } = ctx;
 
-        let prevTokenShouldBeFollowedByWhitespace = false;
-        utils.forEachTokenWithTrivia(node, (_text, tokenKind, range, parent) => {
-            if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
-                tokenKind === ts.SyntaxKind.NewLineTrivia ||
-                tokenKind === ts.SyntaxKind.EndOfFileToken) {
+    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ArrowFunction:
+                checkEqualsGreaterThanTokenInNode(node);
+                break;
 
-                prevTokenShouldBeFollowedByWhitespace = false;
-                return;
-            } else if (prevTokenShouldBeFollowedByWhitespace) {
-                this.addMissingWhitespaceErrorAt(range.pos);
-                prevTokenShouldBeFollowedByWhitespace = false;
-            }
-            // check for trailing space after the given tokens
-            switch (tokenKind) {
-                case ts.SyntaxKind.CatchKeyword:
-                case ts.SyntaxKind.ForKeyword:
-                case ts.SyntaxKind.IfKeyword:
-                case ts.SyntaxKind.SwitchKeyword:
-                case ts.SyntaxKind.WhileKeyword:
-                case ts.SyntaxKind.WithKeyword:
-                    if (this.hasOption(OPTION_BRANCH)) {
-                        prevTokenShouldBeFollowedByWhitespace = true;
-                    }
-                    break;
-                case ts.SyntaxKind.CommaToken:
-                case ts.SyntaxKind.SemicolonToken:
-                    if (this.hasOption(OPTION_SEPARATOR)) {
-                        prevTokenShouldBeFollowedByWhitespace = true;
-                    }
-                    break;
-                case ts.SyntaxKind.EqualsToken:
-                    if (this.hasOption(OPTION_DECL) && parent.kind !== ts.SyntaxKind.JsxAttribute) {
-                        prevTokenShouldBeFollowedByWhitespace = true;
-                    }
-                    break;
-                case ts.SyntaxKind.ColonToken:
-                    if (this.hasOption(OPTION_TYPE)) {
-                        prevTokenShouldBeFollowedByWhitespace = true;
-                    }
-                    break;
-                case ts.SyntaxKind.ImportKeyword:
-                case ts.SyntaxKind.ExportKeyword:
-                case ts.SyntaxKind.FromKeyword:
-                    if (this.hasOption(OPTION_MODULE)) {
-                        prevTokenShouldBeFollowedByWhitespace = true;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-    }
-
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        this.checkEqualsGreaterThanTokenInNode(node);
-        super.visitArrowFunction(node);
-    }
-
-    // check for spaces between the operator symbol (except in the case of comma statements)
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        if (this.hasOption(OPTION_OPERATOR) && node.operatorToken.kind !== ts.SyntaxKind.CommaToken) {
-            this.checkForTrailingWhitespace(node.left.getEnd());
-            this.checkForTrailingWhitespace(node.right.getFullStart());
-        }
-        super.visitBinaryExpression(node);
-    }
-
-    protected visitBlock(block: ts.Block) {
-        if (this.hasOption(OPTION_PREBLOCK)) {
-            this.checkForTrailingWhitespace(block.getFullStart());
-        }
-        super.visitBlock(block);
-    }
-
-    // check for spaces between ternary operator symbols
-    public visitConditionalExpression(node: ts.ConditionalExpression) {
-        if (this.hasOption(OPTION_OPERATOR)) {
-            this.checkForTrailingWhitespace(node.condition.getEnd());
-            this.checkForTrailingWhitespace(node.whenTrue.getFullStart());
-            this.checkForTrailingWhitespace(node.whenTrue.getEnd());
-        }
-        super.visitConditionalExpression(node);
-    }
-
-    public visitConstructorType(node: ts.FunctionOrConstructorTypeNode) {
-        this.checkEqualsGreaterThanTokenInNode(node);
-        super.visitConstructorType(node);
-    }
-
-    public visitExportAssignment(node: ts.ExportAssignment) {
-        if (this.hasOption(OPTION_MODULE)) {
-            const exportKeyword = node.getChildAt(0);
-            const position = exportKeyword.getEnd();
-            this.checkForTrailingWhitespace(position);
-        }
-        super.visitExportAssignment(node);
-    }
-
-    public visitFunctionType(node: ts.FunctionOrConstructorTypeNode) {
-        this.checkEqualsGreaterThanTokenInNode(node);
-        super.visitFunctionType(node);
-    }
-
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        const importClause = node.importClause;
-        if (this.hasOption(OPTION_MODULE) && importClause != null) {
-            // an import clause can have _both_ named bindings and a name (the latter for the default import)
-            // but the named bindings always come last, so we only need to check that for whitespace
-            let position: number | undefined;
-            if (importClause.namedBindings !== undefined) {
-                position = importClause.namedBindings.getEnd();
-            } else if (importClause.name !== undefined) {
-                position = importClause.name.getEnd();
+            // check for spaces between the operator symbol (except in the case of comma statements)
+            case ts.SyntaxKind.BinaryExpression: {
+                const { left, operatorToken, right } = node as ts.BinaryExpression;
+                if (options.operator && operatorToken.kind !== ts.SyntaxKind.CommaToken) {
+                    checkForTrailingWhitespace(left.getEnd());
+                    checkForTrailingWhitespace(right.getFullStart());
+                }
+                break;
             }
 
-            if (position !== undefined) {
-                this.checkForTrailingWhitespace(position);
+            case ts.SyntaxKind.Block:
+                if (options.preblock) {
+                    checkForTrailingWhitespace(node.getFullStart());
+                }
+                break;
+
+            // check for spaces between ternary operator symbols
+            case ts.SyntaxKind.ConditionalExpression:
+                if (options.operator) {
+                    const { condition, whenTrue } = node as ts.ConditionalExpression;
+                    checkForTrailingWhitespace(condition.getEnd());
+                    checkForTrailingWhitespace(whenTrue.getFullStart());
+                    checkForTrailingWhitespace(whenTrue.getEnd());
+                }
+                break;
+
+            case ts.SyntaxKind.ConstructorType:
+                checkEqualsGreaterThanTokenInNode(node);
+                break;
+
+            case ts.SyntaxKind.ExportAssignment:
+                if (options.module) {
+                    const exportKeyword = node.getChildAt(0);
+                    const position = exportKeyword.getEnd();
+                    checkForTrailingWhitespace(position);
+                }
+                break;
+
+            case ts.SyntaxKind.FunctionType:
+                checkEqualsGreaterThanTokenInNode(node);
+                break;
+
+            case ts.SyntaxKind.ImportDeclaration: {
+                const { importClause } = node as ts.ImportDeclaration;
+                if (options.module && importClause !== undefined) {
+                    // an import clause can have _both_ named bindings and a name (the latter for the default import)
+                    // but the named bindings always come last, so we only need to check that for whitespace
+                    let position: number | undefined;
+                    const { namedBindings } = importClause;
+                    if (namedBindings !== undefined) {
+                        if (namedBindings.kind !== ts.SyntaxKind.NamespaceImport) {
+                            namedBindings.elements.forEach((element, idx, arr) => {
+                                const internalName = element.name;
+                                if (internalName !== undefined) {
+                                    if (idx === arr.length - 1) {
+                                        const token = namedBindings.getLastToken();
+                                        checkForTrailingWhitespace(token.getFullStart());
+                                    }
+                                    if (idx === 0) {
+                                        const startPos = internalName.getStart() - 1;
+                                        checkForTrailingWhitespace(startPos, startPos + 1);
+                                    }
+                                }
+                            });
+                        }
+                        position = namedBindings.getEnd();
+                    } else if (importClause.name !== undefined) {
+                        position = importClause.name.getEnd();
+                    }
+
+                    if (position !== undefined) {
+                        checkForTrailingWhitespace(position);
+                    }
+                }
+                break;
             }
-        }
-        super.visitImportDeclaration(node);
-    }
 
-    public visitImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        if (this.hasOption(OPTION_MODULE)) {
-            const position = node.name.getEnd();
-            this.checkForTrailingWhitespace(position);
-        }
-        super.visitImportEqualsDeclaration(node);
-    }
+            case ts.SyntaxKind.ImportEqualsDeclaration:
+                if (options.module) {
+                    const position = (node as ts.ImportEqualsDeclaration).name.getEnd();
+                    checkForTrailingWhitespace(position);
+                }
+                break;
 
-    public visitTypeAssertionExpression(node: ts.TypeAssertion) {
-        if (this.hasOption(OPTION_TYPECAST)) {
-            const position = node.expression.getFullStart();
-            this.checkForTrailingWhitespace(position);
-        }
-        super.visitTypeAssertionExpression(node);
-    }
+            case ts.SyntaxKind.TypeAssertionExpression:
+                if (options.typecast) {
+                    const position = (node as ts.TypeAssertion).expression.getFullStart();
+                    checkForTrailingWhitespace(position);
+                }
+                break;
 
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
-        if (this.hasOption(OPTION_DECL) && node.initializer != null) {
-            if (node.type != null) {
-                this.checkForTrailingWhitespace(node.type.getEnd());
-            } else {
-                this.checkForTrailingWhitespace(node.name.getEnd());
-            }
-        }
-        super.visitVariableDeclaration(node);
-    }
+            case ts.SyntaxKind.VariableDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
+                const { name, type, initializer } = node as ts.VariableDeclaration;
+                if (options.decl && initializer !== undefined) {
+                    checkForTrailingWhitespace((type !== undefined ? type : name).getEnd());
+                }
+                break;
 
-    private checkEqualsGreaterThanTokenInNode(node: ts.Node) {
-        if (!this.hasOption(OPTION_OPERATOR)) {
+            case ts.SyntaxKind.BindingElement:
+            case ts.SyntaxKind.Parameter:
+                const { dotDotDotToken } = node as ts.BindingElement | ts.ParameterDeclaration;
+                if (options.restSpread && dotDotDotToken !== undefined) {
+                    checkForExcessiveWhitespace(dotDotDotToken.end);
+                }
+                break;
+
+            case ts.SyntaxKind.SpreadAssignment:
+            case ts.SyntaxKind.SpreadElement:
+                if (options.restSpread) {
+                    const position = (node as ts.SpreadAssignment).expression.getFullStart();
+                    checkForExcessiveWhitespace(position);
+                }
+                break;
+
+            case ts.SyntaxKind.UnionType:
+            case ts.SyntaxKind.IntersectionType:
+                if (options.typeOperator) {
+                    const { types } = node as ts.UnionOrIntersectionTypeNode;
+                    types.forEach((typeNode, index) => {
+                        if (index > 0) {
+                            checkForTrailingWhitespace(typeNode.getFullStart());
+                        }
+                        if (index < types.length - 1) {
+                            checkForTrailingWhitespace(typeNode.getEnd());
+                        }
+                    });
+                }
+        }
+
+        ts.forEachChild(node, cb);
+    });
+
+    let prevTokenShouldBeFollowedByWhitespace = false;
+    utils.forEachTokenWithTrivia(sourceFile, (_text, tokenKind, range, parent) => {
+        if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
+            tokenKind === ts.SyntaxKind.NewLineTrivia ||
+            tokenKind === ts.SyntaxKind.EndOfFileToken) {
+
+            prevTokenShouldBeFollowedByWhitespace = false;
+            return;
+        } else if (prevTokenShouldBeFollowedByWhitespace) {
+            addMissingWhitespaceErrorAt(range.pos);
+            prevTokenShouldBeFollowedByWhitespace = false;
+        }
+        // check for trailing space after the given tokens
+        switch (tokenKind) {
+            case ts.SyntaxKind.CatchKeyword:
+            case ts.SyntaxKind.ForKeyword:
+            case ts.SyntaxKind.IfKeyword:
+            case ts.SyntaxKind.SwitchKeyword:
+            case ts.SyntaxKind.WhileKeyword:
+            case ts.SyntaxKind.WithKeyword:
+                if (options.branch) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.CommaToken:
+                if (options.separator) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.SemicolonToken:
+                if (!options.separator) {
+                    break;
+                }
+
+                const nextPosition = range.pos + 1;
+                const semicolonInTrivialFor = parent.kind === ts.SyntaxKind.ForStatement &&
+                    nextPosition !== sourceFile.end &&
+                    (sourceFile.text[nextPosition] === ";" || sourceFile.text[nextPosition] === ")");
+
+                if (!semicolonInTrivialFor) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.EqualsToken:
+                if (options.decl && parent.kind !== ts.SyntaxKind.JsxAttribute) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.ColonToken:
+                if (options.type) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+                break;
+            case ts.SyntaxKind.ImportKeyword:
+                if (parent.kind === ts.SyntaxKind.CallExpression &&
+                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword) {
+                    return; // Don't check ImportCall
+                }
+            // falls through
+            case ts.SyntaxKind.ExportKeyword:
+            case ts.SyntaxKind.FromKeyword:
+                if (options.typecast) {
+                    prevTokenShouldBeFollowedByWhitespace = true;
+                }
+        }
+    });
+
+    function checkEqualsGreaterThanTokenInNode(node: ts.Node): void {
+        if (!options.operator) {
             return;
         }
 
-        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+        const equalsGreaterThanToken = utils.getChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken, sourceFile);
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {
             return;
         }
 
-        this.checkForTrailingWhitespace(equalsGreaterThanToken.getFullStart());
-        this.checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
+        checkForTrailingWhitespace(equalsGreaterThanToken.getFullStart());
+        checkForTrailingWhitespace(equalsGreaterThanToken.getEnd());
     }
 
-    private checkForTrailingWhitespace(position: number) {
-        this.scanner.setTextPos(position);
-        const nextTokenType = this.scanner.scan();
-
-        if (nextTokenType !== ts.SyntaxKind.WhitespaceTrivia
-                && nextTokenType !== ts.SyntaxKind.NewLineTrivia
-                && nextTokenType !== ts.SyntaxKind.EndOfFileToken) {
-            this.addMissingWhitespaceErrorAt(position);
+    function checkForTrailingWhitespace(position: number, whiteSpacePos: number = position): void {
+        if (position !== sourceFile.end && !Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+            addMissingWhitespaceErrorAt(whiteSpacePos);
         }
     }
 
-    private addMissingWhitespaceErrorAt(position: number) {
-        const fix = this.appendText(position, " ");
-        this.addFailureAt(position, 1, Rule.FAILURE_STRING, fix);
+    function addMissingWhitespaceErrorAt(position: number): void {
+        // TODO: this rule occasionally adds duplicate failures.
+        if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
+            return;
+        }
+        const fix = Lint.Replacement.appendText(position, " ");
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_MISSING, fix);
+    }
+
+    function checkForExcessiveWhitespace(position: number): void {
+        if (position !== sourceFile.end && Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+            addInvalidWhitespaceErrorAt(position);
+        }
+    }
+
+    function addInvalidWhitespaceErrorAt(position: number): void {
+        const fix = Lint.Replacement.deleteText(position, 1);
+        ctx.addFailureAt(position, 1, Rule.FAILURE_STRING_INVALID, fix);
     }
 }

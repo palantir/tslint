@@ -19,6 +19,38 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/typedef.examples";
+
+interface Options {
+    "call-signature"?: boolean;
+    "arrow-call-signature"?: boolean;
+    parameter?: boolean;
+    "arrow-parameter"?: boolean;
+    "property-declaration"?: boolean;
+    "variable-declaration"?: boolean;
+    "member-variable-declaration"?: boolean;
+    "object-destructuring"?: boolean;
+    "array-destructuring"?: boolean;
+}
+type Option = keyof Options;
+
+const OPTION_CALL_SIGNATURE: Option = "call-signature";
+const OPTION_ARROW_CALL_SIGNATURE: Option = "arrow-call-signature";
+const OPTION_PARAMETER: Option = "parameter";
+const OPTION_ARROW_PARAMETER: Option = "arrow-parameter";
+const OPTION_PROPERTY_DECLARATION: Option = "property-declaration";
+const OPTION_VARIABLE_DECLARATION: Option = "variable-declaration";
+const OPTION_MEMBER_VARIABLE_DECLARATION: Option = "member-variable-declaration";
+const OPTION_OBJECT_DESTRUCTURING: Option = "object-destructuring";
+const OPTION_ARRAY_DESTRUCTURING: Option = "array-destructuring";
+
+function parseOptions(ruleArguments: Option[]) {
+    const options: Options = {};
+    for (const arg of ruleArguments) {
+        options[arg] = true;
+    }
+    return options;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,238 +60,161 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Several arguments may be optionally provided:
 
-            * \`"call-signature"\` checks return type of functions.
-            * \`"arrow-call-signature"\` checks return type of arrow functions.
-            * \`"parameter"\` checks type specifier of function parameters for non-arrow functions.
-            * \`"arrow-parameter"\` checks type specifier of function parameters for arrow functions.
-            * \`"property-declaration"\` checks return types of interface properties.
-            * \`"variable-declaration"\` checks non-binding variable declarations.
-            * \`"member-variable-declaration"\` checks member variable declarations.
-            * \`"object-destructuring"\` checks object destructuring declarations.
-            * \`"array-destructuring"\` checks array destructuring declarations.`,
+            * \`"${OPTION_CALL_SIGNATURE}"\` checks return type of functions.
+            * \`"${OPTION_ARROW_CALL_SIGNATURE}"\` checks return type of arrow functions.
+            * \`"${OPTION_PARAMETER}"\` checks type specifier of function parameters for non-arrow functions.
+            * \`"${OPTION_ARROW_PARAMETER}"\` checks type specifier of function parameters for arrow functions.
+            * \`"${OPTION_PROPERTY_DECLARATION}"\` checks return types of interface properties.
+            * \`"${OPTION_VARIABLE_DECLARATION}"\` checks non-binding variable declarations.
+            * \`"${OPTION_MEMBER_VARIABLE_DECLARATION}"\` checks member variable declarations.
+            * \`"${OPTION_OBJECT_DESTRUCTURING}"\` checks object destructuring declarations.
+            * \`"${OPTION_ARRAY_DESTRUCTURING}"\` checks array destructuring declarations.`,
         options: {
             type: "array",
             items: {
                 type: "string",
                 enum: [
-                    "call-signature",
-                    "arrow-call-signature",
-                    "parameter",
-                    "arrow-parameter",
-                    "property-declaration",
-                    "variable-declaration",
-                    "member-variable-declaration",
-                    "object-destructuring",
-                    "array-destructuring",
+                    OPTION_CALL_SIGNATURE,
+                    OPTION_ARROW_CALL_SIGNATURE,
+                    OPTION_PARAMETER,
+                    OPTION_ARROW_PARAMETER,
+                    OPTION_PROPERTY_DECLARATION,
+                    OPTION_VARIABLE_DECLARATION,
+                    OPTION_MEMBER_VARIABLE_DECLARATION,
+                    OPTION_OBJECT_DESTRUCTURING,
+                    OPTION_ARRAY_DESTRUCTURING,
                 ],
             },
             minLength: 0,
             maxLength: 7,
         },
-        optionExamples: [[true, "call-signature", "parameter", "member-variable-declaration"]],
+        optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "missing type declaration";
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new TypedefWalker(sourceFile, this.getOptions()));
+        return this.applyWithWalker(new TypedefWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
     }
 }
 
-class TypedefWalker extends Lint.RuleWalker {
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.handleCallSignature(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.handleCallSignature(node);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        const location = (node.parameters != null) ? node.parameters.end : null;
-
-        if (location != null
-            && node.parent !== undefined
-            && node.parent.kind !== ts.SyntaxKind.CallExpression
-            && !isTypedPropertyDeclaration(node.parent)) {
-
-            this.checkTypeAnnotation("arrow-call-signature", location, node.type, node.name);
-        }
-        super.visitArrowFunction(node);
-    }
-
-    public visitGetAccessor(node: ts.AccessorDeclaration) {
-        this.handleCallSignature(node);
-        super.visitGetAccessor(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.handleCallSignature(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitMethodSignature(node: ts.SignatureDeclaration) {
-        this.handleCallSignature(node);
-        super.visitMethodSignature(node);
-    }
-
-    public visitObjectLiteralExpression(node: ts.ObjectLiteralExpression) {
-        for (const property of node.properties) {
-            switch (property.kind) {
-                case ts.SyntaxKind.PropertyAssignment:
-                    this.visitPropertyAssignment(property as ts.PropertyAssignment);
-                    break;
-                case ts.SyntaxKind.MethodDeclaration:
-                    this.visitMethodDeclaration(property as ts.MethodDeclaration);
-                    break;
+class TypedefWalker extends Lint.AbstractWalker<Options> {
+    public walk(sourceFile: ts.SourceFile): void {
+        const cb = (node: ts.Node): void => {
+            switch (node.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                case ts.SyntaxKind.FunctionExpression:
                 case ts.SyntaxKind.GetAccessor:
-                    this.visitGetAccessor(property as ts.AccessorDeclaration);
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.MethodSignature: {
+                    const { name, parameters, type } = node as ts.CallSignatureDeclaration;
+                    this.checkTypeAnnotation("call-signature", name !== undefined ? name : parameters, type, name);
                     break;
-                case ts.SyntaxKind.SetAccessor:
-                    this.visitSetAccessor(property as ts.AccessorDeclaration);
+                }
+                case ts.SyntaxKind.ArrowFunction:
+                    this.checkArrowFunction(node as ts.ArrowFunction);
                     break;
-                default:
+                case ts.SyntaxKind.Parameter:
+                    this.checkParameter(node as ts.ParameterDeclaration);
                     break;
+                case ts.SyntaxKind.PropertyDeclaration:
+                    this.checkPropertyDeclaration(node as ts.PropertyDeclaration);
+                    break;
+                case ts.SyntaxKind.PropertySignature: {
+                    const { name, type } = node as ts.PropertySignature;
+                    this.checkTypeAnnotation("property-declaration", name, type, name);
+                    break;
+                }
+                case ts.SyntaxKind.VariableDeclaration:
+                    this.checkVariableDeclaration(node as ts.VariableDeclaration);
             }
+
+            return ts.forEachChild(node, cb);
+        };
+
+        return ts.forEachChild(sourceFile, cb);
+    }
+
+    private checkArrowFunction({ parent, parameters, type }: ts.ArrowFunction): void {
+        if (parent!.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent!)) {
+            this.checkTypeAnnotation("arrow-call-signature", parameters, type);
         }
     }
 
-    public visitParameterDeclaration(node: ts.ParameterDeclaration) {
-        // a parameter's "type" could be a specific string value, for example `fn(option: "someOption", anotherOption: number)`
-        if ((node.type == null || node.type.kind !== ts.SyntaxKind.StringLiteral)
-            && node.parent !== undefined
-            && node.parent.parent !== undefined) {
+    private checkParameter({ parent, name, type }: ts.ParameterDeclaration): void {
+        const isArrowFunction = parent!.kind === ts.SyntaxKind.ArrowFunction;
 
-            const isArrowFunction = node.parent.kind === ts.SyntaxKind.ArrowFunction;
-
-            let optionName: string | null = null;
-            if (isArrowFunction && isTypedPropertyDeclaration(node.parent.parent)) {
-                // leave optionName as null and don't perform check
-            } else if (isArrowFunction && utils.isPropertyDeclaration(node.parent.parent)) {
-                optionName = "member-variable-declaration";
-            } else if (isArrowFunction) {
-                optionName = "arrow-parameter";
+        const option = (() => {
+            if (!isArrowFunction) {
+                return "parameter";
+            } else if (isTypedPropertyDeclaration(parent!.parent!)) {
+                return undefined;
+            } else if (utils.isPropertyDeclaration(parent!.parent!)) {
+                return "member-variable-declaration";
             } else {
-                optionName = "parameter";
+                return "arrow-parameter";
             }
+        })();
 
-            if (optionName !== null) {
-                this.checkTypeAnnotation(optionName, node.getEnd(), node.type as ts.TypeNode, node.name);
-            }
+        if (option !== undefined) {
+            this.checkTypeAnnotation(option, name, type, name);
         }
-        super.visitParameterDeclaration(node);
     }
 
-    public visitPropertyAssignment(node: ts.PropertyAssignment) {
-        switch (node.initializer.kind) {
-            case ts.SyntaxKind.ArrowFunction:
-            case ts.SyntaxKind.FunctionExpression:
-                this.handleCallSignature(node.initializer as ts.FunctionExpression);
-                break;
-            default:
-                break;
-        }
-        super.visitPropertyAssignment(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration) {
-        const optionName = "member-variable-declaration";
-
+    private checkPropertyDeclaration({ initializer, name, type }: ts.PropertyDeclaration): void {
         // If this is an arrow function, it doesn't need to have a typedef on the property declaration
         // as the typedefs can be on the function's parameters instead
-        const performCheck = !(node.initializer != null && node.initializer.kind === ts.SyntaxKind.ArrowFunction && node.type == null);
-
-        if (performCheck) {
-            this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
+        if (initializer === undefined || initializer.kind !== ts.SyntaxKind.ArrowFunction) {
+            this.checkTypeAnnotation("member-variable-declaration", name, type, name);
         }
-        super.visitPropertyDeclaration(node);
     }
 
-    public visitPropertySignature(node: ts.PropertyDeclaration) {
-        const optionName = "property-declaration";
-        this.checkTypeAnnotation(optionName, node.name.getEnd(), node.type, node.name);
-        super.visitPropertySignature(node);
-    }
-
-    public visitSetAccessor(node: ts.AccessorDeclaration) {
-        this.handleCallSignature(node);
-        super.visitSetAccessor(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration) {
+    private checkVariableDeclaration({ parent, name, type }: ts.VariableDeclaration): void {
         // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
-        if (node.parent != null && node.parent.parent != null
-                && (node as ts.Node).parent!.kind !== ts.SyntaxKind.CatchClause
-                && node.parent.parent.kind !== ts.SyntaxKind.ForInStatement
-                && node.parent.parent.kind !== ts.SyntaxKind.ForOfStatement) {
+        if (parent!.kind === ts.SyntaxKind.CatchClause
+                || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
+                || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
+            return;
+        }
 
-            let rule: string;
-            switch (node.name.kind) {
+        const option = (() => {
+            switch (name.kind) {
                 case ts.SyntaxKind.ObjectBindingPattern:
-                    rule = "object-destructuring";
-                    break;
+                    return "object-destructuring";
                 case ts.SyntaxKind.ArrayBindingPattern:
-                    rule = "array-destructuring";
-                    break;
+                    return "array-destructuring";
                 default:
-                    rule = "variable-declaration";
-                    break;
+                    return "variable-declaration";
             }
+        })();
 
-            this.checkTypeAnnotation(rule, node.name.getEnd(), node.type, node.name);
-        }
-        super.visitVariableDeclaration(node);
+        this.checkTypeAnnotation(option, name, type, name);
     }
 
-    private handleCallSignature(node: ts.SignatureDeclaration) {
-        const location = (node.parameters != null) ? node.parameters.end : null;
-        // set accessors can't have a return type.
-        if (location != null && node.kind !== ts.SyntaxKind.SetAccessor && node.kind !== ts.SyntaxKind.ArrowFunction) {
-            this.checkTypeAnnotation("call-signature", location, node.type, node.name);
+    private checkTypeAnnotation(
+            option: Option,
+            location: ts.Node | ts.NodeArray<ts.Node>,
+            typeAnnotation: ts.TypeNode | undefined,
+            name?: ts.Node): void {
+        if (this.options[option] === true && typeAnnotation === undefined) {
+            const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
+            if (isNodeArray(location)) {
+                this.addFailure(location.pos - 1, location.end + 1, failure);
+            } else {
+                this.addFailureAtNode(location, failure);
+            }
         }
     }
-
-    private checkTypeAnnotation(option: string,
-                                location: number,
-                                typeAnnotation: ts.TypeNode | undefined,
-                                name?: ts.Node) {
-        if (this.hasOption(option) && typeAnnotation == null) {
-            this.addFailureAt(location, 1, "expected " + option + getName(name, ": '", "'") + " to have a typedef");
-        }
-    }
-}
-
-function getName(name?: ts.Node, prefix?: string, suffix?: string): string {
-    let ns = "";
-
-    if (name != null) {
-        switch (name.kind) {
-            case ts.SyntaxKind.Identifier:
-                ns = (name as ts.Identifier).text;
-                break;
-            case ts.SyntaxKind.BindingElement:
-                ns = getName((name as ts.BindingElement).name);
-                break;
-            case ts.SyntaxKind.ArrayBindingPattern:
-                ns = `[ ${(name as ts.ArrayBindingPattern).elements.map( (n) => getName(n) ).join(", ")} ]`;
-                break;
-            case ts.SyntaxKind.ObjectBindingPattern:
-                ns = `{ ${(name as ts.ObjectBindingPattern).elements.map( (n) => getName(n) ).join(", ")} }`;
-                break;
-            default:
-                break;
-        }
-    }
-    return ns ? `${prefix || ""}${ns}${suffix || ""}` : "";
 }
 
 function isTypedPropertyDeclaration(node: ts.Node): boolean {
-    return utils.isPropertyDeclaration(node) && node.type != null;
+    return utils.isPropertyDeclaration(node) && node.type !== undefined;
+}
+
+export function isNodeArray(nodeOrArray: ts.Node | ts.NodeArray<ts.Node>): nodeOrArray is ts.NodeArray<ts.Node> {
+    return Array.isArray(nodeOrArray);
 }

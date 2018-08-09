@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noSparseArrays.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,6 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -89,7 +91,6 @@ function traverseExpressionsInLHS(node: ts.Node, cb: (node: ts.Expression) => vo
                 traverseExpressionsInLHS(left, cb);
                 cb(right);
             }
-            break;
         }
     }
 }

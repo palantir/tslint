@@ -1,0 +1,46 @@
+const form = Object.assign({}, this);
+const foo = Object.assign(bar, this);
+const foo = Object.assign({}, bar, baz, this);
+const original = {a: 1, b:2};
+Object.assign({}, original, {c: 3});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({a: 1, b: 2}, {c: 3});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({a:1}, ...[{b: 2}, {c: 3}])
+Object.assign(original, {c: 3});
+var result = Object.assign(original, {c: 3});
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+result = Object.assign(original, {c: 3});
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+var result = Object.assign({}, original, {c: 3});
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+foo(Object.assign(original, {c: 3}));
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+[Object.assign(original, {c: 3})];
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+({
+    foo: Object.assign(original, {c: 3})
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+})
+
+Object.assign({}, {}, {a: 1,},);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({a: 1}, foo ? {b: 2} : {c: 3});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({a: 1, ...{b: 2}});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({}, {});
+~~~~~~~~~~~~~~~~~~~~~ [0]
+Object.assign({}, {},);
+~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+// allowed
+result = Object.assign(new Foo(), {});
+result = Object.assign(createFoo(), {});
+result = Object.assign(function() {}, {});
+result = Object.assign(() => {}, {});
+
+let fn = () => Object.assign({}, original);
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+[0]: Use the object spread operator instead.
+[1]: 'Object.assign' returns the first argument. Prefer object spread if you want a new object.

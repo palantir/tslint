@@ -29,6 +29,10 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Comparing boolean values to boolean literals is unnecessary, as those expressions will result in booleans too.
+            Just use the boolean values directly or negate them.
+        `,
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -40,7 +44,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, program.getTypeChecker()));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
@@ -48,7 +52,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isBinaryExpression(node)) {
             const cmp = getBooleanComparison(node, checker);
-            if (cmp) {
+            if (cmp !== undefined) {
                 ctx.addFailureAtNode(cmp.expression, Rule.FAILURE_STRING(cmp.negate), fix(node, cmp));
             }
         }
@@ -63,7 +67,7 @@ interface Compare {
 
 function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
     const cmp = deconstructComparison(node);
-    return cmp === undefined || !Lint.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+    return cmp === undefined || !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
 }
 
 function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {
@@ -99,7 +103,7 @@ function needsParenthesesForNegate(node: ts.Expression): boolean {
 function deconstructComparison(node: ts.BinaryExpression): Compare | undefined {
     const { left, operatorToken, right } = node;
     const eq = Lint.getEqualsKind(operatorToken);
-    if (!eq) {
+    if (eq === undefined) {
         return undefined;
     }
 

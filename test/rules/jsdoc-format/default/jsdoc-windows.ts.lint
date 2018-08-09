@@ -1,0 +1,24 @@
+/**
+ * MyClass
+ *
+ * Does classy things and impresses everyone. Quite a debonair class indeed.
+ *
+ * This file has all windows line endings "\r\n" and valid jsdoc.
+ */
+class MyClass {
+   
+}
+
+/**
+ *here comes some invalid jsdoc
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+ to ensure that the error is shown in the right place
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [asterisks]
+ *
+*/
+~~ [asterisks]
+function foo() {}
+
+[format]: jsdoc is not formatted correctly on this line
+[asterisks]: asterisks in jsdoc must be aligned

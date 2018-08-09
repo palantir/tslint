@@ -28,6 +28,8 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+import { camelize } from "../lib/utils";
+
 const github = new GitHubApi({
     host: "api.github.com",
     protocol: "https",
@@ -89,7 +91,7 @@ github.repos.getLatestRelease(repoInfo).then((value) => {
                     if (fieldMatch) {
                         commit.fields.push({
                             tag: fieldMatch[1],
-                            text: line + " (#" + commit.pushRequestNum + ")",
+                            text: addLinks(line) + " (#" + commit.pushRequestNum + ")",
                         });
                     }
                 }
@@ -105,7 +107,9 @@ github.repos.getLatestRelease(repoInfo).then((value) => {
     for (const commit of commits) {
         if (commit.fields.length > 0) {
             for (const field of commit.fields) {
-                entries.push(field);
+                if (field.tag !== "[no-log]") {
+                    entries.push(field);
+                }
             }
         } else {
             noFields.push(commit.title);
@@ -134,6 +138,34 @@ github.repos.getLatestRelease(repoInfo).then((value) => {
 }).catch((error) => {
     console.log("Error:" + error);
 });
+
+const cache = new Map<string, boolean>();
+
+function isRule(ruleName: string): boolean {
+    let result = cache.get(ruleName);
+    if (result === undefined) {
+        result = fs.existsSync(`./src/rules/${camelize(ruleName)}Rule.ts`);
+        cache.set(ruleName, result);
+    }
+    return result;
+}
+
+/** Replace rule names with links to the docs website */
+function addLinks(text: string): string {
+    let result = "";
+    let lastIndex = 0;
+    // match everything that looks like a rule name and is enclosed in backticks
+    const regex = /`([a-z][-a-z]*[a-z])+`/g;
+    let match = regex.exec(text);
+    while (match !== null) {
+        if (isRule(match[1])) {
+            result += text.slice(lastIndex, match.index) + `[${match[0]}](https://palantir.github.io/tslint/rules/${match[1]}/)`;
+            lastIndex = regex.lastIndex;
+        }
+        match = regex.exec(text);
+    }
+    return result + text.slice(lastIndex);
+}
 
 interface IField {
     tag: string;

@@ -19,6 +19,7 @@ import { hasModifier, isArrowFunction, isCallExpression, isIdentifier, isSpreadE
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noUnnecessaryCallbackWrapper.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -30,8 +31,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            There's generally no reason to wrap a function with a callback wrapper if it's directly called anyway.
+            Doing so creates extra inline lambdas that slow the runtime down.
+        `,
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

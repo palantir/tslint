@@ -1,5 +1,4 @@
 namespace App {
-~ [This file has 23 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]
     class GiveMeANumber {
 
         /* tslint:disable:no-any */
@@ -21,3 +20,4 @@ namespace App {
         };
     }
 }
+~ [This file has 22 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]

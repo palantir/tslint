@@ -1,0 +1,22 @@
+console.time();
+~~~~~~~~~~~~           [err % ('time')]
+console.log("log");
+~~~~~~~~~~~             [err % ('log')]
+console.dir(object);
+~~~~~~~~~~~             [err % ('dir')]
+console.info("info");
+~~~~~~~~~~~~           [err % ('info')]
+console.trace("trace");
+~~~~~~~~~~~~~           [err % ('trace')]
+console.warn("warn");
+~~~~~~~~~~~~            [err % ('warn')]
+console.error("error");
+~~~~~~~~~~~~~           [err % ('error')]
+console.something();
+~~~~~~~~~~~~~~~~~           [err % ('something')]
+console.timeEnd();
+~~~~~~~~~~~~~~~           [err % ('timeEnd')]
+[].forEach(console.log);
+           ~~~~~~~~~~~   [err % ('log')]
+
+[err]: Calls to 'console.%s' are not allowed.

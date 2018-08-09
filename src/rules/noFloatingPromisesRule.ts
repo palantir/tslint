@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isCallExpression, isExpressionStatement, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,6 +25,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-floating-promises",
         description: "Promises returned by functions must be handled appropriately.",
+        descriptionDetails: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
         optionsDescription: Lint.Utils.dedent`
             A list of \'string\' names of any additional classes that should also be handled as Promises.
         `,
@@ -35,7 +37,14 @@ export class Rule extends Lint.Rules.TypedRule {
             },
         },
         optionExamples: [true, [true, "JQueryPromise"]],
-        rationale: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
+        rationale: Lint.Utils.dedent`
+            Creating a Promise and not storing or returning it may let other code run independently of its result.
+            This can cause unexpected and/or non-deterministic behavior depending on external timing factors.
+
+            It's typically better to return Promises from functions that start them, then handle them in calling code.
+
+            Use \`no-unused-expression\` in addition to this rule to reveal even more floating promises.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -45,61 +54,38 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Promises must be handled appropriately";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const walker = new NoFloatingPromisesWalker(sourceFile, this.getOptions(), program);
-
-        for (const className of this.ruleArguments as string[]) {
-            walker.addPromiseClass(className);
-        }
-
-        return this.applyWithWalker(walker);
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            ["Promise", ...this.ruleArguments as string[]],
+            program.getTypeChecker(),
+        );
     }
 }
 
-class NoFloatingPromisesWalker extends Lint.ProgramAwareRuleWalker {
-    private static barredParentKinds: { [x: number]: boolean } = {
-        [ts.SyntaxKind.Block]: true,
-        [ts.SyntaxKind.ExpressionStatement]: true,
-        [ts.SyntaxKind.SourceFile]: true,
-    };
-
-    private promiseClasses = ["Promise"];
-
-    public addPromiseClass(className: string) {
-        this.promiseClasses.push(className);
-    }
-
-    public visitCallExpression(node: ts.CallExpression): void {
-        this.checkNode(node);
-        super.visitCallExpression(node);
-    }
-
-    public visitExpressionStatement(node: ts.ExpressionStatement): void {
-        this.checkNode(node);
-        super.visitExpressionStatement(node);
-    }
-
-    private checkNode(node: ts.CallExpression | ts.ExpressionStatement) {
-        if (node.parent && this.kindCanContainPromise(node.parent.kind)) {
-            return;
+function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (isExpressionStatement(node)) {
+            const { expression } = node;
+            if (isCallExpression(expression) &&
+                !isPromiseCatchCall(expression) &&
+                !isPromiseThenCallWithRejectionHandler(expression)) {
+                const { symbol } = tc.getTypeAtLocation(expression);
+                if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
+                    ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
+                }
+            }
         }
+        return ts.forEachChild(node, cb);
+    });
+}
 
-        const typeChecker = this.getTypeChecker();
-        const type = typeChecker.getTypeAtLocation(node);
+function isPromiseCatchCall(expression: ts.CallExpression): boolean {
+    return isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch";
+}
 
-        if (this.symbolIsPromise(type.symbol)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        }
-    }
-
-    private symbolIsPromise(symbol?: ts.Symbol) {
-        if (!symbol) {
-            return false;
-        }
-
-        return this.promiseClasses.indexOf(symbol.name) !== -1;
-    }
-
-    private kindCanContainPromise(kind: ts.SyntaxKind) {
-        return !NoFloatingPromisesWalker.barredParentKinds[kind];
-    }
+function isPromiseThenCallWithRejectionHandler(expression: ts.CallExpression): boolean {
+    return isPropertyAccessExpression(expression.expression) &&
+        expression.expression.name.text === "then" &&
+        expression.arguments.length >= 2;
 }

@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { hasCommentAfterPosition } from "../language/utils";
+import { codeExamples } from "./code-examples/arrowReturnShorthand.examples";
 
 const OPTION_MULTILINE = "multiline";
 
@@ -39,8 +40,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             true,
             [true, OPTION_MULTILINE],
         ],
+        rationale: Lint.Utils.dedent`
+            It's unnecessary to include \`return\` and \`{}\` brackets in arrow lambdas.
+            Leaving them out results in simpler and easier to read code.
+        `,
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -60,10 +66,10 @@ interface Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { multiline } } = ctx;
-    ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (utils.isArrowFunction(node) && utils.isBlock(node.body)) {
             const expr = getSimpleReturnExpression(node.body);
-            if (expr !== undefined && (multiline || !node.body.getText(sourceFile).includes("\n"))) {
+            if (expr !== undefined && (multiline || utils.isSameLine(sourceFile, node.body.getStart(sourceFile), node.body.end))) {
                 const isObjectLiteral = expr.kind === ts.SyntaxKind.ObjectLiteralExpression;
                 ctx.addFailureAtNode(node.body, Rule.FAILURE_STRING(isObjectLiteral), createFix(node, node.body, expr, sourceFile.text));
             }
@@ -74,14 +80,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
 function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression, text: string): Lint.Fix | undefined {
     const statement = expr.parent!;
-    const returnKeyword = Lint.childOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
-    const arrow = Lint.childOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
-    const openBrace = Lint.childOfKind(body, ts.SyntaxKind.OpenBraceToken)!;
-    const closeBrace = Lint.childOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
-    const semicolon = Lint.childOfKind(statement, ts.SyntaxKind.SemicolonToken);
+    const returnKeyword = utils.getChildOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
+    const arrow = utils.getChildOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
+    const openBrace = utils.getChildOfKind(body, ts.SyntaxKind.OpenBraceToken)!;
+    const closeBrace = utils.getChildOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
+    const semicolon = utils.getChildOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
     const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-        hasComments(expr) || (semicolon && hasComments(semicolon)) || hasComments(closeBrace);
+        hasComments(expr) || (semicolon !== undefined && hasComments(semicolon)) || hasComments(closeBrace);
     return anyComments ? undefined : [
         // Object literal must be wrapped in `()`
         ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [

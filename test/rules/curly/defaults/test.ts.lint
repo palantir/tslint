@@ -107,3 +107,17 @@ for (let y of [1, 2, 3]) // failure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     console.log(y);
 ~~~~~~~~~~~~~~~~~~~ [for statements must be braced]
+
+if (true) /* some
+~~~~~~~~~~~~~~~~~
+             comment */
+~~~~~~~~~~~~~~~~~~~~~~~
+    console.log(z);
+~~~~~~~~~~~~~~~~~~~ [if statements must be braced]
+
+if (foo === "bar") throw new Error(
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  "baz"
+~~~~~~~
+)
+~ [if statements must be braced]

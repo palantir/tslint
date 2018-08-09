@@ -19,16 +19,40 @@ import { isThrowStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noStringThrowRule.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-string-throw",
-        description: `Flags throwing plain strings or concatenations of strings ` +
-            `because only Errors produce proper stack traces.`,
+        description: "Flags throwing plain strings or concatenations of strings.",
         hasFix: true,
         options: null,
+        optionExamples: [true],
         optionsDescription: "Not configurable.",
+        rationale: Lint.Utils.dedent`
+            Example – Doing it right
+
+            \`\`\`ts
+            // throwing an Error from typical function, whether sync or async
+            if (!productToAdd) {
+                throw new Error("How can I add new product when no value provided?");
+            }
+            \`\`\`
+
+            Example – Anti Pattern
+
+            \`\`\`ts
+            // throwing a string lacks any stack trace information and other important data properties
+            if (!productToAdd) {
+                throw ("How can I add new product when no value provided?");
+            }
+            \`\`\`
+
+            Only Error objects contain a \`.stack\` member equivalent to the current stack trace.
+            Primitives such as strings do not.
+        `,
+        codeExamples,
         type: "functionality",
         typescriptOnly: false,
     };
@@ -46,7 +70,7 @@ function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isThrowStatement(node)) {
-            const { expression } = node as ts.ThrowStatement;
+            const { expression } = node;
             if (isString(expression)) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
                     Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),

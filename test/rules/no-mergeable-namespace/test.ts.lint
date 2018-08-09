@@ -9,24 +9,24 @@ module bar {}
 // invalid case
 namespace a {}
 namespace a {}
-          ~ [Mergeable namespace 'a' found. Merge its contents with the namespace on line 6.]
+          ~ [err % ('a', '10')]
 
 namespace b {
     namespace b {}
     namespace b {}
-              ~ [Mergeable namespace 'b' found. Merge its contents with the namespace on line 12.]
+              ~ [err % ('b', '14')]
     namespace b {}
-              ~ [Mergeable namespace 'b' found. Merge its contents with the namespace on line 13.]
+              ~ [err % ('b', '15')]
 }
 
 namespace x.y {}
 namespace x { namespace y{} }
-          ~ [Mergeable namespace 'x' found. Merge its contents with the namespace on line 16.]
+          ~ [err % ('x', '19')]
 
 namespace m.n {
     namespace l {}
     namespace l {}
-              ~ [Mergeable namespace 'l' found. Merge its contents with the namespace on line 21.]
+              ~ [err % ('l', '23')]
 }
 
 module "foo" {
@@ -35,7 +35,7 @@ module "foo" {
 
     namespace q {}
     namespace q {}
-              ~ [Mergeable namespace 'q' found. Merge its contents with the namespace on line 28.]
+              ~ [err % ('q', '31')]
 }
 
-[0]: This namespace has already been declared. Merge the declarations.
+[err]: Mergeable namespace '%s' found. Merge its contents with the namespace on line %s.

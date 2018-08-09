@@ -20,6 +20,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_CHECK_PARAMETERS = "check-parameters";
+
+interface Options {
+    parameters: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -31,9 +37,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             A variable can be reassigned if necessary -
             there's no good reason to have a duplicate variable declaration.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a parameter.`,
+        options: {
+            type: "string",
+            enum: [OPTION_CHECK_PARAMETERS],
+        },
+        optionExamples: [
+            true,
+            [true, OPTION_CHECK_PARAMETERS],
+        ],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -44,41 +56,48 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
+            parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== - 1,
+        }));
     }
 }
 
-function walk(ctx: Lint.WalkContext): void {
-    let scope = new Set<string>();
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isFunctionScopeBoundary(node)) {
-            const oldScope = scope;
-            scope = new Set();
-            ts.forEachChild(node, cb);
-            scope = oldScope;
-            return;
-        } else if (utils.isVariableDeclaration(node) && !utils.isBlockScopedVariableDeclaration(node)) {
-            forEachBoundIdentifier(node.name, (id) => {
-                const { text } = id;
-                if (scope.has(text)) {
-                    ctx.addFailureAtNode(id, Rule.FAILURE_STRING(text));
-                } else {
-                    scope.add(text);
+class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
+    private scope: Set<string> = new Set();
+    public walk(sourceFile: ts.SourceFile) {
+        this.scope = new Set();
+        const cb = (node: ts.Node): void => {
+            if (utils.isFunctionScopeBoundary(node)) {
+                const oldScope = this.scope;
+                this.scope = new Set();
+                ts.forEachChild(node, cb);
+                this.scope = oldScope;
+                return;
+            }
+            if (this.options.parameters && utils.isParameterDeclaration(node)) {
+                this.handleBindingName(node.name, false);
+            } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
+                for (const variable of node.declarations) {
+                    this.handleBindingName(variable.name, true);
                 }
-            });
-        }
+            }
+            return ts.forEachChild(node, cb);
+        };
+        return ts.forEachChild(sourceFile, cb);
+    }
 
-        return ts.forEachChild(node, cb);
-    });
-}
-
-function forEachBoundIdentifier(name: ts.BindingName, action: (id: ts.Identifier) => void): void {
-    if (name.kind === ts.SyntaxKind.Identifier) {
-        action(name);
-    } else {
-        for (const e of name.elements) {
-            if (e.kind !== ts.SyntaxKind.OmittedExpression) {
-                forEachBoundIdentifier(e.name, action);
+    private handleBindingName(name: ts.BindingName, check: boolean) {
+        if (name.kind === ts.SyntaxKind.Identifier) {
+            if (check && this.scope.has(name.text)) {
+                this.addFailureAtNode(name, Rule.FAILURE_STRING(name.text));
+            } else {
+                this.scope.add(name.text);
+            }
+        } else {
+            for (const e of name.elements) {
+                if (e.kind !== ts.SyntaxKind.OmittedExpression) {
+                    this.handleBindingName(e.name, check);
+                }
             }
         }
     }

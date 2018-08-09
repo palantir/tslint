@@ -17,6 +17,7 @@
 
 // tslint:disable object-literal-sort-keys
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,11 +41,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Five arguments may be optionally provided:
 
-            * \`"${OPTION_CHECK_FORMAT}"\`: allows only camelCased or UPPER_CASED variable names
+            * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
               * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
               * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to camelCase.
-              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to camelCase.
+              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
+              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
               * These are: ${bannedKeywordsStr}`,
         options: {
@@ -110,7 +111,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     handleVariableNameKeyword(name);
                     // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
                     // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName) {
+                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
                         handleVariableNameFormat(name, initializer);
                     }
                 }
@@ -119,7 +120,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
             case ts.SyntaxKind.VariableStatement:
                 // skip 'declare' keywords
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                if (hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
                     return;
                 }
                 break;
@@ -135,7 +136,6 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                         handleVariableNameKeyword(name);
                     }
                 }
-                break;
             }
         }
 
@@ -148,11 +148,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         const { text } = name;
-        if (initializer && isAlias(text, initializer)) {
+        if (initializer !== undefined && isAlias(text, initializer)) {
             return;
         }
 
-        if (!isCamelCase(text, options) && !isUpperCase(text)) {
+        if (text.length !== 0 && !isCamelCase(text, options) && !isUpperCase(text)) {
             ctx.addFailureAtNode(name, formatFailure());
         }
     }
@@ -164,14 +164,14 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     }
 
     function formatFailure(): string {
-        let failureMessage = "variable name must be in camelcase";
+        let failureMessage = "variable name must be in lowerCamelCase";
         if (options.allowPascalCase) {
-            failureMessage += ", pascalcase";
+            failureMessage += ", PascalCase";
         }
         if (options.allowSnakeCase) {
-            failureMessage += ", snakecase";
+            failureMessage += ", snake_case";
         }
-        return failureMessage + " or uppercase";
+        return `${failureMessage} or UPPER_CASE`;
     }
 }
 

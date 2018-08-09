@@ -1,8 +1,13 @@
+[typescript]: < 2.9.0
 // case 1
 const fs = require("fs");
 
 module Foo {
-       ~~~   ['Foo' is declared but never used.]
+#if typescript >= 2.8.0
+~~~~~~~~~~ [err % ('Foo')]
+#else
+       ~~~ [err % ('Foo')]
+#endif
     const path = require("path");
 
     console.log(fs);
@@ -24,7 +29,11 @@ hello.sayHello();
 import Bar = whatever.that.Foo;
 
 module some.module.blah {
-       ~~~~               ['some' is declared but never used.]
+#if typescript >= 2.8.0
+~~~~~~~~~~~ [err % ('some')]
+#else
+       ~~~~ [err % ('some')]
+#endif
     export class bar {
         private bar: Bar;
         constructor() {
@@ -52,3 +61,9 @@ myFunc(bar);
 
 import a from "a";
 export { a };
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+#endif

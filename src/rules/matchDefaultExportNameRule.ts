@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isImportDeclaration, isSymbolFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -40,30 +41,28 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    public visitSourceFile(node: ts.SourceFile) {
-        for (const statement of node.statements) {
-            if (statement.kind !== ts.SyntaxKind.ImportDeclaration) {
-                continue;
-            }
-
-            const { importClause } = statement as ts.ImportDeclaration;
-            if (importClause && importClause.name) {
-                this.checkDefaultImport(importClause.name);
-            }
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
+    for (const statement of ctx.sourceFile.statements) {
+        if (!isImportDeclaration(statement) ||
+            statement.importClause === undefined || statement.importClause.name === undefined) {
+            continue;
         }
-    }
+        const defaultImport = statement.importClause.name;
+        const symbol = tc.getSymbolAtLocation(defaultImport);
+        if (symbol === undefined || !isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+            continue;
+        }
 
-    private checkDefaultImport(defaultImport: ts.Identifier) {
-        const { declarations } = this.getTypeChecker().getAliasedSymbol(
-            this.getTypeChecker().getSymbolAtLocation(defaultImport));
-        const name = declarations && declarations[0] && declarations[0].name;
-        if (name && name.kind === ts.SyntaxKind.Identifier && defaultImport.text !== name.text) {
-            this.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
+        const {declarations} = tc.getAliasedSymbol(symbol);
+        if (declarations !== undefined && declarations.length !== 0) {
+            const { name } = declarations[0] as ts.NamedDeclaration;
+            if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && name.text !== defaultImport.text) {
+                ctx.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
+            }
         }
     }
 }

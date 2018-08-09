@@ -74,11 +74,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
-    public static UNNEEDED_QUOTES = (name: string) => {
+    public static INCONSISTENT_PROPERTY = "All property names in this object literal must be consistently quoted or unquoted.";
+    public static UNNEEDED_QUOTES(name: string) {
         return `Unnecessarily quoted property '${name}' found.`;
     }
-    public static UNQUOTED_PROPERTY = (name: string) => {
+    public static UNQUOTED_PROPERTY(name: string) {
         return `Unquoted property '${name}' found.`;
     }
 
@@ -94,7 +94,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (isObjectLiteralExpression(node)) {
                 const propertyNames = Lint.Utils.mapDefined(node.properties, mapPropertyName);
-                outer: switch (this.options.option) { // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                outer: switch (this.options.option) {
                     case "always":
                         for (const name of propertyNames) {
                             if (name.kind !== ts.SyntaxKind.StringLiteral) {
@@ -123,7 +123,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                                         this.reportMissing(propertyName);
                                     }
                                 }
-                                break outer; // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                                break outer;
                             }
                         }
                         for (const name of propertyNames) {
@@ -162,7 +162,7 @@ function mapPropertyName(property: ts.ObjectLiteralElementLike): ts.StringLitera
     return property.name;
 }
 
-function hasInconsistentQuotes(properties: ts.LiteralLikeNode[]) {
+function hasInconsistentQuotes(properties: ReadonlyArray<ts.LiteralLikeNode>) {
     if (properties.length < 2) {
         return false;
     }

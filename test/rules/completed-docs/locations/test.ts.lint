@@ -28,4 +28,20 @@ class Class {
      * ...
      */
     static goodStaticMethod() { }
+
+    /**
+     * ...
+     */
+    async goodAsyncMethod() { }
+
+    async badAsyncMethod() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for async methods.]
+
+    /**
+     * ...
+     */
+    private async goodPrivateAsyncMethod() { }
+
+    private async badPrivateAsyncMethod() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for private async methods.]
 }

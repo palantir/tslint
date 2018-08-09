@@ -23,8 +23,36 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-non-null-assertion",
-        description: "Disallows non-null assertions.",
-        rationale: "Using non-null assertion cancels the benefits of the strict null checking mode.",
+        description: "Disallows non-null assertions using the `!` postfix operator.",
+        rationale: Lint.Utils.dedent`
+            Using non-null assertion cancels the benefits of the strict null checking mode.
+
+            Instead of assuming objects exist:
+
+            \`\`\`
+            function foo(instance: MyClass | undefined) {
+                instance!.doWork();
+            }
+            \`\`\`
+
+            Either inform the strict type system that the object must exist:
+
+            \`\`\`
+            function foo(instance: MyClass) {
+                instance.doWork();
+            }
+            \`\`\`
+
+            Or verify that the instance exists, which will inform the type checker:
+
+            \`\`\`
+            function foo(instance: MyClass | undefined) {
+                if (instance !== undefined) {
+                    instance.doWork();
+                }
+            }
+            \`\`\`
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -36,13 +64,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Forbidden non null assertion";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoNonNullAssertionWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoNonNullAssertionWalker extends Lint.RuleWalker {
-    public visitNonNullExpression(node: ts.NonNullExpression) {
-        this.addFailureAtNode(node, Rule.FAILURE_STRING);
-        super.visitNonNullExpression(node);
-    }
+function walk(ctx: Lint.WalkContext) {
+    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
+        if (node.kind === ts.SyntaxKind.NonNullExpression) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+        }
+        return ts.forEachChild(node, cb);
+    });
 }

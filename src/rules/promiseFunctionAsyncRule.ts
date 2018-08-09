@@ -15,8 +15,35 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+
+const OPTION_FUNCTION_DECLARATION = "check-function-declaration";
+const OPTION_FUNCTION_EXPRESSION = "check-function-expression";
+const OPTION_ARROW_FUNCTION = "check-arrow-function";
+const OPTION_METHOD_DECLARATION = "check-method-declaration";
+
+const KIND_FOR_OPTION: { [arg: string]: number } = {
+    [OPTION_FUNCTION_DECLARATION]: ts.SyntaxKind.FunctionDeclaration,
+    [OPTION_FUNCTION_EXPRESSION]: ts.SyntaxKind.FunctionExpression,
+    [OPTION_ARROW_FUNCTION]: ts.SyntaxKind.ArrowFunction,
+    [OPTION_METHOD_DECLARATION]: ts.SyntaxKind.MethodDeclaration,
+};
+
+type EnabledSyntaxKinds = ReadonlySet<number>;
+
+function parseOptions(ruleArguments: string[]): EnabledSyntaxKinds {
+    if (ruleArguments.length === 0) {
+        ruleArguments = Object.keys(KIND_FOR_OPTION);
+    }
+
+    const enabledKinds = new Set<number>();
+    for (const arg of ruleArguments) {
+        enabledKinds.add(KIND_FOR_OPTION[arg]);
+    }
+    return enabledKinds;
+}
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -28,10 +55,32 @@ export class Rule extends Lint.Rules.TypedRule {
             throwing an Error object. In contrast, non-\`async\` \`Promise\`-returning functions
             are technically capable of either. This practice removes a requirement for consuming
             code to handle both cases.
+
+            If no optional arguments are provided then all function types are checked,
+            otherwise the specific function types are checked:
+
+            * \`"${OPTION_FUNCTION_DECLARATION}"\` check function declarations.
+            * \`"${OPTION_FUNCTION_EXPRESSION}"\` check function expressions.
+            * \`"${OPTION_ARROW_FUNCTION}"\` check arrow functions.
+            * \`"${OPTION_METHOD_DECLARATION}"\` check method declarations.
         `,
         optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [
+                    OPTION_FUNCTION_DECLARATION,
+                    OPTION_FUNCTION_EXPRESSION,
+                    OPTION_ARROW_FUNCTION,
+                    OPTION_METHOD_DECLARATION,
+                ],
+            },
+            minLength: 0,
+            maxLength: 4,
+        },
+        optionExamples: [true,
+                         [true, OPTION_FUNCTION_DECLARATION, OPTION_METHOD_DECLARATION]],
         type: "typescript",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -41,45 +90,34 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "functions that return promises must be async";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PromiseAsyncWalker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program.getTypeChecker());
     }
 }
 
-class PromiseAsyncWalker extends Lint.ProgramAwareRuleWalker {
-    public visitArrowFunction(node: ts.ArrowFunction) {
-        this.handleDeclaration(node);
-        super.visitArrowFunction(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.handleDeclaration(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitFunctionExpression(node: ts.FunctionExpression) {
-        this.handleDeclaration(node);
-        super.visitFunctionExpression(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.handleDeclaration(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    private handleDeclaration(node: ts.SignatureDeclaration & { body?: ts.Node }) {
-        const tc = this.getTypeChecker();
-        const signature = tc.getTypeAtLocation(node).getCallSignatures()[0];
-        const returnType = tc.typeToString(tc.getReturnTypeOfSignature(signature));
-
-        const isAsync = Lint.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword);
-        const isPromise = returnType.indexOf("Promise<") === 0;
-
-        const signatureEnd = node.body != null
-            ? node.body.getStart() - node.getStart() - 1
-            : node.getWidth();
-
-        if (isPromise && !isAsync) {
-            this.addFailureAt(node.getStart(), signatureEnd, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
+    const { sourceFile, options } = ctx;
+    return ts.forEachChild(sourceFile, function cb(node): void {
+        if (options.has(node.kind)) {
+            switch (node.kind) {
+                case ts.SyntaxKind.MethodDeclaration:
+                case ts.SyntaxKind.FunctionDeclaration:
+                    if ((node as ts.FunctionLikeDeclaration).body === undefined) {
+                        break;
+                    }
+                    // falls through
+                case ts.SyntaxKind.FunctionExpression:
+                case ts.SyntaxKind.ArrowFunction:
+                    if (!hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+                        && returnsPromise(node as ts.FunctionLikeDeclaration, tc)) {
+                        ctx.addFailure(node.getStart(sourceFile), (node as ts.FunctionLikeDeclaration).body!.pos, Rule.FAILURE_STRING);
+                    }
+            }
         }
-    }
+        return ts.forEachChild(node, cb);
+    });
+}
+
+function returnsPromise(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
+    const type = tc.getReturnTypeOfSignature(tc.getTypeAtLocation(node).getCallSignatures()[0]);
+    return type.symbol !== undefined && type.symbol.name === "Promise";
 }
