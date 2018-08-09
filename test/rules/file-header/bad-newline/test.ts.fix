@@ -1,10 +1,7 @@
-/*
+/*!
  * Good header 2
  */
 
-/*
- * Bad header
- */
 export class A {
     public x = 1;
 
