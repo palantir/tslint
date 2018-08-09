@@ -30,7 +30,7 @@ A path to a directory or an array of paths to directories of [custom rules][2]. 
   - Any rules specified in this block will override those configured in any base configuration being extended.
   - [Check out the full rules list here][3].
 * `jsRules?: any`: Same format as `rules`. These rules are applied to `.js` and `.jsx` files.
-* `defaultSeverity?: "error" | "warning" | "off"`: The severity level used when a rule specifies a default warning level. If undefined, "error" is used. This value is not inherited and is only applied to rules in this file.
+* `defaultSeverity?: "error" | "warning" | "off"`: The severity level that is applied to rules in this config file as well as rules in any inherited config files which have their severity set to "default". If undefined, "error" is used as the defaultSeverity.
 * `linterOptions?: { exclude?: string[] }`:
   - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
 
@@ -59,7 +59,7 @@ An example `tslint.json` file might look like this:
                 "log",
                 "time",
                 "timeEnd",
-                "trace",
+                "trace"
             ]
         }
     },
@@ -104,7 +104,7 @@ jsRules:
 
 ### Rule severity
 
-The severity level of each rule can can be configured to `default`, `error`, `warning`/`warn`, or `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` top-level option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
+The severity level of each rule can be configured to `default`, `error`, `warning`/`warn`, or `off`/`none`. If no severity level is specified, `default` is used. The `defaultSeverity` top-level option replaces the severity level for each rule that uses severity level `default` in the current file. Valid values for `defaultSeverity` include `error`, `warning`/`warn`, and `off`/`none`.
 
 ### Configuration presets
 

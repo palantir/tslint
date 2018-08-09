@@ -27,6 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-final-break",
         description: "Checks whether the final clause of a switch statement ends in \`break;\`.",
+        hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             If no options are passed, a final 'break;' is forbidden.
             If the "always" option is passed this will require a 'break;' to always be present
@@ -70,26 +71,54 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
         if (always) {
             if (!endsControlFlow(clause)) {
-                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS);
+                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS, createAddFix(clause));
             }
             return;
         }
 
-        if (clause.statements.length === 0) { return; }
-        const block = clause.statements[0];
-        const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
-        const lastStatement = last(statements);
-        if (lastStatement !== undefined && isBreakStatement(lastStatement)) {
-            if (lastStatement.label !== undefined) {
-                const parent = node.parent!;
-                if (!isLabeledStatement(parent) || parent.label === lastStatement.label) {
-                    // break jumps somewhere else, don't complain
-                    return;
-                }
-            }
-            ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER);
+        const lastStatement = getLastStatement(clause);
+        if (lastStatement === undefined || !isBreakStatement(lastStatement)) {
+            return;
         }
+
+        if (lastStatement.label !== undefined) {
+            const parent = node.parent!;
+            if (!isLabeledStatement(parent) || parent.label === lastStatement.label) {
+                // break jumps somewhere else, don't complain
+                return;
+            }
+        }
+
+        ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER, createRemoveFix(lastStatement));
     }
+
+    function createAddFix(clause: ts.CaseClause | ts.DefaultClause) {
+        const lastStatement = getLastStatement(clause);
+        if (lastStatement === undefined) {
+            return Lint.Replacement.appendText(clause.end, " break;");
+        }
+
+        const fullText = lastStatement.getFullText(ctx.sourceFile);
+        const indentation = fullText.slice(0, fullText.search(/\S+/));
+
+        return Lint.Replacement.appendText(lastStatement.end, `${indentation}break;`);
+    }
+
+    function createRemoveFix(lastStatement: ts.BreakStatement) {
+        return Lint.Replacement.replaceFromTo(lastStatement.getFullStart(), lastStatement.end, "");
+    }
+
+}
+
+function getLastStatement(clause: ts.CaseClause | ts.DefaultClause): ts.Statement | undefined {
+    if (clause.statements.length === 0) {
+        return undefined;
+    }
+
+    const block = clause.statements[0];
+    const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
+
+    return last(statements);
 }
 
 function last<T>(arr: ReadonlyArray<T>): T | undefined {

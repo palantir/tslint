@@ -17,6 +17,7 @@ function f(x: string | (() => void)): void;
 function f(x: (() => string) | (() => number)): void;
 function f(x: string & (() => void)): void;
 function f(x: (() => string) & (() => number)): void;
+function f(x: (() => string)[]): void;
 
 // Overloads OK
 interface K {
@@ -28,3 +29,4 @@ interface K {
 export type I = () => void;
 
 export type T = () => void
+

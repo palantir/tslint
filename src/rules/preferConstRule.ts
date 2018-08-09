@@ -121,7 +121,7 @@ interface DestructuringInfo {
 }
 
 class PreferConstWalker extends Lint.AbstractWalker<Options> {
-    private scope: Scope;
+    private scope: Scope = new Scope();
     public walk(sourceFile: ts.SourceFile) {
         // don't check anything on declaration files
         if (sourceFile.isDeclarationFile) {

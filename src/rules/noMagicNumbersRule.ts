@@ -29,8 +29,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             Disallows the use constant number values outside of variable assignments.
             When no list of allowed values is specified, -1, 0 and 1 are allowed by default.`,
         rationale: Lint.Utils.dedent`
-            Magic numbers should be avoided as they often lack documentation, forcing
-            them to be stored in variables gives them implicit documentation.`,
+            Magic numbers should be avoided as they often lack documentation.
+            Forcing them to be stored in variables gives them implicit documentation.
+        `,
         optionsDescription: "A list of allowed numbers.",
         options: {
             type: "array",
@@ -63,12 +64,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const allowedNumbers = this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED;
-        return this.applyWithWalker(new NoMagicNumbersWalker(sourceFile, this.ruleName, new Set(allowedNumbers.map(String))));
+        return this.applyWithWalker(
+            new NoMagicNumbersWalker(
+                sourceFile,
+                this.ruleName,
+                this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED,
+            ),
+        );
     }
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
+class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
@@ -87,7 +93,11 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
     }
 
     private checkNumericLiteral(node: ts.Node, num: string) {
-        if (!Rule.ALLOWED_NODES.has(node.parent!.kind) && !this.options.has(num)) {
+        /* Using Object.is() to differentiate between pos/neg zero */
+        if (
+            !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
+            !this.options.some((allowedNum) => Object.is(allowedNum, parseFloat(num)))
+        ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
     }

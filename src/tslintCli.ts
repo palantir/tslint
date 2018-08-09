@@ -20,7 +20,7 @@
 import commander = require("commander");
 import * as fs from "fs";
 
-import { VERSION } from "./linter";
+import { Linter } from "./linter";
 import { run } from "./runner";
 import { arrayify, dedent } from "./utils";
 
@@ -40,6 +40,7 @@ interface Argv {
     typeCheck?: boolean;
     test?: boolean;
     version?: boolean;
+    quiet?: boolean;
 }
 
 interface Option {
@@ -174,9 +175,17 @@ const options: Option[] = [
         type: "string",
         describe: "tsconfig.json file",
         description: dedent`
-            The path or directory containing a tsconfig.json file that will be
-            used to determine which files will be linted. This flag also enables
-            rules that require the type checker.`,
+            The path to the tsconfig.json file or to the directory containing
+            the tsconfig.json file. The file will be used to determine which
+            files will be linted. This flag also enables rules that require the
+            type checker.`,
+    },
+    {
+        short: "q",
+        name: "quiet",
+        type: "boolean",
+        describe: "hide errors on lint",
+        description: "If true, hides warnings from linting output.",
     },
     {
         name: "type-check",
@@ -205,7 +214,7 @@ const builtinOptions: Option[] = [
     },
 ];
 
-commander.version(VERSION, "-v, --version");
+commander.version(Linter.VERSION, "-v, --version");
 
 for (const option of options) {
     const commanderStr = optionUsageTag(option) + optionParam(option);
@@ -261,6 +270,7 @@ run(
         out: argv.out,
         outputAbsolutePaths: argv.outputAbsolutePaths,
         project: argv.project,
+        quiet: argv.quiet,
         rulesDirectory: argv.rulesDir,
         test: argv.test,
         typeCheck: argv.typeCheck,

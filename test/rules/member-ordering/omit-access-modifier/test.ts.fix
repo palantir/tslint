@@ -1,0 +1,11 @@
+class C {
+    private static x = 0;
+    static y = 1;
+
+    static z = 2;
+
+    x = 0;
+    private y = 1;
+
+    constructor() {}
+}

@@ -33,7 +33,7 @@ export class Formatter extends AbstractFormatter {
             Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
-        1:14  semicolon  Missing semicolon`,
+        Error: 1:14  semicolon  Missing semicolon`,
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -62,11 +62,13 @@ export class Formatter extends AbstractFormatter {
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
 
             // Output the name of each file once
             if (currentFile !== fileName) {
                 outputLines.push("");
-                outputLines.push(fileName);
+                outputLines.push(`${fileName}${chalk.hidden(`:${positionTuple}`)}`);
                 currentFile = fileName;
             }
 
@@ -79,9 +81,6 @@ export class Formatter extends AbstractFormatter {
             ruleName     = chalk.grey(ruleName);
 
             // Lines
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             positionTuple = failure.getRuleSeverity() === "warning"

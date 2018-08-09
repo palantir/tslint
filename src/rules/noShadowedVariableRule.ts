@@ -28,7 +28,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-shadowed-variable",
         description: "Disallows shadowing variable declarations.",
-        rationale: "Shadowing a variable masks access to it and obscures to what value an identifier actually refers.",
+        rationale: Lint.Utils.dedent`
+            Shadowing a variable masks access to it and obscures to what value an identifier actually refers.
+            For example, in the following code, it can be confusing why the filter is likely never true:
+
+            \`\`\`
+            const findNeighborsWithin = (instance: MyClass, instances: MyClass[]): MyClass[] => {
+                return instances.filter((instance) => instance.neighbors.includes(instance));
+            };
+            \`\`\`
+        `,
         optionsDescription: Lint.Utils.dedent`
             You can optionally pass an object to disable checking for certain kinds of declarations.
             Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
@@ -141,7 +150,7 @@ class Scope {
 }
 
 class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
-    private scope: Scope;
+    private scope: Scope = new Scope();
     public walk(sourceFile: ts.SourceFile) {
         if (sourceFile.isDeclarationFile) {
             return;

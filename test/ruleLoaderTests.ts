@@ -21,7 +21,7 @@ import * as path from "path";
 import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
 import { camelize } from "../src/utils";
 import { IOptions } from "./../src/language/rule/rule";
-import { loadRules } from "./lint";
+import { findRule, loadRules, RuleConstructor } from "./lint";
 
 const builtRulesDir = "build/src/rules";
 const srcRulesDir = "src/rules";
@@ -85,7 +85,7 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 5);
     });
 
-    it("loads js rules", () => {
+    it("loads rules for JS files, excluding typescript-only ones", () => {
         const validConfiguration: IOptions[] = [
             { ruleName: "class-name", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
             { ruleName: "await-promise", ruleArguments: [], ruleSeverity: "error", disabledIntervals: [] },
@@ -95,7 +95,7 @@ describe("Rule Loader", () => {
         assert.equal(rules.length, 1);
     });
 
-    it("tests every rule", () => {
+    it("tests exist for every rule", () => {
         const tests = fs.readdirSync(testRulesDir)
             .filter((file) => !file.startsWith("_") && fs.statSync(path.join(testRulesDir, file)).isDirectory())
             .map(camelize)
@@ -109,6 +109,27 @@ describe("Rule Loader", () => {
         const tslintAllRules = Object.keys(allRules).map(camelize).sort();
 
         assert.deepEqual(expectedAllRules, tslintAllRules, "rule is missing in tslint:all");
+    });
+
+    it("resolves custom rule directories as relative paths", () => {
+        let rule: RuleConstructor | undefined;
+        assert.doesNotThrow(() => {
+            rule = findRule("always-fail", "test/files/custom-rules");
+        });
+        assert.isDefined(rule);
+    });
+
+    it("supports rulesDirectory set to empty string", () => {
+        // see https://github.com/palantir/tslint/issues/3638
+        assert.doesNotThrow(() => {
+            findRule("always-fail", "");
+        });
+    });
+
+    it("throws an error for invalid rulesDirectories", () => {
+        assert.throws(() => {
+            findRule("always-fail", "some/invalid/dir");
+        });
     });
 });
 

@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/onlyArrowFunctions.examples";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
 const OPTION_ALLOW_NAMED_FUNCTIONS = "allow-named-functions";
@@ -47,6 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS]],
         type: "typescript",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
