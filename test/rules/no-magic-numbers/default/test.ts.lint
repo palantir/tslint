@@ -1,6 +1,8 @@
 console.log(-1, 0, 1);
 console.log(42.42);
             ~~~~~                     ['magic numbers' are not allowed]
+console.log(-0);
+            ~~                            ['magic numbers' are not allowed]
 const a = 1337;
 const b = {
     a: 1338,

@@ -1,3 +1,4 @@
+[typescript]: < 2.9.0
 export function func1(x: number, y: number, ...args: number[]) {
                                                ~~~~              [err % ('args')]
     return x + y;

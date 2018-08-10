@@ -1,6 +1,63 @@
 Change Log
 ===
 
+v5.11.0
+---
+
+## :warning: Deprecations
+
+- [deprecation] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) is deprecated because typescript now covers most of its functionality (#3919)
+
+## :tada: Features
+- [new-rule] [`file-name-casing`](https://palantir.github.io/tslint/rules/file-name-casing/) (#3978)
+- [new-fixer] Add fixer for [`switch-final-break`](https://palantir.github.io/tslint/rules/switch-final-break/) (#3615)
+- [new-fixer] Implemented fixer for [`member-ordering`](https://palantir.github.io/tslint/rules/member-ordering/) and added corresponding tests. (#3935)
+- [new-rule-option] Add whitelist for [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) (#3979)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] [`no-use-before-declare`](https://palantir.github.io/tslint/rules/no-use-before-declare/) Fixes false positives when using the destructuring syntax (#3761)  (#3876)
+- [bugfix] Fix Copyright: @license JSDoc tag was missing (#3879)
+- [bugfix] Fix missing newline at end of file (#3896)
+- [bugfix] allow-empty-functions option of [`no-empty`](https://palantir.github.io/tslint/rules/no-empty/) rule is now properly respecting empty methods (#3897)
+- [bugfix] [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers/) - support for negative zero (#3903)
+- [bugfix] Handle tsconfig.json errors without using JSON.stringify (#3908)
+- [bugfix] Fix CI: [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) test failure; typescript@next failure (#4019)
+- [bugfix] Fix edge case in [`no-console`](https://palantir.github.io/tslint/rules/no-console/) rule (#4041)
+- [docs] Fix typos in the [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/) rule docs. (#3886)
+- [docs] Updated [`prefer-while`](https://palantir.github.io/tslint/rules/prefer-while/) docs to be semantically correct (#3888)
+- [docs] Fix link to configuration page (#3891)
+- [docs] Fix docs typo (#3898)
+- [docs] Fix docs typo (#3910)
+- [enhancement] Turn on strictPropertyInitialization for src/ and test/ (#3924)
+- [enhancement] Use Buffer.allocUnsafe instead of the deprecated new Buffer() (#3985)
+- [enhancement] Improve [`radix`](https://palantir.github.io/tslint/rules/radix/) rule checks (#3901)
+- [enhancement] Output +/- on diff so added/removed empty lines are visible. (#3973)
+- [rule-change] [`no-implicit-dependencies`](https://palantir.github.io/tslint/rules/no-implicit-dependencies/) now always considers peer dependencies (#3875)
+
+Thanks to our contributors!
+
+- Bowen Ni
+- Peter Safranek
+- Saugat Acharya
+- Jason Mendes
+- Ryan Waskiewicz
+- Dariusz Rumiński
+- Xinhu Liu
+- Rado Kirov
+- aervin_
+- Josh Goldberg
+- mertdeg2
+- Jason Killian
+- Adrian Leonhard
+- david-cannady
+- Andy Russell
+- Tibor Blenessy
+- Andrew Crites
+- Pavel Birukov
+- shalomdotnet
+
+
 v5.10.0
 ---
 

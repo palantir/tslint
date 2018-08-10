@@ -75,7 +75,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
-            throw new Error(JSON.stringify(error));
+            throw new Error(ts.formatDiagnostics([error], ts.createCompilerHost({})));
         }
 
         const parseConfigHost = {
@@ -250,11 +250,17 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, 
 
     for (const diffResult of diffResults) {
         let color = chalk.grey;
+        let prefix = "  ";
         if (diffResult.added) {
             color = chalk.green.underline;
+            prefix = "+ ";
         } else if (diffResult.removed) {
             color = chalk.red.underline;
+            prefix = "- ";
         }
-        logger.log(color(diffResult.value));
+        logger.log(color(diffResult.value.split(/\r\n|\r|\n/)
+            // strings end on a newline which we do not want to include the prefix.
+            // tslint:disable-next-line:prefer-template
+            .map((line, index, array) => index === array.length - 1 ? line : prefix + line + "\n").join("")));
     }
 }

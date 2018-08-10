@@ -10,10 +10,10 @@ class Good {
     private f = foo();
     constructor() {}
     j = () => {};
-    protected k() {};
+    protected k() {}
     private l = () => {};
 }
-    
+
 interface IGood {
     foo: number;
     arrowsAreFields: () => void;
@@ -34,7 +34,7 @@ class Bad {
     protected e: number = 5;
     constructor() {}
     j = () => {};
-    protected k() {};
+    protected k() {}
     private f = foo();
     ~~~~~~~~~~~~~~~~~~ [Declaration of private instance field not allowed after declaration of protected instance method. Instead, this should come after protected instance fields.]
     private l = () => {};

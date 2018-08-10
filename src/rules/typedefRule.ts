@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/typedef.examples";
 
 interface Options {
     "call-signature"?: boolean;
@@ -90,6 +91,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
