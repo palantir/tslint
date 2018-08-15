@@ -198,6 +198,7 @@ export const rules = {
     "interface-name": true,
     "interface-over-type-literal": true,
     "jsdoc-format": [true, "check-multiline-start"],
+    "key-spacing": true,
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
