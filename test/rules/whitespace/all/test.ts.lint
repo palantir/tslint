@@ -6,14 +6,10 @@ module M {
                   ~     [missing whitespace]
                    ~    [missing whitespace]
 
-    var x:number;
-          ~       [missing whitespace]
-
     var y = (x === 10)?1:2;
                       ~     [missing whitespace]
                        ~    [missing whitespace]
                         ~   [missing whitespace]
-                         ~  [missing whitespace]
 
     var zz = (y===4);
                ~      [missing whitespace]
@@ -26,21 +22,11 @@ module M {
     var a,b;
           ~  [missing whitespace]
 
-    switch(x) {
-          ~     [missing whitespace]
-        case 1:break;
-               ~      [missing whitespace]
-        default:break;
-                ~      [missing whitespace]
-    }
-
     for(x = 1;x <2; ++x){
        ~                   [missing whitespace]
               ~            [missing whitespace]
                  ~         [missing whitespace]
                         ~  [missing whitespace]
-        goto:console.log("hi");
-             ~                  [missing whitespace]
     }
 
     for (x = 2; x--;) {}
@@ -97,11 +83,8 @@ var withinTemplateExpression = `${name==="something"?"foo":"bar"}`;
                                                     ~               [missing whitespace]
                                                      ~              [missing whitespace]
                                                           ~         [missing whitespace]
-                                                           ~        [missing whitespace]
 var withinTemplateExpression = `${name === "something" ? "foo" : "bar"}`;
 
-var objectInsideTemplateExpression = `${({foo:"bar"}).foo}`;
-                                              ~                     [missing whitespace]
 var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
 
 import { importA } from "libA";
@@ -148,8 +131,7 @@ function foorbar()
 if (){
      ~ [missing whitespace]
     //
-} else{}
-      ~ [missing whitespace]
+}
 
 if ()
 {}

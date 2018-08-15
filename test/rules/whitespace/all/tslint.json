@@ -8,7 +8,6 @@
       "check-preblock",
       "check-separator",
       "check-rest-spread",
-      "check-type",
       "check-typecast",
       "check-type-operator"
     ]

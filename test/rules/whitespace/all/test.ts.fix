@@ -2,9 +2,7 @@ import ast = AST;
 module M {
     export var ast = AST;
 
-    var x: number;
-
-    var y = (x === 10) ? 1 : 2;
+    var y = (x === 10) ? 1 :2;
 
     var zz = (y === 4);
 
@@ -12,13 +10,7 @@ module M {
 
     var a, b;
 
-    switch (x) {
-        case 1: break;
-        default: break;
-    }
-
     for (x = 1; x < 2; ++x) {
-        goto: console.log("hi");
     }
 
     for (x = 2; x--;) {}
@@ -56,10 +48,9 @@ var test = `
   <div class="repeat"
 `;
 
-var withinTemplateExpression = `${name === "something" ? "foo" : "bar"}`;
+var withinTemplateExpression = `${name === "something" ? "foo" :"bar"}`;
 var withinTemplateExpression = `${name === "something" ? "foo" : "bar"}`;
 
-var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
 var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
 
 import { importA } from "libA";
@@ -92,7 +83,7 @@ function foorbar()
 
 if () {
     //
-} else {}
+}
 
 if ()
 {}
