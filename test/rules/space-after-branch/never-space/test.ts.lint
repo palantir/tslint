@@ -1,0 +1,26 @@
+if (x = 2) {}
+  ~ [invalid]
+
+for (;;) {
+   ~ [invalid] 
+    const x = 1;
+}
+
+switch(v) {}
+
+while   (true) {
+     ~~~ [invalid]
+    z = 1;
+}
+
+with   (z) {}
+    ~~~ [invalid]
+
+catch (error) {
+     ~ [invalid]
+}
+
+for(;;){}
+
+[_base]: %s whitespace after keyword
+[invalid]: _base % ('invalid')

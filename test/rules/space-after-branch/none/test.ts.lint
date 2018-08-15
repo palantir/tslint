@@ -1,0 +1,23 @@
+if(x = 2) {}
+  ~nil [missing]
+
+for (;;) {
+    const x = 1;
+}
+
+switch   (v) {}
+       ~~ [invalid]
+
+while   (true) {
+      ~~ [invalid]
+    z = 1;
+}
+
+with (z) {}
+
+catch (error) {
+}
+
+[_base]: %s whitespace after keyword
+[missing]: _base % ('missing')
+[invalid]: _base % ('invalid')
