@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "ternary-operator-spacing": true
+    }
+}

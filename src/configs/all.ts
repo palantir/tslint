@@ -252,6 +252,7 @@ export const rules = {
     }],
     "space-within-parens": [true, 0],
     "switch-final-break": true,
+    "ternary-operator-spacing": true,
     "type-literal-delimiter": true,
     "variable-name": [
         true,

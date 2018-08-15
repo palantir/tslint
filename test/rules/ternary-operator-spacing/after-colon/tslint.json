@@ -1,0 +1,10 @@
+{
+    "rules": {
+        "ternary-operator-spacing": [
+            true,
+            {
+                "afterColon": true
+            }
+        ]
+    }
+}

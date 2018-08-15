@@ -1,0 +1,29 @@
+const x = true ? 1: 0;
+                ~ [no-after-question]
+                  ~nil [space-before-colon]
+                   ~ [no-after-colon]  
+
+const z = true ?2 : 1;
+                   ~ [no-after-colon]
+
+const r = <div>HELLO</div>?  <img src=""/>:   <br/>
+                          ~nil [space-before-question]
+                           ~~ [no-after-question]
+                                          ~nil [space-before-colon]
+                                           ~~~ [no-after-colon]
+
+let me = () => true   ?1  :   () => false
+                           ~~~ [no-after-colon]
+
+const correct = <a href="#">LINK</a> ?true :0
+
+
+[_base]: expected %s %s %s
+[space-before-question]: _base % ('space', 'before', 'question')
+[no-before-question]: _base % ('no space', 'before', 'question')
+[space-after-question]: _base % ('space', 'after', 'question')
+[no-after-question]: _base % ('no space', 'after', 'question')
+[space-before-colon]: _base % ('space', 'before', 'colon')
+[no-before-colon]: _base % ('no space', 'before', 'colon')
+[space-after-colon]: _base % ('space', 'after', 'colon')
+[no-after-colon]: _base % ('no space', 'after', 'colon')

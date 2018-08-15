@@ -1,0 +1,20 @@
+const x = true? 1 : 0;
+
+const z = true ?2:1;
+              ~ [no-before-question]
+                ~nil [space-after-question]
+                 ~nil [space-before-colon]
+                  ~nil [space-after-colon]
+
+const r = <div>HELLO</div>? <img src=""/>:   <br/>
+                                         ~nil [space-before-colon]
+
+let me = () => true?1 : () => false
+                    ~nil [space-after-question] 
+
+
+[_base]: expected %s %s %s
+[no-before-question]: _base % ('no space', 'before', 'question')
+[space-after-question]: _base % ('space', 'after', 'question')
+[space-before-colon]: _base % ('space', 'before', 'colon')
+[space-after-colon]: _base % ('space', 'after', 'colon')

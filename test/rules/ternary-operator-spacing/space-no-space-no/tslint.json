@@ -1,0 +1,13 @@
+{
+    "rules": {
+        "ternary-operator-spacing": [
+            true,
+            {
+                "beforeQuestion": true,
+                "afterQuestion": false,
+                "beforeColon": true,
+                "afterColon": false
+            }
+        ]
+    }
+}
