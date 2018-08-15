@@ -1,0 +1,11 @@
+const r = {aProp: 'testA', prop1 :1, bProp:'testbProp'};
+                                ~ [before]
+
+const z = {x  : 'testX', prop2:  2};
+            ~~ [before]
+
+const fx = { a: 1, b: 2 };
+
+
+[_base]: expected %s %s colon
+[before]: _base % ('no space', 'before')

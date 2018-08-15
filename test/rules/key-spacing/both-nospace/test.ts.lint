@@ -1,0 +1,22 @@
+const r = {aProp: 'testA', prop1 :1, bProp:'testbProp'};
+                 ~ [after]
+                                ~ [before]
+
+const z = {x : 'testX', prop2  :  2};
+            ~ [before]
+              ~ [after]
+                             ~~ [before]
+                                ~~ [after]
+
+const v = { r:1, x:{ a:1 } };
+
+const {
+        x  :  1,
+         ~~ [before]
+            ~~ [after]
+        y:5
+} = v;
+
+[_base]: expected no space %s colon
+[before]: _base % ('before')
+[after]: _base % ('after')

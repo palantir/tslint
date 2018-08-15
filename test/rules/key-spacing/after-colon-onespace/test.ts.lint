@@ -1,0 +1,15 @@
+const r = {aProp: 'testA', prop1 :1, bProp:'testbProp'};
+                                ~ [before]
+                                  ~nil [after]
+                                           ~nil [after]
+
+const z = {x : 'testX', prop2:   2};
+            ~ [before]
+                               ~~ [after]
+
+const fx = { a: 1, b: 2 };
+
+
+[_base]: expected %s %s colon
+[before]: _base % ('no space', 'before')
+[after]: _base % ('one space', 'after')

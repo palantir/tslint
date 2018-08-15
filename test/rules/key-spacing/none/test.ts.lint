@@ -1,0 +1,11 @@
+const test = { x :1, y :  2, z: 123};
+                ~ [before]
+                  ~nil [after]
+                      ~ [before]
+                         ~ [after]
+
+const correct = { x: { t: 1 }, z: 2 };
+
+[_base]: expected %s %s colon
+[before]: _base % ('no space', 'before')
+[after]: _base % ('one space', 'after')

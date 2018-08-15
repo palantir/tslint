@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "key-spacing": [
+            true,
+            {
+                "beforeColon": false,
+                "afterColon": false
+            }
+        ]
+    }
+}

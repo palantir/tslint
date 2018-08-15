@@ -1,0 +1,25 @@
+const r = {aProp: 'testA', prop1 :1, bProp:'testbProp', prop3 :   { x : 1 }};
+                ~nil [before]
+                                  ~nil [after]
+                                          ~nil [before]
+                                           ~nil [after]
+                                                                ~~ [after]
+const z = {x : 'testX', prop2 : 2};
+
+const {
+        props:{ routeName, location, currentUser },
+             ~nil [before]
+              ~nil [after]   
+        onTabSelect
+} = this;
+
+const {
+        x  :  1,
+          ~ [before]
+             ~ [after]
+        y : 5
+} = v;
+
+[_base]: expected one space %s colon
+[before]: _base % ('before')
+[after]: _base % ('after')
