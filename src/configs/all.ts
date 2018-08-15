@@ -243,6 +243,7 @@ export const rules = {
     ],
     "return-undefined": true,
     "semicolon": [true, "always"],
+    "space-after-branch": true,
     "space-before-function-paren": [true, {
         "anonymous": "never",
         "asyncArrow": "always",
