@@ -23,6 +23,30 @@ optionExamples:
   - '[true, "allow-declarations", "allow-named-functions"]'
 type: typescript
 typescriptOnly: false
+codeExamples:
+  - description: Disallows functions with the function keyword
+    config: |-
+      ```json
+      "rules": { "only-arrow-functions": true }
+      ```
+    pass: |-
+      ```ts
+      const myFunc = () => {
+          // do something ...
+      };
+      ```
+    fail: |-
+      ```ts
+      function myFunc() {
+          // do something ...
+      };
+
+      const myFunc = function() {
+          // do something ...
+      };
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: only-arrow-functions'
 optionsJSON: |-

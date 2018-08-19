@@ -20,6 +20,22 @@ optionExamples:
   - 'true'
 type: typescript
 typescriptOnly: true
+codeExamples:
+  - description: Disallows usages of `any` as a type declaration.
+    config: |-
+      ```json
+      "rules": { "no-any": true }
+      ```
+    pass: |-
+      ```ts
+      let foo: object;
+      ```
+    fail: |-
+      ```ts
+      let foo: any;
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: no-any'
 optionsJSON: 'null'

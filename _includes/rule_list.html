@@ -13,6 +13,12 @@
             {% if rule.requiresTypeInfo %}
                 <span class="feature feature-sm feature-requires-type-info" title="This rule requires type information to run">Requires Type Info</span>
             {% endif %}
+            {% if rule.isRecommended %}
+                <span class="feature feature-sm feature-is-recommended" title="This rule is included in the recommended config list">Recommended</span>
+            {% endif %}
+            {% if rule.isLatest %}
+                <span class="feature feature-sm feature-is-latest" title="This rule is included in the latest config list">Latest</span>
+            {% endif %}
         </div>
         <strong>{{rule.ruleName}}</strong> - {{rule.description | markdownify | remove:"<p>" | remove: "</p>"}}
       </a>

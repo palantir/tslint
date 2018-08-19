@@ -12,6 +12,28 @@ optionExamples:
   - 'true'
 type: functionality
 typescriptOnly: false
+codeExamples:
+  - description: Requires the inclusion of the radix parameter when calling `parseInt`.
+    config: |-
+      ```json
+      "rules": { "radix": true }
+      ```
+    pass: |-
+      ```ts
+      const x: string = '11';
+      const dec: number = parseInt(x, 10);
+      const bin: number = parseInt(x, 2);
+      const hex: number = parseInt(x, 16);
+      ```
+    fail: |-
+      ```ts
+      const x: string = '11';
+      const dec: number = parseInt(x);
+      const bin: number = parseInt(x, 2);
+      const hex: number = parseInt(x, 16);
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: radix'
 optionsJSON: 'null'

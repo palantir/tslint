@@ -7,6 +7,41 @@ optionExamples:
   - 'true'
 type: functionality
 typescriptOnly: false
+codeExamples:
+  - description: Requires a `default` case in `switch` statements.
+    config: |-
+      ```json
+      "rules": { "switch-default": true }
+      ```
+    pass: |-
+      ```ts
+      let foo: number = 1;
+      switch (foo) {
+          case 1:
+              doSomething();
+              break;
+          case 2:
+              doSomething2();
+              break;
+          default:
+              console.log('default');
+              break;
+      }
+      ```
+    fail: |-
+      ```ts
+      let foo: number = 1;
+      switch (foo) {
+          case 1:
+              doSomething();
+              break;
+          case 2:
+              doSomething2();
+              break;
+      }
+      ```
+isRecommended: false
+isLatest: false
 layout: rule
 title: 'Rule: switch-default'
 optionsJSON: 'null'

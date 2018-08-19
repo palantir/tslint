@@ -9,7 +9,9 @@
     ],
     "rationale": "Improves readability and organization by grouping naturally related items together.",
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "align",
@@ -40,7 +42,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": true
   },
   {
     "ruleName": "array-type",
@@ -70,7 +74,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "arrow-parens",
@@ -92,7 +98,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "arrow-return-shorthand",
@@ -114,7 +122,23 @@
     ],
     "rationale": "\nIt's unnecessary to include `return` and `{}` brackets in arrow lambdas.\nLeaving them out results in simpler and easier to read code.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
+        "config": "```json\n\"rules\": { \"arrow-return-shorthand\": true }\n```",
+        "pass": "```ts\nconst calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```",
+        "fail": "```ts\nconst calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```"
+      },
+      {
+        "description": "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
+        "config": "```json\n\"rules\": { \"arrow-return-shorthand\": [true, \"multiline\"] }\n```",
+        "pass": "```ts\nconst calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });\nconst calc2 = (x: number, y: number) =>\n    ({ add: x + y, sub: x - y, mul: x * y });\n```",
+        "fail": "```ts\nconst calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "await-promise",
@@ -139,7 +163,9 @@
     "rationale": "\nWhile it is valid JavaScript to await a non-Promise-like value (it will resolve immediately),\nthis pattern is often a programmer error and the resulting semantics can be unintuitive.\n\nAwaiting non-Promise-like values often is an indication of programmer error, such as\nforgetting to add parenthesis to call a function that returns a Promise.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "ban-comma-operator",
@@ -152,7 +178,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "ban",
@@ -238,7 +266,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "ban-types",
@@ -268,7 +298,9 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "binary-expression-operand-order",
@@ -280,7 +312,9 @@
     ],
     "rationale": "\nExpressions like `1 + x` are sometimes referred to as \"Yoda\" expressions because they read\nopposite to how we would normally speak the expression.\n\nSticking to a consistent grammar for conditions helps keep code readable and understandable.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "callable-types",
@@ -290,7 +324,9 @@
     "options": null,
     "type": "style",
     "typescriptOnly": true,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "class-name",
@@ -302,7 +338,17 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces PascalCased class and interface names.",
+        "config": "```json\n\"rules\": { \"class-name\": true }\n```",
+        "pass": "```ts\nclass MyClass { }\ninterface MyInterface { }\n```",
+        "fail": "```ts\nclass myClass { }\ninterface myInterface { }\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "comment-format",
@@ -368,7 +414,47 @@
     ],
     "type": "style",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
+  },
+  {
+    "ruleName": "comment-type",
+    "description": "Allows a limited set of comment types",
+    "optionsDescription": "\nOne or more of the following mutually exclusive comment types may be provided:\n\n* `singleline`: Comments starting with `//`\n* `multiline`:  Comments between `/*` and `*/` but are not doc comments\n* `doc`:        Multiline comments that start with `/**`\n* 'directive':  Triple-slash directives that are singleline comments starting with `///`",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "singleline",
+          "multiline",
+          "doc",
+          "directive"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "optionExamples": [
+      [
+        true,
+        "doc",
+        "singleline"
+      ],
+      [
+        true,
+        "singleline"
+      ],
+      [
+        true,
+        "multiline"
+      ]
+    ],
+    "hasFix": false,
+    "type": "style",
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "completed-docs",
@@ -750,7 +836,9 @@
     "rationale": "\nHelps ensure important components are documented.\n\nNote: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.\nComments that only restate the names of variables add nothing to code, and can easily become outdated.\n        ",
     "type": "style",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "curly",
@@ -800,7 +888,9 @@
         "pass": "```ts\nif (x > 0)\n    doStuff();\n\nif (x > 0) {\n    customerUpdates.push(getInfo(customerId));\n    return customerUpdates;\n}\n```",
         "fail": "```ts\nif (x > 0) {\n    doStuff();\n}\n```"
       }
-    ]
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "cyclomatic-complexity",
@@ -820,7 +910,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "deprecation",
@@ -834,7 +926,9 @@
     ],
     "type": "maintainability",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "encoding",
@@ -845,7 +939,9 @@
       "true"
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "eofline",
@@ -859,7 +955,9 @@
     ],
     "hasFix": true,
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "file-header",
@@ -888,13 +986,15 @@
     ],
     "hasFix": true,
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "file-name-casing",
     "description": "Enforces a consistent file naming convention",
     "rationale": "Helps maintain a consistent style across a file hierarchy",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.",
     "options": {
       "type": "array",
       "items": [
@@ -903,7 +1003,8 @@
           "enum": [
             "camel-case",
             "pascal-case",
-            "kebab-case"
+            "kebab-case",
+            "snake-case"
           ]
         }
       ]
@@ -920,11 +1021,17 @@
       [
         true,
         "kebab-case"
+      ],
+      [
+        true,
+        "snake-case"
       ]
     ],
     "hasFix": false,
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "forin",
@@ -936,7 +1043,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "import-blacklist",
@@ -959,7 +1068,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "import-spacing",
@@ -970,7 +1081,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "indent",
@@ -1016,7 +1129,9 @@
     ],
     "hasFix": true,
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "interface-name",
@@ -1041,7 +1156,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "interface-over-type-literal",
@@ -1054,7 +1171,9 @@
     ],
     "type": "style",
     "typescriptOnly": true,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "jsdoc-format",
@@ -1081,7 +1200,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": true
   },
   {
     "ruleName": "label-position",
@@ -1094,7 +1215,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "linebreak-style",
@@ -1119,7 +1242,9 @@
     ],
     "type": "maintainability",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "match-default-export-name",
@@ -1131,7 +1256,9 @@
     ],
     "type": "style",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "max-classes-per-file",
@@ -1168,7 +1295,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "max-file-line-count",
@@ -1186,7 +1315,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "max-line-length",
@@ -1231,7 +1362,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "member-access",
@@ -1265,14 +1398,16 @@
     ],
     "type": "typescript",
     "typescriptOnly": true,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "member-ordering",
     "description": "Enforces member ordering.",
     "hasFix": true,
     "rationale": "\nA consistent ordering for class members can make classes easier to read, navigate, and edit.\n\nA common opposite practice to `member-ordering` is to keep related groups of classes together.\nInstead of creating classes with multiple separate groups, consider splitting class responsibilities\napart across multiple single-responsibility classes.\n        ",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` may be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
     "options": {
       "type": "object",
       "properties": {
@@ -1357,7 +1492,9 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "newline-before-return",
@@ -1369,7 +1506,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "newline-per-chained-call",
@@ -1378,7 +1517,9 @@
     "optionsDescription": "Not configurable",
     "options": null,
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "new-parens",
@@ -1390,7 +1531,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-angle-bracket-type-assertion",
@@ -1403,7 +1546,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-any",
@@ -1416,7 +1561,17 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallows usages of `any` as a type declaration.",
+        "config": "```json\n\"rules\": { \"no-any\": true }\n```",
+        "pass": "```ts\nlet foo: object;\n```",
+        "fail": "```ts\nlet foo: any;\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-arg",
@@ -1428,7 +1583,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-bitwise",
@@ -1441,7 +1598,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-boolean-literal-compare",
@@ -1455,7 +1614,9 @@
     "rationale": "\nComparing boolean values to boolean literals is unnecessary, as those expressions will result in booleans too.\nJust use the boolean values directly or negate them.\n        ",
     "type": "style",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-conditional-assignment",
@@ -1468,7 +1629,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-consecutive-blank-lines",
@@ -1488,7 +1651,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-console",
@@ -1509,7 +1674,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-construct",
@@ -1522,7 +1689,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-debugger",
@@ -1534,7 +1703,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-default-export",
@@ -1547,7 +1718,9 @@
       true
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-duplicate-imports",
@@ -1559,7 +1732,9 @@
       true
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-duplicate-super",
@@ -1571,7 +1746,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "description": "Prevents duplicate cases in switch statements.",
@@ -1582,7 +1759,9 @@
     "optionsDescription": "",
     "ruleName": "no-duplicate-switch-case",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-duplicate-variable",
@@ -1604,7 +1783,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "description": "Bans usage of the delete operator with computed key expressions.",
@@ -1616,7 +1797,9 @@
     "rationale": "\nDeleting dynamically computed keys is dangerous and not well optimized.\n\nAlso consider using a [`Map`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)\nor [`Set`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)\nif you're storing collections of objects.\nUsing `Object`s can cause occasional edge case bugs, such as if a key is named \"hasOwnProperty\".\n        ",
     "ruleName": "no-dynamic-delete",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-empty-interface",
@@ -1625,7 +1808,17 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallows empty interfaces.",
+        "config": "```json\n\"rules\": { \"no-empty-interface\": true }\n```",
+        "pass": "```ts\ninterface I {\n    foo: string;\n}\n```",
+        "fail": "```ts\ninterface I { }\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-empty",
@@ -1669,7 +1862,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-eval",
@@ -1681,7 +1876,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-floating-promises",
@@ -1707,7 +1904,9 @@
     "rationale": "\nCreating a Promise and not storing or returning it may let other code run independently of its result.\nThis can cause unexpected and/or non-deterministic behavior depending on external timing factors.\n\nIt's typically better to return Promises from functions that start them, then handle them in calling code.\n\nUse `no-unused-expression` in addition to this rule to reveal even more floating promises.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-for-in-array",
@@ -1720,7 +1919,9 @@
     ],
     "requiresTypeInfo": true,
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-implicit-dependencies",
@@ -1763,7 +1964,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "description": "Avoid import statements with side-effect.",
@@ -1793,7 +1996,9 @@
     "rationale": "Imports with side effects may have behavior which is hard for static verification.",
     "ruleName": "no-import-side-effect",
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-inferrable-types",
@@ -1826,7 +2031,9 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-inferred-empty-object-type",
@@ -1839,7 +2046,9 @@
     "rationale": "\nWhen function or constructor may be called with a type parameter but one isn't supplied or inferrable,\nTypeScript defaults to `{}`.\nThis is often undesirable as the call is meant to be of a more specific type.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-internal-module",
@@ -1852,7 +2061,9 @@
     ],
     "type": "typescript",
     "typescriptOnly": true,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-invalid-template-strings",
@@ -1864,7 +2075,9 @@
     ],
     "rationale": "Interpolation will only work for template strings.",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-invalid-this",
@@ -1890,7 +2103,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-irregular-whitespace",
@@ -1902,7 +2117,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-magic-numbers",
@@ -1926,7 +2143,9 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-mergeable-namespace",
@@ -1937,7 +2156,9 @@
       true
     ],
     "type": "maintainability",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-misused-new",
@@ -1949,7 +2170,9 @@
     ],
     "rationale": "\nInterfaces in TypeScript aren't meant to describe constructors on their implementations.\nThe `new` descriptor is primarily for describing JavaScript libraries.\nIf you're trying to describe a function known to be a class, it's typically better to `declare class`.\n        ",
     "type": "functionality",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-namespace",
@@ -1976,7 +2199,9 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-non-null-assertion",
@@ -1988,7 +2213,9 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-null-keyword",
@@ -2001,7 +2228,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-object-literal-type-assertion",
@@ -2013,7 +2242,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-parameter-properties",
@@ -2025,7 +2256,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-parameter-reassignment",
@@ -2036,7 +2269,9 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-redundant-jsdoc",
@@ -2047,7 +2282,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-reference-import",
@@ -2055,7 +2292,9 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-reference",
@@ -2067,7 +2306,9 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-require-imports",
@@ -2079,7 +2320,9 @@
       true
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-return-await",
@@ -2092,7 +2335,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-shadowed-variable",
@@ -2147,7 +2392,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-sparse-arrays",
@@ -2159,7 +2406,17 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows sparse arrays",
+        "config": "```json\n\"rules\": { \"no-sparse-arrays\": true }\n```",
+        "pass": "```ts\nconst arr: string[] = ['elemenet1', 'element2'];\n```",
+        "fail": "```ts\nconst arr: string[] = ['elemenet1',, 'element2'];\n```"
+      }
+    ],
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-string-literal",
@@ -2172,7 +2429,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-string-throw",
@@ -2193,7 +2452,9 @@
       }
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-submodule-imports",
@@ -2216,7 +2477,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-switch-case-fall-through",
@@ -2229,7 +2492,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "description": "Disallows unnecessary references to `this`.",
@@ -2262,7 +2527,9 @@
     "rationale": "\nAssigning a variable to `this` instead of properly using arrow lambdas may be a symptom of pre-ES6 practices\nor not managing scope well.\n\nInstead of storing a reference to `this` and using it inside a `function () {`:\n\n```\nconst self = this;\n\nsetTimeout(function () {\n    self.doWork();\n});\n```\n\nUse `() =>` arrow lambdas, as they preserve `this` scope for you:\n\n```\nsetTimeout(() => {\n    this.doWork();\n});\n```\n        ",
     "ruleName": "no-this-assignment",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "no-trailing-whitespace",
@@ -2294,7 +2561,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-unbound-method",
@@ -2316,7 +2585,9 @@
     "rationale": "\nClass functions don't preserve the class scope when passed as standalone variables.\nFor example, this code will log the global scope (`window`/`global`), not the class instance:\n\n```\nclass MyClass {\n    public log(): void {\n        console.log(this);\n    }\n}\n\nconst instance = new MyClass();\nconst log = instance.log;\n\nlog();\n```\n\nYou need to either use an arrow lambda (`() => {...}`) or call the function with the correct scope.\n\n```\nclass MyClass {\n    public logArrowBound = (): void => {\n        console.log(bound);\n    };\n\n    public logManualBind(): void {\n        console.log(this);\n    }\n}\n\nconst instance = new MyClass();\nconst logArrowBound = instance.logArrowBound;\nconst logManualBind = instance.logManualBind.bind(instance);\n\nlogArrowBound();\nlogManualBind();\n```\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unnecessary-callback-wrapper",
@@ -2328,7 +2599,17 @@
     ],
     "rationale": "\nThere's generally no reason to wrap a function with a callback wrapper if it's directly called anyway.\nDoing so creates extra inline lambdas that slow the runtime down.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows unnecessary callback wrappers",
+        "config": "```json\n\"rules\": { \"no-unnecessary-callback-wrapper\": true }\n```",
+        "pass": "```ts\nconst handleContent = (content) => console.log('Handle content:', content);\nconst handleError = (error) => console.log('Handle error:', error);\npromise.then(handleContent).catch(handleError);\n```",
+        "fail": "```ts\nconst handleContent = (content) => console.log('Handle content:', content);\nconst handleError = (error) => console.log('Handle error:', error);\npromise.then((content) => handleContent(content)).catch((error) => handleError(error));\n```"
+      }
+    ],
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unnecessary-class",
@@ -2351,7 +2632,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unnecessary-initializer",
@@ -2364,7 +2647,9 @@
     ],
     "rationale": "\nValues in JavaScript default to `undefined`.\nThere's no need to do so manually.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-unnecessary-qualifier",
@@ -2377,7 +2662,9 @@
     ],
     "type": "style",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unnecessary-type-assertion",
@@ -2395,7 +2682,9 @@
     "type": "typescript",
     "hasFix": true,
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unsafe-any",
@@ -2408,7 +2697,9 @@
     "rationale": "\nIf you're dealing with data of unknown or \"any\" types, you shouldn't be accessing members of it.\nEither add type annotations for properties that may exist or change the data type to the empty object type `{}`.\n\nAlternately, if you're creating storage or handling for consistent but unknown types, such as in data structures\nor serialization, use `<T>` template types for generic type handling.\n\nAlso see the `no-any` rule.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-unsafe-finally",
@@ -2421,7 +2712,9 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-unused-expression",
@@ -2450,7 +2743,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-unused-variable",
@@ -2495,7 +2790,9 @@
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true,
-    "deprecationMessage": "Since TypeScript 2.9. Please use the built-in compiler checks instead."
+    "deprecationMessage": "Since TypeScript 2.9. Please use the built-in compiler checks instead.",
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "no-use-before-declare",
@@ -2516,7 +2813,9 @@
         "pass": "```ts\nvar hello = 'world';\nvar foo;\n\nconsole.log(hello, foo, capitalize(hello));\n// 'world', undefined, 'WORLD'\n\nfunction capitalize(val) {\n    return val.toUpperCase();\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n\nfunction declaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n```",
         "fail": "```ts\nconsole.log(hello, foo);\n\nvar hello = 'world';\nvar foo;\n\nfunction undeclaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n```"
       }
-    ]
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-var-keyword",
@@ -2530,7 +2829,9 @@
     ],
     "rationale": "\nDeclaring variables using `var` has several edge case behaviors that make `var` unsuitable for modern code.\nVariables declared by `var` have their parent function block as their scope, ignoring other control flow statements.\n`var`s have declaration \"hoisting\" (similar to `function`s) and can appear to be used before declaration.\n\nVariables declared by `const` and `let` instead have as their scope the block in which they are defined,\nand are not allowed to used before declaration or be re-declared with another `const` or `let`.\n        ",
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-var-requires",
@@ -2543,7 +2844,9 @@
     ],
     "rationale": "\nAMD-style `require([])` and CommonJS-style `require(\"\")` statements are environment-specific\nand more difficult to statically analyze.\n\nES2015-style `import`s are part of the JavaScript language specfication and recommended as the path going forward.\nTypeScript will compile them to environment-specific forms as needed.\n        ",
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "no-void-expression",
@@ -2563,7 +2866,9 @@
     "rationale": "\nIt's misleading returning the results of an expression whose type is `void`.\nAttempting to do so is likely a symptom of expecting a different return type from a function.\nFor example, the following code will log `undefined` but looks like it logs a value:\n\n```\nconst performWork = (): void => {\n    workFirst();\n    workSecond();\n};\n\nconsole.log(performWork());\n```\n        ",
     "requiresTypeInfo": true,
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "number-literal-format",
@@ -2575,7 +2880,9 @@
     ],
     "rationale": "\nHelps keep a consistent style with numeric literals.\nNon-standard literals are more difficult to scan through and can be a symptom of typos.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "object-literal-key-quotes",
@@ -2603,7 +2910,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "object-literal-shorthand",
@@ -2624,7 +2933,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "object-literal-sort-keys",
@@ -2649,7 +2960,23 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires that an object literal's keys be sorted alphabetically.",
+        "config": "```json\n\"rules\": { \"object-literal-sort-keys\": true }\n```",
+        "pass": "```ts\nlet o = {\n    bar: 2,\n    foo: 1\n};\n```",
+        "fail": "```ts\nlet o = {\n    foo: 1,\n    bar: 2\n};\n```"
+      },
+      {
+        "description": "Requires that an object literal's keys be sorted by interface-definition.\n            If there is no interface fallback to alphabetically.",
+        "config": "```json\n\"rules\": {\n    \"object-literal-sort-keys\": {\n        \"options\": \"match-declaration-order\"\n    }\n}\n```",
+        "pass": "```ts\ninterface I {\n    foo: number;\n    bar: number;\n}\n\nlet o: I = {\n    foo: 1,\n    bar: 2\n};\n```",
+        "fail": "```ts\ninterface I {\n    foo: number;\n    bar: number;\n}\n\nlet o: I = {\n    bar: 2,\n    foo: 1\n};\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "one-line",
@@ -2680,7 +3007,9 @@
     ],
     "type": "style",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "one-variable-per-declaration",
@@ -2705,7 +3034,22 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows multiple variable definitions in the same declaration statement.",
+        "config": "```json\n\"rules\": { \"one-variable-per-declaration\": true }\n```",
+        "pass": "```ts\nconst foo = 1;\nconst bar = '2';\n```",
+        "fail": "```ts\nconst foo = 1, bar = '2';\n```"
+      },
+      {
+        "description": "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+        "config": "```json\n\"rules\": { \"one-variable-per-declaration\": [true, \"ignore-for-loop\"] }\n```",
+        "pass": "```ts\nfor (let i = 0, j = 10; i < 10; i++) {\n    doSomething(j, i);\n}\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "only-arrow-functions",
@@ -2733,7 +3077,17 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows functions with the function keyword",
+        "config": "```json\n\"rules\": { \"only-arrow-functions\": true }\n```",
+        "pass": "```ts\nconst myFunc = () => {\n    // do something ...\n};\n```",
+        "fail": "```ts\nfunction myFunc() {\n    // do something ...\n};\n\nconst myFunc = function() {\n    // do something ...\n};\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "ordered-imports",
@@ -2786,7 +3140,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-conditional-expression",
@@ -2807,7 +3163,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "prefer-const",
@@ -2837,7 +3195,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-for-of",
@@ -2849,7 +3209,9 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-function-over-method",
@@ -2871,7 +3233,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-method-signature",
@@ -2883,7 +3247,9 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-object-spread",
@@ -2896,7 +3262,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "description": "Requires that private variables are marked as `readonly` if they're never modified outside of the constructor.",
@@ -2919,7 +3287,9 @@
     "requiresTypeInfo": true,
     "ruleName": "prefer-readonly",
     "type": "maintainability",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-switch",
@@ -2943,7 +3313,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-template",
@@ -2963,7 +3335,23 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces the use of template strings whenever possible.",
+        "config": "```json\n\"rules\": { \"prefer-template\": true }\n```",
+        "pass": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = `${x} is equals ${y}`;\n```",
+        "fail": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals ' + y;\n```"
+      },
+      {
+        "description": "Enforces the use of template strings, but allows up to one concatenation.",
+        "config": "```json\n\"rules\": { \"prefer-template\": [true, \"allow-single-concat\"] }\n```",
+        "pass": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals 1';\nconst myString: string = `${x} is equals ${y}`;\n```",
+        "fail": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals ' + y;\n```"
+      }
+    ],
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "prefer-while",
@@ -2984,7 +3372,9 @@
         "pass": "```ts\nfor(let i = 1; i < 10; i++) {\n    console.log(i);\n}\n\nfor (let i = 0; i < 10; i+=1) {\n    console.log(i);\n}\n\nfor (let i = 0; i < 10;) {\n    i += 1;\n}\n```",
         "fail": "```ts\nfor(;;) {\n    console.log('Hello World');\n}\n\nfor(;true===true;) {\n    console.log('Hello World');\n}\n```"
       }
-    ]
+    ],
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "promise-function-async",
@@ -3015,13 +3405,15 @@
     ],
     "type": "typescript",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "quotemark",
-    "description": "Requires single or double quotes for string literals.",
+    "description": "Enforces quote character for string literals.",
     "hasFix": true,
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-template\"` forbids single-line untagged template strings that do not contain string interpolations.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"backtick\"` enforces backticks.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-template\"` forbids single-line untagged template strings that do not contain string interpolations.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
     "options": {
       "type": "array",
       "items": {
@@ -3029,6 +3421,7 @@
         "enum": [
           "single",
           "double",
+          "backtick",
           "jsx-single",
           "jsx-double",
           "avoid-escape",
@@ -3052,7 +3445,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "radix",
@@ -3064,7 +3459,17 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires the inclusion of the radix parameter when calling `parseInt`.",
+        "config": "```json\n\"rules\": { \"radix\": true }\n```",
+        "pass": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x, 10);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```",
+        "fail": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "restrict-plus-operands",
@@ -3076,7 +3481,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "return-undefined",
@@ -3088,7 +3495,9 @@
     ],
     "type": "style",
     "typescriptOnly": false,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "semicolon",
@@ -3135,7 +3544,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "description": "Require or disallow a space before function parenthesis",
@@ -3202,7 +3613,9 @@
     "optionsDescription": "\nOne argument which is an object which may contain the keys `anonymous`, `named`, and `asyncArrow`\nThese should be set to either `\"always\"` or `\"never\"`.\n\n* `\"anonymous\"` checks before the opening paren in anonymous functions\n* `\"named\"` checks before the opening paren in named functions\n* `\"asyncArrow\"` checks before the opening paren in async arrow functions\n* `\"method\"` checks before the opening paren in class methods\n* `\"constructor\"` checks before the opening paren in class constructors\n        ",
     "ruleName": "space-before-function-paren",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "space-within-parens",
@@ -3214,12 +3627,14 @@
       "min": 0
     },
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": true
   },
   {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n        ",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-enum` allows enums.\n  - It does *not* allow unions containing `enum`.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n        ",
     "options": {
       "type": "array",
       "items": {
@@ -3228,6 +3643,7 @@
           "allow-null-union",
           "allow-undefined-union",
           "allow-string",
+          "allow-enum",
           "allow-number",
           "allow-boolean-or-undefined"
         ]
@@ -3242,6 +3658,7 @@
         "allow-null-union",
         "allow-undefined-union",
         "allow-string",
+        "allow-enum",
         "allow-number"
       ],
       [
@@ -3251,7 +3668,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "strict-type-predicates",
@@ -3263,7 +3682,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "switch-default",
@@ -3274,7 +3695,17 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires a `default` case in `switch` statements.",
+        "config": "```json\n\"rules\": { \"switch-default\": true }\n```",
+        "pass": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n    default:\n        console.log('default');\n        break;\n}\n```",
+        "fail": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n}\n```"
+      }
+    ],
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "switch-final-break",
@@ -3295,7 +3726,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "trailing-comma",
@@ -3461,7 +3894,9 @@
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "triple-equals",
@@ -3491,7 +3926,9 @@
       ]
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "typedef",
@@ -3525,7 +3962,65 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Requires type definitions for call signatures",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"call-signature\"] }\n```",
+        "pass": "```ts\nfunction add(x, y): number {\n    return x + y;\n}\n```",
+        "fail": "```ts\nfunction add(x, y) {\n    return x + y;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for arrow call signatures",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"arrow-call-signature\"] }\n```",
+        "pass": "```ts\nconst add = (x, y): number => x + y;\n```",
+        "fail": "```ts\nconst add = (x, y) => x + y;\n```"
+      },
+      {
+        "description": "Requires type definitions for parameters",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"parameter\"] }\n```",
+        "pass": "```ts\nfunction add(x: number, y: number) {\n    return x + y;\n}\n```",
+        "fail": "```ts\nfunction add(x, y) {\n    return x + y;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for arrow function parameters",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"arrow-parameter\"] }\n```",
+        "pass": "```ts\nconst add = (x: number, y: number) => x + y;\n```",
+        "fail": "```ts\nconst add = (x, y) => x + y;\n```"
+      },
+      {
+        "description": "Requires type definitions for property declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"property-declaration\"] }\n```",
+        "pass": "```ts\ninterface I {\n    foo: number;\n    bar: string;\n}\n```",
+        "fail": "```ts\ninterface I {\n    foo;\n    bar;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for variable declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"variable-declaration\"] }\n```",
+        "pass": "```ts\nlet x: number;\n```",
+        "fail": "```ts\nlet x;\n```"
+      },
+      {
+        "description": "Requires type definitions for member variable declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"member-variable-declaration\"] }\n```",
+        "pass": "```ts\nclass MyClass {\n    x: number;\n}\n```",
+        "fail": "```ts\nclass MyClass {\n    x;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions when destructuring objects.",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"object-destructuring\"] }\n```",
+        "pass": "```ts\ninterface FooBar {\n    foo: number;\n    bar: string;\n}\nconst foobar = { foo: 1, bar: '2' };\nconst { foo, bar }: FooBar = foobar;\n```",
+        "fail": "```ts\ninterface FooBar {\n    foo: number;\n    bar: string;\n}\nconst foobar = { foo: 1, bar: '2' };\nconst { foo, bar } = foobar;\n```"
+      },
+      {
+        "description": "Requires type definitions when destructuring arrays.",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"array-destructuring\"] }\n```",
+        "pass": "```ts\nconst foobar = [1, '2'];\nconst [foo, bar]: Array<number | string> = foobar;\n```",
+        "fail": "```ts\nconst foobar = [1, '2'];\nconst [foo, bar] = foobar;\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "typedef-whitespace",
@@ -3651,18 +4146,34 @@
     ],
     "type": "typescript",
     "typescriptOnly": true,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "type-literal-delimiter",
     "description": "\nChecks that type literal members are separated by semicolons.\nEnforces a trailing semicolon for multiline type literals.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "`{singleLine: \"always\"}` enforces semicolon for one liners",
+    "options": {
+      "type": "object",
+      "properties": {
+        "singleLine": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never"
+          ]
+        }
+      }
+    },
+    "hasFix": true,
     "optionExamples": [
       true
     ],
     "type": "style",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "typeof-compare",
@@ -3674,7 +4185,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": false,
-    "deprecationMessage": "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
+    "deprecationMessage": "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant.",
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "unified-signatures",
@@ -3685,7 +4198,9 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "use-default-type-parameter",
@@ -3697,7 +4212,9 @@
     ],
     "type": "functionality",
     "typescriptOnly": true,
-    "requiresTypeInfo": true
+    "requiresTypeInfo": true,
+    "isRecommended": false,
+    "isLatest": false
   },
   {
     "ruleName": "use-isnan",
@@ -3709,7 +4226,17 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces usage of `isNan()`.",
+        "config": "```json\n\"rules\": { \"use-isnan\": true }\n```",
+        "pass": "```ts\nif (isNaN(parseInt('_4711'))) {\n    doSomething();\n}\n```",
+        "fail": "```ts\nif (parseInt('_4711') === NaN) {\n    doSomething();\n}\n```"
+      }
+    ],
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "variable-name",
@@ -3740,7 +4267,9 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "isRecommended": true,
+    "isLatest": false
   },
   {
     "ruleName": "whitespace",
@@ -3777,6 +4306,8 @@
     ],
     "type": "style",
     "typescriptOnly": false,
-    "hasFix": true
+    "hasFix": true,
+    "isRecommended": true,
+    "isLatest": true
   }
 ]

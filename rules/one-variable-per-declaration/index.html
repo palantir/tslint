@@ -19,6 +19,34 @@ optionExamples:
   - '[true, "ignore-for-loop"]'
 type: style
 typescriptOnly: false
+codeExamples:
+  - description: Disallows multiple variable definitions in the same declaration statement.
+    config: |-
+      ```json
+      "rules": { "one-variable-per-declaration": true }
+      ```
+    pass: |-
+      ```ts
+      const foo = 1;
+      const bar = '2';
+      ```
+    fail: |-
+      ```ts
+      const foo = 1, bar = '2';
+      ```
+  - description: Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.
+    config: |-
+      ```json
+      "rules": { "one-variable-per-declaration": [true, "ignore-for-loop"] }
+      ```
+    pass: |-
+      ```ts
+      for (let i = 0, j = 10; i < 10; i++) {
+          doSomething(j, i);
+      }
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: one-variable-per-declaration'
 optionsJSON: |-

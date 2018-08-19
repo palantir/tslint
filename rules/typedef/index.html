@@ -34,6 +34,156 @@ optionExamples:
   - '[true, "call-signature", "parameter", "member-variable-declaration"]'
 type: typescript
 typescriptOnly: true
+codeExamples:
+  - description: Requires type definitions for call signatures
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "call-signature"] }
+      ```
+    pass: |-
+      ```ts
+      function add(x, y): number {
+          return x + y;
+      }
+      ```
+    fail: |-
+      ```ts
+      function add(x, y) {
+          return x + y;
+      }
+      ```
+  - description: Requires type definitions for arrow call signatures
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "arrow-call-signature"] }
+      ```
+    pass: |-
+      ```ts
+      const add = (x, y): number => x + y;
+      ```
+    fail: |-
+      ```ts
+      const add = (x, y) => x + y;
+      ```
+  - description: Requires type definitions for parameters
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "parameter"] }
+      ```
+    pass: |-
+      ```ts
+      function add(x: number, y: number) {
+          return x + y;
+      }
+      ```
+    fail: |-
+      ```ts
+      function add(x, y) {
+          return x + y;
+      }
+      ```
+  - description: Requires type definitions for arrow function parameters
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "arrow-parameter"] }
+      ```
+    pass: |-
+      ```ts
+      const add = (x: number, y: number) => x + y;
+      ```
+    fail: |-
+      ```ts
+      const add = (x, y) => x + y;
+      ```
+  - description: Requires type definitions for property declarations
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "property-declaration"] }
+      ```
+    pass: |-
+      ```ts
+      interface I {
+          foo: number;
+          bar: string;
+      }
+      ```
+    fail: |-
+      ```ts
+      interface I {
+          foo;
+          bar;
+      }
+      ```
+  - description: Requires type definitions for variable declarations
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "variable-declaration"] }
+      ```
+    pass: |-
+      ```ts
+      let x: number;
+      ```
+    fail: |-
+      ```ts
+      let x;
+      ```
+  - description: Requires type definitions for member variable declarations
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "member-variable-declaration"] }
+      ```
+    pass: |-
+      ```ts
+      class MyClass {
+          x: number;
+      }
+      ```
+    fail: |-
+      ```ts
+      class MyClass {
+          x;
+      }
+      ```
+  - description: Requires type definitions when destructuring objects.
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "object-destructuring"] }
+      ```
+    pass: |-
+      ```ts
+      interface FooBar {
+          foo: number;
+          bar: string;
+      }
+      const foobar = { foo: 1, bar: '2' };
+      const { foo, bar }: FooBar = foobar;
+      ```
+    fail: |-
+      ```ts
+      interface FooBar {
+          foo: number;
+          bar: string;
+      }
+      const foobar = { foo: 1, bar: '2' };
+      const { foo, bar } = foobar;
+      ```
+  - description: Requires type definitions when destructuring arrays.
+    config: |-
+      ```json
+      "rules": { "typedef": [true, "array-destructuring"] }
+      ```
+    pass: |-
+      ```ts
+      const foobar = [1, '2'];
+      const [foo, bar]: Array<number | string> = foobar;
+      ```
+    fail: |-
+      ```ts
+      const foobar = [1, '2'];
+      const [foo, bar] = foobar;
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: typedef'
 optionsJSON: |-

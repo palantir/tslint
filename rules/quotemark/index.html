@@ -1,6 +1,6 @@
 ---
 ruleName: quotemark
-description: Requires single or double quotes for string literals.
+description: Enforces quote character for string literals.
 hasFix: true
 optionsDescription: |-
 
@@ -8,6 +8,7 @@ optionsDescription: |-
 
   * `"single"` enforces single quotes.
   * `"double"` enforces double quotes.
+  * `"backtick"` enforces backticks.
   * `"jsx-single"` enforces single quotes for JSX attributes.
   * `"jsx-double"` enforces double quotes for JSX attributes.
   * `"avoid-template"` forbids single-line untagged template strings that do not contain string interpolations.
@@ -21,6 +22,7 @@ options:
     enum:
       - single
       - double
+      - backtick
       - jsx-single
       - jsx-double
       - avoid-escape
@@ -32,6 +34,8 @@ optionExamples:
   - '[true, "single", "jsx-double"]'
 type: style
 typescriptOnly: false
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: quotemark'
 optionsJSON: |-
@@ -42,6 +46,7 @@ optionsJSON: |-
       "enum": [
         "single",
         "double",
+        "backtick",
         "jsx-single",
         "jsx-double",
         "avoid-escape",

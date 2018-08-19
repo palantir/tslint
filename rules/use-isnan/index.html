@@ -11,6 +11,26 @@ optionExamples:
   - 'true'
 type: functionality
 typescriptOnly: false
+codeExamples:
+  - description: Enforces usage of `isNan()`.
+    config: |-
+      ```json
+      "rules": { "use-isnan": true }
+      ```
+    pass: |-
+      ```ts
+      if (isNaN(parseInt('_4711'))) {
+          doSomething();
+      }
+      ```
+    fail: |-
+      ```ts
+      if (parseInt('_4711') === NaN) {
+          doSomething();
+      }
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: use-isnan'
 optionsJSON: 'null'

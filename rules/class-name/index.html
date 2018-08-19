@@ -14,6 +14,24 @@ optionExamples:
   - 'true'
 type: style
 typescriptOnly: false
+codeExamples:
+  - description: Enforces PascalCased class and interface names.
+    config: |-
+      ```json
+      "rules": { "class-name": true }
+      ```
+    pass: |-
+      ```ts
+      class MyClass { }
+      interface MyInterface { }
+      ```
+    fail: |-
+      ```ts
+      class myClass { }
+      interface myInterface { }
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: class-name'
 optionsJSON: 'null'

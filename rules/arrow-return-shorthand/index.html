@@ -19,6 +19,46 @@ rationale: |-
           
 type: style
 typescriptOnly: false
+codeExamples:
+  - description: Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.
+    config: |-
+      ```json
+      "rules": { "arrow-return-shorthand": true }
+      ```
+    pass: |-
+      ```ts
+      const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
+      const calc2 = (x: number, y: number) => {
+          return { add: x + y, sub: x - y, mul: x * y }
+      };
+      ```
+    fail: |-
+      ```ts
+      const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
+      const calc2 = (x: number, y: number) => {
+          return { add: x + y, sub: x - y, mul: x * y }
+      };
+      ```
+  - description: Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.
+    config: |-
+      ```json
+      "rules": { "arrow-return-shorthand": [true, "multiline"] }
+      ```
+    pass: |-
+      ```ts
+      const calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });
+      const calc2 = (x: number, y: number) =>
+          ({ add: x + y, sub: x - y, mul: x * y });
+      ```
+    fail: |-
+      ```ts
+      const calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };
+      const calc2 = (x: number, y: number) => {
+          return { add: x + y, sub: x - y, mul: x * y }
+      };
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: arrow-return-shorthand'
 optionsJSON: |-

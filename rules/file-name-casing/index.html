@@ -9,6 +9,7 @@ optionsDescription: |-
   * `camel-case`: File names must be camel-cased: `fileName.ts`.
   * `pascal-case`: File names must be Pascal-cased: `FileName.ts`.
   * `kebab-case`: File names must be kebab-cased: `file-name.ts`.
+  * `snake-case`: File names must be snake-cased: `file_name.ts`.
 options:
   type: array
   items:
@@ -17,13 +18,17 @@ options:
         - camel-case
         - pascal-case
         - kebab-case
+        - snake-case
 optionExamples:
   - '[true, "camel-case"]'
   - '[true, "pascal-case"]'
   - '[true, "kebab-case"]'
+  - '[true, "snake-case"]'
 hasFix: false
 type: style
 typescriptOnly: false
+isRecommended: false
+isLatest: false
 layout: rule
 title: 'Rule: file-name-casing'
 optionsJSON: |-
@@ -35,7 +40,8 @@ optionsJSON: |-
         "enum": [
           "camel-case",
           "pascal-case",
-          "kebab-case"
+          "kebab-case",
+          "snake-case"
         ]
       }
     ]
