@@ -56,7 +56,7 @@
     "formatterName": "stylish",
     "description": "Human-readable formatter which creates stylish messages.",
     "descriptionDetails": "\nThe output matches what is produced by ESLint's stylish formatter.\nIts readability is enhanced through spacing and colouring.",
-    "sample": "\nmyFile.ts\n1:14  semicolon  Missing semicolon",
+    "sample": "\nmyFile.ts\nError: 1:14  semicolon  Missing semicolon",
     "consumer": "human"
   },
   {

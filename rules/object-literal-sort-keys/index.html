@@ -34,6 +34,63 @@ optionExamples:
   - '[true, "ignore-case", "match-declaration-order", "shorthand-first"]'
 type: maintainability
 typescriptOnly: false
+codeExamples:
+  - description: Requires that an object literal's keys be sorted alphabetically.
+    config: |-
+      ```json
+      "rules": { "object-literal-sort-keys": true }
+      ```
+    pass: |-
+      ```ts
+      let o = {
+          bar: 2,
+          foo: 1
+      };
+      ```
+    fail: |-
+      ```ts
+      let o = {
+          foo: 1,
+          bar: 2
+      };
+      ```
+  - description: |-
+      Requires that an object literal's keys be sorted by interface-definition.
+                  If there is no interface fallback to alphabetically.
+    config: |-
+      ```json
+      "rules": {
+          "object-literal-sort-keys": {
+              "options": "match-declaration-order"
+          }
+      }
+      ```
+    pass: |-
+      ```ts
+      interface I {
+          foo: number;
+          bar: number;
+      }
+
+      let o: I = {
+          foo: 1,
+          bar: 2
+      };
+      ```
+    fail: |-
+      ```ts
+      interface I {
+          foo: number;
+          bar: number;
+      }
+
+      let o: I = {
+          bar: 2,
+          foo: 1
+      };
+      ```
+isRecommended: true
+isLatest: false
 layout: rule
 title: 'Rule: object-literal-sort-keys'
 optionsJSON: |-

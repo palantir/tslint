@@ -11,7 +11,7 @@ layout: page
    {{page.rationale | markdownify}}
 {% endif %}
 
-{% if page.typescriptOnly or page.hasFix or page.requiresTypeInfo %}
+{% if page.typescriptOnly or page.hasFix or page.requiresTypeInfo or page.isRecommended or page.isLatest %}
    <h5>Notes: </h5>
     <div class="rule-features">
         {% if page.typescriptOnly %}
@@ -22,6 +22,12 @@ layout: page
         {% endif %}
         {% if page.requiresTypeInfo %}
             <a class="feature feature-requires-type-info" href="/tslint/usage/type-checking" title="This rule requires type information to run. Click to learn more.">Requires Type Info</a>
+        {% endif %}
+        {% if page.isRecommended %}
+            <span class="feature feature-is-recommended" title="This rule is included in the recommended config list.">Recommended</span>
+        {% endif %}
+        {% if page.isLatest %}
+            <span class="feature feature-is-latest" title="This rule is included in the latest config list.">Latest</span>
         {% endif %}
     </div>
 {% endif %}

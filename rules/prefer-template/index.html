@@ -13,6 +13,44 @@ optionExamples:
   - '[true, "allow-single-concat"]'
 type: style
 typescriptOnly: false
+codeExamples:
+  - description: Enforces the use of template strings whenever possible.
+    config: |-
+      ```json
+      "rules": { "prefer-template": true }
+      ```
+    pass: |-
+      ```ts
+      const x: number = 1;
+      const y: number = 1;
+      const myString: string = `${x} is equals ${y}`;
+      ```
+    fail: |-
+      ```ts
+      const x: number = 1;
+      const y: number = 1;
+      const myString: string = x + ' is equals ' + y;
+      ```
+  - description: 'Enforces the use of template strings, but allows up to one concatenation.'
+    config: |-
+      ```json
+      "rules": { "prefer-template": [true, "allow-single-concat"] }
+      ```
+    pass: |-
+      ```ts
+      const x: number = 1;
+      const y: number = 1;
+      const myString: string = x + ' is equals 1';
+      const myString: string = `${x} is equals ${y}`;
+      ```
+    fail: |-
+      ```ts
+      const x: number = 1;
+      const y: number = 1;
+      const myString: string = x + ' is equals ' + y;
+      ```
+isRecommended: false
+isLatest: false
 layout: rule
 title: 'Rule: prefer-template'
 optionsJSON: |-
