@@ -23,6 +23,7 @@ import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
+import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
@@ -462,7 +463,7 @@ export interface RawConfigFile {
     rulesDirectory?: string | string[];
     defaultSeverity?: string;
     rules?: RawRulesConfig;
-    jsRules?: RawRulesConfig;
+    jsRules?: RawRulesConfig | boolean;
 }
 export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
@@ -510,12 +511,18 @@ export function parseConfigFile(
     }
 
     function parse(config: RawConfigFile, dir?: string): IConfigurationFile {
+        const rulesDirectory: string | string[] = getRulesDirectories(config.rulesDirectory, dir);
+        const rules = parseRules(config.rules);
+        const jsRules = typeof config.jsRules === "boolean" ?
+                            filterValidJsRules(rules, config.jsRules, rulesDirectory) :
+                            parseRules(config.jsRules);
+
         return {
             extends: arrayify(config.extends),
-            jsRules: parseRules(config.jsRules),
+            jsRules,
             linterOptions: parseLinterOptions(config.linterOptions, dir),
-            rules: parseRules(config.rules),
-            rulesDirectory: getRulesDirectories(config.rulesDirectory, dir),
+            rules,
+            rulesDirectory,
         };
     }
 
@@ -529,6 +536,24 @@ export function parseConfigFile(
             }
         }
         return map;
+    }
+
+    function filterValidJsRules(rules: Map<string, Partial<IOptions>>,
+                                copyRulestoJsRules = false,
+                                rulesDirectory?: string | string[]): Map<string, Partial<IOptions>> {
+        const validJsRules = new Map<string, Partial<IOptions>>();
+        if (copyRulestoJsRules) {
+            rules.forEach((ruleOptions, ruleName) => {
+                if (ruleOptions.ruleSeverity !== "off") {
+                    const Rule = findRule(ruleName, rulesDirectory);
+                    if ((Rule !== undefined && (Rule.metadata === undefined || !Rule.metadata.typescriptOnly))) {
+                    validJsRules.set(ruleName, ruleOptions);
+                    }
+                }
+            });
+        }
+
+        return validJsRules;
     }
 
     function parseLinterOptions(raw: RawConfigFile["linterOptions"], dir?: string): IConfigurationFile["linterOptions"] {

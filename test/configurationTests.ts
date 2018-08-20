@@ -119,6 +119,53 @@ describe("Configuration", () => {
                 },
             );
         });
+
+        it("parses jsRules when jsRules is a config", () => {
+            const rawConfig: RawConfigFile = {
+                jsRules: {
+                    a: true,
+                },
+            };
+
+            const expected = getEmptyConfig();
+            expected.jsRules.set("a", { ruleArguments: [], ruleSeverity: "error" });
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
+        });
+
+        it("copies valid rules to jsRules when jsRules is a boolean", () => {
+            let rawConfig: RawConfigFile = {
+                jsRules: true,
+                rules: {},
+            };
+
+            const expected = getEmptyConfig();
+            assertConfigEquals(parseConfigFile(rawConfig), expected);
+
+            rawConfig = {
+                jsRules: true,
+                rules: {
+                    eofline: true,
+                },
+            };
+
+            let {rules, jsRules} = parseConfigFile(rawConfig);
+            assert.deepEqual(demap(rules), demap(jsRules));
+
+            rawConfig = {
+                jsRules: true,
+                rules: {
+                    eofline: true,
+                    typedef: true,
+                },
+            };
+
+            ({rules, jsRules} = parseConfigFile(rawConfig));
+            assert(jsRules.has("eofline"));
+            assert(!jsRules.has("typedef"));
+
+            rules.delete("typedef");
+            assert.deepEqual(demap(rules), demap(jsRules));
+        });
     });
 
     describe("defaultSeverity", () => {
