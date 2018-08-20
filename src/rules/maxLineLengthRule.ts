@@ -17,8 +17,12 @@
 
 import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
+
+interface MaxLineLengthRuleOptions {
+    limit: number;
+    ignorePattern?: RegExp;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,12 +33,42 @@ export class Rule extends Lint.Rules.AbstractRule {
             Limiting the length of a line of code improves code readability.
             It also makes comparing code side-by-side easier and improves compatibility with
             various editors, IDEs, and diff viewers.`,
-        optionsDescription: "An integer indicating the max length of lines.",
+        optionsDescription: Lint.Utils.dedent`
+        It can take one argument, which can be any of the following:
+        * integer indicating maximum length of lines.
+        * object with keys:
+          * \`limit\` - number < 0 defining max line length
+          * \`ignore-pattern\` - string defining ignore pattern for this rule, being parsed by \`new RegExp()\`.
+            For example:
+             * \`\/\/ \` pattern will ignore all in-line comments.
+             * \`^import \` pattern will ignore all import statements.
+             * \`^export \{(.*?)\}\` pattern will ignore all multiple export statements.
+             * \`class [a-zA-Z]+ implements \` pattern will ignore all class declarations implementing interfaces.
+             * \`^import |^export \{(.*?)\}|class [a-zA-Z]+ implements |// \` pattern will ignore all the cases listed above.
+         `,
         options: {
-            type: "number",
-            minimum: "1",
+            type: "array",
+            items: {
+                oneOf: [
+                    {
+                        type: "number",
+                    },
+                    {
+                        type: "object",
+                        properties: {
+                            "limit": {type: "number"},
+                            "ignore-pattern": {type: "string"},
+                        },
+                        additionalProperties: false,
+                    },
+                ],
+            },
+            minLength: 1,
+            maxLength: 2,
         },
-        optionExamples: [[true, 120]],
+        optionExamples: [[true, 120], [true, {
+            "limit": 120,
+            "ignore-pattern": "^import |^export \{(.*?)\}"}]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -45,19 +79,37 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] as number > 0;
+        const limit = this.getRuleOptions().limit;
+        return super.isEnabled() && (limit > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as number);
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions());
+    }
+
+    private getRuleOptions(): MaxLineLengthRuleOptions {
+        const argument = this.ruleArguments[0];
+        let options: MaxLineLengthRuleOptions = {limit: 0};
+        if (typeof argument === "number") {
+            options.limit = argument;
+        } else {
+            options = argument as MaxLineLengthRuleOptions;
+            const ignorePattern = (argument as {[key: string]: string})["ignore-pattern"];
+            options.ignorePattern = (typeof ignorePattern === "string") ?
+                new RegExp((ignorePattern)) : undefined;
+        }
+        options.limit = Number(options.limit); // user can pass a string instead of number
+        return options;
     }
 }
 
-function walk(ctx: Lint.WalkContext<number>) {
-    const limit = ctx.options;
+function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
+    const limit = ctx.options.limit;
+    const ignorePattern = ctx.options.ignorePattern;
     for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength > limit) {
-            ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
-        }
+        if (line.contentLength <= limit) { continue; }
+        const lineContent = ctx.sourceFile.text.substr(line.pos, line.contentLength);
+        if (ignorePattern !== undefined && ignorePattern.test(lineContent)) { continue; }
+        ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
     }
 }

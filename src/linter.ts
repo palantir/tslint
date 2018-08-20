@@ -24,26 +24,24 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     findConfigurationPath,
-    getRelativePath,
     getRulesDirectories,
     IConfigurationFile,
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showWarningOnce } from "./error";
+import { FatalError, isError, showRuleCrashWarning } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
-import { IFormatter } from "./language/formatter/formatter";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
 import * as utils from "./language/utils";
 import { loadRules } from "./ruleLoader";
-import { arrayify, dedent, flatMap } from "./utils";
+import { arrayify, dedent, flatMap, mapDefined } from "./utils";
 
 /**
  * Linter that can lint multiple files in consecutive runs.
  */
-class Linter {
-    public static VERSION = "5.7.0";
+export class Linter {
+    public static VERSION = "5.11.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -57,14 +55,32 @@ class Linter {
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
     public static createProgram(configFile: string, projectDirectory: string = path.dirname(configFile)): ts.Program {
-        const { config } = ts.readConfigFile(configFile, ts.sys.readFile);
+        const config = ts.readConfigFile(configFile, ts.sys.readFile);
+        if (config.error !== undefined) {
+            throw new FatalError(ts.formatDiagnostics([config.error], {
+                getCanonicalFileName: (f) => f,
+                getCurrentDirectory: process.cwd,
+                getNewLine: () => "\n",
+            }));
+        }
         const parseConfigHost: ts.ParseConfigHost = {
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
             readFile: (file) => fs.readFileSync(file, "utf8"),
             useCaseSensitiveFileNames: true,
         };
-        const parsed = ts.parseJsonConfigFileContent(config, parseConfigHost, path.resolve(projectDirectory), {noEmit: true});
+        const parsed = ts.parseJsonConfigFileContent(config.config, parseConfigHost, path.resolve(projectDirectory), {noEmit: true});
+        if (parsed.errors !== undefined) {
+            // ignore warnings and 'TS18003: No inputs were found in config file ...'
+            const errors = parsed.errors.filter((d) => d.category === ts.DiagnosticCategory.Error && d.code !== 18003);
+            if (errors.length !== 0) {
+                throw new FatalError(ts.formatDiagnostics(errors, {
+                    getCanonicalFileName: (f) => f,
+                    getCurrentDirectory: process.cwd,
+                    getNewLine: () => "\n",
+                }));
+            }
+        }
         const host = ts.createCompilerHost(parsed.options, true);
         const program = ts.createProgram(parsed.fileNames, parsed.options, host);
 
@@ -76,10 +92,16 @@ class Linter {
      * files and excludes declaration (".d.ts") files.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return program.getSourceFiles().map((s) => s.fileName).filter((l) => l.substr(-5) !== ".d.ts");
+        return mapDefined(
+            program.getSourceFiles(),
+            (file) =>
+                file.fileName.endsWith(".d.ts") || program.isSourceFileFromExternalLibrary(file)
+                    ? undefined
+                    : file.fileName,
+        );
     }
 
-    constructor(private options: ILinterOptions, private program?: ts.Program) {
+    constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
             throw new Error(`Unknown Linter options type: ${typeof options}`);
         }
@@ -120,27 +142,26 @@ class Linter {
     }
 
     public getResult(): LintResult {
-        let formatter: IFormatter;
-        const formattersDirectory = getRelativePath(this.options.formattersDirectory);
+        const errors = this.failures.filter((failure) => failure.getRuleSeverity() === "error");
+        const failures = this.options.quiet ? errors : this.failures;
 
         const formatterName = this.options.formatter !== undefined ? this.options.formatter : "prose";
-        const Formatter = findFormatter(formatterName, formattersDirectory);
-        if (Formatter !== undefined) {
-            formatter = new Formatter();
-        } else {
+        const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
+        if (Formatter === undefined) {
             throw new Error(`formatter '${formatterName}' not found`);
         }
+        const formatter = new Formatter();
 
-        const output = formatter.format(this.failures, this.fixes);
+        const output = formatter.format(failures, this.fixes);
 
-        const errorCount = this.failures.filter((failure) => failure.getRuleSeverity() === "error").length;
+        const errorCount = errors.length;
         return {
             errorCount,
-            failures: this.failures,
+            failures,
             fixes: this.fixes,
             format: formatterName,
             output,
-            warningCount: this.failures.length - errorCount,
+            warningCount: failures.length - errorCount,
         };
     }
 
@@ -207,9 +228,9 @@ class Linter {
             }
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
-                showWarningOnce(error.stack);
+                showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
             } else {
-                showWarningOnce(String(error));
+                showRuleCrashWarning(String(error), rule.getOptions().ruleName, sourceFile.fileName);
             }
             return [];
         }
@@ -237,11 +258,6 @@ class Linter {
         }
     }
 }
-
-// tslint:disable-next-line:no-namespace
-namespace Linter { }
-
-export = Linter;
 
 function createMultiMap<T, K, V>(inputs: T[], getPair: (input: T) => [K, V] | undefined): Map<K, V[]> {
     const map = new Map<K, V[]>();

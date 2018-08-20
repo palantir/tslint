@@ -32,6 +32,20 @@ var fn: {(): void;};
          ~~~~~~~~~ [type % ('() => void')]
 function f(x: { (): void }): void;
                 ~~~~~~~~ [type % ('() => void')]
+function f(x: string | { (): void }): void;
+                         ~~~~~~~~ [type % ('(() => void)')]
+function f(x: string | ({ (): void })): void;
+                          ~~~~~~~~ [type % ('() => void')]
+function f(x: { (): string } | { (): number }): void;
+                ~~~~~~~~~~ [type % ('(() => string)')]
+                                 ~~~~~~~~~~ [type % ('(() => number)')]
+function f(x: string & { (): void }): void;
+                         ~~~~~~~~ [type % ('(() => void)')]
+function f(x: { (): string } & { (): number }): void;
+                ~~~~~~~~~~ [type % ('(() => string)')]
+                                 ~~~~~~~~~~ [type % ('(() => number)')]
+function f(x: { (): string }[]): void;
+                ~~~~~~~~~~ [type % ('(() => string)')]
 
 // Overloads OK
 interface K {

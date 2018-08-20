@@ -18,6 +18,7 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -27,7 +28,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": ["--reporter", "spec", "--colors", "--no-timeouts", "build/test/**/*Tests.js", "build/test/assert.js"],
+            "args": ["--reporter", "spec", "--colors", "--no-timeouts", "build/test/**/*Tests.js"],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
@@ -38,7 +39,8 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
@@ -58,7 +60,8 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
@@ -78,7 +81,8 @@
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*/js"]
         }
     ]

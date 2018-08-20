@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBlockScopedVariableDeclarationList, isVariableDeclarationList, isVariableStatement } from "tsutils";
+import { hasModifier, isBlockScopedVariableDeclarationList, isNodeFlagSet, isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -30,6 +30,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Declaring variables using \`var\` has several edge case behaviors that make \`var\` unsuitable for modern code.
+            Variables declared by \`var\` have their parent function block as their scope, ignoring other control flow statements.
+            \`var\`s have declaration "hoisting" (similar to \`function\`s) and can appear to be used before declaration.
+
+            Variables declared by \`const\` and \`let\` instead have as their scope the block in which they are defined,
+            and are not allowed to used before declaration or be re-declared with another \`const\` or \`let\`.
+        `,
         type: "functionality",
         typescriptOnly: false,
     };
@@ -64,6 +72,6 @@ function walk(ctx: Lint.WalkContext<void>): void {
 // Allow `declare var x: number;` or `declare global { var x: number; }`
 function isGlobalVarDeclaration(node: ts.VariableStatement): boolean {
     const parent = node.parent!;
-    return Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-        || parent.kind === ts.SyntaxKind.ModuleBlock && Lint.isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
+    return hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+        || parent.kind === ts.SyntaxKind.ModuleBlock && isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
 }

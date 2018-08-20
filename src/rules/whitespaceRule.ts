@@ -66,6 +66,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
         typescriptOnly: false,
+        hasFix: true,
     };
 
     public static FAILURE_STRING_MISSING = "missing whitespace";
@@ -200,6 +201,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
+            case ts.SyntaxKind.PropertyDeclaration:
                 const { name, type, initializer } = node as ts.VariableDeclaration;
                 if (options.decl && initializer !== undefined) {
                     checkForTrailingWhitespace((type !== undefined ? type : name).getEnd());
@@ -312,7 +314,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
-        const equalsGreaterThanToken = Lint.childOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken);
+        const equalsGreaterThanToken = utils.getChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken, sourceFile);
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {
             return;

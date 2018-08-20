@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/onlyArrowFunctions.examples";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
 const OPTION_ALLOW_NAMED_FUNCTIONS = "allow-named-functions";
@@ -47,6 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_ALLOW_DECLARATIONS, OPTION_ALLOW_NAMED_FUNCTIONS]],
         type: "typescript",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -74,7 +76,7 @@ function parseOptions(ruleArguments: string[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile, options: { allowDeclarations, allowNamedFunctions } } = ctx;
-    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node): void {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration:
                 if (allowDeclarations) {
@@ -84,7 +86,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.FunctionExpression: {
                 const f = node as ts.FunctionLikeDeclaration;
                 if (!(allowNamedFunctions && f.name !== undefined) && !functionIsExempt(f)) {
-                    ctx.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.FunctionKeyword)!, Rule.FAILURE_STRING);
+                    ctx.addFailureAtNode(utils.getChildOfKind(node, ts.SyntaxKind.FunctionKeyword, ctx.sourceFile)!, Rule.FAILURE_STRING);
                 }
             }
         }
@@ -94,15 +96,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
 /** Generator functions and functions using `this` are allowed. */
 function functionIsExempt(node: ts.FunctionLikeDeclaration): boolean {
-    return node.asteriskToken !== undefined || hasThisParameter(node) || node.body !== undefined && usesThisInBody(node.body) === true;
+    return node.asteriskToken !== undefined ||
+        node.parameters.length !== 0 && utils.isThisParameter(node.parameters[0]) ||
+        node.body !== undefined && ts.forEachChild(node, usesThis) === true;
 }
 
-function hasThisParameter(node: ts.FunctionLikeDeclaration): boolean {
-    const first = node.parameters[0];
-    return first !== undefined && first.name.kind === ts.SyntaxKind.Identifier &&
-        first.name.originalKeywordKind === ts.SyntaxKind.ThisKeyword;
-}
-
-function usesThisInBody(node: ts.Node): boolean | undefined {
-    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThisInBody);
+function usesThis(node: ts.Node): boolean | undefined {
+    return node.kind === ts.SyntaxKind.ThisKeyword || !utils.hasOwnThisReference(node) && ts.forEachChild(node, usesThis);
 }

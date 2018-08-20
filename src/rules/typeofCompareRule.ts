@@ -32,6 +32,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        deprecationMessage: !/^2\.1\./.test(ts.version)
+            ? "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
+            : "",
     };
     /* tslint:enable:object-literal-sort-keys */
 

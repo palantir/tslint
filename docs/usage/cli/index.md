@@ -33,21 +33,22 @@ Usage: `tslint [options] [file ...]`
 Options:
 
 ```
--c, --config          configuration file
--e, --exclude         exclude globs from path expansion
---fix                 Fixes linting errors for select rules. This may overwrite linted files
---force               return status code 0 even if there are lint errors
--h, --help            display detailed help
--i, --init            generate a tslint.json config file in the current working directory
--o, --out             output file
---outputAbsolutePaths whether or not outputted file paths are absolute
--p, --project         tsconfig.json file
--r, --rules-dir       rules directory
--s, --formatters-dir  formatters directory
--t, --format          output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)  [default: "prose"]
---test                test that tslint produces the correct output for the specified directory
---type-check          enable type checking when linting a project
--v, --version         current version
+-v, --version                          output the version number
+-c, --config [config]                  configuration file
+-e, --exclude <exclude>                exclude globs from path expansion
+--fix                                  fixes linting errors for select rules (this may overwrite linted files)
+--force                                return status code 0 even if there are lint errors
+-i, --init                             generate a tslint.json config file in the current working directory
+-o, --out [out]                        output file
+--outputAbsolutePaths                  whether or not outputted file paths are absolute
+-r, --rules-dir [rules-dir]            rules directory
+-s, --formatters-dir [formatters-dir]  formatters directory
+-t, --format [format]                  output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)
+-q, --quiet                            hide non "error" severity linting errors from output
+--test                                 test that tslint produces the correct output for the specified directory
+-p, --project [project]                tsconfig.json file
+--type-check                           (deprecated) check for type errors before linting the project
+-h, --help                             output usage information
 ```
 
 By default, TSLint looks for a configuration file named `tslint.json` in the directory
@@ -91,7 +92,7 @@ tslint accepts the following command-line options:
     stdout, which is usually the console where you're running it from.
 
 --outputAbsolutePaths:
-    Indicates whether or not outputted file paths are absolute paths.
+    If true, all paths in the output will be absolute.
 
 -r, --rules-dir:
     An additional rules directory, for user-created rules.
@@ -114,22 +115,29 @@ tslint accepts the following command-line options:
     formatters are prose (human readable), json (machine readable)
     and verbose. prose is the default if this option is not used.
     Other built-in options include pmd, msbuild, checkstyle, and vso.
-    Additonal formatters can be added and used if the --formatters-dir
+    Additional formatters can be added and used if the --formatters-dir
     option is set.
 
+-q, --quiet
+    Hide non "error" severity linting errors from output. This can be
+    especially useful in CI environments, where you may want only "error"
+    severity linting errors to cause linting to fail.
+
 --test:
-    Runs tslint on the specified directory and checks if tslint's output matches
-    the expected output in .lint files. Automatically loads the tslint.json file in the
-    specified directory as the configuration file for the tests. See the
-    full tslint documentation for more details on how this can be used to test custom rules.
+    Runs tslint on matched directories and checks if tslint outputs
+    match the expected output in .lint files. Automatically loads the
+    tslint.json files in the directories as the configuration file for
+    the tests. See the full tslint documentation for more details on how
+    this can be used to test custom rules.
 
 -p, --project:
-    The location of a tsconfig.json file that will be used to determine which
-    files will be linted.
+    The path or directory containing a tsconfig.json file that will be
+    used to determine which files will be linted. This flag also enables
+    rules that require the type checker.
 
---type-check
-    Enables the type checker when running linting rules. --project must be
-    specified in order to enable type checking.
+--type-check:
+    (deprecated) Checks for type errors before linting a project.
+    --project must be specified in order to enable type checking.
 
 -v, --version:
     The current version of tslint.
@@ -142,7 +150,7 @@ tslint accepts the following command-line options:
 
 The CLI process may exit with the following codes:
 
-- `0`: Linting succeeded without errors (warnings may have ocurred)
+- `0`: Linting succeeded without errors (warnings may have occurred)
 - `1`: An invalid command line argument or combination thereof was used
 - `2`: Linting failed with one or more rule violations with severity `error`
 

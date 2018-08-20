@@ -20,7 +20,7 @@ import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
 import codeFrame = require("babel-code-frame");
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -50,6 +50,7 @@ export class Formatter extends AbstractFormatter {
         if (typeof failures[0] === "undefined") {
             return "\n";
         }
+        failures = this.sortFailures(failures);
 
         const outputLines: string[] = [];
 
@@ -66,7 +67,7 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString = chalk.red(failureString);
+            failureString = failure.getRuleSeverity() === "warning" ? chalk.yellow(failureString) : chalk.red(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();

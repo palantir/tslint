@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             A variable can be reassigned if necessary -
             there's no good reason to have a duplicate variable declaration.`,
-        optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a paramter.`,
+        optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a parameter.`,
         options: {
             type: "string",
             enum: [OPTION_CHECK_PARAMETERS],
@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
-    private scope: Set<string>;
+    private scope: Set<string> = new Set();
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
         const cb = (node: ts.Node): void => {

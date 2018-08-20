@@ -19,6 +19,7 @@ import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { Logger, Options, run, Status } from "../../src/runner";
 import { denormalizeWinPath } from "../../src/utils";
 import { createTempFile } from "../utils";
 
@@ -26,6 +27,11 @@ import { createTempFile } from "../utils";
 const EXECUTABLE_DIR = path.resolve(process.cwd(), "test", "executable");
 const EXECUTABLE_PATH = path.resolve(EXECUTABLE_DIR, "npm-like-executable");
 const TEMP_JSON_PATH = path.resolve(EXECUTABLE_DIR, "tslint.json");
+
+const dummyLogger: Logger = {
+    log() { /* do nothing */ },
+    error() { /* do nothing */ },
+};
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     this.slow(3000);    // the executable is JIT-ed each time it runs; avoid showing slowness warnings
@@ -70,80 +76,109 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 done();
             });
         });
+
+        it("warns if file does not exist", async () => {
+            const result = await execRunnerWithOutput({files: ["foo/bar.ts"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.include(result.stderr, "'foo/bar.ts' does not exist");
+        });
+
+        it("doesn't warn if non-existent file is excluded by --exclude", async () => {
+            const result = await execRunnerWithOutput({files: ["foo/bar.js"], exclude: ["**/*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
+
+        it("doesn't warn if glob pattern doesn't match any file", async () => {
+            const result = await execRunnerWithOutput({files: ["foobar/*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
+        });
     });
 
     describe("Configuration file", () => {
-        it("exits with code 0 if relative path is passed without `./`", (done) => {
-            execCli(["-c", "test/config/tslint-almost-empty.json", "src/test.ts"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if relative path is passed without `./`", async () => {
+            const status = await execRunner({config: "test/config/tslint-almost-empty.json", files: ["src/test.ts"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if config file that extends relative config file", (done) => {
-            execCli(["-c", "test/config/tslint-extends-package-no-mod.json", "src/test.ts"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if config file that extends relative config file", async () => {
+            const status = await execRunner({config: "test/config/tslint-extends-package-no-mod.json", files: ["src/test.ts"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 1 if config file is invalid", (done) => {
-            execCli(["-c", "test/config/tslint-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
+        it("exits with code 1 if config file is invalid", async () => {
+            const result = await execRunnerWithOutput({config: "test/config/tslint-invalid.json", files: ["src/test.ts"]});
 
-                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
-                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
-                done();
-            });
+            assert.equal(result.status, Status.FatalError, "process should exit with error");
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json config");
+            assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
         });
 
-        it("mentions the root cause if a config file extends from an invalid file", (done) => {
-            execCli(["-c", "test/config/tslint-extends-invalid.json", "src/test.ts"], (err, stdout, stderr) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
+        it("exits with code 1 if yaml config file is invalid", async () => {
+            const result = await execRunnerWithOutput({config: "test/config/tslint-invalid.yaml", files: ["src/test.ts"]});
+            assert.strictEqual(result.status, Status.FatalError, "error code should be 1");
 
-                assert.include(stderr, "Failed to load", "stderr should contain notification about failing to load json");
-                assert.include(stderr, "tslint-invalid.json", "stderr should mention the problem file");
-                assert.strictEqual(stdout, "", "shouldn't contain any output in stdout");
-                done();
-            });
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load yaml config");
+            assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
+        });
+
+        it("mentions the root cause if a config file extends from an invalid file", async () => {
+            const result = await execRunnerWithOutput({config: "test/config/tslint-extends-invalid.json", files: ["src/test.ts"]});
+
+            assert.equal(result.status, Status.FatalError, "process should exit with error");
+            assert.include(result.stderr, "Failed to load", "stderr should contain notification about failing to load json config");
+            assert.include(result.stderr, "tslint-invalid.json", "stderr should mention the problem file");
+            assert.strictEqual(result.stdout, "", "shouldn't contain any output in stdout");
         });
     });
 
-    describe("Custom rules", () => {
-        it("exits with code 1 if nonexisting custom rules directory is passed", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./someRandomDir", "src/test.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
-        });
-
-        it("exits with code 2 if custom rules directory is passed and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/test.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
-        });
-
-        it("exits with code 0 if custom rules directory is passed and file contains lint warnings", (done) => {
+    describe("Custom formatters", () => {
+        it("can be loaded from node_modules", (done) => {
             execCli(
-                ["-c", "./test/config/tslint-extends-package-warning.json", "-r", "./test/files/custom-rules", "src/test.ts"],
-                (err) => {
-                    assert.isNull(err, "process should exit without an error");
+                ["-c", "tslint-custom-rules-with-dir.json", "../../src/test.ts", "-t", "tslint-test-custom-formatter"],
+                {
+                    cwd: "./test/config",
+                },
+                (err, stdout) => {
+                    assert.isNotNull(err, "process should exit with error");
+                    assert.strictEqual(err.code, 2, "error code should be 2");
+                    assert.include(stdout, "hello from custom formatter", "stdout should contain output of custom formatter");
                     done();
                 },
             );
         });
+    });
 
-        it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", (done) => {
-            execCli(["-c", "./test/config/tslint-custom-rules-with-dir.json", "src/test.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
+    describe("Custom rules", () => {
+        it("exits with code 1 if nonexisting custom rules directory is passed", async () => {
+            const status = await execRunner(
+                {config: "./test/config/tslint-custom-rules.json", rulesDirectory: "./someRandomDir", files: ["src/test.ts"]},
+            );
+            assert.equal(status, Status.FatalError, "error code should be 1");
+        });
+
+        it("exits with code 2 if custom rules directory is passed and file contains lint errors", async () => {
+            const status = await execRunner(
+                {config: "./test/config/tslint-custom-rules.json", rulesDirectory: "./test/files/custom-rules", files: ["src/test.ts"]},
+            );
+            assert.equal(status, Status.LintError, "error code should be 2");
+        });
+
+        it("exits with code 0 if custom rules directory is passed and file contains lint warnings", async () => {
+            const status = await execRunner(
+                {
+                    config: "./test/config/tslint-extends-package-warning.json",
+                    files: ["src/test.ts"],
+                    rulesDirectory: "./test/files/custom-rules",
+                },
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
+        it("exits with code 2 if custom rules directory is specified in config file and file contains lint errors", async () => {
+            const status = await execRunner({config: "./test/config/tslint-custom-rules-with-dir.json", files: ["src/test.ts"]});
+            assert.equal(status, Status.LintError, "error code should be 2");
         });
 
         it("are compiled just in time when using ts-node", (done) => {
@@ -166,283 +201,282 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Config with excluded files", () => {
-        it("exits with code 2 if linter options doesn't exclude file with lint errors", (done) => {
-            execCli(["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/files/config-exclude/included.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
+        it("exits with code 2 if linter options doesn't exclude file with lint errors", async () => {
+            const status = await execRunner(
+                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/included.ts"]},
+            );
+            assert.equal(status, Status.LintError, "error code should be 2");
         });
 
-        it("exits with code 0 if linter options exclude one file with lint errors", (done) => {
-            execCli(["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/rules/config-exclude/excluded.ts"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if linter options exclude one file with lint errors", async () => {
+            const status = await execRunner(
+                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/excluded.ts"]},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if linter options excludes many files with lint errors", (done) => {
-            execCli(
-                [
-                    "-c",
-                    "./test/files/config-exclude/tslint-exclude-many.json",
-                    "./test/rules/config-exclude/excluded1.ts",
-                    "./test/rules/config-exclude/subdir/excluded2.ts"],
-                (err) => {
-                    assert.isNull(err, "process should exit without an error");
-                    done();
+        it("exits with code 0 if linter options excludes many files with lint errors", async () => {
+            const status = await execRunner(
+                {
+                    config: "./test/files/config-exclude/tslint-exclude-many.json",
+                    files: ["./test/rules/config-exclude/excluded1.ts", "./test/rules/config-exclude/subdir/excluded2.ts"],
                 },
             );
+            assert.strictEqual(status, Status.Ok, "process should exit without an error");
         });
 
-        it("excludes files relative to tslint.json", (done) => {
-            execCli(
-                ["-c", "./test/files/config-exclude/tslint-exclude-one.json", "./test/files/config-exclude/subdir/excluded.ts"],
-                (err) => {
-                    assert.isNotNull(err, "process should exit an error");
-                    assert.equal(err.code, 2, "exit code should be 2");
-                    done();
-                },
+        it("excludes files relative to tslint.json", async () => {
+            const status = await execRunner(
+                {config: "./test/files/config-exclude/tslint-exclude-one.json", files: ["./test/files/config-exclude/subdir/excluded.ts"]},
             );
+            assert.equal(status, Status.LintError, "exit code should be 2");
         });
 
-        it("excludes files relative to tslint.json they were declared in", (done) => {
-            execCli(
-                ["-c", "./test/files/config-exclude/subdir/tslint-extending.json", "./test/files/config-exclude/subdir/excluded.ts"],
-                (err) => {
-                    assert.isNotNull(err, "process should exit an error");
-                    assert.equal(err.code, 2, "exit code should be 2");
-                    done();
+        it("excludes files relative to tslint.json they were declared in", async () => {
+            const status = await execRunner(
+                {
+                    config: "./test/files/config-exclude/subdir/tslint-extending.json",
+                    files: ["./test/files/config-exclude/subdir/excluded.ts"],
                 },
             );
+            assert.equal(status, Status.LintError, "exit code should be 2");
         });
     });
 
+    it("finds configuration above current directory", (done) => {
+        execCli(
+            ["index.test.ts"],
+            {
+                cwd: "./test/files/config-findup/no-config",
+            },
+            (err) => {
+                assert.isNotNull(err, "process should exit with an error");
+                assert.equal(err.code, 2, "exit code should be 2");
+                done();
+            },
+        );
+    });
+
     describe("--fix flag", () => {
-        it("fixes multiple rules without overwriting each other", (done) => {
+        it("fixes multiple rules without overwriting each other", async () => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));
-            fs.createReadStream("test/files/multiple-fixes-test/multiple-fixes.test.ts")
-                .pipe(fs.createWriteStream(tempFile))
-                .on("finish", () => {
-                    execCli(
-                        ["-c", "test/files/multiple-fixes-test/tslint.json", tempFile, "--fix"],
-                        (err, stdout) => {
-                            const content = fs.readFileSync(tempFile, "utf8");
-                            // compare against file name which will be returned by formatter (used in TypeScript)
-                            const denormalizedFileName = denormalizeWinPath(tempFile);
-                            fs.unlinkSync(tempFile);
-                            assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
-                            assert.isNull(err, "process should exit without an error");
-                            assert.strictEqual(stdout, `Fixed 2 error(s) in ${denormalizedFileName}`);
-                            done();
-                        });
-                });
+            fs.writeFileSync(tempFile, 'import * as x from "b"\nimport * as y from "a_long_module";\n');
+            const result = await execRunnerWithOutput(
+                {config: "test/files/multiple-fixes-test/tslint.json", files: [tempFile], fix: true},
+            );
+            const content = fs.readFileSync(tempFile, "utf8");
+            // compare against file name which will be returned by formatter (used in TypeScript)
+            const denormalizedFileName = denormalizeWinPath(tempFile);
+            fs.unlinkSync(tempFile);
+            assert.equal(result.status, Status.Ok, "process should exit without an error");
+            assert.strictEqual(content, "import * as y from \"a_long_module\";\nimport * as x from \"b\";\n");
+            assert.strictEqual(result.stdout.trim(), `Fixed 2 error(s) in ${denormalizedFileName}`);
         }).timeout(8000);
     });
 
     describe("--force flag", () => {
-        it("exits with code 0 if `--force` flag is passed", (done) => {
-            execCli(
-                ["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "--force", "src/test.ts"],
-                (err, stdout) => {
-                    assert.isNull(err, "process should exit without an error");
-                    assert.include(stdout, "failure", "errors should be reported");
-                    done();
-                });
+        it("exits with code 0 if `--force` flag is passed", async () => {
+            const result = await execRunnerWithOutput(
+                {
+                    config: "./test/config/tslint-custom-rules.json",
+                    files: ["src/test.ts"],
+                    force: true,
+                    rulesDirectory: "./test/files/custom-rules",
+                },
+            );
+            assert.equal(result.status, Status.Ok, "process should exit without an error");
+            assert.include(result.stdout, "failure", "errors should be reported");
         });
     });
 
     describe("--test flag", () => {
-        it("exits with code 0 if `--test` flag is used", (done) => {
-            execCli(["--test", "test/rules/no-eval"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if `--test` flag is used", async () => {
+            const status = await execRunner({test: true, files: ["test/rules/no-eval"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if `--test` flag is used with a wildcard", (done) => {
-            execCli(["--test", "test/rules/no-e*"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if `--test` flag is used with a wildcard", async () => {
+            const status = await execRunner({test: true, files: ["test/rules/no-e*"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 1 if `--test` flag is used with incorrect rule", (done) => {
-            execCli(["--test", "test/files/incorrect-rule-test"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+        it("exits with code 1 if `--test` flag is used with incorrect rule", async () => {
+            const status = await execRunner({test: true, files: ["test/files/incorrect-rule-test"]});
+            assert.equal(status, Status.FatalError, "error code should be 1");
         });
 
-        it("exits with code 1 if `--test` flag is used with incorrect rule in a wildcard", (done) => {
-            execCli(["--test", "test/files/incorrect-rule-*"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+        it("exits with code 1 if `--test` flag is used with incorrect rule in a wildcard", async () => {
+            const status = await execRunner({test: true, files: ["test/files/incorrect-rule-*"]});
+            assert.equal(status, Status.FatalError, "error code should be 1");
         });
 
-        it("exits with code 0 if `--test` flag is used with custom rule", (done) => {
-            execCli(["--test", "test/files/custom-rule-rule-test"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if `--test` flag is used with custom rule", async () => {
+            const status = await execRunner({test: true, files: ["test/files/custom-rule-rule-test"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if `--test` and `-r` flags are used with custom rule", (done) => {
-            execCli(["-r", "test/files/custom-rules-2", "--test", "test/files/custom-rule-rule-test"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if `--test` and `-r` flags are used with custom rule", async () => {
+            const status = await execRunner(
+                {test: true, files: ["test/files/custom-rule-cli-rule-test"], rulesDirectory: "test/files/custom-rules-2"},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if `--test` flag is used with fixes", (done) => {
-            execCli(["--test", "test/files/fixes-test"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("exits with code 0 if `--test` flag is used with fixes", async () => {
+            const status = await execRunner({test: true, files: ["test/files/fixes-test"]});
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 1 if `--test` flag is used with incorrect fixes", (done) => {
-            execCli(["--test", "test/files/incorrect-fixes-test"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+        it("exits with code 1 if `--test` flag is used with incorrect fixes", async () => {
+            const status = await execRunner({test: true, files: ["test/files/incorrect-fixes-test"]});
+            assert.equal(status, Status.FatalError, "error code should be 1");
         });
 
-        it("can be used with multiple paths", (done) => {
+        it("can be used with multiple paths", async () => {
             // pass a failing test as second path to make sure it gets executed
-            execCli(["--test", "test/files/custom-rule-rule-test", "test/files/incorrect-fixes-test"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+            const status = await execRunner({test: true, files: ["test/files/custom-rule-rule-test", "test/files/incorrect-fixes-test"]});
+            assert.equal(status, Status.FatalError, "error code should be 1");
         });
     });
 
     describe("--project flag", () => {
-        it("exits with code 0 if `tsconfig.json` is passed and it specifies files without errors", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test/tsconfig.json"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
+        it("exits with code 0 if `tsconfig.json` is passed and it specifies files without errors", async () => {
+            const status = await execRunner(
+                {config: "test/files/tsconfig-test/tslint.json", project: "test/files/tsconfig-test/tsconfig.json"},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
+        it("can be passed a directory and defaults to tsconfig.json", async () => {
+            const status = await execRunner(
+                {config: "test/files/tsconfig-test/tslint.json", project: "test/files/tsconfig-test"},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
+        it("exits with error if passed a directory and there is not tsconfig.json", async () => {
+            const status = await execRunner(
+                {config: "test/files/tsconfig-test/tslint.json", project: "test/files"},
+            );
+            assert.equal(status, Status.FatalError, "exit code should be 1");
+        });
+
+        it("exits with error if passed directory does not exist", async () => {
+            const status = await execRunner(
+                {config: "test/files/tsconfig-test/tslint.json", project: "test/files/non-existent"},
+            );
+            assert.equal(status, Status.FatalError, "exit code should be 1");
+        });
+
+        it("exits with code 1 if file is not included in project", async () => {
+            const status = await execRunner(
+                {
+                    config: "test/files/tsconfig-test/tslint.json",
+                    files: ["test/files/tsconfig-test/other.test.ts"],
+                    project: "test/files/tsconfig-test/tsconfig.json",
+                },
+            );
+            assert.equal(status, Status.FatalError, "exit code should be 1");
+        });
+
+        it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", async () => {
+            const status = await execRunner(
+                {config: "test/files/tsconfig-no-ts-files/tslint.json", project: "test/files/tsconfig-no-ts-files/tsconfig.json"},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
+        });
+
+        it("can extend `tsconfig.json` with relative path", async () => {
+            const status1 = await execRunner(
+                {
+                    config: "test/files/tsconfig-extends-relative/tslint-ok.json",
+                    project: "test/files/tsconfig-extends-relative/test/tsconfig.json",
+                },
+            );
+            assert.equal(status1, Status.Ok, "process should exit without an error");
+            const status2 = await execRunner(
+                {
+                    config: "test/files/tsconfig-extends-relative/tslint-fail.json",
+                    project: "test/files/tsconfig-extends-relative/test/tsconfig.json",
+                },
+            );
+            assert.equal(status2, Status.LintError, "exit code should be 2");
+        });
+
+        it("warns if file-to-lint does not exist", async () => {
+            const result = await execRunnerWithOutput(
+                {project: "test/files/tsconfig-test/tsconfig.json", files: ["test/files/tsconfig-test/non-existent.test.ts"]},
+            );
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.include(result.stderr, `${path.normalize("test/files/tsconfig-test/non-existent.test.ts")}' does not exist`);
+        });
+
+        it("doesn't warn for non-existent file-to-lint if excluded by --exclude", async () => {
+            const result = await execRunnerWithOutput({
+                exclude: ["**/*"],
+                files: ["test/files/tsconfig-test/non-existent.test.ts"],
+                project: "test/files/tsconfig-test/tsconfig.json",
             });
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
         });
 
-        it("can be passed a directory and defaults to tsconfig.json", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/tsconfig-test"], (err) => {
-                assert.isNull(err, "process should exit without an error");
-                done();
-            });
+        it("doesn't warn if glob pattern doesn't match any file", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-test/tsconfig.json", files: ["*.js"]});
+            assert.strictEqual(result.status, Status.Ok, "process should exit without error");
+            assert.notInclude(result.stderr, "does not exist");
         });
 
-        it("exits with error if passed a directory and there is not tsconfig.json", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files"], (err) => {
-                assert.isNotNull(err, "process should exit with an error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+        it("reports errors from parsing tsconfig.json", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-invalid/syntax-error.json"});
+            assert.strictEqual(result.status, Status.FatalError, "exit code should be 1");
+            assert.include(result.stderr, "error TS");
         });
 
-        it("exits with error if passed directory does not exist", (done) => {
-            execCli(["-c", "test/files/tsconfig-test/tslint.json", "--project", "test/files/non-existant"], (err) => {
-                assert.isNotNull(err, "process should exit with an error");
-                assert.strictEqual(err.code, 1, "error code should be 1");
-                done();
-            });
+        it("reports errors from validating tsconfig.json", async () => {
+            const result = await execRunnerWithOutput({project: "test/files/tsconfig-invalid/empty-files.json"});
+            assert.strictEqual(result.status, Status.FatalError, "exit code should be 1");
+            assert.include(result.stderr, "error TS");
         });
 
-        it("exits with code 1 if file is not included in project", (done) => {
-            execCli(
-                [
-                    "-c",
-                    "test/files/tsconfig-test/tslint.json",
-                    "--project",
-                    "test/files/tsconfig-test/tsconfig.json",
-                    "test/files/tsconfig-test/other.test.ts",
-                ],
-                (err) => {
-                    assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 1, "error code should be 1");
-                    done();
-                });
+        it("does not report an error if tsconfig.json matches no files", async () => {
+            const status = await execRunner({project: "test/files/tsconfig-invalid/no-match.json"});
+            assert.strictEqual(status, Status.Ok, "process should exit without an error");
         });
 
-        it("exits with code 0 if `tsconfig.json` is passed but it includes no ts files", (done) => {
-            execCli(
-                ["-c", "test/files/tsconfig-no-ts-files/tslint.json", "-p", "test/files/tsconfig-no-ts-files/tsconfig.json"],
-                (err) => {
-                    assert.isNull(err, "process should exit without an error");
-                    done();
-                });
+        it("can execute typed rules without --type-check", async () => {
+            const status = await execRunner({project: "test/files/typed-rule/tsconfig.json"});
+            assert.equal(status, Status.LintError, "exit code should be 2");
         });
 
-        it("can extend `tsconfig.json` with relative path", (done) => {
-            execCli(
-                ["-c", "test/files/tsconfig-extends-relative/tslint-ok.json", "-p",
-                 "test/files/tsconfig-extends-relative/test/tsconfig.json"],
-                (err) => {
-                    assert.isNull(err, "process should exit without an error");
-                    done();
-                });
+        it("handles 'allowJs' correctly", async () => {
+            const status = await execRunner({project: "test/files/tsconfig-allow-js/tsconfig.json"});
+            assert.equal(status, Status.LintError, "exit code should be 2");
         });
 
-        it("can extend `tsconfig.json` with relative path II", (done) => {
-            execCli(
-                ["-c", "test/files/tsconfig-extends-relative/tslint-fail.json", "-p",
-                 "test/files/tsconfig-extends-relative/test/tsconfig.json"],
-                (err) => {
-                    assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 2, "error code should be 2");
-                    done();
-                });
+        it("doesn't lint external dependencies with 'allowJs'", async () => {
+            const status = await execRunner({project: "test/files/allow-js-exclude-node-modules/tsconfig.json"});
+            assert.equal(status, Status.Ok, "process should exit without error");
         });
 
-        it("can execute typed rules without --type-check", (done) => {
-            execCli(
-                [ "-p", "test/files/typed-rule/tsconfig.json"],
-                (err) => {
-                    assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 2, "error code should be 2");
-                    done();
-                });
+        it("works with '--exclude'", async () => {
+            const status = await execRunner(
+                {project: "test/files/tsconfig-allow-js/tsconfig.json", exclude: ["test/files/tsconfig-allow-js/testfile.test.js"]},
+            );
+            assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
-        it("can handles 'allowJs' correctly", (done) => {
-            execCli(
-                [ "-p", "test/files/tsconfig-allow-js/tsconfig.json"],
-                (err) => {
-                    assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 2, "error code should be 2");
-                    done();
-                });
-        });
-
-        it("works with '--exclude'", (done) => {
-            execCli(
-                [ "-p", "test/files/tsconfig-allow-js/tsconfig.json", "-e", "'test/files/tsconfig-allow-js/testfile.test.js'"],
-                (err) => {
-                    assert.isNull(err, "process should exit without an error");
-                    done();
-                });
-        });
-
-        it("can apply fixes from multiple rules", (done) => {
+        it("can apply fixes from multiple rules", async () => {
             fs.writeFileSync("test/files/project-multiple-fixes/testfile.test.ts",
                              fs.readFileSync("test/files/project-multiple-fixes/before.test.ts", "utf-8"));
-            execCli(
-                [ "-p", "test/files/project-multiple-fixes/", "--fix"],
-                (err) => {
-                    const actual = fs.readFileSync("test/files/project-multiple-fixes/testfile.test.ts", "utf-8");
-                    fs.unlinkSync("test/files/project-multiple-fixes/testfile.test.ts");
-                    assert.isNull(err, "process should exit without an error");
-                    assert.strictEqual(
-                        actual,
-                        fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
-                    );
-                    done();
-                });
+            const status = await execRunner({project: "test/files/project-multiple-fixes/", fix: true});
+            const actual = fs.readFileSync("test/files/project-multiple-fixes/testfile.test.ts", "utf-8");
+            fs.unlinkSync("test/files/project-multiple-fixes/testfile.test.ts");
+            assert.equal(status, Status.Ok, "process should exit without an error");
+            assert.strictEqual(
+                actual,
+                fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
+            );
         }).timeout(8000);
     });
 
@@ -463,7 +497,6 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         afterEach(cleanTempInitFile);
 
         it("exits with code 0 if `--init` flag is used in folder without tslint.json", (done) => {
-
             execCli(["--init"], { cwd: EXECUTABLE_DIR }, (err) => {
                 assert.isNull(err, "process should exit without an error");
                 assert.strictEqual(fs.existsSync(TEMP_JSON_PATH), true, "file should be created");
@@ -489,26 +522,28 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         // on Windows - pattern string without any quotes
         // on Linux - list of files that matches glob (may differ from `glob` module results)
 
-        it("exits with code 2 if correctly finds file containing lint errors when glob is in double quotes", (done) => {
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in double quotes", async () => {
             // when glob pattern is passed in double quotes in npm script `process.env` will contain:
             // on Windows - pattern string without any quotes
             // on Linux - pattern string without any quotes (glob is not expanded)
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "src/**/test.ts"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
+            const status = await execRunner(
+                {config: "./test/config/tslint-custom-rules.json", rulesDirectory: "./test/files/custom-rules", files: ["src/**/test.ts"]},
+            );
+            assert.equal(status, Status.LintError, "error code should be 2");
         });
 
-        it("exits with code 2 if correctly finds file containing lint errors when glob is in single quotes", (done) => {
+        it("exits with code 2 if correctly finds file containing lint errors when glob is in single quotes", async () => {
             // when glob pattern is passed in single quotes in npm script `process.env` will contain:
             // on Windows - pattern string wrapped in single quotes
             // on Linux - pattern string without any quotes (glob is not expanded)
-            execCli(["-c", "./test/config/tslint-custom-rules.json", "-r", "./test/files/custom-rules", "'src/**/test.ts'"], (err) => {
-                assert.isNotNull(err, "process should exit with error");
-                assert.strictEqual(err.code, 2, "error code should be 2");
-                done();
-            });
+            const status = await execRunner(
+                {
+                    config: "./test/config/tslint-custom-rules.json",
+                    files: ["'src/**/test.ts'"],
+                    rulesDirectory: "./test/files/custom-rules",
+                },
+            );
+            assert.equal(status, Status.LintError, "error code should be 2");
         });
 
         it("can handle multiple '--exclude' globs", (done) => {
@@ -552,7 +587,23 @@ function execCli(args: string[], options: cp.ExecFileOptions | ExecFileCallback,
     });
 }
 
-function isFunction(fn: any): fn is (...args: any[]) => any {
+function execRunnerWithOutput(options: Partial<Options>) { // tslint:disable-line:promise-function-async
+    let stdout = "";
+    let stderr = "";
+    return execRunner(
+        options,
+        {
+            log(text) { stdout += text; },
+            error(text) { stderr += text; },
+        },
+    ).then((status) => ({status, stderr, stdout}));
+}
+
+function execRunner(options: Partial<Options>, logger: Logger = dummyLogger) { // tslint:disable-line:promise-function-async
+    return run({exclude: [], files: [], ...options}, logger);
+}
+
+function isFunction(fn: any): fn is Function { // tslint:disable-line:ban-types
     return ({}).toString.call(fn) === "[object Function]";
 }
 

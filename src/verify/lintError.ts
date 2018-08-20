@@ -1,4 +1,5 @@
 /*
+ * @license
  * Copyright 2016 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { Error } from "../error";
 
 export interface PositionInFile {
    line: number;

@@ -23,10 +23,17 @@ import * as Lint from "../index";
 const OPTION_ALWAYS = "always";
 const OPTION_NEVER = "never";
 const OPTION_IGNORE_BOUND_CLASS_METHODS = "ignore-bound-class-methods";
+const OPTION_STRICT_BOUND_CLASS_METHODS = "strict-bound-class-methods";
 const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 
+const enum BoundClassMethodOption {
+    Default,
+    Ignore,
+    Strict,
+}
+
 interface Options {
-    boundClassMethods: boolean;
+    boundClassMethods: BoundClassMethodOption;
     interfaces: boolean;
 }
 
@@ -45,7 +52,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             The following arguments may be optionally provided:
 
             * \`"${OPTION_IGNORE_INTERFACES}"\` skips checking semicolons at the end of interface members.
-            * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.`,
+            * \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\` skips checking semicolons at the end of bound class methods.
+            * \`"${OPTION_STRICT_BOUND_CLASS_METHODS}"\` disables any special handling of bound class methods and treats them as any
+            other assignment. This option overrides \`"${OPTION_IGNORE_BOUND_CLASS_METHODS}"\`.
+        `,
         options: {
             type: "array",
             items: [
@@ -77,7 +87,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            boundClassMethods: this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) === -1,
+            boundClassMethods: this.ruleArguments.indexOf(OPTION_STRICT_BOUND_CLASS_METHODS) !== -1
+                ? BoundClassMethodOption.Strict
+                : this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) !== -1
+                    ? BoundClassMethodOption.Ignore
+                    : BoundClassMethodOption.Default,
             interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
         };
         const Walker = this.ruleArguments.indexOf(OPTION_NEVER) === -1 ? SemicolonAlwaysWalker : SemicolonNeverWalker;
@@ -175,10 +189,11 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
 
     private visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         // check if this is a multi-line arrow function
-        if (node.initializer !== undefined &&
+        if (this.options.boundClassMethods !== BoundClassMethodOption.Strict &&
+            node.initializer !== undefined &&
             node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
             !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
-            if (this.options.boundClassMethods) {
+            if (this.options.boundClassMethods === BoundClassMethodOption.Default) {
                 this.checkUnnecessary(node);
             }
         } else {

@@ -16,16 +16,22 @@
  */
 
 import * as fs from "fs";
+import * as yaml from "js-yaml";
+import * as os from "os";
 import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
+import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
     /**
-     * The severity that is applied to rules in _this_ config with `severity === "default"`.
+     * @deprecated property is never set
+     *
+     * The severity that is applied to rules in this config file as well as rules
+     * in any inherited config files which have their severity set to "default".
      * Not inherited.
      */
     defaultSeverity?: RuleSeverity;
@@ -63,7 +69,12 @@ export interface IConfigurationLoadResult {
     results?: IConfigurationFile;
 }
 
-export const CONFIG_FILENAME = "tslint.json";
+// Note: eslint prefers yaml over json, while tslint prefers json over yaml
+// for backward-compatibility.
+export const JSON_CONFIG_FILENAME = "tslint.json";
+/** @deprecated use `JSON_CONFIG_FILENAME` or `CONFIG_FILENAMES` instead. */
+export const CONFIG_FILENAME = JSON_CONFIG_FILENAME;
+export const CONFIG_FILENAMES = [JSON_CONFIG_FILENAME, "tslint.yaml", "tslint.yml"];
 
 export const DEFAULT_CONFIG: IConfigurationFile = {
     defaultSeverity: "error",
@@ -111,7 +122,7 @@ export function findConfiguration(configFile: string | null, inputFilePath?: str
  * the location of the config file is not known and you want to search for one.
  * @param inputFilePath A path to the current file being linted. This is the starting location
  * of the search for a configuration.
- * @returns An absolute path to a tslint.json file
+ * @returns An absolute path to a tslint.json or tslint.yml or tslint.yaml file
  * or undefined if neither can be found.
  */
 export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string): string | undefined;
@@ -140,15 +151,15 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
         }
 
         // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAME, inputFilePath!);
+        let configFilePath = findup(CONFIG_FILENAMES, path.resolve(inputFilePath!));
         if (configFilePath !== undefined) {
-            return path.resolve(configFilePath);
+            return configFilePath;
         }
 
         // search for tslint.json in home directory
-        const homeDir = getHomeDir();
-        if (homeDir != undefined) {
-            configFilePath = path.join(homeDir, CONFIG_FILENAME);
+        const homeDir = os.homedir();
+        for (const configFilename of CONFIG_FILENAMES) {
+            configFilePath = path.join(homeDir, configFilename);
             if (fs.existsSync(configFilePath)) {
                 return path.resolve(configFilePath);
             }
@@ -159,10 +170,11 @@ export function findConfigurationPath(suppliedConfigFilePath: string | null, inp
 }
 
 /**
- * Find a file by name in a directory or any ancestory directory.
+ * Find a file by names in a directory or any ancestor directory.
+ * Will try each filename in filenames before recursing to a parent directory.
  * This is case-insensitive, so it can find 'TsLiNt.JsOn' when searching for 'tslint.json'.
  */
-function findup(filename: string, directory: string): string | undefined {
+function findup(filenames: string[], directory: string): string | undefined {
     while (true) {
         const res = findFile(directory);
         if (res !== undefined) {
@@ -177,18 +189,21 @@ function findup(filename: string, directory: string): string | undefined {
     }
 
     function findFile(cwd: string): string | undefined {
-        if (fs.existsSync(path.join(cwd, filename))) {
-            return filename;
+        const dirFiles = fs.readdirSync(cwd);
+        for (const filename of filenames) {
+            const index = dirFiles.indexOf(filename);
+            if (index > -1) {
+                return filename;
+            }
+            // TODO: remove in v6.0.0
+            // Try reading in the entire directory and looking for a file with different casing.
+            const result = dirFiles.find((entry) => entry.toLowerCase() === filename);
+            if (result !== undefined) {
+                showWarningOnce(`Using mixed case ${filename} is deprecated. Found: ${path.join(cwd, result)}`);
+                return result;
+            }
         }
-
-        // TODO: remove in v6.0.0
-        // Try reading in the entire directory and looking for a file with different casing.
-        const filenameLower = filename.toLowerCase();
-        const result = fs.readdirSync(cwd).find((entry) => entry.toLowerCase() === filenameLower);
-        if (result !== undefined) {
-            showWarningOnce(`Using mixed case tslint.json is deprecated. Found: ${path.join(cwd, result)}`);
-        }
-        return result;
+        return undefined;
     }
 }
 
@@ -199,42 +214,48 @@ function findup(filename: string, directory: string): string | undefined {
  * './path/to/config' will be treated as a relative path
  * 'path/to/config' will attempt to load a to/config file inside a node module named path
  * @param configFilePath The configuration to load
- * @param originalFilePath The entry point configuration file
+ * @param originalFilePath (deprecated) The entry point configuration file
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
-export function loadConfigurationFromPath(configFilePath?: string, originalFilePath = configFilePath) {
+export function loadConfigurationFromPath(configFilePath?: string, _originalFilePath?: string) {
+
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        let rawConfigFile: RawConfigFile;
-        if (path.extname(resolvedConfigFilePath) === ".json") {
-            const fileContent = stripComments(fs.readFileSync(resolvedConfigFilePath)
-                .toString()
-                .replace(/^\uFEFF/, ""));
-            try {
-                rawConfigFile = JSON.parse(fileContent) as RawConfigFile;
-            } catch (e) {
-                const error = e as Error;
-                // include the configuration file being parsed in the error since it may differ from the directly referenced config
-                throw configFilePath === originalFilePath ? error : new Error(`${error.message} in ${configFilePath}`);
+        const rawConfigFile = readConfigurationFile(resolvedConfigFilePath);
+
+        return parseConfigFile(rawConfigFile, path.dirname(resolvedConfigFilePath), readConfigurationFile);
+    }
+}
+
+/** Reads the configuration file from disk and parses it as raw JSON, YAML or JS depending on the extension. */
+export function readConfigurationFile(filepath: string): RawConfigFile {
+    const resolvedConfigFileExt = path.extname(filepath);
+    if (/\.(json|ya?ml)/.test(resolvedConfigFileExt)) {
+        const fileContent = fs.readFileSync(filepath, "utf8").replace(/^\uFEFF/, "");
+        try {
+            if (resolvedConfigFileExt === ".json") {
+                return JSON.parse(stripComments(fileContent)) as RawConfigFile;
+            } else {
+                return yaml.safeLoad(fileContent, {
+                    // Note: yaml.LoadOptions expects a schema value of type "any",
+                    // but this trips up the no-unsafe-any rule.
+                    // tslint:disable-next-line:no-unsafe-any
+                    schema: yaml.JSON_SCHEMA,
+                    strict: true,
+                }) as RawConfigFile;
             }
-        } else {
-            rawConfigFile = require(resolvedConfigFilePath) as RawConfigFile;
-            delete (require.cache as { [key: string]: any })[resolvedConfigFilePath];
+        } catch (e) {
+            const error = e as Error;
+            // include the configuration file being parsed in the error since it may differ from the directly referenced config
+            throw new Error(`${error.message} in ${filepath}`);
         }
-
-        const configFileDir = path.dirname(resolvedConfigFilePath);
-        const configFile = parseConfigFile(rawConfigFile, configFileDir);
-
-        // load configurations, in order, using their identifiers or relative paths
-        // apply the current configuration last by placing it last in this array
-        const configs: IConfigurationFile[] = configFile.extends.map((name) => {
-            const nextConfigFilePath = resolveConfigurationPath(name, configFileDir);
-            return loadConfigurationFromPath(nextConfigFilePath, originalFilePath);
-        }).concat([configFile]);
-
-        return configs.reduce(extendConfigurationFile, EMPTY_CONFIG);
+    } else {
+        const rawConfigFile = require(filepath) as RawConfigFile;
+        // tslint:disable-next-line no-dynamic-delete
+        delete (require.cache as { [key: string]: any })[filepath];
+        return rawConfigFile;
     }
 }
 
@@ -286,7 +307,6 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
                     }
                 }
             }
-
         }
     }
 
@@ -318,25 +338,11 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     };
 }
 
-function getHomeDir(): string | undefined {
-    const environment = global.process.env as { [key: string]: string };
-    const paths: string[] = [
-        environment.USERPROFILE,
-        environment.HOME,
-        environment.HOMEPATH,
-        environment.HOMEDRIVE + environment.HOMEPATH,
-    ];
-
-    for (const homePath of paths) {
-        if (homePath !== undefined && fs.existsSync(homePath)) {
-            return homePath;
-        }
-    }
-
-    return undefined;
-}
-
-// returns the absolute path (contrary to what the name implies)
+/**
+ * returns the absolute path (contrary to what the name implies)
+ *
+ * @deprecated use `path.resolve` instead
+ */
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != undefined) {
         const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
@@ -369,15 +375,14 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
                 }
             }
 
-            const absolutePath = getRelativePath(dir, relativeTo);
+            const absolutePath = relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
             if (absolutePath !== undefined) {
                 if (!fs.existsSync(absolutePath)) {
                     throw new FatalError(`Could not find custom rule directory: ${dir}`);
                 }
             }
             return absolutePath;
-        })
-        .filter((dir) => dir !== undefined) as string[];
+        });
 }
 
 /**
@@ -458,7 +463,7 @@ export interface RawConfigFile {
     rulesDirectory?: string | string[];
     defaultSeverity?: string;
     rules?: RawRulesConfig;
-    jsRules?: RawRulesConfig;
+    jsRules?: RawRulesConfig | boolean;
 }
 export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
@@ -469,39 +474,95 @@ export type RawRuleConfig = null | undefined | boolean | any[] | {
 };
 
 /**
- * Parses a config file and normalizes legacy config settings
+ * Parses a config file and normalizes legacy config settings.
+ * If `configFileDir` and `readConfig` are provided, this function will load all base configs and reduce them to the final configuration.
  *
  * @param configFile The raw object read from the JSON of a config file
  * @param configFileDir The directory of the config file
+ * @param readConfig Will be used to load all base configurations while parsing. The function is called with the resolved path.
  */
-export function parseConfigFile(configFile: RawConfigFile, configFileDir?: string): IConfigurationFile {
-    return {
-        extends: arrayify(configFile.extends),
-        jsRules: parseRules(configFile.jsRules),
-        linterOptions: parseLinterOptions(configFile.linterOptions),
-        rules: parseRules(configFile.rules),
-        rulesDirectory: getRulesDirectories(configFile.rulesDirectory, configFileDir),
-    };
+export function parseConfigFile(
+    configFile: RawConfigFile,
+    configFileDir?: string,
+    readConfig?: (path: string) => RawConfigFile,
+): IConfigurationFile {
+    let defaultSeverity = configFile.defaultSeverity;
+    if (readConfig === undefined || configFileDir === undefined) {
+        return parse(configFile, configFileDir);
+    }
+
+    return loadExtendsRecursive(configFile, configFileDir)
+        .map(({dir, config}) => parse(config, dir))
+        .reduce(extendConfigurationFile, EMPTY_CONFIG);
+
+    /** Read files in order, depth first, and assign `defaultSeverity` (last config in extends wins). */
+    function loadExtendsRecursive(raw: RawConfigFile, dir: string) {
+        const configs: Array<{dir: string; config: RawConfigFile}> = [];
+        for (const relativePath of arrayify(raw.extends)) {
+            const resolvedPath = resolveConfigurationPath(relativePath, dir);
+            const extendedRaw = readConfig!(resolvedPath);
+            configs.push(...loadExtendsRecursive(extendedRaw, path.dirname(resolvedPath)));
+        }
+        if (raw.defaultSeverity !== undefined) {
+            defaultSeverity = raw.defaultSeverity;
+        }
+        configs.push({dir, config: raw});
+        return configs;
+    }
+
+    function parse(config: RawConfigFile, dir?: string): IConfigurationFile {
+        const rulesDirectory: string | string[] = getRulesDirectories(config.rulesDirectory, dir);
+        const rules = parseRules(config.rules);
+        const jsRules = typeof config.jsRules === "boolean" ?
+                            filterValidJsRules(rules, config.jsRules, rulesDirectory) :
+                            parseRules(config.jsRules);
+
+        return {
+            extends: arrayify(config.extends),
+            jsRules,
+            linterOptions: parseLinterOptions(config.linterOptions, dir),
+            rules,
+            rulesDirectory,
+        };
+    }
 
     function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
         const map = new Map<string, Partial<IOptions>>();
         if (config !== undefined) {
             for (const ruleName in config) {
                 if (hasOwnProperty(config, ruleName)) {
-                    map.set(ruleName, parseRuleOptions(config[ruleName], configFile.defaultSeverity));
+                    map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
                 }
             }
         }
         return map;
     }
 
-    function parseLinterOptions(raw: RawConfigFile["linterOptions"]): IConfigurationFile["linterOptions"] {
+    function filterValidJsRules(rules: Map<string, Partial<IOptions>>,
+                                copyRulestoJsRules = false,
+                                rulesDirectory?: string | string[]): Map<string, Partial<IOptions>> {
+        const validJsRules = new Map<string, Partial<IOptions>>();
+        if (copyRulestoJsRules) {
+            rules.forEach((ruleOptions, ruleName) => {
+                if (ruleOptions.ruleSeverity !== "off") {
+                    const Rule = findRule(ruleName, rulesDirectory);
+                    if ((Rule !== undefined && (Rule.metadata === undefined || !Rule.metadata.typescriptOnly))) {
+                    validJsRules.set(ruleName, ruleOptions);
+                    }
+                }
+            });
+        }
+
+        return validJsRules;
+    }
+
+    function parseLinterOptions(raw: RawConfigFile["linterOptions"], dir?: string): IConfigurationFile["linterOptions"] {
         if (raw === undefined || raw.exclude === undefined) {
             return {};
         }
         return {
             exclude: arrayify(raw.exclude).map(
-                (pattern) => configFileDir === undefined ? path.resolve(pattern) : path.resolve(configFileDir, pattern),
+                (pattern) => dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
             ),
         };
     }

@@ -1,0 +1,36 @@
+const CompletelyEmptyVariable = 0;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * 
+ */
+const ContentEmptyVariable = 1;
+      ~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/** */
+const ContentSingleLineEmptyVariable = 1;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @deprecated
+ */
+const ContentMissingVariable = 2;
+
+/** @deprecated */
+const ContentSingleLineMissingVariable = 2;
+
+/**
+ * @deprecated   Do not use!
+ */
+const ContentValidVariable = 4;
+
+/** @deprecated Do not use! */
+const ContentSingleLineValidVariable = 4;
+
+/**
+ * ...
+ */
+const CommentBodyVariable = 5;
+
+/** ... */
+const CommentSingleLineBodyVariable = 5;

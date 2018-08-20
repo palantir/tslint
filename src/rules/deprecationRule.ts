@@ -23,6 +23,10 @@ import {
     isIdentifier,
     isNewExpression,
     isPropertyAccessExpression,
+    isPropertyAssignment,
+    isReassignmentTarget,
+    isShorthandPropertyAssignment,
+    isSymbolFlagSet,
     isTaggedTemplateExpression,
     isVariableDeclaration,
     isVariableDeclarationList,
@@ -41,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
         rationale: "Deprecated APIs should be avoided, and usage updated.",
         optionsDescription: "",
         options: null,
-        optionExamples: [],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -102,10 +106,12 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.VariableDeclaration:
         case ts.SyntaxKind.Parameter:
         case ts.SyntaxKind.PropertyDeclaration:
-        case ts.SyntaxKind.PropertyAssignment:
         case ts.SyntaxKind.EnumMember:
         case ts.SyntaxKind.ImportEqualsDeclaration:
             return (parent as ts.NamedDeclaration).name === identifier;
+        case ts.SyntaxKind.PropertyAssignment:
+            return (parent as ts.PropertyAssignment).name === identifier &&
+                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression);
         case ts.SyntaxKind.BindingElement:
             // return true for `b` in `const {a: b} = obj"`
             return (parent as ts.BindingElement).name === identifier &&
@@ -134,8 +140,18 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
             return result;
         }
     }
-    let symbol = tc.getSymbolAtLocation(node);
-    if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+    let symbol: ts.Symbol | undefined;
+    const parent = node.parent!;
+    if (parent.kind === ts.SyntaxKind.BindingElement) {
+        symbol = tc.getTypeAtLocation(parent.parent!).getProperty(node.text);
+    } else if (isPropertyAssignment(parent) && parent.name === node ||
+               isShorthandPropertyAssignment(parent) && parent.name === node && isReassignmentTarget(node)) {
+        symbol = tc.getPropertySymbolOfDestructuringAssignment(node);
+    } else {
+        symbol = tc.getSymbolAtLocation(node);
+    }
+
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
     if (symbol === undefined ||
@@ -150,7 +166,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
 function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
     for (const tag of tags) {
         if (tag.name === "deprecated") {
-            return tag.text;
+            return tag.text === undefined ? "" : tag.text;
         }
     }
     return undefined;

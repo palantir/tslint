@@ -19,13 +19,16 @@ import { isInterfaceDeclaration, isObjectLiteralExpression, isSameLine, isTypeAl
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
+const OPTION_SHORTHAND_FIRST = "shorthand-first";
 
 interface Options {
     ignoreCase: boolean;
     matchDeclarationOrder: boolean;
+    shorthandFirst: boolean;
 }
 
 export class Rule extends Lint.Rules.OptionallyTypedRule {
@@ -43,24 +46,28 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             By default, this rule checks that keys are in alphabetical order.
             The following may optionally be passed:
 
-            * "${OPTION_IGNORE_CASE}" will to compare keys in a case insensitive way.
+            * "${OPTION_IGNORE_CASE}" will compare keys in a case insensitive way.
             * "${OPTION_MATCH_DECLARATION_ORDER}" will prefer to use the key ordering of the contextual type of the object literal, as in:
 
                 interface I { foo: number; bar: number; }
                 const obj: I = { foo: 1, bar: 2 };
 
             If a contextual type is not found, alphabetical ordering will be used instead.
+            * "${OPTION_SHORTHAND_FIRST}" will enforce shorthand properties to appear first, as in:
+
+                const obj = { a, c, b: true };
             `,
         options: {
             type: "string",
-            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER],
+            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
         },
         optionExamples: [
             true,
-            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER],
+            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
         ],
         type: "maintainability",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -71,6 +78,10 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     public static FAILURE_STRING_USE_DECLARATION_ORDER(propName: string, typeName: string | undefined): string {
         const type = typeName === undefined ? "its type declaration" : `'${typeName}'`;
         return `The key '${propName}' is not in the same order as it is in ${type}.`;
+    }
+
+    public static FAILURE_STRING_SHORTHAND_FIRST(name: string): string {
+        return `The shorthand property '${name}' should appear before normal properties`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -95,6 +106,7 @@ function parseOptions(ruleArguments: any[]): Options {
     return {
         ignoreCase: has(OPTION_IGNORE_CASE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
+        shorthandFirst: has(OPTION_SHORTHAND_FIRST),
     };
 
     function has(name: string) {
@@ -105,7 +117,7 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, matchDeclarationOrder },
+        options: { ignoreCase, matchDeclarationOrder, shorthandFirst },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -135,13 +147,32 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
         }
 
         let lastKey: string | undefined;
+        let lastPropertyWasShorthand: boolean | undefined;
         for (const property of node.properties) {
             switch (property.kind) {
                 case ts.SyntaxKind.SpreadAssignment:
                     lastKey = undefined; // reset at spread
+                    lastPropertyWasShorthand = undefined; // reset at spread
                     break;
                 case ts.SyntaxKind.ShorthandPropertyAssignment:
                 case ts.SyntaxKind.PropertyAssignment:
+                    if (shorthandFirst) {
+                        if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment) {
+                            if (lastPropertyWasShorthand === false) {
+                                ctx.addFailureAtNode(property.name, Rule.FAILURE_STRING_SHORTHAND_FIRST(property.name.text));
+                                return; // only show warning on first out-of-order property
+                            }
+
+                            lastPropertyWasShorthand = true;
+                        } else {
+                            if (lastPropertyWasShorthand === true) {
+                                lastKey = undefined; // reset on change from shorthand to normal
+                            }
+
+                            lastPropertyWasShorthand = false;
+                        }
+                    }
+
                     if (property.name.kind === ts.SyntaxKind.Identifier ||
                         property.name.kind === ts.SyntaxKind.StringLiteral) {
                         const key = ignoreCase ? property.name.text.toLowerCase() : property.name.text;
@@ -208,7 +239,7 @@ function hasBlankLineBefore(sourceFile: ts.SourceFile, element: ts.ObjectLiteral
 }
 
 function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
-    return /(\r\n|\r|\n){2}/.test(sourceFile.text.slice(position, position + 4));
+    return /(\r?\n){2}/.test(sourceFile.text.slice(position, position + 4));
 }
 
 function getTypeName(t: TypeLike): string | undefined {

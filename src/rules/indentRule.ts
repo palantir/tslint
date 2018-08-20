@@ -44,7 +44,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${OPTION_INDENT_SIZE_2.toString()}\` enforces 2 space indentation.
             * \`${OPTION_INDENT_SIZE_4.toString()}\` enforces 4 space indentation.
 
-            Indentation size is required for auto-fixing, but not for rule checking.
+            Indentation size is **required** for auto-fixing, but not for rule checking.
+
+            **NOTE**: auto-fixing will only convert invalid indent whitespace to the desired type, it will not fix invalid whitespace sizes.
             `,
         options: {
             type: "array",
@@ -66,6 +68,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_USE_SPACES, OPTION_INDENT_SIZE_4],
             [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
+        hasFix: true,
         type: "maintainability",
         typescriptOnly: false,
     };

@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_UNION = "allow-null-union";
 const OPTION_ALLOW_UNDEFINED_UNION = "allow-undefined-union";
 const OPTION_ALLOW_STRING = "allow-string";
+const OPTION_ALLOW_ENUM = "allow-enum";
 const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
@@ -50,6 +52,8 @@ export class Rule extends Lint.Rules.TypedRule {
             * \`${OPTION_ALLOW_STRING}\` allows strings.
               - It does *not* allow unions containing \`string\`.
               - It does *not* allow string literal types.
+            * \`${OPTION_ALLOW_ENUM}\` allows enums.
+              - It does *not* allow unions containing \`enum\`.
             * \`${OPTION_ALLOW_NUMBER}\` allows numbers.
               - It does *not* allow unions containing \`number\`.
               - It does *not* allow enums or number literal types.
@@ -69,6 +73,7 @@ export class Rule extends Lint.Rules.TypedRule {
                     OPTION_ALLOW_NULL_UNION,
                     OPTION_ALLOW_UNDEFINED_UNION,
                     OPTION_ALLOW_STRING,
+                    OPTION_ALLOW_ENUM,
                     OPTION_ALLOW_NUMBER,
                     OPTION_ALLOW_BOOLEAN_OR_UNDEFINED,
                 ],
@@ -78,7 +83,7 @@ export class Rule extends Lint.Rules.TypedRule {
         },
         optionExamples: [
             true,
-            [true, OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_NUMBER],
+            [true, OPTION_ALLOW_NULL_UNION, OPTION_ALLOW_UNDEFINED_UNION, OPTION_ALLOW_STRING, OPTION_ALLOW_ENUM, OPTION_ALLOW_NUMBER],
             [true, OPTION_ALLOW_BOOLEAN_OR_UNDEFINED],
         ],
         type: "functionality",
@@ -97,6 +102,7 @@ interface Options {
     allowNullUnion: boolean;
     allowUndefinedUnion: boolean;
     allowString: boolean;
+    allowEnum: boolean;
     allowNumber: boolean;
     allowMix: boolean;
     allowBooleanOrUndefined: boolean;
@@ -108,6 +114,7 @@ function parseOptions(ruleArguments: string[], strictNullChecks: boolean): Optio
         allowNullUnion: has(OPTION_ALLOW_NULL_UNION),
         allowUndefinedUnion: has(OPTION_ALLOW_UNDEFINED_UNION),
         allowString: has(OPTION_ALLOW_STRING),
+        allowEnum: has(OPTION_ALLOW_ENUM),
         allowNumber: has(OPTION_ALLOW_NUMBER),
         allowMix: has(OPTION_ALLOW_MIX),
         allowBooleanOrUndefined: has(OPTION_ALLOW_BOOLEAN_OR_UNDEFINED),
@@ -205,10 +212,10 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
         case true:
             // Allow 'any'. Allow 'true' itself, but not any other always-truthy type.
             // tslint:disable-next-line no-bitwise
-            return Lint.isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysTruthy;
+            return isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysTruthy;
         case false:
             // Allow 'false' itself, but not any other always-falsy type
-            return Lint.isTypeFlagSet(type, ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysFalsy;
+            return isTypeFlagSet(type, ts.TypeFlags.BooleanLiteral) ? undefined : TypeFailure.AlwaysFalsy;
         case undefined:
             return undefined;
     }
@@ -217,11 +224,11 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
 function isBooleanUndefined(type: ts.UnionType): boolean | undefined {
     let isTruthy = false;
     for (const ty of type.types) {
-        if (Lint.isTypeFlagSet(ty, ts.TypeFlags.Boolean)) {
+        if (isTypeFlagSet(ty, ts.TypeFlags.Boolean)) {
             isTruthy = true;
-        } else if (Lint.isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
+        } else if (isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
             isTruthy = isTruthy || (ty as ts.IntrinsicType).intrinsicName === "true";
-        } else if (!Lint.isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) { // tslint:disable-line:no-bitwise
+        } else if (!isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) { // tslint:disable-line:no-bitwise
             return undefined;
         }
     }
@@ -277,7 +284,7 @@ function failureForKind(kind: TypeKind, isInUnion: boolean, options: Options): T
         case TypeKind.FalseNumberLiteral:
             return options.allowNumber ? undefined : TypeFailure.Number;
         case TypeKind.Enum:
-            return TypeFailure.Enum;
+            return options.allowEnum ? undefined : TypeFailure.Enum;
         case TypeKind.Null:
             return isInUnion && !options.allowNullUnion ? TypeFailure.Null : undefined;
         case TypeKind.Undefined:
@@ -357,7 +364,7 @@ function getKind(type: ts.Type): TypeKind {
         : TypeKind.AlwaysTruthy;
 
     function is(flags: ts.TypeFlags) {
-        return Lint.isTypeFlagSet(type, flags);
+        return isTypeFlagSet(type, flags);
     }
 }
 
@@ -402,7 +409,7 @@ function stringOr(parts: string[]): string {
 }
 
 function isUnionType(type: ts.Type): type is ts.UnionType {
-    return Lint.isTypeFlagSet(type, ts.TypeFlags.Union) && !Lint.isTypeFlagSet(type, ts.TypeFlags.Enum);
+    return isTypeFlagSet(type, ts.TypeFlags.Union) && !isTypeFlagSet(type, ts.TypeFlags.Enum);
 }
 
 function showLocation(n: Location): string {
@@ -438,6 +445,7 @@ function showExpectedTypes(options: Options): string[] {
     if (options.allowNullUnion) { parts.push("null-union"); }
     if (options.allowUndefinedUnion) { parts.push("undefined-union"); }
     if (options.allowString) { parts.push("string"); }
+    if (options.allowEnum) { parts.push("enum"); }
     if (options.allowNumber) { parts.push("number"); }
     if (options.allowBooleanOrUndefined) { parts.push("boolean-or-undefined"); }
     return parts;

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -106,7 +107,7 @@ const optionsDescription = Lint.Utils.dedent`
 
     ${namesMarkdown(PRESET_NAMES)}
 
-    Alternatively, the value for \`order\` maybe be an array consisting of the following strings:
+    Alternatively, the value for \`order\` may be an array consisting of the following strings:
 
     ${namesMarkdown(allMemberKindNames)}
 
@@ -131,7 +132,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "member-ordering",
         description: "Enforces member ordering.",
-        rationale: "A consistent ordering for class members can make classes easier to read, navigate, and edit.",
+        hasFix: true,
+        rationale: Lint.Utils.dedent`
+            A consistent ordering for class members can make classes easier to read, navigate, and edit.
+
+            A common opposite practice to \`member-ordering\` is to keep related groups of classes together.
+            Instead of creating classes with multiple separate groups, consider splitting class responsibilities
+            apart across multiple single-responsibility classes.
+        `,
         optionsDescription,
         options: {
             type: "object",
@@ -210,8 +218,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
+
+    private readonly fixes: Array<[Lint.RuleFailure, Lint.Replacement]> = [];
+
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
+            // NB: iterate through children first!
+            ts.forEachChild(node, cb);
+
             switch (node.kind) {
                 case ts.SyntaxKind.ClassDeclaration:
                 case ts.SyntaxKind.ClassExpression:
@@ -219,14 +233,27 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.TypeLiteral:
                     this.checkMembers((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members);
             }
-            return ts.forEachChild(node, cb);
         };
-        return ts.forEachChild(sourceFile, cb);
+        ts.forEachChild(sourceFile, cb);
+
+        // assign Replacements which have not been merged into surrounding ones to their RuleFailures.
+        this.fixes.forEach(([failure, replacement]) => {
+            (failure.getFix() as Lint.Replacement[]).push(replacement);
+        });
     }
 
+    /**
+     * Check wether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
+     * Lint.Replacement is generated, which replaces the entire NodeArray with a correctly sorted one. The Replacement
+     * is not immediately added to a RuleFailure, as incorrectly sorted nodes can be nested (e.g. a class declaration
+     * in a method implementation), but instead temporarily stored in `this.fixes`. Nested Replacements are manually
+     * merged, as TSLint doesn't handle overlapping ones. For this reason it is important that the recursion happens
+     * before the checkMembers call in this.walk().
+     */
     private checkMembers(members: ts.NodeArray<Member>) {
         let prevRank = -1;
         let prevName: string | undefined;
+        let failureExists = false;
         for (const member of members) {
             const rank = this.memberRank(member);
             if (rank === -1) {
@@ -243,7 +270,9 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     : "at the beginning of the class/interface";
                 const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
                     `Instead, this should come ${locationHint}.`;
-                this.addFailureAtNode(member, errorLine1);
+                // add empty array as fix so we can add a replacement later. (fix itself is readonly)
+                this.addFailureAtNode(member, errorLine1, []);
+                failureExists = true;
             } else {
                 if (this.options.alphabetize && member.name !== undefined) {
                     if (rank !== prevRank) {
@@ -255,7 +284,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
                         this.addFailureAtNode(
                             member.name,
-                            Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName));
+                            Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
+                        failureExists = true;
                     } else {
                         prevName = curName;
                     }
@@ -264,6 +294,53 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 // keep track of last good node
                 prevRank = rank;
             }
+        }
+        if (failureExists) {
+            const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
+                const a = members[ai];
+                const b = members[bi];
+
+                // first, sort by member rank
+                const rankDiff = this.memberRank(a) - this.memberRank(b);
+                if (rankDiff !== 0) { return rankDiff; }
+                // then lexicographically if alphabetize == true
+                if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
+                    const aName = nameString(a.name);
+                    const bName = nameString(b.name);
+                    const nameDiff = aName.localeCompare(bName);
+                    if (nameDiff !== 0) { return nameDiff; }
+                }
+                // finally, sort by position in original NodeArray so the sort remains stable.
+                return ai - bi;
+            });
+            const splits = getSplitIndexes(members, this.sourceFile.text);
+            const sortedMembersText = sortedMemberIndexes.map((i) => {
+                const start = splits[i];
+                const end = splits[i + 1];
+                let nodeText = this.sourceFile.text.substring(start, end);
+                while (true) {
+                    // check if there are previous fixes which we need to merge into this one
+                    // if yes, remove it from the list so that we do not return overlapping Replacements
+                    const fixIndex = arrayFindLastIndex(
+                        this.fixes,
+                        ([, r]) => r.start >= start && r.start + r.length <= end,
+                    );
+                    if (fixIndex === -1) {
+                        break;
+                    }
+                    const fix = this.fixes.splice(fixIndex, 1)[0];
+                    const [, replacement] = fix;
+                    nodeText = applyReplacementOffset(nodeText, replacement, start);
+                }
+                return nodeText;
+            });
+            // instead of assigning the fix immediately to the last failure, we temporarily store it in `this.fixes`,
+            // in case a containing node needs to be fixed too. We only "add" the fix to the last failure, although
+            // it fixes all failures in this NodeArray, as TSLint doesn't handle duplicate Replacements.
+            this.fixes.push([
+                arrayLast(this.failures),
+                Lint.Replacement.replaceFromTo(splits[0], arrayLast(splits), sortedMembersText.join("")),
+            ]);
         }
     }
 
@@ -334,8 +411,8 @@ function memberKindFromName(name: string): MemberKind[] {
 }
 
 function getMemberKind(member: Member): MemberKind | undefined {
-    const accessLevel =  hasModifier(ts.SyntaxKind.PrivateKeyword) ? "private"
-        : hasModifier(ts.SyntaxKind.ProtectedKeyword) ? "protected"
+    const accessLevel =  hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword) ? "private"
+        : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword) ? "protected"
         : "public";
 
     switch (member.kind) {
@@ -356,12 +433,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     }
 
     function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
+        const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
         return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
-    }
-
-    function hasModifier(kind: ts.SyntaxKind) {
-        return Lint.hasModifier(member.modifiers, kind);
     }
 }
 
@@ -483,4 +556,128 @@ function nameString(name: ts.PropertyName): string {
         default:
             return "";
     }
+}
+/**
+ * Returns the last element of an array. (Or undefined).
+ */
+function arrayLast<T>(array: ArrayLike<T>): T {
+    return array[array.length - 1];
+}
+
+/**
+ * Array.prototype.findIndex, but the last index.
+ */
+function arrayFindLastIndex<T>(
+    array: ArrayLike<T>,
+    predicate: (el: T, elIndex: number, array: ArrayLike<T>) => boolean,
+): number {
+    for (let i = array.length; i-- > 0;) {
+        if (predicate(array[i], i, array)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+/**
+ * Applies a Replacement to a part of the text which starts at offset.
+ * See also Replacement.apply
+ */
+function applyReplacementOffset(content: string, replacement: Lint.Replacement, offset: number) {
+    return content.substring(0, replacement.start - offset)
+        + replacement.text
+        + content.substring(replacement.start - offset + replacement.length);
+}
+
+/**
+ * Get the indexes of the boundaries between nodes in the node array. The following points must be taken into account:
+ * - Trivia should stay with its corresponding node (comments on the same line following the token belong to the
+ *   previous token, the rest to the next).
+ * - Reordering the subtexts should not result in code being commented out due to being moved between a "//" and
+ *   the following newline.
+ * - The end of one node must be the start of the next, otherwise the intravening whitespace will be lost when
+ *   reordering.
+ *
+ * Hence, the boundaries are chosen to be _after_ the newline following the node, or the beginning of the next token,
+ * if that comes first.
+ */
+function getSplitIndexes(members: ts.NodeArray<Member>, text: string) {
+    const result = members.map((member) => getNextSplitIndex(text, member.getFullStart()));
+    result.push(getNextSplitIndex(text, arrayLast(members).getEnd()));
+    return result;
+}
+
+/**
+ * Calculates the index after the newline following pos, or the beginning of the next token, whichever comes first.
+ * See also getSplitIndexes.
+ * This method is a modified version of TypeScript's internal iterateCommentRanges function.
+ */
+function getNextSplitIndex(text: string, pos: number) {
+    const enum CharacterCodes {
+        lineFeed = 0x0A,              // \n
+        carriageReturn = 0x0D,        // \r
+        formFeed = 0x0C,              // \f
+        tab = 0x09,                   // \t
+        verticalTab = 0x0B,           // \v
+        slash = 0x2F,                 // /
+        asterisk = 0x2A,              // *
+        space = 0x0020,   // " "
+        maxAsciiCharacter = 0x7F,
+    }
+    scan: while (pos >= 0 && pos < text.length) {
+        const ch = text.charCodeAt(pos);
+        switch (ch) {
+            case CharacterCodes.carriageReturn:
+                if (text.charCodeAt(pos + 1) === CharacterCodes.lineFeed) {
+                    pos++;
+                }
+            // falls through
+            case CharacterCodes.lineFeed:
+                pos++;
+                // split is after new line
+                return pos;
+            case CharacterCodes.tab:
+            case CharacterCodes.verticalTab:
+            case CharacterCodes.formFeed:
+            case CharacterCodes.space:
+                // skip whitespace
+                pos++;
+                continue;
+            case CharacterCodes.slash:
+                const nextChar = text.charCodeAt(pos + 1);
+                if (nextChar === CharacterCodes.slash || nextChar === CharacterCodes.asterisk) {
+                    const isSingleLineComment = nextChar === CharacterCodes.slash;
+                    pos += 2;
+                    if (isSingleLineComment) {
+                        while (pos < text.length) {
+                            if (ts.isLineBreak(text.charCodeAt(pos))) {
+                                // the comment ends here, go back to default logic to handle parsing new line and result
+                                continue scan;
+                            }
+                            pos++;
+                        }
+                    } else {
+                        while (pos < text.length) {
+                            if (text.charCodeAt(pos) === CharacterCodes.asterisk && text.charCodeAt(pos + 1) === CharacterCodes.slash) {
+                                pos += 2;
+                                continue scan;
+                            }
+                            pos++;
+                        }
+                    }
+
+                    // if we arrive here, it's because pos == text.length
+                    return pos;
+                }
+                break scan;
+            default:
+                // skip whitespace:
+                if (ch > CharacterCodes.maxAsciiCharacter && (ts.isWhiteSpaceLike(ch))) {
+                    pos++;
+                    continue;
+                }
+                break scan;
+        }
+    }
+    return pos;
 }

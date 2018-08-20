@@ -120,9 +120,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     }
 
     function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
-        // TODO remove type assertion on update to typescript@2.6.0
-        if ((checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol !== undefined) {
-            inScope = (checker as any as {getExportSymbolOfSymbol(s: ts.Symbol): ts.Symbol}).getExportSymbolOfSymbol(inScope);
+        if (checker.getExportSymbolOfSymbol !== undefined) {
+            inScope = checker.getExportSymbolOfSymbol(inScope);
             return accessed === inScope;
         }
         return accessed === inScope ||
@@ -132,5 +131,5 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 }
 
 function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol | undefined {
-    return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
+    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
 }

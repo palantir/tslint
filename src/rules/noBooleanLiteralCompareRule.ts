@@ -29,6 +29,10 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Comparing boolean values to boolean literals is unnecessary, as those expressions will result in booleans too.
+            Just use the boolean values directly or negate them.
+        `,
         type: "style",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -63,7 +67,7 @@ interface Compare {
 
 function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
     const cmp = deconstructComparison(node);
-    return cmp === undefined || !Lint.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+    return cmp === undefined || !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
 }
 
 function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {

@@ -64,7 +64,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            destructuringAll: this.ruleArguments.length !== 0 && this.ruleArguments[0].destructuring === OPTION_DESTRUCTURING_ALL,
+            destructuringAll: this.ruleArguments.length !== 0 &&
+                (this.ruleArguments[0] as {destructuring?: string}).destructuring === OPTION_DESTRUCTURING_ALL,
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -120,7 +121,7 @@ interface DestructuringInfo {
 }
 
 class PreferConstWalker extends Lint.AbstractWalker<Options> {
-    private scope: Scope;
+    private scope: Scope = new Scope();
     public walk(sourceFile: ts.SourceFile) {
         // don't check anything on declaration files
         if (sourceFile.isDeclarationFile) {
@@ -174,10 +175,12 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     });
                 }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
-                this.handleBindingName((node as ts.ParameterDeclaration).name, {
-                    canBeConst: false,
-                    isBlockScoped: true,
-                });
+                if (node.parent!.kind !== ts.SyntaxKind.IndexSignature) {
+                    this.handleBindingName((node as ts.ParameterDeclaration).name, {
+                        canBeConst: false,
+                        isBlockScoped: true,
+                    });
+                }
             } else if (utils.isPostfixUnaryExpression(node) ||
                        utils.isPrefixUnaryExpression(node) &&
                        (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) {

@@ -20,7 +20,12 @@ typings/.basedir.ts
 *.swp
 
 docs/_data/rules.json
+docs/_data/formatters.json
 docs/rules/*/index.html
+docs/formatters/*/index.html
 
 /coverage/
 /.nyc_output
+
+# ide
+/.idea

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as diff from "diff";
 import * as fs from "fs";
 import * as glob from "glob";
@@ -24,7 +24,8 @@ import * as semver from "semver";
 import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
-import * as Linter from "./linter";
+import { Linter } from "./linter";
+import { Logger } from "./runner";
 import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
 import { LintError } from "./verify/lintError";
 import * as parse from "./verify/parse";
@@ -74,7 +75,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     if (hasConfig) {
         const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
-            throw new Error(JSON.stringify(error));
+            throw new Error(ts.formatDiagnostics([error], ts.createCompilerHost({})));
         }
 
         const parseConfigHost = {
@@ -119,13 +120,13 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
                 getDirectories: (dir) => fs.readdirSync(dir),
                 getNewLine: () => "\n",
-                getSourceFile(filenameToGet) {
-                    const target = compilerOptions.target === undefined ? ts.ScriptTarget.ES5 : compilerOptions.target;
-                    if (filenameToGet === ts.getDefaultLibFileName(compilerOptions)) {
-                        const fileContent = fs.readFileSync(ts.getDefaultLibFilePath(compilerOptions), "utf8");
-                        return ts.createSourceFile(filenameToGet, fileContent, target);
-                    } else if (denormalizeWinPath(filenameToGet) === fileCompileName) {
+                getSourceFile(filenameToGet, target) {
+                    if (denormalizeWinPath(filenameToGet) === fileCompileName) {
                         return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
+                    }
+                    if (path.basename(filenameToGet) === filenameToGet) {
+                        // resolve path of lib.xxx.d.ts
+                        filenameToGet = path.join(path.dirname(ts.getDefaultLibFilePath(compilerOptions)), filenameToGet);
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");
                     return ts.createSourceFile(filenameToGet, text, target, true);
@@ -195,11 +196,11 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
     return results;
 }
 
-export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
+export function consoleTestResultsHandler(testResults: TestResult[], logger: Logger): boolean {
     let didAllTestsPass = true;
 
     for (const testResult of testResults) {
-        if (!consoleTestResultHandler(testResult)) {
+        if (!consoleTestResultHandler(testResult, logger)) {
             didAllTestsPass = false;
         }
     }
@@ -207,7 +208,7 @@ export function consoleTestResultsHandler(testResults: TestResult[]): boolean {
     return didAllTestsPass;
 }
 
-export function consoleTestResultHandler(testResult: TestResult): boolean {
+export function consoleTestResultHandler(testResult: TestResult, logger: Logger): boolean {
     // needed to get colors to show up when passing through Grunt
     (chalk as any).enabled = true;
 
@@ -215,11 +216,10 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
 
     for (const fileName of Object.keys(testResult.results)) {
         const results = testResult.results[fileName];
-        process.stdout.write(`${fileName}:`);
+        logger.log(`${fileName}:`);
 
-        /* tslint:disable:no-console */
         if (results.skipped) {
-            console.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}`));
+            logger.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}\n`));
         } else {
             const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
             const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
@@ -227,37 +227,40 @@ export function consoleTestResultHandler(testResult: TestResult): boolean {
             const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
 
             if (didMarkupTestPass && didFixesTestPass) {
-                console.log(chalk.green(" Passed"));
+                logger.log(chalk.green(" Passed\n"));
             } else {
-                console.log(chalk.red(" Failed!"));
+                logger.log(chalk.red(" Failed!\n"));
                 didAllTestsPass = false;
                 if (!didMarkupTestPass) {
-                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION);
+                    displayDiffResults(markupDiffResults, MARKUP_FILE_EXTENSION, logger);
                 }
                 if (!didFixesTestPass) {
-                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION);
+                    displayDiffResults(fixesDiffResults, FIXES_FILE_EXTENSION, logger);
                 }
             }
         }
-        /* tslint:enable:no-console */
     }
 
     return didAllTestsPass;
 }
 
-function displayDiffResults(diffResults: diff.IDiffResult[], extension: string) {
-    /* tslint:disable:no-console */
-    console.log(chalk.green(`Expected (from ${extension} file)`));
-    console.log(chalk.red("Actual (from TSLint)"));
+function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, logger: Logger) {
+    logger.log(chalk.green(`Expected (from ${extension} file)\n`));
+    logger.log(chalk.red("Actual (from TSLint)\n"));
 
     for (const diffResult of diffResults) {
         let color = chalk.grey;
+        let prefix = "  ";
         if (diffResult.added) {
             color = chalk.green.underline;
+            prefix = "+ ";
         } else if (diffResult.removed) {
             color = chalk.red.underline;
+            prefix = "- ";
         }
-        process.stdout.write(color(diffResult.value));
+        logger.log(color(diffResult.value.split(/\r\n|\r|\n/)
+            // strings end on a newline which we do not want to include the prefix.
+            // tslint:disable-next-line:prefer-template
+            .map((line, index, array) => index === array.length - 1 ? line : prefix + line + "\n").join("")));
     }
-    /* tslint:enable:no-console */
 }

@@ -19,7 +19,7 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as Utils from "../utils";
 
@@ -29,16 +29,17 @@ export class Formatter extends AbstractFormatter {
         formatterName: "stylish",
         description: "Human-readable formatter which creates stylish messages.",
         descriptionDetails: Utils.dedent`
-            The output matches that produced by eslint's stylish formatter. Its readability
-            enhanced through spacing and colouring`,
+            The output matches what is produced by ESLint's stylish formatter.
+            Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
-        1:14  semicolon  Missing semicolon`,
+        Error: 1:14  semicolon  Missing semicolon`,
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
+        failures = this.sortFailures(failures);
         const outputLines = this.mapToMessages(failures);
 
         // Removes initial blank line
@@ -61,11 +62,13 @@ export class Formatter extends AbstractFormatter {
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
 
             // Output the name of each file once
             if (currentFile !== fileName) {
                 outputLines.push("");
-                outputLines.push(fileName);
+                outputLines.push(`${fileName}${chalk.hidden(`:${positionTuple}`)}`);
                 currentFile = fileName;
             }
 
@@ -78,9 +81,6 @@ export class Formatter extends AbstractFormatter {
             ruleName     = chalk.grey(ruleName);
 
             // Lines
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
             positionTuple = failure.getRuleSeverity() === "warning"

@@ -36,7 +36,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
-    "member-access": [true, "check-accessor", "check-constructor"],
+    "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [true, {
         "order": "statics-first",
         "alphabetize": true,
@@ -55,6 +55,7 @@ export const rules = {
     "no-var-requires": true,
     "only-arrow-functions": true,
     "prefer-for-of": true,
+    "prefer-readonly": true,
     "promise-function-async": true,
     "typedef": [
         true,
@@ -105,26 +106,30 @@ export const rules = {
         true,
         "check-parameters",
     ],
+    "no-dynamic-delete": true,
     "no-empty": true,
     "no-eval": true,
     "no-floating-promises": true,
     "no-for-in-array": true,
+    "no-implicit-dependencies": true,
     "no-inferred-empty-object-type": true,
     "no-invalid-template-strings": true,
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
     "no-object-literal-type-assertion": true,
+    "no-return-await": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
     "no-sparse-arrays": true,
     "no-submodule-imports": true,
     "no-unbound-method": true,
+    "no-unnecessary-class": [true, "allow-empty-class"],
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
+    // "no-unused-variable" - deprecated in #3919
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
@@ -157,6 +162,7 @@ export const rules = {
     "object-literal-sort-keys": true,
     "prefer-const": true,
     "trailing-comma": [true, {
+        "esSpecCompliant": true,
         "multiline": "always",
         "singleline": "never",
     }],
@@ -182,10 +188,12 @@ export const rules = {
         "check-space",
         "check-uppercase",
     ],
+    "comment-type": [true, "singleline", "multiline", "doc", "directive"],
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
     "encoding": true,
+    "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
     "interface-name": true,
     "interface-over-type-literal": true,
@@ -193,10 +201,12 @@ export const rules = {
     "match-default-export-name": true,
     "new-parens": true,
     "newline-before-return": true,
+    "newline-per-chained-call": true,
     "no-angle-bracket-type-assertion": true,
     "no-boolean-literal-compare": true,
     "no-consecutive-blank-lines": true,
     "no-parameter-properties": true,
+    "no-redundant-jsdoc": true,
     "no-reference-import": true,
     "no-unnecessary-callback-wrapper": true,
     "no-unnecessary-initializer": true,
@@ -224,6 +234,7 @@ export const rules = {
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
+    "prefer-while": true,
     "quotemark": [
         true,
         "double",
@@ -263,7 +274,7 @@ export const rules = {
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
-    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
+    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare", "noUnusedVariable"];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};

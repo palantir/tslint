@@ -15,7 +15,7 @@
  */
 
 import { assert } from "chai";
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 import * as ts from "typescript";
 
@@ -26,15 +26,20 @@ describe("CodeFrame Formatter", () => {
     const TEST_FILE = "formatters/codeFrameFormatter.test.ts";
     let sourceFile: ts.SourceFile;
     let formatter: IFormatter;
-
+    let colorsEnabled: boolean;
     before(() => {
-        (chalk as any).enabled = true;
+        colorsEnabled = chalk.enabled;
         const Formatter = TestUtils.getFormatter("codeFrame");
         sourceFile = TestUtils.getSourceFile(TEST_FILE);
         formatter = new Formatter();
     });
 
-    it("formats failures", () => {
+    after(() => {
+        (chalk as any).enabled = colorsEnabled;
+    });
+
+    it("formats failures with colors", () => {
+        (chalk as any).enabled = true;
         const maxPosition = sourceFile.getFullWidth();
 
         const failures = [
@@ -42,41 +47,24 @@ describe("CodeFrame Formatter", () => {
             createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
             createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
             createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "error"),
+            createFailure(sourceFile, 0, maxPosition, "warning failure", "warning-name", undefined, "warning"),
         ];
-
-        const expectedResultPlain =
-            `formatters/codeFrameFormatter.test.ts
-            first failure (first-name)
-            > 1 | module CodeFrameModule {
-            2 |     export class CodeFrameClass {
-            3 |         private name: string;
-            4 |
-
-            &<>'" should be escaped (escape)
-            > 1 | module CodeFrameModule {
-                |  ^
-            2 |     export class CodeFrameClass {
-            3 |         private name: string;
-            4 |
-
-            last failure (last-name)
-            7 |         }
-            8 |     }
-            >  9 | }
-                | ^
-            10 |
-
-            full failure (full-name)
-            > 1 | module CodeFrameModule {
-            2 |     export class CodeFrameClass {
-            3 |         private name: string;
-            4 |
-
-        `;
 
         const expectedResultColored =
             `formatters/codeFrameFormatter.test.ts
             \u001b[31mfirst failure\u001b[39m \u001b[90m(first-name)\u001b[39m
+            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
+            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
+            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
+            \u001b[90m 4 | \u001b[39m\u001b[0m
+
+            \u001b[31mfull failure\u001b[39m \u001b[90m(full-name)\u001b[39m
+            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
+            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
+            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
+            \u001b[90m 4 | \u001b[39m\u001b[0m
+
+            \u001b[33mwarning failure\u001b[39m \u001b[90m(warning-name)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
             \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
@@ -96,12 +84,6 @@ describe("CodeFrame Formatter", () => {
             \u001b[90m    | \u001b[39m\u001b[31m\u001b[1m^\u001b[22m\u001b[39m
             \u001b[90m 10 | \u001b[39m\u001b[0m
 
-            \u001b[31mfull failure\u001b[39m \u001b[90m(full-name)\u001b[39m
-            \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
-            \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
-            \u001b[90m 3 | \u001b[39m        private name\u001b[33m:\u001b[39m string\u001b[33m;\u001b[39m
-            \u001b[90m 4 | \u001b[39m\u001b[0m
-
         `;
 
         /** Convert output lines to an array of trimmed lines for easier comparing */
@@ -109,7 +91,7 @@ describe("CodeFrame Formatter", () => {
             return lines.split("\n").map((line) => line.trim());
         }
 
-        const expectedResult = toTrimmedLines(chalk.enabled ? expectedResultColored : expectedResultPlain);
+        const expectedResult = toTrimmedLines(expectedResultColored);
         const result = toTrimmedLines(formatter.format(failures));
 
         assert.deepEqual(result, expectedResult);
