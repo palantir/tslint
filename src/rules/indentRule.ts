@@ -141,7 +141,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             continue;
         }
 
-        ctx.addFailureAt(pos, whitespace.length, failure, createFix(pos, whitespace, tabs, correctIndent));
+        const fix = correctIndent !== undefined
+            ? createFix(pos, whitespace, tabs, correctIndent)
+            : undefined;
+        ctx.addFailureAt(pos, whitespace.length, failure, fix);
     }
 }
 
@@ -151,8 +154,7 @@ function createIndentEstimator(size: number, tabs: boolean) {
     return (whitespace: string) => whitespace.replace(reNormalize, "\t").length * expectedSize;
 }
 
-function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, correctIndent?: number): Lint.Fix | undefined {
-    if (correctIndent === undefined) { return undefined; }
+function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, correctIndent: number): Lint.Fix {
     const replacement = (tabs ? "\t" : " ").repeat(correctIndent);
     return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
 }
