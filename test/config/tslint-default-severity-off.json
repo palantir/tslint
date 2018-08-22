@@ -1,0 +1,6 @@
+{
+  "defaultSeverity": "off",
+  "rules": {
+    "default-severity-off": { "severity": "default" }
+  }
+}

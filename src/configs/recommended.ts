@@ -155,6 +155,7 @@ export const rules = {
     },
     "trailing-comma": {
         options: {
+            esSpecCompliant: true,
             multiline: "always",
             singleline: "never",
         },
@@ -181,7 +182,7 @@ export const rules = {
             },
         ],
     },
-    "typeof-compare": true,
+    "typeof-compare": false, // deprecated in TSLint 5.9.0
     "unified-signatures": true,
     "use-isnan": true,
     "variable-name": {

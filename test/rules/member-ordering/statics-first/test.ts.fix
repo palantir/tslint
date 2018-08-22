@@ -1,0 +1,37 @@
+class Good {
+    public static a = 1;
+    public static g() {}
+    protected static b = 2;
+    protected static h() {}
+    private static c = 3;
+    private static i = () => {};
+    public d = 4;
+    protected e: number = 5;
+    private f = foo();
+    constructor() {}
+    j = () => {};
+    protected k() {}
+    private l = () => {};
+}
+
+interface IGood {
+    foo: number;
+    arrowsAreFields: () => void;
+    nonArrowsAreMethods(): void;
+}
+
+class Bad {
+    public static a = 1;
+    public static g() {}
+    protected static b = 2;
+    protected static h() {}
+    private static c = 3;
+    private static i = () => {};
+    public d = 4;
+    protected e: number = 5;
+    private f = foo();
+    constructor() {}
+    j = () => {};
+    protected k() {}
+    private l = () => {};
+}

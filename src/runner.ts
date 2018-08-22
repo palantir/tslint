@@ -30,7 +30,7 @@ import {
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
-import * as Linter from "./linter";
+import { Linter } from "./linter";
 import { flatMap } from "./utils";
 
 export interface Options {
@@ -88,6 +88,11 @@ export interface Options {
      * tsconfig.json file.
      */
     project?: string;
+
+    /**
+     * Whether to hide warnings
+     */
+    quiet?: boolean;
 
     /**
      * Rules directory paths.
@@ -241,9 +246,11 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             fix: !!options.fix,
             formatter: options.format,
             formattersDirectory: options.formattersDirectory,
+            quiet: !!options.quiet,
             rulesDirectory: options.rulesDirectory,
         },
-        program);
+        program,
+    );
 
     let lastFolder: string | undefined;
     let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
@@ -260,7 +267,16 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             continue;
         }
 
-        const contents = program !== undefined ? program.getSourceFile(file).text : await tryReadFile(file, logger);
+        let contents: string | undefined;
+        if (program !== undefined) {
+            const sourceFile = program.getSourceFile(file);
+            if (sourceFile !== undefined) {
+                contents = sourceFile.text;
+            }
+        } else {
+            contents = await tryReadFile(file, logger);
+        }
+
         if (contents !== undefined) {
             linter.lint(file, contents, configFile);
         }
@@ -282,11 +298,11 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);
     }
-    const buffer = new Buffer(256);
+    const buffer = Buffer.allocUnsafe(256);
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);
-        if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
+        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
             // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
             // separator, repeating every 188 bytes. It is unlikely to find that pattern in
             // TypeScript source, so tslint ignores files with the specific pattern.

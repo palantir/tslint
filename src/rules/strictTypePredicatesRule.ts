@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isTypeFlagSet, isUnionType } from "tsutils";
+import { isBinaryExpression, isIdentifier, isLiteralExpression, isTypeFlagSet, isUnionType } from "tsutils";
 
 import * as ts from "typescript";
 import { showWarningOnce } from "../error";
@@ -130,11 +130,19 @@ function getTypePredicateOneWay(left: ts.Expression, right: ts.Expression, isStr
     switch (right.kind) {
         case ts.SyntaxKind.TypeOfExpression:
             const expression = (right as ts.TypeOfExpression).expression;
-            const kind = left.kind === ts.SyntaxKind.StringLiteral ? (left as ts.StringLiteral).text : "";
-            const predicate = getTypePredicateForKind(kind);
+            if (!isLiteralExpression(left)) {
+                if (isIdentifier(left) && left.text === "undefined" ||
+                    left.kind === ts.SyntaxKind.NullKeyword ||
+                    left.kind === ts.SyntaxKind.TrueKeyword ||
+                    left.kind === ts.SyntaxKind.FalseKeyword) {
+                    return {kind: TypePredicateKind.TypeofTypo};
+                }
+                return undefined;
+            }
+            const predicate = getTypePredicateForKind(left.text);
             return predicate === undefined
                 ? { kind: TypePredicateKind.TypeofTypo }
-                : { kind: TypePredicateKind.Plain, expression, predicate, isNullOrUndefined: kind === "undefined" };
+                : { kind: TypePredicateKind.Plain, expression, predicate, isNullOrUndefined: left.text === "undefined" };
 
         case ts.SyntaxKind.NullKeyword:
             return nullOrUndefined(ts.TypeFlags.Null);

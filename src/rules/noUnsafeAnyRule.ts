@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { isReassignmentTarget, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
+import { isIdentifier, isReassignmentTarget, isSymbolFlagSet, isTokenKind, isTypeFlagSet, isTypeNodeKind } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { isLowerCase } from "../utils";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,6 +32,15 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            If you're dealing with data of unknown or "any" types, you shouldn't be accessing members of it.
+            Either add type annotations for properties that may exist or change the data type to the empty object type \`{}\`.
+
+            Alternately, if you're creating storage or handling for consistent but unknown types, such as in data structures
+            or serialization, use \`<T>\` template types for generic type handling.
+
+            Also see the \`no-any\` rule.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -119,6 +129,12 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return initializer !== undefined &&
                     this.visitNode(initializer, isPropertyAny(node as ts.PropertyDeclaration, this.checker));
             }
+            case ts.SyntaxKind.SpreadAssignment:
+                return this.visitNode(
+                    (node as ts.SpreadAssignment).expression,
+                    // allow any in object spread, but not in object rest
+                    !isReassignmentTarget(node.parent as ts.ObjectLiteralExpression),
+                );
             case ts.SyntaxKind.ComputedPropertyName:
                 return this.visitNode((node as ts.ComputedPropertyName).expression, true);
             case ts.SyntaxKind.TaggedTemplateExpression: {
@@ -349,7 +365,7 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
     if (!isNodeAny(node.name, checker) || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
         return false;
     }
-    for (const base of checker.getBaseTypes(checker.getTypeAtLocation(node.parent!) as ts.InterfaceType)) {
+    for (const base of checker.getBaseTypes(checker.getTypeAtLocation(node.parent) as ts.InterfaceType)) {
         const prop = base.getProperty(node.name.text);
         if (prop !== undefined && prop.declarations !== undefined) {
             return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]));
@@ -359,7 +375,45 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
 }
 
 function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
+    let symbol = checker.getSymbolAtLocation(node);
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+        symbol = checker.getAliasedSymbol(symbol);
+    }
+    if (symbol !== undefined) {
+        // NamespaceModule is a type-only namespace without runtime value, its type is 'any' when used as 'ns.Type' -> avoid error
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.NamespaceModule)) {
+            return false;
+        }
+        if (isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
+            return isAny(checker.getDeclaredTypeOfSymbol(symbol));
+        }
+    }
+
+    // Lowercase JSX elements are assumed to be allowed by design
+    if (isJsxNativeElement(node)) {
+        return false;
+    }
+
     return isAny(checker.getTypeAtLocation(node));
+}
+
+const jsxElementTypes = new Set<ts.SyntaxKind>([
+    ts.SyntaxKind.JsxClosingElement,
+    ts.SyntaxKind.JsxOpeningElement,
+    ts.SyntaxKind.JsxSelfClosingElement,
+]);
+
+function isJsxNativeElement(node: ts.Node): boolean {
+    if (!isIdentifier(node) || node.parent === undefined) {
+        return false;
+    }
+
+    // TypeScript <=2.1 incorrectly parses JSX fragments
+    if (node.text === "") {
+        return true;
+    }
+
+    return jsxElementTypes.has(node.parent.kind) && isLowerCase(node.text[0]);
 }
 
 function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {

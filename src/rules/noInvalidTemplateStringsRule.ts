@@ -28,6 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: "Interpolation will only work for template strings.",
         type: "functionality",
         typescriptOnly: false,
     };
@@ -50,15 +51,14 @@ function walk(ctx: Lint.WalkContext<void>) {
 
     function check(node: ts.StringLiteral): void {
         const text = node.getText(ctx.sourceFile);
-        const findTemplateStrings = /\\*\$\{/g;
+        const findTemplateStrings = /(\\*)(\$\{.+?\})/g;
         let instance = findTemplateStrings.exec(text);
         while (instance !== null) {
-            const matchLength = instance[0].length;
-            const backslashCount = matchLength - 2;
+            const backslashCount = instance[1].length;
             const instanceIsEscaped = backslashCount % 2 === 1;
             if (!instanceIsEscaped) {
                 const start = node.getStart() + (instance.index + backslashCount);
-                ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
+                ctx.addFailureAt(start, instance[2].length, Rule.FAILURE_STRING);
             }
             instance = findTemplateStrings.exec(text);
         }
