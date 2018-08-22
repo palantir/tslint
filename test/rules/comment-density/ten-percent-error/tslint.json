@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "comment-density": [true, 10]
+    }
+}
