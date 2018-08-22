@@ -1,0 +1,14 @@
+namespace App {
+    class GiveMeANumber {
+
+        private num:any = 10;
+
+        constructor(){
+            this.giveNumber();
+        }
+        // unnecessary comment
+        public giveNumber = () =>{
+            alert(this.num);
+        };
+    }
+}
