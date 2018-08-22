@@ -1,0 +1,13 @@
+namespace App {
+//    class GiveMeANumber {
+        // a comment
+        //private num:any = 10;
+        //constructor(){
+        //   this.giveNumber();
+        //}
+        /*public giveNumber = () =>{
+            alert(this.num);
+        };*/
+    }
+}
+~ [This file has 75% of comments, which is lower than the minimum of 100% allowed]
