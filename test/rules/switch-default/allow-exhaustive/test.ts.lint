@@ -1,0 +1,18 @@
+type Tag = 'foo' | 'bar';
+
+// valid
+function processTag(tag: Tag) {
+  switch (tag) {
+  case 'foo': return 1;
+  case 'bar': return 2;
+  }
+}
+
+function processTag(tag: Tag) {
+  switch (tag) {
+  ~~~~~~~~~~~~~~
+  case 'bar': return 2;
+~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [Switch statement should include a 'default' case, at least the 'foo' case is missing]
+}
