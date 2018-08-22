@@ -96,6 +96,7 @@ export const rules = {
     "label-position": true,
     "no-arg": true,
     "no-bitwise": true,
+    "no-boolean-literal-in-conditional": true,
     "no-conditional-assignment": true,
     "no-console": true,
     "no-construct": true,

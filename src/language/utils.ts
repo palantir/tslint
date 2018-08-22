@@ -491,3 +491,13 @@ export function isWhiteSpace(ch: number): boolean {
     // tslint:disable-next-line
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
+
+export function needsParenthesesForNegate(node: ts.Expression): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.AsExpression:
+        case ts.SyntaxKind.BinaryExpression:
+            return true;
+        default:
+            return false;
+    }
+}

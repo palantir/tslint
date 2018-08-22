@@ -1,0 +1,11 @@
+{
+  "linterOptions": {
+    "typeCheck": true
+  },
+  "rules": {
+    "no-boolean-literal-in-conditional": true
+  },
+  "jsRules": {
+    "no-boolean-literal-in-conditional": true
+  }
+}

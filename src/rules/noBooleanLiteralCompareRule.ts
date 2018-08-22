@@ -18,6 +18,7 @@
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
+import { needsParenthesesForNegate } from "..";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -87,16 +88,6 @@ function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.F
             deleted,
             Lint.Replacement.appendText(node.getStart(), "!"),
         ];
-    }
-}
-
-function needsParenthesesForNegate(node: ts.Expression): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.AsExpression:
-        case ts.SyntaxKind.BinaryExpression:
-            return true;
-        default:
-            return false;
     }
 }
 

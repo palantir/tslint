@@ -84,9 +84,8 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         node.members.forEach((member, idx) => {
             const end = member.end - 1;
             // Check if delimiter should be ommitted for a single-line type literal.
-            const shouldOmit = options.singleLine === "always"
-                ? false
-                : idx === node.members.length - 1 && isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
+            const shouldOmit = options.singleLine !== "always" &&
+                idx === node.members.length - 1 && isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
             const delimiter = sourceFile.text[end];
             switch (delimiter) {
                 case ";":
