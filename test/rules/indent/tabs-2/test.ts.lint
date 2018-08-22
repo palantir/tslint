@@ -29,7 +29,6 @@ module TestModule {
      multiline ${ "A" }
      template ${ "B"
      + "C" }
-~~~~~ [0]
      string`;
 
 	export enum TestEnum {
@@ -160,5 +159,4 @@ var arr2 = [
 		b: 4
 	}
 ];
-
 [0]: tab indentation expected

@@ -147,7 +147,7 @@ export const rules = {
 
     "cyclomatic-complexity": true,
     "eofline": true,
-    "indent": [true, "spaces"],
+    "indent": [true, "spaces", 4],
     "linebreak-style": [true, "LF"],
     "max-classes-per-file": [true, 1],
     "max-file-line-count": [true, 1000],

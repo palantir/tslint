@@ -1,10 +1,15 @@
 // valid code
 module TestModule {
+    interface Foo {
+        a: number
+        b: string
+    }
     var func = () => {
         console.warn("hi");
     };
 
-    class TestClass {
+    class
+    TestClass {
         private variable;
 
         testFunction() {
@@ -25,7 +30,7 @@ module TestModule {
     var s2 = `
 		multiline ${ "A" }
 		template ${ "B"
-		+ "C" }
+        + "C" }
 		string`;
 
     export enum TestEnum {
@@ -60,6 +65,44 @@ module TestModule {
         } else {
             console.warn(i + 1);
         }
+    }
+}
+
+function abc() {
+    let a = 1
+    let b = 1
+    let c = 1
+    let d = 1
+    let e = 1
+    var a1 = 1,
+        a2 = 2,
+        a3 = 3
+}
+
+function() {
+    return new Promise((resolve, reject) => {
+        doxxx()
+            .then(abcd)
+        doxxx().then(resolve)
+    })
+}
+
+function fff(
+    aaa,
+    bbb,
+    ccc
+) {
+    if (
+        aaaif
+        && bbb &&
+        ccc
+    ) {
+        var bbbbcontent
+    }
+    if (
+        const axa = true
+    ) { // close paren
+
     }
 }
 
@@ -115,7 +158,8 @@ while (i < 1) {
 
 do {
     console.warn("123");
-} while (i < 1);
+} while (
+    i < 1);
 
 if (i < 1) {
     console.warn("123");
@@ -136,3 +180,46 @@ var arr2 = [
         b: 4
     }
 ];
+// multiline condition, works well for `if`, but probably doesn't for `while`
+while(foo() &&
+    bar() &&
+    baz()) {
+    doStuff;
+}
+// might not be worth fixing, because it can be reformatted to
+while(
+    foo() &&
+    bar() &&
+    baz()
+) {
+    doStuff;
+}
+
+// statement continuation on the next line
+let foo = bar
+    ? baz
+    : bas;
+foo = "some"
+    + "really"
+    + "long"
+    + "string";
+
+// multiline property access
+foo
+    .bar
+    .baz();
+var a = 10
+    - 9
+    *8
+    /7
+namespace Foo {
+    export interface InterFoo {
+        foo(s: string): boolean
+    }
+    const a = 1
+    export class Bar implements Barz {
+        fff(s: string): boolean {
+            return false
+        }
+    }
+}

@@ -11,7 +11,7 @@ module TestModule {
 		private variable;
 
 		testFunction() {
-			this.variable = 3;
+			this.variable = 1;
 		}
 	}
 
@@ -28,7 +28,7 @@ module TestModule {
 	var s2 = `
      multiline ${ "A" }
      template ${ "B"
-		+ "C" }
+	+ "C" }
      string`;
 
 	export enum TestEnum {
@@ -80,7 +80,7 @@ class TestClass {
 
 	testFunction() {
 		// fix incomplete space groups
-		this.variable = 3;
+		this.variable = 1;
 	}
 }
 

@@ -2,16 +2,16 @@
 	<bar>
 ~ [0]
 		baz
-~~ [0]
+~~ [1]
 	</bar>
 ~ [0]
-  
+
 	{
 ~ [0]
-		
-~~ [0]
+
 	}
 ~ [0]
 </foo>
 
 [0]: 2 space indentation expected
+[1]: 4 space indentation expected

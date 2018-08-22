@@ -25,7 +25,7 @@ module TestModule {
   var s2 = `
 		multiline ${ "A" }
 		template ${ "B"
-    + "C" }
+		+ "C" }
 		string`;
 
   export enum TestEnum {
@@ -71,7 +71,7 @@ module TestModule {
 }
 
 function() {
-    var test = 123;
+  var test = 123;
 }
 
 class TestClass {
@@ -136,4 +136,3 @@ var arr2 = [
     b: 4
   }
 ];
-

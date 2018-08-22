@@ -26,7 +26,6 @@ module TestModule {
 		multiline ${ "A" }
 		template ${ "B"
 		+ "C" }
-~~ [0]
 		string`;
 
     export enum TestEnum {
@@ -84,7 +83,7 @@ class TestClass {
 	testFunction() {
 ~ [0]
 		this.variable = 3;
-~~ [0]
+~~ [1]
 	}
 ~ [0]
 }
@@ -106,18 +105,18 @@ switch (integerValue) {
 	case 0:
 ~ [0]
 		console.warn("1");
-~~ [0]
+~~ [1]
 		break;
-~~ [0]
+~~ [1]
     case 1:
         console.warn("1");
         break;
 	default:
 ~ [0]
 		console.warn("default");
-~~ [0]
+~~ [1]
 		break;
-~~ [0]
+~~ [1]
 }
 
 for (var i = 0; i < 1; ++i) {
@@ -149,7 +148,7 @@ var arr = [
 var arr2 = [
     {
 		a: 1,
-~~ [0]
+~~ [1]
         b: 2
 	},
 ~ [0]
@@ -158,5 +157,5 @@ var arr2 = [
         b: 4
     }
 ];
-
 [0]: 4 space indentation expected
+[1]: 8 space indentation expected
