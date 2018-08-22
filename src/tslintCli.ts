@@ -280,7 +280,7 @@ run(
             outputStream.write(m);
         },
         error(m) {
-            process.stdout.write(m);
+            process.stderr.write(m);
         },
     })
     .then((rc) => {
