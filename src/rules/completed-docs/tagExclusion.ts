@@ -75,7 +75,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
             return [];
         }
 
-        const docMatches = nodeText.match((/\/\*\*\s*\n([^\*]*(\*[^\/])?)*\*\//));
+        const docMatches = nodeText.match((/\/\*\*\s*\n?([^\*]*(\*[^\/])?)*\*\//));
         if (docMatches === null || docMatches.length === 0) {
             return [];
         }

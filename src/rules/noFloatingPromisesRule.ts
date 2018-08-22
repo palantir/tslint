@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.TypedRule {
         },
         optionExamples: [true, [true, "JQueryPromise"]],
         rationale: Lint.Utils.dedent`
-            Creating a Promise and not storing or returning may lets other code run independent of of its results.
+            Creating a Promise and not storing or returning it may let other code run independently of its result.
             This can cause unexpected and/or non-deterministic behavior depending on external timing factors.
 
             It's typically better to return Promises from functions that start them, then handle them in calling code.
