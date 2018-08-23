@@ -39,6 +39,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
         ]
     },
+    "ban-ts-ignore": true,
     "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [
         true,
@@ -191,6 +192,7 @@ export const rules = {
     encoding: true,
     "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
+    "increment-decrement": true,
     "interface-name": true,
     "interface-over-type-literal": true,
     "jsdoc-format": [true, "check-multiline-start"],

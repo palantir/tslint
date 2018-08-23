@@ -1,21 +1,28 @@
 {
-    "lintOptions": {
-        "typeCheck": true
-    },
-    "extends": ["tslint:all", "tslint-config-prettier"],
-    "rules": {
-        // Don't want these
-        "cyclomatic-complexity": false,
-        "newline-before-return": false,
-        "no-parameter-properties": false,
-        "no-parameter-reassignment": false,
-        "no-unused-variable": false,
-        // TODO: Enable stricter options for these
-        "comment-format": [true, "check-space"],
-        "comment-density": false,
-        "member-access": true,
-        "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
-
+  "lintOptions": {
+    "typeCheck": true
+  },
+  "extends": ["tslint:all", "tslint-config-prettier"],
+  "rules": {
+    // Don't want these
+    "cyclomatic-complexity": false,
+    "increment-decrement": false,
+    "newline-before-return": false,
+    "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
+    "no-unused-variable": false,
+    // TODO: Enable stricter options for these
+    "comment-format": [
+        true,
+        "check-space"
+    ],
+    "comment-density": false,
+    "member-access": true,
+    "only-arrow-functions": [
+        true,
+        "allow-declarations",
+        "allow-named-functions"
+    ],
         // TODO: Enable these
         "completed-docs": false,
         "no-any": false,
