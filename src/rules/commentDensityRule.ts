@@ -48,8 +48,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: true
     };
 
-    public static FAILURE_STRING(lineCount: number, percentLimit: number) {
-        return `This file has ${lineCount}% of comments, which is lower than the minimum of ${percentLimit}% allowed`;
+    public static FAILURE_STRING(lineCount: number, percentLimit: number, missingLines: number) {
+        const lineString = missingLines > 1 ? "lines" : "line";
+        return (
+            `This file has ${lineCount}% of comments, ` +
+            `which is lower than the minimum of ${percentLimit}% allowed, ` +
+            `${missingLines} ${lineString} of comments missing`
+        );
     }
 
     public isEnabled(): boolean {
@@ -60,28 +65,32 @@ export class Rule extends Lint.Rules.AbstractRule {
         const minPercent = this.ruleArguments[0] as number;
         const lineCount = sourceFile.getLineStarts().length;
         let numberOfLinesOfComments = 0;
-
-        utils.forEachComment(sourceFile, (fullText, { kind, pos, end }) => {
-            if (
-                kind === ts.SyntaxKind.SingleLineCommentTrivia ||
-                kind === ts.SyntaxKind.MultiLineCommentTrivia
-            ) {
-                const substring = fullText.substring(pos, end);
-                const splittedSubstring = substring.split("\n");
-                numberOfLinesOfComments += splittedSubstring.length;
-            }
-        });
-        const percentage = Math.round((numberOfLinesOfComments / lineCount) * 100);
-        if (percentage >= minPercent) {
+        const len = sourceFile.text.length;
+        if (len > 0) {
+            utils.forEachComment(sourceFile, (fullText, { kind, pos, end }) => {
+                if (
+                    kind === ts.SyntaxKind.SingleLineCommentTrivia ||
+                    kind === ts.SyntaxKind.MultiLineCommentTrivia
+                ) {
+                    const substring = fullText.substring(pos, end);
+                    const splittedSubstring = substring.split("\n");
+                    numberOfLinesOfComments += splittedSubstring.length;
+                }
+            });
+        }
+        const percentage =
+            lineCount === 0 ? 0 : Math.round((numberOfLinesOfComments / lineCount) * 100);
+        if (len === 0 || percentage >= minPercent) {
             return [];
         } else {
-            const len = sourceFile.text.length;
+            const missingLines =
+                Math.ceil((minPercent * lineCount) / 100) - numberOfLinesOfComments;
             return [
                 new Lint.RuleFailure(
                     sourceFile,
                     len - 1,
                     len,
-                    Rule.FAILURE_STRING(percentage, minPercent),
+                    Rule.FAILURE_STRING(percentage, minPercent, missingLines),
                     this.ruleName
                 )
             ];
