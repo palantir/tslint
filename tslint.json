@@ -16,6 +16,7 @@
         true,
         "check-space"
     ],
+    "comment-density": false,
     "member-access": true,
     "only-arrow-functions": [
         true,

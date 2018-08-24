@@ -189,6 +189,7 @@ export const rules = {
         "check-space",
         "check-uppercase",
     ],
+    "comment-density": [true, 0],
     "comment-type": [true, "singleline", "multiline", "doc", "directive"],
     "completed-docs": true,
     // "file-header": No sensible default
