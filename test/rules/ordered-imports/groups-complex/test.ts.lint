@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+// comment outside of imports
+import {app_f} from 'app/foo';
+import {x} from '@pkg/foo';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: extra, ^app, ^@pkg, current dir, parent_dir.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+
+import {app_b} from 'app/bar';
+// comment pkg/bar
+import {a} from '@pkg/bar';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+
+import {xbar} from '../xbar';
+
+import {bar} from '../bar';
+
+import {foo, afoo} from 'foo';
+        ~~~~~~~~~              [Named imports must be alphabetized.]
+
+import x = require('y');
+
+import './baz'; // required
+import './baa';
+~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+
+
+export class Test {}

@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+import { app_b } from "app/bar";
+import { app_f } from "app/foo";
+
+import { a } from "@pkg/bar";
+import { x } from "@pkg/foo";
+
+import { bar } from "../bar";
+import { xbar } from "../xbar";
+
+import "./baa";
+import "./baz";
+
+import { foo } from "foo";
+
+export class Test {}
