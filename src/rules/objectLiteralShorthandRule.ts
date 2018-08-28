@@ -84,9 +84,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static LONGHAND_PROPERTY = "Expected property shorthand in object literal ";
-    public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
-    public static SHORTHAND_ASSIGNMENT = "Shorthand property assignments have been disallowed.";
+    public static getLonghandPropertyErrorMessage(nodeText: string) {
+        return `Expected property shorthand in object literal ('${nodeText}').`;
+    }
+    public static getLonghandMethodErrorMessage(nodeText: string) {
+        return `Expected method shorthand in object literal ('${nodeText}').`;
+    }
+    public static getDisallowedShorthandErrorMessage(options: Options) {
+        if (options.enforceShorthandMethods && !options.enforceShorthandProperties) {
+            return "Shorthand property assignments have been disallowed.";
+        } else if (!options.enforceShorthandMethods && options.enforceShorthandProperties) {
+            return "Shorthand method assignments have been disallowed.";
+        }
+        return "Shorthand property and method assignments have been disallowed.";
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.parseOptions(this.ruleArguments));
@@ -129,7 +140,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         ) {
             ctx.addFailureAtNode(
                 node,
-                `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
+                Rule.getLonghandPropertyErrorMessage(`{${node.name.text}}`),
                 Lint.Replacement.deleteFromTo(node.name.end, node.end)
             );
         } else if (
@@ -143,13 +154,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
             ctx.addFailure(
                 node.getStart(ctx.sourceFile),
                 getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
-                `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
+                Rule.getLonghandMethodErrorMessage(`{${name}() {...}}`),
                 fix
             );
         } else if (!enforceShorthandProperties && isShorthandPropertyAssignment(node)) {
             ctx.addFailureAtNode(
                 node.name,
-                Rule.SHORTHAND_ASSIGNMENT,
+                Rule.getDisallowedShorthandErrorMessage(ctx.options),
                 Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `)
             );
         } else if (
@@ -159,7 +170,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         ) {
             ctx.addFailureAtNode(
                 node.name,
-                Rule.SHORTHAND_ASSIGNMENT,
+                Rule.getDisallowedShorthandErrorMessage(ctx.options),
                 fixShorthandMethodDeclaration(node, ctx.sourceFile)
             );
         }

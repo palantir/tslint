@@ -69,4 +69,4 @@ export class ClassA extends ClassZ {
   ~~~ [SHORTHAND_ASSIGNMENT]
           ~~~ [SHORTHAND_ASSIGNMENT]
 
-[SHORTHAND_ASSIGNMENT]: Shorthand property assignments have been disallowed.
+[SHORTHAND_ASSIGNMENT]: Shorthand property and method assignments have been disallowed.
