@@ -1,12 +1,12 @@
 const bad = {
   w: function() {},
-  ~~~~~~~~~~~ [Expected method shorthand in object literal ('{w() {...}}').]
+  ~~~~~~~~~~~ [LONGHAND_METHOD % ("('{w() {...}}')")]
   x: function *() {},
-  ~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{*x() {...}}').]
+  ~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{*x() {...}}')")]
   [y]: function() {},
-  ~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{[y]() {...}}').]
+  ~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{[y]() {...}}')")]
   z: z
-  ~~~~  [Expected property shorthand in object literal ('{z}').]
+  ~~~~  [LONGHAND_PROPERTY % ("('{z}')")]
 };
 
 const good = {
@@ -26,7 +26,7 @@ const namedFunctions = {
 
 const quotes = {
   "foo-bar": function() {},
-  ~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{"foo-bar"() {...}}').]
+  ~~~~~~~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{\"foo-bar\"() {...}}')")]
   "foo-bar"() {}
 };
 
@@ -37,17 +37,19 @@ const extraCases = {
   c: 'c',
   ["a" + "nested"]: {
     x: x
-    ~~~~  [Expected property shorthand in object literal ('{x}').]
+    ~~~~  [LONGHAND_PROPERTY % ("('{x}')")]
   }
 };
 
 const asyncFn = {
   foo: async function() {},
-  ~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{async foo() {...}}').]
+  ~~~~~~~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{async foo() {...}}')")]
   bar: async function*() {}
-  ~~~~~~~~~~~~~~~~~~~~  [Expected method shorthand in object literal ('{async *bar() {...}}').]
+  ~~~~~~~~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{async *bar() {...}}')")]
 }
 
 ({foo: foo} = {foo: foo});
-  ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]
-               ~~~~~~~~ [Expected property shorthand in object literal ('{foo}').]
+  ~~~~~~~~ [LONGHAND_PROPERTY % ("('{foo}')")]
+               ~~~~~~~~ [LONGHAND_PROPERTY % ("('{foo}')")]
+[LONGHAND_METHOD]: Expected method shorthand in object literal %s.
+[LONGHAND_PROPERTY]: Expected property shorthand in object literal %s.

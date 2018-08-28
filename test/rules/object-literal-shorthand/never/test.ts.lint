@@ -1,31 +1,31 @@
 const asyncFn = {
   async f() {
-        ~ [OBJECT_LITERAL_DISALLOWED]
+        ~ [SHORTHAND_ASSIGNMENT]
     await some_promise;
   },
   async* fa() {
-         ~~ [OBJECT_LITERAL_DISALLOWED]
+         ~~ [SHORTHAND_ASSIGNMENT]
     await some_promise;
   }
 };
 
 const bad = {
   w() {
-  ~ [OBJECT_LITERAL_DISALLOWED]
+  ~ [SHORTHAND_ASSIGNMENT]
     const alsoBad = {
         bad,
-        ~~~ [OBJECT_LITERAL_DISALLOWED]
+        ~~~ [SHORTHAND_ASSIGNMENT]
     };
   },
   *x() {},
-   ~ [OBJECT_LITERAL_DISALLOWED]
+   ~ [SHORTHAND_ASSIGNMENT]
   [y]() {},
-  ~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~~~ [SHORTHAND_ASSIGNMENT]
   z,
-  ~ [OBJECT_LITERAL_DISALLOWED]
+  ~ [SHORTHAND_ASSIGNMENT]
   nest: {
     nestBad() {},
-    ~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+    ~~~~~~~ [SHORTHAND_ASSIGNMENT]
     nextGood: function(prop: string): void {}
   }
 };
@@ -47,12 +47,12 @@ const namedFunctions = {
 const quotes = {
   "foo-bar": function() {},
   "foo-bar"() {}
-  ~~~~~~~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~~~~~~~~~ [SHORTHAND_ASSIGNMENT]
 };
 
 const extraCases = {
   x,
-  ~ [OBJECT_LITERAL_DISALLOWED]
+  ~ [SHORTHAND_ASSIGNMENT]
   a: 123,
   b: "hello",
   c: 'c',
@@ -66,7 +66,7 @@ export class ClassA extends ClassZ {
 }
 
 ({foo} = {foo});
-  ~~~ [OBJECT_LITERAL_DISALLOWED]
-          ~~~ [OBJECT_LITERAL_DISALLOWED]
+  ~~~ [SHORTHAND_ASSIGNMENT]
+          ~~~ [SHORTHAND_ASSIGNMENT]
 
-[OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.
+[SHORTHAND_ASSIGNMENT]: Shorthand property assignments have been disallowed.
