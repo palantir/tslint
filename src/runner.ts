@@ -27,6 +27,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     JSON_CONFIG_FILENAME,
+    isFileExcluded,
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
@@ -263,7 +264,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (isFileExcluded(file)) {
+        if (configFile && isFileExcluded(file, configFile)) {
             continue;
         }
 
@@ -283,14 +284,6 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     }
 
     return linter.getResult();
-
-    function isFileExcluded(filepath: string) {
-        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
-            return false;
-        }
-        const fullPath = path.resolve(filepath);
-        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
-    }
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */

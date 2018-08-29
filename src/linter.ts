@@ -27,6 +27,7 @@ import {
     getRulesDirectories,
     IConfigurationFile,
     loadConfigurationFromPath,
+    isFileExcluded,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showRuleCrashWarning } from "./error";
@@ -113,6 +114,9 @@ export class Linter {
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
         const sourceFile = this.getSourceFile(fileName, source);
+        if (configuration && isFileExcluded(fileName, configuration)) {
+            return [];
+        }
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
 

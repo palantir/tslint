@@ -25,6 +25,7 @@ import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
+import { Minimatch } from "minimatch";
 
 export interface IConfigurationFile {
     /**
@@ -583,4 +584,12 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
         output.push(options);
     });
     return output;
+}
+
+export function isFileExcluded(filepath: string, configFile: IConfigurationFile) {
+    if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
+        return false;
+    }
+    const fullPath = path.resolve(filepath);
+    return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
 }
