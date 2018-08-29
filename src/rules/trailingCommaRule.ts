@@ -207,7 +207,7 @@ class TrailingCommaWalker extends Lint.AbstractWalker<Options> {
                         (node as ts.CallExpression | ts.NewExpression).arguments!,
                         node.end,
                         "functions",
-                        isSpreadParameter
+                        isSpreadElement
                     );
                     break;
                 case ts.SyntaxKind.ArrowFunction:
@@ -333,10 +333,6 @@ function isObjectRest(node: ts.ObjectLiteralElementLike) {
 
 function isArrayRest(node: ts.Expression) {
     return node.kind === ts.SyntaxKind.SpreadElement && isReassignmentTarget(node);
-}
-
-function isSpreadParameter(node: ts.Node) {
-    return isSpreadElement(node);
 }
 
 function noRest() {
