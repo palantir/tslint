@@ -17,6 +17,7 @@
 
 import * as fs from "fs";
 import * as yaml from "js-yaml";
+import { Minimatch } from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as resolve from "resolve";
@@ -25,7 +26,6 @@ import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
-import { Minimatch } from "minimatch";
 
 export interface IConfigurationFile {
     /**

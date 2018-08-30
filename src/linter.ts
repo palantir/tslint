@@ -26,8 +26,8 @@ import {
     findConfigurationPath,
     getRulesDirectories,
     IConfigurationFile,
-    loadConfigurationFromPath,
     isFileExcluded,
+    loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
 import { FatalError, isError, showRuleCrashWarning } from "./error";

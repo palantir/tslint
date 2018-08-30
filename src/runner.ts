@@ -26,8 +26,8 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
-    JSON_CONFIG_FILENAME,
     isFileExcluded,
+    JSON_CONFIG_FILENAME,
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
