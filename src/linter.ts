@@ -113,8 +113,10 @@ export class Linter {
     }
 
     public lint(fileName: string, source: string, configuration: IConfigurationFile = DEFAULT_CONFIG): void {
+        if (isFileExcluded(fileName, configuration)) {
+            return;
+        }
         const sourceFile = this.getSourceFile(fileName, source);
-        if (configuration && isFileExcluded(fileName, configuration)) { return; }
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
 

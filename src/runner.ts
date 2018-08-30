@@ -264,7 +264,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (configFile && isFileExcluded(file, configFile)) {
+        if (isFileExcluded(file, configFile)) {
             continue;
         }
 
