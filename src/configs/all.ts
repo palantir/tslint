@@ -123,6 +123,7 @@ export const rules = {
     "no-shadowed-variable": true,
     "no-string-literal": true,
     "no-string-throw": true,
+    "no-switch-case-fall-through": true,
     "no-sparse-arrays": true,
     "no-submodule-imports": true,
     "no-unbound-method": true,
