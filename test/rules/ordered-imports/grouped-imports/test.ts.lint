@@ -3,7 +3,7 @@
 import {bar} from '../bar';
 
 import {foo, afoo} from 'foo';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: libraries, parent directories, current directory.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: libraries, parent directories, current directory .]
         ~~~~~~~~~              [Named imports must be alphabetized.]
 
 import './baz'; // required

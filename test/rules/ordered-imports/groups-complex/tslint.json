@@ -9,8 +9,8 @@
                 "groups": [
                     { "match": "^app", "order": 20 },
                     { "match": "^@pkg", "order": 30 },
-                    { "name": "parent_dir", "match": "^[.][.]", "order": 50 },
-                    { "name": "current dir", "match": "^[.]", "order": 40 },
+                    { "name": "parent_dir", "match": "^\\.\\.", "order": 50 },
+                    { "name": "current dir", "match": "^\\.", "order": 40 },
                     { "name": "extra", "match": ".*", "order": 5 }
                 ]
             }

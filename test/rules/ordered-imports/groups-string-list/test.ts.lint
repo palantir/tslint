@@ -2,7 +2,7 @@
 
 import { x } from "@pkg/foo";
 import { app_f } from "app/foo";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg, ^[.][.], ^[.].]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg, ^\.\., ^\. .]
 
 import { a } from "@pkg/bar";
 import { app_b } from "app/bar";

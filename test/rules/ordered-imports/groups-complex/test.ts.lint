@@ -3,7 +3,7 @@
 // comment outside of imports
 import {app_f} from 'app/foo';
 import {x} from '@pkg/foo';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: extra, ^app, ^@pkg, current dir, parent_dir.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: extra, ^app, ^@pkg, current dir, parent_dir .]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import {app_b} from 'app/bar';

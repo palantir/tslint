@@ -10,7 +10,7 @@ import {y} from 'app_a/bar';
 import {a} from '@pkg/foo';
 
 import {b} from '@pkg/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app_b, ^app_a, ^@pkg.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app_b, ^app_a, ^@pkg .]
 
 import {o} from 'other/bar';
 

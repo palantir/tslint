@@ -79,7 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             there is also a simplified form where you only pass a list of patterns and
             the order is given by the position in the list
 
-                ["^@pkga", "^[.][.]"]
+                ["^@pkga", "^\\.\\."]
 
             The first rule in the list to match a given import is the group that is used.
             If no rule in matched then the import will be put in an \`unmatched\` group
@@ -240,8 +240,8 @@ function parseOptions(ruleArguments: any[]): Options {
     const optionSet = (ruleArguments as JsonOptions[])[0];
 
     const defaultGroups: JsonGroupOption[] = [
-        { name: "parent directories", match: "^[.][.]", order: 20 },
-        { name: "current directory", match: "^[.]", order: 30 },
+        { name: "parent directories", match: "^\\.\\.", order: 20 },
+        { name: "current directory", match: "^\\.", order: 30 },
         { name: "libraries", match: ".*", order: 10 }
     ];
 
@@ -435,7 +435,7 @@ class Walker extends Lint.AbstractWalker<Options> {
                 .sort((a, b) => a.order - b.order)
                 .map(g => g.name)
                 .join(", ");
-            const msg = `${Rule.IMPORT_SOURCES_NOT_GROUPED_PREFIX} ${groupsMsg}.`;
+            const msg = `${Rule.IMPORT_SOURCES_NOT_GROUPED_PREFIX} ${groupsMsg} .`;
 
             this.addFailureAtNode(decl.node, msg, this.getGroupOrderReplacements());
         };

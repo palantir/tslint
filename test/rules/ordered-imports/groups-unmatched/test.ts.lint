@@ -5,7 +5,7 @@ import {app_f} from 'app/foo';
 import {x} from '@pkg/foo';
 
 import {app_b} from 'app/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg .]
 
 import {a} from '@pkg/bar';
 
