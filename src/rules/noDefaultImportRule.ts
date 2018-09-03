@@ -38,14 +38,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             In addition, current tooling differs on the correct way to handle default imports/exports.
             Avoiding them all together can help avoid tooling bugs and conflicts.
 
-            The rule supposed to narrow the scope of your changes in the case of monorepos.
-            Say, you have 20 packages and every removed default export from utility package would lead to changes
-            in each package, which might be harder to get merged by various reasons (harder to get your code approved
-            due to a number of required reviewers; longer build time due to a number of affected packages).
-            That's why "requires too many changes elsewhere" is a reason to ignore "no-default-export" rule.
+            The rule supposed to narrow the scope of your changes in the case of monorepo.
+            Say, you have packages \`A\`, \`B\`, \`C\` and \`utils\`, where \`A\`, \`B\`, \`C\` dependends on \`utils\`,
+            which is full of default exports.
+            \`"no-default-export"\` requires you to remove default _export_ from \`utils\`, which leads to changes
+            in packages \`A\`, \`B\`, \`C\`. It's harder to get merged bigger changeset by various reasons (harder to get your code approved
+            due to a number of required reviewers; longer build time due to a number of affected packages)
+            and could result in ignored \`"no-default-export"\` rule in \`utils'\`.
 
-            Unlike "no-default-export", the rule requires you to make changes only in the package you work on
-            and the package you import from (unless the member you try to import already exported as a named one).`,
+            Unlike \`"no-default-export"\`, the rule requires you to repalce default _import_ with named only in \`A\` you work on,
+            and \`utils\` you import from.`,
         optionsDescription: "optionsDescription",
         options: {
             type: "array",
