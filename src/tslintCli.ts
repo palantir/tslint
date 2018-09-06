@@ -264,7 +264,7 @@ run(
         files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
-        format: argv.format === undefined ? "prose" : argv.format,
+        format: argv.format,
         formattersDirectory: argv.formattersDir,
         init: argv.init,
         out: argv.out,

@@ -242,10 +242,21 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
 }
 
 async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
+    let configFile =
+        options.config !== undefined ? findConfiguration(options.config).results : undefined;
+
+    let formatter = options.format;
+    if (formatter === undefined) {
+        formatter =
+            configFile && configFile.linterOptions && configFile.linterOptions.format
+                ? configFile.linterOptions.format
+                : "prose";
+    }
+
     const linter = new Linter(
         {
             fix: !!options.fix,
-            formatter: options.format,
+            formatter,
             formattersDirectory: options.formattersDirectory,
             quiet: !!options.quiet,
             rulesDirectory: options.rulesDirectory,
@@ -254,7 +265,6 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     );
 
     let lastFolder: string | undefined;
-    let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
     for (const file of files) {
         if (options.config === undefined) {

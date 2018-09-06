@@ -33,6 +33,7 @@ A path to a directory or an array of paths to directories of [custom rules][2]. 
 * `defaultSeverity?: "error" | "warning" | "off"`: The severity level that is applied to rules in this config file as well as rules in any inherited config files which have their severity set to "default". If undefined, "error" is used as the defaultSeverity.
 * `linterOptions?: { exclude?: string[] }`:
   - `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.
+  - `format: string`: Default [lint formatter][4]
 
 `tslint.json` configuration files may have JavaScript-style `// single-line` and `/* multi-line */` comments in them (even though this is technically invalid JSON). If this confuses your syntax highlighter, you may want to switch it to JavaScript format.
 
@@ -129,6 +130,7 @@ Some commonly used custom rule packages in the TSLint community are listed in th
 [1]: {{site.baseurl | append: "/usage/third-party-tools"}}
 [2]: {{site.baseurl | append: "/develop/custom-rules"}}
 [3]: {{site.baseurl | append: "/rules"}}
+[4]: {{site.baseurl | append: "/formatters"}}
 [rule-ban]: {{site.baseurl | append: "/rules/ban"}}
 [rule-import-blacklist]: {{site.baseurl | append: "/rules/import-blacklist"}}
 [rule-file-header]: {{site.baseurl | append: "/rules/file-header"}}
