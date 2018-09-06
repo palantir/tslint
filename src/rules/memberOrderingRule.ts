@@ -197,6 +197,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                         },
                     ],
                 },
+                alphabetize: {
+                    type: "boolean",
+                },
             },
             additionalProperties: false,
         },
@@ -216,6 +219,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                         "protected-instance-method",
                         "private-instance-method",
                     ],
+                    alphabetize: true,
                 },
             ],
             [
