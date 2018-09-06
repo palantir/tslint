@@ -622,7 +622,7 @@ export function parseConfigFile(
             return {};
         }
         return {
-            ...(raw.exclude
+            ...(raw.exclude !== undefined
                 ? {
                     exclude: arrayify(raw.exclude).map(
                         pattern =>
@@ -630,7 +630,7 @@ export function parseConfigFile(
                     )
                 }
                 : {}),
-            ...(raw.format
+            ...(raw.format !== undefined
                 ? {
                     format: raw.format
                 }
