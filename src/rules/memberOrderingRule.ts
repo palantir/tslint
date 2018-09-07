@@ -264,7 +264,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /**
-     * Check wether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
+     * Check whether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
      * Lint.Replacement is generated, which replaces the entire NodeArray with a correctly sorted one. The Replacement
      * is not immediately added to a RuleFailure, as incorrectly sorted nodes can be nested (e.g. a class declaration
      * in a method implementation), but instead temporarily stored in `this.fixes`. Nested Replacements are manually
