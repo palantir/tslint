@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_STATEMENTS}"\` checks alignment of statements.
             * \`"${OPTION_MEMBERS}"\` checks alignment of members of classes, interfaces, type literal, object literals and
             object destructuring.
-            * \`"${OPTION_ELEMENTS}"\` checks alignment of elements of array iterals, array destructuring and tuple types.`,
+            * \`"${OPTION_ELEMENTS}"\` checks alignment of elements of array literals, array destructuring and tuple types.`,
         options: {
             type: "array",
             items: {
