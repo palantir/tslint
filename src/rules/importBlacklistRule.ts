@@ -110,19 +110,29 @@ function walk(ctx: Lint.WalkContext<Array<string | ImportBlacklistObjectOption>>
                                 const name = importSpecifier.name;
 
                                 if (option.importNames.indexOf(name.text) !== -1) {
+                                    const message =
+                                        option.message !== undefined
+                                            ? option.message
+                                            : Rule.FAILURE_IMPORT_NAME_STRING;
+
                                     ctx.addFailure(
                                         name.getStart(ctx.sourceFile),
                                         name.end,
-                                        option.message || Rule.FAILURE_IMPORT_NAME_STRING
+                                        message
                                     );
                                 }
                             }
                         }
                     } else {
+                        const message =
+                            option.message !== undefined
+                                ? option.message
+                                : Rule.FAILURE_IMPORT_STRING;
+
                         ctx.addFailure(
                             importName.getStart(ctx.sourceFile) + 1,
                             importName.end - 1,
-                            option.message || Rule.FAILURE_IMPORT_STRING
+                            message
                         );
                     }
                 }
