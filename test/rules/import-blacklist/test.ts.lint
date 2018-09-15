@@ -2,17 +2,44 @@ import { Observable } from 'rxjs';
                             ~~~~ [0]
 import { Observable } from 'rxjs/Observable';
 
-import forOwn = require('lodash');
-                         ~~~~~~ [0]
-import forOwn = require('lodash/forOwn');
+const { Observable } = require('rxjs');
+                                ~~~~ [0]
+const Observable = require('rxjs/Observable');
 
-// non-static imports cannot be checked
-import {Observable} from rxjs;
-import forOwn = require(lodash);
+// export all from
+export * from 'rxjs';
+               ~~~~ [0]
+
+// blacklist import with custom message
+import { first }  from 'underscore';
+                        ~~~~~~~~~~ [1]
+
+// blacklist import names with default message
+import {
+    includes,
+    ~~~~~~~~ [2]
+    find,
+    ~~~~ [2]
+    head,
+} from 'utils';
+
+// blacklist import names with custom message
+import {
+    FormattedMessage,
+    ~~~~~~~~~~~~~~~~ [3]
+    FormattedHtmlMessage,
+    ~~~~~~~~~~~~~~~~~~~~ [3]
+    FormattedPlural,
+} from 'react-intl';
 
 import * as notBlacklisted from "not-blacklisted";
 
-export * from 'lodash';
-               ~~~~~~ [0]
+// non-static imports cannot be checked
+import {Observable} from rxjs;
+import forOwn = require(rxjs);
 
 [0]: This import is blacklisted, import a submodule instead
+[1]: Please use lodash
+[2]: This import name is blacklisted
+[3]: Please import from react-intl-phraseapp
+
