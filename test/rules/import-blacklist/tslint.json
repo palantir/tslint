@@ -1,5 +1,21 @@
 {
-  "rules": {
-    "import-blacklist": [true, "lodash", "rxjs"]
-  }
+    "rules": {
+        "import-blacklist": [
+            true,
+            "rxjs",
+            {
+                "name": "underscore",
+                "message": "Please use lodash"
+            },
+            {
+                "name": "utils",
+                "importNames": ["includes", "find"]
+            },
+            {
+                "name": "react-intl",
+                "importNames": ["FormattedMessage", "FormattedHtmlMessage"],
+                "message": "Please import from react-intl-phraseapp"
+            }
+        ]
+    }
 }
