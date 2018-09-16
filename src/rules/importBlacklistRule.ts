@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { findImports, ImportKind, isExportDeclaration, isImportDeclaration, isNamedImports } from "tsutils";
+import {
+    findImports,
+    ImportKind,
+    isExportDeclaration,
+    isImportDeclaration,
+    isNamedImports
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -39,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 oneOf: [
                     {
                         type: "string",
-                        minLength: 1,
+                        minLength: 1
                     },
                     {
                         type: "object",
@@ -48,20 +54,20 @@ export class Rule extends Lint.Rules.AbstractRule {
                             minItems: 1,
                             items: {
                                 type: "string",
-                                minLength: 1,
-                            },
-                        },
-                    },
-                ],
-            },
+                                minLength: 1
+                            }
+                        }
+                    }
+                ]
+            }
         },
         optionExamples: [
             true,
             [true, "rxjs", "lodash"],
-            [true, "lodash", { lodash: ["pull", "pullAll"] }],
+            [true, "lodash", { lodash: ["pull", "pullAll"] }]
         ],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
     public static WHOLE_MODULE_FAILURE_STRING =
@@ -87,23 +93,24 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<string[]>) {
-    type Options = Array<string | { [moduleName: string]: string[] }>;
+type Options = Array<string | { [moduleName: string]: string[] }>;
+
+function walk(ctx: Lint.WalkContext<Options>) {
     interface BannedImports {
         [moduleName: string]: true | Set<string>;
     }
 
     // Merge/normalize options.
-    // E.g., ["a", { "b": ["c"], "d": ["e"] }, "f", { "f": ["g"] }]
+    // E.g., ["a", { "b": ["c"], "d": ["e", "e"] }, "f", { "f": ["g"] }]
     // becomes { "a": true, "b": Set(["c"]), "d": Set(["e"]), "f": true }.
-    const bannedImports = (ctx.options as Options).reduce<BannedImports>(
+    const bannedImports = ctx.options.reduce<BannedImports>(
         (acc, it) => {
             if (typeof it === "string") {
                 acc[it] = true;
             } else {
-                Object.keys(it).forEach((moduleName) => {
+                Object.keys(it).forEach(moduleName => {
                     if (acc[moduleName] instanceof Set) {
-                        it[moduleName].forEach((bannedImport) => {
+                        it[moduleName].forEach(bannedImport => {
                             (acc[moduleName] as Set<string>).add(bannedImport);
                         });
                     } else if (acc[moduleName] !== true) {
@@ -113,7 +120,7 @@ function walk(ctx: Lint.WalkContext<string[]>) {
             }
             return acc;
         },
-        Object.create(null) as BannedImports,
+        Object.create(null) as BannedImports
     );
 
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
@@ -130,7 +137,7 @@ function walk(ctx: Lint.WalkContext<string[]>) {
                 ctx.addFailure(
                     name.getStart(ctx.sourceFile) + 1,
                     name.end - 1,
-                    Rule.WHOLE_MODULE_FAILURE_STRING,
+                    Rule.WHOLE_MODULE_FAILURE_STRING
                 );
                 continue;
             }
@@ -163,28 +170,31 @@ function walk(ctx: Lint.WalkContext<string[]>) {
             // checks can help type inference figure out if when don't have undefined.
             // tslint:disable strict-boolean-expressions
 
-            const importClause = parentNode && isImportDeclaration(parentNode)
-                ? parentNode.importClause
-                : undefined;
+            const importClause =
+                parentNode && isImportDeclaration(parentNode) ? parentNode.importClause : undefined;
 
             const importsDefaultExport = importClause && Boolean(importClause.name);
 
             // Below, check isNamedImports to rule out the
             // `import * as ns from "..."` case.
-            const importsSpecificNamedExports = importClause
-                && importClause.namedBindings
-                && isNamedImports(importClause.namedBindings);
+            const importsSpecificNamedExports =
+                importClause &&
+                importClause.namedBindings &&
+                isNamedImports(importClause.namedBindings);
 
             // If parentNode is an ExportDeclaration, it must represent an
             // `export from`, as findImports verifies that. Then, if exportClause
             // is undefined, we're dealing with `export * from ...`.
-            const reExportsSpecificNamedExports = parentNode
-                && isExportDeclaration(parentNode)
-                && Boolean(parentNode.exportClause);
+            const reExportsSpecificNamedExports =
+                parentNode && isExportDeclaration(parentNode) && Boolean(parentNode.exportClause);
 
             // tslint:enable strict-boolean-expressions
 
-            if (importsDefaultExport || importsSpecificNamedExports || reExportsSpecificNamedExports) {
+            if (
+                importsDefaultExport ||
+                importsSpecificNamedExports ||
+                reExportsSpecificNamedExports
+            ) {
                 // Add an import for the default import and any named bindings.
                 // For the named bindings, we use the name of the export from the
                 // module (i.e., .propertyName) over its alias in the import when
@@ -199,18 +209,18 @@ function walk(ctx: Lint.WalkContext<string[]>) {
                 const namedImportsOrReExports = [
                     ...(importsDefaultExport ? ["default"] : []),
                     ...(importsSpecificNamedExports
-                        ? (importClause!.namedBindings as ts.NamedImports).elements.map(toExportName)
+                        ? (importClause!.namedBindings as ts.NamedImports).elements.map(
+                              toExportName
+                          )
                         : []),
-                    ...(exportClause !== undefined
-                        ? exportClause.elements.map(toExportName)
-                        : []),
+                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : [])
                 ];
 
                 for (const importName of namedImportsOrReExports) {
                     if (bansForModule.has(importName)) {
                         ctx.addFailureAtNode(
                             exportClause !== undefined ? exportClause : importClause!,
-                            Rule.MAKE_NAMED_IMPORT_FAILURE_STRING(importName),
+                            Rule.MAKE_NAMED_IMPORT_FAILURE_STRING(importName)
                         );
                     }
                 }
@@ -219,7 +229,7 @@ function walk(ctx: Lint.WalkContext<string[]>) {
                 ctx.addFailure(
                     name.getStart(ctx.sourceFile) + 1,
                     name.end - 1,
-                    Rule.IMPLICIT_NAMED_IMPORT_FAILURE_STRING,
+                    Rule.IMPLICIT_NAMED_IMPORT_FAILURE_STRING
                 );
             }
         }
