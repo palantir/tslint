@@ -222,12 +222,20 @@ export function isCamelCased(name: string): boolean {
     return isLowerCase(name[0]) && !name.includes("_") && !name.includes("-");
 }
 
-export function isKebabCased(name: string): boolean {
+function isSeparatorCased(name: string, disallowedSeparator: string): boolean {
     for (let i = 0; i < name.length; i++) {
         const c = name.charAt(i);
-        if (c === "_" || !isLowerCase(c)) {
+        if (c === disallowedSeparator || !isLowerCase(c)) {
             return false;
         }
     }
     return true;
+}
+
+export function isKebabCased(name: string): boolean {
+    return isSeparatorCased(name, "_");
+}
+
+export function isSnakeCased(name: string): boolean {
+    return isSeparatorCased(name, "-");
 }

@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "comment-type": [true, "singleline", "doc"]
+  }
+}

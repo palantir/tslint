@@ -12,3 +12,7 @@ class C {
     foo: () => void;
 }
 
+export interface Bar {
+  someMethod(someArg: Pick<HTMLAllCollection, "item">): string;
+}
+

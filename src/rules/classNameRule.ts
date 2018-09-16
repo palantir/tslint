@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { isPascalCased } from "../utils";
+import { codeExamples } from "./code-examples/className.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -37,6 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

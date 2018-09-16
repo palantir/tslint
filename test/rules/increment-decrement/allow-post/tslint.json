@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "increment-decrement": [true, "allow-post"]
+  }
+}

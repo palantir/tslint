@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noAny.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -41,6 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

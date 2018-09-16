@@ -19,6 +19,7 @@ import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/preferTemplate.examples";
 
 const OPTION_SINGLE_CONCAT = "allow-single-concat";
 
@@ -40,6 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 

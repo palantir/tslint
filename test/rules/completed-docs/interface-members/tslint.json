@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "completed-docs": [
+      true,
+      "interfaces",
+      "methods",
+      "properties"
+    ]
+  }
+}
