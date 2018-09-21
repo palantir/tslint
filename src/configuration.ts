@@ -52,6 +52,7 @@ export interface IConfigurationFile {
      */
     linterOptions?: Partial<{
         exclude: string[];
+        format: string;
     }>;
 
     /**
@@ -617,13 +618,23 @@ export function parseConfigFile(
         raw: RawConfigFile["linterOptions"],
         dir?: string
     ): IConfigurationFile["linterOptions"] {
-        if (raw === undefined || raw.exclude === undefined) {
+        if (raw === undefined) {
             return {};
         }
         return {
-            exclude: arrayify(raw.exclude).map(
-                pattern => (dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern))
-            )
+            ...(raw.exclude !== undefined
+                ? {
+                    exclude: arrayify(raw.exclude).map(
+                        pattern =>
+                            dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern)
+                    )
+                }
+                : {}),
+            ...(raw.format !== undefined
+                ? {
+                    format: raw.format
+                }
+                : {})
         };
     }
 }
