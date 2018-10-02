@@ -36,6 +36,7 @@ export const rules = {
             ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
         ],
     },
+    "ban-ts-ignore": true,
     "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [true, {
         "order": "statics-first",
@@ -129,7 +130,7 @@ export const rules = {
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
+    // "no-unused-variable" - deprecated in #3919
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
@@ -162,6 +163,7 @@ export const rules = {
     "object-literal-sort-keys": true,
     "prefer-const": true,
     "trailing-comma": [true, {
+        "esSpecCompliant": true,
         "multiline": "always",
         "singleline": "never",
     }],
@@ -187,11 +189,14 @@ export const rules = {
         "check-space",
         "check-uppercase",
     ],
+    "comment-type": [true, "singleline", "multiline", "doc", "directive"],
     "completed-docs": true,
     // "file-header": No sensible default
     "deprecation": true,
     "encoding": true,
+    "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
+    "increment-decrement": true,
     "interface-name": true,
     "interface-over-type-literal": true,
     "jsdoc-format": [true, "check-multiline-start"],
@@ -231,6 +236,7 @@ export const rules = {
     "prefer-object-spread": true,
     "prefer-switch": true,
     "prefer-template": true,
+    "prefer-while": true,
     "quotemark": [
         true,
         "double",
@@ -270,7 +276,7 @@ export const rules = {
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG =
-    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare"];
+    ["ban", "fileHeader", "importBlacklist", "noInvalidThis", "noSwitchCaseFallThrough", "typeofCompare", "noUnusedVariable"];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};

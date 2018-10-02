@@ -134,18 +134,40 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Custom formatters", () => {
-        it("can be loaded from node_modules", (done) => {
+        const createFormatVerifier = (done: MochaDone): ExecFileCallback => (err, stdout) => {
+            assert.isNotNull(err, "process should exit with error");
+            assert.strictEqual(err.code, 2, "error code should be 2");
+            assert.include(
+                stdout,
+                "hello from custom formatter",
+                "stdout should contain output of custom formatter"
+            );
+            done();
+        };
+
+        it("can be loaded from node_modules", done => {
             execCli(
-                ["-c", "tslint-custom-rules-with-dir.json", "../../src/test.ts", "-t", "tslint-test-custom-formatter"],
+                [
+                    "-c",
+                    "tslint-custom-rules-with-dir.json",
+                    "../../src/test.ts",
+                    "-t",
+                    "tslint-test-custom-formatter"
+                ],
                 {
-                    cwd: "./test/config",
+                    cwd: "./test/config"
                 },
-                (err, stdout) => {
-                    assert.isNotNull(err, "process should exit with error");
-                    assert.strictEqual(err.code, 2, "error code should be 2");
-                    assert.include(stdout, "hello from custom formatter", "stdout should contain output of custom formatter");
-                    done();
+                createFormatVerifier(done)
+            );
+        });
+
+        it("can be specified from config", done => {
+            execCli(
+                ["-c", "tslint-custom-rules-with-dir-and-format.json", "../../src/test.ts"],
+                {
+                    cwd: "./test/config"
                 },
+                createFormatVerifier(done)
             );
         });
     });

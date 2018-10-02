@@ -182,9 +182,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "completed-docs",
-        description: "Enforces documentation for important items be filled out.",
+        description: "Enforces JSDoc comments for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for [${Object.keys(Rule.defaultArguments).join(", ")}]],
+            \`true\` to enable for \`[${Object.keys(Rule.defaultArguments).join(", ")}]\`,
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
@@ -340,6 +340,10 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
                 checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
                 break;
 
+            case ts.SyntaxKind.MethodSignature:
+                checkNode(node as ts.MethodSignature, ARGUMENT_METHODS);
+                break;
+
             case ts.SyntaxKind.MethodDeclaration:
                 if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
                     checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
@@ -348,6 +352,10 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
 
             case ts.SyntaxKind.ModuleDeclaration:
                 checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
+                break;
+
+            case ts.SyntaxKind.PropertySignature:
+                checkNode(node as ts.PropertySignature, ARGUMENT_PROPERTIES);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:

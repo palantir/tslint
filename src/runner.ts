@@ -26,6 +26,7 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
+    isFileExcluded,
     JSON_CONFIG_FILENAME,
 } from "./configuration";
 import { FatalError } from "./error";
@@ -88,6 +89,11 @@ export interface Options {
      * tsconfig.json file.
      */
     project?: string;
+
+    /**
+     * Whether to hide warnings
+     */
+    quiet?: boolean;
 
     /**
      * Rules directory paths.
@@ -236,17 +242,29 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
 }
 
 async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
+    let configFile =
+        options.config !== undefined ? findConfiguration(options.config).results : undefined;
+
+    let formatter = options.format;
+    if (formatter === undefined) {
+        formatter =
+            configFile && configFile.linterOptions && configFile.linterOptions.format
+                ? configFile.linterOptions.format
+                : "prose";
+    }
+
     const linter = new Linter(
         {
             fix: !!options.fix,
-            formatter: options.format,
+            formatter,
             formattersDirectory: options.formattersDirectory,
+            quiet: !!options.quiet,
             rulesDirectory: options.rulesDirectory,
         },
-        program);
+        program,
+    );
 
     let lastFolder: string | undefined;
-    let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
     for (const file of files) {
         if (options.config === undefined) {
@@ -256,7 +274,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (isFileExcluded(file)) {
+        if (isFileExcluded(file, configFile)) {
             continue;
         }
 
@@ -276,14 +294,6 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     }
 
     return linter.getResult();
-
-    function isFileExcluded(filepath: string) {
-        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
-            return false;
-        }
-        const fullPath = path.resolve(filepath);
-        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
-    }
 }
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
@@ -291,7 +301,7 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     if (!fs.existsSync(filename)) {
         throw new FatalError(`Unable to open file: ${filename}`);
     }
-    const buffer = new Buffer(256);
+    const buffer = Buffer.allocUnsafe(256);
     const fd = fs.openSync(filename, "r");
     try {
         fs.readSync(fd, buffer, 0, 256, 0);

@@ -97,7 +97,8 @@ function isExcluded(node: ts.Node, options: Options): boolean {
     }
 
     if (options.allowEmptyFunctions &&
-        (node.kind === ts.SyntaxKind.FunctionDeclaration ||
+        (node.kind === ts.SyntaxKind.MethodDeclaration ||
+         node.kind === ts.SyntaxKind.FunctionDeclaration ||
          node.kind === ts.SyntaxKind.FunctionExpression ||
          node.kind === ts.SyntaxKind.ArrowFunction)) {
         return true;

@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
               * the name of the function in an array with one element: \`["functionName"]\`
               * an object in the following format: \`{"name": "functionName", "message": "optional explanation message"}\`
             * banning methods:
-              * an array with the object name, method name and optional message: \`["functionName", "methodName", "optional message"]\`
+              * an array with the object name, method name and optional message: \`["objectName", "methodName", "optional message"]\`
               * an object in the following format: \`{"name": ["objectName", "methodName"], "message": "optional message"}\`
                 * you can also ban deeply nested methods: \`{"name": ["foo", "bar", "baz"]}\` bans \`foo.bar.baz()\`
                 * the first element can contain a wildcard (\`*\`) that matches everything. \`{"name": ["*", "forEach"]}\` bans\
@@ -61,52 +61,56 @@ export class Rule extends Lint.Rules.AbstractRule {
             listType: {
                 anyOf: [
                     {
-                        type: "string",
+                        type: "string"
                     },
                     {
                         type: "array",
-                        items: {type: "string"},
+                        items: { type: "string" },
                         minLength: 1,
-                        maxLength: 3,
+                        maxLength: 3
                     },
                     {
                         type: "object",
                         properties: {
                             name: {
                                 anyOf: [
-                                    {type: "string"},
-                                    {type: "array", items: {type: "string"}, minLength: 1},
-                                ],
+                                    { type: "string" },
+                                    { type: "array", items: { type: "string" }, minLength: 1 }
+                                ]
                             },
-                            message: {type: "string"},
+                            message: { type: "string" }
                         },
-                        required: ["name"],
-                    },
-                ],
-            },
+                        required: ["name"]
+                    }
+                ]
+            }
         },
         optionExamples: [
             [
                 true,
                 "eval",
-                {name: "$", message: "please don't"},
+                { name: "$", message: "please don't" },
                 ["describe", "only"],
-                {name: ["it", "only"], message: "don't focus tests"},
-                {name: ["chai", "assert", "equal"], message: "Use 'strictEqual' instead."},
-                {name: ["*", "forEach"], message: "Use a regular for loop instead."},
-            ],
+                { name: ["it", "only"], message: "don't focus tests" },
+                { name: ["chai", "assert", "equal"], message: "Use 'strictEqual' instead." },
+                { name: ["*", "forEach"], message: "Use a regular for loop instead." }
+            ]
         ],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(expression: string, messageAddition?: string) {
-        return `Calls to '${expression}' are not allowed.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
+        return `Calls to '${expression}' are not allowed.${
+            messageAddition !== undefined ? ` ${messageAddition}` : ""
+        }`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new BanFunctionWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        return this.applyWithWalker(
+            new BanFunctionWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+        );
     }
 }
 
@@ -115,16 +119,16 @@ function parseOptions(args: Array<string | string[] | OptionsInput>): Options {
     const methods: MethodBan[] = [];
     for (const arg of args) {
         if (typeof arg === "string") {
-            functions.push({name: arg});
+            functions.push({ name: arg });
         } else if (Array.isArray(arg)) {
             switch (arg.length) {
                 case 0:
                     break;
                 case 1:
-                    functions.push({name: arg[0]});
+                    functions.push({ name: arg[0] });
                     break;
                 default:
-                    methods.push({object: [arg[0]], name: arg[1], message: arg[2]});
+                    methods.push({ object: [arg[0]], name: arg[1], message: arg[2] });
             }
         } else if (!Array.isArray(arg.name)) {
             functions.push(arg as FunctionBan);
@@ -133,10 +137,14 @@ function parseOptions(args: Array<string | string[] | OptionsInput>): Options {
                 case 0:
                     break;
                 case 1:
-                    functions.push({name: arg.name[0], message: arg.message});
+                    functions.push({ name: arg.name[0], message: arg.message });
                     break;
                 default:
-                    methods.push({name: arg.name[arg.name.length - 1], object: arg.name.slice(0, -1), message: arg.message});
+                    methods.push({
+                        message: arg.message,
+                        name: arg.name[arg.name.length - 1],
+                        object: arg.name.slice(0, -1)
+                    });
             }
         }
     }
@@ -160,22 +168,31 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
 
     private checkForObjectMethodBan(expression: ts.PropertyAccessExpression) {
         for (const ban of this.options.methods) {
-            if (expression.name.text !== ban.name) { continue; }
+            if (expression.name.text !== ban.name) {
+                continue;
+            }
             let current = expression.expression;
             for (let i = ban.object.length - 1; i > 0; --i) {
-                if (!isPropertyAccessExpression(current) || current.name.text !== ban.object[i]) { continue; }
+                if (!isPropertyAccessExpression(current) || current.name.text !== ban.object[i]) {
+                    continue;
+                }
                 current = current.expression;
             }
-            if (ban.object[0] === "*" ||
-                isIdentifier(current) && current.text === ban.object[0]) {
-                this.addFailureAtNode(expression, Rule.FAILURE_STRING_FACTORY(`${ban.object.join(".")}.${ban.name}`, ban.message));
+            if (
+                ban.object[0] === "*" ||
+                (isIdentifier(current) && current.text === ban.object[0])
+            ) {
+                this.addFailureAtNode(
+                    expression,
+                    Rule.FAILURE_STRING_FACTORY(`${ban.object.join(".")}.${ban.name}`, ban.message)
+                );
                 break;
             }
         }
     }
 
     private checkFunctionBan(name: ts.Identifier) {
-        const {text} = name;
+        const { text } = name;
         for (const ban of this.options.functions) {
             if (ban.name === text) {
                 this.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(text, ban.message));
