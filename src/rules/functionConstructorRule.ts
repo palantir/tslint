@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isNewExpression, isIdentifier } from "tsutils";
+import { isCallExpression, isIdentifier, isNewExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "..";
@@ -23,29 +23,29 @@ import { codeExamples } from "./code-examples/functionConstructor.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "function-constructor",
+        codeExamples,
         description: Lint.Utils.dedent`
             Prevents using the built-in Function constructor.
         `,
+        optionExamples: [true],
+        options: null,
+        optionsDescription: "Not configurable.",
         rationale: Lint.Utils.dedent`
             Calling the constructor directly is similar to \`eval\`, which is a symptom of design issues.
             String inputs don't receive type checking and can cause performance issues, particularly when dynamically created.
-
+            
             If you need to dynamically create functions, use "factory" functions that themselves return functions.
         `,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        ruleName: "function-constructor",
         type: "functionality",
-        typescriptOnly: false,
-        codeExamples
+        typescriptOnly: false
     };
+
+    public static FAILURE = "Do not use the Function constructor to create functions.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
     }
-
-    public static FAILURE = "Do not use the Function constructor to create functions.";
 }
 
 function walk(context: Lint.WalkContext<void>): void {
