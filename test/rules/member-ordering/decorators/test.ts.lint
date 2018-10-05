@@ -1,0 +1,15 @@
+class Foo {
+    z: number;
+    @Input() x: number;
+    ~~~~~~~~~~~~~~~~~~~ [Declaration of decorated field not allowed after declaration of instance field. Instead, this should come at the beginning of the class/interface.]
+    @ViewChild('somethingY') y: number;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Declaration of decorated field not allowed after declaration of instance field. Instead, this should come at the beginning of the class/interface.]
+    @Effect('even with multiple lines', {
+        bar: 0
+    })
+    n() {}
+    private y: number;
+    ~~~~~~~~~~~~~~~~~~ [Declaration of instance field not allowed after declaration of decorated method. Instead, this should come after decorated fields.]
+    constructor() {}
+    m() {}
+}

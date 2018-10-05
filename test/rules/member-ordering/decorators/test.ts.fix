@@ -1,0 +1,12 @@
+class Foo {
+    @Input() x: number;
+    @ViewChild('somethingY') y: number;
+    z: number;
+    private y: number;
+    @Effect('even with multiple lines', {
+        bar: 0
+    })
+    n() {}
+    constructor() {}
+    m() {}
+}

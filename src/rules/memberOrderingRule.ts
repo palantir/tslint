@@ -1,8 +1,3 @@
-import { hasModifier } from "tsutils";
-import * as ts from "typescript";
-import { showWarningOnce } from "../error";
-import * as Lint from "../index";
-import { flatMap, mapDefined } from "../utils";
 /**
  * @license
  * Copyright 2013 Palantir Technologies, Inc.
@@ -19,6 +14,11 @@ import { flatMap, mapDefined } from "../utils";
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { hasModifier } from "tsutils";
+import * as ts from "typescript";
+import { showWarningOnce } from "../error";
+import * as Lint from "../index";
+import { flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
@@ -38,15 +38,12 @@ enum MemberKind {
     privateDecoratedSetter,
     publicAbstractField,
     publicAbstractGetter,
-    publicAbstractMethod,
     publicAbstractSetter,
     protectedAbstractField,
     protectedAbstractGetter,
-    protectedAbstractMethod,
     protectedAbstractSetter,
     privateAbstractField,
     privateAbstractGetter,
-    privateAbstractMethod,
     privateAbstractSetter,
     publicReadonlyField,
     protectedReadonlyField,
@@ -489,7 +486,7 @@ function memberKindForMethodOrField(
 const allAccess: Access[] = ["public", "protected", "private"];
 
 function getMembership(member: Member): AllowedMembers {
-    if (member.decorators && member.decorators.length) {
+    if (member.decorators !== undefined && member.decorators.length > 0) {
         return "Decorated";
     }
     if (hasModifier(member.modifiers, ts.SyntaxKind.AbstractKeyword)) {
@@ -556,13 +553,13 @@ function getMemberKind(member: Member): MemberKind | undefined {
         if (isMethod && testForNg()) {
             return MemberKind.ngInstanceMethod;
         }
-        const methodOrField = isMethod ? "Method" : "Field";
+        const kind = isMethod ? "Method" : "Field";
         const membership = getMembership(member);
-        return memberKindForMethodOrField(accessLevel, membership, methodOrField);
+        return memberKindForMethodOrField(accessLevel, membership, kind);
     }
 
     function testForNg() {
-        return member.name != null && nameString(member.name).startsWith("ng");
+        return member.name !== undefined && nameString(member.name).startsWith("ng");
     }
 }
 
@@ -608,8 +605,8 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
     }
 
     return {
-        order: categoryFromOption(firstOption[OPTION_ORDER]),
-        alphabetize: firstOption[OPTION_ALPHABETIZE] === true
+        alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
+        order: categoryFromOption(firstOption[OPTION_ORDER])
     };
 }
 function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {
@@ -709,13 +706,13 @@ function isFunctionLiteral(node: ts.Node | undefined) {
     }
 }
 function decoratedNameString(member: Member): string {
-    if (member.name == null) {
+    if (member.name === undefined) {
         return "";
     }
     let decoratorNames = "";
-    if (member.decorators) {
+    if (member.decorators !== undefined) {
         decoratorNames = member.decorators
-            .map(decorator => decorator.getText().replace(/@|\(|\)/g, ""))
+            .map(decorator => decorator.getText().replace(/@|(\([^)]*\))/g, ""))
             .join("");
     }
     return decoratorNames + nameString(member.name);
