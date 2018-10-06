@@ -93,7 +93,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    private static isFileIgnored(
+    private static shouldFileBeConsidered(
         filesToIgnore: string[] | undefined,
         fileNameWithExtension: string
     ) {
@@ -125,7 +125,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const fileName = parsedPath.name;
 
         if (
-            Rule.isFileIgnored(filesToIgnore, fileNameWithExtension) &&
+            Rule.shouldFileBeConsidered(filesToIgnore, fileNameWithExtension) &&
             !Rule.isCorrectCasing(fileName, casing)
         ) {
             return [
