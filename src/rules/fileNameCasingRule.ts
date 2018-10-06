@@ -97,7 +97,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         filesToIgnore: string[] | undefined,
         fileNameWithExtension: string
     ) {
-        return !filesToIgnore ? true : filesToIgnore.indexOf(fileNameWithExtension) === -1;
+        return filesToIgnore == undefined
+            ? true
+            : filesToIgnore.indexOf(fileNameWithExtension) === -1;
     }
 
     private static isCorrectCasing(fileName: string, casing: Casing): boolean {
@@ -118,7 +120,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
-        const [casing, filesToIgnore] = this.ruleArguments;
+        const casing = this.ruleArguments[0] as Casing;
+        const filesToIgnore = this.ruleArguments[1] as string[];
 
         const parsedPath = path.parse(sourceFile.fileName);
         const fileNameWithExtension = parsedPath.base;
