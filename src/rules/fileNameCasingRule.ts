@@ -25,7 +25,7 @@ enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
     KebabCase = "kebab-case",
-    SnakeCase = "snake-case",
+    SnakeCase = "snake-case"
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -40,25 +40,39 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
             * \`${Casing.PascalCase}\`: File names must be Pascal-cased: \`FileName.ts\`.
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
-            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
+            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
+            
+            If one of the above above arguments is specified, an additional array parameter may be specified containing the names of files
+            to exclude from the specified casing rule (including their extensions).`,
         options: {
             type: "array",
             items: [
                 {
                     type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
+                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase]
                 },
+                {
+                    type: "array",
+                    items: {
+                        type: "string"
+                    }
+                }
             ],
+            minLength: 1
         },
         optionExamples: [
             [true, Casing.CamelCase],
+            [true, Casing.CamelCase, ["index.ts", "myFile.ts"]],
             [true, Casing.PascalCase],
+            [true, Casing.PascalCase, ["index.ts", "MyFile.ts"]],
             [true, Casing.KebabCase],
+            [true, Casing.KebabCase, ["index.ts", "my-file.ts"]],
             [true, Casing.SnakeCase],
+            [true, Casing.SnakeCase, ["index.ts", "my_file.ts"]]
         ],
         hasFix: false,
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -79,6 +93,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
+    private static isFileIgnored(
+        filesToIgnore: string[] | undefined,
+        fileNameWithExtension: string
+    ) {
+        return !filesToIgnore ? true : filesToIgnore.indexOf(fileNameWithExtension) === -1;
+    }
+
     private static isCorrectCasing(fileName: string, casing: Casing): boolean {
         switch (casing) {
             case Casing.CamelCase:
@@ -93,14 +114,23 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        if (this.ruleArguments.length !== 1) {
+        if (this.ruleArguments.length < 1) {
             return [];
         }
 
-        const casing = this.ruleArguments[0] as Casing;
-        const fileName = path.parse(sourceFile.fileName).name;
-        if (!Rule.isCorrectCasing(fileName, casing)) {
-            return [new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)];
+        const [casing, filesToIgnore] = this.ruleArguments;
+
+        const parsedPath = path.parse(sourceFile.fileName);
+        const fileNameWithExtension = parsedPath.base;
+        const fileName = parsedPath.name;
+
+        if (
+            Rule.isFileIgnored(filesToIgnore, fileNameWithExtension) &&
+            !Rule.isCorrectCasing(fileName, casing)
+        ) {
+            return [
+                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)
+            ];
         }
 
         return [];
