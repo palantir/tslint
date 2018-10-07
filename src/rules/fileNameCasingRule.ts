@@ -38,12 +38,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces a consistent file naming convention",
         rationale: "Helps maintain a consistent style across a file hierarchy",
         optionsDescription: Lint.Utils.dedent`
-            One of the following arguments must be provided:
+            One argument which is either a string defining the file casing or an array consisting of a file name
+            matches and corresponding casing strings.
 
-            * \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
-            * \`${Casing.PascalCase}\`: File names must be pascal-cased: \`FileName.ts\`.
-            * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
-            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
+            * In both cases the casing string must be one of the options:
+            ** \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
+            ** \`${Casing.PascalCase}\`: File names must be pascal-cased: \`FileName.ts\`.
+            ** \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
+            ** \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
+        
+            * The array again consists of array with two items. The first item must be a case-insenstive
+            regular expression to match files, the second item must be a valid casing option (see above)`,
         options: {
             type: "list",
             listType: {
@@ -81,7 +86,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, Casing.CamelCase],
             [true, Casing.PascalCase],
             [true, Casing.KebabCase],
-            [true, Casing.SnakeCase]
+            [true, Casing.SnakeCase],
+            [
+                true,
+                [
+                    [".style.ts$", Casing.KebabCase],
+                    [".tsx$", Casing.PascalCase],
+                    [".*", Casing.CamelCase]
+                ]
+            ]
         ],
         hasFix: false,
         type: "style",
