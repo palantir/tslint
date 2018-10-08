@@ -42,8 +42,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
             * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
             
-            If one of the above above arguments is specified, an additional array parameter may be specified containing the names of files
-            to exclude from the specified casing rule (including their extensions).`,
+            If one of the above arguments is specified, an additional array parameter may be specified containing the names of files to
+            exclude from the specified casing rule (including their extensions).`,
         options: {
             type: "array",
             items: [
@@ -121,7 +121,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const casing = this.ruleArguments[0] as Casing;
-        const filesToIgnore = this.ruleArguments[1] as string[];
+        const filesToIgnore = this.ruleArguments[1] as string[] | undefined;
 
         const parsedPath = path.parse(sourceFile.fileName);
         const fileNameWithExtension = parsedPath.base;
