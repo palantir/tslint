@@ -50,6 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Possible values for \`"import-sources-order"\` are:
 
             * \`"case-insensitive'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`. (This is the default.)
+            * \`"case-insensitive-legacy'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`.
             * \`"lowercase-first"\`: Correct order is \`"baz"\`, \`"Bar"\`, \`"Foo"\`.
             * \`"lowercase-last"\`: Correct order is \`"Bar"\`, \`"Foo"\`, \`"baz"\`.
             * \`"any"\`: Allow any order.
@@ -68,6 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Possible values for \`"named-imports-order"\` are:
 
             * \`"case-insensitive'\`: Correct order is \`{A, b, C}\`. (This is the default.)
+            * \`"case-insensitive-legacy'\`: Correct order is \`"Bar"\`, \`"baz"\`, \`"Foo"\`.
             * \`"lowercase-first"\`: Correct order is \`{b, A, C}\`.
             * \`"lowercase-last"\`: Correct order is \`{A, C, b}\`.
             * \`"any"\`: Allow any order.
@@ -89,11 +91,23 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
                 "import-sources-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                    enum: [
+                        "case-insensitive",
+                        "case-insensitive-legacy",
+                        "lowercase-first",
+                        "lowercase-last",
+                        "any",
+                    ],
                 },
                 "named-imports-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                    enum: [
+                        "case-insensitive",
+                        "case-insensitive-legacy",
+                        "lowercase-first",
+                        "lowercase-last",
+                        "any",
+                    ],
                 },
                 "module-source-path": {
                     type: "string",
@@ -135,6 +149,7 @@ type Transform = (x: string) => string;
 const TRANSFORMS = new Map<string, Transform>([
     ["any", () => ""],
     ["case-insensitive", x => x.toUpperCase()],
+    ["case-insensitive-legacy", x => x.toLowerCase()],
     ["lowercase-first", flipCase],
     ["lowercase-last", x => x],
     ["full", x => x],
