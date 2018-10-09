@@ -114,7 +114,8 @@ function buildDocumentation(documentation: IDocumentation) {
     // Create each module's documentation file.
     const modulePaths = glob.sync(documentation.globPattern);
     const metadataJson = modulePaths.map((modulePath: string) =>
-        buildSingleModuleDocumentation(documentation, modulePath));
+        buildSingleModuleDocumentation(documentation, modulePath),
+    );
 
     // Delete outdated directories
     const rulesDirs = metadataJson.map((metadata: any) => metadata[documentation.nameMetadataKey]);
@@ -133,17 +134,21 @@ function deleteOutdatedDocumentation(directory: string, rulesDirs: string[]) {
     // find if the thing at particular location is a directory
     const isDirectory = (source: string) => fs.lstatSync(source).isDirectory();
     // get all subdirectories in source directory
-    const getDirectories = (source: string) => fs.readdirSync(source).filter((name) => isDirectory(path.join(source, name)));
+    const getDirectories = (source: string) =>
+        fs.readdirSync(source).filter(name => isDirectory(path.join(source, name)));
 
     const subDirs = getDirectories(directory);
-    const outdatedDirs = subDirs.filter((dir) => rulesDirs.indexOf(dir) < 0);
-    outdatedDirs.forEach((outdatedDir) => rimraf.sync(path.join(directory, outdatedDir)));
+    const outdatedDirs = subDirs.filter(dir => rulesDirs.indexOf(dir) < 0);
+    outdatedDirs.forEach(outdatedDir => rimraf.sync(path.join(directory, outdatedDir)));
 }
 
 /**
  * Produces documentation for a single file/module.
  */
-function buildSingleModuleDocumentation(documentation: IDocumentation, modulePath: string): Metadata {
+function buildSingleModuleDocumentation(
+    documentation: IDocumentation,
+    modulePath: string,
+): Metadata {
     // Load the module.
     // tslint:disable-next-line:no-var-requires
     const module = require(modulePath);
@@ -191,8 +196,9 @@ function generateJekyllData(metadata: any, layout: string, type: string, name: s
 function generateRuleFile(metadata: IRuleMetadata): string {
     if (metadata.optionExamples) {
         metadata = { ...metadata };
-        metadata.optionExamples = (metadata.optionExamples as any[]).map((example) =>
-            typeof example === "string" ? example : stringify(example));
+        metadata.optionExamples = (metadata.optionExamples as any[]).map(
+            example => (typeof example === "string" ? example : stringify(example)),
+        );
     }
 
     if (metadata.codeExamples) {
@@ -208,7 +214,7 @@ function generateRuleFile(metadata: IRuleMetadata): string {
 
     const yamlData = generateJekyllData(metadata, "rule", "Rule", metadata.ruleName);
     yamlData.optionsJSON = JSON.stringify(metadata.options, undefined, 2);
-    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
+    return `---\n${yaml.safeDump(yamlData, { lineWidth: 140 } as any)}---`;
 }
 
 /**
@@ -216,8 +222,13 @@ function generateRuleFile(metadata: IRuleMetadata): string {
  * that only consists of a YAML front matter block.
  */
 function generateFormatterFile(metadata: IFormatterMetadata): string {
-    const yamlData = generateJekyllData(metadata, "formatter", "TSLint formatter", metadata.formatterName);
-    return `---\n${yaml.safeDump(yamlData, {lineWidth: 140} as any)}---`;
+    const yamlData = generateJekyllData(
+        metadata,
+        "formatter",
+        "TSLint formatter",
+        metadata.formatterName,
+    );
+    return `---\n${yaml.safeDump(yamlData, { lineWidth: 140 } as any)}---`;
 }
 
 buildDocumentation(ruleDocumentation);
