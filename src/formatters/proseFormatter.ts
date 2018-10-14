@@ -54,9 +54,11 @@ export class Formatter extends AbstractFormatter {
             const failureString = failure.getFailure();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
+            const positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
 
-            return `${failure.getRuleSeverity().toUpperCase()}: ${fileName}${positionTuple}: ${failureString}`;
+            return `${failure
+                .getRuleSeverity()
+                .toUpperCase()}: ${fileName}:${positionTuple} - ${failureString}`;
         });
 
         return `${fixLines.concat(errorLines).join("\n")}\n`;
