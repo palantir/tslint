@@ -1,0 +1,5 @@
+if (1 != 1 || 2 == 3) {
+      ~~                [!= should be !==]
+                ~~      [== should be ===]
+  alert('ruh roh');
+}
