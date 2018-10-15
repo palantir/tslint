@@ -1,0 +1,14 @@
+const withMultilineComment = () => {
+    /* ... */
+};
+
+const withSingleLineComment = () => {
+    // ...
+};
+
+const withoutComments = () => {
+                        ~~~~~~~
+    return [];
+~~~~~~~~~~~~~~
+};
+~ [Maximum arrow function body length exceeded: 3 lines instead of <= 2.]

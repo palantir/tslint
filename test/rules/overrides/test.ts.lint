@@ -1,0 +1,102 @@
+const arrowFunctionShort = () => {
+    return [];
+};
+
+const arrowFunctionLong = () => {
+                          ~~~~~~~
+    return [
+~~~~~~~~~~~~
+    ];
+~~~~~~
+};
+~ [Maximum arrow function body length exceeded: 4 lines instead of <= 3.]
+
+class HasConstructorShort {
+    constructor() {
+        const _ = [
+        ];
+    }
+}
+
+class HasConstructorLong {
+    constructor() {
+    ~~~~~~~~~~~~~~~
+        const _ = [
+~~~~~~~~~~~~~~~~~~~
+            1,
+~~~~~~~~~~~~~~
+        ];
+~~~~~~~~~~
+    }
+~~~~~ [Maximum constructor body length exceeded: 5 lines instead of <= 4.]
+}
+
+function declarationShort() {
+    return [
+        1,
+    ];
+}
+
+function declarationLong() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    return [
+~~~~~~~~~~~~
+        1,
+~~~~~~~~~~
+        1,
+~~~~~~~~~~
+    ];
+~~~~~~
+}
+~ [Maximum function declaration body length exceeded: 6 lines instead of <= 5.]
+
+const expressionShort = function () {
+    return [
+        1,
+        1,
+    ];
+};
+
+const expressionLong = function () {
+                       ~~~~~~~~~~~~~
+    return [
+~~~~~~~~~~~~
+        1,
+~~~~~~~~~~
+        1,
+~~~~~~~~~~
+        1,
+~~~~~~~~~~
+    ];
+~~~~~~
+};
+~ [Maximum function expression body length exceeded: 7 lines instead of <= 6.]
+
+class HasMethodShort {
+    methodShort() {
+        return [
+            1,
+            1,
+            1,
+        ];
+    }
+}
+
+class HasMethodLong {
+    methodLong() {
+    ~~~~~~~~~~~~~~
+        return [
+~~~~~~~~~~~~~~~~
+            1,
+~~~~~~~~~~~~~~
+            1,
+~~~~~~~~~~~~~~
+            1,
+~~~~~~~~~~~~~~
+            1,
+~~~~~~~~~~~~~~
+        ];
+~~~~~~~~~~
+    }
+~~~~~ [Maximum method body length exceeded: 8 lines instead of <= 7.]
+}

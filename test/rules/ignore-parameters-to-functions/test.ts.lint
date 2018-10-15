@@ -1,0 +1,21 @@
+describe("", () => {
+    it("", () => {
+        return [];
+    });
+});
+
+const outsideDescribe = () => {
+                        ~~~~~~~
+    return [];
+~~~~~~~~~~~~~~
+};
+~ [0]
+
+other("", () => {
+          ~~~~~~~
+    return [];
+~~~~~~~~~~~~~~
+});
+~ [0]
+
+[0]: Maximum arrow function body length exceeded: 3 lines instead of <= 2.
