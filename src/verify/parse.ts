@@ -28,7 +28,7 @@ import {
     MessageSubstitutionLine,
     MultilineErrorLine,
     parseLine,
-    printLine,
+    printLine
 } from "./lines";
 import { errorComparator, LintError, lintSyntaxError } from "./lintError";
 
@@ -57,7 +57,7 @@ export function preprocessDirectives(text: string): string {
     const enum State {
         Initial,
         If,
-        Else,
+        Else
     }
     const lines = text.split(/\n/);
     const result = [];
@@ -101,7 +101,9 @@ export function preprocessDirectives(text: string): string {
 export function removeErrorMarkup(text: string): string {
     const textWithMarkup = text.split("\n");
     const lines = textWithMarkup.map(parseLine);
-    const codeText = lines.filter((line) => (line instanceof CodeLine)).map((line) => (line as CodeLine).contents);
+    const codeText = lines
+        .filter(line => line instanceof CodeLine)
+        .map(line => (line as CodeLine).contents);
     return codeText.join("\n");
 }
 
@@ -118,9 +120,11 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
         throw lintSyntaxError("text cannot start with an error mark line.");
     }
 
-    const messageSubstitutionLines = lines.filter((l) => l instanceof MessageSubstitutionLine) as MessageSubstitutionLine[];
+    const messageSubstitutionLines = lines.filter(
+        l => l instanceof MessageSubstitutionLine
+    ) as MessageSubstitutionLine[];
     const messageSubstitutions = new Map<string, string>();
-    for (const {key, message} of messageSubstitutionLines) {
+    for (const { key, message } of messageSubstitutionLines) {
         messageSubstitutions.set(key, formatMessage(messageSubstitutions, message));
     }
 
@@ -128,16 +132,19 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
     const errorLinesForCodeLines = createCodeLineNoToErrorsMap(lines);
 
     const lintErrors: LintError[] = [];
-    function addError(errorLine: EndErrorLine, errorStartPos: { line: number; col: number }, lineNo: number) {
+    function addError(
+        errorLine: EndErrorLine,
+        errorStartPos: { line: number; col: number },
+        lineNo: number
+    ) {
         lintErrors.push({
             startPos: errorStartPos,
             endPos: { line: lineNo, col: errorLine.endCol },
-            message: substituteMessage(messageSubstitutions, errorLine.message),
+            message: substituteMessage(messageSubstitutions, errorLine.message)
         });
     }
     // for each line of code...
     errorLinesForCodeLines.forEach((errorLinesForLineOfCode, lineNo) => {
-
         // for each error marking on that line...
         while (errorLinesForLineOfCode.length > 0) {
             const errorLine = errorLinesForLineOfCode.shift();
@@ -147,14 +154,15 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
             if (errorLine instanceof EndErrorLine) {
                 addError(errorLine, errorStartPos, lineNo);
 
-            // if the error is the start of a multiline error
+                // if the error is the start of a multiline error
             } else if (errorLine instanceof MultilineErrorLine) {
-
                 // iterate through the MultilineErrorLines until we get to an EndErrorLine
                 for (let nextLineNo = lineNo + 1; ; ++nextLineNo) {
                     if (!isValidErrorMarkupContinuation(errorLinesForCodeLines, nextLineNo)) {
                         throw lintSyntaxError(
-                            `Error mark starting at ${errorStartPos.line}:${errorStartPos.col} does not end correctly.`,
+                            `Error mark starting at ${errorStartPos.line}:${
+                                errorStartPos.col
+                            } does not end correctly.`
                         );
                     } else {
                         const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
@@ -222,7 +230,11 @@ function parseFormatArguments(text: string): string[] | undefined {
     scanner.setText(text);
     const result: string[] = [];
     let expectValue = true;
-    for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+    for (
+        let token = scanner.scan();
+        token !== ts.SyntaxKind.EndOfFileToken;
+        token = scanner.scan()
+    ) {
         if (token === ts.SyntaxKind.StringLiteral) {
             if (!expectValue) {
                 return undefined;
@@ -250,11 +262,13 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
     const errorLinesForCodeText: ErrorLine[][] = codeText.map(() => []);
 
     for (const error of lintErrors) {
-        const {startPos, endPos, message} = error;
+        const { startPos, endPos, message } = error;
 
         if (startPos.line === endPos.line) {
             // single line error
-            errorLinesForCodeText[startPos.line].push(new EndErrorLine(startPos.col, endPos.col, message));
+            errorLinesForCodeText[startPos.line].push(
+                new EndErrorLine(startPos.col, endPos.col, message)
+            );
         } else {
             // multiline error
             errorLinesForCodeText[startPos.line].push(new MultilineErrorLine(startPos.col));
@@ -265,7 +279,10 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
         }
     }
 
-    return flatMap(codeText, (line, i) => [line, ...mapDefined(errorLinesForCodeText[i], (err) => printLine(err, line))]).join("\n");
+    return flatMap(codeText, (line, i) => [
+        line,
+        ...mapDefined(errorLinesForCodeText[i], err => printLine(err, line))
+    ]).join("\n");
 }
 /* tslint:enable:object-literal-sort-keys */
 
@@ -282,7 +299,9 @@ function createCodeLineNoToErrorsMap(lines: Line[]) {
 }
 
 function isValidErrorMarkupContinuation(errorLinesForCodeLines: ErrorLine[][], lineNo: number) {
-    return lineNo < errorLinesForCodeLines.length
-        && errorLinesForCodeLines[lineNo].length !== 0
-        && errorLinesForCodeLines[lineNo][0].startCol === 0;
+    return (
+        lineNo < errorLinesForCodeLines.length &&
+        errorLinesForCodeLines[lineNo].length !== 0 &&
+        errorLinesForCodeLines[lineNo][0].startCol === 0
+    );
 }

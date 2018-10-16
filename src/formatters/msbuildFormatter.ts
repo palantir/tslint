@@ -29,7 +29,7 @@ export class Formatter extends AbstractFormatter {
         description: "Formats errors for consumption by msbuild.",
         descriptionDetails: "The output is compatible with both msbuild and Visual Studio.",
         sample: "myFile.ts(1,14): warning: Missing semicolon",
-        consumer: "machine",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -40,7 +40,8 @@ export class Formatter extends AbstractFormatter {
             const camelizedRule = camelize(failure.getRuleName());
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character + 1})`;
+            const positionTuple = `(${lineAndCharacter.line + 1},${lineAndCharacter.character +
+                1})`;
             const severity = failure.getRuleSeverity();
 
             return `${fileName}${positionTuple}: ${severity} ${camelizedRule}: ${failureString}`;

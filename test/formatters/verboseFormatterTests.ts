@@ -38,7 +38,15 @@ describe("Verbose Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            )
         ];
 
         const expectedResult = dedent`

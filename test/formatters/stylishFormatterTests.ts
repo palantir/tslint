@@ -37,9 +37,33 @@ describe("Stylish Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
-            createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
+                undefined,
+                "error"
+            )
         ];
 
         const maxPositionObj = sourceFile.getLineAndCharacterOfPosition(maxPosition - 1);
@@ -51,8 +75,9 @@ describe("Stylish Formatter", () => {
             \u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfirst-name\u001b[39m  \u001b[33mfirst failure\u001b[39m
             \u001b[31mERROR: 1:1\u001b[39m  \u001b[90mfull-name \u001b[39m  \u001b[33mfull failure\u001b[39m
             \u001b[31mERROR: 1:3\u001b[39m  \u001b[90mescape    \u001b[39m  \u001b[33m&<>'\" should be escaped\u001b[39m
-            \u001b[31mERROR: ${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m\n`
-            .slice(1); // remove leading newline
+            \u001b[31mERROR: ${maxPositionTuple}\u001b[39m  \u001b[90mlast-name \u001b[39m  \u001b[33mlast failure\u001b[39m\n`.slice(
+            1
+        ); // remove leading newline
 
         assert.equal(formatter.format(failures), expectedResult);
     });

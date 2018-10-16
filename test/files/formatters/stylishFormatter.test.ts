@@ -1,4 +1,4 @@
-module StylishModule {
+namespace StylishModule {
     export class StylishClass {
         private name: string;
 

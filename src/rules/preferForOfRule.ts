@@ -24,17 +24,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-for-of",
-        description: "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
-        rationale: "A for(... of ...) loop is easier to implement and read when the index is not needed.",
+        description:
+            "Recommends a 'for-of' loop over a standard 'for' loop if the index is only used to access the array being iterated.",
+        rationale:
+            "A for(... of ...) loop is easier to implement and read when the index is not needed.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "typescript",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
+    public static FAILURE_STRING =
+        "Expected a 'for-of' loop instead of a 'for' loop with this simple iteration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -63,10 +66,13 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (variables === undefined) {
             variables = utils.collectVariableUsage(sourceFile);
         }
-        for (const {location} of variables.get(indexVariable)!.uses) {
-            if (location.pos < node.initializer!.end || location.pos >= node.end || // bail out on use outside of for loop
-                location.pos >= node.statement.pos && // only check uses in loop body
-                isNonSimpleIncrementorUse(location, arrayExpr, sourceFile)) {
+        for (const { location } of variables.get(indexVariable)!.uses) {
+            if (
+                location.pos < node.initializer!.end ||
+                location.pos >= node.end || // bail out on use outside of for loop
+                (location.pos >= node.statement.pos && // only check uses in loop body
+                    isNonSimpleIncrementorUse(location, arrayExpr, sourceFile))
+            ) {
                 return;
             }
         }
@@ -74,14 +80,20 @@ function walk(ctx: Lint.WalkContext<void>): void {
     }
 }
 
-function isNonSimpleIncrementorUse(node: ts.Identifier, arrayExpr: ts.Expression, sourceFile: ts.SourceFile): boolean {
+function isNonSimpleIncrementorUse(
+    node: ts.Identifier,
+    arrayExpr: ts.Expression,
+    sourceFile: ts.SourceFile
+): boolean {
     // check if iterator is used for something other than reading data from array
     const parent = node.parent!;
-    return !utils.isElementAccessExpression(parent)
+    return (
+        !utils.isElementAccessExpression(parent) ||
         // `a[i] = ...` or similar
-        || utils.isReassignmentTarget(parent)
+        utils.isReassignmentTarget(parent) ||
         // `b[i]`
-        || !nodeEquals(arrayExpr, unwrapParentheses(parent.expression), sourceFile);
+        !nodeEquals(arrayExpr, unwrapParentheses(parent.expression), sourceFile)
+    );
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {
@@ -89,7 +101,9 @@ function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean 
 }
 
 // returns the iterator and array of a `for` loop if the `for` loop is basic.
-function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Identifier; arrayExpr: ts.Expression } | undefined {
+function getForLoopHeaderInfo(
+    forLoop: ts.ForStatement
+): { indexVariable: ts.Identifier; arrayExpr: ts.Expression } | undefined {
     const { initializer, condition, incrementor } = forLoop;
     if (initializer === undefined || condition === undefined || incrementor === undefined) {
         return undefined;
@@ -100,7 +114,11 @@ function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Ide
         return undefined;
     }
     const { name: indexVariable, initializer: indexInit } = initializer.declarations[0];
-    if (indexVariable.kind !== ts.SyntaxKind.Identifier || indexInit === undefined || !isNumber(indexInit, "0")) {
+    if (
+        indexVariable.kind !== ts.SyntaxKind.Identifier ||
+        indexInit === undefined ||
+        !isNumber(indexInit, "0")
+    ) {
         return undefined;
     }
 
@@ -115,9 +133,11 @@ function getForLoopHeaderInfo(forLoop: ts.ForStatement): { indexVariable: ts.Ide
     }
 
     const { left, operatorToken, right } = condition;
-    if (!isIdentifierNamed(left, indexVariable.text) ||
-            operatorToken.kind !== ts.SyntaxKind.LessThanToken ||
-            !utils.isPropertyAccessExpression(right)) {
+    if (
+        !isIdentifierNamed(left, indexVariable.text) ||
+        operatorToken.kind !== ts.SyntaxKind.LessThanToken ||
+        !utils.isPropertyAccessExpression(right)
+    ) {
         return undefined;
     }
 
@@ -133,7 +153,9 @@ function isIncremented(node: ts.Node, indexVariableName: string): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.PrefixUnaryExpression:
         case ts.SyntaxKind.PostfixUnaryExpression: {
-            const { operator, operand } = node as ts.PrefixUnaryExpression | ts.PostfixUnaryExpression;
+            const { operator, operand } = node as
+                | ts.PrefixUnaryExpression
+                | ts.PostfixUnaryExpression;
             // `++x` or `x++`
             return operator === ts.SyntaxKind.PlusPlusToken && isVar(operand);
         }
@@ -154,7 +176,10 @@ function isIncremented(node: ts.Node, indexVariableName: string): boolean {
                     }
                     const { operatorToken: rhsOp, left, right } = rhs;
                     // `x = 1 + x` or `x = x + 1`
-                    return rhsOp.kind === ts.SyntaxKind.PlusToken && (isVar(left) && isOne(right) || isOne(left) && isVar(right));
+                    return (
+                        rhsOp.kind === ts.SyntaxKind.PlusToken &&
+                        ((isVar(left) && isOne(right)) || (isOne(left) && isVar(right)))
+                    );
                 }
                 default:
                     return false;

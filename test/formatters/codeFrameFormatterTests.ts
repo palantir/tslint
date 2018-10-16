@@ -44,14 +44,45 @@ describe("CodeFrame Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
-            createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "error"),
-            createFailure(sourceFile, 0, maxPosition, "warning failure", "warning-name", undefined, "warning"),
+            createFailure(
+                sourceFile,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "warning failure",
+                "warning-name",
+                undefined,
+                "warning"
+            )
         ];
 
-        const expectedResultColored =
-            `formatters/codeFrameFormatter.test.ts
+        const expectedResultColored = `formatters/codeFrameFormatter.test.ts
             \u001b[31mfirst failure\u001b[39m \u001b[90m(first-name)\u001b[39m
             \u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 1 | \u001b[39mmodule \u001b[33mCodeFrameModule\u001b[39m {
             \u001b[90m 2 | \u001b[39m    \u001b[36mexport\u001b[39m \u001b[36mclass\u001b[39m \u001b[33mCodeFrameClass\u001b[39m {
@@ -88,7 +119,7 @@ describe("CodeFrame Formatter", () => {
 
         /** Convert output lines to an array of trimmed lines for easier comparing */
         function toTrimmedLines(lines: string): string[] {
-            return lines.split("\n").map((line) => line.trim());
+            return lines.split("\n").map(line => line.trim());
         }
 
         const expectedResult = toTrimmedLines(expectedResultColored);

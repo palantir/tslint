@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -68,14 +68,18 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                     visitNamespaceAccess(node, expression, name);
                     break;
                 }
-                // falls through
+            // falls through
 
             default:
                 ts.forEachChild(node, cb);
         }
     }
 
-    function visitNamespaceAccess(node: ts.Node, qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier): void {
+    function visitNamespaceAccess(
+        node: ts.Node,
+        qualifier: ts.EntityNameOrEntityNameExpression,
+        name: ts.Identifier
+    ): void {
         if (qualifierIsUnnecessary(qualifier, name)) {
             const fix = Lint.Replacement.deleteFromTo(qualifier.getStart(), name.getStart());
             ctx.addFailureAtNode(qualifier, Rule.FAILURE_STRING(qualifier.getText()), fix);
@@ -85,7 +89,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         }
     }
 
-    function qualifierIsUnnecessary(qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier): boolean {
+    function qualifierIsUnnecessary(
+        qualifier: ts.EntityNameOrEntityNameExpression,
+        name: ts.Identifier
+    ): boolean {
         const namespaceSymbol = checker.getSymbolAtLocation(qualifier);
         if (namespaceSymbol === undefined || !symbolIsNamespaceInScope(namespaceSymbol)) {
             return false;
@@ -101,17 +108,21 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         return fromScope === undefined || symbolsAreEqual(accessedSymbol, fromScope);
     }
 
-    function getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {
+    function getSymbolInScope(
+        node: ts.Node,
+        flags: ts.SymbolFlags,
+        name: string
+    ): ts.Symbol | undefined {
         // TODO:PERF `getSymbolsInScope` gets a long list. Is there a better way?
         const scope = checker.getSymbolsInScope(node, flags);
-        return scope.find((scopeSymbol) => scopeSymbol.name === name);
+        return scope.find(scopeSymbol => scopeSymbol.name === name);
     }
 
     function symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
         const symbolDeclarations = symbol.getDeclarations();
         if (symbolDeclarations === undefined) {
             return false;
-        } else if (symbolDeclarations.some((decl) => namespacesInScope.some((ns) => ns === decl))) {
+        } else if (symbolDeclarations.some(decl => namespacesInScope.some(ns => ns === decl))) {
             return true;
         }
 
@@ -124,12 +135,20 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             inScope = checker.getExportSymbolOfSymbol(inScope);
             return accessed === inScope;
         }
-        return accessed === inScope ||
+        return (
+            accessed === inScope ||
             // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
-            Lint.Utils.arraysAreEqual(accessed.declarations, inScope.declarations, (a, b) => a === b);
+            Lint.Utils.arraysAreEqual(
+                accessed.declarations,
+                inScope.declarations,
+                (a, b) => a === b
+            )
+        );
     }
 }
 
 function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol | undefined {
-    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : undefined;
+    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)
+        ? checker.getAliasedSymbol(symbol)
+        : undefined;
 }

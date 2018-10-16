@@ -24,17 +24,19 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "restrict-plus-operands",
-        description: "When adding two variables, operands must both be of type number or of type string.",
+        description:
+            "When adding two variables, operands must both be of type number or of type string.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INVALID_TYPES_ERROR = "Operands of '+' operation must either be both strings or both numbers";
+    public static INVALID_TYPES_ERROR =
+        "Operands of '+' operation must either be both strings or both numbers";
     public static SUGGEST_TEMPLATE_LITERALS = ", consider using template literals";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -49,7 +51,10 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
             const rightType = getBaseTypeOfLiteralType(tc.getTypeAtLocation(node.right));
             if (leftType === "invalid" || rightType === "invalid" || leftType !== rightType) {
                 if (leftType === "string" || rightType === "string") {
-                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS);
+                    return ctx.addFailureAtNode(
+                        node,
+                        Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS
+                    );
                 } else {
                     return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
                 }
@@ -60,20 +65,26 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
 }
 
 function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid" {
-    if (isTypeFlagSet(type, ts.TypeFlags.StringLiteral) || isTypeFlagSet(type, ts.TypeFlags.String)) {
+    if (
+        isTypeFlagSet(type, ts.TypeFlags.StringLiteral) ||
+        isTypeFlagSet(type, ts.TypeFlags.String)
+    ) {
         return "string";
-    } else if (isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) || isTypeFlagSet(type, ts.TypeFlags.Number)) {
+    } else if (
+        isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) ||
+        isTypeFlagSet(type, ts.TypeFlags.Number)
+    ) {
         return "number";
     } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
     } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         // Compatibility for TypeScript pre-2.4, which used EnumLiteralType instead of LiteralType
-        getBaseTypeOfLiteralType((type as any as { baseType: ts.LiteralType }).baseType);
+        getBaseTypeOfLiteralType(((type as any) as { baseType: ts.LiteralType }).baseType);
     }
     return "invalid";
 }
 
 function allSame(array: string[]) {
-    return array.every((value) => value === array[0]);
+    return array.every(value => value === array[0]);
 }

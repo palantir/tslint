@@ -19,23 +19,23 @@
  * This script auto-generate test files for the `no-irregular-whitespace` rule
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
-import { IRREGULAR_WHITESPACE_REGEX } from '../../../src/rules/noIrregularWhitespaceRule';
+import { IRREGULAR_WHITESPACE_REGEX } from "../../../src/rules/noIrregularWhitespaceRule";
 
 const matches = IRREGULAR_WHITESPACE_REGEX.source
     .substring(1, IRREGULAR_WHITESPACE_REGEX.source.length - 2)
     .match(/\\\w+/g)
-    .filter(match => ['\\u2029', '\\u2028'].indexOf(match) === -1) // those seems to break the parser
+    .filter(match => ["\\u2029", "\\u2028"].indexOf(match) === -1) // those seems to break the parser
     .map(match => JSON.parse(`"${match}"`) as string);
 
 const lintFilePath = path.join(__dirname, "test.ts.lint");
 const lintFileContent = matches.reduce((acc: string, match) => {
-    return acc += `let ${match} foo;\n    ~    [Irregular whitespace not allowed]\n`;
-}, '');
+    return (acc += `let ${match} foo;\n    ~    [Irregular whitespace not allowed]\n`);
+}, "");
 fs.writeFileSync(lintFilePath, lintFileContent);
 
 const fixFilePath = path.join(__dirname, "test.ts.fix");
-const fixFileContent = 'let   foo;\n'.repeat(matches.length)
+const fixFileContent = "let   foo;\n".repeat(matches.length);
 fs.writeFileSync(fixFilePath, fixFileContent);

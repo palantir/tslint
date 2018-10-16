@@ -29,8 +29,9 @@ export class Formatter extends AbstractFormatter {
         descriptionDetails: Utils.dedent`
             Integrates with Visual Studio Online and Team Foundation Server by outputting errors
             as 'warning' logging commands.`,
-        sample: "##vso[task.logissue type=warning;sourcepath=myFile.ts;linenumber=1;columnnumber=14;code=semicolon;]Missing semicolon",
-        consumer: "machine",
+        sample:
+            "##vso[task.logissue type=warning;sourcepath=myFile.ts;linenumber=1;columnnumber=14;code=semicolon;]Missing semicolon",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 

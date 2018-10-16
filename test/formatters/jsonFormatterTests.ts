@@ -36,11 +36,24 @@ describe("JSON Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
             createFailure(
-                sourceFile, 0, maxPosition, "full failure", "full-name",
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
                 new Replacement(0, 0, ""),
-                "error"),
+                "error"
+            )
         ];
 
         /* tslint:disable:object-literal-sort-keys */
@@ -51,15 +64,15 @@ describe("JSON Formatter", () => {
                 startPosition: {
                     position: 0,
                     line: 0,
-                    character: 0,
+                    character: 0
                 },
                 endPosition: {
                     position: 1,
                     line: 0,
-                    character: 1,
+                    character: 1
                 },
                 ruleName: "first-name",
-                ruleSeverity: "ERROR",
+                ruleSeverity: "ERROR"
             },
             {
                 name: TEST_FILE,
@@ -67,15 +80,15 @@ describe("JSON Formatter", () => {
                 startPosition: {
                     position: maxPosition - 1,
                     line: 5,
-                    character: 2,
+                    character: 2
                 },
                 endPosition: {
                     position: maxPosition,
                     line: 6,
-                    character: 0,
+                    character: 0
                 },
                 ruleName: "last-name",
-                ruleSeverity: "ERROR",
+                ruleSeverity: "ERROR"
             },
             {
                 name: TEST_FILE,
@@ -83,21 +96,21 @@ describe("JSON Formatter", () => {
                 fix: {
                     innerLength: 0,
                     innerStart: 0,
-                    innerText: "",
+                    innerText: ""
                 },
                 startPosition: {
                     position: 0,
                     line: 0,
-                    character: 0,
+                    character: 0
                 },
                 endPosition: {
                     position: maxPosition,
                     line: 6,
-                    character: 0,
+                    character: 0
                 },
                 ruleName: "full-name",
-                ruleSeverity: "ERROR",
-            },
+                ruleSeverity: "ERROR"
+            }
         ];
         /* tslint:enable:object-literal-sort-keys */
 

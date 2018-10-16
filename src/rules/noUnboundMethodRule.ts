@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: `You may optionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods.`,
         options: {
             type: "string",
-            enum: [OPTION_IGNORE_STATIC],
+            enum: [OPTION_IGNORE_STATIC]
         },
         optionExamples: [true, [true, OPTION_IGNORE_STATIC]],
         rationale: Lint.Utils.dedent`
@@ -76,20 +76,21 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "functionality",
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
+    public static FAILURE_STRING =
+        "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(
             sourceFile,
             walk,
             {
-                ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1,
+                ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1
             },
-            program.getTypeChecker(),
+            program.getTypeChecker()
         );
     }
 }

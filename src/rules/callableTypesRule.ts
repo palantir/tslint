@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { getChildOfKind, isCallSignatureDeclaration, isIdentifier, isInterfaceDeclaration, isTypeLiteralNode } from "tsutils";
+import {
+    getChildOfKind,
+    isCallSignatureDeclaration,
+    isIdentifier,
+    isInterfaceDeclaration,
+    isTypeLiteralNode
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,13 +30,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "callable-types",
-        description: "An interface or literal type with just a call signature can be written as a function type.",
+        description:
+            "An interface or literal type with just a call signature can be written as a function type.",
         rationale: "style",
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",
         typescriptOnly: true,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -45,20 +52,30 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if ((isInterfaceDeclaration(node) && noSupertype(node) || isTypeLiteralNode(node))
-            && node.members.length === 1) {
+        if (
+            ((isInterfaceDeclaration(node) && noSupertype(node)) || isTypeLiteralNode(node)) &&
+            node.members.length === 1
+        ) {
             const member = node.members[0];
-            if (isCallSignatureDeclaration(member) &&
+            if (
+                isCallSignatureDeclaration(member) &&
                 // avoid bad parse
-                member.type !== undefined) {
+                member.type !== undefined
+            ) {
                 const suggestion = renderSuggestion(member, node, ctx.sourceFile);
-                const fixStart = node.kind === ts.SyntaxKind.TypeLiteral
-                    ? node.getStart(ctx.sourceFile)
-                    : getChildOfKind(node, ts.SyntaxKind.InterfaceKeyword)!.getStart(ctx.sourceFile);
+                const fixStart =
+                    node.kind === ts.SyntaxKind.TypeLiteral
+                        ? node.getStart(ctx.sourceFile)
+                        : getChildOfKind(node, ts.SyntaxKind.InterfaceKeyword)!.getStart(
+                              ctx.sourceFile
+                          );
                 ctx.addFailureAtNode(
                     member,
-                    Rule.FAILURE_STRING_FACTORY(node.kind === ts.SyntaxKind.TypeLiteral ? "Type literal" : "Interface", suggestion),
-                    Lint.Replacement.replaceFromTo(fixStart, node.end, suggestion),
+                    Rule.FAILURE_STRING_FACTORY(
+                        node.kind === ts.SyntaxKind.TypeLiteral ? "Type literal" : "Interface",
+                        suggestion
+                    ),
+                    Lint.Replacement.replaceFromTo(fixStart, node.end, suggestion)
                 );
             }
         }
@@ -78,10 +95,11 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
     return isIdentifier(expr) && expr.text === "Function";
 }
 
-function renderSuggestion(call: ts.CallSignatureDeclaration,
-                          parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
-                          sourceFile: ts.SourceFile): string {
-
+function renderSuggestion(
+    call: ts.CallSignatureDeclaration,
+    parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
+    sourceFile: ts.SourceFile
+): string {
     const start = call.getStart(sourceFile);
     const colonPos = call.type!.pos - 1 - start;
     const text = sourceFile.text.substring(start, call.end);
@@ -92,7 +110,10 @@ function renderSuggestion(call: ts.CallSignatureDeclaration,
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
         if (parent.typeParameters !== undefined) {
-            return `type${sourceFile.text.substring(parent.name.pos, parent.typeParameters.end + 1)} = ${suggestion}`;
+            return `type${sourceFile.text.substring(
+                parent.name.pos,
+                parent.typeParameters.end + 1
+            )} = ${suggestion}`;
         } else {
             return `type ${parent.name.text} = ${suggestion}`;
         }

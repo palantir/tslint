@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "ban-comma-operator",
         description: "Disallows the comma operator to be used.",
-        descriptionDetails: "[Read more about the comma operator here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator).",
+        descriptionDetails:
+            "[Read more about the comma operator here](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comma_Operator).",
         rationale: Lint.Utils.dedent`
             Using the comma operator can create a potential for many non-obvious bugs or lead to misunderstanding of code.
 
@@ -51,11 +52,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "",
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys max-line-length */
 
-    public static FAILURE_STRING = "Do not use comma operator here because it can be easily misunderstood or lead to unintended bugs.";
+    public static FAILURE_STRING =
+        "Do not use comma operator here because it can be easily misunderstood or lead to unintended bugs.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -64,7 +66,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.CommaToken && !isForLoopIncrementor(node)) {
+        if (
+            isBinaryExpression(node) &&
+            node.operatorToken.kind === ts.SyntaxKind.CommaToken &&
+            !isForLoopIncrementor(node)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
@@ -73,5 +79,8 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function isForLoopIncrementor(node: ts.Node) {
     const parent = node.parent!;
-    return parent.kind === ts.SyntaxKind.ForStatement && (parent as ts.ForStatement).incrementor === node;
+    return (
+        parent.kind === ts.SyntaxKind.ForStatement &&
+        (parent as ts.ForStatement).incrementor === node
+    );
 }

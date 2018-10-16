@@ -37,6 +37,6 @@ export const codeExamples = [
             const myFunc = function() {
                 // do something ...
             };
-        `,
-    },
+        `
+    }
 ];

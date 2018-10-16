@@ -33,6 +33,6 @@ export const codeExamples = [
             if (parseInt('_4711') === NaN) {
                 doSomething();
             }
-       `,
-    },
+       `
+    }
 ];

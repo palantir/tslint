@@ -1,3 +1,5 @@
 const x: any = 0;
-namespace x {}
+namespace x {
+
+}
 export = x;

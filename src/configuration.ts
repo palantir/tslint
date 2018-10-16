@@ -624,16 +624,16 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                    exclude: arrayify(raw.exclude).map(
-                        pattern =>
-                            dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern)
-                    )
-                }
+                      exclude: arrayify(raw.exclude).map(
+                          pattern =>
+                              dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern)
+                      )
+                  }
                 : {}),
             ...(raw.format !== undefined
                 ? {
-                    format: raw.format
-                }
+                      format: raw.format
+                  }
                 : {})
         };
     }

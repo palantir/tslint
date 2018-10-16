@@ -1,1 +1,1 @@
-var foo = 42
+var foo = 42;

@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { isAwaitExpression, isForOfStatement, isTypeFlagSet, isTypeReference, isUnionOrIntersectionType } from "tsutils";
+import {
+    isAwaitExpression,
+    isForOfStatement,
+    isTypeFlagSet,
+    isTypeReference,
+    isUnionOrIntersectionType
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -35,8 +41,8 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             listType: {
                 type: "array",
-                items: {type: "string"},
-            },
+                items: { type: "string" }
+            }
         },
         optionExamples: [true, [true, "Thenable"]],
         rationale: Lint.Utils.dedent`
@@ -48,7 +54,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "functionality",
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -56,7 +62,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_FOR_AWAIT_OF = "Invalid 'for-await-of' of a non-AsyncIterable value.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const promiseTypes = new Set(["Promise", ...this.ruleArguments as string[]]);
+        const promiseTypes = new Set(["Promise", ...(this.ruleArguments as string[])]);
         return this.applyWithFunction(sourceFile, walk, promiseTypes, program.getTypeChecker());
     }
 }
@@ -66,10 +72,16 @@ function walk(ctx: Lint.WalkContext<Set<string>>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, cb);
 
     function cb(node: ts.Node): void {
-        if (isAwaitExpression(node) && !containsType(tc.getTypeAtLocation(node.expression), isPromiseType)) {
+        if (
+            isAwaitExpression(node) &&
+            !containsType(tc.getTypeAtLocation(node.expression), isPromiseType)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-        } else if (isForOfStatement(node) && node.awaitModifier !== undefined &&
-                   !containsType(tc.getTypeAtLocation(node.expression), isAsyncIterable)) {
+        } else if (
+            isForOfStatement(node) &&
+            node.awaitModifier !== undefined &&
+            !containsType(tc.getTypeAtLocation(node.expression), isAsyncIterable)
+        ) {
             ctx.addFailureAtNode(node.expression, Rule.FAILURE_FOR_AWAIT_OF);
         }
         return ts.forEachChild(node, cb);
@@ -91,10 +103,10 @@ function containsType(type: ts.Type, predicate: (name: string) => boolean): bool
         return true;
     }
     if (isUnionOrIntersectionType(type)) {
-        return type.types.some((t) => containsType(t, predicate));
+        return type.types.some(t => containsType(t, predicate));
     }
     const bases = type.getBaseTypes();
-    return bases !== undefined && bases.some((t) => containsType(t, predicate));
+    return bases !== undefined && bases.some(t => containsType(t, predicate));
 }
 
 function isAsyncIterable(name: string) {

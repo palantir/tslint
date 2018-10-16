@@ -27,10 +27,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "",
         ruleName: "no-duplicate-switch-case",
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
-    public static readonly FAILURE_STRING_FACTORY = (text: string) => `Duplicate switch case: '${text}'.`;
+    public static readonly FAILURE_STRING_FACTORY = (text: string) =>
+        `Duplicate switch case: '${text}'.`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);

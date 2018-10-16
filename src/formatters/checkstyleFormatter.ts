@@ -35,7 +35,7 @@ export class Formatter extends AbstractFormatter {
                 <error line="1" column="14" severity="warning" message="Missing semicolon" source="failure.tslint.semicolon" />
             </file>
         </checkstyle>`,
-        consumer: "machine",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -43,8 +43,9 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
         if (failures.length !== 0) {
-            const failuresSorted = failures.sort(
-                (a, b) => a.getFileName().localeCompare(b.getFileName()));
+            const failuresSorted = failures.sort((a, b) =>
+                a.getFileName().localeCompare(b.getFileName())
+            );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const severity = failure.getRuleSeverity();
@@ -55,8 +56,10 @@ export class Formatter extends AbstractFormatter {
                     previousFilename = failure.getFileName();
                     output += `<file name="${this.escapeXml(failure.getFileName())}">`;
                 }
-                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
-                output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
+                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line +
+                    1}" `;
+                output += `column="${failure.getStartPosition().getLineAndCharacter().character +
+                    1}" `;
                 output += `severity="${severity}" `;
                 output += `message="${this.escapeXml(failure.getFailure())}" `;
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>

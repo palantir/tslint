@@ -38,20 +38,22 @@ export class Rule extends Lint.Rules.AbstractRule {
                 type: "array",
                 items: { type: "string" },
                 minLength: 1,
-                maxLength: 2,
-            },
+                maxLength: 2
+            }
         },
         optionsDescription: Lint.Utils.dedent`
             A list of \`["regex", "optional explanation here"]\`, which bans
             types that match \`regex\``,
         optionExamples: [[true, ["Object", "Use {} instead."], ["String"]]],
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(typeName: string, messageAddition?: string) {
-        return `Don't use '${typeName}' as a type.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
+        return `Don't use '${typeName}' as a type.${
+            messageAddition !== undefined ? ` ${messageAddition}` : ""
+        }`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -60,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function parseOption([pattern, message]: [string, string | undefined]): Option {
-    return {message, pattern: new RegExp(`^${pattern}$`)};
+    return { message, pattern: new RegExp(`^${pattern}$`) };
 }
 
 function walk(ctx: Lint.WalkContext<Option[]>) {

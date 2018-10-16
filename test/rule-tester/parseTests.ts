@@ -66,11 +66,17 @@ describe("Rule Test Parse", () => {
 
     describe("createMarkupFromErrors", () => {
         it("should generate correct markup", () => {
-            assert.strictEqual(parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5), testData.lintStr5);
+            assert.strictEqual(
+                parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5),
+                testData.lintStr5
+            );
         });
 
         it("should generate correct markup with nil-length errors", () => {
-            assert.strictEqual(parse.createMarkupFromErrors(testData.codeStr7, testData.resultErrs7), testData.lintStr7);
+            assert.strictEqual(
+                parse.createMarkupFromErrors(testData.codeStr7, testData.resultErrs7),
+                testData.lintStr7
+            );
         });
     });
 });

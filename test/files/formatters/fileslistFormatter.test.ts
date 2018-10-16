@@ -1,4 +1,4 @@
-module FilesListModule {
+namespace FilesListModule {
     export class FilesListClass {
         name: string;
 

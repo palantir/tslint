@@ -30,7 +30,7 @@ class TestLinter extends Linter {
 }
 
 const componentDeclaration = (templateUrl: string) =>
-`import { Component } from '@angular/component';
+    `import { Component } from '@angular/component';
 
 @Component({
   selector: 'foo-bar',
@@ -39,32 +39,39 @@ const componentDeclaration = (templateUrl: string) =>
 class SampleComponent {}
 `;
 
-const templateDeclaration =
-`
+const templateDeclaration = `
 <div>{{ foo }}</div>
 `;
 
-const templateDeclarationFixed =
-`
+const templateDeclarationFixed = `
 <div></div>
 `;
 
-const withWarningDeclaration =
-`
+const withWarningDeclaration = `
   console.log("This line will not pass linting with the default rule set");
 `;
 
 describe("Linter", () => {
-
     it("apply fixes to correct files", () => {
         const linter = new TestLinter({ fix: true });
         const componentFile = createTempFile("ts");
         const templateFile = createTempFile("ts");
         fs.writeFileSync(componentFile, componentDeclaration(templateFile));
         fs.writeFileSync(templateFile, templateDeclaration);
-        const sourceFile = createSourceFile(templateFile, `${templateDeclaration}`, ScriptTarget.ES2015);
+        const sourceFile = createSourceFile(
+            templateFile,
+            `${templateDeclaration}`,
+            ScriptTarget.ES2015
+        );
         const replacement = new Replacement(6, 9, "");
-        const failure = new RuleFailure(sourceFile, 6, 15, "Declaration doesn't exist", "foo-bar", replacement);
+        const failure = new RuleFailure(
+            sourceFile,
+            6,
+            15,
+            "Declaration doesn't exist",
+            "foo-bar",
+            replacement
+        );
         linter.applyFixesHelper(componentFile, componentDeclaration(templateFile), [failure]);
         assert.equal(fs.readFileSync(templateFile, "utf-8"), templateDeclarationFixed);
     });
@@ -74,7 +81,7 @@ describe("Linter", () => {
         config.rules.set("no-console", {
             ruleArguments: ["log"],
             ruleName: "no-console",
-            ruleSeverity: "warning",
+            ruleSeverity: "warning"
         });
 
         const linter = new TestLinter({ fix: false });
@@ -92,7 +99,7 @@ describe("Linter", () => {
         config.rules.set("no-console", {
             ruleArguments: ["log"],
             ruleName: "no-console",
-            ruleSeverity: "warning",
+            ruleSeverity: "warning"
         });
 
         const linter = new TestLinter({ fix: false, quiet: true });

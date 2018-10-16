@@ -25,9 +25,11 @@ import { arrayify, camelize, dedent, find } from "./utils";
 const CORE_RULES_DIRECTORY = path.resolve(__dirname, "rules");
 const cachedRules = new Map<string, RuleConstructor | "not-found">();
 
-export function loadRules(ruleOptionsList: IOptions[],
-                          rulesDirectories?: string | string[],
-                          isJs = false): IRule[] {
+export function loadRules(
+    ruleOptionsList: IOptions[],
+    rulesDirectories?: string | string[],
+    isJs = false
+): IRule[] {
     const rules: IRule[] = [];
     const notFoundRules: string[] = [];
     const notAllowedInJsRules: string[] = [];
@@ -51,7 +53,9 @@ export function loadRules(ruleOptionsList: IOptions[],
             }
 
             if (Rule.metadata !== undefined && Boolean(Rule.metadata.deprecationMessage)) {
-                showWarningOnce(`${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`);
+                showWarningOnce(
+                    `${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`
+                );
             }
         }
     }
@@ -83,13 +87,17 @@ export function loadRules(ruleOptionsList: IOptions[],
 }
 
 /** @internal private API */
-export function findRule(name: string, rulesDirectories?: string | string[]): RuleConstructor | undefined {
+export function findRule(
+    name: string,
+    rulesDirectories?: string | string[]
+): RuleConstructor | undefined {
     const camelizedName = transformName(name);
     // first check for core rules
     const Rule = loadCachedRule(CORE_RULES_DIRECTORY, camelizedName);
-    return Rule !== undefined ? Rule :
-        // then check for rules within the first level of rulesDirectory
-        find(arrayify(rulesDirectories), (dir) => loadCachedRule(dir, camelizedName, true));
+    return Rule !== undefined
+        ? Rule
+        : // then check for rules within the first level of rulesDirectory
+          find(arrayify(rulesDirectories), dir => loadCachedRule(dir, camelizedName, true));
 }
 
 function transformName(name: string): string {
@@ -117,7 +125,11 @@ function loadRule(directory: string, ruleName: string): RuleConstructor | "not-f
     return (require(ruleFullPath) as { Rule: RuleConstructor }).Rule;
 }
 
-function loadCachedRule(directory: string, ruleName: string, isCustomPath?: boolean): RuleConstructor | undefined {
+function loadCachedRule(
+    directory: string,
+    ruleName: string,
+    isCustomPath?: boolean
+): RuleConstructor | undefined {
     // use cached value if available
     const fullPath = path.join(directory, ruleName);
     const cachedRule = cachedRules.get(fullPath);

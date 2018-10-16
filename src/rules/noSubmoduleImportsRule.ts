@@ -33,15 +33,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: {
-                type: "string",
-            },
+                type: "string"
+            }
         },
-        optionExamples: [true, [true, "rxjs", "@angular/platform-browser", "@angular/core/testing"]],
+        optionExamples: [
+            true,
+            [true, "rxjs", "@angular/platform-browser", "@angular/core/testing"]
+        ],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
-    public static FAILURE_STRING = "Submodule import paths from this package are disallowed; import from the root instead";
+    public static FAILURE_STRING =
+        "Submodule import paths from this package are disallowed; import from the root instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.ruleArguments);
@@ -50,9 +54,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<string[]>) {
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
-        if (!ts.isExternalModuleNameRelative(name.text) &&
+        if (
+            !ts.isExternalModuleNameRelative(name.text) &&
             isSubmodulePath(name.text) &&
-            !isWhitelisted(name.text, ctx.options)) {
+            !isWhitelisted(name.text, ctx.options)
+        ) {
             ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
         }
     }

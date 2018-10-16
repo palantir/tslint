@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "use-isnan",
-        description: "Enforces use of the `isNaN()` function to check for NaN references instead of a comparison to the `NaN` constant.",
+        description:
+            "Enforces use of the `isNaN()` function to check for NaN references instead of a comparison to the `NaN` constant.",
         rationale: Lint.Utils.dedent`
             Since \`NaN !== NaN\`, comparisons with regular operators will produce unexpected results.
             So, instead of \`if (myVar === NaN)\`, do \`if (isNaN(myVar))\`.`,
@@ -34,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -58,7 +59,10 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.EqualsEqualsEqualsToken:
                 case ts.SyntaxKind.ExclamationEqualsEqualsToken:
                     if (isExpressionNaN(node.right) || isExpressionNaN(node.left)) {
-                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING + node.getText(ctx.sourceFile));
+                        ctx.addFailureAtNode(
+                            node,
+                            Rule.FAILURE_STRING + node.getText(ctx.sourceFile)
+                        );
                     }
             }
         }

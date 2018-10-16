@@ -33,13 +33,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: {
-                type: "string",
+                type: "string"
             },
-            minLength: 1,
+            minLength: 1
         },
         optionExamples: [true, [true, "rxjs", "lodash"]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
     public static FAILURE_STRING = "This import is blacklisted, import a submodule instead";

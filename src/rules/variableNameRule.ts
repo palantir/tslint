@@ -23,9 +23,19 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { isLowerCase, isUpperCase } from "../utils";
 
-const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
+const BANNED_KEYWORDS = [
+    "any",
+    "Number",
+    "number",
+    "String",
+    "string",
+    "Boolean",
+    "boolean",
+    "Undefined",
+    "undefined"
+];
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
-const bannedKeywordsStr = BANNED_KEYWORDS.map((kw) => `\`${kw}\``).join(", ");
+const bannedKeywordsStr = BANNED_KEYWORDS.map(kw => `\`${kw}\``).join(", ");
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
@@ -58,15 +68,15 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_TRAILING_UNDERSCORE,
                     OPTION_ALLOW_PASCAL_CASE,
                     OPTION_ALLOW_SNAKE_CASE,
-                    OPTION_BAN_KEYWORDS,
-                ],
+                    OPTION_BAN_KEYWORDS
+                ]
             },
             minLength: 0,
-            maxLength: 5,
+            maxLength: 5
         },
         optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
@@ -93,7 +103,7 @@ function parseOptions(ruleArguments: string[]): Options {
         leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
         trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
-        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
+        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE)
     };
 
     function hasOption(name: string): boolean {
@@ -111,7 +121,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     handleVariableNameKeyword(name);
                     // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
                     // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
+                    if (
+                        node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern ||
+                        propertyName !== undefined
+                    ) {
                         handleVariableNameFormat(name, initializer);
                     }
                 }
@@ -128,7 +141,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.Parameter:
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.VariableDeclaration: {
-                const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
+                const { name, initializer } = node as
+                    | ts.ParameterDeclaration
+                    | ts.PropertyDeclaration
+                    | ts.VariableDeclaration;
                 if (name.kind === ts.SyntaxKind.Identifier) {
                     handleVariableNameFormat(name, initializer);
                     // do not check property declarations for keywords, they are allowed to be keywords

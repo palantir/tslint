@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isBlock, isExpressionStatement, isIfStatement, isSameLine } from "tsutils";
+import {
+    isBinaryExpression,
+    isBlock,
+    isExpressionStatement,
+    isIfStatement,
+    isSameLine
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -37,11 +43,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: `If \`${OPTION_CHECK_ELSE_IF}\` is specified, the rule also checks nested if-else-if statements.`,
         options: {
             type: "string",
-            enum: [OPTION_CHECK_ELSE_IF],
+            enum: [OPTION_CHECK_ELSE_IF]
         },
         optionExamples: [true, [true, OPTION_CHECK_ELSE_IF]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -51,20 +57,24 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
-            checkElseIf: this.ruleArguments.indexOf(OPTION_CHECK_ELSE_IF) !== -1,
+            checkElseIf: this.ruleArguments.indexOf(OPTION_CHECK_ELSE_IF) !== -1
         });
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { checkElseIf } } = ctx;
+    const {
+        sourceFile,
+        options: { checkElseIf }
+    } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isIfStatement(node)) {
             const assigned = detectAssignment(node, sourceFile, checkElseIf);
             if (assigned !== undefined) {
                 ctx.addFailureAtNode(
                     node.getChildAt(0, sourceFile),
-                    Rule.FAILURE_STRING(assigned.getText(sourceFile)));
+                    Rule.FAILURE_STRING(assigned.getText(sourceFile))
+                );
             }
             if (assigned !== undefined || !checkElseIf) {
                 // Be careful not to fail again for the "else if"
@@ -92,10 +102,10 @@ function detectAssignment(
     statement: ts.Statement,
     sourceFile: ts.SourceFile,
     checkElseIf: boolean,
-    inElse?: boolean,
+    inElse?: boolean
 ): ts.Expression | undefined {
     if (isIfStatement(statement)) {
-        if (inElse === false || !checkElseIf && inElse || statement.elseStatement === undefined) {
+        if (inElse === false || (!checkElseIf && inElse) || statement.elseStatement === undefined) {
             return undefined;
         }
         const then = detectAssignment(statement.thenStatement, sourceFile, checkElseIf, false);
@@ -109,8 +119,15 @@ function detectAssignment(
             ? detectAssignment(statement.statements[0], sourceFile, checkElseIf, inElse)
             : undefined;
     } else if (isExpressionStatement(statement) && isBinaryExpression(statement.expression)) {
-        const { operatorToken: { kind }, left, right } = statement.expression;
-        return kind === ts.SyntaxKind.EqualsToken && isSameLine(sourceFile, right.getStart(sourceFile), right.end) ? left : undefined;
+        const {
+            operatorToken: { kind },
+            left,
+            right
+        } = statement.expression;
+        return kind === ts.SyntaxKind.EqualsToken &&
+            isSameLine(sourceFile, right.getStart(sourceFile), right.end)
+            ? left
+            : undefined;
     } else {
         return undefined;
     }

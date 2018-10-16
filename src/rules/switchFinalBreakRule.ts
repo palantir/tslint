@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { endsControlFlow, isBlock, isBreakStatement, isLabeledStatement, isSwitchStatement } from "tsutils";
+import {
+    endsControlFlow,
+    isBlock,
+    isBreakStatement,
+    isLabeledStatement,
+    isSwitchStatement
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -26,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "switch-final-break",
-        description: "Checks whether the final clause of a switch statement ends in \`break;\`.",
+        description: "Checks whether the final clause of a switch statement ends in `break;`.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             If no options are passed, a final 'break;' is forbidden.
@@ -34,21 +40,23 @@ export class Rule extends Lint.Rules.AbstractRule {
             unless control flow is escaped in some other way.`,
         options: {
             type: "string",
-            enum: [
-                OPTION_ALWAYS,
-            ],
+            enum: [OPTION_ALWAYS]
         },
         optionExamples: [true, [true, OPTION_ALWAYS]],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_ALWAYS = "Final clause in 'switch' statement should end with 'break;'.";
-    public static FAILURE_STRING_NEVER = "Final clause in 'switch' statement should not end with 'break;'.";
+    public static FAILURE_STRING_ALWAYS =
+        "Final clause in 'switch' statement should end with 'break;'.";
+    public static FAILURE_STRING_NEVER =
+        "Final clause in 'switch' statement should not end with 'break;'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { always: this.ruleArguments.indexOf(OPTION_ALWAYS) !== -1 });
+        return this.applyWithFunction(sourceFile, walk, {
+            always: this.ruleArguments.indexOf(OPTION_ALWAYS) !== -1
+        });
     }
 }
 
@@ -57,7 +65,10 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { always } } = ctx;
+    const {
+        sourceFile,
+        options: { always }
+    } = ctx;
     ts.forEachChild(sourceFile, function cb(node) {
         if (isSwitchStatement(node)) {
             check(node);
@@ -67,11 +78,17 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
     function check(node: ts.SwitchStatement): void {
         const clause = last(node.caseBlock.clauses);
-        if (clause === undefined) { return; }
+        if (clause === undefined) {
+            return;
+        }
 
         if (always) {
             if (!endsControlFlow(clause)) {
-                ctx.addFailureAtNode(clause.getChildAt(0), Rule.FAILURE_STRING_ALWAYS, createAddFix(clause));
+                ctx.addFailureAtNode(
+                    clause.getChildAt(0),
+                    Rule.FAILURE_STRING_ALWAYS,
+                    createAddFix(clause)
+                );
             }
             return;
         }
@@ -89,7 +106,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             }
         }
 
-        ctx.addFailureAtNode(lastStatement, Rule.FAILURE_STRING_NEVER, createRemoveFix(lastStatement));
+        ctx.addFailureAtNode(
+            lastStatement,
+            Rule.FAILURE_STRING_NEVER,
+            createRemoveFix(lastStatement)
+        );
     }
 
     function createAddFix(clause: ts.CaseClause | ts.DefaultClause) {
@@ -107,7 +128,6 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     function createRemoveFix(lastStatement: ts.BreakStatement) {
         return Lint.Replacement.replaceFromTo(lastStatement.getFullStart(), lastStatement.end, "");
     }
-
 }
 
 function getLastStatement(clause: ts.CaseClause | ts.DefaultClause): ts.Statement | undefined {
@@ -116,7 +136,8 @@ function getLastStatement(clause: ts.CaseClause | ts.DefaultClause): ts.Statemen
     }
 
     const block = clause.statements[0];
-    const statements = clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
+    const statements =
+        clause.statements.length === 1 && isBlock(block) ? block.statements : clause.statements;
 
     return last(statements);
 }

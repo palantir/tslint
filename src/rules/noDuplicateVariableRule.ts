@@ -40,14 +40,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: `You can specify \`"${OPTION_CHECK_PARAMETERS}"\` to check for variables with the same name as a parameter.`,
         options: {
             type: "string",
-            enum: [OPTION_CHECK_PARAMETERS],
+            enum: [OPTION_CHECK_PARAMETERS]
         },
-        optionExamples: [
-            true,
-            [true, OPTION_CHECK_PARAMETERS],
-        ],
+        optionExamples: [true, [true, OPTION_CHECK_PARAMETERS]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -56,9 +53,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
-            parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== - 1,
-        }));
+        return this.applyWithWalker(
+            new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
+                parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== -1
+            })
+        );
     }
 }
 
@@ -76,7 +75,10 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
             }
             if (this.options.parameters && utils.isParameterDeclaration(node)) {
                 this.handleBindingName(node.name, false);
-            } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
+            } else if (
+                utils.isVariableDeclarationList(node) &&
+                !utils.isBlockScopedVariableDeclarationList(node)
+            ) {
                 for (const variable of node.declarations) {
                     this.handleBindingName(variable.name, true);
                 }

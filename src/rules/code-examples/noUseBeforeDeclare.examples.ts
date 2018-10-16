@@ -66,6 +66,6 @@ export const codeExamples = [
             import _, { map, foldl } from "./underscore";
             import * as foo3 from "./lib";
             import "./lib";
-        `,
-    },
+        `
+    }
 ];

@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-floating-promises",
         description: "Promises returned by functions must be handled appropriately.",
-        descriptionDetails: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
+        descriptionDetails:
+            "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
         optionsDescription: Lint.Utils.dedent`
             A list of \'string\' names of any additional classes that should also be handled as Promises.
         `,
@@ -33,8 +34,8 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             listType: {
                 type: "array",
-                items: {type: "string"},
-            },
+                items: { type: "string" }
+            }
         },
         optionExamples: [true, [true, "JQueryPromise"]],
         rationale: Lint.Utils.dedent`
@@ -47,7 +48,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "functionality",
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -57,8 +58,8 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithFunction(
             sourceFile,
             walk,
-            ["Promise", ...this.ruleArguments as string[]],
-            program.getTypeChecker(),
+            ["Promise", ...(this.ruleArguments as string[])],
+            program.getTypeChecker()
         );
     }
 }
@@ -67,9 +68,11 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isExpressionStatement(node)) {
             const { expression } = node;
-            if (isCallExpression(expression) &&
+            if (
+                isCallExpression(expression) &&
                 !isPromiseCatchCall(expression) &&
-                !isPromiseThenCallWithRejectionHandler(expression)) {
+                !isPromiseThenCallWithRejectionHandler(expression)
+            ) {
                 const { symbol } = tc.getTypeAtLocation(expression);
                 if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
                     ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
@@ -81,11 +84,16 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
 }
 
 function isPromiseCatchCall(expression: ts.CallExpression): boolean {
-    return isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch";
+    return (
+        isPropertyAccessExpression(expression.expression) &&
+        expression.expression.name.text === "catch"
+    );
 }
 
 function isPromiseThenCallWithRejectionHandler(expression: ts.CallExpression): boolean {
-    return isPropertyAccessExpression(expression.expression) &&
+    return (
+        isPropertyAccessExpression(expression.expression) &&
         expression.expression.name.text === "then" &&
-        expression.arguments.length >= 2;
+        expression.arguments.length >= 2
+    );
 }

@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             TypeScript will compile them to environment-specific forms as needed.
         `,
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 

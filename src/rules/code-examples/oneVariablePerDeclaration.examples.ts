@@ -30,10 +30,11 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             const foo = 1, bar = '2';
-       `,
+       `
     },
     {
-        description: "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+        description:
+            "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
         config: Lint.Utils.dedent`
             "rules": { "one-variable-per-declaration": [true, "ignore-for-loop"] }
         `,
@@ -41,6 +42,6 @@ export const codeExamples = [
             for (let i = 0, j = 10; i < 10; i++) {
                 doSomething(j, i);
             }
-        `,
-    },
+        `
+    }
 ];

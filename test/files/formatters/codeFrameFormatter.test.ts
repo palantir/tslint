@@ -1,4 +1,4 @@
-module CodeFrameModule {
+namespace CodeFrameModule {
     export class CodeFrameClass {
         private name: string;
 

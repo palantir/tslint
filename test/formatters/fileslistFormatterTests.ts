@@ -35,7 +35,7 @@ describe("Files-list Formatter", () => {
         // this part really doesn't matter, as long as we get some failure`
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, 32, 36, "last failure", "last-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "last failure", "last-name", undefined, "error")
         ];
 
         // we only print file-names in this formatter

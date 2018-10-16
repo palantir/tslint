@@ -32,8 +32,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-inferrable-types",
-        description: "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
-        rationale: "Explicit types where they can be easily inferred by the compiler make code more verbose.",
+        description:
+            "Disallows explicit type declarations for variables or parameters initialized to a number, string, or boolean.",
+        rationale:
+            "Explicit types where they can be easily inferred by the compiler make code more verbose.",
         optionsDescription: Lint.Utils.dedent`
             Two arguments may be optionally provided:
 
@@ -44,19 +46,19 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES],
+                enum: [OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES]
             },
             minLength: 0,
-            maxLength: 2,
+            maxLength: 2
         },
         hasFix: true,
         optionExamples: [
             true,
             [true, OPTION_IGNORE_PARMS],
-            [true, OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES],
+            [true, OPTION_IGNORE_PARMS, OPTION_IGNORE_PROPERTIES]
         ],
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -65,10 +67,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInferrableTypesWalker(sourceFile, this.ruleName, {
-            ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARMS) !== -1,
-            ignoreProperties: this.ruleArguments.indexOf(OPTION_IGNORE_PROPERTIES) !== -1,
-        }));
+        return this.applyWithWalker(
+            new NoInferrableTypesWalker(sourceFile, this.ruleName, {
+                ignoreParameters: this.ruleArguments.indexOf(OPTION_IGNORE_PARMS) !== -1,
+                ignoreProperties: this.ruleArguments.indexOf(OPTION_IGNORE_PROPERTIES) !== -1
+            })
+        );
     }
 }
 
@@ -77,10 +81,17 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (shouldCheck(node, this.options)) {
                 const { name, type, initializer } = node;
-                if (type !== undefined && initializer !== undefined
-                    && typeIsInferrable(type.kind, initializer)) {
+                if (
+                    type !== undefined &&
+                    initializer !== undefined &&
+                    typeIsInferrable(type.kind, initializer)
+                ) {
                     const fix = Lint.Replacement.deleteFromTo(name.end, type.end);
-                    this.addFailureAtNode(type, Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)!), fix);
+                    this.addFailureAtNode(
+                        type,
+                        Rule.FAILURE_STRING_FACTORY(ts.tokenToString(type.kind)!),
+                        fix
+                    );
                 }
             }
             return ts.forEachChild(node, cb);
@@ -91,14 +102,16 @@ class NoInferrableTypesWalker extends Lint.AbstractWalker<Options> {
 
 function shouldCheck(
     node: ts.Node,
-    { ignoreParameters, ignoreProperties }: Options,
+    { ignoreParameters, ignoreProperties }: Options
 ): node is ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration {
     switch (node.kind) {
         case ts.SyntaxKind.Parameter:
-            return !ignoreParameters &&
+            return (
+                !ignoreParameters &&
                 !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword) &&
                 // "ignore-properties" also works for parameter properties
-                !(ignoreProperties && node.modifiers !== undefined);
+                !(ignoreProperties && node.modifiers !== undefined)
+            );
         case ts.SyntaxKind.PropertyDeclaration:
             return !ignoreProperties && !hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword);
         case ts.SyntaxKind.VariableDeclaration:
@@ -111,7 +124,10 @@ function shouldCheck(
 function typeIsInferrable(type: ts.SyntaxKind, initializer: ts.Expression): boolean {
     switch (type) {
         case ts.SyntaxKind.BooleanKeyword:
-            return initializer.kind === ts.SyntaxKind.TrueKeyword || initializer.kind === ts.SyntaxKind.FalseKeyword;
+            return (
+                initializer.kind === ts.SyntaxKind.TrueKeyword ||
+                initializer.kind === ts.SyntaxKind.FalseKeyword
+            );
         case ts.SyntaxKind.NumberKeyword:
             return Lint.isNumeric(initializer);
         case ts.SyntaxKind.StringKeyword:

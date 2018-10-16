@@ -24,12 +24,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-debugger",
         description: "Disallows `debugger` statements.",
-        rationale: "In general, \`debugger\` statements aren't appropriate for production code.",
+        rationale: "In general, `debugger` statements aren't appropriate for production code.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 

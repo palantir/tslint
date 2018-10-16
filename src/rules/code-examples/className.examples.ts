@@ -31,6 +31,6 @@ export const codeExamples = [
         fail: Lint.Utils.dedent`
             class myClass { }
             interface myInterface { }
-       `,
-    },
+       `
+    }
 ];

@@ -25,30 +25,45 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "eofline",
         description: "Ensures the file ends with a newline.",
         descriptionDetails: "Fix for single-line files is not supported.",
-        rationale: "It is a [standard convention](https://stackoverflow.com/q/729692/3124288) to end files with a newline.",
+        rationale:
+            "It is a [standard convention](https://stackoverflow.com/q/729692/3124288) to end files with a newline.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         hasFix: true,
         type: "maintainability",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
     public static FAILURE_STRING = "file should end with a newline";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const length = sourceFile.text.length;
-        if (length === 0 || // if the file is empty, it "ends with a newline", so don't return a failure
-            sourceFile.text[length - 1] === "\n") {
+        if (
+            length === 0 || // if the file is empty, it "ends with a newline", so don't return a failure
+            sourceFile.text[length - 1] === "\n"
+        ) {
             return [];
         }
 
         let fix: Lint.Fix | undefined;
         const lines = sourceFile.getLineStarts();
         if (lines.length > 1) {
-            fix = Lint.Replacement.appendText(length, sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n");
+            fix = Lint.Replacement.appendText(
+                length,
+                sourceFile.text[lines[1] - 2] === "\r" ? "\r\n" : "\n"
+            );
         }
 
-        return [new Lint.RuleFailure(sourceFile, length, length, Rule.FAILURE_STRING, this.ruleName, fix)];
+        return [
+            new Lint.RuleFailure(
+                sourceFile,
+                length,
+                length,
+                Rule.FAILURE_STRING,
+                this.ruleName,
+                fix
+            )
+        ];
     }
 }

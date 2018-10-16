@@ -23,12 +23,12 @@ describe("no-implicit-dependencies", () => {
     it("assumes empty package.json if not found", () => {
         const linter = new Linter({
             fix: false,
-            formatter: "prose",
+            formatter: "prose"
         });
         const config = parseConfigFile({
             rules: {
-                "no-implicit-dependencies": true,
-            },
+                "no-implicit-dependencies": true
+            }
         });
         linter.lint(
             "/builtin-only.ts",
@@ -36,7 +36,7 @@ describe("no-implicit-dependencies", () => {
                 import * as fs from 'fs';
                 const path = require('path');
             `,
-            config,
+            config
         );
         assert.equal(linter.getResult().errorCount, 0, "no error expected");
 
@@ -45,7 +45,7 @@ describe("no-implicit-dependencies", () => {
             `
                 import {assert} from "chai";
             `,
-            config,
+            config
         );
         assert.equal(linter.getResult().errorCount, 1, "expected one error");
     });

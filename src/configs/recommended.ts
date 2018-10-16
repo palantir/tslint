@@ -17,57 +17,57 @@
 
 export const rules = {
     "adjacent-overload-signatures": true,
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-        ],
+    align: {
+        options: ["parameters", "statements"]
     },
     "array-type": {
-        options: ["array-simple"],
+        options: ["array-simple"]
     },
     "arrow-parens": true,
     "arrow-return-shorthand": true,
     "ban-types": {
         options: [
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
-            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+            [
+                "Function",
+                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
+            ],
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
-            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
-        ],
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
+        ]
     },
     "callable-types": true,
     "class-name": true,
     "comment-format": {
-        options: ["check-space"],
+        options: ["check-space"]
     },
-    "curly": true,
+    curly: true,
     "cyclomatic-complexity": false,
-    "eofline": true,
-    "forin": true,
+    eofline: true,
+    forin: true,
     "import-spacing": true,
-    "indent":  {
-        options: ["spaces"],
+    indent: {
+        options: ["spaces"]
     },
     "interface-name": {
-        options: ["always-prefix"],
+        options: ["always-prefix"]
     },
     "interface-over-type-literal": true,
     "jsdoc-format": true,
     "label-position": true,
     "max-classes-per-file": {
-        options: [1],
+        options: [1]
     },
     "max-line-length": {
-        options: [120],
+        options: [120]
     },
     "member-access": true,
     "member-ordering": {
         options: {
-            order: "statics-first",
-        },
+            order: "statics-first"
+        }
     },
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
@@ -103,7 +103,7 @@ export const rules = {
     "no-var-keyword": true,
     "no-var-requires": true,
     "object-literal-key-quotes": {
-        options: ["consistent-as-needed"],
+        options: ["consistent-as-needed"]
     },
     "object-literal-shorthand": true,
     "object-literal-sort-keys": true,
@@ -113,36 +113,30 @@ export const rules = {
             "check-else",
             "check-finally",
             "check-open-brace",
-            "check-whitespace",
-        ],
+            "check-whitespace"
+        ]
     },
     "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
+        options: ["ignore-for-loop"]
     },
     "only-arrow-functions": {
-        options: [
-            "allow-declarations",
-            "allow-named-functions",
-        ],
+        options: ["allow-declarations", "allow-named-functions"]
     },
     "ordered-imports": {
         options: {
             "import-sources-order": "case-insensitive",
             "module-source-path": "full",
-            "named-imports-order": "case-insensitive",
-        },
+            "named-imports-order": "case-insensitive"
+        }
     },
     "prefer-const": true,
     "prefer-for-of": true,
-    "quotemark": {
-        options: [
-            "double",
-            "avoid-escape",
-        ],
+    quotemark: {
+        options: ["double", "avoid-escape"]
     },
-    "radix": true,
-    "semicolon": {
-        options: ["always"],
+    radix: true,
+    semicolon: {
+        options: ["always"]
     },
     "space-before-function-paren": {
         options: {
@@ -150,78 +144,71 @@ export const rules = {
             asyncArrow: "always",
             constructor: "never",
             method: "never",
-            named: "never",
-        },
+            named: "never"
+        }
     },
     "trailing-comma": {
         options: {
             esSpecCompliant: true,
             multiline: "always",
-            singleline: "never",
-        },
+            singleline: "never"
+        }
     },
     "triple-equals": {
-        options: ["allow-null-check"],
+        options: ["allow-null-check"]
     },
-    "typedef": false,
+    typedef: false,
     "typedef-whitespace": {
         options: [
             {
                 "call-signature": "nospace",
                 "index-signature": "nospace",
-                "parameter": "nospace",
+                parameter: "nospace",
                 "property-declaration": "nospace",
-                "variable-declaration": "nospace",
+                "variable-declaration": "nospace"
             },
             {
                 "call-signature": "onespace",
                 "index-signature": "onespace",
-                "parameter": "onespace",
+                parameter: "onespace",
                 "property-declaration": "onespace",
-                "variable-declaration": "onespace",
-            },
-        ],
+                "variable-declaration": "onespace"
+            }
+        ]
     },
     "typeof-compare": false, // deprecated in TSLint 5.9.0
     "unified-signatures": true,
     "use-isnan": true,
     "variable-name": {
-        options: [
-            "ban-keywords",
-            "check-format",
-            "allow-pascal-case",
-        ],
+        options: ["ban-keywords", "check-format", "allow-pascal-case"]
     },
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",
             "check-operator",
             "check-separator",
             "check-type",
-            "check-typecast",
-        ],
-    },
+            "check-typecast"
+        ]
+    }
 };
 export const jsRules = {
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-        ],
+    align: {
+        options: ["parameters", "statements"]
     },
     "class-name": true,
-    "curly": true,
-    "eofline": true,
-    "forin": true,
+    curly: true,
+    eofline: true,
+    forin: true,
     "import-spacing": true,
-    "indent":  {
-        options: ["spaces"],
+    indent: {
+        options: ["spaces"]
     },
     "jsdoc-format": true,
     "label-position": true,
     "max-line-length": {
-        options: [120],
+        options: [120]
     },
     "new-parens": true,
     "no-arg": true,
@@ -251,21 +238,18 @@ export const jsRules = {
             "check-else",
             "check-finally",
             "check-open-brace",
-            "check-whitespace",
-        ],
+            "check-whitespace"
+        ]
     },
     "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
+        options: ["ignore-for-loop"]
     },
-    "quotemark": {
-        options: [
-            "double",
-            "avoid-escape",
-        ],
+    quotemark: {
+        options: ["double", "avoid-escape"]
     },
-    "radix": true,
-    "semicolon": {
-        options: ["always"],
+    radix: true,
+    semicolon: {
+        options: ["always"]
     },
     "space-before-function-paren": {
         options: {
@@ -273,34 +257,30 @@ export const jsRules = {
             asyncArrow: "always",
             constructor: "never",
             method: "never",
-            named: "never",
-        },
+            named: "never"
+        }
     },
     "trailing-comma": {
         options: {
             multiline: "always",
-            singleline: "never",
-        },
+            singleline: "never"
+        }
     },
     "triple-equals": {
-        options: ["allow-null-check"],
+        options: ["allow-null-check"]
     },
     "use-isnan": true,
     "variable-name": {
-        options: [
-            "ban-keywords",
-            "check-format",
-            "allow-pascal-case",
-        ],
+        options: ["ban-keywords", "check-format", "allow-pascal-case"]
     },
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",
             "check-operator",
             "check-separator",
             "check-type",
-            "check-typecast",
-        ],
-    },
+            "check-typecast"
+        ]
+    }
 };

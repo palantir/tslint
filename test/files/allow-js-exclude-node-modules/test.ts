@@ -1,2 +1,2 @@
-import * as dependency from 'dependency';
+import * as dependency from "dependency";
 console.log(dependency);

@@ -31,7 +31,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-const",
-        description: "Requires that variable declarations use `const` instead of `let` and `var` if possible.",
+        description:
+            "Requires that variable declarations use `const` instead of `let` and `var` if possible.",
         descriptionDetails: Lint.Utils.dedent`
             If a variable is only assigned to once when it is declared, it should be declared using 'const'`,
         hasFix: true,
@@ -45,27 +46,28 @@ export class Rule extends Lint.Rules.AbstractRule {
             properties: {
                 destructuring: {
                     type: "string",
-                    enum: [OPTION_DESTRUCTURING_ALL, OPTION_DESTRUCTURING_ANY],
-                },
-            },
+                    enum: [OPTION_DESTRUCTURING_ALL, OPTION_DESTRUCTURING_ANY]
+                }
+            }
         },
-        optionExamples: [
-            true,
-            [true, {destructuring: OPTION_DESTRUCTURING_ALL}],
-        ],
+        optionExamples: [true, [true, { destructuring: OPTION_DESTRUCTURING_ALL }]],
         type: "maintainability",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(identifier: string, blockScoped: boolean) {
-        return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${blockScoped ? "let" : "var"}'.`;
+        return `Identifier '${identifier}' is never reassigned; use 'const' instead of '${
+            blockScoped ? "let" : "var"
+        }'.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            destructuringAll: this.ruleArguments.length !== 0 &&
-                (this.ruleArguments[0] as {destructuring?: string}).destructuring === OPTION_DESTRUCTURING_ALL,
+            destructuringAll:
+                this.ruleArguments.length !== 0 &&
+                (this.ruleArguments[0] as { destructuring?: string }).destructuring ===
+                    OPTION_DESTRUCTURING_ALL
         };
         const preferConstWalker = new PreferConstWalker(sourceFile, this.ruleName, options);
         return this.applyWithWalker(preferConstWalker);
@@ -81,14 +83,18 @@ class Scope {
         this.functionScope = functionScope === undefined ? this : functionScope;
     }
 
-    public addVariable(identifier: ts.Identifier, declarationInfo: DeclarationInfo, destructuringInfo?: DestructuringInfo) {
+    public addVariable(
+        identifier: ts.Identifier,
+        declarationInfo: DeclarationInfo,
+        destructuringInfo?: DestructuringInfo
+    ) {
         // block scoped variables go to the block scope, function scoped variables to the containing function scope
         const scope = declarationInfo.isBlockScoped ? this : this.functionScope;
         scope.variables.set(identifier.text, {
             declarationInfo,
             destructuringInfo,
             identifier,
-            reassigned: false,
+            reassigned: false
         });
     }
 }
@@ -134,16 +140,21 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
             const boundary = utils.isScopeBoundary(node);
             if (boundary !== utils.ScopeBoundary.None) {
                 if (boundary === utils.ScopeBoundary.Function) {
-                    if (node.kind === ts.SyntaxKind.ModuleDeclaration && utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                    if (
+                        node.kind === ts.SyntaxKind.ModuleDeclaration &&
+                        utils.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
+                    ) {
                         // don't check ambient namespaces
                         return;
                     }
                     this.scope = new Scope();
-                    if (utils.isFunctionDeclaration(node) ||
+                    if (
+                        utils.isFunctionDeclaration(node) ||
                         utils.isMethodDeclaration(node) ||
                         utils.isFunctionExpression(node) ||
                         utils.isArrowFunction(node) ||
-                        utils.isConstructorDeclaration(node)) {
+                        utils.isConstructorDeclaration(node)
+                    ) {
                         // special handling for function parameters
                         // each parameter initializer can only reassign preceding parameters of variables of the containing scope
                         if (node.body !== undefined) {
@@ -159,8 +170,10 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     }
                 } else {
                     this.scope = new Scope(this.scope.functionScope);
-                    if ((utils.isForInStatement(node) || utils.isForOfStatement(node)) &&
-                        node.initializer.kind !== ts.SyntaxKind.VariableDeclarationList) {
+                    if (
+                        (utils.isForInStatement(node) || utils.isForOfStatement(node)) &&
+                        node.initializer.kind !== ts.SyntaxKind.VariableDeclarationList
+                    ) {
                         this.handleExpression(node.initializer);
                     }
                 }
@@ -171,23 +184,29 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 if ((node as ts.CatchClause).variableDeclaration !== undefined) {
                     this.handleBindingName((node as ts.CatchClause).variableDeclaration!.name, {
                         canBeConst: false,
-                        isBlockScoped: true,
+                        isBlockScoped: true
                     });
                 }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
                 if (node.parent!.kind !== ts.SyntaxKind.IndexSignature) {
                     this.handleBindingName((node as ts.ParameterDeclaration).name, {
                         canBeConst: false,
-                        isBlockScoped: true,
+                        isBlockScoped: true
                     });
                 }
-            } else if (utils.isPostfixUnaryExpression(node) ||
-                       utils.isPrefixUnaryExpression(node) &&
-                       (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) {
+            } else if (
+                utils.isPostfixUnaryExpression(node) ||
+                (utils.isPrefixUnaryExpression(node) &&
+                    (node.operator === ts.SyntaxKind.PlusPlusToken ||
+                        node.operator === ts.SyntaxKind.MinusMinusToken))
+            ) {
                 if (utils.isIdentifier(node.operand)) {
                     this.scope.reassigned.add(node.operand.text);
                 }
-            } else if (utils.isBinaryExpression(node) && utils.isAssignmentKind(node.operatorToken.kind)) {
+            } else if (
+                utils.isBinaryExpression(node) &&
+                utils.isAssignmentKind(node.operatorToken.kind)
+            ) {
                 this.handleExpression(node.left);
             }
 
@@ -251,11 +270,10 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
             this.scope.addVariable(name, declarationInfo);
         } else {
             const destructuringInfo: DestructuringInfo = {
-                reassignedSiblings: false,
+                reassignedSiblings: false
             };
-            utils.forEachDestructuringIdentifier(
-                name,
-                (declaration) => this.scope.addVariable(declaration.name, declarationInfo, destructuringInfo),
+            utils.forEachDestructuringIdentifier(name, declaration =>
+                this.scope.addVariable(declaration.name, declarationInfo, destructuringInfo)
             );
         }
     }
@@ -263,24 +281,33 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     private handleVariableDeclaration(declarationList: ts.VariableDeclarationList) {
         let declarationInfo: DeclarationInfo;
         const kind = utils.getVariableDeclarationKind(declarationList);
-        if (kind === utils.VariableDeclarationKind.Const ||
-            utils.hasModifier(declarationList.parent!.modifiers, ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DeclareKeyword)) {
-
+        if (
+            kind === utils.VariableDeclarationKind.Const ||
+            utils.hasModifier(
+                declarationList.parent!.modifiers,
+                ts.SyntaxKind.ExportKeyword,
+                ts.SyntaxKind.DeclareKeyword
+            )
+        ) {
             declarationInfo = {
                 canBeConst: false,
-                isBlockScoped: kind !== utils.VariableDeclarationKind.Var,
+                isBlockScoped: kind !== utils.VariableDeclarationKind.Var
             };
         } else {
             declarationInfo = {
-                allInitialized: declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement ||
-                                declarationList.parent!.kind === ts.SyntaxKind.ForInStatement ||
-                                declarationList.declarations.every((declaration) => declaration.initializer !== undefined),
+                allInitialized:
+                    declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement ||
+                    declarationList.parent!.kind === ts.SyntaxKind.ForInStatement ||
+                    declarationList.declarations.every(
+                        declaration => declaration.initializer !== undefined
+                    ),
                 canBeConst: true,
                 declarationList,
                 isBlockScoped: kind === utils.VariableDeclarationKind.Let,
-                isForLoop: declarationList.parent!.kind === ts.SyntaxKind.ForStatement ||
-                           declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement,
-                reassignedSiblings: false,
+                isForLoop:
+                    declarationList.parent!.kind === ts.SyntaxKind.ForStatement ||
+                    declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement,
+                reassignedSiblings: false
             };
         }
 
@@ -290,8 +317,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
     }
 
     private settle(parent?: Scope) {
-        const {variables, reassigned} = this.scope;
-        reassigned.forEach((name) => {
+        const { variables, reassigned } = this.scope;
+        reassigned.forEach(name => {
             const variableInfo = variables.get(name);
             if (variableInfo !== undefined) {
                 if (variableInfo.declarationInfo.canBeConst) {
@@ -313,27 +340,38 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         this.settle(parent);
         const appliedFixes = new Set<ts.VariableDeclarationList>();
         this.scope.variables.forEach((info, name) => {
-            if (info.declarationInfo.canBeConst &&
+            if (
+                info.declarationInfo.canBeConst &&
                 !info.reassigned &&
                 // don't add failures for reassigned variables in for loop initializer
                 !(info.declarationInfo.reassignedSiblings && info.declarationInfo.isForLoop) &&
                 // if {destructuring: "all"} is set, only add a failure if all variables in a destructuring assignment can be const
                 (!this.options.destructuringAll ||
-                 info.destructuringInfo === undefined ||
-                 !info.destructuringInfo.reassignedSiblings)) {
-
+                    info.destructuringInfo === undefined ||
+                    !info.destructuringInfo.reassignedSiblings)
+            ) {
                 let fix: Lint.Fix | undefined;
                 // only apply fixes if the VariableDeclarationList has no reassigned variables
                 // and the variable is block scoped aka `let` and initialized
-                if (info.declarationInfo.allInitialized &&
+                if (
+                    info.declarationInfo.allInitialized &&
                     !info.declarationInfo.reassignedSiblings &&
                     info.declarationInfo.isBlockScoped &&
-                    !appliedFixes.has(info.declarationInfo.declarationList)) {
-                    fix = new Lint.Replacement(info.declarationInfo.declarationList.getStart(this.sourceFile), 3, "const");
+                    !appliedFixes.has(info.declarationInfo.declarationList)
+                ) {
+                    fix = new Lint.Replacement(
+                        info.declarationInfo.declarationList.getStart(this.sourceFile),
+                        3,
+                        "const"
+                    );
                     // add only one fixer per VariableDeclarationList
                     appliedFixes.add(info.declarationInfo.declarationList);
                 }
-                this.addFailureAtNode(info.identifier, Rule.FAILURE_STRING_FACTORY(name, info.declarationInfo.isBlockScoped), fix);
+                this.addFailureAtNode(
+                    info.identifier,
+                    Rule.FAILURE_STRING_FACTORY(name, info.declarationInfo.isBlockScoped),
+                    fix
+                );
             }
         });
     }

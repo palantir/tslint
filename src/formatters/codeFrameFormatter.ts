@@ -42,7 +42,7 @@ export class Formatter extends AbstractFormatter {
               24 |     }
               25 |
               26 |     public render() {`,
-        consumer: "human",
+        consumer: "human"
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -67,7 +67,10 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString = failure.getRuleSeverity() === "warning" ? chalk.yellow(failureString) : chalk.red(failureString);
+            failureString =
+                failure.getRuleSeverity() === "warning"
+                    ? chalk.yellow(failureString)
+                    : chalk.red(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
@@ -81,8 +84,8 @@ export class Formatter extends AbstractFormatter {
                 lineAndCharacter.character,
                 {
                     forceColor: chalk.enabled,
-                    highlightCode: true,
-                },
+                    highlightCode: true
+                }
             );
 
             // Ouput

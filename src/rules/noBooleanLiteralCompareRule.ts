@@ -35,12 +35,14 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "style",
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(negate: boolean) {
-        return `This expression is unnecessarily compared to a boolean. Just ${negate ? "negate it" : "use it directly"}.`;
+        return `This expression is unnecessarily compared to a boolean. Just ${
+            negate ? "negate it" : "use it directly"
+        }.`;
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -53,7 +55,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         if (utils.isBinaryExpression(node)) {
             const cmp = getBooleanComparison(node, checker);
             if (cmp !== undefined) {
-                ctx.addFailureAtNode(cmp.expression, Rule.FAILURE_STRING(cmp.negate), fix(node, cmp));
+                ctx.addFailureAtNode(
+                    cmp.expression,
+                    Rule.FAILURE_STRING(cmp.negate),
+                    fix(node, cmp)
+                );
             }
         }
         return ts.forEachChild(node, cb);
@@ -65,28 +71,32 @@ interface Compare {
     expression: ts.Expression;
 }
 
-function getBooleanComparison(node: ts.BinaryExpression, checker: ts.TypeChecker): Compare | undefined {
+function getBooleanComparison(
+    node: ts.BinaryExpression,
+    checker: ts.TypeChecker
+): Compare | undefined {
     const cmp = deconstructComparison(node);
-    return cmp === undefined || !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean) ? undefined : cmp;
+    return cmp === undefined ||
+        !utils.isTypeFlagSet(checker.getTypeAtLocation(cmp.expression), ts.TypeFlags.Boolean)
+        ? undefined
+        : cmp;
 }
 
 function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.Fix {
-    const deleted = node.left === expression
-        ? Lint.Replacement.deleteFromTo(node.left.end, node.end)
-        : Lint.Replacement.deleteFromTo(node.getStart(), node.right.getStart());
+    const deleted =
+        node.left === expression
+            ? Lint.Replacement.deleteFromTo(node.left.end, node.end)
+            : Lint.Replacement.deleteFromTo(node.getStart(), node.right.getStart());
     if (!negate) {
         return deleted;
     } else if (needsParenthesesForNegate(expression)) {
         return [
             deleted,
             Lint.Replacement.appendText(node.getStart(), "!("),
-            Lint.Replacement.appendText(node.getEnd(), ")"),
+            Lint.Replacement.appendText(node.getEnd(), ")")
         ];
     } else {
-        return [
-            deleted,
-            Lint.Replacement.appendText(node.getStart(), "!"),
-        ];
+        return [deleted, Lint.Replacement.appendText(node.getStart(), "!")];
     }
 }
 

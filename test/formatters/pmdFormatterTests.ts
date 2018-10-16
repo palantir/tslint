@@ -36,12 +36,35 @@ describe("PMD Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
-            createFailure(sourceFile, 0, maxPosition, "full failure", "full-name", undefined, "warning"),
+            createFailure(
+                sourceFile,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "warning"
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
+                undefined,
+                "warning"
+            )
         ];
-        const expectedResult =
-            `<pmd version="tslint">
+        const expectedResult = `<pmd version="tslint">
                 <file name="formatters/pmdFormatter.test.ts">
                     <violation begincolumn="1" beginline="1" priority="3" rule="first failure">
                     </violation>

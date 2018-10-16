@@ -44,7 +44,10 @@ export class ExclusionFactory {
 
         for (const docType in descriptors) {
             if (hasOwnProperty(descriptors, docType)) {
-                exclusionsMap.set(docType as DocType, this.createRequirementsForDocType(docType as DocType, descriptors[docType]));
+                exclusionsMap.set(
+                    docType as DocType,
+                    this.createRequirementsForDocType(docType as DocType, descriptors[docType])
+                );
             }
         }
     }

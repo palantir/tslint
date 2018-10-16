@@ -30,29 +30,35 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: {
                 properties: {
                     "ignore-module": {
-                        type: "string",
-                    },
+                        type: "string"
+                    }
                 },
-                type: "object",
+                type: "object"
             },
             maxLength: 1,
             minLength: 0,
-            type: "array",
+            type: "array"
         },
         optionsDescription: Lint.Utils.dedent`
             One argument may be optionally provided:
 
             * \`${OPTION_IGNORE_MODULE}\` allows to specify a regex and ignore modules which it matches.`,
-        rationale: "Imports with side effects may have behavior which is hard for static verification.",
+        rationale:
+            "Imports with side effects may have behavior which is hard for static verification.",
         ruleName: "no-import-side-effect",
         type: "typescript",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     public static FAILURE_STRING = "import with explicit side-effect";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string } | undefined;
-        const ignorePattern = patternConfig === undefined ? undefined : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as
+            | { "ignore-module": string }
+            | undefined;
+        const ignorePattern =
+            patternConfig === undefined
+                ? undefined
+                : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
         return this.applyWithFunction(sourceFile, walk, ignorePattern);
     }
 }

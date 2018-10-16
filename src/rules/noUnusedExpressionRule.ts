@@ -16,8 +16,14 @@
  */
 
 import {
-    isAssignmentKind, isBinaryExpression, isConditionalExpression, isExpressionStatement,
-    isIdentifier, isNumericLiteral, isParenthesizedExpression, isVoidExpression,
+    isAssignmentKind,
+    isBinaryExpression,
+    isConditionalExpression,
+    isExpressionStatement,
+    isIdentifier,
+    isNumericLiteral,
+    isParenthesizedExpression,
+    isVoidExpression
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -54,14 +60,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [ALLOW_FAST_NULL_CHECKS, ALLOW_NEW, ALLOW_TAGGED_TEMPLATE],
+                enum: [ALLOW_FAST_NULL_CHECKS, ALLOW_NEW, ALLOW_TAGGED_TEMPLATE]
             },
             minLength: 0,
-            maxLength: 3,
+            maxLength: 3
         },
         optionExamples: [true, [true, ALLOW_FAST_NULL_CHECKS]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -71,7 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return this.applyWithFunction(sourceFile, walk, {
             allowFastNullChecks: this.ruleArguments.indexOf(ALLOW_FAST_NULL_CHECKS) !== -1,
             allowNew: this.ruleArguments.indexOf(ALLOW_NEW) !== -1,
-            allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1,
+            allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1
         });
     }
 }
@@ -115,11 +121,21 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return false;
         } else if (isVoidExpression(node)) {
             // allow `void 0` and `void(0)`
-            if (!isLiteralZero(isParenthesizedExpression(node.expression) ? node.expression.expression : node.expression)) {
+            if (
+                !isLiteralZero(
+                    isParenthesizedExpression(node.expression)
+                        ? node.expression.expression
+                        : node.expression
+                )
+            ) {
                 check(node.expression);
             }
             return false;
-        } else if (isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.CommaToken && !isIndirectEval(node)) {
+        } else if (
+            isBinaryExpression(node) &&
+            node.operatorToken.kind === ts.SyntaxKind.CommaToken &&
+            !isIndirectEval(node)
+        ) {
             check(node.left);
             return cb(node.right);
         }
@@ -176,8 +192,10 @@ function isUnusedExpression(node: ts.Node, options: Options): boolean {
         case ts.SyntaxKind.BinaryExpression:
             return !isAssignmentKind((node as ts.BinaryExpression).operatorToken.kind);
         case ts.SyntaxKind.PrefixUnaryExpression:
-            return (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.PlusPlusToken &&
-                   (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.MinusMinusToken;
+            return (
+                (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.PlusPlusToken &&
+                (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.MinusMinusToken
+            );
         default:
             return true;
     }
@@ -188,14 +206,20 @@ function isLiteralZero(node: ts.Expression) {
 }
 
 function isIndirectEval(node: ts.BinaryExpression): boolean {
-    return isIdentifier(node.right) && node.right.text === "eval" &&
+    return (
+        isIdentifier(node.right) &&
+        node.right.text === "eval" &&
         isLiteralZero(node.left) &&
         node.parent!.kind === ts.SyntaxKind.ParenthesizedExpression &&
-        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression;
+        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression
+    );
 }
 
 function isDirective(node: ts.ExpressionStatement) {
-    if (node.expression.kind !== ts.SyntaxKind.StringLiteral || !canContainDirective(node.parent!)) {
+    if (
+        node.expression.kind !== ts.SyntaxKind.StringLiteral ||
+        !canContainDirective(node.parent!)
+    ) {
         return false;
     }
 
@@ -203,7 +227,10 @@ function isDirective(node: ts.ExpressionStatement) {
     // check if all previous statements in block are also directives
     for (let i = parent.statements.indexOf(node) - 1; i >= 0; --i) {
         const statement = parent.statements[i];
-        if (!isExpressionStatement(statement) || statement.expression.kind !== ts.SyntaxKind.StringLiteral) {
+        if (
+            !isExpressionStatement(statement) ||
+            statement.expression.kind !== ts.SyntaxKind.StringLiteral
+        ) {
             return false;
         }
     }

@@ -49,12 +49,12 @@ export class Formatter extends AbstractFormatter {
                 }
             }
         ]`,
-        consumer: "machine",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        const failuresJSON = failures.map((failure) => failure.toJson());
+        const failuresJSON = failures.map(failure => failure.toJson());
         return JSON.stringify(failuresJSON);
     }
 }

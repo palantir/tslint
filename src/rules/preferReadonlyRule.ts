@@ -31,17 +31,15 @@ interface Options {
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
-        description: "Requires that private variables are marked as `readonly` if they're never modified outside of the constructor.",
+        description:
+            "Requires that private variables are marked as `readonly` if they're never modified outside of the constructor.",
         descriptionDetails: Lint.Utils.dedent`
             If a private variable is only assigned to in the constructor, it should be declared as \`readonly\`.
         `,
-        optionExamples: [
-            true,
-            [true, OPTION_ONLY_INLINE_LAMBDAS],
-        ],
+        optionExamples: [true, [true, OPTION_ONLY_INLINE_LAMBDAS]],
         options: {
             enum: [OPTION_ONLY_INLINE_LAMBDAS],
-            type: "string",
+            type: "string"
         },
         optionsDescription: Lint.Utils.dedent`
             If \`${OPTION_ONLY_INLINE_LAMBDAS}\` is specified, only immediately-declared arrow functions are checked.`,
@@ -51,12 +49,12 @@ export class Rule extends Lint.Rules.TypedRule {
         requiresTypeInfo: true,
         ruleName: "prefer-readonly",
         type: "maintainability",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         const options = {
-            onlyInlineLambdas: this.ruleArguments.indexOf(OPTION_ONLY_INLINE_LAMBDAS) !== -1,
+            onlyInlineLambdas: this.ruleArguments.indexOf(OPTION_ONLY_INLINE_LAMBDAS) !== -1
         };
 
         return this.applyWithFunction(sourceFile, walk, options, program.getTypeChecker());
@@ -93,7 +91,10 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
 
             case ts.SyntaxKind.PropertyAccessExpression:
                 if (scope !== undefined) {
-                    handlePropertyAccessExpression(node as ts.PropertyAccessExpression, node.parent!);
+                    handlePropertyAccessExpression(
+                        node as ts.PropertyAccessExpression,
+                        node.parent!
+                    );
                 }
                 break;
 
@@ -119,7 +120,7 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
 
     function handleClassDeclarationOrExpression(node: ts.ClassLikeDeclaration) {
         const parentScope = scope;
-        const childScope = scope = new ClassScope(node, typeChecker);
+        const childScope = (scope = new ClassScope(node, typeChecker));
 
         ts.forEachChild(node, visitNode);
 
@@ -161,20 +162,30 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
 
             case ts.SyntaxKind.PostfixUnaryExpression:
             case ts.SyntaxKind.PrefixUnaryExpression:
-                handleParentPostfixOrPrefixUnaryExpression(parent as ts.PostfixUnaryExpression | ts.PrefixUnaryExpression);
+                handleParentPostfixOrPrefixUnaryExpression(parent as
+                    | ts.PostfixUnaryExpression
+                    | ts.PrefixUnaryExpression);
         }
 
         ts.forEachChild(node, visitNode);
     }
 
-    function handleParentBinaryExpression(node: ts.PropertyAccessExpression, parent: ts.BinaryExpression) {
+    function handleParentBinaryExpression(
+        node: ts.PropertyAccessExpression,
+        parent: ts.BinaryExpression
+    ) {
         if (parent.left === node && utils.isAssignmentKind(parent.operatorToken.kind)) {
             scope.addVariableModification(node);
         }
     }
 
-    function handleParentPostfixOrPrefixUnaryExpression(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
-        if (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken) {
+    function handleParentPostfixOrPrefixUnaryExpression(
+        node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression
+    ) {
+        if (
+            node.operator === ts.SyntaxKind.PlusPlusToken ||
+            node.operator === ts.SyntaxKind.MinusMinusToken
+        ) {
             scope.addVariableModification(node.operand as ts.PropertyAccessExpression);
         }
     }
@@ -188,7 +199,9 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
             return false;
         }
 
-        return node.initializer === undefined || node.initializer.kind !== ts.SyntaxKind.ArrowFunction;
+        return (
+            node.initializer === undefined || node.initializer.kind !== ts.SyntaxKind.ArrowFunction
+        );
     }
 
     function finalizeScope(childScope: ClassScope) {
@@ -234,9 +247,11 @@ class ClassScope {
     }
 
     public addDeclaredVariable(node: ParameterOrPropertyDeclaration) {
-        if (!utils.isModifierFlagSet(node, ts.ModifierFlags.Private)
-            || utils.isModifierFlagSet(node, ts.ModifierFlags.Readonly)
-            || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
+        if (
+            !utils.isModifierFlagSet(node, ts.ModifierFlags.Private) ||
+            utils.isModifierFlagSet(node, ts.ModifierFlags.Readonly) ||
+            node.name.kind === ts.SyntaxKind.ComputedPropertyName
+        ) {
             return;
         }
 
@@ -249,18 +264,25 @@ class ClassScope {
 
     public addVariableModification(node: ts.PropertyAccessExpression) {
         const modifierType = this.typeChecker.getTypeAtLocation(node.expression);
-        if (modifierType.symbol === undefined || !typeIsOrHasBaseType(modifierType, this.classType)) {
+        if (
+            modifierType.symbol === undefined ||
+            !typeIsOrHasBaseType(modifierType, this.classType)
+        ) {
             return;
         }
 
-        const toStatic = utils.isObjectType(modifierType) && utils.isObjectFlagSet(modifierType, ts.ObjectFlags.Anonymous);
+        const toStatic =
+            utils.isObjectType(modifierType) &&
+            utils.isObjectFlagSet(modifierType, ts.ObjectFlags.Anonymous);
         if (!toStatic && this.constructorScopeDepth === DIRECTLY_INSIDE_CONSTRUCTOR) {
             return;
         }
 
         const variable = node.name.text;
 
-        (toStatic ? this.staticVariableModifications : this.memberVariableModifications).add(variable);
+        (toStatic ? this.staticVariableModifications : this.memberVariableModifications).add(
+            variable
+        );
     }
 
     public enterConstructor() {
@@ -284,17 +306,17 @@ class ClassScope {
     }
 
     public finalizeUnmodifiedPrivateNonReadonlys() {
-        this.memberVariableModifications.forEach((variableName) => {
+        this.memberVariableModifications.forEach(variableName => {
             this.privateModifiableMembers.delete(variableName);
         });
 
-        this.staticVariableModifications.forEach((variableName) => {
+        this.staticVariableModifications.forEach(variableName => {
             this.privateModifiableStatics.delete(variableName);
         });
 
         return [
             ...Array.from(this.privateModifiableMembers.values()),
-            ...Array.from(this.privateModifiableStatics.values()),
+            ...Array.from(this.privateModifiableStatics.values())
         ];
     }
 }

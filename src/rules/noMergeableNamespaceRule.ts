@@ -28,7 +28,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "maintainability",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -59,7 +59,10 @@ class Walker extends Lint.AbstractWalker<void> {
                 const { text } = name;
                 const prev = seen.get(text);
                 if (prev !== undefined) {
-                    this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev.name)));
+                    this.addFailureAtNode(
+                        name,
+                        Rule.failureStringFactory(text, this.getLineOfNode(prev.name))
+                    );
                 }
                 seen.set(text, statement as ts.NamespaceDeclaration);
             }

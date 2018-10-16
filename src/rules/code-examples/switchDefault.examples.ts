@@ -48,6 +48,6 @@ export const codeExamples = [
                     doSomething2();
                     break;
             }
-        `,
-    },
+        `
+    }
 ];

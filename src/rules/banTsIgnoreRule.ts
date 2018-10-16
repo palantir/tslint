@@ -30,11 +30,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "typescript",
         typescriptOnly: true,
-        codeExamples,
+        codeExamples
     };
     /* tslint:disable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = 'Do not use "// @ts-ignore" comments because they suppress compilation errors.';
+    public static FAILURE_STRING =
+        'Do not use "// @ts-ignore" comments because they suppress compilation errors.';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);

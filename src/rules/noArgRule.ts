@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -46,9 +46,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isPropertyAccessExpression(node) &&
+        if (
+            isPropertyAccessExpression(node) &&
             node.name.text === "callee" &&
-            node.expression.kind === ts.SyntaxKind.Identifier && (node.expression as ts.Identifier).text === "arguments") {
+            node.expression.kind === ts.SyntaxKind.Identifier &&
+            (node.expression as ts.Identifier).text === "arguments"
+        ) {
             return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

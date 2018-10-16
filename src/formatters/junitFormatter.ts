@@ -38,7 +38,7 @@ export class Formatter extends AbstractFormatter {
           </testsuite>
         </testsuites>
         `,
-        consumer: "machine",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -46,8 +46,9 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
         if (failures.length !== 0) {
-            const failuresSorted = failures.sort(
-                (a, b) => a.getFileName().localeCompare(b.getFileName()));
+            const failuresSorted = failures.sort((a, b) =>
+                a.getFileName().localeCompare(b.getFileName())
+            );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

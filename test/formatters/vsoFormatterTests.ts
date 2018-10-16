@@ -37,13 +37,21 @@ describe("VSO Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            )
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") +
+            getFailureString(TEST_FILE, 1, 1, "first failure", "first-name") +
             getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+            getFailureString(TEST_FILE, 9, 2, "last failure", "last-name");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -55,13 +63,21 @@ describe("VSO Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            )
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") +
+            getFailureString(TEST_FILE, 1, 1, "first failure", "first-name") +
             getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+            getFailureString(TEST_FILE, 9, 2, "last failure", "last-name");
 
         const fixed = failures.slice();
 
@@ -74,7 +90,13 @@ describe("VSO Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, reason: string, code: string) {
+    function getFailureString(
+        file: string,
+        line: number,
+        character: number,
+        reason: string,
+        code: string
+    ) {
         return `##vso[task.logissue type=warning;sourcepath=${file};linenumber=${line};columnnumber=${character};code=${code};]${reason}\n`;
     }
 });

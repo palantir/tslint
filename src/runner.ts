@@ -27,7 +27,7 @@ import {
     DEFAULT_CONFIG,
     findConfiguration,
     isFileExcluded,
-    JSON_CONFIG_FILENAME,
+    JSON_CONFIG_FILENAME
 } from "./configuration";
 import { FatalError } from "./error";
 import { LintResult } from "./index";
@@ -115,7 +115,7 @@ export interface Options {
 export const enum Status {
     Ok = 0,
     FatalError = 1,
-    LintError = 2,
+    LintError = 2
 }
 
 export interface Logger {
@@ -147,7 +147,10 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 
     if (options.test) {
         const test = await import("./test");
-        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        const results = test.runTests(
+            (options.files || []).map(trimSingleQuotes),
+            options.rulesDirectory
+        );
         return test.consoleTestResultsHandler(results, logger) ? Status.Ok : Status.FatalError;
     }
 
@@ -168,7 +171,9 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
+            const message = diagnostics
+                .map(d => showDiagnostic(d, program, options.outputAbsolutePaths))
+                .join("\n");
             if (options.force) {
                 logger.error(`${message}\n`);
             } else {
@@ -181,7 +186,7 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
 
 function resolveFilesAndProgram(
     { files, project, exclude, outputAbsolutePaths }: Options,
-    logger: Logger,
+    logger: Logger
 ): { files: string[]; program?: ts.Program } {
     // remove single quotes which break matching on Windows when glob is passed in single quotes
     exclude = exclude.map(trimSingleQuotes);
@@ -195,14 +200,14 @@ function resolveFilesAndProgram(
         throw new FatalError(`Invalid option for project: ${project}`);
     }
 
-    exclude = exclude.map((pattern) => path.resolve(pattern));
+    exclude = exclude.map(pattern => path.resolve(pattern));
     const program = Linter.createProgram(projectPath);
     let filesFound: string[];
     if (files.length === 0) {
         filesFound = filterFiles(Linter.getFileNames(program), exclude, false);
     } else {
-        files = files.map((f) => path.resolve(f));
-        filesFound = filterFiles(program.getSourceFiles().map((f) => f.fileName), files, true);
+        files = files.map(f => path.resolve(f));
+        filesFound = filterFiles(program.getSourceFiles().map(f => f.fileName), files, true);
         filesFound = filterFiles(filesFound, exclude, false);
 
         // find non-glob files that have no matching file in the project and are not excluded by any exclude pattern
@@ -222,14 +227,18 @@ function filterFiles(files: string[], patterns: string[], include: boolean): str
     if (patterns.length === 0) {
         return include ? [] : files;
     }
-    const matcher = patterns.map((pattern) => new Minimatch(pattern, {dot: !include})); // `glob` always enables `dot` for ignore patterns
-    return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
+    const matcher = patterns.map(pattern => new Minimatch(pattern, { dot: !include })); // `glob` always enables `dot` for ignore patterns
+    return files.filter(file => include === matcher.some(pattern => pattern.match(file)));
 }
 
-function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: boolean | undefined, logger: Logger): string[] {
-    const results = flatMap(
-        files,
-        (file) => glob.sync(trimSingleQuotes(file), { ignore, nodir: true }),
+function resolveGlobs(
+    files: string[],
+    ignore: string[],
+    outputAbsolutePaths: boolean | undefined,
+    logger: Logger
+): string[] {
+    const results = flatMap(files, file =>
+        glob.sync(trimSingleQuotes(file), { ignore, nodir: true })
     );
     // warn if `files` contains non-existent files, that are not patters and not excluded by any of the exclude patterns
     for (const file of filterFiles(files, ignore, false)) {
@@ -238,10 +247,17 @@ function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: bo
         }
     }
     const cwd = process.cwd();
-    return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
+    return results.map(
+        file => (outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file))
+    );
 }
 
-async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
+async function doLinting(
+    options: Options,
+    files: string[],
+    program: ts.Program | undefined,
+    logger: Logger
+): Promise<LintResult> {
     let configFile =
         options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
@@ -259,9 +275,9 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
             formatter,
             formattersDirectory: options.formattersDirectory,
             quiet: !!options.quiet,
-            rulesDirectory: options.rulesDirectory,
+            rulesDirectory: options.rulesDirectory
         },
-        program,
+        program
     );
 
     let lastFolder: string | undefined;
@@ -319,10 +335,14 @@ async function tryReadFile(filename: string, logger: Logger): Promise<string | u
     return fs.readFileSync(filename, "utf8");
 }
 
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
+function showDiagnostic(
+    { file, start, category, messageText }: ts.Diagnostic,
+    program: ts.Program,
+    outputAbsolutePaths?: boolean
+): string {
     let message = ts.DiagnosticCategory[category];
     if (file !== undefined && start !== undefined) {
-        const {line, character} = file.getLineAndCharacterOfPosition(start);
+        const { line, character } = file.getLineAndCharacterOfPosition(start);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths
             ? path.resolve(currentDirectory, file.fileName)

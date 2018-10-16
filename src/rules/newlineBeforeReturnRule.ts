@@ -29,14 +29,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {},
         optionExamples: [true],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "Missing blank line before return";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined)
+        );
     }
 }
 
@@ -65,7 +67,8 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         if (comments !== undefined) {
             // check for blank lines between comments
             for (let i = comments.length - 1; i >= 0; --i) {
-                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end).line;
+                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end)
+                    .line;
                 if (endLine < line - 1) {
                     return;
                 }

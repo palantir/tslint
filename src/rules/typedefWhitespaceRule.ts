@@ -21,14 +21,19 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 type Option = "nospace" | "onespace" | "space";
-type OptionType = "call-signature" | "index-signature" | "parameter" | "property-declaration" | "variable-declaration";
+type OptionType =
+    | "call-signature"
+    | "index-signature"
+    | "parameter"
+    | "property-declaration"
+    | "variable-declaration";
 type OptionInput = Partial<Record<OptionType, Option>>;
 type Options = Partial<Record<"left" | "right", OptionInput>>;
 
 /* tslint:disable:object-literal-sort-keys */
 const SPACE_OPTIONS = {
     type: "string",
-    enum: ["nospace", "onespace", "space"],
+    enum: ["nospace", "onespace", "space"]
 };
 
 const SPACE_OBJECT = {
@@ -36,18 +41,19 @@ const SPACE_OBJECT = {
     properties: {
         "call-signature": SPACE_OPTIONS,
         "index-signature": SPACE_OPTIONS,
-        "parameter": SPACE_OPTIONS,
+        parameter: SPACE_OPTIONS,
         "property-declaration": SPACE_OPTIONS,
-        "variable-declaration": SPACE_OPTIONS,
+        "variable-declaration": SPACE_OPTIONS
     },
-    additionalProperties: false,
+    additionalProperties: false
 };
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "typedef-whitespace",
         description: "Requires or disallows whitespace for type definitions.",
-        descriptionDetails: "Determines if a space is required or not before the colon in a type specifier.",
+        descriptionDetails:
+            "Determines if a space is required or not before the colon in a type specifier.",
         optionsDescription: Lint.Utils.dedent`
             Two arguments which are both objects.
             The first argument specifies how much space should be to the _left_ of a typedef colon.
@@ -63,7 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: [SPACE_OBJECT, SPACE_OBJECT],
-            additionalItems: false,
+            additionalItems: false
         },
         optionExamples: [
             [
@@ -71,22 +77,22 @@ export class Rule extends Lint.Rules.AbstractRule {
                 {
                     "call-signature": "nospace",
                     "index-signature": "nospace",
-                    "parameter": "nospace",
+                    parameter: "nospace",
                     "property-declaration": "nospace",
-                    "variable-declaration": "nospace",
+                    "variable-declaration": "nospace"
                 },
                 {
                     "call-signature": "onespace",
                     "index-signature": "onespace",
-                    "parameter": "onespace",
+                    parameter: "onespace",
                     "property-declaration": "onespace",
-                    "variable-declaration": "onespace",
-                },
-            ],
+                    "variable-declaration": "onespace"
+                }
+            ]
         ],
         type: "typescript",
         typescriptOnly: true,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -98,9 +104,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         const args = this.ruleArguments as Array<OptionInput | undefined>;
         const options = {
             left: args[0],
-            right: args[1],
+            right: args[1]
         };
-        return this.applyWithWalker(new TypedefWhitespaceWalker(sourceFile, this.ruleName, options));
+        return this.applyWithWalker(
+            new TypedefWhitespaceWalker(sourceFile, this.ruleName, options)
+        );
     }
 }
 
@@ -109,18 +117,24 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             const optionType = getOptionType(node);
             if (optionType !== undefined) {
-                this.checkSpace(node as ts.SignatureDeclaration | ts.VariableLikeDeclaration, optionType);
+                this.checkSpace(
+                    node as ts.SignatureDeclaration | ts.VariableLikeDeclaration,
+                    optionType
+                );
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkSpace(node: ts.SignatureDeclaration | ts.VariableLikeDeclaration, key: OptionType) {
+    private checkSpace(
+        node: ts.SignatureDeclaration | ts.VariableLikeDeclaration,
+        key: OptionType
+    ) {
         if (!("type" in node) || node.type === undefined) {
             return;
         }
-        const {left, right} = this.options;
+        const { left, right } = this.options;
         const colon = getChildOfKind(node, ts.SyntaxKind.ColonToken, this.sourceFile)!;
         if (right !== undefined && right[key] !== undefined) {
             this.checkRight(colon.end, right[key]!, key);
@@ -132,7 +146,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
 
     private checkRight(colonEnd: number, option: Option, key: OptionType) {
         let pos = colonEnd;
-        const {text} = this.sourceFile;
+        const { text } = this.sourceFile;
         let current = text.charCodeAt(pos);
         if (ts.isLineBreak(current)) {
             return;
@@ -146,7 +160,7 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
 
     private checkLeft(colonStart: number, option: Option, key: OptionType) {
         let pos = colonStart;
-        const {text} = this.sourceFile;
+        const { text } = this.sourceFile;
         let current = text.charCodeAt(pos - 1);
         while (ts.isWhiteSpaceSingleLine(current)) {
             --pos;
@@ -158,28 +172,53 @@ class TypedefWhitespaceWalker extends Lint.AbstractWalker<Options> {
         return this.validateWhitespace(pos, colonStart, option, "before", key);
     }
 
-    private validateWhitespace(start: number, end: number, option: Option, location: "before" | "after", key: OptionType) {
+    private validateWhitespace(
+        start: number,
+        end: number,
+        option: Option,
+        location: "before" | "after",
+        key: OptionType
+    ) {
         switch (option) {
             case "nospace":
                 if (start !== end) {
-                    this.addFailure(start, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.deleteFromTo(start, end));
+                    this.addFailure(
+                        start,
+                        end,
+                        Rule.FAILURE_STRING(option, location, key),
+                        Lint.Replacement.deleteFromTo(start, end)
+                    );
                 }
                 break;
             case "space":
                 if (start === end) {
-                    this.addFailure(end, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.appendText(end, " "));
+                    this.addFailure(
+                        end,
+                        end,
+                        Rule.FAILURE_STRING(option, location, key),
+                        Lint.Replacement.appendText(end, " ")
+                    );
                 }
                 break;
             case "onespace":
                 switch (end - start) {
                     case 0:
-                        this.addFailure(end, end, Rule.FAILURE_STRING(option, location, key), Lint.Replacement.appendText(end, " "));
+                        this.addFailure(
+                            end,
+                            end,
+                            Rule.FAILURE_STRING(option, location, key),
+                            Lint.Replacement.appendText(end, " ")
+                        );
                         break;
                     case 1:
                         break;
                     default:
-                        this.addFailure(start + 1, end, Rule.FAILURE_STRING(option, location, key),
-                                        Lint.Replacement.deleteFromTo(start + 1, end));
+                        this.addFailure(
+                            start + 1,
+                            end,
+                            Rule.FAILURE_STRING(option, location, key),
+                            Lint.Replacement.deleteFromTo(start + 1, end)
+                        );
                 }
         }
     }
