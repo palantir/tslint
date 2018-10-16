@@ -24,9 +24,10 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "verbose",
         description: "The human-readable formatter which includes the rule name in messages.",
-        descriptionDetails: "The output is the same as the prose formatter with the rule name included",
+        descriptionDetails:
+            "The output is the same as the prose formatter with the rule name included",
         sample: "ERROR: (semicolon) myFile.ts[1, 14]: Missing semicolon",
-        consumer: "human",
+        consumer: "human"
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -42,10 +43,12 @@ export class Formatter extends AbstractFormatter {
             const ruleName = failure.getRuleName();
 
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character + 1}]`;
+            const positionTuple = `[${lineAndCharacter.line + 1}, ${lineAndCharacter.character +
+                1}]`;
 
-            return `${failure.getRuleSeverity().toUpperCase()}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
+            return `${failure
+                .getRuleSeverity()
+                .toUpperCase()}: (${ruleName}) ${fileName}${positionTuple}: ${failureString}`;
         });
-
     }
 }

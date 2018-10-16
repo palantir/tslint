@@ -28,9 +28,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
-        rationale: "Improves readability and organization by grouping naturally related items together.",
+        rationale:
+            "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -55,9 +56,19 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.TypeLiteral: {
-                const { members } = node as ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeLiteralNode;
-                addFailures(getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, (member) =>
-                    utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined));
+                const { members } = node as
+                    | ts.InterfaceDeclaration
+                    | ts.ClassDeclaration
+                    | ts.TypeLiteralNode;
+                addFailures(
+                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(
+                        members,
+                        member =>
+                            utils.isSignatureDeclaration(member)
+                                ? getOverloadKey(member)
+                                : undefined
+                    )
+                );
             }
         }
 
@@ -65,8 +76,15 @@ function walk(ctx: Lint.WalkContext<void>): void {
     });
 
     function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
-        addFailures(getMisplacedOverloads(statements, (statement) =>
-            utils.isFunctionDeclaration(statement) && statement.name !== undefined ? statement.name.text : undefined));
+        addFailures(
+            getMisplacedOverloads(
+                statements,
+                statement =>
+                    utils.isFunctionDeclaration(statement) && statement.name !== undefined
+                        ? statement.name.text
+                        : undefined
+            )
+        );
     }
 
     function addFailures(misplacedOverloads: ReadonlyArray<ts.SignatureDeclaration>): void {
@@ -79,7 +97,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
 /** 'getOverloadName' may return undefined for nodes that cannot be overloads, e.g. a `const` declaration. */
 function getMisplacedOverloads<T extends ts.Node>(
     overloads: ReadonlyArray<T>,
-    getKey: (node: T) => string | undefined): ts.SignatureDeclaration[] {
+    getKey: (node: T) => string | undefined
+): ts.SignatureDeclaration[] {
     const result: ts.SignatureDeclaration[] = [];
     let lastKey: string | undefined;
     const seen = new Set<string>();
@@ -91,7 +110,7 @@ function getMisplacedOverloads<T extends ts.Node>(
         const key = getKey(node);
         if (key !== undefined) {
             if (seen.has(key) && lastKey !== key) {
-                result.push(node as any as ts.SignatureDeclaration);
+                result.push((node as any) as ts.SignatureDeclaration);
             }
             seen.add(key);
             lastKey = key;
@@ -118,7 +137,9 @@ export function getOverloadKey(node: ts.SignatureDeclaration): string | undefine
     return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
 
-function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string; computed?: boolean } | undefined {
+function getOverloadInfo(
+    node: ts.SignatureDeclaration
+): string | { name: string; computed?: boolean } | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.Constructor:
@@ -136,7 +157,9 @@ function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string
                     return name.text;
                 case ts.SyntaxKind.ComputedPropertyName:
                     const { expression } = name;
-                    return utils.isLiteralExpression(expression) ? expression.text : { name: expression.getText(), computed: true };
+                    return utils.isLiteralExpression(expression)
+                        ? expression.text
+                        : { name: expression.getText(), computed: true };
                 default:
                     return utils.isLiteralExpression(name) ? name.text : undefined;
             }

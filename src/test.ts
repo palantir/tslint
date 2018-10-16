@@ -63,17 +63,20 @@ export function runTests(patterns: string[], rulesDirectory?: string | string[])
         }
         files.push(...glob.sync(pattern));
     }
-    return files.map((directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory));
+    return files.map(
+        (directory: string): TestResult => runTest(path.dirname(directory), rulesDirectory)
+    );
 }
 
 export function runTest(testDirectory: string, rulesDirectory?: string | string[]): TestResult {
     const filesToLint = glob.sync(path.join(testDirectory, `**/*${MARKUP_FILE_EXTENSION}`));
-    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "").results;
+    const tslintConfig = Linter.findConfiguration(path.join(testDirectory, "tslint.json"), "")
+        .results;
     const tsConfig = path.join(testDirectory, "tsconfig.json");
     let compilerOptions: ts.CompilerOptions = { allowJs: true };
     const hasConfig = fs.existsSync(tsConfig);
     if (hasConfig) {
-        const {config, error} = ts.readConfigFile(tsConfig, ts.sys.readFile);
+        const { config, error } = ts.readConfigFile(tsConfig, ts.sys.readFile);
         if (error !== undefined) {
             throw new Error(ts.formatDiagnostics([error], ts.createCompilerHost({})));
         }
@@ -82,9 +85,10 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             fileExists: fs.existsSync,
             readDirectory: ts.sys.readDirectory,
             readFile: (file: string) => fs.readFileSync(file, "utf8"),
-            useCaseSensitiveFileNames: true,
+            useCaseSensitiveFileNames: true
         };
-        compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory).options;
+        compilerOptions = ts.parseJsonConfigFileContent(config, parseConfigHost, testDirectory)
+            .options;
     }
     const results: TestResult = { directory: testDirectory, results: {} };
 
@@ -92,14 +96,16 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         const isEncodingRule = path.basename(testDirectory) === "encoding";
 
         const fileCompileName = denormalizeWinPath(path.resolve(fileToLint.replace(/\.lint$/, "")));
-        let fileText = isEncodingRule ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint)) : fs.readFileSync(fileToLint, "utf-8");
+        let fileText = isEncodingRule
+            ? readBufferWithDetectedEncoding(fs.readFileSync(fileToLint))
+            : fs.readFileSync(fileToLint, "utf-8");
         const tsVersionRequirement = parse.getTypescriptVersionRequirement(fileText);
         if (tsVersionRequirement !== undefined) {
             // remove prerelease suffix when matching to allow testing with nightly builds
             if (!semver.satisfies(parse.getNormalizedTypescriptVersion(), tsVersionRequirement)) {
                 results.results[fileToLint] = {
                     requirement: tsVersionRequirement,
-                    skipped: true,
+                    skipped: true
                 };
                 continue;
             }
@@ -114,26 +120,34 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
         let program: ts.Program | undefined;
         if (hasConfig) {
             const compilerHost: ts.CompilerHost = {
-                fileExists: (file) => file === fileCompileName || fs.existsSync(file),
-                getCanonicalFileName: (filename) => filename,
+                fileExists: file => file === fileCompileName || fs.existsSync(file),
+                getCanonicalFileName: filename => filename,
                 getCurrentDirectory: () => process.cwd(),
                 getDefaultLibFileName: () => ts.getDefaultLibFileName(compilerOptions),
-                getDirectories: (dir) => fs.readdirSync(dir),
+                getDirectories: dir => fs.readdirSync(dir),
                 getNewLine: () => "\n",
                 getSourceFile(filenameToGet, target) {
                     if (denormalizeWinPath(filenameToGet) === fileCompileName) {
-                        return ts.createSourceFile(filenameToGet, fileTextWithoutMarkup, target, true);
+                        return ts.createSourceFile(
+                            filenameToGet,
+                            fileTextWithoutMarkup,
+                            target,
+                            true
+                        );
                     }
                     if (path.basename(filenameToGet) === filenameToGet) {
                         // resolve path of lib.xxx.d.ts
-                        filenameToGet = path.join(path.dirname(ts.getDefaultLibFilePath(compilerOptions)), filenameToGet);
+                        filenameToGet = path.join(
+                            path.dirname(ts.getDefaultLibFilePath(compilerOptions)),
+                            filenameToGet
+                        );
                     }
                     const text = fs.readFileSync(filenameToGet, "utf8");
                     return ts.createSourceFile(filenameToGet, text, target, true);
                 },
-                readFile: (x) => x,
+                readFile: x => x,
                 useCaseSensitiveFileNames: () => true,
-                writeFile: () => null,
+                writeFile: () => null
             };
 
             program = ts.createProgram([fileCompileName], compilerOptions, compilerHost);
@@ -143,26 +157,30 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             fix: false,
             formatter: "prose",
             formattersDirectory: "",
-            rulesDirectory,
+            rulesDirectory
         };
         const linter = new Linter(lintOptions, program);
         // Need to use the true path (ending in '.lint') for "encoding" rule so that it can read the file.
-        linter.lint(isEncodingRule ? fileToLint : fileCompileName, fileTextWithoutMarkup, tslintConfig);
+        linter.lint(
+            isEncodingRule ? fileToLint : fileCompileName,
+            fileTextWithoutMarkup,
+            tslintConfig
+        );
         const failures = linter.getResult().failures;
-        const errorsFromLinter: LintError[] = failures.map((failure) => {
+        const errorsFromLinter: LintError[] = failures.map(failure => {
             const startLineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const endLineAndCharacter = failure.getEndPosition().getLineAndCharacter();
 
             return {
                 endPos: {
                     col: endLineAndCharacter.character,
-                    line: endLineAndCharacter.line,
+                    line: endLineAndCharacter.line
                 },
                 message: failure.getFailure(),
                 startPos: {
                     col: startLineAndCharacter.character,
-                    line: startLineAndCharacter.line,
-                },
+                    line: startLineAndCharacter.line
+                }
             };
         });
 
@@ -174,7 +192,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             const stat = fs.statSync(fixedFile);
             if (stat.isFile()) {
                 fixedFileText = fs.readFileSync(fixedFile, "utf8");
-                const fixes = mapDefined(failures, (f) => f.getFix());
+                const fixes = mapDefined(failures, f => f.getFix());
                 newFileText = Replacement.applyFixes(fileTextWithoutMarkup, fixes);
             }
         } catch (e) {
@@ -189,7 +207,7 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             fixesFromMarkup: fixedFileText,
             markupFromLinter: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromMarkup),
             markupFromMarkup: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromLinter),
-            skipped: false,
+            skipped: false
         };
     }
 
@@ -221,10 +239,20 @@ export function consoleTestResultHandler(testResult: TestResult, logger: Logger)
         if (results.skipped) {
             logger.log(chalk.yellow(` Skipped, requires typescript ${results.requirement}\n`));
         } else {
-            const markupDiffResults = diff.diffLines(results.markupFromMarkup, results.markupFromLinter);
-            const fixesDiffResults = diff.diffLines(results.fixesFromLinter, results.fixesFromMarkup);
-            const didMarkupTestPass = !markupDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
-            const didFixesTestPass = !fixesDiffResults.some((hunk) => hunk.added === true || hunk.removed === true);
+            const markupDiffResults = diff.diffLines(
+                results.markupFromMarkup,
+                results.markupFromLinter
+            );
+            const fixesDiffResults = diff.diffLines(
+                results.fixesFromLinter,
+                results.fixesFromMarkup
+            );
+            const didMarkupTestPass = !markupDiffResults.some(
+                hunk => hunk.added === true || hunk.removed === true
+            );
+            const didFixesTestPass = !fixesDiffResults.some(
+                hunk => hunk.added === true || hunk.removed === true
+            );
 
             if (didMarkupTestPass && didFixesTestPass) {
                 logger.log(chalk.green(" Passed\n"));
@@ -258,9 +286,18 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, 
             color = chalk.red.underline;
             prefix = "- ";
         }
-        logger.log(color(diffResult.value.split(/\r\n|\r|\n/)
-            // strings end on a newline which we do not want to include the prefix.
-            // tslint:disable-next-line:prefer-template
-            .map((line, index, array) => index === array.length - 1 ? line : prefix + line + "\n").join("")));
+        logger.log(
+            color(
+                diffResult.value
+                    .split(/\r\n|\r|\n/)
+                    // strings end on a newline which we do not want to include the prefix.
+                    // tslint:disable-next-line:prefer-template
+                    .map(
+                        (line, index, array) =>
+                            index === array.length - 1 ? line : prefix + line + "\n"
+                    )
+                    .join("")
+            )
+        );
     }
 }

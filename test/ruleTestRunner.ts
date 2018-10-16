@@ -32,7 +32,7 @@ for (const testDirectory of testDirectories) {
         },
         error(m) {
             process.stderr.write(m);
-        },
+        }
     });
     if (!didAllTestsPass) {
         process.exitCode = 1;

@@ -34,7 +34,7 @@ export const codeExamples = [
                 doStuff();
 
             if (x > 0) doStuff();
-        `,
+        `
     },
     {
         description: "Make an exception for single-line instances",
@@ -47,7 +47,7 @@ export const codeExamples = [
         fail: Lint.Utils.dedent`
             if (x > 0)
                 doStuff()
-        `,
+        `
     },
     {
         description: "Error on unnecessary curly braces",
@@ -67,6 +67,6 @@ export const codeExamples = [
             if (x > 0) {
                 doStuff();
             }
-        `,
-    },
+        `
+    }
 ];

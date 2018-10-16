@@ -66,18 +66,18 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_JSX_SINGLE,
                     OPTION_JSX_DOUBLE,
                     OPTION_AVOID_ESCAPE,
-                    OPTION_AVOID_TEMPLATE,
-                ],
+                    OPTION_AVOID_TEMPLATE
+                ]
             },
             minLength: 0,
-            maxLength: 5,
+            maxLength: 5
         },
         optionExamples: [
             [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE, OPTION_AVOID_TEMPLATE],
-            [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
+            [true, OPTION_SINGLE, OPTION_JSX_DOUBLE]
         ],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -88,14 +88,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const args = this.ruleArguments;
 
-        const quoteMark = getQuotemarkPreference(args) ;
+        const quoteMark = getQuotemarkPreference(args);
         const jsxQuoteMark = getJSXQuotemarkPreference(args);
 
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
             avoidTemplate: hasArg(OPTION_AVOID_TEMPLATE),
             jsxQuoteMark,
-            quoteMark,
+            quoteMark
         });
 
         function hasArg(name: string): boolean {
@@ -107,11 +107,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<Options>) {
     const { sourceFile, options } = ctx;
     ts.forEachChild(sourceFile, function cb(node) {
-        if (isStringLiteral(node)
-                || options.avoidTemplate && isNoSubstitutionTemplateLiteral(node)
-                && node.parent!.kind !== ts.SyntaxKind.TaggedTemplateExpression
-                && isSameLine(sourceFile, node.getStart(sourceFile), node.end)) {
-            const expectedQuoteMark = node.parent!.kind === ts.SyntaxKind.JsxAttribute ? options.jsxQuoteMark : options.quoteMark;
+        if (
+            isStringLiteral(node) ||
+            (options.avoidTemplate &&
+                isNoSubstitutionTemplateLiteral(node) &&
+                node.parent!.kind !== ts.SyntaxKind.TaggedTemplateExpression &&
+                isSameLine(sourceFile, node.getStart(sourceFile), node.end))
+        ) {
+            const expectedQuoteMark =
+                node.parent!.kind === ts.SyntaxKind.JsxAttribute
+                    ? options.jsxQuoteMark
+                    : options.quoteMark;
             const actualQuoteMark = sourceFile.text[node.end - 1];
 
             if (actualQuoteMark === expectedQuoteMark) {
@@ -130,9 +136,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
                 // If we are expecting double quotes, use single quotes to avoid
                 //   escaping. Otherwise, just use double quotes.
-                fixQuoteMark = expectedQuoteMark === '"' ?
-                    "'" :
-                    '"';
+                fixQuoteMark = expectedQuoteMark === '"' ? "'" : '"';
 
                 // It also includes the fixQuoteMark. Let's try to use single
                 //   quotes instead, unless we originally expected single
@@ -141,9 +145,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 //   in trying to avoid escaping. What is the desired priority
                 //   here?
                 if (node.text.includes(fixQuoteMark)) {
-                    fixQuoteMark = expectedQuoteMark === "'" ?
-                        "`" :
-                        "'";
+                    fixQuoteMark = expectedQuoteMark === "'" ? "`" : "'";
 
                     // It contains all of the other kinds of quotes. Escaping is
                     //   unavoidable, sadly.
@@ -162,8 +164,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             text = text.replace(new RegExp(`\\\\${actualQuoteMark}`, "g"), actualQuoteMark);
 
-            return ctx.addFailure(start, node.end, Rule.FAILURE_STRING(actualQuoteMark, fixQuoteMark),
-                                  new Lint.Replacement(start, node.end - start, fixQuoteMark + text + fixQuoteMark));
+            return ctx.addFailure(
+                start,
+                node.end,
+                Rule.FAILURE_STRING(actualQuoteMark, fixQuoteMark),
+                new Lint.Replacement(start, node.end - start, fixQuoteMark + text + fixQuoteMark)
+            );
         }
         ts.forEachChild(node, cb);
     });
@@ -175,7 +181,7 @@ function getQuotemarkPreference(args: any[]): QUOTE_MARK {
     const quoteFromOption = {
         [OPTION_SINGLE]: "'",
         [OPTION_DOUBLE]: '"',
-        [OPTION_BACKTICK]: "`",
+        [OPTION_BACKTICK]: "`"
     };
 
     for (const arg of args) {
@@ -196,7 +202,7 @@ function getJSXQuotemarkPreference(args: any[]): JSX_QUOTE_MARK {
 
     const jsxQuoteFromOption = {
         [OPTION_JSX_SINGLE]: "'",
-        [OPTION_JSX_DOUBLE]: '"',
+        [OPTION_JSX_DOUBLE]: '"'
     };
 
     for (const arg of args) {

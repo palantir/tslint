@@ -29,6 +29,6 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             const arr: string[] = ['elemenet1',, 'element2'];
-        `,
-    },
+        `
+    }
 ];

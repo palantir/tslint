@@ -1,4 +1,4 @@
-module SimpleModule {
+namespace SimpleModule {
     export class SimpleClass {
         private name: string;
 

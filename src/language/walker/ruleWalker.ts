@@ -66,8 +66,8 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** @deprecated Prefer `addFailureAt` and its variants. */
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
-        const from = (start > this.limit) ? this.limit : start;
-        const to = ((start + width) > this.limit) ? this.limit : (start + width);
+        const from = start > this.limit ? this.limit : start;
+        const to = start + width > this.limit ? this.limit : start + width;
         return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
@@ -89,7 +89,12 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
-        this.addFailureAt(node.getStart(this.sourceFile), node.getWidth(this.sourceFile), failure, fix);
+        this.addFailureAt(
+            node.getStart(this.sourceFile),
+            node.getWidth(this.sourceFile),
+            failure,
+            fix
+        );
     }
 
     public createReplacement(start: number, length: number, text: string): Replacement {

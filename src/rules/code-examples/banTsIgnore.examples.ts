@@ -35,6 +35,6 @@ export const codeExamples = [
                 // @ts-ignore: Unreachable code error
                 console.log("hello");
             }
-        `,
-    },
+        `
+    }
 ];

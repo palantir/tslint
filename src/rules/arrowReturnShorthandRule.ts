@@ -34,29 +34,31 @@ export class Rule extends Lint.Rules.AbstractRule {
             If \`${OPTION_MULTILINE}\` is specified, then this will warn even if the function spans multiple lines.`,
         options: {
             type: "string",
-            enum: [OPTION_MULTILINE],
+            enum: [OPTION_MULTILINE]
         },
-        optionExamples: [
-            true,
-            [true, OPTION_MULTILINE],
-        ],
+        optionExamples: [true, [true, OPTION_MULTILINE]],
         rationale: Lint.Utils.dedent`
             It's unnecessary to include \`return\` and \`{}\` brackets in arrow lambdas.
             Leaving them out results in simpler and easier to read code.
         `,
         type: "style",
         typescriptOnly: false,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(isObjectLiteral: boolean): string {
-        const start = "This arrow function body can be simplified by omitting the curly braces and the keyword 'return'";
-        return start + (isObjectLiteral ? ", and wrapping the object literal in parentheses." : ".");
+        const start =
+            "This arrow function body can be simplified by omitting the curly braces and the keyword 'return'";
+        return (
+            start + (isObjectLiteral ? ", and wrapping the object literal in parentheses." : ".")
+        );
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { multiline: this.ruleArguments.indexOf(OPTION_MULTILINE) !== -1 });
+        return this.applyWithFunction(sourceFile, walk, {
+            multiline: this.ruleArguments.indexOf(OPTION_MULTILINE) !== -1
+        });
     }
 }
 
@@ -65,20 +67,36 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { multiline } } = ctx;
+    const {
+        sourceFile,
+        options: { multiline }
+    } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (utils.isArrowFunction(node) && utils.isBlock(node.body)) {
             const expr = getSimpleReturnExpression(node.body);
-            if (expr !== undefined && (multiline || utils.isSameLine(sourceFile, node.body.getStart(sourceFile), node.body.end))) {
+            if (
+                expr !== undefined &&
+                (multiline ||
+                    utils.isSameLine(sourceFile, node.body.getStart(sourceFile), node.body.end))
+            ) {
                 const isObjectLiteral = expr.kind === ts.SyntaxKind.ObjectLiteralExpression;
-                ctx.addFailureAtNode(node.body, Rule.FAILURE_STRING(isObjectLiteral), createFix(node, node.body, expr, sourceFile.text));
+                ctx.addFailureAtNode(
+                    node.body,
+                    Rule.FAILURE_STRING(isObjectLiteral),
+                    createFix(node, node.body, expr, sourceFile.text)
+                );
             }
         }
         return ts.forEachChild(node, cb);
     });
 }
 
-function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, expr: ts.Expression, text: string): Lint.Fix | undefined {
+function createFix(
+    arrowFunction: ts.FunctionLikeDeclaration,
+    body: ts.Block,
+    expr: ts.Expression,
+    text: string
+): Lint.Fix | undefined {
     const statement = expr.parent!;
     const returnKeyword = utils.getChildOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
     const arrow = utils.getChildOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
@@ -86,21 +104,31 @@ function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, ex
     const closeBrace = utils.getChildOfKind(body, ts.SyntaxKind.CloseBraceToken)!;
     const semicolon = utils.getChildOfKind(statement, ts.SyntaxKind.SemicolonToken);
 
-    const anyComments = hasComments(arrow) || hasComments(openBrace) || hasComments(statement) || hasComments(returnKeyword) ||
-        hasComments(expr) || (semicolon !== undefined && hasComments(semicolon)) || hasComments(closeBrace);
-    return anyComments ? undefined : [
-        // Object literal must be wrapped in `()`
-        ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression ? [
-            Lint.Replacement.appendText(expr.getStart(), "("),
-            Lint.Replacement.appendText(expr.getEnd(), ")"),
-        ] : []),
-        // " {"
-        Lint.Replacement.deleteFromTo(arrow.end, openBrace.end),
-        // "return "
-        Lint.Replacement.deleteFromTo(statement.getStart(), expr.getStart()),
-        // " }" (may include semicolon)
-        Lint.Replacement.deleteFromTo(expr.end, closeBrace.end),
-    ];
+    const anyComments =
+        hasComments(arrow) ||
+        hasComments(openBrace) ||
+        hasComments(statement) ||
+        hasComments(returnKeyword) ||
+        hasComments(expr) ||
+        (semicolon !== undefined && hasComments(semicolon)) ||
+        hasComments(closeBrace);
+    return anyComments
+        ? undefined
+        : [
+              // Object literal must be wrapped in `()`
+              ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression
+                  ? [
+                        Lint.Replacement.appendText(expr.getStart(), "("),
+                        Lint.Replacement.appendText(expr.getEnd(), ")")
+                    ]
+                  : []),
+              // " {"
+              Lint.Replacement.deleteFromTo(arrow.end, openBrace.end),
+              // "return "
+              Lint.Replacement.deleteFromTo(statement.getStart(), expr.getStart()),
+              // " }" (may include semicolon)
+              Lint.Replacement.deleteFromTo(expr.end, closeBrace.end)
+          ];
 
     function hasComments(node: ts.Node): boolean {
         return hasCommentAfterPosition(text, node.getEnd());
@@ -109,7 +137,8 @@ function createFix(arrowFunction: ts.FunctionLikeDeclaration, body: ts.Block, ex
 
 /** Given `{ return x; }`, return `x`. */
 function getSimpleReturnExpression(block: ts.Block): ts.Expression | undefined {
-    return block.statements.length === 1 && block.statements[0].kind === ts.SyntaxKind.ReturnStatement
+    return block.statements.length === 1 &&
+        block.statements[0].kind === ts.SyntaxKind.ReturnStatement
         ? (block.statements[0] as ts.ReturnStatement).expression
         : undefined;
 }

@@ -23,7 +23,10 @@ import { camelize } from "./utils";
 
 const CORE_FORMATTERS_DIRECTORY = path.resolve(__dirname, "formatters");
 
-export function findFormatter(name: string | FormatterConstructor, formattersDirectory?: string): FormatterConstructor | undefined {
+export function findFormatter(
+    name: string | FormatterConstructor,
+    formattersDirectory?: string
+): FormatterConstructor | undefined {
     if (typeof name === "function") {
         return name;
     } else if (typeof name === "string") {
@@ -52,7 +55,11 @@ export function findFormatter(name: string | FormatterConstructor, formattersDir
     }
 }
 
-function loadFormatter(directory: string, name: string, isCore?: boolean): FormatterConstructor | undefined {
+function loadFormatter(
+    directory: string,
+    name: string,
+    isCore?: boolean
+): FormatterConstructor | undefined {
     const formatterPath = path.resolve(path.join(directory, name));
     let fullPath: string;
     if (isCore) {
@@ -75,7 +82,7 @@ function loadFormatterModule(name: string): FormatterConstructor | undefined {
     let src: string;
     try {
         // first try to find a module in the dependencies of the currently linted project
-        src = resolve.sync(name, {basedir: process.cwd()});
+        src = resolve.sync(name, { basedir: process.cwd() });
     } catch {
         try {
             // if there is no local module, try relative to the installation of TSLint (might be global)

@@ -51,21 +51,21 @@ export class Rule extends Lint.Rules.TypedRule {
                 oneOf: [
                     {
                         type: "string",
-                        enum: ["check-parameters"],
+                        enum: ["check-parameters"]
                     },
                     {
                         type: "object",
                         properties: {
-                            "ignore-pattern": {type: "string"},
+                            "ignore-pattern": { type: "string" }
                         },
-                        additionalProperties: false,
-                    },
-                ],
+                        additionalProperties: false
+                    }
+                ]
             },
             minLength: 0,
-            maxLength: 3,
+            maxLength: 3
         },
-        optionExamples: [true, [true, {"ignore-pattern": "^_"}]],
+        optionExamples: [true, [true, { "ignore-pattern": "^_" }]],
         rationale: Lint.Utils.dedent`
             Variables that are declared and not used anywhere in code are likely an error due to incomplete refactoring.
             Such variables take up space in the code, are mild performance pains, and can lead to confusion by readers.
@@ -75,7 +75,7 @@ export class Rule extends Lint.Rules.TypedRule {
         requiresTypeInfo: true,
         deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
             ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
-            : undefined,
+            : undefined
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -107,7 +107,10 @@ function parseOptions(options: any[]): Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
-    const { sourceFile, options: { checkParameters, ignorePattern } } = ctx;
+    const {
+        sourceFile,
+        options: { checkParameters, ignorePattern }
+    } = ctx;
     const unusedCheckedProgram = getUnusedCheckedProgram(program, checkParameters);
     const diagnostics = ts.getPreEmitDiagnostics(unusedCheckedProgram, sourceFile);
     const checker = unusedCheckedProgram.getTypeChecker(); // Doesn't matter which program is used for this.
@@ -117,14 +120,22 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
     const importSpecifierFailures = new Map<ts.Identifier, string>();
 
     for (const diag of diagnostics) {
-        if (diag.start === undefined) { continue; }
+        if (diag.start === undefined) {
+            continue;
+        }
         const kind = getUnusedDiagnostic(diag);
-        if (kind === undefined) { continue; }
+        if (kind === undefined) {
+            continue;
+        }
 
         const failure = ts.flattenDiagnosticMessageText(diag.messageText, "\n");
 
         // BUG: this means imports / destructures with all (2+) unused variables don't respect ignore pattern
-        if (ignorePattern !== undefined && kind !== UnusedKind.DECLARATION && kind !== UnusedKind.ALL_DESTRUCTURES) {
+        if (
+            ignorePattern !== undefined &&
+            kind !== UnusedKind.DECLARATION &&
+            kind !== UnusedKind.ALL_DESTRUCTURES
+        ) {
             const varName = /'(.*)'/.exec(failure)![1];
             if (ignorePattern.test(varName)) {
                 continue;
@@ -161,8 +172,12 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program): void {
  * - If all of the import specifiers in an import are unused, add a combined failure for them all.
  * - Unused imports are fixable.
  */
-function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Map<ts.Identifier, string>, sourceFile: ts.SourceFile) {
-    forEachImport(sourceFile, (importNode) => {
+function addImportSpecifierFailures(
+    ctx: Lint.WalkContext<Options>,
+    failures: Map<ts.Identifier, string>,
+    sourceFile: ts.SourceFile
+) {
+    forEachImport(sourceFile, importNode => {
         if (importNode.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             tryRemoveAll(importNode.name);
             return;
@@ -179,15 +194,21 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
             return;
         }
 
-        const allNamedBindingsAreFailures = namedBindings === undefined || namedBindings.elements.every((e) => failures.has(e.name));
+        const allNamedBindingsAreFailures =
+            namedBindings === undefined || namedBindings.elements.every(e => failures.has(e.name));
         if (namedBindings !== undefined && allNamedBindingsAreFailures) {
             for (const e of namedBindings.elements) {
                 failures.delete(e.name);
             }
         }
 
-        if ((defaultName === undefined || failures.has(defaultName)) && allNamedBindingsAreFailures) {
-            if (defaultName !== undefined) { failures.delete(defaultName); }
+        if (
+            (defaultName === undefined || failures.has(defaultName)) &&
+            allNamedBindingsAreFailures
+        ) {
+            if (defaultName !== undefined) {
+                failures.delete(defaultName);
+            }
             removeAll(importNode, "All imports on this line are unused.");
             return;
         }
@@ -196,7 +217,10 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
             const failure = tryDelete(defaultName);
             if (failure !== undefined) {
                 const start = defaultName.getStart();
-                const end = namedBindings !== undefined ? namedBindings.getStart() : importNode.moduleSpecifier.getStart();
+                const end =
+                    namedBindings !== undefined
+                        ? namedBindings.getStart()
+                        : importNode.moduleSpecifier.getStart();
                 const fix = Lint.Replacement.deleteFromTo(start, end);
                 ctx.addFailureAtNode(defaultName, failure, fix);
             }
@@ -204,7 +228,8 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
 
         if (namedBindings !== undefined) {
             if (allNamedBindingsAreFailures) {
-                const start = defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
+                const start =
+                    defaultName !== undefined ? defaultName.getEnd() : namedBindings.getStart();
                 const fix = Lint.Replacement.deleteFromTo(start, namedBindings.getEnd());
                 const failure = "All named bindings are unused.";
                 ctx.addFailureAtNode(namedBindings, failure, fix);
@@ -219,8 +244,12 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
 
                     const prevElement = elements[i - 1];
                     const nextElement = elements[i + 1];
-                    const start = prevElement !== undefined ? prevElement.getEnd() : element.getStart();
-                    const end = nextElement !== undefined && prevElement == undefined ? nextElement.getStart() : element.getEnd();
+                    const start =
+                        prevElement !== undefined ? prevElement.getEnd() : element.getStart();
+                    const end =
+                        nextElement !== undefined && prevElement == undefined
+                            ? nextElement.getStart()
+                            : element.getEnd();
                     const fix = Lint.Replacement.deleteFromTo(start, end);
                     ctx.addFailureAtNode(element.name, failure, fix);
                 }
@@ -239,13 +268,17 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
             let end = importNode.getEnd();
             utils.forEachToken(
                 importNode,
-                (token) => {
+                token => {
                     ts.forEachTrailingCommentRange(
-                        ctx.sourceFile.text, token.end, (_, commentEnd, __) => {
+                        ctx.sourceFile.text,
+                        token.end,
+                        (_, commentEnd, __) => {
                             end = commentEnd;
-                        });
+                        }
+                    );
                 },
-                ctx.sourceFile);
+                ctx.sourceFile
+            );
             if (isEntireLine(start, end)) {
                 end = getNextLineStart(end);
             }
@@ -255,8 +288,10 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
         }
 
         function isEntireLine(start: number, end: number): boolean {
-            return ctx.sourceFile.getLineAndCharacterOfPosition(start).character === 0 &&
-                ctx.sourceFile.getLineEndOfPosition(end) === end;
+            return (
+                ctx.sourceFile.getLineAndCharacterOfPosition(start).character === 0 &&
+                ctx.sourceFile.getLineEndOfPosition(end) === end
+            );
         }
 
         function getNextLineStart(position: number): number {
@@ -288,7 +323,11 @@ function addImportSpecifierFailures(ctx: Lint.WalkContext<Options>, failures: Ma
  * Ignore this import if it's used as an implicit type somewhere.
  * Workround for https://github.com/Microsoft/TypeScript/issues/9944
  */
-function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile, checker: ts.TypeChecker): boolean {
+function isImportUsed(
+    importSpecifier: ts.Identifier,
+    sourceFile: ts.SourceFile,
+    checker: ts.TypeChecker
+): boolean {
     const importedSymbol = checker.getSymbolAtLocation(importSpecifier);
     if (importedSymbol === undefined) {
         return false;
@@ -299,25 +338,33 @@ function isImportUsed(importSpecifier: ts.Identifier, sourceFile: ts.SourceFile,
         return false;
     }
 
-    return ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
-        if (isImportLike(child)) {
-            return false;
-        }
+    return (
+        ts.forEachChild(sourceFile, function cb(child): boolean | undefined {
+            if (isImportLike(child)) {
+                return false;
+            }
 
-        const type = getImplicitType(child, checker);
-        // TODO: checker.typeEquals https://github.com/Microsoft/TypeScript/issues/13502
-        if (type !== undefined && checker.typeToString(type) === checker.symbolToString(symbol)) {
-            return true;
-        }
+            const type = getImplicitType(child, checker);
+            // TODO: checker.typeEquals https://github.com/Microsoft/TypeScript/issues/13502
+            if (
+                type !== undefined &&
+                checker.typeToString(type) === checker.symbolToString(symbol)
+            ) {
+                return true;
+            }
 
-        return ts.forEachChild(child, cb);
-    }) === true;
+            return ts.forEachChild(child, cb);
+        }) === true
+    );
 }
 
 function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | undefined {
-    if ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) &&
-        node.type === undefined && node.name.kind === ts.SyntaxKind.Identifier ||
-        utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier) {
+    if (
+        ((utils.isPropertyDeclaration(node) || utils.isVariableDeclaration(node)) &&
+            node.type === undefined &&
+            node.name.kind === ts.SyntaxKind.Identifier) ||
+        (utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier)
+    ) {
         return checker.getTypeAtLocation(node);
     } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
         const sig = checker.getSignatureFromDeclaration(node);
@@ -329,11 +376,17 @@ function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | unde
 
 type ImportLike = ts.ImportDeclaration | ts.ImportEqualsDeclaration;
 function isImportLike(node: ts.Node): node is ImportLike {
-    return node.kind === ts.SyntaxKind.ImportDeclaration || node.kind === ts.SyntaxKind.ImportEqualsDeclaration;
+    return (
+        node.kind === ts.SyntaxKind.ImportDeclaration ||
+        node.kind === ts.SyntaxKind.ImportEqualsDeclaration
+    );
 }
 
-function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | undefined): T | undefined {
-    return ts.forEachChild(sourceFile, (child) => {
+function forEachImport<T>(
+    sourceFile: ts.SourceFile,
+    f: (i: ImportLike) => T | undefined
+): T | undefined {
+    return ts.forEachChild(sourceFile, child => {
         if (isImportLike(child)) {
             const res = f(child);
             if (res !== undefined) {
@@ -344,8 +397,12 @@ function forEachImport<T>(sourceFile: ts.SourceFile, f: (i: ImportLike) => T | u
     });
 }
 
-function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): ReadonlyArray<ts.Identifier> {
-    const imports = forEachImport(sourceFile, (i) => {
+function findImports(
+    pos: number,
+    sourceFile: ts.SourceFile,
+    kind: UnusedKind
+): ReadonlyArray<ts.Identifier> {
+    const imports = forEachImport(sourceFile, i => {
         if (!isInRange(i, pos)) {
             return undefined;
         }
@@ -359,7 +416,10 @@ function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): 
             }
 
             const { name: defaultName, namedBindings } = i.importClause;
-            if (namedBindings !== undefined && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+            if (
+                namedBindings !== undefined &&
+                namedBindings.kind === ts.SyntaxKind.NamespaceImport
+            ) {
                 return [namedBindings.name];
             }
 
@@ -384,12 +444,13 @@ function findImports(pos: number, sourceFile: ts.SourceFile, kind: UnusedKind): 
                     imp.push(defaultName);
                 }
                 if (namedBindings !== undefined) {
-                    imp.push(...namedBindings.elements.map((el) => el.name));
+                    imp.push(...namedBindings.elements.map(el => el.name));
                 }
                 return imp.length > 0 ? imp : undefined;
-            } else if (defaultName !== undefined && (
-                isInRange(defaultName, pos) || namedBindings === undefined // defaultName is the only option
-            )) {
+            } else if (
+                defaultName !== undefined &&
+                (isInRange(defaultName, pos) || namedBindings === undefined) // defaultName is the only option
+            ) {
                 return [defaultName];
             } else if (namedBindings !== undefined) {
                 if (namedBindings.elements.length === 1) {
@@ -416,13 +477,13 @@ const enum UnusedKind {
     VARIABLE_OR_PARAMETER,
     PROPERTY,
     DECLARATION, // Introduced in TS 2.8
-    ALL_DESTRUCTURES, // introduced in TS 2.9
+    ALL_DESTRUCTURES // introduced in TS 2.9
 }
-function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined  {
+function getUnusedDiagnostic(diag: ts.Diagnostic): UnusedKind | undefined {
     // https://github.com/Microsoft/TypeScript/blob/master/src/compiler/diagnosticMessages.json
     switch (diag.code) {
         case 6133: // Pre TS 2.9 "'{0}' is declared but never used.
-                   // TS 2.9+ "'{0}' is declared but its value is never read."
+        // TS 2.9+ "'{0}' is declared but its value is never read."
         case 6196: // TS 2.9+ "'{0}' is declared but never used."
             return UnusedKind.VARIABLE_OR_PARAMETER;
         case 6138:
@@ -456,23 +517,26 @@ function makeUnusedCheckedProgram(program: ts.Program, checkParameters: boolean)
         ...originalOptions,
         noEmit: true,
         noUnusedLocals: true,
-        noUnusedParameters: originalOptions.noUnusedParameters || checkParameters,
+        noUnusedParameters: originalOptions.noUnusedParameters || checkParameters
     };
     const sourceFilesByName = new Map<string, ts.SourceFile>(
-        program.getSourceFiles().map<[string, ts.SourceFile]>((s) => [getCanonicalFileName(s.fileName), s]));
+        program
+            .getSourceFiles()
+            .map<[string, ts.SourceFile]>(s => [getCanonicalFileName(s.fileName), s])
+    );
 
     // tslint:disable object-literal-sort-keys
     return ts.createProgram(Array.from(sourceFilesByName.keys()), options, {
-        fileExists: (f) => sourceFilesByName.has(getCanonicalFileName(f)),
-        readFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!.text,
-        getSourceFile: (f) => sourceFilesByName.get(getCanonicalFileName(f))!,
+        fileExists: f => sourceFilesByName.has(getCanonicalFileName(f)),
+        readFile: f => sourceFilesByName.get(getCanonicalFileName(f))!.text,
+        getSourceFile: f => sourceFilesByName.get(getCanonicalFileName(f))!,
         getDefaultLibFileName: () => ts.getDefaultLibFileName(options),
         writeFile: () => undefined,
         getCurrentDirectory: () => "",
         getDirectories: () => [],
         getCanonicalFileName,
         useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-        getNewLine: () => "\n",
+        getNewLine: () => "\n"
     });
     // tslint:enable object-literal-sort-keys
 

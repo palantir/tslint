@@ -34,12 +34,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_LINEBREAK_STYLE_CRLF}"\` requires CRLF (\`\\r\\n\`) linebreaks`,
         options: {
             type: "string",
-            enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
+            enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF]
         },
         optionExamples: [[true, OPTION_LINEBREAK_STYLE_LF], [true, OPTION_LINEBREAK_STYLE_CRLF]],
         type: "maintainability",
         typescriptOnly: false,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -47,7 +47,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_LF = `Expected linebreak to be '${OPTION_LINEBREAK_STYLE_LF}'`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, this.ruleArguments.indexOf(OPTION_LINEBREAK_STYLE_CRLF) !== -1);
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            this.ruleArguments.indexOf(OPTION_LINEBREAK_STYLE_CRLF) !== -1
+        );
     }
 }
 
@@ -59,10 +63,20 @@ function walk(ctx: Lint.WalkContext<boolean>) {
         const lineEnd = lineStarts[i] - 1;
         if (sourceText[lineEnd - 1] === "\r") {
             if (!expectedCr) {
-                ctx.addFailure(lineStarts[i - 1], lineEnd - 1, Rule.FAILURE_LF, Lint.Replacement.deleteText(lineEnd - 1, 1));
+                ctx.addFailure(
+                    lineStarts[i - 1],
+                    lineEnd - 1,
+                    Rule.FAILURE_LF,
+                    Lint.Replacement.deleteText(lineEnd - 1, 1)
+                );
             }
         } else if (expectedCr) {
-            ctx.addFailure(lineStarts[i - 1], lineEnd, Rule.FAILURE_CRLF, Lint.Replacement.appendText(lineEnd, "\r"));
+            ctx.addFailure(
+                lineStarts[i - 1],
+                lineEnd,
+                Rule.FAILURE_CRLF,
+                Lint.Replacement.appendText(lineEnd, "\r")
+            );
         }
     }
 }

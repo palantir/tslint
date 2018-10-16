@@ -22,7 +22,11 @@ import { Fix, RuleFailure } from "../rule/rule";
 export class WalkContext<T> {
     public readonly failures: RuleFailure[] = [];
 
-    constructor(public readonly sourceFile: ts.SourceFile, public readonly ruleName: string, public readonly options: T) {}
+    constructor(
+        public readonly sourceFile: ts.SourceFile,
+        public readonly ruleName: string,
+        public readonly options: T
+    ) {}
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
     public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
@@ -32,7 +36,14 @@ export class WalkContext<T> {
     public addFailure(start: number, end: number, failure: string, fix?: Fix) {
         const fileLength = this.sourceFile.end;
         this.failures.push(
-            new RuleFailure(this.sourceFile, Math.min(start, fileLength), Math.min(end, fileLength), failure, this.ruleName, fix),
+            new RuleFailure(
+                this.sourceFile,
+                Math.min(start, fileLength),
+                Math.min(end, fileLength),
+                failure,
+                this.ruleName,
+                fix
+            )
         );
     }
 

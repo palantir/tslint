@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -48,13 +48,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (node.kind === ts.SyntaxKind.AwaitExpression && isUnnecessaryAwait(node)) {
-            const {expression} = node as ts.AwaitExpression;
+            const { expression } = node as ts.AwaitExpression;
             const keywordStart = expression.pos - "await".length;
             ctx.addFailure(
                 keywordStart,
                 expression.pos,
                 Rule.FAILURE_STRING,
-                Lint.Replacement.deleteFromTo(keywordStart, expression.getStart(ctx.sourceFile)),
+                Lint.Replacement.deleteFromTo(keywordStart, expression.getStart(ctx.sourceFile))
             );
         }
         return ts.forEachChild(node, cb);
@@ -103,7 +103,7 @@ function isInsideTryBlock(node: ts.Node): boolean {
                 // statements inside the try block always have an error handler, either catch or finally
                 node.parent.tryBlock === node ||
                 // statement inside the catch block only have an error handler if there is a finally block
-                node.parent.finallyBlock !== undefined && node.parent.catchClause === node
+                (node.parent.finallyBlock !== undefined && node.parent.catchClause === node)
             ) {
                 return true;
             }

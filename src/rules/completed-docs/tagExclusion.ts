@@ -31,14 +31,14 @@ export interface IContentTags {
 }
 
 export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
-    private readonly contentTags: IContentTags = this.descriptor.tags === undefined
-        ? {}
-        : this.descriptor.tags.content;
+    private readonly contentTags: IContentTags =
+        this.descriptor.tags === undefined ? {} : this.descriptor.tags.content;
 
     private readonly existenceTags = new Set(
         this.descriptor.tags !== undefined && this.descriptor.tags.existence !== undefined
             ? this.descriptor.tags.existence
-            : undefined);
+            : undefined
+    );
 
     public excludes(node: ts.Node) {
         const documentationNode = this.getDocumentationNode(node);
@@ -75,7 +75,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
             return [];
         }
 
-        const docMatches = nodeText.match((/\/\*\*\s*\n?([^\*]*(\*[^\/])?)*\*\//));
+        const docMatches = nodeText.match(/\/\*\*\s*\n?([^\*]*(\*[^\/])?)*\*\//);
         if (docMatches === null || docMatches.length === 0) {
             return [];
         }
@@ -85,15 +85,13 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
             return [];
         }
 
-        return lines
-            .map((line): [string, string] => {
+        return lines.map(
+            (line): [string, string] => {
                 const body = line.substring(line.indexOf("@"));
                 const firstSpaceIndex = body.search(/\s/);
 
-                return [
-                    body.substring(1, firstSpaceIndex),
-                    body.substring(firstSpaceIndex).trim(),
-                ];
-            });
+                return [body.substring(1, firstSpaceIndex), body.substring(firstSpaceIndex).trim()];
+            }
+        );
     }
 }

@@ -82,21 +82,25 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_VARIABLE_DECLARATION,
                     OPTION_MEMBER_VARIABLE_DECLARATION,
                     OPTION_OBJECT_DESTRUCTURING,
-                    OPTION_ARRAY_DESTRUCTURING,
-                ],
+                    OPTION_ARRAY_DESTRUCTURING
+                ]
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 7
         },
-        optionExamples: [[true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]],
+        optionExamples: [
+            [true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION]
+        ],
         type: "typescript",
         typescriptOnly: true,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new TypedefWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        return this.applyWithWalker(
+            new TypedefWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+        );
     }
 }
 
@@ -110,7 +114,12 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.MethodDeclaration:
                 case ts.SyntaxKind.MethodSignature: {
                     const { name, parameters, type } = node as ts.CallSignatureDeclaration;
-                    this.checkTypeAnnotation("call-signature", name !== undefined ? name : parameters, type, name);
+                    this.checkTypeAnnotation(
+                        "call-signature",
+                        name !== undefined ? name : parameters,
+                        type,
+                        name
+                    );
                     break;
                 }
                 case ts.SyntaxKind.ArrowFunction:
@@ -175,9 +184,11 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
-        if (parent!.kind === ts.SyntaxKind.CatchClause
-                || parent!.parent!.kind === ts.SyntaxKind.ForInStatement
-                || parent!.parent!.kind === ts.SyntaxKind.ForOfStatement) {
+        if (
+            parent!.kind === ts.SyntaxKind.CatchClause ||
+            parent!.parent!.kind === ts.SyntaxKind.ForInStatement ||
+            parent!.parent!.kind === ts.SyntaxKind.ForOfStatement
+        ) {
             return;
         }
 
@@ -196,12 +207,15 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkTypeAnnotation(
-            option: Option,
-            location: ts.Node | ts.NodeArray<ts.Node>,
-            typeAnnotation: ts.TypeNode | undefined,
-            name?: ts.Node): void {
+        option: Option,
+        location: ts.Node | ts.NodeArray<ts.Node>,
+        typeAnnotation: ts.TypeNode | undefined,
+        name?: ts.Node
+    ): void {
         if (this.options[option] === true && typeAnnotation === undefined) {
-            const failure = `expected ${option}${name === undefined ? "" : `: '${name.getText()}'`} to have a typedef`;
+            const failure = `expected ${option}${
+                name === undefined ? "" : `: '${name.getText()}'`
+            } to have a typedef`;
             if (isNodeArray(location)) {
                 this.addFailure(location.pos - 1, location.end + 1, failure);
             } else {
@@ -215,6 +229,8 @@ function isTypedPropertyDeclaration(node: ts.Node): boolean {
     return utils.isPropertyDeclaration(node) && node.type !== undefined;
 }
 
-export function isNodeArray(nodeOrArray: ts.Node | ts.NodeArray<ts.Node>): nodeOrArray is ts.NodeArray<ts.Node> {
+export function isNodeArray(
+    nodeOrArray: ts.Node | ts.NodeArray<ts.Node>
+): nodeOrArray is ts.NodeArray<ts.Node> {
     return Array.isArray(nodeOrArray);
 }

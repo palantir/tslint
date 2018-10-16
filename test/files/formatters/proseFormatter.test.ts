@@ -1,4 +1,4 @@
-module ProseModule {
+namespace ProseModule {
     export class ProseClass {
         private name: string;
 

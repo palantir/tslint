@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { getPropertyName, isConstructSignatureDeclaration, isMethodDeclaration, isMethodSignature, isTypeReferenceNode } from "tsutils";
+import {
+    getPropertyName,
+    isConstructSignatureDeclaration,
+    isMethodDeclaration,
+    isMethodSignature,
+    isTypeReferenceNode
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +30,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-misused-new",
-        description: "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
+        description:
+            "Warns on apparent attempts to define constructors for interfaces or `new` for classes.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -34,12 +41,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             If you're trying to describe a function known to be a class, it's typically better to \`declare class\`.
         `,
         type: "functionality",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_INTERFACE = "Interfaces cannot be constructed, only classes. Did you mean `declare class`?";
-    public static FAILURE_STRING_CLASS = '`new` in a class is a method named "new". Did you mean `constructor`?';
+    public static FAILURE_STRING_INTERFACE =
+        "Interfaces cannot be constructed, only classes. Did you mean `declare class`?";
+    public static FAILURE_STRING_CLASS =
+        '`new` in a class is a method named "new". Did you mean `constructor`?';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -53,9 +62,11 @@ function walk(ctx: Lint.WalkContext<void>) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INTERFACE);
             }
         } else if (isMethodDeclaration(node)) {
-            if (node.body === undefined &&
+            if (
+                node.body === undefined &&
                 getPropertyName(node.name) === "new" &&
-                returnTypeMatchesParent(node.parent as ts.ClassLikeDeclaration, node)) {
+                returnTypeMatchesParent(node.parent as ts.ClassLikeDeclaration, node)
+            ) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING_CLASS);
             }
         } else if (isConstructSignatureDeclaration(node)) {
@@ -67,9 +78,15 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function returnTypeMatchesParent(parent: { name?: ts.Identifier }, decl: ts.SignatureDeclaration): boolean {
+function returnTypeMatchesParent(
+    parent: { name?: ts.Identifier },
+    decl: ts.SignatureDeclaration
+): boolean {
     if (parent.name === undefined || decl.type === undefined || !isTypeReferenceNode(decl.type)) {
         return false;
     }
-    return decl.type.typeName.kind === ts.SyntaxKind.Identifier && decl.type.typeName.text === parent.name.text;
+    return (
+        decl.type.typeName.kind === ts.SyntaxKind.Identifier &&
+        decl.type.typeName.text === parent.name.text
+    );
 }

@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -66,8 +66,10 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                     ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
-        } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
-                   (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken) {
+        } else if (
+            node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+            (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

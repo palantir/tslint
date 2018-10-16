@@ -36,22 +36,25 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_FOR_LOOP],
+                enum: [OPTION_IGNORE_FOR_LOOP]
             },
             minLength: 0,
-            maxLength: 1,
+            maxLength: 1
         },
         optionExamples: [true, [true, OPTION_IGNORE_FOR_LOOP]],
         type: "style",
         typescriptOnly: false,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Multiple variable declarations in the same statement are forbidden";
+    public static FAILURE_STRING =
+        "Multiple variable declarations in the same statement are forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { ignoreForLoop: this.ruleArguments.indexOf(OPTION_IGNORE_FOR_LOOP) !== -1 });
+        return this.applyWithFunction(sourceFile, walk, {
+            ignoreForLoop: this.ruleArguments.indexOf(OPTION_IGNORE_FOR_LOOP) !== -1
+        });
     }
 }
 
@@ -61,9 +64,11 @@ function walk(ctx: Lint.WalkContext<{ ignoreForLoop: boolean }>): void {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else if (isForStatement(node) && !ctx.options.ignoreForLoop) {
             const { initializer } = node;
-            if (initializer !== undefined
-                    && initializer.kind === ts.SyntaxKind.VariableDeclarationList
-                    && (initializer as ts.VariableDeclarationList).declarations.length > 1) {
+            if (
+                initializer !== undefined &&
+                initializer.kind === ts.SyntaxKind.VariableDeclarationList &&
+                (initializer as ts.VariableDeclarationList).declarations.length > 1
+            ) {
                 ctx.addFailureAtNode(initializer, Rule.FAILURE_STRING);
             }
         }

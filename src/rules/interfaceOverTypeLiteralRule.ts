@@ -24,13 +24,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-over-type-literal",
         description: "Prefer an interface declaration over a type literal (`type T = { ... }`)",
-        rationale: "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
+        rationale:
+            "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "style",
         typescriptOnly: true,
-        hasFix: true,
+        hasFix: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -49,7 +50,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 // "type" -> "interface"
                 new Lint.Replacement(typeKeyword.end - 4, 4, "interface"),
                 // remove "=" and trivia up to the open curly brace of the type literal
-                Lint.Replacement.deleteFromTo(node.type.pos - 1, node.type.members.pos - 1),
+                Lint.Replacement.deleteFromTo(node.type.pos - 1, node.type.members.pos - 1)
             ];
             // remove trailing semicolon if exists
             if (ctx.sourceFile.text[node.end - 1] === ";") {

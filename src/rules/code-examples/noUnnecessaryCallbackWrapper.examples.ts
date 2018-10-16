@@ -33,6 +33,6 @@ export const codeExamples = [
             const handleContent = (content) => console.log('Handle content:', content);
             const handleError = (error) => console.log('Handle error:', error);
             promise.then((content) => handleContent(content)).catch((error) => handleError(error));
-        `,
-    },
+        `
+    }
 ];

@@ -20,7 +20,15 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const LEGAL_TYPEOF_RESULTS = new Set(["undefined", "string", "boolean", "number", "function", "object", "symbol"]);
+const LEGAL_TYPEOF_RESULTS = new Set([
+    "undefined",
+    "string",
+    "boolean",
+    "number",
+    "function",
+    "object",
+    "symbol"
+]);
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,12 +42,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
         deprecationMessage: !/^2\.1\./.test(ts.version)
             ? "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
-            : "",
+            : ""
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING =
-        `'typeof' expression must be compared to one of: ${Array.from(LEGAL_TYPEOF_RESULTS).map((x) => `"${x}"`).join(", ")}`;
+    public static FAILURE_STRING = `'typeof' expression must be compared to one of: ${Array.from(
+        LEGAL_TYPEOF_RESULTS
+    )
+        .map(x => `"${x}"`)
+        .join(", ")}`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -50,7 +61,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (tsutils.isBinaryExpression(node)) {
             const { operatorToken, left, right } = node;
-            if (Lint.getEqualsKind(operatorToken) !== undefined && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
+            if (
+                Lint.getEqualsKind(operatorToken) !== undefined &&
+                (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))
+            ) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }

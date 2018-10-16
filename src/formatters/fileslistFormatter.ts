@@ -25,7 +25,7 @@ export class Formatter extends AbstractFormatter {
         formatterName: "filesList",
         description: "Lists files containing lint errors.",
         sample: "directory/myFile.ts",
-        consumer: "machine",
+        consumer: "machine"
     };
     /* tslint:enable:object-literal-sort-keys */
 

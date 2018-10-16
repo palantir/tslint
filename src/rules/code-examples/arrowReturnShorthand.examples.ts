@@ -20,7 +20,8 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
+        description:
+            "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
         config: Lint.Utils.dedent`
             "rules": { "arrow-return-shorthand": true }
         `,
@@ -35,10 +36,11 @@ export const codeExamples = [
             const calc2 = (x: number, y: number) => {
                 return { add: x + y, sub: x - y, mul: x * y }
             };
-       `,
+       `
     },
     {
-        description: "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
+        description:
+            "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
         config: Lint.Utils.dedent`
             "rules": { "arrow-return-shorthand": [true, "multiline"] }
         `,
@@ -52,6 +54,6 @@ export const codeExamples = [
             const calc2 = (x: number, y: number) => {
                 return { add: x + y, sub: x - y, mul: x * y }
             };
-       `,
-    },
+       `
+    }
 ];

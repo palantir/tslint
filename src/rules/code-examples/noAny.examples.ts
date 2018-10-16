@@ -29,6 +29,6 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             let foo: any;
-        `,
-    },
+        `
+    }
 ];

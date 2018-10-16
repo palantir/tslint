@@ -41,15 +41,46 @@ describe("JUnit Formatter", () => {
 
         const failures = [
             createFailure(sourceFile1, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
-            createFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile1,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error"
+            ),
+            createFailure(
+                sourceFile1,
+                maxPosition1 - 1,
+                maxPosition1,
+                "last failure",
+                "last-name",
+                undefined,
+                "error"
+            ),
             createFailure(sourceFile2, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape", undefined, "warning"),
-            createFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name", undefined, "warning"),
+            createFailure(
+                sourceFile2,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "warning"
+            ),
+            createFailure(
+                sourceFile2,
+                maxPosition2 - 1,
+                maxPosition2,
+                "last failure",
+                "last-name",
+                undefined,
+                "warning"
+            )
         ];
 
-        const expectedResult =
-            `<?xml version="1.0" encoding="utf-8"?>
+        const expectedResult = `<?xml version="1.0" encoding="utf-8"?>
             <testsuites package="tslint">
                 <testsuite name="${TEST_FILE_1}">
                     <testcase name="Line 1, Column 1: first-name">
@@ -80,6 +111,9 @@ describe("JUnit Formatter", () => {
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.deepEqual(result, '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint"></testsuites>');
+        assert.deepEqual(
+            result,
+            '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint"></testsuites>'
+        );
     });
 });

@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -54,9 +54,11 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (node.kind === ts.SyntaxKind.Constructor) {
             for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
                 if (isParameterProperty(parameter)) {
-                    ctx.addFailure(parameter.getStart(ctx.sourceFile),
-                                   parameter.name.pos,
-                                   Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)));
+                    ctx.addFailure(
+                        parameter.getStart(ctx.sourceFile),
+                        parameter.name.pos,
+                        Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile))
+                    );
                 }
             }
         }

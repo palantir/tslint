@@ -37,11 +37,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_NEVER}"\` requires interface names to not have an "I" prefix`,
         options: {
             type: "string",
-            enum: [OPTION_ALWAYS, OPTION_NEVER],
+            enum: [OPTION_ALWAYS, OPTION_NEVER]
         },
         optionExamples: [[true, OPTION_ALWAYS], [true, OPTION_NEVER]],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -49,12 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_NO_PREFIX = 'interface name must not have an "I" prefix';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1 });
+        return this.applyWithFunction(sourceFile, walk, {
+            never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1
+        });
     }
 }
 
 function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
-    const { options: { never } } = ctx;
+    const {
+        options: { never }
+    } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isInterfaceDeclaration(node)) {
             const { name } = node;

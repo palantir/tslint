@@ -33,7 +33,7 @@ export const codeExamples = [
             const x: number = 1;
             const y: number = 1;
             const myString: string = x + ' is equals ' + y;
-        `,
+        `
     },
     {
         description: "Enforces the use of template strings, but allows up to one concatenation.",
@@ -50,6 +50,6 @@ export const codeExamples = [
             const x: number = 1;
             const y: number = 1;
             const myString: string = x + ' is equals ' + y;
-        `,
-    },
+        `
+    }
 ];

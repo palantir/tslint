@@ -71,7 +71,7 @@ const options: Option[] = [
             as in the non-list case, and the rest of the list are options passed
             to the rule that will determine what it checks for (such as number
             of characters for the max-line-length rule, or what functions to ban
-            for the ban rule).`,
+            for the ban rule).`
     },
     {
         short: "e",
@@ -81,13 +81,13 @@ const options: Option[] = [
         description: dedent`
             A filename or glob which indicates files to exclude from linting.
             This option can be supplied multiple times if you need multiple
-            globs to indicate which files to exclude.`,
+            globs to indicate which files to exclude.`
     },
     {
         name: "fix",
         type: "boolean",
         describe: "fixes linting errors for select rules (this may overwrite linted files)",
-        description: "Fixes linting errors for select rules. This may overwrite linted files.",
+        description: "Fixes linting errors for select rules. This may overwrite linted files."
     },
     {
         name: "force",
@@ -95,14 +95,14 @@ const options: Option[] = [
         describe: "return status code 0 even if there are lint errors",
         description: dedent`
             Return status code 0 even if there are any lint errors.
-            Useful while running as npm script.`,
+            Useful while running as npm script.`
     },
     {
         short: "i",
         name: "init",
         type: "boolean",
         describe: "generate a tslint.json config file in the current working directory",
-        description: "Generates a tslint.json config file in the current working directory.",
+        description: "Generates a tslint.json config file in the current working directory."
     },
     {
         short: "o",
@@ -111,13 +111,13 @@ const options: Option[] = [
         describe: "output file",
         description: dedent`
             A filename to output the results to. By default, tslint outputs to
-            stdout, which is usually the console where you're running it from.`,
+            stdout, which is usually the console where you're running it from.`
     },
     {
         name: "outputAbsolutePaths",
         type: "boolean",
         describe: "whether or not outputted file paths are absolute",
-        description: "If true, all paths in the output will be absolute.",
+        description: "If true, all paths in the output will be absolute."
     },
     {
         short: "r",
@@ -129,7 +129,7 @@ const options: Option[] = [
             tslint will always check its default rules directory, in
             node_modules/tslint/lib/rules, before checking the user-provided
             rules directory, so rules in the user-provided rules directory
-            with the same name as the base rules will not be loaded.`,
+            with the same name as the base rules will not be loaded.`
     },
     {
         short: "s",
@@ -142,13 +142,14 @@ const options: Option[] = [
             writing it to stdout or the file passed in --out. The default
             directory, node_modules/tslint/build/formatters, will always be
             checked first, so user-created formatters with the same names
-            as the base formatters will not be loaded.`,
+            as the base formatters will not be loaded.`
     },
     {
         short: "t",
         name: "format",
         type: "string",
-        describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
+        describe:
+            "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
         description: dedent`
             The formatter to use to format the results of the linter before
             outputting it to stdout or the file passed in --out. The core
@@ -156,7 +157,7 @@ const options: Option[] = [
             and verbose. prose is the default if this option is not used.
             Other built-in options include pmd, msbuild, checkstyle, and vso.
             Additional formatters can be added and used if the --formatters-dir
-            option is set.`,
+            option is set.`
     },
     {
         name: "test",
@@ -167,7 +168,7 @@ const options: Option[] = [
             match the expected output in .lint files. Automatically loads the
             tslint.json files in the directories as the configuration file for
             the tests. See the full tslint documentation for more details on how
-            this can be used to test custom rules.`,
+            this can be used to test custom rules.`
     },
     {
         short: "p",
@@ -178,14 +179,14 @@ const options: Option[] = [
             The path to the tsconfig.json file or to the directory containing
             the tsconfig.json file. The file will be used to determine which
             files will be linted. This flag also enables rules that require the
-            type checker.`,
+            type checker.`
     },
     {
         short: "q",
         name: "quiet",
         type: "boolean",
         describe: "hide errors on lint",
-        description: "If true, hides warnings from linting output.",
+        description: "If true, hides warnings from linting output."
     },
     {
         name: "type-check",
@@ -193,8 +194,8 @@ const options: Option[] = [
         describe: "(deprecated) check for type errors before linting the project",
         description: dedent`
             (deprecated) Checks for type errors before linting a project.
-            --project must be specified in order to enable type checking.`,
-    },
+            --project must be specified in order to enable type checking.`
+    }
 ];
 
 const builtinOptions: Option[] = [
@@ -203,15 +204,15 @@ const builtinOptions: Option[] = [
         name: "version",
         type: "boolean",
         describe: "current version",
-        description: "The current version of tslint.",
+        description: "The current version of tslint."
     },
     {
         short: "h",
         name: "help",
         type: "boolean",
         describe: "display detailed help",
-        description: "Prints this help message.",
-    },
+        description: "Prints this help message."
+    }
 ];
 
 commander.version(Linter.VERSION, "-v, --version");
@@ -227,9 +228,21 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.concat(builtinOptions).map((o) =>
-        `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
-    console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
+    const optionDetails = options
+        .concat(builtinOptions)
+        .map(
+            o =>
+                `${optionUsageTag(o)}:${
+                    o.description.startsWith("\n")
+                        ? o.description.replace(/\n/g, indent)
+                        : indent + o.description
+                }`
+        );
+    console.log(
+        `tslint accepts the following commandline options:\n\n    ${optionDetails.join(
+            "\n\n    "
+        )}\n\n`
+    );
 });
 
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
@@ -238,24 +251,34 @@ commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }
-const argv = commander.opts() as any as Argv;
+const argv = (commander.opts() as any) as Argv;
 
-if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (
+    !(
+        argv.init ||
+        argv.test !== undefined ||
+        argv.project !== undefined ||
+        commander.args.length > 0
+    )
+) {
     console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 
 if (argv.typeCheck) {
-    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
+    console.warn(
+        "--type-check is deprecated. You only need --project to enable rules which need type information."
+    );
     if (argv.project === undefined) {
         console.error("--project must be specified in order to enable type checking.");
         process.exit(1);
     }
 }
 
-const outputStream: NodeJS.WritableStream = argv.out === undefined
-    ? process.stdout
-    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
+const outputStream: NodeJS.WritableStream =
+    argv.out === undefined
+        ? process.stdout
+        : fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
 
 run(
     {
@@ -273,7 +296,7 @@ run(
         quiet: argv.quiet,
         rulesDirectory: argv.rulesDir,
         test: argv.test,
-        typeCheck: argv.typeCheck,
+        typeCheck: argv.typeCheck
     },
     {
         log(m) {
@@ -281,16 +304,18 @@ run(
         },
         error(m) {
             process.stderr.write(m);
-        },
-    })
-    .then((rc) => {
+        }
+    }
+)
+    .then(rc => {
         process.exitCode = rc;
-    }).catch((e) => {
+    })
+    .catch(e => {
         console.error(e);
         process.exitCode = 1;
     });
 
-function optionUsageTag({short, name}: Option) {
+function optionUsageTag({ short, name }: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
 }
 

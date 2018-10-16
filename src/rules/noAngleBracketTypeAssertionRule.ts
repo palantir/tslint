@@ -34,11 +34,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.";
+    public static FAILURE_STRING =
+        "Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -48,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAssertion(node)) {
-            let {expression} = node;
+            let { expression } = node;
             const start = node.getStart(ctx.sourceFile);
             const addParens = needsParens(node);
             let replaceText = ` as ${node.type.getText(ctx.sourceFile)}${addParens ? ")" : ""}`;
@@ -58,7 +59,11 @@ function walk(ctx: Lint.WalkContext<void>) {
             }
             ctx.addFailure(start, node.end, Rule.FAILURE_STRING, [
                 Lint.Replacement.appendText(node.end, replaceText),
-                Lint.Replacement.replaceFromTo(start, expression.getStart(ctx.sourceFile), addParens ? "(" : ""),
+                Lint.Replacement.replaceFromTo(
+                    start,
+                    expression.getStart(ctx.sourceFile),
+                    addParens ? "(" : ""
+                )
             ]);
             return cb(expression);
         }
@@ -68,6 +73,9 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function needsParens(node: ts.TypeAssertion): boolean {
     const parent = node.parent!;
-    return isBinaryExpression(parent) &&
-        (parent.operatorToken.kind === ts.SyntaxKind.AmpersandToken || parent.operatorToken.kind === ts.SyntaxKind.BarToken);
+    return (
+        isBinaryExpression(parent) &&
+        (parent.operatorToken.kind === ts.SyntaxKind.AmpersandToken ||
+            parent.operatorToken.kind === ts.SyntaxKind.BarToken)
+    );
 }

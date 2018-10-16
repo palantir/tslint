@@ -22,7 +22,7 @@ import {
     isIdentifier,
     isMethodDeclaration,
     isPropertyAssignment,
-    isShorthandPropertyAssignment,
+    isShorthandPropertyAssignment
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
@@ -39,11 +39,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.`,
         options: {
             type: "string",
-            enum: [OPTION_NEVER],
+            enum: [OPTION_NEVER]
         },
         optionExamples: [true, [true, OPTION_NEVER]],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             sourceFile,
             this.ruleArguments.indexOf(OPTION_NEVER) === -1
                 ? enforceShorthandWalker
-                : disallowShorthandWalker,
+                : disallowShorthandWalker
         );
     }
 }
@@ -67,13 +67,16 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
             ctx.addFailureAtNode(
                 node.name,
                 Rule.SHORTHAND_ASSIGNMENT,
-                Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `),
+                Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `)
             );
-        } else if (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+        } else if (
+            isMethodDeclaration(node) &&
+            node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression
+        ) {
             ctx.addFailureAtNode(
                 node.name,
                 Rule.SHORTHAND_ASSIGNMENT,
-                fixShorthandMethodDeclaration(node, ctx.sourceFile),
+                fixShorthandMethodDeclaration(node, ctx.sourceFile)
             );
         }
         return ts.forEachChild(node, cb);
@@ -83,23 +86,32 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
 function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
-            if (node.name.kind === ts.SyntaxKind.Identifier &&
+            if (
+                node.name.kind === ts.SyntaxKind.Identifier &&
                 isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text) {
+                node.name.text === node.initializer.text
+            ) {
                 ctx.addFailureAtNode(
                     node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
-                    Lint.Replacement.deleteFromTo(node.name.end, node.end),
+                    Lint.Replacement.deleteFromTo(node.name.end, node.end)
                 );
-            } else if (isFunctionExpression(node.initializer) &&
-                       // allow named function expressions
-                       node.initializer.name === undefined) {
-                const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
+            } else if (
+                isFunctionExpression(node.initializer) &&
+                // allow named function expressions
+                node.initializer.name === undefined
+            ) {
+                const [name, fix] = handleLonghandMethod(
+                    node.name,
+                    node.initializer,
+                    ctx.sourceFile
+                );
                 ctx.addFailure(
                     node.getStart(ctx.sourceFile),
-                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
+                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!
+                        .pos,
                     `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
-                    fix,
+                    fix
                 );
             }
         }
@@ -114,13 +126,22 @@ function fixShorthandMethodDeclaration(node: ts.MethodDeclaration, sourceFile: t
     return Lint.Replacement.replaceFromTo(
         node.getStart(sourceFile),
         node.name.end,
-        `${node.name.getText(sourceFile)}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+        `${node.name.getText(sourceFile)}:${isAsync ? " async" : ""} function${
+            isGenerator ? "*" : ""
+        }`
     );
 }
 
-function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
+function handleLonghandMethod(
+    name: ts.PropertyName,
+    initializer: ts.FunctionExpression,
+    sourceFile: ts.SourceFile
+): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
-    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
+    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
+        name.end,
+        getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos
+    );
     let prefix = "";
     if (initializer.asteriskToken !== undefined) {
         prefix = "*";

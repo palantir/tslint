@@ -21,7 +21,7 @@ import {
     isImportEqualsDeclaration,
     isModuleDeclaration,
     isNamedImports,
-    isStringLiteral,
+    isStringLiteral
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -86,29 +86,35 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 "grouped-imports": {
-                    type: "boolean",
+                    type: "boolean"
                 },
                 "import-sources-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"]
                 },
                 "named-imports-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"]
                 },
                 "module-source-path": {
                     type: "string",
-                    enum: ["full", "basename"],
-                },
+                    enum: ["full", "basename"]
+                }
             },
-            additionalProperties: false,
+            additionalProperties: false
         },
         optionExamples: [
             true,
-            [true, {"import-sources-order": "lowercase-last", "named-imports-order": "lowercase-first"}],
+            [
+                true,
+                {
+                    "import-sources-order": "lowercase-last",
+                    "named-imports-order": "lowercase-first"
+                }
+            ]
         ],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -118,7 +124,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)));
+        return this.applyWithWalker(
+            new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+        );
     }
 }
 
@@ -127,27 +135,30 @@ export class Rule extends Lint.Rules.AbstractRule {
 type Transform = (x: string) => string;
 const TRANSFORMS = new Map<string, Transform>([
     ["any", () => ""],
-    ["case-insensitive", (x) => x.toLowerCase()],
+    ["case-insensitive", x => x.toLowerCase()],
     ["lowercase-first", flipCase],
-    ["lowercase-last", (x) => x],
-    ["full", (x) => x],
-    ["basename", (x) => {
-        if (!ts.isExternalModuleNameRelative(x)) {
-            return x;
-        }
+    ["lowercase-last", x => x],
+    ["full", x => x],
+    [
+        "basename",
+        x => {
+            if (!ts.isExternalModuleNameRelative(x)) {
+                return x;
+            }
 
-        const splitIndex = x.lastIndexOf("/");
-        if (splitIndex === -1) {
-            return x;
+            const splitIndex = x.lastIndexOf("/");
+            if (splitIndex === -1) {
+                return x;
+            }
+            return x.substr(splitIndex + 1);
         }
-        return x.substr(splitIndex + 1);
-    }],
+    ]
 ]);
 
 enum ImportType {
     LIBRARY_IMPORT = 1,
     PARENT_DIRECTORY_IMPORT = 2, // starts with "../"
-    CURRENT_DIRECTORY_IMPORT = 3, // starts with "./"
+    CURRENT_DIRECTORY_IMPORT = 3 // starts with "./"
 }
 
 interface Options {
@@ -170,13 +181,14 @@ function parseOptions(ruleArguments: any[]): Options {
         "grouped-imports": isGrouped = false,
         "import-sources-order": sources = "case-insensitive",
         "named-imports-order": named = "case-insensitive",
-        "module-source-path": path = "full",
-    } = optionSet === undefined ? {} : optionSet;
+        "module-source-path": path = "full"
+    } =
+        optionSet === undefined ? {} : optionSet;
     return {
         groupedImports: isGrouped,
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
         moduleSourcePath: TRANSFORMS.get(path)!,
-        namedImportsOrderTransform: TRANSFORMS.get(named)!,
+        namedImportsOrderTransform: TRANSFORMS.get(named)!
     };
 }
 
@@ -201,8 +213,15 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkStatement(statement: ts.Statement): void {
-        if (!(isImportDeclaration(statement) || isImportEqualsDeclaration(statement)) ||
-            /\r?\n\r?\n/.test(this.sourceFile.text.slice(statement.getFullStart(), statement.getStart(this.sourceFile)))) {
+        if (
+            !(isImportDeclaration(statement) || isImportEqualsDeclaration(statement)) ||
+            /\r?\n\r?\n/.test(
+                this.sourceFile.text.slice(
+                    statement.getFullStart(),
+                    statement.getStart(this.sourceFile)
+                )
+            )
+        ) {
             this.endBlock();
         }
 
@@ -227,11 +246,17 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = this.options.importSourcesOrderTransform(removeQuotes(node.moduleSpecifier.text));
+        const source = this.options.importSourcesOrderTransform(
+            removeQuotes(node.moduleSpecifier.text)
+        );
         this.checkSource(source, node);
 
         const { importClause } = node;
-        if (importClause !== undefined && importClause.namedBindings !== undefined && isNamedImports(importClause.namedBindings)) {
+        if (
+            importClause !== undefined &&
+            importClause.namedBindings !== undefined &&
+            isNamedImports(importClause.namedBindings)
+        ) {
             this.checkNamedImports(importClause.namedBindings);
         }
     }
@@ -283,8 +308,9 @@ class Walker extends Lint.AbstractWalker<Options> {
         const pair = findUnsortedPair(imports, this.options.namedImportsOrderTransform);
         if (pair !== undefined) {
             const [a, b] = pair;
-            const sortedDeclarations = sortByKey(imports, (x) =>
-                this.options.namedImportsOrderTransform(x.getText())).map((x) => x.getText());
+            const sortedDeclarations = sortByKey(imports, x =>
+                this.options.namedImportsOrderTransform(x.getText())
+            ).map(x => x.getText());
             // replace in reverse order to preserve earlier offsets
             for (let i = imports.length - 1; i >= 0; i--) {
                 const start = imports[i].getStart();
@@ -306,7 +332,11 @@ class Walker extends Lint.AbstractWalker<Options> {
     private checkBlockGroups(importsBlock: ImportsBlock): boolean {
         const oddImportDeclaration = this.getOddImportDeclaration(importsBlock);
         if (oddImportDeclaration !== undefined) {
-            this.addFailureAtNode(oddImportDeclaration.node, Rule.IMPORT_SOURCES_NOT_GROUPED, this.getReplacements());
+            this.addFailureAtNode(
+                oddImportDeclaration.node,
+                Rule.IMPORT_SOURCES_NOT_GROUPED,
+                this.getReplacements()
+            );
             return true;
         }
         return false;
@@ -322,22 +352,27 @@ class Walker extends Lint.AbstractWalker<Options> {
             return importDeclarations[0];
         } else {
             this.nextType = type;
-            return importDeclarations.find((importDeclaration) => importDeclaration.type !== type);
+            return importDeclarations.find(importDeclaration => importDeclaration.type !== type);
         }
     }
 
     private getReplacements(): Lint.Replacement[] {
         const importDeclarationsList = this.importsBlocks
-            .map((block) => block.getImportDeclarations())
-            .filter((imports) => imports.length > 0);
+            .map(block => block.getImportDeclarations())
+            .filter(imports => imports.length > 0);
         const allImportDeclarations = ([] as ImportDeclaration[]).concat(...importDeclarationsList);
         const replacements = this.getReplacementsForExistingImports(importDeclarationsList);
-        const startOffset = allImportDeclarations.length === 0 ? 0 : allImportDeclarations[0].nodeStartOffset;
-        replacements.push(Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations)));
+        const startOffset =
+            allImportDeclarations.length === 0 ? 0 : allImportDeclarations[0].nodeStartOffset;
+        replacements.push(
+            Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations))
+        );
         return replacements;
     }
 
-    private getReplacementsForExistingImports(importDeclarationsList: ImportDeclaration[][]): Lint.Replacement[] {
+    private getReplacementsForExistingImports(
+        importDeclarationsList: ImportDeclaration[][]
+    ): Lint.Replacement[] {
         return importDeclarationsList.map((items, index) => {
             let start = items[0].nodeStartOffset;
             if (index > 0) {
@@ -353,12 +388,18 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private getGroupedImports(importDeclarations: ImportDeclaration[]): string {
-        return [ImportType.LIBRARY_IMPORT, ImportType.PARENT_DIRECTORY_IMPORT, ImportType.CURRENT_DIRECTORY_IMPORT]
-            .map((type) => {
-                const imports = importDeclarations.filter((importDeclaration) => importDeclaration.type === type);
+        return [
+            ImportType.LIBRARY_IMPORT,
+            ImportType.PARENT_DIRECTORY_IMPORT,
+            ImportType.CURRENT_DIRECTORY_IMPORT
+        ]
+            .map(type => {
+                const imports = importDeclarations.filter(
+                    importDeclaration => importDeclaration.type === type
+                );
                 return getSortedImportDeclarationsAsText(imports);
             })
-            .filter((text) => text.length > 0)
+            .filter(text => text.length > 0)
             .join(this.getEolChar());
     }
 
@@ -378,9 +419,9 @@ class Walker extends Lint.AbstractWalker<Options> {
 
 interface ImportDeclaration {
     node: ts.ImportDeclaration | ts.ImportEqualsDeclaration;
-    nodeEndOffset: number;      // end position of node within source file
-    nodeStartOffset: number;    // start position of node within source file
-    text: string;               // initialized with original import text; modified if the named imports are reordered
+    nodeEndOffset: number; // end position of node within source file
+    nodeStartOffset: number; // start position of node within source file
+    text: string; // initialized with original import text; modified if the named imports are reordered
     sourcePath: string;
     type: ImportType;
 }
@@ -388,7 +429,11 @@ interface ImportDeclaration {
 class ImportsBlock {
     private importDeclarations: ImportDeclaration[] = [];
 
-    public addImportDeclaration(sourceFile: ts.SourceFile, node: ImportDeclaration["node"], sourcePath: string) {
+    public addImportDeclaration(
+        sourceFile: ts.SourceFile,
+        node: ImportDeclaration["node"],
+        sourcePath: string
+    ) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
         const text = sourceFile.text.substring(start, end);
@@ -406,7 +451,7 @@ class ImportsBlock {
             nodeStartOffset: start,
             sourcePath,
             text,
-            type,
+            type
         });
     }
 
@@ -428,7 +473,8 @@ class ImportsBlock {
         }
 
         const initialText = importDeclaration.text;
-        importDeclaration.text = initialText.substring(0, start) + replacement + initialText.substring(start + length);
+        importDeclaration.text =
+            initialText.substring(0, start) + replacement + initialText.substring(start + length);
     }
 
     public getLastImportSource() {
@@ -481,19 +527,24 @@ class ImportsBlock {
 
 // Convert aBcD --> AbCd
 function flipCase(str: string): string {
-    return Array.from(str).map((char) => {
-        if (char >= "a" && char <= "z") {
-            return char.toUpperCase();
-        } else if (char >= "A" && char <= "Z") {
-            return char.toLowerCase();
-        }
-        return char;
-    }).join("");
+    return Array.from(str)
+        .map(char => {
+            if (char >= "a" && char <= "z") {
+                return char.toUpperCase();
+            } else if (char >= "A" && char <= "Z") {
+                return char.toLowerCase();
+            }
+            return char;
+        })
+        .join("");
 }
 
 // After applying a transformation, are the nodes sorted according to the text they contain?
 // If not, return the pair of nodes which are out of order.
-function findUnsortedPair(xs: ReadonlyArray<ts.Node>, transform: (x: string) => string): [ts.Node, ts.Node] | undefined {
+function findUnsortedPair(
+    xs: ReadonlyArray<ts.Node>,
+    transform: (x: string) => string
+): [ts.Node, ts.Node] | undefined {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
             return [xs[i - 1], xs[i]];
@@ -520,15 +571,15 @@ function compare(a: string, b: string): 0 | 1 | -1 {
 
 function removeQuotes(value: string): string {
     // strip out quotes
-    if (value.length > 1 && (value[0] === "'" || value[0] === "\"")) {
+    if (value.length > 1 && (value[0] === "'" || value[0] === '"')) {
         value = value.substr(1, value.length - 2);
     }
     return value;
 }
 
 function getSortedImportDeclarationsAsText(importDeclarations: ImportDeclaration[]): string {
-    const sortedDeclarations = sortByKey(importDeclarations.slice(), (x) => x.sourcePath);
-    return sortedDeclarations.map((x) => x.text).join("");
+    const sortedDeclarations = sortByKey(importDeclarations.slice(), x => x.sourcePath);
+    return sortedDeclarations.map(x => x.text).join("");
 }
 
 function sortByKey<T>(xs: ReadonlyArray<T>, getSortKey: (x: T) => string): T[] {

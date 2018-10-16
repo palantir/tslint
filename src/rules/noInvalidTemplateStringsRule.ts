@@ -24,13 +24,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-invalid-template-strings",
-        description: "Warns on use of `\${` in non-template strings.",
+        description: "Warns on use of `${` in non-template strings.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         rationale: "Interpolation will only work for template strings.",
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 

@@ -23,7 +23,7 @@ import {
     hasModifier,
     isClassDeclaration,
     isConstructorDeclaration,
-    isParameterProperty,
+    isParameterProperty
 } from "tsutils";
 
 interface Options {
@@ -40,7 +40,7 @@ function parseOptions(options: string[]): Options {
     return {
         allowConstructorOnly: options.indexOf(OPTION__ALLOW_CONSTRUCTOR_ONLY) !== -1,
         allowEmptyClass: options.indexOf(OPTION__ALLOW_EMPTY_CLASS) !== -1,
-        allowStaticOnly: options.indexOf(OPTION__ALLOW_STATIC_ONLY) !== -1,
+        allowStaticOnly: options.indexOf(OPTION__ALLOW_STATIC_ONLY) !== -1
     };
 }
 
@@ -63,24 +63,30 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: {
-                type: "string",
+                type: "string"
             },
             minLength: 0,
-            maxLength: 3,
+            maxLength: 3
         },
         optionExamples: [true, ["allow-empty-class", "allow-constructor-only"]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_CONSTRUCTOR_ONLY = "Every member of this class is a constructor. Use functions instead.";
-    public static FAILURE_STATIC_ONLY = "Every member of this class is static. Use namespaces or plain objects instead.";
+    public static FAILURE_CONSTRUCTOR_ONLY =
+        "Every member of this class is a constructor. Use functions instead.";
+    public static FAILURE_STATIC_ONLY =
+        "Every member of this class is static. Use namespaces or plain objects instead.";
     public static FAILURE_EMPTY_CLASS = "This class has no members.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NoUnnecessaryClassWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
+            new NoUnnecessaryClassWalker(
+                sourceFile,
+                this.ruleName,
+                parseOptions(this.ruleArguments)
+            )
         );
     }
 }
@@ -99,7 +105,10 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
     private checkMembers(node: ts.ClassDeclaration) {
         if (node.members.length === 0) {
             if (!this.options.allowEmptyClass) {
-                this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
+                this.addFailureAtNode(
+                    getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!,
+                    Rule.FAILURE_EMPTY_CLASS
+                );
             }
             return;
         }
@@ -112,7 +121,7 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
         ) {
             this.addFailureAtNode(
                 getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
-                Rule.FAILURE_CONSTRUCTOR_ONLY,
+                Rule.FAILURE_CONSTRUCTOR_ONLY
             );
         }
 
@@ -123,7 +132,7 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
         ) {
             this.addFailureAtNode(
                 getChildOfKind(node, ts.SyntaxKind.ClassKeyword, this.sourceFile)!,
-                Rule.FAILURE_STATIC_ONLY,
+                Rule.FAILURE_STATIC_ONLY
             );
         }
     }
@@ -132,7 +141,8 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
 function isNonStaticMember(member: ts.ClassElement): boolean {
     return (
         isConstructorWithShorthandProps(member) ||
-        (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
+        (!isConstructorDeclaration(member) &&
+            !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
     );
 }
 

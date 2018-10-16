@@ -36,13 +36,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: {
-                type: "number",
+                type: "number"
             },
-            minLength: 1,
+            minLength: 1
         },
         optionExamples: [true, [true, 1, 2, 3]],
         type: "typescript",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -58,18 +58,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         ts.SyntaxKind.VariableDeclarationList,
         ts.SyntaxKind.EnumMember,
         ts.SyntaxKind.PropertyDeclaration,
-        ts.SyntaxKind.Parameter,
+        ts.SyntaxKind.Parameter
     ]);
 
-    public static DEFAULT_ALLOWED = [ -1, 0, 1 ];
+    public static DEFAULT_ALLOWED = [-1, 0, 1];
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
             new NoMagicNumbersWalker(
                 sourceFile,
                 this.ruleName,
-                this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED,
-            ),
+                this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED
+            )
         );
     }
 }
@@ -77,7 +77,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (isCallExpression(node) && isIdentifier(node.expression) && node.expression.text === "parseInt") {
+            if (
+                isCallExpression(node) &&
+                isIdentifier(node.expression) &&
+                node.expression.text === "parseInt"
+            ) {
                 return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
             }
 
@@ -85,7 +89,10 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
                 return this.checkNumericLiteral(node, (node as ts.NumericLiteral).text);
             }
             if (isNegativeNumberLiteral(node)) {
-                return this.checkNumericLiteral(node, `-${(node.operand as ts.NumericLiteral).text}`);
+                return this.checkNumericLiteral(
+                    node,
+                    `-${(node.operand as ts.NumericLiteral).text}`
+                );
             }
             return ts.forEachChild(node, cb);
         };
@@ -96,7 +103,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
         /* Using Object.is() to differentiate between pos/neg zero */
         if (
             !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
-            !this.options.some((allowedNum) => Object.is(allowedNum, parseFloat(num)))
+            !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num)))
         ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING);
         }

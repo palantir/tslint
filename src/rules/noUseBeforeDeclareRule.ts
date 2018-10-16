@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -70,7 +70,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.ExportSpecifier:
                 return checkIdentifier(
                     (node as ts.ExportSpecifier).name,
-                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier));
+                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier)
+                );
             default:
                 return ts.forEachChild(node, recur);
         }
@@ -82,7 +83,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             return;
         }
 
-        const declaredBefore = declarations.some((decl) => {
+        const declaredBefore = declarations.some(decl => {
             switch (decl.kind) {
                 case ts.SyntaxKind.FunctionDeclaration:
                     // Functions may be declared later.
@@ -104,6 +105,10 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
      * var { x: y } = { x: 43 };
      */
     function isPropNameInBinding(node: ts.Node): boolean {
-        return node.parent !== undefined && isBindingElement(node.parent) && node.parent.propertyName === node;
+        return (
+            node.parent !== undefined &&
+            isBindingElement(node.parent) &&
+            node.parent.propertyName === node
+        );
     }
 }

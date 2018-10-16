@@ -38,18 +38,22 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_ARRAY_SIMPLE}"\` enforces use of \`T[]\` if \`T\` is a simple type (primitive or type reference).`,
         options: {
             type: "string",
-            enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
+            enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE]
         },
         optionExamples: [[true, OPTION_ARRAY], [true, OPTION_GENERIC], [true, OPTION_ARRAY_SIMPLE]],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_ARRAY = "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
-    public static FAILURE_STRING_GENERIC = "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
-    public static FAILURE_STRING_ARRAY_SIMPLE = "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
-    public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_ARRAY =
+        "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
+    public static FAILURE_STRING_GENERIC =
+        "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_ARRAY_SIMPLE =
+        "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
+    public static FAILURE_STRING_GENERIC_SIMPLE =
+        "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as Option);
@@ -71,18 +75,22 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
     function checkArrayType(node: ts.ArrayTypeNode): void {
         const { elementType, parent } = node;
-        if (option === "array" || option === "array-simple" && isSimpleType(elementType)) {
+        if (option === "array" || (option === "array-simple" && isSimpleType(elementType))) {
             return;
         }
 
-        const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
+        const failureString =
+            option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
         const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-        const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+        const space =
+            parens === 0 &&
+            parent!.kind === ts.SyntaxKind.AsExpression &&
+            node.getStart() === node.getFullStart();
         const fix = [
             new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
-            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
+            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">")
         ];
         ctx.addFailureAtNode(node, failureString, fix);
     }
@@ -94,14 +102,22 @@ function walk(ctx: Lint.WalkContext<Option>): void {
             return;
         }
 
-        const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
+        const failureString =
+            option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
         if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
-            ctx.addFailureAtNode(node, failureString, Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"));
+            ctx.addFailureAtNode(
+                node,
+                failureString,
+                Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]")
+            );
             return;
         }
 
-        if (typeArguments.length !== 1 || (option === "array-simple" && !isSimpleType(typeArguments[0]))) {
+        if (
+            typeArguments.length !== 1 ||
+            (option === "array-simple" && !isSimpleType(typeArguments[0]))
+        ) {
             return;
         }
 
@@ -111,7 +127,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
-            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
+            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]")
         ]);
     }
 }
@@ -157,7 +173,11 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
                 case 0:
                     return true;
                 case 1:
-                    return typeName.kind === ts.SyntaxKind.Identifier && typeName.text === "Array" && isSimpleType(typeArguments[0]);
+                    return (
+                        typeName.kind === ts.SyntaxKind.Identifier &&
+                        typeName.text === "Array" &&
+                        isSimpleType(typeArguments[0])
+                    );
                 default:
                     return false;
             }

@@ -38,13 +38,21 @@ describe("MSBuild Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "warning"
+            )
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure", "firstName", "error") +
+            getFailureString(TEST_FILE, 1, 1, "first failure", "firstName", "error") +
             getFailureString(TEST_FILE, 2, 12, "mid failure", "midName", "error") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure", "lastName", "warning");
+            getFailureString(TEST_FILE, 9, 2, "last failure", "lastName", "warning");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -55,7 +63,16 @@ describe("MSBuild Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, reason: string, ruleCamelCase: string, severity: string) {
-        return `${path.normalize(file)}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
+    function getFailureString(
+        file: string,
+        line: number,
+        character: number,
+        reason: string,
+        ruleCamelCase: string,
+        severity: string
+    ) {
+        return `${path.normalize(
+            file
+        )}(${line},${character}): ${severity} ${ruleCamelCase}: ${reason}\n`;
     }
 });

@@ -19,7 +19,7 @@ import {
     isCallExpression,
     isElementAccessExpression,
     isPropertyAccessExpression,
-    isSameLine,
+    isSameLine
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "..";
@@ -35,14 +35,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable",
         options: null,
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
     public static FAILURE_STRING = "When chaining calls, put method calls on new lines.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NewlinePerChainedCallWalker(sourceFile, this.ruleName, undefined),
+            new NewlinePerChainedCallWalker(sourceFile, this.ruleName, undefined)
         );
     }
 }
@@ -53,17 +53,13 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
             if (
                 isCallExpression(node) &&
                 isPropertyAccessExpression(node.expression) &&
-                isSameLine(
-                    sourceFile,
-                    node.expression.expression.end,
-                    node.expression.name.pos,
-                ) &&
+                isSameLine(sourceFile, node.expression.expression.end, node.expression.name.pos) &&
                 hasChildCall(node.expression)
             ) {
                 this.addFailure(
                     node.expression.name.pos - 1,
                     node.expression.name.end,
-                    Rule.FAILURE_STRING,
+                    Rule.FAILURE_STRING
                 );
             }
             return ts.forEachChild(node, checkForSameLine);
@@ -74,10 +70,7 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
 
 function hasChildCall(node: ts.PropertyAccessExpression): boolean {
     let { expression } = node;
-    while (
-        isPropertyAccessExpression(expression) ||
-        isElementAccessExpression(expression)
-    ) {
+    while (isPropertyAccessExpression(expression) || isElementAccessExpression(expression)) {
         ({ expression } = expression);
     }
     return expression.kind === ts.SyntaxKind.CallExpression;

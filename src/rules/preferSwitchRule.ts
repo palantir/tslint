@@ -26,7 +26,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-switch",
-        description: "Prefer a `switch` statement to an `if` statement with simple `===` comparisons.",
+        description:
+            "Prefer a `switch` statement to an `if` statement with simple `===` comparisons.",
         optionsDescription: Lint.Utils.dedent`
             An optional object with the property '${OPTION_MIN_CASES}'.
             This is the number cases needed before a switch statement is recommended.
@@ -34,12 +35,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "object",
             properties: {
-                [OPTION_MIN_CASES]: { type: "number" },
-            },
+                [OPTION_MIN_CASES]: { type: "number" }
+            }
         },
         optionExamples: [true, [true, { [OPTION_MIN_CASES]: 2 }]],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -76,7 +77,7 @@ function walk(ctx: Lint.WalkContext<number>): void {
 function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number): boolean {
     let switchVariable: ts.Expression | undefined;
     let casesSeen = 0;
-    const couldBeSwitch = everyCase(node, (expr) => {
+    const couldBeSwitch = everyCase(node, expr => {
         casesSeen++;
         if (switchVariable !== undefined) {
             return nodeEquals(expr, switchVariable, sourceFile);
@@ -88,11 +89,18 @@ function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number
     return couldBeSwitch && casesSeen >= minCases;
 }
 
-function everyCase({ expression, elseStatement }: ts.IfStatement, test: (e: ts.Expression) => boolean): boolean {
+function everyCase(
+    { expression, elseStatement }: ts.IfStatement,
+    test: (e: ts.Expression) => boolean
+): boolean {
     if (!everyCondition(expression, test)) {
         return false;
     }
-    return elseStatement === undefined || !utils.isIfStatement(elseStatement) || everyCase(elseStatement, test);
+    return (
+        elseStatement === undefined ||
+        !utils.isIfStatement(elseStatement) ||
+        everyCase(elseStatement, test)
+    );
 }
 
 function everyCondition(node: ts.Expression, test: (e: ts.Expression) => boolean): boolean {

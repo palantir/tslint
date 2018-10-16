@@ -16,8 +16,15 @@
  */
 
 import {
-    hasModifier, isBlockScopedVariableDeclarationList, isClassExpression, isFunctionExpression, isFunctionWithBody, isNodeFlagSet,
-    isScopeBoundary, isThisParameter, ScopeBoundary,
+    hasModifier,
+    isBlockScopedVariableDeclarationList,
+    isClassExpression,
+    isFunctionExpression,
+    isFunctionWithBody,
+    isNodeFlagSet,
+    isScopeBoundary,
+    isThisParameter,
+    ScopeBoundary
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -69,23 +76,34 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "object",
             properties: {
-                class: {type: "boolean"},
-                enum: {type: "boolean"},
-                function: {type: "boolean"},
-                import: {type: "boolean"},
-                interface: {type: "boolean"},
-                namespace: {type: "boolean"},
-                typeAlias: {type: "boolean"},
-                typeParameter: {type: "boolean"},
-                temporalDeadZone: {type: "boolean"},
-            },
+                class: { type: "boolean" },
+                enum: { type: "boolean" },
+                function: { type: "boolean" },
+                import: { type: "boolean" },
+                interface: { type: "boolean" },
+                namespace: { type: "boolean" },
+                typeAlias: { type: "boolean" },
+                typeParameter: { type: "boolean" },
+                temporalDeadZone: { type: "boolean" }
+            }
         },
         optionExamples: [
             true,
-            [true, {class: true, enum: true, function: true, interface: false, namespace: true, typeAlias: false, typeParameter: false}],
+            [
+                true,
+                {
+                    class: true,
+                    enum: true,
+                    function: true,
+                    interface: false,
+                    namespace: true,
+                    typeAlias: false,
+                    typeParameter: false
+                }
+            ]
         ],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -95,12 +113,25 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NoShadowedVariableWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0] as Partial<Options> | undefined)),
+            new NoShadowedVariableWalker(
+                sourceFile,
+                this.ruleName,
+                parseOptions(this.ruleArguments[0] as Partial<Options> | undefined)
+            )
         );
     }
 }
 
-type Kind = "class" | "import" | "interface" | "function" | "enum" | "namespace" | "typeParameter" | "typeAlias" | "temporalDeadZone";
+type Kind =
+    | "class"
+    | "import"
+    | "interface"
+    | "function"
+    | "enum"
+    | "namespace"
+    | "typeParameter"
+    | "typeAlias"
+    | "temporalDeadZone";
 type Options = Record<Kind, boolean>;
 
 function parseOptions(option: Partial<Options> | undefined): Options {
@@ -114,7 +145,7 @@ function parseOptions(option: Partial<Options> | undefined): Options {
         temporalDeadZone: true,
         typeAlias: true,
         typeParameter: true,
-        ...option,
+        ...option
     };
 }
 
@@ -139,7 +170,7 @@ class Scope {
         const list = scope.variables.get(identifier.text);
         const variableInfo: VariableInfo = {
             identifier,
-            tdz,
+            tdz
         };
         if (list === undefined) {
             scope.variables.set(identifier.text, [variableInfo]);
@@ -159,8 +190,11 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
 
         const cb = (node: ts.Node): void => {
             const parentScope = this.scope;
-            if ((this.options.function && isFunctionExpression(node) || this.options.class && isClassExpression(node)) &&
-                node.name !== undefined) {
+            if (
+                ((this.options.function && isFunctionExpression(node)) ||
+                    (this.options.class && isClassExpression(node))) &&
+                node.name !== undefined
+            ) {
                 /* special handling for named function and class expressions:
                    technically the name of the function is only visible inside of it,
                    but variables with the same name declared inside don't cause compiler errors.
@@ -209,7 +243,10 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     }
                     break;
                 case ts.SyntaxKind.FunctionDeclaration:
-                    if (this.options.function && (node as ts.FunctionDeclaration).name !== undefined) {
+                    if (
+                        this.options.function &&
+                        (node as ts.FunctionDeclaration).name !== undefined
+                    ) {
                         parentScope.addVariable((node as ts.FunctionDeclaration).name!, false);
                     }
                     break;
@@ -217,9 +254,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     if (this.options.class && (node as ts.ClassDeclaration).name !== undefined) {
                         parentScope.addVariable((node as ts.ClassDeclaration).name!, true, true);
                     }
-                    // falls through
+                // falls through
                 case ts.SyntaxKind.ClassExpression:
-                    this.visitClassLikeDeclaration(node as ts.ClassLikeDeclaration, parentScope, cb);
+                    this.visitClassLikeDeclaration(
+                        node as ts.ClassLikeDeclaration,
+                        parentScope,
+                        cb
+                    );
                     this.onScopeEnd(parentScope);
                     this.scope = parentScope;
                     return;
@@ -239,14 +280,17 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     }
                     break;
                 case ts.SyntaxKind.Parameter:
-                    if (node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                    if (
+                        node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
                         !isThisParameter(node as ts.ParameterDeclaration) &&
-                        isFunctionWithBody(node.parent!)) {
+                        isFunctionWithBody(node.parent!)
+                    ) {
                         this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
                     break;
                 case ts.SyntaxKind.ModuleDeclaration:
-                    if (this.options.namespace &&
+                    if (
+                        this.options.namespace &&
                         node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
                         (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
                         !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
@@ -268,7 +312,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ImportSpecifier:
                 case ts.SyntaxKind.ImportEqualsDeclaration:
                     if (this.options.import) {
-                        this.scope.addVariable((node as ts.NamespaceImport | ts.ImportSpecifier | ts.ImportEqualsDeclaration).name, false);
+                        this.scope.addVariable(
+                            (node as
+                                | ts.NamespaceImport
+                                | ts.ImportSpecifier
+                                | ts.ImportEqualsDeclaration).name,
+                            false
+                        );
                     }
             }
             if (boundary !== ScopeBoundary.None) {
@@ -284,9 +334,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
         this.onScopeEnd();
     }
 
-    private visitClassLikeDeclaration(declaration: ts.ClassLikeDeclaration, parentScope: Scope, cb: (node: ts.Node) => void) {
+    private visitClassLikeDeclaration(
+        declaration: ts.ClassLikeDeclaration,
+        parentScope: Scope,
+        cb: (node: ts.Node) => void
+    ) {
         const currentScope = this.scope;
-        ts.forEachChild(declaration, (node) => {
+        ts.forEachChild(declaration, node => {
             if (!hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
                 return cb(node);
             }
@@ -321,14 +375,18 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
     }
 
     private onScopeEnd(parent?: Scope) {
-        const {variables, variablesSeen} = this.scope;
+        const { variables, variablesSeen } = this.scope;
         variablesSeen.forEach((identifiers, name) => {
             const declarationsInScope = variables.get(name);
             for (const identifier of identifiers) {
-                if (declarationsInScope !== undefined &&
+                if (
+                    declarationsInScope !== undefined &&
                     (this.options.temporalDeadZone ||
-                     // check if any of the declaration either has no temporal dead zone or is declared before the identifier
-                     declarationsInScope.some((declaration) => !declaration.tdz || declaration.identifier.pos < identifier.pos))
+                        // check if any of the declaration either has no temporal dead zone or is declared before the identifier
+                        declarationsInScope.some(
+                            declaration =>
+                                !declaration.tdz || declaration.identifier.pos < identifier.pos
+                        ))
                 ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
                 } else if (parent !== undefined) {

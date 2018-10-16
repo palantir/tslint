@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-construct",
         description: "Disallows access to the constructors of `String`, `Number`, and `Boolean`.",
-        descriptionDetails: "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
+        descriptionDetails:
+            "Disallows constructor use such as `new Number(foo)` but does not disallow `Number(foo)`.",
         rationale: Lint.Utils.dedent`
             There is little reason to use \`String\`, \`Number\`, or \`Boolean\` as constructors.
             In almost all cases, the regular function-call version is more appropriate.
@@ -34,11 +35,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Forbidden constructor, use a literal or simple function call instead";
+    public static FAILURE_STRING =
+        "Forbidden constructor, use a literal or simple function call instead";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -52,7 +54,11 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case "Boolean":
                 case "String":
                 case "Number":
-                    ctx.addFailure(node.getStart(ctx.sourceFile), node.expression.end, Rule.FAILURE_STRING);
+                    ctx.addFailure(
+                        node.getStart(ctx.sourceFile),
+                        node.expression.end,
+                        Rule.FAILURE_STRING
+                    );
             }
         }
         return ts.forEachChild(node, cb);

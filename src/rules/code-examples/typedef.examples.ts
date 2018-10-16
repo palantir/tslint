@@ -33,7 +33,7 @@ export const codeExamples = [
             function add(x, y) {
                 return x + y;
             }
-        `,
+        `
     },
     {
         description: "Requires type definitions for arrow call signatures",
@@ -45,7 +45,7 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             const add = (x, y) => x + y;
-        `,
+        `
     },
     {
         description: "Requires type definitions for parameters",
@@ -61,7 +61,7 @@ export const codeExamples = [
             function add(x, y) {
                 return x + y;
             }
-        `,
+        `
     },
     {
         description: "Requires type definitions for arrow function parameters",
@@ -73,7 +73,7 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             const add = (x, y) => x + y;
-        `,
+        `
     },
     {
         description: "Requires type definitions for property declarations",
@@ -91,7 +91,7 @@ export const codeExamples = [
                 foo;
                 bar;
             }
-        `,
+        `
     },
     {
         description: "Requires type definitions for variable declarations",
@@ -103,7 +103,7 @@ export const codeExamples = [
         `,
         fail: Lint.Utils.dedent`
             let x;
-        `,
+        `
     },
     {
         description: "Requires type definitions for member variable declarations",
@@ -119,7 +119,7 @@ export const codeExamples = [
             class MyClass {
                 x;
             }
-        `,
+        `
     },
     {
         description: "Requires type definitions when destructuring objects.",
@@ -141,7 +141,7 @@ export const codeExamples = [
             }
             const foobar = { foo: 1, bar: '2' };
             const { foo, bar } = foobar;
-        `,
+        `
     },
     {
         description: "Requires type definitions when destructuring arrays.",
@@ -155,6 +155,6 @@ export const codeExamples = [
         fail: Lint.Utils.dedent`
             const foobar = [1, '2'];
             const [foo, bar] = foobar;
-        `,
-    },
+        `
+    }
 ];

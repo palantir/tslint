@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "label-position",
         description: "Only allows labels in sensible locations.",
-        descriptionDetails: "This rule only allows labels to be on `do/for/while/switch` statements.",
+        descriptionDetails:
+            "This rule only allows labels to be on `do/for/while/switch` statements.",
         rationale: Lint.Utils.dedent`
             Labels in JavaScript only can be used in conjunction with \`break\` or \`continue\`,
             constructs meant to be used for loop flow control. While you can theoretically use
@@ -34,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 

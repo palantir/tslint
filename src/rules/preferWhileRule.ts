@@ -24,19 +24,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-while",
-        description: "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
-        rationale: "Simplifies the readability of the loop statement, while maintaining the same functionality.",
+        description:
+            "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
+        rationale:
+            "Simplifies the readability of the loop statement, while maintaining the same functionality.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         hasFix: true,
         type: "style",
         typescriptOnly: false,
-        codeExamples,
+        codeExamples
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Prefer `while` loops instead of `for` loops without an initializer and incrementor.";
+    public static FAILURE_STRING =
+        "Prefer `while` loops instead of `for` loops without an initializer and incrementor.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const failures: Lint.RuleFailure[] = [];
@@ -53,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private doesNodeViolateRule(node: ts.ForStatement) {
-        return (node.initializer === undefined && node.incrementor === undefined);
+        return node.initializer === undefined && node.incrementor === undefined;
     }
 
     private createFailure(sourceFile: ts.SourceFile, node: ts.ForStatement): Lint.RuleFailure {
@@ -65,10 +68,21 @@ export class Rule extends Lint.Rules.AbstractRule {
             fix = Lint.Replacement.replaceFromTo(start, end, "while (true)");
         } else {
             fix = [
-                Lint.Replacement.replaceFromTo(start, node.condition.getStart(sourceFile), "while ("),
-                Lint.Replacement.deleteFromTo(node.condition.end, end - 1),
+                Lint.Replacement.replaceFromTo(
+                    start,
+                    node.condition.getStart(sourceFile),
+                    "while ("
+                ),
+                Lint.Replacement.deleteFromTo(node.condition.end, end - 1)
             ];
         }
-        return new Lint.RuleFailure(sourceFile, start, end, Rule.FAILURE_STRING, this.ruleName, fix);
+        return new Lint.RuleFailure(
+            sourceFile,
+            start,
+            end,
+            Rule.FAILURE_STRING,
+            this.ruleName,
+            fix
+        );
     }
 }

@@ -28,26 +28,34 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             listType: {
                 type: "array",
-                items: {type: "string"},
-            },
+                items: { type: "string" }
+            }
         },
         optionsDescription: "A list of whitelisted assertion types to ignore",
         type: "typescript",
         hasFix: true,
         typescriptOnly: true,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "This assertion is unnecessary since it does not change the type of the expression.";
+    public static FAILURE_STRING =
+        "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker()));
+        return this.applyWithWalker(
+            new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker())
+        );
     }
 }
 
 class Walker extends Lint.AbstractWalker<string[]> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
+    constructor(
+        sourceFile: ts.SourceFile,
+        ruleName: string,
+        options: string[],
+        private readonly checker: ts.TypeChecker
+    ) {
         super(sourceFile, ruleName, options);
     }
 
@@ -71,7 +79,11 @@ class Walker extends Lint.AbstractWalker<string[]> {
     private checkNonNullAssertion(node: ts.NonNullExpression) {
         const type = this.checker.getTypeAtLocation(node.expression);
         if (type === this.checker.getNonNullableType(type)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.deleteFromTo(node.expression.end, node.end));
+            this.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                Lint.Replacement.deleteFromTo(node.expression.end, node.end)
+            );
         }
     }
 
@@ -81,9 +93,11 @@ class Walker extends Lint.AbstractWalker<string[]> {
         }
         const castType = this.checker.getTypeAtLocation(node);
 
-        if (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
-            isObjectType(castType) && (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType))) {
-
+        if (
+            isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
+            (isObjectType(castType) &&
+                (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType)))
+        ) {
             // It's not always safe to remove a cast to a literal type or tuple
             // type, as those types are sometimes widened without the cast.
             return;
@@ -91,9 +105,13 @@ class Walker extends Lint.AbstractWalker<string[]> {
 
         const uncastType = this.checker.getTypeAtLocation(node.expression);
         if (uncastType === castType) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
-                ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
-                : Lint.Replacement.deleteFromTo(node.expression.end, node.end));
+            this.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                node.kind === ts.SyntaxKind.TypeAssertionExpression
+                    ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
+                    : Lint.Replacement.deleteFromTo(node.expression.end, node.end)
+            );
         }
     }
 }

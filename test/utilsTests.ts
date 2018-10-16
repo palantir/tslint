@@ -24,7 +24,7 @@ describe("Utils", () => {
         assert.deepEqual(arrayify([]), []);
         assert.deepEqual(arrayify("foo"), ["foo"]);
         assert.deepEqual(arrayify(1), [1]);
-        assert.deepEqual(arrayify({foo: 2}), [{foo: 2}]);
+        assert.deepEqual(arrayify({ foo: 2 }), [{ foo: 2 }]);
         assert.deepEqual(arrayify([1, 2]), [1, 2]);
         assert.deepEqual(arrayify(["foo"]), ["foo"]);
     });
@@ -34,7 +34,8 @@ describe("Utils", () => {
             dedent`
             foo
             bar`,
-            "\nfoo\nbar");
+            "\nfoo\nbar"
+        );
 
         assert.equal(dedent`   one-line`, "one-line");
 

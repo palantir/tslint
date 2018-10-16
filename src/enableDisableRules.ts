@@ -30,21 +30,27 @@ import { RuleFailure } from "./language/rule/rule";
  */
 export const ENABLE_DISABLE_REGEX = /^\s*tslint:(enable|disable)(?:-(line|next-line))?(:|\s|$)/;
 
-export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: RuleFailure[]): RuleFailure[] {
+export function removeDisabledFailures(
+    sourceFile: ts.SourceFile,
+    failures: RuleFailure[]
+): RuleFailure[] {
     if (failures.length === 0) {
         // Usually there won't be failures anyway, so no need to look for "tslint:disable".
         return failures;
     }
 
-    const failingRules = new Set(failures.map((f) => f.getRuleName()));
+    const failingRules = new Set(failures.map(f => f.getRuleName()));
     const map = getDisableMap(sourceFile, failingRules);
-    return failures.filter((failure) => {
+    return failures.filter(failure => {
         const disabledIntervals = map.get(failure.getRuleName());
-        return disabledIntervals === undefined || !disabledIntervals.some(({ pos, end }) => {
-            const failPos = failure.getStartPosition().getPosition();
-            const failEnd = failure.getEndPosition().getPosition();
-            return failEnd >= pos && (end === -1 || failPos < end);
-        });
+        return (
+            disabledIntervals === undefined ||
+            !disabledIntervals.some(({ pos, end }) => {
+                const failPos = failure.getStartPosition().getPosition();
+                const failEnd = failure.getEndPosition().getPosition();
+                return failEnd >= pos && (end === -1 || failPos < end);
+            })
+        );
     });
 }
 
@@ -52,19 +58,26 @@ export function removeDisabledFailures(sourceFile: ts.SourceFile, failures: Rule
  * The map will have an array of TextRange for each disable of a rule in a file.
  * (It will have no entry if the rule is never disabled, meaning all arrays are non-empty.)
  */
-function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): ReadonlyMap<string, ts.TextRange[]> {
+function getDisableMap(
+    sourceFile: ts.SourceFile,
+    failingRules: Set<string>
+): ReadonlyMap<string, ts.TextRange[]> {
     const map = new Map<string, ts.TextRange[]>();
 
     utils.forEachComment(sourceFile, (fullText, comment) => {
-        const commentText = comment.kind === ts.SyntaxKind.SingleLineCommentTrivia
-            ? fullText.substring(comment.pos + 2, comment.end)
-            : fullText.substring(comment.pos + 2, comment.end - 2);
+        const commentText =
+            comment.kind === ts.SyntaxKind.SingleLineCommentTrivia
+                ? fullText.substring(comment.pos + 2, comment.end)
+                : fullText.substring(comment.pos + 2, comment.end - 2);
         const parsed = parseComment(commentText);
         if (parsed !== undefined) {
             const { rulesList, isEnabled, modifier } = parsed;
             const switchRange = getSwitchRange(modifier, comment, sourceFile);
             if (switchRange !== undefined) {
-                const rulesToSwitch = rulesList === "all" ? Array.from(failingRules) : rulesList.filter((r) => failingRules.has(r));
+                const rulesToSwitch =
+                    rulesList === "all"
+                        ? Array.from(failingRules)
+                        : rulesList.filter(r => failingRules.has(r));
                 for (const ruleToSwitch of rulesToSwitch) {
                     switchRuleState(ruleToSwitch, isEnabled, switchRange.pos, switchRange.end);
                 }
@@ -74,7 +87,12 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
 
     return map;
 
-    function switchRuleState(ruleName: string, isEnable: boolean, start: number, end: number): void {
+    function switchRuleState(
+        ruleName: string,
+        isEnable: boolean,
+        start: number,
+        end: number
+    ): void {
         const disableRanges = map.get(ruleName);
 
         if (isEnable) {
@@ -88,7 +106,8 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
                     }
                 }
             }
-        } else { // disable
+        } else {
+            // disable
             if (disableRanges === undefined) {
                 map.set(ruleName, [{ pos: start, end }]);
             } else if (disableRanges[disableRanges.length - 1].end !== -1) {
@@ -99,7 +118,11 @@ function getDisableMap(sourceFile: ts.SourceFile, failingRules: Set<string>): Re
 }
 
 /** End will be -1 to indicate no end. */
-function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.SourceFile): ts.TextRange | undefined {
+function getSwitchRange(
+    modifier: Modifier,
+    range: ts.TextRange,
+    sourceFile: ts.SourceFile
+): ts.TextRange | undefined {
     const lineStarts = sourceFile.getLineStarts();
 
     switch (modifier) {
@@ -108,7 +131,7 @@ function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.
                 // start at the beginning of the line where comment starts
                 pos: getStartOfLinePosition(range.pos),
                 // end at the beginning of the line following the comment
-                end: getStartOfLinePosition(range.end, 1),
+                end: getStartOfLinePosition(range.end, 1)
             };
         case "next-line":
             // start at the beginning of the line following the comment
@@ -133,7 +156,9 @@ function getSwitchRange(modifier: Modifier, range: ts.TextRange, sourceFile: ts.
 }
 
 type Modifier = "line" | "next-line" | undefined;
-function parseComment(commentText: string): { rulesList: string[] | "all"; isEnabled: boolean; modifier: Modifier } | undefined {
+function parseComment(
+    commentText: string
+): { rulesList: string[] | "all"; isEnabled: boolean; modifier: Modifier } | undefined {
     const match = ENABLE_DISABLE_REGEX.exec(commentText);
     if (match === null) {
         return undefined;
@@ -147,8 +172,7 @@ function parseComment(commentText: string): { rulesList: string[] | "all"; isEna
         // nothing to do here: an explicit separator was specified but no rules to switch
         return undefined;
     }
-    if (rulesList.length === 0 ||
-        rulesList.indexOf("all") !== -1) {
+    if (rulesList.length === 0 || rulesList.indexOf("all") !== -1) {
         // if list is empty we default to all enabled rules
         // if `all` is specified we ignore the other rules and take all enabled rules
         rulesList = "all";
@@ -158,5 +182,5 @@ function parseComment(commentText: string): { rulesList: string[] | "all"; isEna
 }
 
 function splitOnSpaces(str: string): string[] {
-    return str.split(/\s+/).filter((s) => s !== "");
+    return str.split(/\s+/).filter(s => s !== "");
 }

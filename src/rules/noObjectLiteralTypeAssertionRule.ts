@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { isAssertionExpression, isObjectLiteralExpression, isParenthesizedExpression } from "tsutils";
+import {
+    isAssertionExpression,
+    isObjectLiteralExpression,
+    isParenthesizedExpression
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -37,11 +41,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type assertion on object literals is forbidden, use a type annotation instead.";
+    public static FAILURE_STRING =
+        "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -50,8 +55,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isAssertionExpression(node) && node.type.kind !== ts.SyntaxKind.AnyKeyword &&
-            isObjectLiteralExpression(isParenthesizedExpression(node.expression) ? node.expression.expression : node.expression)) {
+        if (
+            isAssertionExpression(node) &&
+            node.type.kind !== ts.SyntaxKind.AnyKeyword &&
+            isObjectLiteralExpression(
+                isParenthesizedExpression(node.expression)
+                    ? node.expression.expression
+                    : node.expression
+            )
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

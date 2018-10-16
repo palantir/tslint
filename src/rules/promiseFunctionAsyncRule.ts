@@ -28,7 +28,7 @@ const KIND_FOR_OPTION: { [arg: string]: number } = {
     [OPTION_FUNCTION_DECLARATION]: ts.SyntaxKind.FunctionDeclaration,
     [OPTION_FUNCTION_EXPRESSION]: ts.SyntaxKind.FunctionExpression,
     [OPTION_ARROW_FUNCTION]: ts.SyntaxKind.ArrowFunction,
-    [OPTION_METHOD_DECLARATION]: ts.SyntaxKind.MethodDeclaration,
+    [OPTION_METHOD_DECLARATION]: ts.SyntaxKind.MethodDeclaration
 };
 
 type EnabledSyntaxKinds = ReadonlySet<number>;
@@ -73,24 +73,28 @@ export class Rule extends Lint.Rules.TypedRule {
                     OPTION_FUNCTION_DECLARATION,
                     OPTION_FUNCTION_EXPRESSION,
                     OPTION_ARROW_FUNCTION,
-                    OPTION_METHOD_DECLARATION,
-                ],
+                    OPTION_METHOD_DECLARATION
+                ]
             },
             minLength: 0,
-            maxLength: 4,
+            maxLength: 4
         },
-        optionExamples: [true,
-                         [true, OPTION_FUNCTION_DECLARATION, OPTION_METHOD_DECLARATION]],
+        optionExamples: [true, [true, OPTION_FUNCTION_DECLARATION, OPTION_METHOD_DECLARATION]],
         type: "typescript",
         typescriptOnly: false,
-        requiresTypeInfo: true,
+        requiresTypeInfo: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING = "functions that return promises must be async";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments), program.getTypeChecker());
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            parseOptions(this.ruleArguments),
+            program.getTypeChecker()
+        );
     }
 }
 
@@ -104,12 +108,18 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
                     if ((node as ts.FunctionLikeDeclaration).body === undefined) {
                         break;
                     }
-                    // falls through
+                // falls through
                 case ts.SyntaxKind.FunctionExpression:
                 case ts.SyntaxKind.ArrowFunction:
-                    if (!hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
-                        && returnsPromise(node as ts.FunctionLikeDeclaration, tc)) {
-                        ctx.addFailure(node.getStart(sourceFile), (node as ts.FunctionLikeDeclaration).body!.pos, Rule.FAILURE_STRING);
+                    if (
+                        !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
+                        returnsPromise(node as ts.FunctionLikeDeclaration, tc)
+                    ) {
+                        ctx.addFailure(
+                            node.getStart(sourceFile),
+                            (node as ts.FunctionLikeDeclaration).body!.pos,
+                            Rule.FAILURE_STRING
+                        );
                     }
             }
         }

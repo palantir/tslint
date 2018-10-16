@@ -29,7 +29,7 @@ const OPTION_IGNORE_INTERFACES = "ignore-interfaces";
 const enum BoundClassMethodOption {
     Default,
     Ignore,
-    Strict,
+    Strict
 }
 
 interface Options {
@@ -61,23 +61,23 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: [
                 {
                     type: "string",
-                    enum: [OPTION_ALWAYS, OPTION_NEVER],
+                    enum: [OPTION_ALWAYS, OPTION_NEVER]
                 },
                 {
                     type: "string",
-                    enum: [OPTION_IGNORE_INTERFACES],
-                },
+                    enum: [OPTION_IGNORE_INTERFACES]
+                }
             ],
-            additionalItems: false,
+            additionalItems: false
         },
         optionExamples: [
             [true, OPTION_ALWAYS],
             [true, OPTION_NEVER],
             [true, OPTION_ALWAYS, OPTION_IGNORE_INTERFACES],
-            [true, OPTION_ALWAYS, OPTION_IGNORE_BOUND_CLASS_METHODS],
+            [true, OPTION_ALWAYS, OPTION_IGNORE_BOUND_CLASS_METHODS]
         ],
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -87,14 +87,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            boundClassMethods: this.ruleArguments.indexOf(OPTION_STRICT_BOUND_CLASS_METHODS) !== -1
-                ? BoundClassMethodOption.Strict
-                : this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) !== -1
-                    ? BoundClassMethodOption.Ignore
-                    : BoundClassMethodOption.Default,
-            interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
+            boundClassMethods:
+                this.ruleArguments.indexOf(OPTION_STRICT_BOUND_CLASS_METHODS) !== -1
+                    ? BoundClassMethodOption.Strict
+                    : this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) !== -1
+                        ? BoundClassMethodOption.Ignore
+                        : BoundClassMethodOption.Default,
+            interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1
         };
-        const Walker = this.ruleArguments.indexOf(OPTION_NEVER) === -1 ? SemicolonAlwaysWalker : SemicolonNeverWalker;
+        const Walker =
+            this.ruleArguments.indexOf(OPTION_NEVER) === -1
+                ? SemicolonAlwaysWalker
+                : SemicolonNeverWalker;
         return this.applyWithWalker(new Walker(sourceFile, this.ruleName, options));
     }
 }
@@ -120,7 +124,12 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
     }
 
     protected reportUnnecessary(pos: number, noFix?: boolean) {
-        this.addFailure(pos - 1, pos, Rule.FAILURE_STRING_UNNECESSARY, noFix ? undefined : Lint.Replacement.deleteText(pos - 1, 1));
+        this.addFailure(
+            pos - 1,
+            pos,
+            Rule.FAILURE_STRING_UNNECESSARY,
+            noFix ? undefined : Lint.Replacement.deleteText(pos - 1, 1)
+        );
     }
 
     protected checkSemicolonOrLineBreak(node: ts.Node) {
@@ -143,12 +152,19 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
         if (this.sourceFile.text[node.end - 1] !== ";") {
             return;
         }
-        const lastToken = utils.getPreviousToken(node.getLastToken(this.sourceFile), this.sourceFile)!;
+        const lastToken = utils.getPreviousToken(
+            node.getLastToken(this.sourceFile),
+            this.sourceFile
+        )!;
         // yield does not continue on the next line if there is no yielded expression
-        if (lastToken.kind === ts.SyntaxKind.YieldKeyword && lastToken.parent!.kind === ts.SyntaxKind.YieldExpression ||
+        if (
+            (lastToken.kind === ts.SyntaxKind.YieldKeyword &&
+                lastToken.parent!.kind === ts.SyntaxKind.YieldExpression) ||
             // arrow functions with block as body don't continue on the next line
-            lastToken.kind === ts.SyntaxKind.CloseBraceToken && lastToken.parent!.kind === ts.SyntaxKind.Block &&
-                lastToken.parent!.parent!.kind === ts.SyntaxKind.ArrowFunction) {
+            (lastToken.kind === ts.SyntaxKind.CloseBraceToken &&
+                lastToken.parent!.kind === ts.SyntaxKind.Block &&
+                lastToken.parent!.parent!.kind === ts.SyntaxKind.ArrowFunction)
+        ) {
             return this.checkSemicolonOrLineBreak(node);
         }
         const nextToken = utils.getNextToken(node, this.sourceFile)!;
@@ -180,19 +196,22 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
             const parentKind = node.parent!.kind;
             // don't remove empty statement if it is a direct child of if, with or a LabeledStatement
             // otherwise this would unintentionally change control flow
-            const noFix = parentKind === ts.SyntaxKind.IfStatement ||
-                          parentKind === ts.SyntaxKind.LabeledStatement ||
-                          parentKind === ts.SyntaxKind.WithStatement;
+            const noFix =
+                parentKind === ts.SyntaxKind.IfStatement ||
+                parentKind === ts.SyntaxKind.LabeledStatement ||
+                parentKind === ts.SyntaxKind.WithStatement;
             this.reportUnnecessary(node.end, noFix);
         }
     }
 
     private visitPropertyDeclaration(node: ts.PropertyDeclaration) {
         // check if this is a multi-line arrow function
-        if (this.options.boundClassMethods !== BoundClassMethodOption.Strict &&
+        if (
+            this.options.boundClassMethods !== BoundClassMethodOption.Strict &&
             node.initializer !== undefined &&
             node.initializer.kind === ts.SyntaxKind.ArrowFunction &&
-            !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)) {
+            !utils.isSameLine(this.sourceFile, node.getStart(this.sourceFile), node.end)
+        ) {
             if (this.options.boundClassMethods === BoundClassMethodOption.Default) {
                 this.checkUnnecessary(node);
             }
@@ -223,7 +242,9 @@ class SemicolonAlwaysWalker extends SemicolonWalker {
             case ts.SyntaxKind.MethodDeclaration:
             case ts.SyntaxKind.FunctionDeclaration:
                 // check shorthand module declarations and method / function signatures
-                if ((node as ts.FunctionLikeDeclaration | ts.ModuleDeclaration).body === undefined) {
+                if (
+                    (node as ts.FunctionLikeDeclaration | ts.ModuleDeclaration).body === undefined
+                ) {
                     this.checkMissing(node);
                 }
                 break;
@@ -248,15 +269,26 @@ class SemicolonAlwaysWalker extends SemicolonWalker {
     }
 
     private reportMissing(pos: number) {
-        this.addFailureAt(pos, 0, Rule.FAILURE_STRING_MISSING, Lint.Replacement.appendText(pos, ";"));
+        this.addFailureAt(
+            pos,
+            0,
+            Rule.FAILURE_STRING_MISSING,
+            Lint.Replacement.appendText(pos, ";")
+        );
     }
 
     private checkInterface(node: ts.InterfaceDeclaration) {
         for (const member of node.members) {
             switch (this.sourceFile.text[member.end - 1]) {
-                case ";": break;
+                case ";":
+                    break;
                 case ",":
-                    this.addFailureAt(member.end - 1, 1, Rule.FAILURE_STRING_COMMA, new Lint.Replacement(member.end - 1, 1, ";"));
+                    this.addFailureAt(
+                        member.end - 1,
+                        1,
+                        Rule.FAILURE_STRING_COMMA,
+                        new Lint.Replacement(member.end - 1, 1, ";")
+                    );
                     break;
                 default:
                     this.reportMissing(member.end);

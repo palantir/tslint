@@ -38,29 +38,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             properties: {
                 [singeLineConfigOptionName]: {
                     type: "string",
-                    enum: ["always", "never"] as Array<Options["singleLine"]>,
-                },
-            },
+                    enum: ["always", "never"] as Array<Options["singleLine"]>
+                }
+            }
         },
         hasFix: true,
         optionExamples: [true],
         type: "style",
-        typescriptOnly: true,
+        typescriptOnly: true
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_MISSING =
-        "Expected type literal to use ';' to separate members.";
-    public static FAILURE_STRING_COMMA =
-        "Expected type literal to use ';' instead of ','.";
+    public static FAILURE_STRING_MISSING = "Expected type literal to use ';' to separate members.";
+    public static FAILURE_STRING_COMMA = "Expected type literal to use ';' instead of ','.";
     public static FAILURE_STRING_TRAILING =
         "Did not expect single-line type literal to have a trailing ';'.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(
-            sourceFile,
-            walk,
-            this.getRuleOptions());
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions());
     }
 
     private getRuleOptions(): Options {
@@ -84,22 +79,39 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         node.members.forEach((member, idx) => {
             const end = member.end - 1;
             // Check if delimiter should be ommitted for a single-line type literal.
-            const shouldOmit = options.singleLine === "always"
-                ? false
-                : idx === node.members.length - 1 && isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
+            const shouldOmit =
+                options.singleLine === "always"
+                    ? false
+                    : idx === node.members.length - 1 &&
+                      isSameLine(sourceFile, node.getStart(sourceFile), node.getEnd());
             const delimiter = sourceFile.text[end];
             switch (delimiter) {
                 case ";":
                     if (shouldOmit) {
-                        ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_TRAILING, Lint.Replacement.replaceFromTo(end, end + 1, ""));
+                        ctx.addFailureAt(
+                            end,
+                            1,
+                            Rule.FAILURE_STRING_TRAILING,
+                            Lint.Replacement.replaceFromTo(end, end + 1, "")
+                        );
                     }
                     break;
                 case ",":
-                    ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_COMMA, Lint.Replacement.replaceFromTo(end, end + 1, ";"));
+                    ctx.addFailureAt(
+                        end,
+                        1,
+                        Rule.FAILURE_STRING_COMMA,
+                        Lint.Replacement.replaceFromTo(end, end + 1, ";")
+                    );
                     break;
                 default:
                     if (!shouldOmit) {
-                        ctx.addFailureAt(end, 1, Rule.FAILURE_STRING_MISSING, Lint.Replacement.replaceFromTo(end + 1, end + 1, ";"));
+                        ctx.addFailureAt(
+                            end,
+                            1,
+                            Rule.FAILURE_STRING_MISSING,
+                            Lint.Replacement.replaceFromTo(end + 1, end + 1, ";")
+                        );
                     }
             }
         });

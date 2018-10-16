@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "triple-equals",
         description: "Requires `===` and `!==` in place of `==` and `!=`.",
-        optionsDescription: Lint.Utils.dedent `
+        optionsDescription: Lint.Utils.dedent`
             Two arguments may be optionally provided:
 
             * \`"allow-null-check"\` allows \`==\` and \`!=\` when comparing to \`null\`.
@@ -42,18 +42,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_ALLOW_NULL_CHECK, OPTION_ALLOW_UNDEFINED_CHECK],
+                enum: [OPTION_ALLOW_NULL_CHECK, OPTION_ALLOW_UNDEFINED_CHECK]
             },
             minLength: 0,
-            maxLength: 2,
+            maxLength: 2
         },
-        optionExamples: [
-            true,
-            [true, "allow-null-check"],
-            [true, "allow-undefined-check"],
-        ],
+        optionExamples: [true, [true, "allow-null-check"], [true, "allow-undefined-check"]],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -63,7 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
             allowNull: this.ruleArguments.indexOf(OPTION_ALLOW_NULL_CHECK) !== -1,
-            allowUndefined: this.ruleArguments.indexOf(OPTION_ALLOW_UNDEFINED_CHECK) !== -1,
+            allowUndefined: this.ruleArguments.indexOf(OPTION_ALLOW_UNDEFINED_CHECK) !== -1
         });
     }
 }
@@ -71,12 +67,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<Options>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node)) {
-            if ((node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
-                 node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
-                !(isExpressionAllowed(node.right, ctx.options) || isExpressionAllowed(node.left, ctx.options))) {
-                ctx.addFailureAtNode(node.operatorToken, node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
-                                                         ? Rule.EQ_FAILURE_STRING
-                                                         : Rule.NEQ_FAILURE_STRING);
+            if (
+                (node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
+                    node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken) &&
+                !(
+                    isExpressionAllowed(node.right, ctx.options) ||
+                    isExpressionAllowed(node.left, ctx.options)
+                )
+            ) {
+                ctx.addFailureAtNode(
+                    node.operatorToken,
+                    node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken
+                        ? Rule.EQ_FAILURE_STRING
+                        : Rule.NEQ_FAILURE_STRING
+                );
             }
         }
         return ts.forEachChild(node, cb);
@@ -87,7 +91,9 @@ function isExpressionAllowed(node: ts.Expression, options: Options) {
     if (node.kind === ts.SyntaxKind.NullKeyword) {
         return options.allowNull;
     }
-    return options.allowUndefined &&
+    return (
+        options.allowUndefined &&
         node.kind === ts.SyntaxKind.Identifier &&
-        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
+        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword
+    );
 }

@@ -25,7 +25,7 @@ enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
     KebabCase = "kebab-case",
-    SnakeCase = "snake-case",
+    SnakeCase = "snake-case"
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -46,19 +46,19 @@ export class Rule extends Lint.Rules.AbstractRule {
             items: [
                 {
                     type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
-                },
-            ],
+                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase]
+                }
+            ]
         },
         optionExamples: [
             [true, Casing.CamelCase],
             [true, Casing.PascalCase],
             [true, Casing.KebabCase],
-            [true, Casing.SnakeCase],
+            [true, Casing.SnakeCase]
         ],
         hasFix: false,
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -100,7 +100,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const casing = this.ruleArguments[0] as Casing;
         const fileName = path.parse(sourceFile.fileName).name;
         if (!Rule.isCorrectCasing(fileName, casing)) {
-            return [new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)];
+            return [
+                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)
+            ];
         }
 
         return [];

@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "functionality",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -50,7 +50,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type JumpStatement = ts.BreakStatement | ts.ContinueStatement | ts.ThrowStatement | ts.ReturnStatement;
+type JumpStatement =
+    | ts.BreakStatement
+    | ts.ContinueStatement
+    | ts.ThrowStatement
+    | ts.ReturnStatement;
 
 function walk(ctx: Lint.WalkContext<void>): void {
     let inFinally = false;
@@ -75,9 +79,12 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.ThrowStatement:
             case ts.SyntaxKind.ReturnStatement:
                 if (inFinally && !jumpIsLocalToFinallyBlock(node as JumpStatement)) {
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING(printJumpKind(node as JumpStatement)));
+                    ctx.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING(printJumpKind(node as JumpStatement))
+                    );
                 }
-                // falls through
+            // falls through
 
             default:
                 return ts.forEachChild(node, cb);

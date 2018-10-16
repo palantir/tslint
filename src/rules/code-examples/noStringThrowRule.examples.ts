@@ -37,6 +37,6 @@ export const codeExamples = [
             } catch {
                 throw 'There was a problem.';
             }
-        `,
-    },
+        `
+    }
 ];

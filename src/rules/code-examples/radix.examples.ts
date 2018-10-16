@@ -35,6 +35,6 @@ export const codeExamples = [
             const dec: number = parseInt(x);
             const bin: number = parseInt(x, 2);
             const hex: number = parseInt(x, 16);
-        `,
-    },
+        `
+    }
 ];
