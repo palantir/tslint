@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import {readFile} from 'fs';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('fs')]
 
 import * as path from 'path';
+import { join } from 'path';
 
 import {writeFileSync as wfs} from 'fs';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('fs')]

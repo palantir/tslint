@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isLiteralExpression, isModuleDeclaration } from "tsutils";
+import {
+    isImportDeclaration,
+    isLiteralExpression,
+    isModuleDeclaration,
+    isNamespaceImport,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -45,21 +50,28 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<void>): void {
-    walkWorker(ctx, ctx.sourceFile.statements, new Set());
+    walkWorker(ctx, ctx.sourceFile.statements, new Set(), new Set());
 }
 
 function walkWorker(
     ctx: Lint.WalkContext<void>,
     statements: ReadonlyArray<ts.Statement>,
-    seen: Set<string>,
+    seenNamedImports: Set<string>,
+    seenNamespaceImports: Set<string>,
 ): void {
     for (const statement of statements) {
         if (isImportDeclaration(statement) && isLiteralExpression(statement.moduleSpecifier)) {
             const { text } = statement.moduleSpecifier;
-            if (seen.has(text)) {
+            const seenSet =
+                Boolean(statement.importClause) &&
+                Boolean(statement.importClause!.namedBindings) &&
+                isNamespaceImport(statement.importClause!.namedBindings!)
+                    ? seenNamespaceImports
+                    : seenNamedImports;
+            if (seenSet.has(text)) {
                 ctx.addFailureAtNode(statement, Rule.FAILURE_STRING(text));
             }
-            seen.add(text);
+            seenSet.add(text);
         }
 
         if (
@@ -73,7 +85,8 @@ function walkWorker(
             walkWorker(
                 ctx,
                 (statement.body as ts.ModuleBlock).statements,
-                ts.isExternalModule(ctx.sourceFile) ? seen : new Set(),
+                ts.isExternalModule(ctx.sourceFile) ? seenNamedImports : new Set(),
+                ts.isExternalModule(ctx.sourceFile) ? seenNamespaceImports : new Set(),
             );
         }
     }
