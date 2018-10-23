@@ -46,16 +46,20 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             By default, this rule checks that keys are in alphabetical order.
             The following may optionally be passed:
 
-            * "${OPTION_IGNORE_CASE}" will compare keys in a case insensitive way.
-            * "${OPTION_MATCH_DECLARATION_ORDER}" will prefer to use the key ordering of the contextual type of the object literal, as in:
+            * \`${OPTION_IGNORE_CASE}\` will compare keys in a case insensitive way.
+            * \`${OPTION_MATCH_DECLARATION_ORDER}\` will prefer to use the key ordering of the contextual type of the object literal, as in:
 
+                \`\`\`
                 interface I { foo: number; bar: number; }
                 const obj: I = { foo: 1, bar: 2 };
+                \`\`\`
 
-            If a contextual type is not found, alphabetical ordering will be used instead.
-            * "${OPTION_SHORTHAND_FIRST}" will enforce shorthand properties to appear first, as in:
+                If a contextual type is not found, alphabetical ordering will be used instead.
+            * \`${OPTION_SHORTHAND_FIRST}\` will enforce shorthand properties to appear first, as in:
 
+                \`\`\`
                 const obj = { a, c, b: true };
+                \`\`\`
             `,
         options: {
             type: "string",
