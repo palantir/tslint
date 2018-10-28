@@ -20,6 +20,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [tslint.tmbundle][17] ([TextMate][18])
 * [generator-tslint][19]
 * [Flycheck][20] ([Emacs][21])
+* [tslint-brunch][22] ([Brunch][23])
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -44,3 +45,5 @@ _Note: Most of these tools are not maintained by TSLint._
 [19]: https://github.com/greybax/generator-tslint
 [20]: http://www.flycheck.org/
 [21]: https://www.gnu.org/software/emacs/
+[22]: https://www.npmjs.com/package/tslint-brunch
+[23]: https://brunch.io/
