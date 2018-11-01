@@ -1,0 +1,32 @@
+let a = [1];
+let b = [2];
+
+// good
+let c = [];
+c = a.concat(b);
+
+let d = a.concat(b);
+
+a.reduce((acc, cur) => acc.concat(cur), []);
+
+a.filter((val) => val.concat(b).length > 1, []);
+
+a.reduce((acc, cur) => { return acc.concat(cur) }, []);
+
+a.reduce((acc, cur) => {
+    const next = acc.concat(cur);
+    return next;
+}, []);
+
+let e = false || a.concat(b);
+
+e = true && a.concat(b);
+
+e = false || true && a.concat(b);
+
+//bad
+a.concat(b);
+~~~~~~~~~~~  [concat operation should be assigned]
+
+a.reduce((acc, cur) => { acc.concat(cur) }, []);
+                         ~~~~~~~~~~~~~~~        [concat operation should be assigned]
