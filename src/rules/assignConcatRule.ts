@@ -64,6 +64,8 @@ class AssignConcatWalker extends Lint.RuleWalker {
                     // Assigment: concat is being correctly used.
                 } else if (node.parent!.kind === ts.SyntaxKind.PropertyAccessExpression) {
                     // Here the result of the concat it is being accesed at least.
+                } else if (node.parent!.kind === ts.SyntaxKind.CallExpression) {
+                    // Here the result of the concat it is being used as a param.
                 } else {
                     // tslint:disable-next-line:no-console
                     console.log(node.parent!.kind);

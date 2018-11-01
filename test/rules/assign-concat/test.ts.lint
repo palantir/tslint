@@ -24,6 +24,10 @@ e = true && a.concat(b);
 
 e = false || true && a.concat(b);
 
+let func = (arr) => arr.length > 0;
+
+func(a.concat(b));
+
 //bad
 a.concat(b);
 ~~~~~~~~~~~  [concat operation should be assigned]
