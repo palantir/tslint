@@ -122,7 +122,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${IGNORE_PARAMETERS_TO_FUNCTIONS}\`: Regular expression of functions to ignore parameters of, such as in test \`describe\`s.
         `,
         rationale: Lint.Utils.dedent`
-            wat
+            Limiting the number of lines allowed in a block allows blocks to remain small,
+            single purpose, and maintainable.`,
         `,
         ruleName: "max-function-body-length",
         type: "maintainability",
