@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class AssignConcatWalker extends Lint.RuleWalker {
-    private checker: Checkable;
+    private readonly checker: Checkable;
 
     constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
         super(sourceFile, options);
@@ -77,7 +77,7 @@ class AssignConcatWalker extends Lint.RuleWalker {
 }
 
 abstract class Checkable {
-    private childs: Checkable[];
+    private readonly childs: Checkable[];
 
     public abstract check(node: ts.Node): boolean;
 
@@ -95,7 +95,7 @@ abstract class Checkable {
 }
 
 class OperatorTokenKind extends Checkable {
-    private kind: ts.SyntaxKind;
+    private readonly kind: ts.SyntaxKind;
 
     constructor(kind: ts.SyntaxKind, childs: Checkable[] = []) {
         super(childs);
@@ -109,7 +109,7 @@ class OperatorTokenKind extends Checkable {
 }
 
 class ParentKind extends Checkable {
-    private kind: ts.SyntaxKind;
+    private readonly kind: ts.SyntaxKind;
 
     constructor(kind: ts.SyntaxKind, childs: Checkable[] = []) {
         super(childs);
