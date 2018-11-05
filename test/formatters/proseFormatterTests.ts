@@ -79,6 +79,6 @@ describe("Prose Formatter", () => {
     });
 
     function getPositionString(line: number, character: number) {
-        return `[${line}, ${character}]: `;
+        return `:${line}:${character} - `;
     }
 });
