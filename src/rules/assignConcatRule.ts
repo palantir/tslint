@@ -27,56 +27,97 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class AssignConcatWalker extends Lint.RuleWalker {
+    private checker: Checkable;
+
+    constructor(sourceFile: ts.SourceFile, options: Lint.IOptions) {
+        super(sourceFile, options);
+
+        this.checker = new ConcatPropertyAccessExpression([
+            new ParentKind(ts.SyntaxKind.BinaryExpression, [
+                new OperatorTokenKind(ts.SyntaxKind.EqualsToken),
+                new ParentKind(ts.SyntaxKind.VariableDeclaration),
+                new ParentKind(ts.SyntaxKind.BinaryExpression),
+                new ParentKind(ts.SyntaxKind.ExpressionStatement)
+            ]),
+            new ParentKind(ts.SyntaxKind.VariableDeclaration),
+            new ParentKind(ts.SyntaxKind.ArrowFunction),
+            new ParentKind(ts.SyntaxKind.ReturnStatement),
+            new ParentKind(ts.SyntaxKind.VariableDeclaration),
+            new ParentKind(ts.SyntaxKind.PropertyAccessExpression),
+            new ParentKind(ts.SyntaxKind.CallExpression)
+        ]);
+    }
+
     public visitCallExpression(node: ts.CallExpression) {
-        if (node.expression.kind === ts.SyntaxKind.PropertyAccessExpression) {
-            const pae = node.expression as ts.PropertyAccessExpression;
-
-            if (pae.name.text === "concat") {
-                if (node.parent!.kind === ts.SyntaxKind.BinaryExpression) {
-                    const be = node.parent as ts.BinaryExpression;
-
-                    if (be.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
-                        // Assigment: concat is being correctly used.
-                    } else if (be.parent!.kind === ts.SyntaxKind.VariableDeclaration) {
-                        // Assigment: concat is being correctly used.
-                    } else if (be.parent!.kind === ts.SyntaxKind.BinaryExpression) {
-                        // Here we can't decide, will have to analize the parent chain.
-                    } else if (be.parent!.kind === ts.SyntaxKind.ExpressionStatement) {
-                        // Here we can't decide, will have to analize the parent chain.
-                    } else {
-                        // tslint:disable-next-line:no-console
-                        console.log(be.parent!.kind);
-                        // tslint:disable-next-line:no-console
-                        // console.log(be.parent);
-                        this.addFailure(
-                            this.createFailure(
-                                node.getStart(),
-                                node.getWidth(),
-                                Rule.FAILURE_STRING
-                            )
-                        );
-                    }
-                } else if (node.parent!.kind === ts.SyntaxKind.VariableDeclaration) {
-                    // Assigment: concat is being correctly used.
-                } else if (node.parent!.kind === ts.SyntaxKind.ArrowFunction) {
-                    // Assigment: concat is being correctly used.
-                } else if (node.parent!.kind === ts.SyntaxKind.ReturnStatement) {
-                    // Assigment: concat is being correctly used.
-                } else if (node.parent!.kind === ts.SyntaxKind.PropertyAccessExpression) {
-                    // Here the result of the concat it is being accesed at least.
-                } else if (node.parent!.kind === ts.SyntaxKind.CallExpression) {
-                    // Here the result of the concat it is being used as a param.
-                } else {
-                    // tslint:disable-next-line:no-console
-                    console.log(node.parent!.kind);
-
-                    this.addFailure(
-                        this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING)
-                    );
-                }
-            }
+        if (!this.checker.check(node)) {
+            this.addFailure(
+                this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING)
+            );
         }
 
         super.visitCallExpression(node);
+    }
+}
+
+abstract class Checkable {
+    private childs: Checkable[];
+
+    public abstract check(node: ts.Node): boolean;
+
+    constructor(childs: Checkable[]) {
+        this.childs = childs;
+    }
+
+    protected runChecks(cond: boolean, node: ts.Node) {
+        if (this.childs.length === 0) {
+            // leaf
+            return cond;
+        } else if (!cond) {
+            // branch with no precondition
+            return true;
+        } else {
+            return this.childs.map(c => c.check(node)).reduce((acc, cur) => acc && cur);
+        }
+    }
+}
+
+class OperatorTokenKind extends Checkable {
+    private kind: ts.SyntaxKind;
+
+    constructor(kind: ts.SyntaxKind, childs: Checkable[] = []) {
+        super(childs);
+        this.kind = kind;
+    }
+
+    public check(node: ts.Node) {
+        const be = node as ts.BinaryExpression;
+        return this.runChecks(be.operatorToken.kind === this.kind, node);
+    }
+}
+
+class ParentKind extends Checkable {
+    private kind: ts.SyntaxKind;
+
+    constructor(kind: ts.SyntaxKind, childs: Checkable[] = []) {
+        super(childs);
+        this.kind = kind;
+    }
+
+    public check(node: ts.Node) {
+        return this.runChecks(node.parent!.kind === this.kind, node.parent!);
+    }
+}
+
+class ConcatPropertyAccessExpression extends Checkable {
+    constructor(childs: Checkable[] = []) {
+        super(childs);
+    }
+
+    public check(node: ts.CallExpression) {
+        const pae = node.expression as ts.PropertyAccessExpression;
+        return this.runChecks(
+            pae.kind === ts.SyntaxKind.PropertyAccessExpression && pae.name.text === "concat",
+            node
+        );
     }
 }
