@@ -64,7 +64,12 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_NO_PUBLIC, OPTION_CHECK_ACCESSOR, OPTION_CHECK_CONSTRUCTOR, OPTION_CHECK_PARAMETER_PROPERTY],
+                enum: [
+                    OPTION_NO_PUBLIC,
+                    OPTION_CHECK_ACCESSOR,
+                    OPTION_CHECK_CONSTRUCTOR,
+                    OPTION_CHECK_PARAMETER_PROPERTY,
+                ],
             },
             minLength: 0,
             maxLength: 4,
@@ -78,7 +83,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING_NO_PUBLIC = "'public' is implicit.";
 
-    public static FAILURE_STRING_FACTORY(memberType: string, memberName: string | undefined): string {
+    public static FAILURE_STRING_FACTORY(
+        memberType: string,
+        memberName: string | undefined,
+    ): string {
         memberName = memberName === undefined ? "" : ` '${memberName}'`;
         return `The ${memberType}${memberName} must be marked either 'private', 'public', or 'protected'`;
     }
@@ -91,7 +99,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         let checkParameterProperty = options.indexOf(OPTION_CHECK_PARAMETER_PROPERTY) !== -1;
         if (noPublic) {
             if (checkAccessor || checkConstructor || checkParameterProperty) {
-                showWarningOnce(`Warning: ${this.ruleName} - If 'no-public' is present, it should be the only option.`);
+                showWarningOnce(
+                    `Warning: ${
+                        this.ruleName
+                    } - If 'no-public' is present, it should be the only option.`,
+                );
                 return [];
             }
             checkAccessor = checkConstructor = checkParameterProperty = true;
@@ -113,7 +125,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 if (shouldCheck(child)) {
                     check(child);
                 }
-                if (checkParameterProperty && isConstructorDeclaration(child) && child.body !== undefined) {
+                if (
+                    checkParameterProperty &&
+                    isConstructorDeclaration(child) &&
+                    child.body !== undefined
+                ) {
                     for (const param of child.parameters) {
                         if (isParameterProperty(param)) {
                             check(param);
@@ -141,27 +157,45 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function check(node: ts.ClassElement | ts.ParameterDeclaration): void {
-        if (hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword)) {
+        if (
+            hasModifier(
+                node.modifiers,
+                ts.SyntaxKind.ProtectedKeyword,
+                ts.SyntaxKind.PrivateKeyword,
+            )
+        ) {
             return;
         }
         const publicKeyword = getModifier(node, ts.SyntaxKind.PublicKeyword);
         if (noPublic && publicKeyword !== undefined) {
             // public is not optional for parameter property without the readonly modifier
-            if (node.kind !== ts.SyntaxKind.Parameter || hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)) {
+            if (
+                node.kind !== ts.SyntaxKind.Parameter ||
+                hasModifier(node.modifiers, ts.SyntaxKind.ReadonlyKeyword)
+            ) {
                 const start = publicKeyword.end - "public".length;
                 ctx.addFailure(
                     start,
                     publicKeyword.end,
                     Rule.FAILURE_STRING_NO_PUBLIC,
-                    Lint.Replacement.deleteFromTo(start, getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile)),
+                    Lint.Replacement.deleteFromTo(
+                        start,
+                        getNextToken(publicKeyword, ctx.sourceFile)!.getStart(ctx.sourceFile),
+                    ),
                 );
             }
         }
         if (!noPublic && publicKeyword === undefined) {
-            const nameNode = node.kind === ts.SyntaxKind.Constructor
-                ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
-                : node.name !== undefined ? node.name : node;
-            const memberName = node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier ? node.name.text : undefined;
+            const nameNode =
+                node.kind === ts.SyntaxKind.Constructor
+                    ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
+                    : node.name !== undefined
+                        ? node.name
+                        : node;
+            const memberName =
+                node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier
+                    ? node.name.text
+                    : undefined;
             ctx.addFailureAtNode(
                 nameNode,
                 Rule.FAILURE_STRING_FACTORY(typeToString(node), memberName),
@@ -171,8 +205,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 }
 
-function getInsertionPosition(member: ts.ClassElement | ts.ParameterDeclaration, sourceFile: ts.SourceFile): number {
-    const node = member.decorators === undefined ? member : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
+function getInsertionPosition(
+    member: ts.ClassElement | ts.ParameterDeclaration,
+    sourceFile: ts.SourceFile,
+): number {
+    const node =
+        member.decorators === undefined
+            ? member
+            : getTokenAtPosition(member, member.decorators.end, sourceFile)!;
     return node.getStart(sourceFile);
 }
 
