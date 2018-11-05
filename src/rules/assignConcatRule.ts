@@ -69,15 +69,11 @@ abstract class Checkable {
     }
 
     protected runChecks(cond: boolean, node: ts.Node) {
-        if (this.childs.length === 0) {
-            // leaf
-            return cond;
-        } else if (!cond) {
-            // branch with no precondition
-            return true;
-        } else {
-            return this.childs.map(c => c.check(node)).reduce((acc, cur) => acc && cur);
-        }
+        return (
+            cond &&
+            (this.childs.length === 0 ||
+                !!this.childs.map(c => c.check(node)).find(result => result))
+        );
     }
 }
 
@@ -115,9 +111,8 @@ class ConcatPropertyAccessExpression extends Checkable {
 
     public check(node: ts.CallExpression) {
         const pae = node.expression as ts.PropertyAccessExpression;
-        return this.runChecks(
-            pae.kind === ts.SyntaxKind.PropertyAccessExpression && pae.name.text === "concat",
-            node
-        );
+        const cond =
+            pae.kind === ts.SyntaxKind.PropertyAccessExpression && pae.name.text === "concat";
+        return !cond || this.runChecks(true, node);
     }
 }

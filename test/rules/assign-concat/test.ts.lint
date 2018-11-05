@@ -1,5 +1,4 @@
 // good
-/*
 c = a.concat(b);
 
 let d = a.concat(b);
@@ -22,7 +21,7 @@ e = true && a.concat(b);
 e = false || true && a.concat(b);
 
 func(a.concat(b));
-*/
+
 //bad
 a.concat(b);
 ~~~~~~~~~~~  [concat operation should be assigned]
