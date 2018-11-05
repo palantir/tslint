@@ -122,7 +122,7 @@ const options: Option[] = [
     {
         short: "r",
         name: "rules-dir",
-        type: "string",
+        type: "array",
         describe: "rules directory",
         description: dedent`
             An additional rules directory, for user-created rules.
