@@ -191,7 +191,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                                         checkForTrailingWhitespace(token.getFullStart());
                                     }
                                     if (idx === 0) {
-                                        const startPos = internalName.getStart() - 1;
+                                        const startPos = element.getStart() - 1;
                                         checkForTrailingWhitespace(startPos, startPos + 1);
                                     }
                                 }
