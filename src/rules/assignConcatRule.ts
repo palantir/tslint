@@ -17,8 +17,27 @@
 
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/assignConcat.example";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
+    public static metadata: Lint.IRuleMetadata = {
+        ruleName: "assign-concat",
+        description: "Prevents user assuming concat is destructive.",
+        hasFix: false,
+        optionsDescription: "Not configurable.",
+        options: null,
+        optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Helps one remember that the concat method in javascript is not destructive.
+            Every once and then happens that one forgets that and incurs in hard to find bugs.
+        `,
+        type: "functionality",
+        typescriptOnly: false,
+        codeExamples
+    };
+    /* tslint:enable:object-literal-sort-keys */
+
     public static FAILURE_STRING = "concat operation should be assigned";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -50,9 +69,7 @@ class AssignConcatWalker extends Lint.RuleWalker {
 
     public visitCallExpression(node: ts.CallExpression) {
         if (!this.checker.check(node)) {
-            this.addFailure(
-                this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING)
-            );
+            this.addFailureAt(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
         }
 
         super.visitCallExpression(node);
