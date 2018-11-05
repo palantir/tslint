@@ -46,7 +46,7 @@ export class Formatter extends AbstractFormatter {
             perFileFixes.forEach((fixCount, fixedFile) => {
                 fixLines.push(`Fixed ${fixCount} error(s) in ${fixedFile}`);
             });
-            fixLines.push("");   // add a blank line between fixes and failures
+            fixLines.push(""); // add a blank line between fixes and failures
         }
 
         const errorLines = failures.map((failure: RuleFailure) => {
