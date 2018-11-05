@@ -528,8 +528,8 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
     }
 
     return {
-        order: categoryFromOption(firstOption[OPTION_ORDER]),
         alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
+        order: categoryFromOption(firstOption[OPTION_ORDER]),
     };
 }
 function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {

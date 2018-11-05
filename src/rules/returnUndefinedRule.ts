@@ -144,8 +144,8 @@ function isEffectivelyVoidPromise(type: ts.Type): boolean {
     // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
     // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
 
-    // tslint:disable-next-line no-bitwise
     return (
+        // tslint:disable-next-line:no-bitwise
         isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
         (isUnionType(type) && type.types.every(isEffectivelyVoidPromise)) ||
         (isTypeReference(type) &&
@@ -157,8 +157,8 @@ function isEffectivelyVoidPromise(type: ts.Type): boolean {
 
 /** True for `void`, `undefined`, or `void | undefined`. */
 function isEffectivelyVoid(type: ts.Type): boolean {
-    // tslint:disable-next-line no-bitwise
     return (
+        // tslint:disable-next-line:no-bitwise
         isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
         (isUnionType(type) && type.types.every(isEffectivelyVoid))
     );

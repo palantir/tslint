@@ -93,8 +93,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("doesn't warn if non-existent file is excluded by --exclude", async () => {
             const result = await execRunnerWithOutput({
-                files: ["foo/bar.js"],
                 exclude: ["**/*.js"],
+                files: ["foo/bar.js"],
             });
             assert.strictEqual(result.status, Status.Ok, "process should exit without error");
             assert.notInclude(result.stderr, "does not exist");
@@ -218,8 +218,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("exits with code 1 if nonexisting custom rules directory is passed", async () => {
             const status = await execRunner({
                 config: "./test/config/tslint-custom-rules.json",
-                rulesDirectory: "./someRandomDir",
                 files: ["src/test.ts"],
+                rulesDirectory: "./someRandomDir",
             });
             assert.equal(status, Status.FatalError, "error code should be 1");
         });
@@ -227,8 +227,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("exits with code 2 if custom rules directory is passed and file contains lint errors", async () => {
             const status = await execRunner({
                 config: "./test/config/tslint-custom-rules.json",
-                rulesDirectory: "./test/files/custom-rules",
                 files: ["src/test.ts"],
+                rulesDirectory: "./test/files/custom-rules",
             });
             assert.equal(status, Status.LintError, "error code should be 2");
         });
@@ -379,8 +379,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("exits with code 1 if `--test` flag is used with incorrect rule", async () => {
             const status = await execRunner({
-                test: true,
                 files: ["test/files/incorrect-rule-test"],
+                test: true,
             });
             assert.equal(status, Status.FatalError, "error code should be 1");
         });
@@ -392,17 +392,17 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("exits with code 0 if `--test` flag is used with custom rule", async () => {
             const status = await execRunner({
-                test: true,
                 files: ["test/files/custom-rule-rule-test"],
+                test: true,
             });
             assert.equal(status, Status.Ok, "process should exit without an error");
         });
 
         it("exits with code 0 if `--test` and `-r` flags are used with custom rule", async () => {
             const status = await execRunner({
-                test: true,
                 files: ["test/files/custom-rule-cli-rule-test"],
                 rulesDirectory: "test/files/custom-rules-2",
+                test: true,
             });
             assert.equal(status, Status.Ok, "process should exit without an error");
         });
@@ -414,8 +414,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("exits with code 1 if `--test` flag is used with incorrect fixes", async () => {
             const status = await execRunner({
-                test: true,
                 files: ["test/files/incorrect-fixes-test"],
+                test: true,
             });
             assert.equal(status, Status.FatalError, "error code should be 1");
         });
@@ -423,8 +423,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         it("can be used with multiple paths", async () => {
             // pass a failing test as second path to make sure it gets executed
             const status = await execRunner({
-                test: true,
                 files: ["test/files/custom-rule-rule-test", "test/files/incorrect-fixes-test"],
+                test: true,
             });
             assert.equal(status, Status.FatalError, "error code should be 1");
         });
@@ -495,8 +495,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("warns if file-to-lint does not exist", async () => {
             const result = await execRunnerWithOutput({
-                project: "test/files/tsconfig-test/tsconfig.json",
                 files: ["test/files/tsconfig-test/non-existent.test.ts"],
+                project: "test/files/tsconfig-test/tsconfig.json",
             });
             assert.strictEqual(result.status, Status.Ok, "process should exit without error");
             assert.include(
@@ -519,8 +519,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("doesn't warn if glob pattern doesn't match any file", async () => {
             const result = await execRunnerWithOutput({
-                project: "test/files/tsconfig-test/tsconfig.json",
                 files: ["*.js"],
+                project: "test/files/tsconfig-test/tsconfig.json",
             });
             assert.strictEqual(result.status, Status.Ok, "process should exit without error");
             assert.notInclude(result.stderr, "does not exist");
@@ -570,8 +570,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         it("works with '--exclude'", async () => {
             const status = await execRunner({
-                project: "test/files/tsconfig-allow-js/tsconfig.json",
                 exclude: ["test/files/tsconfig-allow-js/testfile.test.js"],
+                project: "test/files/tsconfig-allow-js/tsconfig.json",
             });
             assert.equal(status, Status.Ok, "process should exit without an error");
         });
@@ -582,8 +582,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 fs.readFileSync("test/files/project-multiple-fixes/before.test.ts", "utf-8"),
             );
             const status = await execRunner({
-                project: "test/files/project-multiple-fixes/",
                 fix: true,
+                project: "test/files/project-multiple-fixes/",
             });
             const actual = fs.readFileSync(
                 "test/files/project-multiple-fixes/testfile.test.ts",
@@ -645,8 +645,8 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
             // on Linux - pattern string without any quotes (glob is not expanded)
             const status = await execRunner({
                 config: "./test/config/tslint-custom-rules.json",
-                rulesDirectory: "./test/files/custom-rules",
                 files: ["src/**/test.ts"],
+                rulesDirectory: "./test/files/custom-rules",
             });
             assert.equal(status, Status.LintError, "error code should be 2");
         });
@@ -716,8 +716,8 @@ function execCli(
     });
 }
 
+// tslint:disable-next-line:promise-function-async
 function execRunnerWithOutput(options: Partial<Options>) {
-    // tslint:disable-line:promise-function-async
     let stdout = "";
     let stderr = "";
     return execRunner(options, {
@@ -730,13 +730,13 @@ function execRunnerWithOutput(options: Partial<Options>) {
     }).then(status => ({ status, stderr, stdout }));
 }
 
+// tslint:disable-next-line:promise-function-async
 function execRunner(options: Partial<Options>, logger: Logger = dummyLogger) {
-    // tslint:disable-line:promise-function-async
     return run({ exclude: [], files: [], ...options }, logger);
 }
 
+// tslint:disable-next-line:ban-types
 function isFunction(fn: any): fn is Function {
-    // tslint:disable-line:ban-types
     return {}.toString.call(fn) === "[object Function]";
 }
 

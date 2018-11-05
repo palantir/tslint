@@ -38,9 +38,9 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
 /** @deprecated See IDisabledInterval. */
 export function doesIntersect(
     failure: RuleFailure,
+    // tslint:disable-next-line:deprecation
     disabledIntervals: IDisabledInterval[],
 ): boolean {
-    // tslint:disable-line deprecation
     return disabledIntervals.some(interval => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
@@ -430,8 +430,8 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
        forEachToken also does intentionally not pay attention to the correct comment ownership of nodes as it always
        scans all trivia before each token, which could include trailing comments of the previous token.
        Comment onwership is done right in this function*/
+    // tslint:disable-next-line:deprecation
     return forEachToken(node, true, (fullText, tokenKind, pos, parent) => {
-        // tslint:disable-line:deprecation
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
@@ -439,9 +439,9 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
             if (comments !== undefined) {
                 for (const comment of comments) {
                     cb(fullText, comment.kind, {
+                        end: comment.end,
                         fullStart: pos.fullStart,
                         tokenStart: comment.pos,
-                        end: comment.end,
                     });
                 }
             }
@@ -451,9 +451,9 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
             if (comments !== undefined) {
                 for (const comment of comments) {
                     cb(fullText, comment.kind, {
+                        end: comment.end,
                         fullStart: pos.fullStart,
                         tokenStart: comment.pos,
-                        end: comment.end,
                     });
                 }
             }

@@ -301,8 +301,8 @@ function signaturesDifferByOptionalOrRestParameter(
     }
 
     return {
-        kind: "extra-parameter",
         extraParameter: longer[longer.length - 1],
+        kind: "extra-parameter",
         otherSignature: shorter,
     };
 }

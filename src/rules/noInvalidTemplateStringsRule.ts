@@ -24,6 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-invalid-template-strings",
+        // tslint:disable-next-line no-invalid-template-strings
         description: "Warns on use of `${` in non-template strings.",
         optionsDescription: "Not configurable.",
         options: null,

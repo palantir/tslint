@@ -100,8 +100,8 @@ class OneLineWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.EnumDeclaration:
                     this.check({
-                        pos: (node as ts.EnumDeclaration).name.end,
                         end: (node as ts.EnumDeclaration).members.pos,
+                        pos: (node as ts.EnumDeclaration).name.end,
                     });
                     break;
                 case ts.SyntaxKind.InterfaceDeclaration:

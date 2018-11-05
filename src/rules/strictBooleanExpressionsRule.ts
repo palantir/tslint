@@ -245,8 +245,8 @@ function isBooleanUndefined(type: ts.UnionType): boolean | undefined {
             isTruthy = true;
         } else if (isTypeFlagSet(ty, ts.TypeFlags.BooleanLiteral)) {
             isTruthy = isTruthy || (ty as ts.IntrinsicType).intrinsicName === "true";
+            // tslint:disable-next-line:no-bitwise
         } else if (!isTypeFlagSet(ty, ts.TypeFlags.Void | ts.TypeFlags.Undefined)) {
-            // tslint:disable-line:no-bitwise
             return undefined;
         }
     }
@@ -383,8 +383,9 @@ function getKind(type: ts.Type): TypeKind {
                 ? TypeKind.Boolean
                 : is(ts.TypeFlags.Null)
                     ? TypeKind.Null
-                    : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
-                        ? TypeKind.Undefined // tslint:disable-line:no-bitwise
+                    : // tslint:disable-next-line:no-bitwise
+                      is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
+                        ? TypeKind.Undefined
                         : is(ts.TypeFlags.EnumLike)
                             ? TypeKind.Enum
                             : is(ts.TypeFlags.NumberLiteral)

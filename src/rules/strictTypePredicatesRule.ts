@@ -166,10 +166,10 @@ function getTypePredicateOneWay(
             return predicate === undefined
                 ? { kind: TypePredicateKind.TypeofTypo }
                 : {
-                      kind: TypePredicateKind.Plain,
                       expression,
-                      predicate,
                       isNullOrUndefined: left.text === "undefined",
+                      kind: TypePredicateKind.Plain,
+                      predicate,
                   };
 
         case ts.SyntaxKind.NullKeyword:
@@ -187,10 +187,10 @@ function getTypePredicateOneWay(
     function nullOrUndefined(flags: ts.TypeFlags): TypePredicate {
         return isStrictEquals
             ? {
-                  kind: TypePredicateKind.Plain,
                   expression: left,
-                  predicate: flagPredicate(flags),
                   isNullOrUndefined: true,
+                  kind: TypePredicateKind.Plain,
+                  predicate: flagPredicate(flags),
               }
             : { kind: TypePredicateKind.NonStructNullUndefined, expression: left };
     }
