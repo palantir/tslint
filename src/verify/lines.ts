@@ -16,14 +16,32 @@
  */
 
 // Use classes here instead of interfaces because we want runtime type data
-export class Line { }
-export class CodeLine extends Line { constructor(public contents: string) { super(); } }
-export class MessageSubstitutionLine extends Line { constructor(public key: string, public message: string) { super(); } }
+export class Line {}
+export class CodeLine extends Line {
+    constructor(public contents: string) {
+        super();
+    }
+}
+export class MessageSubstitutionLine extends Line {
+    constructor(public key: string, public message: string) {
+        super();
+    }
+}
 
-export class ErrorLine extends Line { constructor(public startCol: number) { super(); } }
-export class MultilineErrorLine extends ErrorLine { constructor(startCol: number) { super(startCol); } }
+export class ErrorLine extends Line {
+    constructor(public startCol: number) {
+        super();
+    }
+}
+export class MultilineErrorLine extends ErrorLine {
+    constructor(startCol: number) {
+        super(startCol);
+    }
+}
 export class EndErrorLine extends ErrorLine {
-    constructor(startCol: number, public endCol: number, public message: string) { super(startCol); }
+    constructor(startCol: number, public endCol: number, public message: string) {
+        super(startCol);
+    }
 }
 
 // example matches (between the quotes):
@@ -50,7 +68,7 @@ export function parseLine(text: string): Line {
     if (endErrorMatch !== null) {
         const [, squiggles, message] = endErrorMatch;
         const startErrorCol = text.indexOf("~");
-        const zeroLengthError = (squiggles === ZERO_LENGTH_ERROR);
+        const zeroLengthError = squiggles === ZERO_LENGTH_ERROR;
         const endErrorCol = zeroLengthError ? startErrorCol : text.lastIndexOf("~") + 1;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
     }
@@ -76,7 +94,7 @@ export function parseLine(text: string): Line {
 export function printLine(line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
         if (code === undefined) {
-           throw new Error("Must supply argument for code parameter when line is an ErrorLine");
+            throw new Error("Must supply argument for code parameter when line is an ErrorLine");
         }
 
         const leadingSpaces = " ".repeat(line.startCol);
