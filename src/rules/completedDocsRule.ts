@@ -55,7 +55,8 @@ export const VISIBILITY_INTERNAL = "internal";
 
 export type All = typeof ALL;
 
-export type DocType = All
+export type DocType =
+    | All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
     | typeof ARGUMENT_ENUM_MEMBERS
@@ -67,18 +68,15 @@ export type DocType = All
     | typeof ARGUMENT_TYPES
     | typeof ARGUMENT_VARIABLES;
 
-export type Location = All
-    | typeof LOCATION_INSTANCE
-    | typeof LOCATION_STATIC;
+export type Location = All | typeof LOCATION_INSTANCE | typeof LOCATION_STATIC;
 
-export type Privacy = All
+export type Privacy =
+    | All
     | typeof PRIVACY_PRIVATE
     | typeof PRIVACY_PROTECTED
     | typeof PRIVACY_PUBLIC;
 
-export type Visibility = All
-    | typeof VISIBILITY_EXPORTED
-    | typeof VISIBILITY_INTERNAL;
+export type Visibility = All | typeof VISIBILITY_EXPORTED | typeof VISIBILITY_INTERNAL;
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
@@ -91,10 +89,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 [TAGS_FOR_CONTENT]: {
                     see: ".*",
                 },
-                [TAGS_FOR_EXISTENCE]: [
-                    "deprecated",
-                    "inheritdoc",
-                ],
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
             },
         },
         [ARGUMENT_PROPERTIES]: {
@@ -102,10 +97,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 [TAGS_FOR_CONTENT]: {
                     see: ".*",
                 },
-                [TAGS_FOR_EXISTENCE]: [
-                    "deprecated",
-                    "inheritdoc",
-                ],
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
             },
         },
     };
@@ -129,11 +121,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             },
             [DESCRIPTOR_VISIBILITIES]: {
-                enum: [
-                    ALL,
-                    VISIBILITY_EXPORTED,
-                    VISIBILITY_INTERNAL,
-                ],
+                enum: [ALL, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL],
                 type: "string",
             },
         },
@@ -159,20 +147,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             },
             [DESCRIPTOR_LOCATIONS]: {
-                enum: [
-                    ALL,
-                    LOCATION_INSTANCE,
-                    LOCATION_STATIC,
-                ],
+                enum: [ALL, LOCATION_INSTANCE, LOCATION_STATIC],
                 type: "string",
             },
             [DESCRIPTOR_PRIVACIES]: {
-                enum: [
-                    ALL,
-                    PRIVACY_PRIVATE,
-                    PRIVACY_PROTECTED,
-                    PRIVACY_PUBLIC,
-                ],
+                enum: [ALL, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC],
                 type: "string",
             },
         },
@@ -301,7 +280,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         return this.applyWithFunction(sourceFile, walk, exclusionsMap);
     }
 
-    private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): ExclusionsMap {
+    private getExclusionsMap(
+        ruleArguments: Array<DocType | IInputExclusionDescriptors>,
+    ): ExclusionsMap {
         if (ruleArguments.length === 0) {
             ruleArguments = [Rule.defaultArguments];
         }
@@ -372,7 +353,8 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
                 switch (node.parent!.kind) {
                     case ts.SyntaxKind.SourceFile:
                     case ts.SyntaxKind.ModuleBlock:
-                        for (const declaration of (node as ts.VariableStatement).declarationList.declarations) {
+                        for (const declaration of (node as ts.VariableStatement).declarationList
+                            .declarations) {
                             checkNode(declaration, ARGUMENT_VARIABLES, node);
                         }
                 }
@@ -388,7 +370,11 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         return ts.forEachChild(node, cb);
     }
 
-    function checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
+    function checkNode(
+        node: ts.NamedDeclaration,
+        nodeType: DocType,
+        requirementNode: ts.Node = node,
+    ): void {
         if (!nodeIsExcluded(node, nodeType, requirementNode) && !nodeHasDocs(node)) {
             addDocumentationFailure(node, describeNode(nodeType), requirementNode);
         }
@@ -406,7 +392,11 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         }
     }
 
-    function nodeIsExcluded(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node): boolean {
+    function nodeIsExcluded(
+        node: ts.NamedDeclaration,
+        nodeType: DocType,
+        requirementNode: ts.Node,
+    ): boolean {
         const { name } = node;
         if (name === undefined) {
             return true;
@@ -433,13 +423,17 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         }
 
         const comments = docs
-            .map((doc) => doc.comment)
-            .filter((comment) => comment !== undefined && comment.trim() !== "");
+            .map(doc => doc.comment)
+            .filter(comment => comment !== undefined && comment.trim() !== "");
 
         return comments.length !== 0;
     }
 
-    function addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
+    function addDocumentationFailure(
+        node: ts.Node,
+        nodeType: string,
+        requirementNode: ts.Node,
+    ): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = describeDocumentationFailure(requirementNode, nodeType);
@@ -455,9 +449,8 @@ function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
     }
 
     const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
-    const correspondingKindCheck = node.kind === ts.SyntaxKind.GetAccessor
-        ? isSetAccessor
-        : isGetAccessor;
+    const correspondingKindCheck =
+        node.kind === ts.SyntaxKind.GetAccessor ? isSetAccessor : isGetAccessor;
 
     for (const member of parent.members) {
         if (!correspondingKindCheck(member)) {
@@ -504,7 +497,9 @@ function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
     let description = Rule.FAILURE_STRING_EXIST;
 
     if (node.modifiers !== undefined) {
-        description += `${node.modifiers.map((modifier) => describeModifier(modifier.kind)).join(" ")} `;
+        description += `${node.modifiers
+            .map(modifier => describeModifier(modifier.kind))
+            .join(" ")} `;
     }
 
     return `${description}${nodeType}.`;

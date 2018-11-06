@@ -65,7 +65,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const limit = this.ruleArguments[0] as number | undefined;
-        return this.applyWithFunction(sourceFile, walk, limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS);
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS,
+        );
     }
 }
 
@@ -76,7 +80,10 @@ function walk(ctx: Lint.WalkContext<number>) {
     let consecutiveBlankLines = 0;
 
     for (const line of utils.getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength === 0 || sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1) {
+        if (
+            line.contentLength === 0 ||
+            sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1
+        ) {
             ++consecutiveBlankLines;
             if (consecutiveBlankLines === threshold) {
                 possibleFailures.push({
@@ -97,12 +104,19 @@ function walk(ctx: Lint.WalkContext<number>) {
     const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options);
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
-        if (!templateRanges.some((template) => template.pos < possibleFailure.pos && possibleFailure.pos < template.end)) {
+        if (
+            !templateRanges.some(
+                template =>
+                    template.pos < possibleFailure.pos && possibleFailure.pos < template.end,
+            )
+        ) {
             ctx.addFailureAt(possibleFailure.pos, 1, failureString, [
                 Lint.Replacement.deleteFromTo(
                     // special handling for fixing blank lines at the end of the file
                     // to fix this we need to cut off the line break of the last allowed blank line, too
-                    possibleFailure.end === sourceText.length ? getStartOfLineBreak(sourceText, possibleFailure.pos) : possibleFailure.pos,
+                    possibleFailure.end === sourceText.length
+                        ? getStartOfLineBreak(sourceText, possibleFailure.pos)
+                        : possibleFailure.pos,
                     possibleFailure.end,
                 ),
             ]);
@@ -117,8 +131,10 @@ function getStartOfLineBreak(sourceText: string, pos: number) {
 export function getTemplateRanges(sourceFile: ts.SourceFile): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     const cb = (node: ts.Node): void => {
-        if (node.kind >= ts.SyntaxKind.FirstTemplateToken &&
-            node.kind <= ts.SyntaxKind.LastTemplateToken) {
+        if (
+            node.kind >= ts.SyntaxKind.FirstTemplateToken &&
+            node.kind <= ts.SyntaxKind.LastTemplateToken
+        ) {
             intervals.push({
                 end: node.end,
                 pos: node.getStart(sourceFile),

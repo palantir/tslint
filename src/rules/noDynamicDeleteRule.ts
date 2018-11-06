@@ -67,7 +67,11 @@ function walk(context: Lint.WalkContext<void>) {
                 fix = Lint.Replacement.replaceFromTo(start, start + width, `[${convertedOperand}]`);
             }
         } else if (tsutils.isStringLiteral(argumentExpression)) {
-            fix = Lint.Replacement.replaceFromTo(start, start + width, `.${argumentExpression.text}`);
+            fix = Lint.Replacement.replaceFromTo(
+                start,
+                start + width,
+                `.${argumentExpression.text}`,
+            );
         }
 
         context.addFailureAt(start, width, Rule.FAILURE_STRING, fix);
@@ -83,9 +87,7 @@ function walk(context: Lint.WalkContext<void>) {
 }
 
 function convertUnaryOperand(node: ts.PrefixUnaryExpression) {
-    return tsutils.isNumericLiteral(node.operand)
-        ? node.operand.text
-        : undefined;
+    return tsutils.isNumericLiteral(node.operand) ? node.operand.text : undefined;
 }
 
 function isDeleteExpression(node: ts.Node): node is ts.DeleteExpression {
@@ -105,5 +107,8 @@ function isNecessaryDynamicAccess(argumentExpression: ts.Expression): boolean {
         return true;
     }
 
-    return tsutils.isStringLiteral(argumentExpression) && !tsutils.isValidPropertyAccess(argumentExpression.text);
+    return (
+        tsutils.isStringLiteral(argumentExpression) &&
+        !tsutils.isValidPropertyAccess(argumentExpression.text)
+    );
 }

@@ -16,14 +16,14 @@
  */
 
 export interface PositionInFile {
-   line: number;
-   col: number;
+    line: number;
+    col: number;
 }
 
 export interface LintError {
-   startPos: PositionInFile;
-   endPos: PositionInFile;
-   message: string;
+    startPos: PositionInFile;
+    endPos: PositionInFile;
+    message: string;
 }
 
 export function errorComparator(err1: LintError, err2: LintError) {
