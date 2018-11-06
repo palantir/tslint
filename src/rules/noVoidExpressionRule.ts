@@ -58,11 +58,18 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Expression has type `void`. Put it on its own line as a statement.";
+    public static FAILURE_STRING =
+        "Expression has type `void`. Put it on its own line as a statement.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const ignoreArrowFunctionShorthand = this.ruleArguments.indexOf(OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND) !== -1;
-        return this.applyWithFunction(sourceFile, walk, { ignoreArrowFunctionShorthand }, program.getTypeChecker());
+        const ignoreArrowFunctionShorthand =
+            this.ruleArguments.indexOf(OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND) !== -1;
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            { ignoreArrowFunctionShorthand },
+            program.getTypeChecker(),
+        );
     }
 }
 
@@ -71,11 +78,16 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
-    const { sourceFile, options: { ignoreArrowFunctionShorthand } } = ctx;
+    const {
+        sourceFile,
+        options: { ignoreArrowFunctionShorthand },
+    } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (isPossiblyVoidExpression(node)
-                && !isParentAllowedVoid(node)
-                && isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Void)) {
+        if (
+            isPossiblyVoidExpression(node) &&
+            !isParentAllowedVoid(node) &&
+            isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Void)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

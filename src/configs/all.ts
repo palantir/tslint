@@ -31,21 +31,22 @@ export const rules = {
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
             [
                 "Function",
-                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
+                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
             ],
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
-            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
-        ]
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
+        ],
     },
+    "ban-ts-ignore": true,
     "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
     "member-ordering": [
         true,
         {
             order: "statics-first",
-            alphabetize: true
-        }
+            alphabetize: true,
+        },
     ],
     "no-any": true,
     "no-empty-interface": true,
@@ -71,7 +72,7 @@ export const rules = {
         "arrow-parameter",
         "property-declaration",
         "variable-declaration",
-        "member-variable-declaration"
+        "member-variable-declaration",
     ],
     "typedef-whitespace": [
         true,
@@ -80,15 +81,15 @@ export const rules = {
             "index-signature": "nospace",
             parameter: "nospace",
             "property-declaration": "nospace",
-            "variable-declaration": "nospace"
+            "variable-declaration": "nospace",
         },
         {
             "call-signature": "onespace",
             "index-signature": "onespace",
             parameter: "onespace",
             "property-declaration": "onespace",
-            "variable-declaration": "onespace"
-        }
+            "variable-declaration": "onespace",
+        },
     ],
     "unified-signatures": true,
 
@@ -132,7 +133,7 @@ export const rules = {
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    "no-unused-variable": true,
+    // "no-unused-variable" - deprecated in #3919
     "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-void-expression": true,
@@ -169,8 +170,8 @@ export const rules = {
         {
             esSpecCompliant: true,
             multiline: "always",
-            singleline: "never"
-        }
+            singleline: "never",
+        },
     ],
 
     // Style
@@ -190,6 +191,7 @@ export const rules = {
     encoding: true,
     "file-name-casing": [true, "camel-case"],
     "import-spacing": true,
+    "increment-decrement": true,
     "interface-name": true,
     "interface-over-type-literal": true,
     "jsdoc-format": [true, "check-multiline-start"],
@@ -216,7 +218,7 @@ export const rules = {
         "check-else",
         "check-finally",
         "check-open-brace",
-        "check-whitespace"
+        "check-whitespace",
     ],
     "one-variable-per-declaration": true,
     "ordered-imports": [
@@ -224,8 +226,8 @@ export const rules = {
         {
             "import-sources-order": "case-insensitive",
             "named-imports-order": "case-insensitive",
-            "module-source-path": "full"
-        }
+            "module-source-path": "full",
+        },
     ],
     "prefer-function-over-method": true,
     "prefer-method-signature": true,
@@ -243,8 +245,8 @@ export const rules = {
             asyncArrow: "always",
             constructor: "never",
             method: "never",
-            named: "never"
-        }
+            named: "never",
+        },
     ],
     "space-within-parens": [true, 0],
     "switch-final-break": true,
@@ -262,8 +264,8 @@ export const rules = {
         "check-typecast",
         "check-preblock",
         "check-type-operator",
-        "check-rest-spread"
-    ]
+        "check-rest-spread",
+    ],
 };
 
 export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
@@ -272,7 +274,8 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
     "importBlacklist",
     "noInvalidThis",
     "noSwitchCaseFallThrough",
-    "typeofCompare"
+    "typeofCompare",
+    "noUnusedVariable",
 ];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.

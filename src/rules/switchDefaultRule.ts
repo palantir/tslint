@@ -44,8 +44,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (node.kind === ts.SyntaxKind.SwitchStatement &&
-            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)) {
+        if (
+            node.kind === ts.SyntaxKind.SwitchStatement &&
+            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
