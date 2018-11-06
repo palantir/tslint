@@ -31,14 +31,16 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             Additionally, there's no use in binding a scope to an arrow lambda, as it already has one.
         `,
         requiresTypeInfo: true,
-        ruleName: "no-unnecessary-bind",
+        ruleName: "unnecessary-bind",
         type: "style",
-        typescriptOnly: false,
+        typescriptOnly: false
     };
 
-    public static FAILURE_STRING_FUNCTION = "Don't bind \`this\` without arguments as a scope to a function. Use an arrow lambda instead.";
+    public static FAILURE_STRING_FUNCTION =
+        "Don't bind `this` without arguments as a scope to a function. Use an arrow lambda instead.";
 
-    public static FAILURE_STRING_ARROW = "Don't bind scopes to arrow lambdas, as they already have a bound scope.";
+    public static FAILURE_STRING_ARROW =
+        "Don't bind scopes to arrow lambdas, as they already have a bound scope.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -52,23 +54,24 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
     const variableUsage = tsutils.collectVariableUsage(context.sourceFile);
 
-    function checkArrowFunction(node: ts.CallExpression, boundExpression: ts.Node): void {
+    function checkArrowFunction(node: ts.CallExpression): void {
         if (node.arguments.length !== 1) {
             return;
         }
 
-        const replacement = Lint.Replacement.replaceNode(
-            node,
-            boundExpression.getText(context.sourceFile));
-
-        context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW, replacement);
+        context.addFailureAtNode(node, Rule.FAILURE_STRING_ARROW);
     }
 
-    function canFunctionExpressionBeFixed(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): boolean {
-        if (callExpression.arguments.length !== 1
-            || callExpression.arguments[0].kind !== ts.SyntaxKind.ThisKeyword
-            || valueDeclaration.asteriskToken !== undefined
-            || valueDeclaration.decorators !== undefined) {
+    function canFunctionExpressionBeFixed(
+        callExpression: ts.CallExpression,
+        valueDeclaration: ts.FunctionExpression
+    ): boolean {
+        if (
+            callExpression.arguments.length !== 1 ||
+            callExpression.arguments[0].kind !== ts.SyntaxKind.ThisKeyword ||
+            valueDeclaration.asteriskToken !== undefined ||
+            valueDeclaration.decorators !== undefined
+        ) {
             return false;
         }
 
@@ -81,7 +84,10 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
         return nameInfo === undefined || nameInfo.uses.length === 0;
     }
 
-    function checkFunctionExpression(callExpression: ts.CallExpression, valueDeclaration: ts.FunctionExpression): void {
+    function checkFunctionExpression(
+        callExpression: ts.CallExpression,
+        valueDeclaration: ts.FunctionExpression
+    ): void {
         if (!canFunctionExpressionBeFixed(callExpression, valueDeclaration)) {
             return;
         }
@@ -112,9 +118,11 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
     }
 
     function isDecoratedPropertyMember(node: ts.CallExpression): boolean {
-        return node.parent !== undefined
-            && tsutils.isPropertyDeclaration(node.parent)
-            && node.parent.decorators !== undefined;
+        return (
+            node.parent !== undefined &&
+            tsutils.isPropertyDeclaration(node.parent) &&
+            node.parent.decorators !== undefined
+        );
     }
 
     function checkCallExpression(node: ts.CallExpression): void {
@@ -135,7 +143,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
 
         const valueDeclaration = getArrowFunctionDeclaration(boundExpression);
         if (valueDeclaration !== undefined) {
-            checkArrowFunction(node, boundExpression);
+            checkArrowFunction(node);
         }
     }
 
@@ -148,6 +156,8 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
     });
 }
 
-function isBindPropertyAccess(node: ts.LeftHandSideExpression): node is ts.PropertyAccessExpression {
+function isBindPropertyAccess(
+    node: ts.LeftHandSideExpression
+): node is ts.PropertyAccessExpression {
     return ts.isPropertyAccessExpression(node) && node.name.text === "bind";
 }
