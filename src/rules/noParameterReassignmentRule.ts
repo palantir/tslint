@@ -15,7 +15,11 @@
  * limitations under the License.
  */
 
-import { collectVariableUsage, getDeclarationOfBindingElement, isReassignmentTarget } from "tsutils";
+import {
+    collectVariableUsage,
+    getDeclarationOfBindingElement,
+    isReassignmentTarget,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -59,7 +63,10 @@ function isParameter(node: ts.Node): boolean {
         case ts.SyntaxKind.Parameter:
             return true;
         case ts.SyntaxKind.BindingElement:
-            return getDeclarationOfBindingElement(node as ts.BindingElement).kind === ts.SyntaxKind.Parameter;
+            return (
+                getDeclarationOfBindingElement(node as ts.BindingElement).kind ===
+                ts.SyntaxKind.Parameter
+            );
         default:
             return false;
     }

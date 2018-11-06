@@ -53,9 +53,12 @@ function walk(ctx: Lint.WalkContext<void>) {
             if (!(statement as ts.ExportAssignment).isExportEquals) {
                 ctx.addFailureAtNode(statement.getChildAt(1, ctx.sourceFile), Rule.FAILURE_STRING);
             }
-        } else if (statement.modifiers !== undefined && statement.modifiers.length >= 2 &&
-                   statement.modifiers[0].kind === ts.SyntaxKind.ExportKeyword &&
-                   statement.modifiers[1].kind === ts.SyntaxKind.DefaultKeyword) {
+        } else if (
+            statement.modifiers !== undefined &&
+            statement.modifiers.length >= 2 &&
+            statement.modifiers[0].kind === ts.SyntaxKind.ExportKeyword &&
+            statement.modifiers[1].kind === ts.SyntaxKind.DefaultKeyword
+        ) {
             ctx.addFailureAtNode(statement.modifiers[1], Rule.FAILURE_STRING);
         }
     }

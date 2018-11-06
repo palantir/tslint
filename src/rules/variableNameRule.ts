@@ -32,7 +32,7 @@ const BANNED_KEYWORDS = [
     "Boolean",
     "boolean",
     "Undefined",
-    "undefined"
+    "undefined",
 ];
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
 const bannedKeywordsStr = BANNED_KEYWORDS.map(kw => `\`${kw}\``).join(", ");
@@ -70,15 +70,15 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_TRAILING_UNDERSCORE,
                     OPTION_ALLOW_PASCAL_CASE,
                     OPTION_ALLOW_SNAKE_CASE,
-                    OPTION_BAN_KEYWORDS
-                ]
+                    OPTION_BAN_KEYWORDS,
+                ],
             },
             minLength: 0,
-            maxLength: 6
+            maxLength: 6,
         },
         optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
 
     public static KEYWORD_FAILURE = "variable name clashes with keyword/type";
@@ -109,7 +109,7 @@ function parseOptions(ruleArguments: string[]): Options {
         trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
         allCapsForConst: hasOption(OPTION_ALL_CAPS_FOR_CONST),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
-        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE)
+        allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
     };
 
     function hasOption(name: string): boolean {
@@ -157,7 +157,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 
     function handleDeclaredVariable(
-        node: ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration
+        node: ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration,
     ): void {
         const { name, initializer } = node;
 

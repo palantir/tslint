@@ -20,7 +20,8 @@ import * as Lint from "../../index";
 // tslint:disable: object-literal-sort-keys
 export const codeExamples = [
     {
-        description: "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
+        description:
+            "Prefer `while` loops instead of `for` loops without an initializer and incrementor.",
         config: Lint.Utils.dedent`
             "rules": { "prefer-while": true }
         `,
