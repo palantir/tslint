@@ -130,7 +130,6 @@ export const rules = {
     "no-submodule-imports": true,
     "no-unbound-method": true,
     "no-unnecessary-class": [true, "allow-empty-class"],
-    "no-unnecessary-constructor": true,
     "no-unsafe-any": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
@@ -145,6 +144,7 @@ export const rules = {
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,
+    "unnecessary-constructor": true,
     "use-default-type-parameter": true,
     "use-isnan": true,
 

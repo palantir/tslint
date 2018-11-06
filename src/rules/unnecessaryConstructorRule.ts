@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             JavaScript implicitly adds a blank constructor when there isn't one.
             It's not necessary to manually one in.
         `,
-        ruleName: "no-unnecessary-constructor",
+        ruleName: "unnecessary-constructor",
         type: "functionality",
         typescriptOnly: false,
     };
@@ -57,7 +57,11 @@ const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean 
 
 function walk(context: Lint.WalkContext<void>) {
     const callback = (node: ts.Node): void => {
-        if (isConstructorDeclaration(node) && isEmptyConstructor(node) && !containsConstructorParameter(node)) {
+        if (
+            isConstructorDeclaration(node) &&
+            isEmptyConstructor(node) &&
+            !containsConstructorParameter(node)
+        ) {
             context.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else {
             ts.forEachChild(node, callback);
