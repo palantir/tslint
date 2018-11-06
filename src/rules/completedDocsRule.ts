@@ -340,6 +340,10 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
                 break;
 
+            case ts.SyntaxKind.MethodSignature:
+                checkNode(node as ts.MethodSignature, ARGUMENT_METHODS);
+                break;
+
             case ts.SyntaxKind.MethodDeclaration:
                 if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
                     checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
@@ -348,6 +352,10 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.ModuleDeclaration:
                 checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
+                break;
+
+            case ts.SyntaxKind.PropertySignature:
+                checkNode(node as ts.PropertySignature, ARGUMENT_PROPERTIES);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:

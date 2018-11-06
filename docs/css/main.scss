@@ -1,26 +1,15 @@
 ---
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
-@charset "utf-8";
 
-
-
-// Our variables
+@charset "utf-8"; // Our variables
 $font-stack: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 $code-font-stack: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-$base-font-size:   16px;
-$small-font-size:  $base-font-size * 0.875;
+$base-font-size: 16px;
+$small-font-size: $base-font-size * 0.875;
 $base-line-height: 1.5;
-
-$heading-color:        #159957;
-$text-color:           #606c71;
-$link-color:           #1e6bb8;
-$link-visited-color:   #7d0ce8;
-
-// Import partials from `sass_dir` (defaults to `_sass`)
-@import
-        "normalize",
-        "base",
-        "cayman",
-        "syntax-highlighting"
-;
+$heading-color: #159957;
+$text-color: #606c71;
+$link-color: #1e6bb8;
+$link-visited-color: #7d0ce8; // Import partials from `sass_dir` (defaults to `_sass`)
+@import "normalize", "base", "cayman", "syntax-highlighting";

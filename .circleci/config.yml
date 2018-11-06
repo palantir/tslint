@@ -96,6 +96,17 @@ jobs:
           key: dependency-cache-{{ checksum "yarn.lock" }}
       - run: yarn add typescript@2.9
       - run: yarn test
+  test3.0:
+    docker:
+      - image: circleci/node:6
+    steps:
+      - checkout
+      - attach_workspace:
+          at: '.'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "yarn.lock" }}
+      - run: yarn add typescript@3.0.1
+      - run: yarn test
   testRc:
     docker:
       - image: circleci/node:6
@@ -143,6 +154,9 @@ workflows:
           requires:
             - build
       - test2.9:
+          requires:
+            - build
+      - test3.0:
           requires:
             - build
       - testRc:
