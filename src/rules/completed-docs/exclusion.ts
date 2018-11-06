@@ -21,7 +21,7 @@ import { All, ALL } from "../completedDocsRule";
 import { ExclusionDescriptor } from "./exclusionDescriptors";
 
 export abstract class Exclusion<TDescriptor extends ExclusionDescriptor> {
-    public constructor(protected readonly descriptor: Partial<TDescriptor> = {}) { }
+    public constructor(protected readonly descriptor: Partial<TDescriptor> = {}) {}
 
     public abstract excludes(node: ts.Node): boolean;
 

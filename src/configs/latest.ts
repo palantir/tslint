@@ -19,12 +19,8 @@
 // tslint:disable:object-literal-key-quotes
 export const rules = {
     // added in v5.1
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-            "members",
-        ],
+    align: {
+        options: ["parameters", "statements", "members"],
     },
     "no-invalid-template-strings": true,
     "no-sparse-arrays": true,
@@ -37,10 +33,7 @@ export const rules = {
     "prefer-object-spread": true,
 
     // added in v5.4
-    "no-duplicate-variable": [
-        true,
-        "check-parameters",
-    ],
+    "no-duplicate-variable": [true, "check-parameters"],
 
     // added in v5.5
     "no-this-assignment": true,
@@ -51,7 +44,7 @@ export const rules = {
     "no-submodule-imports": true,
 
     // added in v5.7
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",

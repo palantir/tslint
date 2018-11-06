@@ -17,12 +17,14 @@
 
 import * as fs from "fs";
 import * as yaml from "js-yaml";
+import { Minimatch } from "minimatch";
 import * as os from "os";
 import * as path from "path";
 import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
+import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments } from "./utils";
 
 export interface IConfigurationFile {
@@ -50,6 +52,7 @@ export interface IConfigurationFile {
      */
     linterOptions?: Partial<{
         exclude: string[];
+        format: string;
     }>;
 
     /**
@@ -100,9 +103,18 @@ const BUILT_IN_CONFIG = /^tslint:(.*)$/;
  * of the search for a configuration.
  * @returns Load status for a TSLint configuration object
  */
-export function findConfiguration(configFile: string | null, inputFilePath: string): IConfigurationLoadResult;
-export function findConfiguration(configFile: string, inputFilePath?: string): IConfigurationLoadResult;
-export function findConfiguration(configFile: string | null, inputFilePath?: string): IConfigurationLoadResult {
+export function findConfiguration(
+    configFile: string | null,
+    inputFilePath: string,
+): IConfigurationLoadResult;
+export function findConfiguration(
+    configFile: string,
+    inputFilePath?: string,
+): IConfigurationLoadResult;
+export function findConfiguration(
+    configFile: string | null,
+    inputFilePath?: string,
+): IConfigurationLoadResult {
     const configPath = findConfigurationPath(configFile, inputFilePath!);
     const loadResult: IConfigurationLoadResult = { path: configPath };
 
@@ -110,7 +122,10 @@ export function findConfiguration(configFile: string | null, inputFilePath?: str
         loadResult.results = loadConfigurationFromPath(configPath);
         return loadResult;
     } catch (error) {
-        throw new FatalError(`Failed to load ${configPath}: ${(error as Error).message}`, error as Error);
+        throw new FatalError(
+            `Failed to load ${configPath}: ${(error as Error).message}`,
+            error as Error,
+        );
     }
 }
 
@@ -124,12 +139,23 @@ export function findConfiguration(configFile: string | null, inputFilePath?: str
  * @returns An absolute path to a tslint.json or tslint.yml or tslint.yaml file
  * or undefined if neither can be found.
  */
-export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath: string): string | undefined;
-export function findConfigurationPath(suppliedConfigFilePath: string, inputFilePath?: string): string | undefined;
-export function findConfigurationPath(suppliedConfigFilePath: string | null, inputFilePath?: string): string | undefined {
+export function findConfigurationPath(
+    suppliedConfigFilePath: string | null,
+    inputFilePath: string,
+): string | undefined;
+export function findConfigurationPath(
+    suppliedConfigFilePath: string,
+    inputFilePath?: string,
+): string | undefined;
+export function findConfigurationPath(
+    suppliedConfigFilePath: string | null,
+    inputFilePath?: string,
+): string | undefined {
     if (suppliedConfigFilePath != undefined) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
-            throw new FatalError(`Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`);
+            throw new FatalError(
+                `Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`,
+            );
         } else {
             return path.resolve(suppliedConfigFilePath);
         }
@@ -196,9 +222,11 @@ function findup(filenames: string[], directory: string): string | undefined {
             }
             // TODO: remove in v6.0.0
             // Try reading in the entire directory and looking for a file with different casing.
-            const result = dirFiles.find((entry) => entry.toLowerCase() === filename);
+            const result = dirFiles.find(entry => entry.toLowerCase() === filename);
             if (result !== undefined) {
-                showWarningOnce(`Using mixed case ${filename} is deprecated. Found: ${path.join(cwd, result)}`);
+                showWarningOnce(
+                    `Using mixed case ${filename} is deprecated. Found: ${path.join(cwd, result)}`,
+                );
                 return result;
             }
         }
@@ -217,14 +245,17 @@ function findup(filenames: string[], directory: string): string | undefined {
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
 export function loadConfigurationFromPath(configFilePath?: string, _originalFilePath?: string) {
-
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
         const rawConfigFile = readConfigurationFile(resolvedConfigFilePath);
 
-        return parseConfigFile(rawConfigFile, path.dirname(resolvedConfigFilePath), readConfigurationFile);
+        return parseConfigFile(
+            rawConfigFile,
+            path.dirname(resolvedConfigFilePath),
+            readConfigurationFile,
+        );
     }
 }
 
@@ -270,7 +301,9 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(`./configs/${configName}`);
         } catch (err) {
-            throw new Error(`${filePath} is not a built-in config, try "tslint:recommended" instead.`);
+            throw new Error(
+                `${filePath} is not a built-in config, try "tslint:recommended" instead.`,
+            );
         }
     }
 
@@ -281,16 +314,19 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
         try {
             return require.resolve(filePath);
         } catch (err) {
-            throw new Error(`Invalid "extends" configuration value - could not require "${filePath}". ` +
-                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-                "for the approximate method TSLint uses to find the referenced configuration file.");
+            throw new Error(
+                `Invalid "extends" configuration value - could not require "${filePath}". ` +
+                    "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+                    "for the approximate method TSLint uses to find the referenced configuration file.",
+            );
         }
     }
 }
 
-export function extendConfigurationFile(targetConfig: IConfigurationFile,
-                                        nextConfigSource: IConfigurationFile): IConfigurationFile {
-
+export function extendConfigurationFile(
+    targetConfig: IConfigurationFile,
+    nextConfigSource: IConfigurationFile,
+): IConfigurationFile {
     function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
@@ -309,7 +345,10 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
         }
     }
 
-    function combineMaps(target: Map<string, Partial<IOptions>>, next: Map<string, Partial<IOptions>>) {
+    function combineMaps(
+        target: Map<string, Partial<IOptions>>,
+        next: Map<string, Partial<IOptions>>,
+    ) {
         const combined = new Map<string, Partial<IOptions>>();
         target.forEach((options, ruleName) => {
             combined.set(ruleName, options);
@@ -331,7 +370,10 @@ export function extendConfigurationFile(targetConfig: IConfigurationFile,
     return {
         extends: [],
         jsRules: combineMaps(targetConfig.jsRules, nextConfigSource.jsRules),
-        linterOptions: combineProperties(targetConfig.linterOptions, nextConfigSource.linterOptions),
+        linterOptions: combineProperties(
+            targetConfig.linterOptions,
+            nextConfigSource.linterOptions,
+        ),
         rules: combineMaps(targetConfig.rules, nextConfigSource.rules),
         rulesDirectory: dedupedRulesDirs,
     };
@@ -363,25 +405,28 @@ export function useAsPath(directory: string) {
  * should be the path to the tslint.json file.
  * @return An array of absolute paths to directories potentially containing rules
  */
-export function getRulesDirectories(directories?: string | string[], relativeTo?: string): string[] {
-    return arrayify(directories)
-        .map((dir) => {
-            if (!useAsPath(dir)) {
-                try {
-                    return path.dirname(resolve.sync(dir, { basedir: relativeTo }));
-                } catch (err) {
-                    // swallow error and fallback to using directory as path
-                }
+export function getRulesDirectories(
+    directories?: string | string[],
+    relativeTo?: string,
+): string[] {
+    return arrayify(directories).map(dir => {
+        if (!useAsPath(dir)) {
+            try {
+                return path.dirname(resolve.sync(dir, { basedir: relativeTo }));
+            } catch (err) {
+                // swallow error and fallback to using directory as path
             }
+        }
 
-            const absolutePath = relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
-            if (absolutePath !== undefined) {
-                if (!fs.existsSync(absolutePath)) {
-                    throw new FatalError(`Could not find custom rule directory: ${dir}`);
-                }
+        const absolutePath =
+            relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
+        if (absolutePath !== undefined) {
+            if (!fs.existsSync(absolutePath)) {
+                throw new FatalError(`Could not find custom rule directory: ${dir}`);
             }
-            return absolutePath;
-        });
+        }
+        return absolutePath;
+    });
 }
 
 /**
@@ -389,7 +434,10 @@ export function getRulesDirectories(directories?: string | string[], relativeTo?
  *
  * @param ruleConfigValue The raw option setting of a rule
  */
-function parseRuleOptions(ruleConfigValue: RawRuleConfig, rawDefaultRuleSeverity: string | undefined): Partial<IOptions> {
+function parseRuleOptions(
+    ruleConfigValue: RawRuleConfig,
+    rawDefaultRuleSeverity: string | undefined,
+): Partial<IOptions> {
     let ruleArguments: any[] | undefined;
     let defaultRuleSeverity: RuleSeverity = "error";
 
@@ -462,15 +510,20 @@ export interface RawConfigFile {
     rulesDirectory?: string | string[];
     defaultSeverity?: string;
     rules?: RawRulesConfig;
-    jsRules?: RawRulesConfig;
+    jsRules?: RawRulesConfig | boolean;
 }
 export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
-export type RawRuleConfig = null | undefined | boolean | any[] | {
-    severity?: RuleSeverity | "warn" | "none" | "default";
-    options?: any;
-};
+export type RawRuleConfig =
+    | null
+    | undefined
+    | boolean
+    | any[]
+    | {
+          severity?: RuleSeverity | "warn" | "none" | "default";
+          options?: any;
+      };
 
 /**
  * Parses a config file and normalizes legacy config settings.
@@ -491,12 +544,12 @@ export function parseConfigFile(
     }
 
     return loadExtendsRecursive(configFile, configFileDir)
-        .map(({dir, config}) => parse(config, dir))
+        .map(({ dir, config }) => parse(config, dir))
         .reduce(extendConfigurationFile, EMPTY_CONFIG);
 
     /** Read files in order, depth first, and assign `defaultSeverity` (last config in extends wins). */
     function loadExtendsRecursive(raw: RawConfigFile, dir: string) {
-        const configs: Array<{dir: string; config: RawConfigFile}> = [];
+        const configs: Array<{ dir: string; config: RawConfigFile }> = [];
         for (const relativePath of arrayify(raw.extends)) {
             const resolvedPath = resolveConfigurationPath(relativePath, dir);
             const extendedRaw = readConfig!(resolvedPath);
@@ -505,17 +558,24 @@ export function parseConfigFile(
         if (raw.defaultSeverity !== undefined) {
             defaultSeverity = raw.defaultSeverity;
         }
-        configs.push({dir, config: raw});
+        configs.push({ dir, config: raw });
         return configs;
     }
 
     function parse(config: RawConfigFile, dir?: string): IConfigurationFile {
+        const rulesDirectory: string | string[] = getRulesDirectories(config.rulesDirectory, dir);
+        const rules = parseRules(config.rules);
+        const jsRules =
+            typeof config.jsRules === "boolean"
+                ? filterValidJsRules(rules, config.jsRules, rulesDirectory)
+                : parseRules(config.jsRules);
+
         return {
             extends: arrayify(config.extends),
-            jsRules: parseRules(config.jsRules),
+            jsRules,
             linterOptions: parseLinterOptions(config.linterOptions, dir),
-            rules: parseRules(config.rules),
-            rulesDirectory: getRulesDirectories(config.rulesDirectory, dir),
+            rules,
+            rulesDirectory,
         };
     }
 
@@ -531,14 +591,52 @@ export function parseConfigFile(
         return map;
     }
 
-    function parseLinterOptions(raw: RawConfigFile["linterOptions"], dir?: string): IConfigurationFile["linterOptions"] {
-        if (raw === undefined || raw.exclude === undefined) {
+    function filterValidJsRules(
+        rules: Map<string, Partial<IOptions>>,
+        copyRulestoJsRules = false,
+        rulesDirectory?: string | string[],
+    ): Map<string, Partial<IOptions>> {
+        const validJsRules = new Map<string, Partial<IOptions>>();
+        if (copyRulestoJsRules) {
+            rules.forEach((ruleOptions, ruleName) => {
+                if (ruleOptions.ruleSeverity !== "off") {
+                    const Rule = findRule(ruleName, rulesDirectory);
+                    if (
+                        Rule !== undefined &&
+                        (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
+                    ) {
+                        validJsRules.set(ruleName, ruleOptions);
+                    }
+                }
+            });
+        }
+
+        return validJsRules;
+    }
+
+    function parseLinterOptions(
+        raw: RawConfigFile["linterOptions"],
+        dir?: string,
+    ): IConfigurationFile["linterOptions"] {
+        if (raw === undefined) {
             return {};
         }
         return {
-            exclude: arrayify(raw.exclude).map(
-                (pattern) => dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
-            ),
+            ...(raw.exclude !== undefined
+                ? {
+                      exclude: arrayify(raw.exclude).map(
+                          pattern =>
+                              dir === undefined
+                                  ? path.resolve(pattern)
+                                  : path.resolve(dir, pattern),
+                      ),
+                  }
+                : {}),
+            ...(raw.format !== undefined
+                ? {
+                      format: raw.format,
+                  }
+                : {}),
         };
     }
 }
@@ -558,4 +656,16 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
         output.push(options);
     });
     return output;
+}
+
+export function isFileExcluded(filepath: string, configFile?: IConfigurationFile) {
+    if (
+        configFile === undefined ||
+        configFile.linterOptions == undefined ||
+        configFile.linterOptions.exclude == undefined
+    ) {
+        return false;
+    }
+    const fullPath = path.resolve(filepath);
+    return configFile.linterOptions.exclude.some(pattern => new Minimatch(pattern).match(fullPath));
 }

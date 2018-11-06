@@ -36,7 +36,9 @@ export abstract class BlockScopeAwareRuleWalker<T, U> extends ScopeAwareRuleWalk
         super(sourceFile, options);
 
         // initialize with global scope if file is not a module
-        this.blockScopeStack = ts.isExternalModule(sourceFile) ? [] : [this.createBlockScope(sourceFile)];
+        this.blockScopeStack = ts.isExternalModule(sourceFile)
+            ? []
+            : [this.createBlockScope(sourceFile)];
     }
 
     public abstract createBlockScope(node: ts.Node): U;
