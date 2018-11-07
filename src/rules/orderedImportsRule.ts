@@ -109,9 +109,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     "import-sources-order": "lowercase-last",
-                    "named-imports-order": "lowercase-first"
-                }
-            ]
+                    "named-imports-order": "lowercase-first",
+                },
+            ],
         ],
         type: "style",
         typescriptOnly: false
@@ -125,7 +125,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+            new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
         );
     }
 }
@@ -151,8 +151,8 @@ const TRANSFORMS = new Map<string, Transform>([
                 return x;
             }
             return x.substr(splitIndex + 1);
-        }
-    ]
+        },
+    ],
 ]);
 
 enum ImportType {
@@ -218,8 +218,8 @@ class Walker extends Lint.AbstractWalker<Options> {
             /\r?\n\r?\n/.test(
                 this.sourceFile.text.slice(
                     statement.getFullStart(),
-                    statement.getStart(this.sourceFile)
-                )
+                    statement.getStart(this.sourceFile),
+                ),
             )
         ) {
             this.endBlock();
@@ -247,7 +247,7 @@ class Walker extends Lint.AbstractWalker<Options> {
         }
 
         const source = this.options.importSourcesOrderTransform(
-            removeQuotes(node.moduleSpecifier.text)
+            removeQuotes(node.moduleSpecifier.text),
         );
         this.checkSource(source, node);
 
@@ -309,7 +309,7 @@ class Walker extends Lint.AbstractWalker<Options> {
         if (pair !== undefined) {
             const [a, b] = pair;
             const sortedDeclarations = sortByKey(imports, x =>
-                this.options.namedImportsOrderTransform(x.getText())
+                this.options.namedImportsOrderTransform(x.getText()),
             ).map(x => x.getText());
             // replace in reverse order to preserve earlier offsets
             for (let i = imports.length - 1; i >= 0; i--) {
@@ -335,7 +335,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             this.addFailureAtNode(
                 oddImportDeclaration.node,
                 Rule.IMPORT_SOURCES_NOT_GROUPED,
-                this.getReplacements()
+                this.getReplacements(),
             );
             return true;
         }
@@ -365,13 +365,13 @@ class Walker extends Lint.AbstractWalker<Options> {
         const startOffset =
             allImportDeclarations.length === 0 ? 0 : allImportDeclarations[0].nodeStartOffset;
         replacements.push(
-            Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations))
+            Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations)),
         );
         return replacements;
     }
 
     private getReplacementsForExistingImports(
-        importDeclarationsList: ImportDeclaration[][]
+        importDeclarationsList: ImportDeclaration[][],
     ): Lint.Replacement[] {
         return importDeclarationsList.map((items, index) => {
             let start = items[0].nodeStartOffset;
@@ -391,11 +391,11 @@ class Walker extends Lint.AbstractWalker<Options> {
         return [
             ImportType.LIBRARY_IMPORT,
             ImportType.PARENT_DIRECTORY_IMPORT,
-            ImportType.CURRENT_DIRECTORY_IMPORT
+            ImportType.CURRENT_DIRECTORY_IMPORT,
         ]
             .map(type => {
                 const imports = importDeclarations.filter(
-                    importDeclaration => importDeclaration.type === type
+                    importDeclaration => importDeclaration.type === type,
                 );
                 return getSortedImportDeclarationsAsText(imports);
             })
@@ -432,7 +432,7 @@ class ImportsBlock {
     public addImportDeclaration(
         sourceFile: ts.SourceFile,
         node: ImportDeclaration["node"],
-        sourcePath: string
+        sourcePath: string,
     ) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
@@ -543,7 +543,7 @@ function flipCase(str: string): string {
 // If not, return the pair of nodes which are out of order.
 function findUnsortedPair(
     xs: ReadonlyArray<ts.Node>,
-    transform: (x: string) => string
+    transform: (x: string) => string,
 ): [ts.Node, ts.Node] | undefined {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {

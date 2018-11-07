@@ -97,8 +97,8 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
             "private-static-method",
             "public-instance-method",
             "protected-instance-method",
-            "private-instance-method"
-        ]
+            "private-instance-method",
+        ],
     ],
     [
         "instance-sandwich",
@@ -115,8 +115,8 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
             "private-instance-method",
             "public-static-method",
             "protected-static-method",
-            "private-static-method"
-        ]
+            "private-static-method",
+        ],
     ],
     [
         "statics-first",
@@ -133,9 +133,9 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
             "constructor",
             "public-instance-method",
             "protected-instance-method",
-            "private-instance-method"
-        ]
-    ]
+            "private-instance-method",
+        ],
+    ],
 ]);
 const PRESET_NAMES = Array.from(PRESETS.keys());
 
@@ -226,9 +226,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                         "private-constructor",
                         "public-instance-method",
                         "protected-instance-method",
-                        "private-instance-method"
-                    ]
-                }
+                        "private-instance-method",
+                    ],
+                },
             ],
             [
                 true,
@@ -240,13 +240,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                                 "public-static-field",
                                 "protected-static-field",
                                 "public-static-method",
-                                "protected-static-method"
-                            ]
+                                "protected-static-method",
+                            ],
                         },
-                        "constructor"
-                    ]
-                }
-            ]
+                        "constructor",
+                    ],
+                },
+            ],
         ],
         type: "typescript",
         typescriptOnly: false
@@ -289,7 +289,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                         (node as
                             | ts.ClassLikeDeclaration
                             | ts.InterfaceDeclaration
-                            | ts.TypeLiteralNode).members
+                            | ts.TypeLiteralNode).members,
                     );
             }
         };
@@ -347,9 +347,9 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                             member.name,
                             Rule.FAILURE_STRING_ALPHABETIZE(
                                 this.findLowerName(members, rank, curName),
-                                curName
+                                curName,
                             ),
-                            []
+                            [],
                         );
                         failureExists = true;
                     } else {
@@ -412,8 +412,8 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 Lint.Replacement.replaceFromTo(
                     splits[0],
                     arrayLast(splits),
-                    sortedMembersText.join("")
-                )
+                    sortedMembersText.join(""),
+                ),
             ]);
         }
     }
@@ -422,7 +422,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     private findLowerName(
         members: ReadonlyArray<Member>,
         targetRank: Rank,
-        targetName: string
+        targetName: string,
     ): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
@@ -590,7 +590,7 @@ function parseOptions(options: any[]): Options {
         cat =>
             typeof cat === "string"
                 ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName)))
+                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
     );
     return { order, alphabetize };
 }
@@ -609,7 +609,7 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
 
     return {
         alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
-        order: categoryFromOption(firstOption[OPTION_ORDER])
+        order: categoryFromOption(firstOption[OPTION_ORDER]),
     };
 }
 function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {
@@ -635,7 +635,7 @@ function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
             categories,
             kind => kind.includes("field"),
             "field",
-            "method"
+            "method",
         );
     }
     if (hasOption("static-before-instance")) {
@@ -643,7 +643,7 @@ function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
             categories,
             kind => kind.includes("static"),
             "static",
-            "instance"
+            "instance",
         );
     }
     if (hasOption("public-before-private")) {
@@ -652,7 +652,7 @@ function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
             categories,
             kind => !kind.includes("private"),
             "public",
-            "private"
+            "private",
         );
     }
     return categories;
@@ -669,7 +669,7 @@ function splitOldStyleOptions(
     categories: NameAndKinds[],
     filter: (name: string) => boolean,
     a: string,
-    b: string
+    b: string,
 ): NameAndKinds[] {
     const newCategories: NameAndKinds[] = [];
     for (const cat of categories) {
@@ -797,7 +797,7 @@ function getNextSplitIndex(text: string, pos: number) {
         slash = 0x2f, // /
         asterisk = 0x2a, // *
         space = 0x0020, // " "
-        maxAsciiCharacter = 0x7f
+        maxAsciiCharacter = 0x7f,
     }
     scan: while (pos >= 0 && pos < text.length) {
         const ch = text.charCodeAt(pos);
