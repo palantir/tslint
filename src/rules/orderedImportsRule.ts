@@ -21,7 +21,7 @@ import {
     isImportEqualsDeclaration,
     isModuleDeclaration,
     isNamedImports,
-    isStringLiteral
+    isStringLiteral,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -112,41 +112,41 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "object",
             properties: {
                 "grouped-imports": {
-                    type: "boolean"
+                    type: "boolean",
                 },
                 groups: {
                     type: "list",
                     listType: {
                         oneOf: [
                             {
-                                type: "string"
+                                type: "string",
                             },
                             {
                                 type: "object",
                                 properties: {
                                     name: { type: "string" },
                                     match: { type: "string" },
-                                    order: { type: "number" }
+                                    order: { type: "number" },
                                 },
-                                required: ["match", "order"]
-                            }
-                        ]
-                    }
+                                required: ["match", "order"],
+                            },
+                        ],
+                    },
                 },
                 "import-sources-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"]
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
                 },
                 "named-imports-order": {
                     type: "string",
-                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"]
+                    enum: ["case-insensitive", "lowercase-first", "lowercase-last", "any"],
                 },
                 "module-source-path": {
                     type: "string",
-                    enum: ["full", "basename"]
-                }
+                    enum: ["full", "basename"],
+                },
             },
-            additionalProperties: false
+            additionalProperties: false,
         },
         optionExamples: [
             true,
@@ -154,12 +154,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     "import-sources-order": "lowercase-last",
-                    "named-imports-order": "lowercase-first"
-                }
-            ]
+                    "named-imports-order": "lowercase-first",
+                },
+            ],
         ],
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -172,7 +172,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+            new Walker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
         );
     }
 }
@@ -198,14 +198,14 @@ const TRANSFORMS = new Map<string, Transform>([
                 return x;
             }
             return x.substr(splitIndex + 1);
-        }
-    ]
+        },
+    ],
 ]);
 
 enum ImportType {
     LIBRARY_IMPORT = 1,
     PARENT_DIRECTORY_IMPORT = 2, // starts with "../"
-    CURRENT_DIRECTORY_IMPORT = 3 // starts with "./"
+    CURRENT_DIRECTORY_IMPORT = 3, // starts with "./"
 }
 
 interface Options {
@@ -242,7 +242,7 @@ function parseOptions(ruleArguments: any[]): Options {
     const defaultGroups: JsonGroupOption[] = [
         { name: "parent directories", match: "^\\.\\.", order: 20 },
         { name: "current directory", match: "^\\.", order: 30 },
-        { name: "libraries", match: ".*", order: 10 }
+        { name: "libraries", match: ".*", order: 10 },
     ];
 
     const {
@@ -250,9 +250,8 @@ function parseOptions(ruleArguments: any[]): Options {
         "import-sources-order": sources = "case-insensitive",
         "named-imports-order": named = "case-insensitive",
         "module-source-path": path = "full",
-        groups = defaultGroups
-    } =
-        optionSet === undefined ? {} : optionSet;
+        groups = defaultGroups,
+    } = optionSet === undefined ? {} : optionSet;
 
     // build up list of compiled groups
     // - handle case where "group" is just a string pattern
@@ -264,7 +263,7 @@ function parseOptions(ruleArguments: any[]): Options {
             return {
                 match: new RegExp(g.match),
                 name: g.name !== undefined ? g.name : g.match,
-                order: g.order
+                order: g.order,
             };
         }
     });
@@ -274,7 +273,7 @@ function parseOptions(ruleArguments: any[]): Options {
         groups: compiledGroups,
         importSourcesOrderTransform: TRANSFORMS.get(sources)!,
         moduleSourceTransform: TRANSFORMS.get(path)!,
-        namedImportsOrderTransform: TRANSFORMS.get(named)!
+        namedImportsOrderTransform: TRANSFORMS.get(named)!,
     };
 }
 
@@ -287,7 +286,7 @@ class Walker extends Lint.AbstractWalker<Options> {
     private readonly defaultGroup: GroupOption = {
         match: /.*/,
         name: "unmatched",
-        order: Number.MAX_SAFE_INTEGER
+        order: Number.MAX_SAFE_INTEGER,
     };
 
     private get currentImportsBlock(): ImportsBlock {
@@ -310,8 +309,8 @@ class Walker extends Lint.AbstractWalker<Options> {
             /\r?\n\r?\n/.test(
                 this.sourceFile.text.slice(
                     statement.getFullStart(),
-                    statement.getStart(this.sourceFile)
-                )
+                    statement.getStart(this.sourceFile),
+                ),
             )
         ) {
             this.endBlock();
@@ -381,7 +380,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             node,
             currentSource,
             matchingGroup,
-            type
+            type,
         );
 
         if (previousSource !== null && compare(currentSource, previousSource) === -1) {
@@ -408,7 +407,7 @@ class Walker extends Lint.AbstractWalker<Options> {
         if (pair !== undefined) {
             const [a, b] = pair;
             const sortedDeclarations = sortByKey(imports, x =>
-                this.options.namedImportsOrderTransform(x.getText())
+                this.options.namedImportsOrderTransform(x.getText()),
             ).map(x => x.getText());
             // replace in reverse order to preserve earlier offsets
             for (let i = imports.length - 1; i >= 0; i--) {
@@ -493,7 +492,7 @@ class Walker extends Lint.AbstractWalker<Options> {
         const startOffset =
             allImportDeclarations.length === 0 ? 0 : allImportDeclarations[0].nodeStartOffset;
         replacements.push(
-            Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations))
+            Lint.Replacement.appendText(startOffset, this.getGroupedImports(allImportDeclarations)),
         );
         return replacements;
     }
@@ -502,7 +501,7 @@ class Walker extends Lint.AbstractWalker<Options> {
      * Get set of replacements that delete all existing imports.
      */
     private getGroupRemovalReplacements(
-        groupedDeclarations: ImportDeclaration[][]
+        groupedDeclarations: ImportDeclaration[][],
     ): Lint.Replacement[] {
         return groupedDeclarations.map((items, index) => {
             let start = items[0].nodeStartOffset;
@@ -595,7 +594,7 @@ class ImportsBlock {
             nodeStartOffset: start,
             sourcePath,
             text,
-            type
+            type,
         });
     }
 
@@ -687,7 +686,7 @@ function flipCase(str: string): string {
 // If not, return the pair of nodes which are out of order.
 function findUnsortedPair(
     xs: ReadonlyArray<ts.Node>,
-    transform: (x: string) => string
+    transform: (x: string) => string,
 ): [ts.Node, ts.Node] | undefined {
     for (let i = 1; i < xs.length; i++) {
         if (transform(xs[i].getText()) < transform(xs[i - 1].getText())) {
