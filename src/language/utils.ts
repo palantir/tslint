@@ -177,7 +177,10 @@ export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags):
  *
  * @deprecated no longer used
  */
-export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+export function isCombinedModifierFlagSet(
+    node: ts.Declaration,
+    flagToCheck: ts.ModifierFlags,
+): boolean {
     // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
 }

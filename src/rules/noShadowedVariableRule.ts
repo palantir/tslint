@@ -230,6 +230,8 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 this.scope = new Scope(parentScope.functionScope);
             } else if (boundary === ScopeBoundary.Function) {
                 this.scope = new Scope();
+            } else if (boundary === ScopeBoundary.Type) {
+                this.scope = new Scope();
             }
             switch (node.kind) {
                 case ts.SyntaxKind.Decorator:

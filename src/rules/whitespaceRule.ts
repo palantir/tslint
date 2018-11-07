@@ -187,7 +187,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                                 const internalName = element.name;
                                 if (internalName !== undefined) {
                                     if (idx === arr.length - 1) {
-                                        const token = namedBindings.getLastToken();
+                                        const token = namedBindings.getLastToken()!;
                                         checkForTrailingWhitespace(token.getFullStart());
                                     }
                                     if (idx === 0) {

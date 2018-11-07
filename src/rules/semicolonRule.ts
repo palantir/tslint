@@ -153,7 +153,7 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
             return;
         }
         const lastToken = utils.getPreviousToken(
-            node.getLastToken(this.sourceFile),
+            node.getLastToken(this.sourceFile)!,
             this.sourceFile,
         )!;
         // yield does not continue on the next line if there is no yielded expression

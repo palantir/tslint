@@ -121,11 +121,14 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                         | ts.ExpressionStatement
                         | ts.AssertionExpression
                         | ts.TemplateSpan
-                        | ts.ThrowStatement
                         | ts.TypeOfExpression
                         | ts.VoidExpression).expression,
                     true,
                 );
+            case ts.SyntaxKind.ThrowStatement: {
+                const { expression } = node as ts.ThrowStatement;
+                return expression ? this.visitNode(expression, true) : false;
+            }
             case ts.SyntaxKind.PropertyAssignment: {
                 const { name, initializer } = node as ts.PropertyAssignment;
                 this.visitNode(name, /*anyOk*/ true);
