@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ** \`${Casing.PascalCase}\`: File names must be pascal-cased: \`FileName.ts\`.
             ** \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
             ** \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
-        
+
             * The array again consists of array with two items. The first item must be a case-insenstive
             regular expression to match files, the second item must be a valid casing option (see above)`,
         options: {
@@ -149,18 +149,20 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    private static findApplicableCasing(
-        fileBaseName: string,
-        fileNameCasings: FileNameCasings
-    ): Casing | null {
+    private static findApplicableCasing(fileBaseName: string, fileNameCasings: FileNameCasings) {
         const applicableCasing = fileNameCasings.find(fileNameCasing => {
             const fileNameMatch = fileNameCasing[0];
+
             return (
                 Rule.isValidRegExp(fileNameMatch) && RegExp(fileNameMatch, "i").test(fileBaseName)
             );
         });
 
-        return applicableCasing !== undefined ? applicableCasing[1] : null;
+        if (!applicableCasing) {
+            return;
+        }
+
+        return applicableCasing[1];
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -168,7 +170,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
-        let casing: Casing | null = null;
+        let casing: Casing | undefined;
 
         const parsedPath = path.parse(sourceFile.fileName);
 
@@ -179,7 +181,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             casing = this.ruleArguments[0] as Casing;
         }
 
-        if (casing === null || !Rule.isValidCasingOption(casing)) {
+        if (!casing || !Rule.isValidCasingOption(casing)) {
             return [];
         }
 
