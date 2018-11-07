@@ -17,7 +17,9 @@
 
 import * as ts from "typescript";
 
+import { isBindingElement } from "tsutils";
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/noUseBeforeDeclare.examples";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -38,6 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -60,11 +63,15 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
                 // Ignore `y` in `x.y`, but recurse to `x`.
                 return recur((node as ts.PropertyAccessExpression).expression);
             case ts.SyntaxKind.Identifier:
+                if (isPropNameInBinding(node)) {
+                    return;
+                }
                 return checkIdentifier(node as ts.Identifier, checker.getSymbolAtLocation(node));
             case ts.SyntaxKind.ExportSpecifier:
                 return checkIdentifier(
                     (node as ts.ExportSpecifier).name,
-                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier));
+                    checker.getExportSpecifierLocalTargetSymbol(node as ts.ExportSpecifier),
+                );
             default:
                 return ts.forEachChild(node, recur);
         }
@@ -76,7 +83,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
             return;
         }
 
-        const declaredBefore = declarations.some((decl) => {
+        const declaredBefore = declarations.some(decl => {
             switch (decl.kind) {
                 case ts.SyntaxKind.FunctionDeclaration:
                     // Functions may be declared later.
@@ -91,5 +98,17 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         if (!declaredBefore) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));
         }
+    }
+
+    /**
+     * Destructured vars/args w/ rename are declared later in the source.
+     * var { x: y } = { x: 43 };
+     */
+    function isPropNameInBinding(node: ts.Node): boolean {
+        return (
+            node.parent !== undefined &&
+            isBindingElement(node.parent) &&
+            node.parent.propertyName === node
+        );
     }
 }

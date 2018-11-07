@@ -47,7 +47,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
+    public static FAILURE_STRING =
+        "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
@@ -58,9 +59,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.ForInStatement) {
             const type = checker.getTypeAtLocation((node as ts.ForInStatement).expression);
-            if (type.symbol !== undefined && type.symbol.name === "Array" ||
+            if (
+                (type.symbol !== undefined && type.symbol.name === "Array") ||
                 // tslint:disable-next-line:no-bitwise
-                (type.flags & ts.TypeFlags.StringLike) !== 0) {
+                (type.flags & ts.TypeFlags.StringLike) !== 0
+            ) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }

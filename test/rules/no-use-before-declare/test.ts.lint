@@ -1,3 +1,9 @@
+subscribe(({ meta: newMeta }:  {meta: SessionMeta}) => {
+    this.setCount(newMeta.match_count);
+});
+
+subscribe(({ meta: newMeta }) => this.setCount(meta.match_count));
+
 $.x = 3;
 ~        [variable '$' used before declaration]
 import $ = require("./$");
@@ -68,7 +74,10 @@ export {
 };
 
 var undeclaredA = 42;
-let { undeclaredB } = { undeclaredB: 43 };
+var { undeclaredB } = { undeclaredB: 43 };
+var { undeclaredB: undeclaredA } = { undeclaredB: 43 };
+var { undeclaredB: undeclaredA, undeclaredC } = { undeclaredB: 43, undeclaredC: 'hello' };
+var { undeclaredB: undeclaredA, undeclaredC: undeclaredD } = { undeclaredB: 43, undeclaredC: 'hello' };
 const [ undeclaredC, [undeclaredD] ] = [ 1, [2] ];
 
 // shouldn't crash tslint

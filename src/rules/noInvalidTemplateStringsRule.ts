@@ -24,7 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-invalid-template-strings",
-        description: "Warns on use of `\${` in non-template strings.",
+        // tslint:disable-next-line no-invalid-template-strings
+        description: "Warns on use of `${` in non-template strings.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -51,15 +52,14 @@ function walk(ctx: Lint.WalkContext<void>) {
 
     function check(node: ts.StringLiteral): void {
         const text = node.getText(ctx.sourceFile);
-        const findTemplateStrings = /\\*\$\{/g;
+        const findTemplateStrings = /(\\*)(\$\{.+?\})/g;
         let instance = findTemplateStrings.exec(text);
         while (instance !== null) {
-            const matchLength = instance[0].length;
-            const backslashCount = matchLength - 2;
+            const backslashCount = instance[1].length;
             const instanceIsEscaped = backslashCount % 2 === 1;
             if (!instanceIsEscaped) {
                 const start = node.getStart() + (instance.index + backslashCount);
-                ctx.addFailureAt(start, 2, Rule.FAILURE_STRING);
+                ctx.addFailureAt(start, instance[2].length, Rule.FAILURE_STRING);
             }
             instance = findTemplateStrings.exec(text);
         }

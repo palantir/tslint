@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-namespace",
-        description: "Disallows use of internal \`module\`s and \`namespace\`s.",
+        description: "Disallows use of internal `module`s and `namespace`s.",
         descriptionDetails: "This rule still allows the use of `declare module ... {}`",
         rationale: Lint.Utils.dedent`
             ES6-style external modules are the standard way to modularize code.
@@ -71,9 +71,12 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
     for (const node of ctx.sourceFile.statements) {
         if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
+            if (
+                (node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
                 !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation) &&
-                (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
+                (!ctx.options.allowDeclarations ||
+                    !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))
+            ) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
