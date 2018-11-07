@@ -19,7 +19,6 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-// TODO: add a default list
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
