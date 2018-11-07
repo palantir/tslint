@@ -226,12 +226,13 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
             }
 
             const boundary = isScopeBoundary(node);
-            if (boundary === ScopeBoundary.Block) {
-                this.scope = new Scope(parentScope.functionScope);
-            } else if (boundary === ScopeBoundary.Function) {
-                this.scope = new Scope();
-            } else if (boundary === ScopeBoundary.Type) {
-                this.scope = new Scope();
+            switch (boundary) {
+                case ScopeBoundary.Block:
+                    this.scope = new Scope(parentScope.functionScope);
+                    break;
+                case ScopeBoundary.Function:
+                case ScopeBoundary.Type:
+                    this.scope = new Scope();
             }
             switch (node.kind) {
                 case ts.SyntaxKind.Decorator:
@@ -283,9 +284,9 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.Parameter:
                     if (
-                        node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                        node.parent.kind !== ts.SyntaxKind.IndexSignature &&
                         !isThisParameter(node as ts.ParameterDeclaration) &&
-                        isFunctionWithBody(node.parent!)
+                        isFunctionWithBody(node.parent)
                     ) {
                         this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
@@ -293,7 +294,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ModuleDeclaration:
                     if (
                         this.options.namespace &&
-                        node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
+                        node.parent.kind !== ts.SyntaxKind.ModuleDeclaration &&
                         (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
                         !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
                     ) {

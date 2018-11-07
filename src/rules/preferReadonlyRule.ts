@@ -93,13 +93,13 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
                 if (scope !== undefined) {
                     handlePropertyAccessExpression(
                         node as ts.PropertyAccessExpression,
-                        node.parent!,
+                        node.parent,
                     );
                 }
                 break;
 
             default:
-                if (utils.isFunctionScopeBoundary(node)) {
+                if (utils.isFunctionScopeBoundary(node) !== utils.ScopeBoundary.None) {
                     handleFunctionScopeBoundary(node);
                 } else {
                     ts.forEachChild(node, visitNode);

@@ -66,7 +66,7 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
         const cb = (node: ts.Node): void => {
-            if (utils.isFunctionScopeBoundary(node)) {
+            if (utils.isFunctionScopeBoundary(node) !== utils.ScopeBoundary.None) {
                 const oldScope = this.scope;
                 this.scope = new Set();
                 ts.forEachChild(node, cb);

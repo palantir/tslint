@@ -71,7 +71,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
             );
         } else if (
             isMethodDeclaration(node) &&
-            node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression
+            node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
         ) {
             ctx.addFailureAtNode(
                 node.name,

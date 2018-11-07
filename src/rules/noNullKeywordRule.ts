@@ -74,7 +74,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (node.kind !== ts.SyntaxKind.NullKeyword) {
             return ts.forEachChild(node, cb);
         }
-        const parent = node.parent!;
+        const parent = node.parent;
         let eq: Lint.EqualsKind | undefined;
         if (isBinaryExpression(parent)) {
             eq = Lint.getEqualsKind(parent.operatorToken);

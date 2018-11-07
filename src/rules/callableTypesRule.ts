@@ -105,7 +105,7 @@ function renderSuggestion(
     const text = sourceFile.text.substring(start, call.end);
 
     let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
-    if (shouldWrapSuggestion(parent.parent!)) {
+    if (shouldWrapSuggestion(parent.parent)) {
         suggestion = `(${suggestion})`;
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {

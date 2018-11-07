@@ -287,7 +287,7 @@ function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
 }
 
 function getTypeName(t: TypeLike): string | undefined {
-    const parent = t.parent!;
+    const parent = t.parent;
     return t.kind === ts.SyntaxKind.InterfaceDeclaration
         ? t.name.text
         : isTypeAliasDeclaration(parent)

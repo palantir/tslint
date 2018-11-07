@@ -119,7 +119,7 @@ function isMethod(node: ts.Node, ignoreStatic: boolean): boolean {
 }
 
 function isSafeUse(node: ts.Node): boolean {
-    const parent = node.parent!;
+    const parent = node.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.CallExpression:
             return (parent as ts.CallExpression).expression === node;

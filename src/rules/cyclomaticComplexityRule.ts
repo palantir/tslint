@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
+import { isFunctionScopeBoundary, isIdentifier, ScopeBoundary } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -90,7 +90,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isFunctionScopeBoundary(node)) {
+        if (isFunctionScopeBoundary(node) !== ScopeBoundary.None) {
             const old = complexity;
             complexity = 1;
             ts.forEachChild(node, cb);

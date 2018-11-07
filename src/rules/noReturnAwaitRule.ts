@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isTryStatement } from "tsutils";
+import { isFunctionScopeBoundary, isTryStatement, ScopeBoundary } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -63,12 +63,12 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function isUnnecessaryAwait(node: ts.Node): boolean {
     while (true) {
-        const parent = node.parent!;
+        const parent = node.parent;
         outer: switch (parent.kind) {
             case ts.SyntaxKind.ArrowFunction:
                 return true;
             case ts.SyntaxKind.ReturnStatement:
-                return !isInsideTryBlock(parent.parent!);
+                return !isInsideTryBlock(parent.parent);
             case ts.SyntaxKind.ParenthesizedExpression:
                 break;
             case ts.SyntaxKind.ConditionalExpression:
@@ -95,7 +95,7 @@ function isUnnecessaryAwait(node: ts.Node): boolean {
 
 function isInsideTryBlock(node: ts.Node): boolean {
     while (node.parent !== undefined) {
-        if (isFunctionScopeBoundary(node)) {
+        if (isFunctionScopeBoundary(node) !== ScopeBoundary.None) {
             return false;
         }
         if (isTryStatement(node.parent)) {
@@ -107,7 +107,7 @@ function isInsideTryBlock(node: ts.Node): boolean {
             ) {
                 return true;
             }
-            node = node.parent.parent!;
+            node = node.parent.parent;
         } else {
             node = node.parent;
         }

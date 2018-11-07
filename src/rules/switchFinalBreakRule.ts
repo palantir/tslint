@@ -99,7 +99,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         if (lastStatement.label !== undefined) {
-            const parent = node.parent!;
+            const parent = node.parent;
             if (!isLabeledStatement(parent) || parent.label === lastStatement.label) {
                 // break jumps somewhere else, don't complain
                 return;
