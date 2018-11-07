@@ -38,10 +38,11 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        let output = "<pmd version=\"tslint\">";
+        let output = '<pmd version="tslint">';
 
         for (const failure of failures) {
-            const failureString = failure.getFailure()
+            const failureString = failure
+                .getFailure()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")

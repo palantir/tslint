@@ -122,7 +122,7 @@ const options: Option[] = [
     {
         short: "r",
         name: "rules-dir",
-        type: "string",
+        type: "array",
         describe: "rules directory",
         description: dedent`
             An additional rules directory, for user-created rules.
@@ -148,7 +148,8 @@ const options: Option[] = [
         short: "t",
         name: "format",
         type: "string",
-        describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
+        describe:
+            "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
         description: dedent`
             The formatter to use to format the results of the linter before
             outputting it to stdout or the file passed in --out. The core
@@ -227,9 +228,21 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.concat(builtinOptions).map((o) =>
-        `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
-    console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
+    const optionDetails = options
+        .concat(builtinOptions)
+        .map(
+            o =>
+                `${optionUsageTag(o)}:${
+                    o.description.startsWith("\n")
+                        ? o.description.replace(/\n/g, indent)
+                        : indent + o.description
+                }`,
+        );
+    console.log(
+        `tslint accepts the following commandline options:\n\n    ${optionDetails.join(
+            "\n\n    ",
+        )}\n\n`,
+    );
 });
 
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
@@ -238,24 +251,34 @@ commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }
-const argv = commander.opts() as any as Argv;
+const argv = (commander.opts() as any) as Argv;
 
-if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (
+    !(
+        argv.init ||
+        argv.test !== undefined ||
+        argv.project !== undefined ||
+        commander.args.length > 0
+    )
+) {
     console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 
 if (argv.typeCheck) {
-    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
+    console.warn(
+        "--type-check is deprecated. You only need --project to enable rules which need type information.",
+    );
     if (argv.project === undefined) {
         console.error("--project must be specified in order to enable type checking.");
         process.exit(1);
     }
 }
 
-const outputStream: NodeJS.WritableStream = argv.out === undefined
-    ? process.stdout
-    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
+const outputStream: NodeJS.WritableStream =
+    argv.out === undefined
+        ? process.stdout
+        : fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
 
 run(
     {
@@ -264,7 +287,7 @@ run(
         files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
-        format: argv.format === undefined ? "prose" : argv.format,
+        format: argv.format,
         formattersDirectory: argv.formattersDir,
         init: argv.init,
         out: argv.out,
@@ -282,15 +305,17 @@ run(
         error(m) {
             process.stderr.write(m);
         },
-    })
-    .then((rc) => {
+    },
+)
+    .then(rc => {
         process.exitCode = rc;
-    }).catch((e) => {
+    })
+    .catch(e => {
         console.error(e);
         process.exitCode = 1;
     });
 
-function optionUsageTag({short, name}: Option) {
+function optionUsageTag({ short, name }: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
 }
 

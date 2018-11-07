@@ -74,13 +74,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_CONSTRUCTOR_ONLY = "Every member of this class is a constructor. Use functions instead.";
-    public static FAILURE_STATIC_ONLY = "Every member of this class is static. Use namespaces or plain objects instead.";
+    public static FAILURE_CONSTRUCTOR_ONLY =
+        "Every member of this class is a constructor. Use functions instead.";
+    public static FAILURE_STATIC_ONLY =
+        "Every member of this class is static. Use namespaces or plain objects instead.";
     public static FAILURE_EMPTY_CLASS = "This class has no members.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NoUnnecessaryClassWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
+            new NoUnnecessaryClassWalker(
+                sourceFile,
+                this.ruleName,
+                parseOptions(this.ruleArguments),
+            ),
         );
     }
 }
@@ -99,7 +105,10 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
     private checkMembers(node: ts.ClassDeclaration) {
         if (node.members.length === 0) {
             if (!this.options.allowEmptyClass) {
-                this.addFailureAtNode(getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!, Rule.FAILURE_EMPTY_CLASS);
+                this.addFailureAtNode(
+                    getChildOfKind(node, ts.SyntaxKind.ClassKeyword)!,
+                    Rule.FAILURE_EMPTY_CLASS,
+                );
             }
             return;
         }
@@ -132,7 +141,8 @@ class NoUnnecessaryClassWalker extends Lint.AbstractWalker<Options> {
 function isNonStaticMember(member: ts.ClassElement): boolean {
     return (
         isConstructorWithShorthandProps(member) ||
-        (!isConstructorDeclaration(member) && !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
+        (!isConstructorDeclaration(member) &&
+            !hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword))
     );
 }
 

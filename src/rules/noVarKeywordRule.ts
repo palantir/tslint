@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import { hasModifier, isBlockScopedVariableDeclarationList, isNodeFlagSet, isVariableDeclarationList, isVariableStatement } from "tsutils";
+import {
+    hasModifier,
+    isBlockScopedVariableDeclarationList,
+    isNodeFlagSet,
+    isVariableDeclarationList,
+    isVariableStatement,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -54,14 +60,18 @@ function walk(ctx: Lint.WalkContext<void>): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         const parent = node.parent!;
-        if (isVariableDeclarationList(node)
-                && !isBlockScopedVariableDeclarationList(node)
-                // If !isVariableStatement, this is inside of a for loop.
-                && (!isVariableStatement(parent) || !isGlobalVarDeclaration(parent))) {
+        if (
+            isVariableDeclarationList(node) &&
+            !isBlockScopedVariableDeclarationList(node) &&
+            // If !isVariableStatement, this is inside of a for loop.
+            (!isVariableStatement(parent) || !isGlobalVarDeclaration(parent))
+        ) {
             const start = node.getStart(sourceFile);
             const width = "var".length;
             // Don't apply fix in a declaration file, because may have meant 'const'.
-            const fix = sourceFile.isDeclarationFile ? undefined : new Lint.Replacement(start, width, "let");
+            const fix = sourceFile.isDeclarationFile
+                ? undefined
+                : new Lint.Replacement(start, width, "let");
             ctx.addFailureAt(start, width, Rule.FAILURE_STRING, fix);
         }
 
@@ -72,6 +82,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
 // Allow `declare var x: number;` or `declare global { var x: number; }`
 function isGlobalVarDeclaration(node: ts.VariableStatement): boolean {
     const parent = node.parent!;
-    return hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)
-        || parent.kind === ts.SyntaxKind.ModuleBlock && isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation);
+    return (
+        hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword) ||
+        (parent.kind === ts.SyntaxKind.ModuleBlock &&
+            isNodeFlagSet(parent.parent!, ts.NodeFlags.GlobalAugmentation))
+    );
 }

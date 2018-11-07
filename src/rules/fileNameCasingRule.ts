@@ -100,7 +100,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         const casing = this.ruleArguments[0] as Casing;
         const fileName = path.parse(sourceFile.fileName).name;
         if (!Rule.isCorrectCasing(fileName, casing)) {
-            return [new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)];
+            return [
+                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName),
+            ];
         }
 
         return [];
