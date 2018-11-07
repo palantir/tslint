@@ -335,10 +335,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
             case ts.SyntaxKind.ImportKeyword:
                 if (
-                    parent.kind === ts.SyntaxKind.CallExpression &&
-                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword
+                    utils.isCallExpression(parent) &&
+                    parent.expression.kind === ts.SyntaxKind.ImportKeyword
                 ) {
                     return; // Don't check ImportCall
+                }
+                if (utils.isImportTypeNode(parent)) {
+                    return; // Don't check TypeQuery
                 }
             // falls through
             case ts.SyntaxKind.ExportKeyword:

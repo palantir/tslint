@@ -1,0 +1,32 @@
+[typescript]: >=2.9.0
+
+const foo: import("bar");
+const foo: import ("bar");
+
+function foo(a: import("bar")): import("baz") {}
+function foo(a: import ("bar")): import ("baz") {}
+
+const foo = (a: import("bar")): import("baz") => {};
+const foo = (a: import ("bar")): import ("baz") => {};
+
+type foo = { bar: import("baz") } & import("qux");
+type foo = { bar: import ("baz") } & import ("qux");
+
+interface Foo {
+    bar: import("baz");
+    qux: import ("quux");
+}
+
+class Foo {
+    bar: import("baz");
+    qux: import ("quux");
+}
+
+/**
+ * @param bar { import("qux") }
+ * @param baz { import ("qux") }
+ */
+function foo(bar, baz) { }
+
+type foo = Bar<import("baz")>;
+type foo = Bar<import ("baz")>;
