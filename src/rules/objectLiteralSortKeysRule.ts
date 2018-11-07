@@ -20,7 +20,7 @@ import {
     isObjectLiteralExpression,
     isSameLine,
     isTypeAliasDeclaration,
-    isTypeLiteralNode
+    isTypeLiteralNode,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -97,7 +97,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
     public static FAILURE_STRING_USE_DECLARATION_ORDER(
         propName: string,
-        typeName: string | undefined
+        typeName: string | undefined,
     ): string {
         const type = typeName === undefined ? "its type declaration" : `'${typeName}'`;
         return `The key '${propName}' is not in the same order as it is in ${type}.`;
@@ -111,7 +111,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         const options = parseOptions(this.ruleArguments);
         if (options.matchDeclarationOrder) {
             throw new Error(
-                `${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}".`
+                `${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}".`,
             );
         }
         return this.applyWithFunction(sourceFile, walk, options);
@@ -163,7 +163,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                 type.members.every(
                     m =>
                         m.kind === ts.SyntaxKind.PropertySignature ||
-                        m.kind === ts.SyntaxKind.MethodSignature
+                        m.kind === ts.SyntaxKind.MethodSignature,
                 )
             ) {
                 checkMatchesDeclarationOrder(node, type, type.members as ReadonlyArray<
@@ -195,7 +195,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                             if (lastPropertyWasShorthand === false) {
                                 ctx.addFailureAtNode(
                                     property.name,
-                                    Rule.FAILURE_STRING_SHORTHAND_FIRST(property.name.text)
+                                    Rule.FAILURE_STRING_SHORTHAND_FIRST(property.name.text),
                                 );
                                 return; // only show warning on first out-of-order property
                             }
@@ -269,7 +269,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
             // so it must have come before it and is therefore out of order.
             ctx.addFailureAtNode(
                 prop.name,
-                Rule.FAILURE_STRING_USE_DECLARATION_ORDER(propName, getTypeName(type))
+                Rule.FAILURE_STRING_USE_DECLARATION_ORDER(propName, getTypeName(type)),
             );
             // Don't bother with multiple errors.
             break;
@@ -295,7 +295,7 @@ function hasBlankLineBefore(sourceFile: ts.SourceFile, element: ts.ObjectLiteral
             const commentLineStartPosition = ts.getPositionOfLineAndCharacter(
                 sourceFile,
                 commentLine,
-                0
+                0,
             );
 
             return hasDoubleNewLine(sourceFile, commentLineStartPosition - 4);
