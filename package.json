@@ -31,7 +31,7 @@
         "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
         "precommit": "npm-run-all precommit:prettier",
         "precommit:prettier": "pretty-quick --staged",
-        "prettier": "prettier --write ./**/*.{js,ts,css,scss,md,yml} --ignore-path ./.prettierignore",
+        "prettier": "prettier --write './**/*.{js,ts,css,scss,md,yml}' --ignore-path ./.prettierignore",
         "publish:local": "./scripts/npmPublish.sh",
         "test": "npm-run-all test:pre -p test:mocha test:rules",
         "test:pre": "cd ./test/config && npm install --no-save",
