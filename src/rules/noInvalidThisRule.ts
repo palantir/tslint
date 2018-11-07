@@ -61,21 +61,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+const enum parentType {
+    None,
+    Class,
+    ClassMethod,
+    BoundRegularFunction,
+    UnboundRegularFunction,
+}
+const thisAllowedParents = new Set([parentType.ClassMethod, parentType.BoundRegularFunction]);
+
 function walk(ctx: Lint.WalkContext<boolean>): void {
     const { sourceFile, options: checkFuncInMethod } = ctx;
 
-    const enum parentType {
-        None,
-        Class,
-        ClassMethod,
-        BoundRegularFunction,
-        UnboundRegularFunction,
-    }
-
-    function thisIsAllowed(parent: parentType): boolean {
-        return [parentType.ClassMethod, parentType.BoundRegularFunction]
-            .some((t) => parent === t);
-    }
     let currentParent: parentType = parentType.None;
     let inClass = false;
 
@@ -115,7 +112,7 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
                 }
 
             case ts.SyntaxKind.ThisKeyword:
-                if (!thisIsAllowed(currentParent)) {
+                if (!thisAllowedParents.has(currentParent)) {
                     if (!inClass) {
                         ctx.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
                     } else if (checkFuncInMethod) {
