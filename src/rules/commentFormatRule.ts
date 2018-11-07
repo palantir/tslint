@@ -70,6 +70,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
                 * \`"ignore-words"\`  - array of strings - words that will be ignored at the beginning of the comment.
                 * \`"ignore-pattern"\` - string - RegExp pattern that will be ignored at the beginning of the comment.
+
+            Keywords can be managed with an object that can be passed as a second argument (right after \`"check-space"\`).
+
+            One option can be provided in this object:
+
+                * \`"no-space-keywords"\` - array of strings - keywords that can be used at the beginning of the comment.
             `,
         options: {
             type: "array",
