@@ -43,7 +43,7 @@ jobs:
             - run: yarn test
     test2.1:
         docker:
-            - image: circleci/node:4
+            - image: circleci/node:6
         steps:
             - checkout
             - attach_workspace:
