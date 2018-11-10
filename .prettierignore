@@ -3,16 +3,25 @@
 # dependencies
 /node_modules
 
+# docs
+.github
+/docs
+
 # testing
 /coverage
+/test/external/
+/test/files/
+/test/rules/
 
 # production
 /build
+/lib
 
 # ide
 /.idea
 
 # npm
+package.json
 package-lock.json
 
 # misc

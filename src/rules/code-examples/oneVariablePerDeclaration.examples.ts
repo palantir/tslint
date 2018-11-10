@@ -33,7 +33,8 @@ export const codeExamples = [
        `,
     },
     {
-        description: "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+        description:
+            "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
         config: Lint.Utils.dedent`
             "rules": { "one-variable-per-declaration": [true, "ignore-for-loop"] }
         `,

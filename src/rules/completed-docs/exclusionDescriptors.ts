@@ -20,7 +20,10 @@ import { IBlockExclusionDescriptor } from "./blockExclusion";
 import { IClassExclusionDescriptor } from "./classExclusion";
 import { ITagExclusionDescriptor } from "./tagExclusion";
 
-export type ExclusionDescriptor = IBlockExclusionDescriptor | IClassExclusionDescriptor | ITagExclusionDescriptor;
+export type ExclusionDescriptor =
+    | IBlockExclusionDescriptor
+    | IClassExclusionDescriptor
+    | ITagExclusionDescriptor;
 
 export type InputExclusionDescriptor = boolean | ExclusionDescriptor;
 
@@ -28,6 +31,8 @@ export interface IExclusionDescriptors {
     [type: string /* DocType */]: ExclusionDescriptor;
 }
 
-export type IInputExclusionDescriptors = DocType | {
-    [type: string /* DocType */]: InputExclusionDescriptor;
-};
+export type IInputExclusionDescriptors =
+    | DocType
+    | {
+          [type: string /* DocType */]: InputExclusionDescriptor;
+      };

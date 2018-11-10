@@ -1,0 +1,16 @@
+{
+    "rulesDirectory": "../files/custom-rules/",
+    "jsRules": {
+        "always-fail": {
+            "severity": "error"
+        }
+    },
+    "rules": {
+        "always-fail": {
+            "severity": "error"
+        }
+    },
+    "linterOptions": {
+        "format": "tslint-test-custom-formatter"
+    }
+}

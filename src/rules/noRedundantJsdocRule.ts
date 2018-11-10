@@ -67,7 +67,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
         switch (tag.kind) {
             case ts.SyntaxKind.JSDocTag:
                 if (redundantTags.has(tag.tagName.text)) {
-                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
+                    ctx.addFailureAtNode(
+                        tag.tagName,
+                        Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text),
+                    );
                 }
                 break;
 
@@ -80,12 +83,21 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.JSDocTypedefTag:
             case ts.SyntaxKind.JSDocPropertyTag:
                 // Always redundant
-                ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text));
+                ctx.addFailureAtNode(
+                    tag.tagName,
+                    Rule.FAILURE_STRING_REDUNDANT_TAG(tag.tagName.text),
+                );
                 break;
 
             case ts.SyntaxKind.JSDocTemplateTag:
-                if ((tag as ts.JSDocTemplateTag).comment === undefined || (tag as ts.JSDocTemplateTag).comment === "") {
-                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text));
+                if (
+                    (tag as ts.JSDocTemplateTag).comment === undefined ||
+                    (tag as ts.JSDocTemplateTag).comment === ""
+                ) {
+                    ctx.addFailureAtNode(
+                        tag.tagName,
+                        Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text),
+                    );
                 }
                 break;
 
@@ -97,7 +109,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 }
                 if (comment === undefined || comment === "") {
                     // Redundant if no documentation
-                    ctx.addFailureAtNode(tag.tagName, Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text));
+                    ctx.addFailureAtNode(
+                        tag.tagName,
+                        Rule.FAILURE_STRING_NO_COMMENT(tag.tagName.text),
+                    );
                 }
                 break;
             }

@@ -6,6 +6,7 @@
   "rules": {
     // Don't want these
     "cyclomatic-complexity": false,
+    "increment-decrement": false,
     "newline-before-return": false,
     "no-parameter-properties": false,
     "no-parameter-reassignment": false,
