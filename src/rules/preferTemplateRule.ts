@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Prefer a template expression over string literal concatenation.
 
             There is one expection for this rule regarding long strings. It is allowed
-            to concatenate stings and template expressions if they do not contain a
+            to concatenate strings and template expressions if they do not contain a
             newline character and there is exactly one expression per line.`,
         optionsDescription: Lint.Utils.dedent`
             If \`${OPTION_SINGLE_CONCAT}\` is specified, then a single concatenation (\`x + y\`) is allowed, but not more (\`x + y + z\`).`,
@@ -96,7 +96,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             // Currently no fixer available
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING_MULTILINE);
         } else {
-            // (Concatenated) single line stinglikes
+            // (Concatenated) single line stringlikes
             const groupedExpressions = groupBy(evalExpressions, (el) => el.line);
             groupedExpressions.forEach((exps) => {
                 if (exps.length <= 1) { return; }
