@@ -80,8 +80,8 @@ const validateWithSimpleConfig: Validator<SimpleConfig> = (sourceFile, casingCon
 
 const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult =>
     typeof casingConfig === "string"
-        ? validateWithSimpleConfig(sourceFile, casingConfig as SimpleConfig)
-        : validateWithRegexConfig(sourceFile, casingConfig as RegexConfig);
+        ? validateWithSimpleConfig(sourceFile, casingConfig)
+        : validateWithRegexConfig(sourceFile, casingConfig);
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
