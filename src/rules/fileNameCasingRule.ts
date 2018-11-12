@@ -45,7 +45,7 @@ interface ValidatorFailureResult {
 
 type ValidatorResult = ValidatorSuccessfulResult | ValidatorFailureResult;
 
-type Validator<T> = (sourceFile: ts.SourceFile, casing: T) => ValidatorResult;
+type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => ValidatorResult;
 
 const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
 
@@ -62,7 +62,7 @@ function isCorrectCasing(fileName: string, casing: Casing): boolean {
     }
 }
 
-const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig): ValidatorResult => {
+const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).base;
     const config = Object.keys(casingConfig).map(key => ({
         casing: casingConfig[key],
@@ -82,7 +82,7 @@ const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig): Valid
         : { valid: false, failedCasing: match.casing };
 };
 
-const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig): ValidatorResult => {
+const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
