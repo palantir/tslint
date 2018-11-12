@@ -78,13 +78,10 @@ const validateWithSimpleConfig: Validator<Casing> = (sourceFile, casingConfig) =
     return isValid ? undefined : casingConfig;
 };
 
-const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult => {
-    const validator =
-        typeof casingConfig === "string" ? validateWithSimpleConfig : validateWithRegexConfig;
-
-    // @ts-ignore https://github.com/Microsoft/TypeScript/issues/7294
-    return validator(sourceFile, casingConfig);
-};
+const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult =>
+    casingConfig === "string"
+        ? validateWithSimpleConfig(sourceFile, casingConfig as SimpleConfig)
+        : validateWithRegexConfig(sourceFile, casingConfig as RegexConfig);
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
