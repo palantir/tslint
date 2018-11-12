@@ -71,7 +71,7 @@ const validateWithRegexConfig: Validator<RegexConfig> = (sourceFile, casingConfi
     return isCorrectCasing(normalizedFileName, match.casing) ? undefined : match.casing;
 };
 
-const validateWithSimpleConfig: Validator<Casing> = (sourceFile, casingConfig) => {
+const validateWithSimpleConfig: Validator<SimpleConfig> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
