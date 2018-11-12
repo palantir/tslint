@@ -45,7 +45,7 @@ interface ValidatorFailureResult {
 
 type ValidatorResult = ValidatorSuccessfulResult | ValidatorFailureResult;
 
-type Validator<T> = (casing: T) => (sourceFile: ts.SourceFile) => ValidatorResult;
+type Validator<T> = (sourceFile: ts.SourceFile, casing: T) => ValidatorResult;
 
 const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
 
@@ -62,7 +62,7 @@ function isCorrectCasing(fileName: string, casing: Casing): boolean {
     }
 }
 
-const RegexValidator: Validator<RegexConfig> = casingConfig => (sourceFile): ValidatorResult => {
+const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig): ValidatorResult => {
     const fileName = path.parse(sourceFile.fileName).base;
     const config = Object.keys(casingConfig).map(key => ({
         casing: casingConfig[key],
@@ -82,7 +82,7 @@ const RegexValidator: Validator<RegexConfig> = casingConfig => (sourceFile): Val
         : { valid: false, failedCasing: match.casing };
 };
 
-const SimpleValidator: Validator<Casing> = casingConfig => (sourceFile): ValidatorResult => {
+const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig): ValidatorResult => {
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
@@ -93,7 +93,7 @@ const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidatorRes
     const validator = typeof casingConfig === "string" ? SimpleValidator : RegexValidator;
 
     // @ts-ignore https://github.com/Microsoft/TypeScript/issues/7294
-    return validator(casingConfig)(sourceFile);
+    return validator(sourceFile, casingConfig);
 };
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -124,11 +124,17 @@ export class Rule extends Lint.Rules.AbstractRule {
                     },
                     {
                         type: "object",
-                        // TODO: I am not sure how to setup the type
-                        // properties: {
-                        //     type: "string",
-                        //     enum: rules,
-                        // },
+                        /**
+                         * TODO: Add valid validation
+                         * We do not care about the key but the value most be
+                         * an string of rules enum.
+                         *
+                         * Example:
+                         *      properties: valuesOf({
+                         *          type: "string",
+                         *          enum: rules
+                         *      })
+                         */
                     },
                 ],
             },
