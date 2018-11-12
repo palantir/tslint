@@ -79,7 +79,7 @@ const validateWithSimpleConfig: Validator<SimpleConfig> = (sourceFile, casingCon
 };
 
 const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult =>
-    casingConfig === "string"
+    typeof casingConfig === "string"
         ? validateWithSimpleConfig(sourceFile, casingConfig as SimpleConfig)
         : validateWithRegexConfig(sourceFile, casingConfig as RegexConfig);
 
