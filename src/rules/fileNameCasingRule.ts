@@ -111,17 +111,11 @@ export class Rule extends Lint.Rules.AbstractRule {
                     },
                     {
                         type: "object",
-                        /**
-                         * TODO: Add valid validation
-                         * We do not care about the key but the value most be
-                         * an string of rules enum.
-                         *
-                         * Example:
-                         *      properties: valuesOf({
-                         *          type: "string",
-                         *          enum: rules
-                         *      })
-                         */
+                        additionalProperties: {
+                            type: "string",
+                            enum: rules,
+                        },
+                        minProperties: 1,
                     },
                 ],
             },
