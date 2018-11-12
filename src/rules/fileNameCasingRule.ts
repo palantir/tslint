@@ -34,18 +34,9 @@ type SimpleConfig = Casing;
 
 type Config = SimpleConfig | RegexConfig;
 
-interface ValidatorSuccessfulResult {
-    valid: true;
-}
+type ValidationResult = Casing | undefined;
 
-interface ValidatorFailureResult {
-    valid: false;
-    failedCasing: Casing;
-}
-
-type ValidatorResult = ValidatorSuccessfulResult | ValidatorFailureResult;
-
-type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => ValidatorResult;
+type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => ValidationResult;
 
 const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
 
@@ -72,24 +63,22 @@ const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig) => {
     const match = config.find(c => c.regex.test(fileName));
 
     if (match === undefined) {
-        return { valid: true };
+        return undefined;
     }
 
     const normalizedFileName = fileName.replace(match.regex, "");
 
-    return isCorrectCasing(normalizedFileName, match.casing)
-        ? { valid: true }
-        : { valid: false, failedCasing: match.casing };
+    return isCorrectCasing(normalizedFileName, match.casing) ? undefined : match.casing;
 };
 
 const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
-    return isValid ? { valid: true } : { valid: false, failedCasing: casingConfig };
+    return isValid ? undefined : casingConfig;
 };
 
-const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidatorResult => {
+const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult => {
     const validator = typeof casingConfig === "string" ? SimpleValidator : RegexValidator;
 
     // @ts-ignore https://github.com/Microsoft/TypeScript/issues/7294
@@ -174,16 +163,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const casingConfig = this.ruleArguments[0] as Config;
-        const validationResult: ValidatorResult = validate(sourceFile, casingConfig);
+        const validation = validate(sourceFile, casingConfig);
 
-        return validationResult.valid
+        return validation === undefined
             ? []
             : [
                   new Lint.RuleFailure(
                       sourceFile,
                       0,
                       0,
-                      Rule.FAILURE_STRING(validationResult.failedCasing),
+                      Rule.FAILURE_STRING(validation),
                       this.ruleName,
                   ),
               ];
