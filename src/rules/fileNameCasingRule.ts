@@ -53,7 +53,7 @@ function isCorrectCasing(fileName: string, casing: Casing): boolean {
     }
 }
 
-const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig) => {
+const validateWithRegexConfig: Validator<RegexConfig> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).base;
     const config = Object.keys(casingConfig).map(key => ({
         casing: casingConfig[key],
@@ -71,7 +71,7 @@ const RegexValidator: Validator<RegexConfig> = (sourceFile, casingConfig) => {
     return isCorrectCasing(normalizedFileName, match.casing) ? undefined : match.casing;
 };
 
-const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig) => {
+const validateWithSimpleConfig: Validator<Casing> = (sourceFile, casingConfig) => {
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
@@ -79,7 +79,8 @@ const SimpleValidator: Validator<Casing> = (sourceFile, casingConfig) => {
 };
 
 const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult => {
-    const validator = typeof casingConfig === "string" ? SimpleValidator : RegexValidator;
+    const validator =
+        typeof casingConfig === "string" ? validateWithSimpleConfig : validateWithRegexConfig;
 
     // @ts-ignore https://github.com/Microsoft/TypeScript/issues/7294
     return validator(sourceFile, casingConfig);
