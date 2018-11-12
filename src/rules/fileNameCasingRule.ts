@@ -101,7 +101,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             matches the file name, and the value is the file name rule from
             the previous list.
 
-            * { ".tsx": ${Casing.PascalCase}, ".ts": ${Casing.CamelCase} }
+            * \{ \".tsx\": \"${Casing.PascalCase}\", \".ts\": \"${Casing.CamelCase}\" \}
         `,
         options: {
             type: "array",
