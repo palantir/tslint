@@ -95,7 +95,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
             * \`${Casing.PascalCase}\`: File names must be Pascal-cased: \`FileName.ts\`.
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
-            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
+            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
+
+            Or an object, where the key reprents a regular expression that
+            matches the file name, and the value is the file name rule from
+            the previous list.
+
+            * { ".tsx": ${Casing.PascalCase}, ".ts": ${Casing.CamelCase} }
+        `,
         options: {
             type: "array",
             items: {
