@@ -57,7 +57,7 @@ const validateWithRegexConfig: Validator<RegexConfig> = (sourceFile, casingConfi
     const fileName = path.parse(sourceFile.fileName).base;
     const config = Object.keys(casingConfig).map(key => ({
         casing: casingConfig[key],
-        regex: RegExp(`${key}$`),
+        regex: RegExp(key),
     }));
 
     const match = config.find(c => c.regex.test(fileName));
