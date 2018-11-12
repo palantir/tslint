@@ -18,6 +18,7 @@
 import * as path from "path";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 import { isCamelCased, isKebabCased, isPascalCased, isSnakeCased } from "../utils";
 
@@ -27,9 +28,6 @@ enum Casing {
     KebabCase = "kebab-case",
     SnakeCase = "snake-case"
 }
-
-type FileNameRegExpWithCasing = [string, Casing];
-type FileNameCasings = FileNameRegExpWithCasing[];
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -50,10 +48,14 @@ export class Rule extends Lint.Rules.AbstractRule {
             * The array again consists of array with two items. The first item must be a case-insenstive
             regular expression to match files, the second item must be a valid casing option (see above)`,
         options: {
-            type: "list",
-            listType: {
-                anyOf: [
-                    {
+            oneOf: [
+                {
+                    type: "string",
+                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase]
+                },
+                {
+                    type: "object",
+                    additionalProperties: {
                         type: "string",
                         enum: [
                             Casing.CamelCase,
@@ -62,25 +64,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                             Casing.SnakeCase
                         ]
                     },
-                    {
-                        type: "array",
-                        items: [
-                            {
-                                type: "string"
-                            },
-                            {
-                                type: "string",
-                                enum: [
-                                    Casing.CamelCase,
-                                    Casing.PascalCase,
-                                    Casing.KebabCase,
-                                    Casing.SnakeCase
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
+                    minProperties: 1
+                }
+            ]
         },
         optionExamples: [
             [true, Casing.CamelCase],
@@ -102,16 +88,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    private static readonly validCasingOptions = new Set([
+        Casing.CamelCase,
+        Casing.KebabCase,
+        Casing.PascalCase,
+        Casing.SnakeCase
+    ]);
+
     private static FAILURE_STRING(expectedCasing: Casing): string {
         return `File name must be ${Rule.stylizedNameForCasing(expectedCasing)}`;
     }
 
-    private static isValidCasingOption(casing: string) {
-        return (
-            [Casing.CamelCase, Casing.KebabCase, Casing.PascalCase, Casing.SnakeCase].indexOf(
-                casing as Casing
-            ) !== -1
-        );
+    private static isValidCasingOption(casing: string): boolean {
+        return Rule.validCasingOptions.has(casing as Casing);
     }
 
     private static stylizedNameForCasing(casing: Casing): string {
@@ -149,39 +138,74 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    private static findApplicableCasing(fileBaseName: string, fileNameCasings: FileNameCasings) {
-        const applicableCasing = fileNameCasings.find(fileNameCasing => {
-            const fileNameMatch = fileNameCasing[0];
-
-            return (
-                Rule.isValidRegExp(fileNameMatch) && RegExp(fileNameMatch, "i").test(fileBaseName)
-            );
-        });
-
-        if (!applicableCasing) {
-            return;
+    private static getCasingFromStringArgument(ruleArgument: string): Casing | undefined {
+        if (!Rule.isValidCasingOption(ruleArgument)) {
+            Rule.showWarning(`Unexpected casing option provided: ${ruleArgument}`);
+            return undefined;
         }
 
-        return applicableCasing[1];
+        return ruleArgument as Casing;
+    }
+
+    private static getCasingFromObjectArgument(
+        ruleArgument: { [index: string]: string },
+        fileBaseName: string
+    ): Casing | undefined {
+        const fileNameMatches = Object.keys(ruleArgument);
+
+        if (fileNameMatches.length === 0) {
+            Rule.showWarning(`Atleast one file name match must be provided`);
+            return undefined;
+        }
+
+        const matchingFileNameMatch = fileNameMatches.find(fileNameMatch => {
+            if (!this.isValidRegExp(fileNameMatch)) {
+                Rule.showWarning(`Invalid regular expression provided: ${fileNameMatch}`);
+                return false;
+            }
+
+            if (!Rule.isValidCasingOption(ruleArgument[fileNameMatch])) {
+                Rule.showWarning(`Unexpected casing option provided: ${ruleArgument}`);
+                return false;
+            }
+
+            return RegExp(fileNameMatch, "i").test(fileBaseName);
+        });
+
+        if (matchingFileNameMatch === undefined) {
+            return undefined;
+        }
+
+        return ruleArgument[matchingFileNameMatch] as Casing;
+    }
+
+    private static showWarning(message: string): void {
+        showWarningOnce(`Warning: ${Rule.metadata.ruleName} - ${message}`);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (this.ruleArguments.length !== 1) {
+            Rule.showWarning("Provide a rule option as string or object");
             return [];
         }
+
+        const ruleArgument = this.ruleArguments[0];
 
         let casing: Casing | undefined;
 
         const parsedPath = path.parse(sourceFile.fileName);
 
-        if (typeof this.ruleArguments[0] === "object") {
-            casing = Rule.findApplicableCasing(parsedPath.base, this
-                .ruleArguments[0] as FileNameCasings);
-        } else if (typeof this.ruleArguments[0] === "string") {
-            casing = this.ruleArguments[0] as Casing;
+        if (typeof ruleArgument === "object") {
+            const objectRuleArgument = ruleArgument as { [index: string]: string };
+            casing = Rule.getCasingFromObjectArgument(objectRuleArgument, parsedPath.base);
+        } else if (typeof ruleArgument === "string") {
+            casing = Rule.getCasingFromStringArgument(ruleArgument);
+        } else {
+            Rule.showWarning("Received unexpected rule option");
+            return [];
         }
 
-        if (!casing || !Rule.isValidCasingOption(casing)) {
+        if (casing === undefined) {
             return [];
         }
 
