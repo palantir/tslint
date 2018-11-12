@@ -28,6 +28,74 @@ enum Casing {
     SnakeCase = "snake-case",
 }
 
+type RegexConfig = Record<string, Casing>;
+
+type SimpleConfig = Casing;
+
+type Config = SimpleConfig | RegexConfig;
+
+interface ValidatorSuccessfulResult {
+    valid: true;
+}
+
+interface ValidatorFailureResult {
+    valid: false;
+    failedCasing: Casing;
+}
+
+type ValidatorResult = ValidatorSuccessfulResult | ValidatorFailureResult;
+
+type Validator<T> = (casing: T) => (sourceFile: ts.SourceFile) => ValidatorResult;
+
+const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
+
+function isCorrectCasing(fileName: string, casing: Casing): boolean {
+    switch (casing) {
+        case Casing.CamelCase:
+            return isCamelCased(fileName);
+        case Casing.PascalCase:
+            return isPascalCased(fileName);
+        case Casing.KebabCase:
+            return isKebabCased(fileName);
+        case Casing.SnakeCase:
+            return isSnakeCased(fileName);
+    }
+}
+
+const RegexValidator: Validator<RegexConfig> = casingConfig => (sourceFile): ValidatorResult => {
+    const fileName = path.parse(sourceFile.fileName).base;
+    const config = Object.keys(casingConfig).map(key => ({
+        casing: casingConfig[key],
+        regex: RegExp(`${key}$`),
+    }));
+
+    const match = config.find(c => c.regex.test(fileName));
+
+    if (!match) {
+        return { valid: true };
+    }
+
+    const normalizedFileName = fileName.replace(match.regex, "");
+
+    return isCorrectCasing(normalizedFileName, match.casing)
+        ? { valid: true }
+        : { valid: false, failedCasing: match.casing };
+};
+
+const SimpleValidator: Validator<Casing> = casingConfig => (sourceFile): ValidatorResult => {
+    const fileName = path.parse(sourceFile.fileName).name;
+    const isValid = isCorrectCasing(fileName, casingConfig);
+
+    return isValid ? { valid: true } : { valid: false, failedCasing: casingConfig };
+};
+
+const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidatorResult => {
+    const validator = typeof casingConfig === "string" ? SimpleValidator : RegexValidator;
+
+    // @ts-ignore https://github.com/Microsoft/TypeScript/issues/7294
+    return validator(casingConfig)(sourceFile);
+};
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -43,12 +111,27 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
         options: {
             type: "array",
-            items: [
-                {
-                    type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
-                },
-            ],
+            items: {
+                anyOf: [
+                    {
+                        type: "array",
+                        items: [
+                            {
+                                type: "string",
+                                enum: rules,
+                            },
+                        ],
+                    },
+                    {
+                        type: "object",
+                        // TODO: I am not sure how to setup the type
+                        // properties: {
+                        //     type: "string",
+                        //     enum: rules,
+                        // },
+                    },
+                ],
+            },
         },
         optionExamples: [
             [true, Casing.CamelCase],
@@ -79,32 +162,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    private static isCorrectCasing(fileName: string, casing: Casing): boolean {
-        switch (casing) {
-            case Casing.CamelCase:
-                return isCamelCased(fileName);
-            case Casing.PascalCase:
-                return isPascalCased(fileName);
-            case Casing.KebabCase:
-                return isKebabCased(fileName);
-            case Casing.SnakeCase:
-                return isSnakeCased(fileName);
-        }
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (this.ruleArguments.length !== 1) {
             return [];
         }
 
-        const casing = this.ruleArguments[0] as Casing;
-        const fileName = path.parse(sourceFile.fileName).name;
-        if (!Rule.isCorrectCasing(fileName, casing)) {
-            return [
-                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName),
-            ];
-        }
+        const casingConfig = this.ruleArguments[0] as Config;
+        const validationResult: ValidatorResult = validate(sourceFile, casingConfig);
 
-        return [];
+        return validationResult.valid
+            ? []
+            : [
+                  new Lint.RuleFailure(
+                      sourceFile,
+                      0,
+                      0,
+                      Rule.FAILURE_STRING(validationResult.failedCasing),
+                      this.ruleName,
+                  ),
+              ];
     }
 }
