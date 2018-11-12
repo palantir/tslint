@@ -134,8 +134,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
-                    ".tsx": "pascal-case",
-                    ".ts": "camel-case",
+                    ".tsx": Casing.PascalCase,
+                    ".ts": Casing.CamelCase,
                 },
             ],
         ],
