@@ -133,6 +133,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, Casing.PascalCase],
             [true, Casing.KebabCase],
             [true, Casing.SnakeCase],
+            [
+                true,
+                {
+                    ".tsx": "pascal-case",
+                    ".ts": "camel-case",
+                },
+            ],
         ],
         hasFix: false,
         type: "style",
