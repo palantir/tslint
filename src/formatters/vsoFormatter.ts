@@ -39,13 +39,14 @@ export class Formatter extends AbstractFormatter {
         const outputLines = failures.map((failure: RuleFailure) => {
             const fileName = failure.getFileName();
             const failureString = failure.getFailure();
+            const failureSeverity = failure.getRuleSeverity();
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
             const line = lineAndCharacter.line + 1;
             const character = lineAndCharacter.character + 1;
             const code = failure.getRuleName();
             const properties = `sourcepath=${fileName};linenumber=${line};columnnumber=${character};code=${code};`;
 
-            return `##vso[task.logissue type=warning;${properties}]${failureString}`;
+            return `##vso[task.logissue type=${failureSeverity};${properties}]${failureString}`;
         });
 
         return `${outputLines.join("\n")}\n`;
