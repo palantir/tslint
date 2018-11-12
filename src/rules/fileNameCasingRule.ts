@@ -71,7 +71,7 @@ const RegexValidator: Validator<RegexConfig> = casingConfig => (sourceFile): Val
 
     const match = config.find(c => c.regex.test(fileName));
 
-    if (!match) {
+    if (match === undefined) {
         return { valid: true };
     }
 
