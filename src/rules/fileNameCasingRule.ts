@@ -26,7 +26,7 @@ enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
     KebabCase = "kebab-case",
-    SnakeCase = "snake-case"
+    SnakeCase = "snake-case",
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -36,22 +36,22 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces a consistent file naming convention",
         rationale: "Helps maintain a consistent style across a file hierarchy",
         optionsDescription: Lint.Utils.dedent`
-            One argument which is either a string defining the file casing or an array consisting of a file name
-            matches and corresponding casing strings.
+            One argument which is either a string defining the file casing or an object with key values pairs
+            consisting of a file name match and a corresponding casing.
 
-            * In both cases the casing string must be one of the options:
+            * In both cases the casing string must be one of this options:
             ** \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
             ** \`${Casing.PascalCase}\`: File names must be pascal-cased: \`FileName.ts\`.
             ** \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
             ** \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
 
-            * The array again consists of array with two items. The first item must be a case-insenstive
-            regular expression to match files, the second item must be a valid casing option (see above)`,
+            * The key of the object option be a case-insenstive regular expression to match files,
+            the second item must be a valid casing option for these files (see above)`,
         options: {
             oneOf: [
                 {
                     type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase]
+                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
                 },
                 {
                     type: "object",
@@ -61,12 +61,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                             Casing.CamelCase,
                             Casing.PascalCase,
                             Casing.KebabCase,
-                            Casing.SnakeCase
-                        ]
+                            Casing.SnakeCase,
+                        ],
                     },
-                    minProperties: 1
-                }
-            ]
+                    minProperties: 1,
+                },
+            ],
         },
         optionExamples: [
             [true, Casing.CamelCase],
@@ -75,16 +75,16 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, Casing.SnakeCase],
             [
                 true,
-                [
-                    [".style.ts$", Casing.KebabCase],
-                    [".tsx$", Casing.PascalCase],
-                    [".*", Casing.CamelCase]
-                ]
-            ]
+                {
+                    ".style.ts$": Casing.KebabCase,
+                    ".tsx$": Casing.PascalCase,
+                    ".*": Casing.CamelCase,
+                },
+            ],
         ],
         hasFix: false,
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -92,7 +92,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         Casing.CamelCase,
         Casing.KebabCase,
         Casing.PascalCase,
-        Casing.SnakeCase
+        Casing.SnakeCase,
     ]);
 
     private static FAILURE_STRING(expectedCasing: Casing): string {
@@ -149,7 +149,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private static getCasingFromObjectArgument(
         ruleArgument: { [index: string]: string },
-        fileBaseName: string
+        fileBaseName: string,
     ): Casing | undefined {
         const fileNameMatches = Object.keys(ruleArgument);
 
@@ -211,7 +211,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         if (!Rule.hasFileNameCorrectCasing(parsedPath.name, casing)) {
             return [
-                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName)
+                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName),
             ];
         }
 
