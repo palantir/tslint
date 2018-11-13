@@ -25,7 +25,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "checkstyle",
-        description: "Formats errors as through they were Checkstyle output.",
+        description: "Formats errors as though they were Checkstyle output.",
         descriptionDetails: Utils.dedent`
             Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.`,
         sample: Utils.dedent`

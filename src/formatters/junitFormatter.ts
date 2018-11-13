@@ -25,7 +25,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "junit",
-        description: "Formats errors as through they were JUnit output.",
+        description: "Formats errors as though they were JUnit output.",
         descriptionDetails: Utils.dedent`
             Imitates the JUnit XML Output`,
         sample: Utils.dedent`
