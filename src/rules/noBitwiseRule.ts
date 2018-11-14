@@ -66,8 +66,10 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                     ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
-        } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
-                   (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken) {
+        } else if (
+            node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+            (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsut
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/radix.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,6 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -58,32 +60,46 @@ function isPropertyAccessOfIdentifier(
     expression: ts.LeftHandSideExpression,
     identifers: string[],
 ): expression is ts.PropertyAccessExpression {
-    return isPropertyAccessExpression(expression) && isIdentifier(expression.expression) &&
-        identifers.some((identifer) => (expression.expression as ts.Identifier).text === identifer);
+    return (
+        isPropertyAccessExpression(expression) &&
+        isIdentifier(expression.expression) &&
+        identifers.some(identifer => (expression.expression as ts.Identifier).text === identifer)
+    );
 }
 
 function isPropertyAccessOfProperty(
     expression: ts.LeftHandSideExpression,
     identifers: string[],
 ): expression is ts.PropertyAccessExpression {
-    return isPropertyAccessExpression(expression) && isPropertyAccessExpression(expression.expression) &&
-        identifers.some((identifer) => (expression.expression as ts.PropertyAccessExpression).name.text === identifer);
+    return (
+        isPropertyAccessExpression(expression) &&
+        isPropertyAccessExpression(expression.expression) &&
+        identifers.some(
+            identifer =>
+                (expression.expression as ts.PropertyAccessExpression).name.text === identifer,
+        )
+    );
 }
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isCallExpression(node) && node.arguments.length === 1 &&
-            (
-                // parseInt("123")
-                isParseInt(node.expression) ||
+        if (
+            isCallExpression(node) &&
+            node.arguments.length === 1 &&
+            // parseInt("123")
+            (isParseInt(node.expression) ||
                 // window.parseInt("123") || global.parseInt("123") || Number.parseInt("123")
-                isPropertyAccessParseInt(node.expression) &&
-                isPropertyAccessOfIdentifier(node.expression, [ "global", "window", "Number" ])  ||
+                (isPropertyAccessParseInt(node.expression) &&
+                    isPropertyAccessOfIdentifier(node.expression, [
+                        "global",
+                        "window",
+                        "Number",
+                    ])) ||
                 // window.Number.parseInt("123") || global.Number.parseInt("123")
-                isPropertyAccessParseInt(node.expression) &&
-                isPropertyAccessOfProperty(node.expression, [ "Number" ]) &&
-                isPropertyAccessOfIdentifier(node.expression.expression, [ "global", "window" ])
-            )) {
+                (isPropertyAccessParseInt(node.expression) &&
+                    isPropertyAccessOfProperty(node.expression, ["Number"]) &&
+                    isPropertyAccessOfIdentifier(node.expression.expression, ["global", "window"])))
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

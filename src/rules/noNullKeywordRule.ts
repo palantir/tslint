@@ -82,7 +82,11 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (eq === undefined) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else if (!eq.isStrict) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.replaceNode(node, "undefined", ctx.sourceFile));
+            ctx.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                Lint.Replacement.replaceNode(node, "undefined", ctx.sourceFile),
+            );
         }
     }
 }

@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { isPascalCased } from "../utils";
+import { codeExamples } from "./code-examples/className.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -37,6 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -49,8 +51,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isClassLikeDeclaration(node) && node.name !== undefined ||
-            isInterfaceDeclaration(node)) {
+        if (
+            (isClassLikeDeclaration(node) && node.name !== undefined) ||
+            isInterfaceDeclaration(node)
+        ) {
             if (!isPascalCased(node.name!.text)) {
                 ctx.addFailureAtNode(node.name!, Rule.FAILURE_STRING);
             }

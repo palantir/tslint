@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
+import { isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -25,8 +25,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-console",
         description: "Bans the use of specified `console` methods.",
-        rationale: "In general, \`console\` methods aren't appropriate for production code.",
-        optionsDescription: "A list of method names to ban. If no method names are provided, all console methods are banned.",
+        rationale: "In general, `console` methods aren't appropriate for production code.",
+        optionsDescription:
+            "A list of method names to ban. If no method names are provided, all console methods are banned.",
         options: {
             type: "array",
             items: { type: "string" },
@@ -48,13 +49,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<string[]>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isCallExpression(node) &&
-            isPropertyAccessExpression(node.expression) &&
-            isIdentifier(node.expression.expression) &&
-            node.expression.expression.text === "console" &&
-            (ctx.options.length === 0 || ctx.options.indexOf(node.expression.name.text) !== -1)) {
-
-            ctx.addFailureAtNode(node.expression, Rule.FAILURE_STRING_FACTORY(node.expression.name.text));
+        if (
+            isPropertyAccessExpression(node) &&
+            isIdentifier(node.expression) &&
+            node.expression.text === "console" &&
+            (ctx.options.length === 0 || ctx.options.indexOf(node.name.text) !== -1)
+        ) {
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY(node.name.text));
         }
         return ts.forEachChild(node, cb);
     });

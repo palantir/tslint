@@ -44,7 +44,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 1,
         },
         optionExamples: [true, [true, IGNORE_ACCESSORS]],
-        rationale: "Improves readability and organization by grouping naturally related items together.",
+        rationale:
+            "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
         typescriptOnly: true,
     };
@@ -73,11 +74,20 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.InterfaceDeclaration:
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.TypeLiteral: {
-                const { members } = node as ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeLiteralNode;
-                addFailures(getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(
-                                members,
-                                (member) => utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined,
-                                ctx.options.ignoreAccessors));
+                const { members } = node as
+                    | ts.InterfaceDeclaration
+                    | ts.ClassDeclaration
+                    | ts.TypeLiteralNode;
+                addFailures(
+                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(
+                        members,
+                        member =>
+                            utils.isSignatureDeclaration(member)
+                                ? getOverloadKey(member)
+                                : undefined,
+                        ctx.options.ignoreAccessors,
+                    ),
+                );
             }
         }
 
@@ -85,9 +95,16 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     });
 
     function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
-        addFailures(getMisplacedOverloads(statements, (statement) =>
-            utils.isFunctionDeclaration(statement) && statement.name !== undefined ? statement.name.text : undefined,
-                                          ctx.options.ignoreAccessors));
+        addFailures(
+            getMisplacedOverloads(
+                statements,
+                statement =>
+                    utils.isFunctionDeclaration(statement) && statement.name !== undefined
+                        ? statement.name.text
+                        : undefined,
+                ctx.options.ignoreAccessors,
+            ),
+        );
     }
 
     function addFailures(misplacedOverloads: ReadonlyArray<ts.SignatureDeclaration>): void {
@@ -101,19 +118,23 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 function getMisplacedOverloads<T extends ts.Node>(
     overloads: ReadonlyArray<T>,
     getKey: (node: T) => string | undefined,
-    ignoreAccessors: boolean): ts.SignatureDeclaration[] {
+    ignoreAccessors: boolean,
+): ts.SignatureDeclaration[] {
     const result: ts.SignatureDeclaration[] = [];
     let lastKey: string | undefined;
     const seen = new Set<string>();
     for (const node of overloads) {
-        if (node.kind === ts.SyntaxKind.SemicolonClassElement || (ignoreAccessors && isAccessor(node))) {
+        if (
+            node.kind === ts.SyntaxKind.SemicolonClassElement ||
+            (ignoreAccessors && isAccessor(node))
+        ) {
             continue;
         }
 
         const key = getKey(node);
         if (key !== undefined) {
             if (seen.has(key) && lastKey !== key) {
-                result.push(node as any as ts.SignatureDeclaration);
+                result.push((node as any) as ts.SignatureDeclaration);
             }
             seen.add(key);
             lastKey = key;
@@ -144,7 +165,9 @@ export function getOverloadKey(node: ts.SignatureDeclaration): string | undefine
     return (computed ? "0" : "1") + (isStatic ? "0" : "1") + name;
 }
 
-function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string; computed?: boolean } | undefined {
+function getOverloadInfo(
+    node: ts.SignatureDeclaration,
+): string | { name: string; computed?: boolean } | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.Constructor:
@@ -162,7 +185,9 @@ function getOverloadInfo(node: ts.SignatureDeclaration): string | { name: string
                     return name.text;
                 case ts.SyntaxKind.ComputedPropertyName:
                     const { expression } = name;
-                    return utils.isLiteralExpression(expression) ? expression.text : { name: expression.getText(), computed: true };
+                    return utils.isLiteralExpression(expression)
+                        ? expression.text
+                        : { name: expression.getText(), computed: true };
                 default:
                     return utils.isLiteralExpression(name) ? name.text : undefined;
             }
