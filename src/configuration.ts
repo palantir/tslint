@@ -20,12 +20,11 @@ import * as yaml from "js-yaml";
 import { Minimatch } from "minimatch";
 import * as os from "os";
 import * as path from "path";
-import * as resolve from "resolve";
 import { FatalError, showWarningOnce } from "./error";
 
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
-import { arrayify, hasOwnProperty, stripComments } from "./utils";
+import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
 
 export interface IConfigurationFile {
     /**
@@ -309,17 +308,13 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 
     const basedir = relativeTo !== undefined ? relativeTo : process.cwd();
     try {
-        return resolve.sync(filePath, { basedir });
+        return tryResolvePackage(filePath, basedir) || require.resolve(filePath);
     } catch (err) {
-        try {
-            return require.resolve(filePath);
-        } catch (err) {
-            throw new Error(
-                `Invalid "extends" configuration value - could not require "${filePath}". ` +
-                    "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-                    "for the approximate method TSLint uses to find the referenced configuration file.",
-            );
-        }
+        throw new Error(
+            `Invalid "extends" configuration value - could not require "${filePath}". ` +
+                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+                "for the approximate method TSLint uses to find the referenced configuration file.",
+        );
     }
 }
 
@@ -411,10 +406,9 @@ export function getRulesDirectories(
 ): string[] {
     return arrayify(directories).map(dir => {
         if (!useAsPath(dir)) {
-            try {
-                return path.dirname(resolve.sync(dir, { basedir: relativeTo }));
-            } catch (err) {
-                // swallow error and fallback to using directory as path
+            const resolvedPackagePath: string | undefined = tryResolvePackage(dir, relativeTo);
+            if (resolvedPackagePath) {
+                return path.dirname(resolvedPackagePath);
             }
         }
 
