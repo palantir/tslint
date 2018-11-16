@@ -266,7 +266,7 @@ export function isSnakeCased(name: string): boolean {
 }
 
 /**
- * This function tries to resolve a package by name, optionally relative to a file path. If the
+ * Tries to resolve a package by name, optionally relative to a file path. If the
  * file path is under a symlink, it tries to resolve the package under both the real path and under
  * the symlink path.
  */
@@ -274,21 +274,21 @@ export function tryResolvePackage(packageName: string, relativeTo?: string): str
     const realRelativeToPath: string | undefined =
         relativeTo !== undefined ? fs.realpathSync(relativeTo) : undefined;
 
-    let resolvedPath: string | undefined = _tryResolvePackage(packageName, realRelativeToPath);
+    let resolvedPath: string | undefined = tryResolveSync(packageName, realRelativeToPath);
     if (resolvedPath === undefined) {
-        resolvedPath = _tryResolvePackage(packageName, relativeTo);
+        resolvedPath = tryResolveSync(packageName, relativeTo);
     }
 
     return resolvedPath;
 }
 
 /**
- * This function calls `resolve.sync` and if it fails, it returns `undefined`
+ * Calls `resolve.sync` and if it fails, it returns `undefined`
  */
-function _tryResolvePackage(packageName: string, relativeTo?: string): string | undefined {
+function tryResolveSync(packageName: string, relativeTo?: string): string | undefined {
     try {
         return resolve.sync(packageName, { basedir: relativeTo });
-    } catch (e) {
+    } catch {
         return undefined;
     }
 }
