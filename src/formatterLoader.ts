@@ -78,13 +78,14 @@ function loadFormatter(
 }
 
 function loadFormatterModule(name: string): FormatterConstructor | undefined {
-    let src: string;
+    let src: string | undefined;
     try {
-        src =
-            // first try to find a module in the dependencies of the currently linted project
-            tryResolvePackage(name, process.cwd()) ||
+        // first try to find a module in the dependencies of the currently linted project
+        src = tryResolvePackage(name, process.cwd());
+        if (src === undefined) {
             // if there is no local module, try relative to the installation of TSLint (might be global)
-            require.resolve(name);
+            src = require.resolve(name);
+        }
     } catch {
         return undefined;
     }

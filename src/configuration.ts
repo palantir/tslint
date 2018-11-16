@@ -308,7 +308,12 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
 
     const basedir = relativeTo !== undefined ? relativeTo : process.cwd();
     try {
-        return tryResolvePackage(filePath, basedir) || require.resolve(filePath);
+        let resolvedPackagePath: string | undefined = tryResolvePackage(filePath, basedir);
+        if (resolvedPackagePath === undefined) {
+            resolvedPackagePath = require.resolve(filePath);
+        }
+
+        return resolvedPackagePath;
     } catch (err) {
         throw new Error(
             `Invalid "extends" configuration value - could not require "${filePath}". ` +
@@ -407,7 +412,7 @@ export function getRulesDirectories(
     return arrayify(directories).map(dir => {
         if (!useAsPath(dir)) {
             const resolvedPackagePath: string | undefined = tryResolvePackage(dir, relativeTo);
-            if (resolvedPackagePath) {
+            if (resolvedPackagePath !== undefined) {
                 return path.dirname(resolvedPackagePath);
             }
         }

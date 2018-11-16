@@ -271,13 +271,15 @@ export function isSnakeCased(name: string): boolean {
  * the symlink path.
  */
 export function tryResolvePackage(packageName: string, relativeTo?: string): string | undefined {
-    const realRelativeToPath: string | undefined = relativeTo
-        ? fs.realpathSync(relativeTo)
-        : undefined;
-    return (
-        _tryResolvePackage(packageName, realRelativeToPath) ||
-        _tryResolvePackage(packageName, relativeTo)
-    );
+    const realRelativeToPath: string | undefined =
+        relativeTo !== undefined ? fs.realpathSync(relativeTo) : undefined;
+
+    let resolvedPath: string | undefined = _tryResolvePackage(packageName, realRelativeToPath);
+    if (resolvedPath === undefined) {
+        resolvedPath = _tryResolvePackage(packageName, relativeTo);
+    }
+
+    return resolvedPath;
 }
 
 /**
