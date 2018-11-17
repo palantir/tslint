@@ -27,8 +27,8 @@ export class Formatter extends AbstractFormatter {
         formatterName: "vso",
         description: "Formats output as VSO/TFS logging commands.",
         descriptionDetails: Utils.dedent`
-            Integrates with Azure DevOps (previously known as Visual Studio Online, Team Foundation Server, or Visual Studio Team Services) by outputting errors
-            as 'warning' logging commands.`,
+            Integrates with Azure DevOps (previously known as Visual Studio Online, Team Foundation Server,
+            or Visual Studio Team Services) by outputting errors as 'warning' logging commands.`,
         sample:
             "##vso[task.logissue type=warning;sourcepath=myFile.ts;linenumber=1;columnnumber=14;code=semicolon;]Missing semicolon",
         consumer: "machine",
