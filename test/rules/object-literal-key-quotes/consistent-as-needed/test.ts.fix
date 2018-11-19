@@ -25,7 +25,6 @@ const q = {
 };
 const t = {
   hello: 123,
-  bye-bye: 45,
   nested: {
     bird: 2,
     egg: 3,

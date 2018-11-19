@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "number-literal-format",
-        description: "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
+        description:
+            "Checks that decimal literals should begin with '0.' instead of just '.', and should not end with a trailing '0'.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -41,7 +42,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_LEADING_0 = "Number literal should not have a leading '0'.";
     public static FAILURE_STRING_TRAILING_0 = "Number literal should not have a trailing '0'.";
     public static FAILURE_STRING_TRAILING_DECIMAL = "Number literal should not end in '.'.";
-    public static FAILURE_STRING_LEADING_DECIMAL = "Number literal should begin with '0.' and not just '.'.";
+    public static FAILURE_STRING_LEADING_DECIMAL =
+        "Number literal should begin with '0.' and not just '.'.";
     public static FAILURE_STRING_NOT_UPPERCASE = "Hexadecimal number literal should be uppercase.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

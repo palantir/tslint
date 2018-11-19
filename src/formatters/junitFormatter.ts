@@ -25,7 +25,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "junit",
-        description: "Formats errors as through they were JUnit output.",
+        description: "Formats errors as though they were JUnit output.",
         descriptionDetails: Utils.dedent`
             Imitates the JUnit XML Output`,
         sample: Utils.dedent`
@@ -46,8 +46,9 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
         if (failures.length !== 0) {
-            const failuresSorted = failures.sort(
-                (a, b) => a.getFileName().localeCompare(b.getFileName()));
+            const failuresSorted = failures.sort((a, b) =>
+                a.getFileName().localeCompare(b.getFileName()),
+            );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();

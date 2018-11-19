@@ -1,0 +1,33 @@
+if (false) {
+    // @ts-ignore: Unreachable code error
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Do not use "// @ts-ignore" comments because they suppress compilation errors.]
+    console.log("hello"); // Random comments.
+}
+
+var x = 0;
+
+/// @ts-ignore Triple-slash
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Do not use "// @ts-ignore" comments because they suppress compilation errors.]
+x();
+
+/// @ts-ignore
+~~~~~~~~~~~~~~ [Do not use "// @ts-ignore" comments because they suppress compilation errors.]
+x(
+    2,
+    3);
+
+// come comment
+
+// @ts-ignore Multiple comments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Do not use "// @ts-ignore" comments because they suppress compilation errors.]
+
+// some other comment
+
+// @anohter
+
+x();
+
+x( // @ts-ignore inline
+   ~~~~~~~~~~~~~~~~~~~~ [Do not use "// @ts-ignore" comments because they suppress compilation errors.]
+    2,
+    3);
