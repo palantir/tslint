@@ -29,7 +29,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
-        rationale: "Cleaner code, can possibly reduce transpiled output",
+        /* tslint:disable:max-line-length */
+        rationale: Lint.Utils.dedent`
+        Marking a function as \`async\` without using \`await\` or returning a value inside it can lead to an unintended promise return and a larger transpiled output.
+        Often the function can be synchronous and the \`async\` keyword is there by mistake.
+        Return statements are allowed has sometimes it is desirable to wrap the returned value in promise`,
+        /* tslint:enable:max-line-length */
         ruleName: "no-async-without-await",
         type: "functionality",
         typescriptOnly: false,
@@ -113,10 +118,11 @@ class Walk extends Lint.RuleWalker {
     }
 
     private addFailureIfAsyncFunctionHasNoAwait(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
-        if (this.isAsyncFunction(node)
+        if (!this.isShortArrowReturn(node)
+            && this.isAsyncFunction(node)
             && !this.functionBlockHasAwait(node.body as ts.Node)
             && !this.functionBlockHasReturn(node.body as ts.Node)
-            && !this.isShortArrowReturn(node)) {
+            ) {
             const asyncModifier = this.getAsyncModifier(node);
             if (asyncModifier !== undefined) {
                 this.addFailureAt(asyncModifier.getStart(), asyncModifier.getEnd() - asyncModifier.getStart(), Rule.FAILURE_STRING);
