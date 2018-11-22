@@ -5,7 +5,7 @@
             "name": "Debug CLI",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/build/src/tslint-cli.js",
+            "program": "${workspaceRoot}/build/src/tslintCli.js",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",

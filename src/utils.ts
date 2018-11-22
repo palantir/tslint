@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+import * as fs from "fs";
+import * as resolve from "resolve";
+
 /**
  * Enforces the invariant that the input is an array.
  */
@@ -260,4 +263,32 @@ export function isKebabCased(name: string): boolean {
 
 export function isSnakeCased(name: string): boolean {
     return isSeparatorCased(name, "-");
+}
+
+/**
+ * Tries to resolve a package by name, optionally relative to a file path. If the
+ * file path is under a symlink, it tries to resolve the package under both the real path and under
+ * the symlink path.
+ */
+export function tryResolvePackage(packageName: string, relativeTo?: string): string | undefined {
+    const realRelativeToPath: string | undefined =
+        relativeTo !== undefined ? fs.realpathSync(relativeTo) : undefined;
+
+    let resolvedPath: string | undefined = tryResolveSync(packageName, realRelativeToPath);
+    if (resolvedPath === undefined) {
+        resolvedPath = tryResolveSync(packageName, relativeTo);
+    }
+
+    return resolvedPath;
+}
+
+/**
+ * Calls `resolve.sync` and if it fails, it returns `undefined`
+ */
+function tryResolveSync(packageName: string, relativeTo?: string): string | undefined {
+    try {
+        return resolve.sync(packageName, { basedir: relativeTo });
+    } catch {
+        return undefined;
+    }
 }
