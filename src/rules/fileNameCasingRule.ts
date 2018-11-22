@@ -97,7 +97,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
             * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
 
-            Or an object, where the key reprents a regular expression that
+            Or an object, where the key represents a regular expression that
             matches the file name, and the value is the file name rule from
             the previous list.
 
