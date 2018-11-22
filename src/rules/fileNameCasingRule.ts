@@ -28,6 +28,61 @@ enum Casing {
     SnakeCase = "snake-case",
 }
 
+type RegexConfig = Record<string, Casing>;
+
+type SimpleConfig = Casing;
+
+type Config = SimpleConfig | RegexConfig;
+
+type ValidationResult = Casing | undefined;
+
+type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => ValidationResult;
+
+const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
+
+function isCorrectCasing(fileName: string, casing: Casing): boolean {
+    switch (casing) {
+        case Casing.CamelCase:
+            return isCamelCased(fileName);
+        case Casing.PascalCase:
+            return isPascalCased(fileName);
+        case Casing.KebabCase:
+            return isKebabCased(fileName);
+        case Casing.SnakeCase:
+            return isSnakeCased(fileName);
+    }
+}
+
+const validateWithRegexConfig: Validator<RegexConfig> = (sourceFile, casingConfig) => {
+    const fileName = path.parse(sourceFile.fileName).base;
+    const config = Object.keys(casingConfig).map(key => ({
+        casing: casingConfig[key],
+        regex: RegExp(key),
+    }));
+
+    const match = config.find(c => c.regex.test(fileName));
+
+    if (match === undefined) {
+        return undefined;
+    }
+
+    const normalizedFileName = fileName.replace(match.regex, "");
+
+    return isCorrectCasing(normalizedFileName, match.casing) ? undefined : match.casing;
+};
+
+const validateWithSimpleConfig: Validator<SimpleConfig> = (sourceFile, casingConfig) => {
+    const fileName = path.parse(sourceFile.fileName).name;
+    const isValid = isCorrectCasing(fileName, casingConfig);
+
+    return isValid ? undefined : casingConfig;
+};
+
+const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult =>
+    typeof casingConfig === "string"
+        ? validateWithSimpleConfig(sourceFile, casingConfig)
+        : validateWithRegexConfig(sourceFile, casingConfig);
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -40,21 +95,50 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.CamelCase}\`: File names must be camel-cased: \`fileName.ts\`.
             * \`${Casing.PascalCase}\`: File names must be Pascal-cased: \`FileName.ts\`.
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
-            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.`,
+            * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
+
+            Or an object, where the key represents a regular expression that
+            matches the file name, and the value is the file name rule from
+            the previous list.
+
+            * \{ \".tsx\": \"${Casing.PascalCase}\", \".ts\": \"${Casing.CamelCase}\" \}
+        `,
         options: {
             type: "array",
-            items: [
-                {
-                    type: "string",
-                    enum: [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase],
-                },
-            ],
+            items: {
+                anyOf: [
+                    {
+                        type: "array",
+                        items: [
+                            {
+                                type: "string",
+                                enum: rules,
+                            },
+                        ],
+                    },
+                    {
+                        type: "object",
+                        additionalProperties: {
+                            type: "string",
+                            enum: rules,
+                        },
+                        minProperties: 1,
+                    },
+                ],
+            },
         },
         optionExamples: [
             [true, Casing.CamelCase],
             [true, Casing.PascalCase],
             [true, Casing.KebabCase],
             [true, Casing.SnakeCase],
+            [
+                true,
+                {
+                    ".tsx": Casing.PascalCase,
+                    ".ts": Casing.CamelCase,
+                },
+            ],
         ],
         hasFix: false,
         type: "style",
@@ -79,32 +163,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    private static isCorrectCasing(fileName: string, casing: Casing): boolean {
-        switch (casing) {
-            case Casing.CamelCase:
-                return isCamelCased(fileName);
-            case Casing.PascalCase:
-                return isPascalCased(fileName);
-            case Casing.KebabCase:
-                return isKebabCased(fileName);
-            case Casing.SnakeCase:
-                return isSnakeCased(fileName);
-        }
-    }
-
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (this.ruleArguments.length !== 1) {
             return [];
         }
 
-        const casing = this.ruleArguments[0] as Casing;
-        const fileName = path.parse(sourceFile.fileName).name;
-        if (!Rule.isCorrectCasing(fileName, casing)) {
-            return [
-                new Lint.RuleFailure(sourceFile, 0, 0, Rule.FAILURE_STRING(casing), this.ruleName),
-            ];
-        }
+        const casingConfig = this.ruleArguments[0] as Config;
+        const validation = validate(sourceFile, casingConfig);
 
-        return [];
+        return validation === undefined
+            ? []
+            : [
+                  new Lint.RuleFailure(
+                      sourceFile,
+                      0,
+                      0,
+                      Rule.FAILURE_STRING(validation),
+                      this.ruleName,
+                  ),
+              ];
     }
 }
