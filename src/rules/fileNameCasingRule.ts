@@ -18,6 +18,7 @@
 import * as path from "path";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 import { isCamelCased, isKebabCased, isPascalCased, isSnakeCased } from "../utils";
 
@@ -40,6 +41,8 @@ type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => Val
 
 const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
 
+const validCasingOptions = new Set(rules);
+
 function isCorrectCasing(fileName: string, casing: Casing): boolean {
     switch (casing) {
         case Casing.CamelCase:
@@ -53,35 +56,78 @@ function isCorrectCasing(fileName: string, casing: Casing): boolean {
     }
 }
 
+const getValidRegExp = (regExpString: string): RegExp | undefined => {
+    try {
+        return RegExp(regExpString, "i");
+    } catch {
+        return undefined;
+    }
+};
+
 const validateWithRegexConfig: Validator<RegexConfig> = (sourceFile, casingConfig) => {
-    const fileName = path.parse(sourceFile.fileName).base;
-    const config = Object.keys(casingConfig).map(key => ({
-        casing: casingConfig[key],
-        regex: RegExp(key),
-    }));
+    const fileBaseName = path.parse(sourceFile.fileName).base;
 
-    const match = config.find(c => c.regex.test(fileName));
-
-    if (match === undefined) {
+    const fileNameMatches = Object.keys(casingConfig);
+    if (fileNameMatches.length === 0) {
+        Rule.showWarning(`At least one file name match must be provided`);
         return undefined;
     }
 
-    const normalizedFileName = fileName.replace(match.regex, "");
+    for (const rawMatcher of fileNameMatches) {
+        const regex = getValidRegExp(rawMatcher);
+        if (regex === undefined) {
+            Rule.showWarning(`Invalid regular expression provided: ${rawMatcher}`);
+            continue;
+        }
 
-    return isCorrectCasing(normalizedFileName, match.casing) ? undefined : match.casing;
+        const casing = casingConfig[rawMatcher];
+        if (!validCasingOptions.has(casing)) {
+            Rule.showWarning(`Unexpected casing option provided: ${casing}`);
+            continue;
+        }
+
+        if (!regex.test(fileBaseName)) {
+            continue;
+        }
+
+        return isCorrectCasing(fileBaseName, casing) ? undefined : casing;
+    }
+
+    return undefined;
 };
 
 const validateWithSimpleConfig: Validator<SimpleConfig> = (sourceFile, casingConfig) => {
+    if (!validCasingOptions.has(casingConfig)) {
+        Rule.showWarning(`Unexpected casing option provided: ${casingConfig}`);
+        return undefined;
+    }
+
     const fileName = path.parse(sourceFile.fileName).name;
     const isValid = isCorrectCasing(fileName, casingConfig);
 
     return isValid ? undefined : casingConfig;
 };
 
-const validate = (sourceFile: ts.SourceFile, casingConfig: Config): ValidationResult =>
-    typeof casingConfig === "string"
-        ? validateWithSimpleConfig(sourceFile, casingConfig)
-        : validateWithRegexConfig(sourceFile, casingConfig);
+const validate = (
+    sourceFile: ts.SourceFile,
+    casingConfig: Config | undefined,
+): ValidationResult | undefined => {
+    if (casingConfig === undefined) {
+        Rule.showWarning("Provide a rule option as string or object");
+        return undefined;
+    }
+
+    if (typeof casingConfig === "string") {
+        return validateWithSimpleConfig(sourceFile, casingConfig);
+    }
+
+    if (typeof casingConfig === "object") {
+        return validateWithRegexConfig(sourceFile, casingConfig);
+    }
+
+    Rule.showWarning("Received unexpected rule option");
+    return undefined;
+};
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -139,12 +185,24 @@ export class Rule extends Lint.Rules.AbstractRule {
                     ".ts": Casing.CamelCase,
                 },
             ],
+            [
+                true,
+                {
+                    ".style.ts": Casing.KebabCase,
+                    ".tsx": Casing.PascalCase,
+                    ".*": Casing.CamelCase,
+                },
+            ],
         ],
         hasFix: false,
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
+
+    public static showWarning(message: string): void {
+        showWarningOnce(`Warning: ${Rule.metadata.ruleName} - ${message}`);
+    }
 
     private static FAILURE_STRING(expectedCasing: Casing): string {
         return `File name must be ${Rule.stylizedNameForCasing(expectedCasing)}`;
@@ -168,7 +226,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             return [];
         }
 
-        const casingConfig = this.ruleArguments[0] as Config;
+        const casingConfig = this.ruleArguments[0] as Config | undefined;
         const validation = validate(sourceFile, casingConfig);
 
         return validation === undefined
