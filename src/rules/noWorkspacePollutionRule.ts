@@ -25,17 +25,23 @@ interface IWorkspaceOption {
     workspaceName: string;
     workspaceEntryPoint: string;
 }
-
+// tslint:disable-next-line:no-unsafe-any
 function throwIfNotIWorkspaceOption(input: any): input is IWorkspaceOption {
-    if (!input || typeof input != "object") {
+    if (input === undefined || input === null || typeof input !== "object") {
         throw new Error(`An option must be an object in the ${ruleName} rule.`);
     }
+    // tslint:disable-next-line:no-unsafe-any
     const assumeItToBeTrue: Partial<IWorkspaceOption> = input;
-    if (!assumeItToBeTrue.workspaceName || typeof assumeItToBeTrue.workspaceName !== "string") {
+    if (
+        assumeItToBeTrue.workspaceName === undefined ||
+        assumeItToBeTrue.workspaceName === null ||
+        typeof assumeItToBeTrue.workspaceName !== "string"
+    ) {
         throw new Error(`Missing the workspaceName string property in the ${ruleName} rule.`);
     }
     if (
-        !assumeItToBeTrue.workspaceEntryPoint ||
+        assumeItToBeTrue.workspaceEntryPoint === undefined ||
+        assumeItToBeTrue.workspaceEntryPoint === null ||
         typeof assumeItToBeTrue.workspaceEntryPoint !== "string"
     ) {
         throw new Error(`Missing the workspaceEntryPoint string property in the ${ruleName} rule.`);
@@ -48,9 +54,8 @@ function throwIfPathRelationshipsAreIncorrect(workspaceNumOneDefinition: IWorksp
         workspaceNumOneDefinition.workspaceName.includes("\\")
     ) {
         throw new Error(
-            `workspaceName must be the name of a folder without a path (i.e. no relative paths) in the ${ruleName} rule. Please correct this: ${
-                workspaceNumOneDefinition.workspaceName
-            }`,
+            `workspaceName must be the name of a folder without a path (i.e. no relative paths) in the ${ruleName} rule.` +
+                `Please correct this: ${workspaceNumOneDefinition.workspaceName}`,
         );
     }
     if (
@@ -58,35 +63,23 @@ function throwIfPathRelationshipsAreIncorrect(workspaceNumOneDefinition: IWorksp
         workspaceNumOneDefinition.workspaceEntryPoint.includes("\\")
     ) {
         throw new Error(
-            `workspaceEntryPoint must be the name of a file without a path (i.e. no relative paths) in the ${ruleName} rule. Please correct this: ${
-                workspaceNumOneDefinition.workspaceEntryPoint
-            }`,
+            `workspaceEntryPoint must be the name of a file without a path (i.e. no relative paths) in the ${ruleName} rule.` +
+                `Please correct this: ${workspaceNumOneDefinition.workspaceEntryPoint}`,
         );
     }
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
-    private static optionExamples: Array<true | IWorkspaceOption> = [
-        true,
-        {
-            workspaceName: "workspaceNumOne",
-            workspaceEntryPoint: "entrypoint.ts",
-        },
-        {
-            workspaceName: "workspaceNumTwo",
-            workspaceEntryPoint: "entrypoint.ts",
-        },
-    ];
-
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: ruleName,
+        ruleName,
         description: Lint.Utils.dedent`
             Disallows importing sub modules of workspaces via \`import\` and \`require\`.
             Instead only the entrypoint (as defined in the options/configuration) can be included.`,
         rationale: Lint.Utils.dedent`
             When utilizing a monorepo, you want the convenience of having access to the various workspaces in the repo.
-            However, it is not good practice to let workspaces import nested modules of the sibling workspaces as this would create a monolith that would be difficult to separate later.`,
+            However, it is not good practice to let workspaces import nested modules of the sibling workspaces
+            as this would create a monolith that would be difficult to separate later.`,
         optionsDescription: "A list of workspace definitions.",
         options: {
             type: "array",
@@ -110,7 +103,20 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static FAILURE_STRING =
-        "Only the entrypoint defined as workspaceEntryPoint is public. Importing nested files would break separation of concerns. Do not include this, or expose it via it's public entrypoint:";
+        "Only the entrypoint defined as workspaceEntryPoint is public. Importing nested files would break separation of concerns. " +
+        "Do not include this, or expose it via it's public entrypoint:";
+
+    private static readonly optionExamples: Array<true | IWorkspaceOption> = [
+        true,
+        {
+            workspaceEntryPoint: "entrypoint.ts",
+            workspaceName: "workspaceNumOne",
+        },
+        {
+            workspaceEntryPoint: "entrypoint.ts",
+            workspaceName: "workspaceNumTwo",
+        },
+    ];
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
@@ -144,7 +150,7 @@ function walk(ctx: Lint.WalkContext<IWorkspaceOption[]>) {
                 ctx.sourceFile,
                 workspaceDefinitions,
             );
-            if (aPollutedWorkspace) {
+            if (aPollutedWorkspace !== null) {
                 ctx.addFailure(
                     anImport.getStart(ctx.sourceFile) + 1,
                     anImport.end - 1,
