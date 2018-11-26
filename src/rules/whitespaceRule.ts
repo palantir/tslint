@@ -32,6 +32,7 @@ const OPTION_TYPE = "check-type";
 const OPTION_TYPECAST = "check-typecast";
 const OPTION_TYPE_OPERATOR = "check-type-operator";
 const OPTION_PREBLOCK = "check-preblock";
+const OPTION_POSTBRACE = "check-postbrace";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -50,18 +51,28 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"check-type"\` checks for whitespace before a variable type specification.
             * \`"check-typecast"\` checks for whitespace between a typecast and its target.
             * \`"check-type-operator"\` checks for whitespace between type operators \`|\` and \`&\`.
-            * \`"check-preblock"\` checks for whitespace before the opening brace of a block`,
+            * \`"check-preblock"\` checks for whitespace before the opening brace of a block.
+            * \`"check-postbrace"\` checks for whitespace after an opening brace.`,
         options: {
             type: "array",
             items: {
                 type: "string",
                 enum: [
-                    "check-branch", "check-decl", "check-operator", "check-module", "check-separator",
-                    "check-rest-spread", "check-type", "check-typecast", "check-type-operator", "check-preblock",
+                    "check-branch",
+                    "check-decl",
+                    "check-operator",
+                    "check-module",
+                    "check-separator",
+                    "check-rest-spread",
+                    "check-type",
+                    "check-typecast",
+                    "check-type-operator",
+                    "check-preblock",
+                    "check-postbrace",
                 ],
             },
             minLength: 0,
-            maxLength: 10,
+            maxLength: 11,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
@@ -78,8 +89,19 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 type Options = Record<
-    "branch" | "decl" | "operator" | "module" | "separator" | "restSpread" | "type" | "typecast" | "typeOperator" | "preblock",
-    boolean>;
+    | "branch"
+    | "decl"
+    | "operator"
+    | "module"
+    | "separator"
+    | "restSpread"
+    | "type"
+    | "typecast"
+    | "typeOperator"
+    | "preblock"
+    | "postbrace",
+    boolean
+>;
 
 function parseOptions(ruleArguments: string[]): Options {
     return {
@@ -93,6 +115,7 @@ function parseOptions(ruleArguments: string[]): Options {
         typecast: has(OPTION_TYPECAST),
         typeOperator: has(OPTION_TYPE_OPERATOR),
         preblock: has(OPTION_PREBLOCK),
+        postbrace: has(OPTION_POSTBRACE),
     };
 
     function has(option: string): boolean {
@@ -168,7 +191,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                                         checkForTrailingWhitespace(token.getFullStart());
                                     }
                                     if (idx === 0) {
-                                        const startPos = internalName.getStart() - 1;
+                                        const startPos = element.getStart() - 1;
                                         checkForTrailingWhitespace(startPos, startPos + 1);
                                     }
                                 }
@@ -244,10 +267,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     let prevTokenShouldBeFollowedByWhitespace = false;
     utils.forEachTokenWithTrivia(sourceFile, (_text, tokenKind, range, parent) => {
-        if (tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
+        if (
+            tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
             tokenKind === ts.SyntaxKind.NewLineTrivia ||
-            tokenKind === ts.SyntaxKind.EndOfFileToken) {
-
+            tokenKind === ts.SyntaxKind.EndOfFileToken
+        ) {
             prevTokenShouldBeFollowedByWhitespace = false;
             return;
         } else if (prevTokenShouldBeFollowedByWhitespace) {
@@ -277,9 +301,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
 
                 const nextPosition = range.pos + 1;
-                const semicolonInTrivialFor = parent.kind === ts.SyntaxKind.ForStatement &&
+                const semicolonInTrivialFor =
+                    parent.kind === ts.SyntaxKind.ForStatement &&
                     nextPosition !== sourceFile.end &&
-                    (sourceFile.text[nextPosition] === ";" || sourceFile.text[nextPosition] === ")");
+                    (sourceFile.text[nextPosition] === ";" ||
+                        sourceFile.text[nextPosition] === ")");
 
                 if (!semicolonInTrivialFor) {
                     prevTokenShouldBeFollowedByWhitespace = true;
@@ -295,10 +321,27 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     prevTokenShouldBeFollowedByWhitespace = true;
                 }
                 break;
+            case ts.SyntaxKind.OpenBraceToken:
+                const nextPos = range.pos + 1;
+                if (
+                    options.postbrace &&
+                    (sourceFile.text[nextPos] !== " " &&
+                        sourceFile.text[nextPos] !== "\r" &&
+                        sourceFile.text[nextPos] !== "\t" &&
+                        sourceFile.text[nextPos] !== "\n")
+                ) {
+                    addMissingWhitespaceErrorAt(nextPos);
+                }
+                break;
             case ts.SyntaxKind.ImportKeyword:
-                if (parent.kind === ts.SyntaxKind.CallExpression &&
-                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword) {
+                if (
+                    utils.isCallExpression(parent) &&
+                    parent.expression.kind === ts.SyntaxKind.ImportKeyword
+                ) {
                     return; // Don't check ImportCall
+                }
+                if (utils.isImportTypeNode(parent)) {
+                    return; // Don't check TypeQuery
                 }
             // falls through
             case ts.SyntaxKind.ExportKeyword:
@@ -314,7 +357,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
 
-        const equalsGreaterThanToken = utils.getChildOfKind(node, ts.SyntaxKind.EqualsGreaterThanToken, sourceFile);
+        const equalsGreaterThanToken = utils.getChildOfKind(
+            node,
+            ts.SyntaxKind.EqualsGreaterThanToken,
+            sourceFile,
+        );
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {
             return;
@@ -325,14 +372,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function checkForTrailingWhitespace(position: number, whiteSpacePos: number = position): void {
-        if (position !== sourceFile.end && !Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+        if (
+            position !== sourceFile.end &&
+            !Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))
+        ) {
             addMissingWhitespaceErrorAt(whiteSpacePos);
         }
     }
 
     function addMissingWhitespaceErrorAt(position: number): void {
         // TODO: this rule occasionally adds duplicate failures.
-        if (ctx.failures.some((f) => f.getStartPosition().getPosition() === position)) {
+        if (ctx.failures.some(f => f.getStartPosition().getPosition() === position)) {
             return;
         }
         const fix = Lint.Replacement.appendText(position, " ");
@@ -340,7 +390,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 
     function checkForExcessiveWhitespace(position: number): void {
-        if (position !== sourceFile.end && Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))) {
+        if (
+            position !== sourceFile.end &&
+            Lint.isWhiteSpace(sourceFile.text.charCodeAt(position))
+        ) {
             addInvalidWhitespaceErrorAt(position);
         }
     }

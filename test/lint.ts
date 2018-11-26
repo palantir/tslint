@@ -19,4 +19,4 @@ export * from "../src/index";
 
 import * as TestUtils from "./utils";
 
-export {TestUtils};
+export { TestUtils };

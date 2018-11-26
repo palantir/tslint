@@ -71,9 +71,13 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    return utils.forEachComment(ctx.sourceFile, (fullText, {kind, pos, end}) => {
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
-            fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
+    return utils.forEachComment(ctx.sourceFile, (fullText, { kind, pos, end }) => {
+        if (
+            kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
+            fullText[pos + 2] !== "*" ||
+            fullText[pos + 3] === "*" ||
+            fullText[pos + 3] === "/"
+        ) {
             return;
         }
         const lines = fullText.slice(pos + 3, end - 2).split("\n");
@@ -112,7 +116,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (lastLine.length !== alignColumn) {
             ctx.addFailure(lineStart, end, Rule.ALIGNMENT_FAILURE_STRING);
         }
-
     });
 }
 

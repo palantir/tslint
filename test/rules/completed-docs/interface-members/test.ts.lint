@@ -1,0 +1,39 @@
+/**
+ * ...
+ */
+interface BadInterfaceMembers {
+    prop: number;
+    ~~~~~~~~~~~~~                [Documentation must exist for properties.]
+    method(): number;
+    ~~~~~~~~~~~~~~~~~            [Documentation must exist for methods.]
+}
+
+/**
+ * ...
+ */
+interface EmptyInterfaceMembers {
+    /**
+     *
+     */
+    prop: number;
+    ~~~~~~~~~~~~~               [Documentation must exist for properties.]
+    /**
+     *
+     */
+    method(): number;
+    ~~~~~~~~~~~~~~~~~           [Documentation must exist for methods.]
+}
+
+/**
+ * ...
+ */
+interface GoodInterfaceMembers {
+    /**
+     * ...
+     */
+    prop: number;
+    /**
+     * ...
+     */
+    method(): number;
+}
