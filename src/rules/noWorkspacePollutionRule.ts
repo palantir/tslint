@@ -70,7 +70,19 @@ function throwIfPathRelationshipsAreIncorrect(workspaceNumOneDefinition: IWorksp
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
-    /* tslint:disable:object-literal-sort-keys */
+    private static readonly optionExamples: Array<true | IWorkspaceOption> = [
+        true,
+        {
+            workspaceEntryPoint: "entrypoint.ts",
+            workspaceName: "workspaceNumOne",
+        },
+        {
+            workspaceEntryPoint: "entrypoint.ts",
+            workspaceName: "workspaceNumTwo",
+        },
+    ];
+
+    /* tslint:disable:object-literal-sort-keys member-ordering */
     public static metadata: Lint.IRuleMetadata = {
         ruleName,
         description: Lint.Utils.dedent`
@@ -102,21 +114,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
+    /* tslint:disable:member-ordering */
     public static FAILURE_STRING =
         "Only the entrypoint defined as workspaceEntryPoint is public. Importing nested files would break separation of concerns. " +
         "Do not include this, or expose it via it's public entrypoint:";
-
-    private static readonly optionExamples: Array<true | IWorkspaceOption> = [
-        true,
-        {
-            workspaceEntryPoint: "entrypoint.ts",
-            workspaceName: "workspaceNumOne",
-        },
-        {
-            workspaceEntryPoint: "entrypoint.ts",
-            workspaceName: "workspaceNumTwo",
-        },
-    ];
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
