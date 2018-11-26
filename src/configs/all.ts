@@ -275,6 +275,7 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
     "noSwitchCaseFallThrough",
     "typeofCompare",
     "noUnusedVariable",
+    "noWorkspacePollution",
 ];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.

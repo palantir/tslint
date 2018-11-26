@@ -1,0 +1,7 @@
+import * as shouldBeAbleToBringInMyIndex from './../workspaceNumTwo/index';
+import * as shouldBeAbleToBringInAnotherIndex from './../workspaceNumOne/index';
+import * as thisShouldWorkBecauseItIsMyOwnPrivates from './../workspaceNumTwo/privateMethods/utilities';
+import * as thisShouldFailBecauseItIsAPrivateModuleOfworkspaceNumOne from './../workspaceNumOne/privateMethods/utilities';
+                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+[0]: Only the entrypoint defined as workspaceEntryPoint is public. Importing nested files would break separation of concerns. Do not include this, or expose it via it's public entrypoint: workspaceNumOne/index.ts.lint

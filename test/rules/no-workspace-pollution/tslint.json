@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "no-workspace-pollution": [true, {
+      "workspaceName": "workspaceNumOne",
+      "workspaceEntryPoint": "index.ts.lint"
+    }, {
+      "workspaceName": "workspaceNumTwo",
+      "workspaceEntryPoint": "index.ts.lint"
+    }]
+  }
+}
