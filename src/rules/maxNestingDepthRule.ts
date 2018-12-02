@@ -84,8 +84,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function getFunctionName(node: ts.FunctionLikeDeclaration): any {
-    return node.name !== undefined && isIdentifier(node.name) ? node.name.text : undefined;
+function getFunctionName(node: ts.FunctionLikeDeclaration): string {
+    return node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
 }
 
 function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
@@ -93,7 +93,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
         options: { threshold },
     } = ctx;
     const nestingDepthStack: number[] = [];
-    const functionNameStack: any[] = [];
+    const functionNameStack: string[] = [];
     const cbNode = (node: ts.Node): void => {
         if (isFunctionScopeBoundary(node)) {
             nestingDepthStack.push(0);
