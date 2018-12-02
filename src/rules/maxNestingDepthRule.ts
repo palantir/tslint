@@ -60,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
         return (
-            `The function${name === undefined ? "" : ` ${name}`} has a nesting depth of at least ` +
+            `The function${name === "" ? "" : ` ${name}`} has a nesting depth of at least ` +
             `${actual} which is higher than the threshold of ${expected}`
         );
     }
