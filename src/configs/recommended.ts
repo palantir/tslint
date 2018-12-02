@@ -63,6 +63,7 @@ export const rules = {
     "max-line-length": {
         options: [120],
     },
+    "max-nesting-depth": true,
     "member-access": true,
     "member-ordering": {
         options: {

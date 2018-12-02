@@ -1,0 +1,21 @@
+// Check that rule is not applied for invalid config values by checking a
+// function with complexity higher than the dafault threshold.
+
+function invalidThresholdPass() {
+    const condition1: boolean = false;
+    const condition2: boolean = false;
+    const condition3: boolean = false;
+    const condition4: boolean = false;
+    const condition5: boolean = false;
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                if (condition4) {
+                    if (condition5) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}

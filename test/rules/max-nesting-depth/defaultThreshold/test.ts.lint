@@ -1,0 +1,51 @@
+// Check that a default threshold is used if none is specified.
+
+function validThresholdPass() {
+    const condition1: boolean = false;
+    const condition2: boolean = false;
+    const condition3: boolean = false;
+    const condition4: boolean = false;
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                if (condition4) {
+                    return;
+                }
+            }
+        }
+    }
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                if (condition4) {
+                    return;
+                }
+                if (condition4) {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+function validThresholdFail() {
+    const condition1: boolean = false;
+    const condition2: boolean = false;
+    const condition3: boolean = false;
+    const condition4: boolean = false;
+    const condition5: boolean = false;
+    if (condition1) {
+        if (condition2) {
+            if (condition3) {
+                if (condition4) {
+                    if (condition5) {
+                    ~~~~~~~~~~~~~~~~~
+                        return;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    }
+~~~~~~~~~~~~~~~~~~~~~ [The function validThresholdFail has a nesting depth of at least 5 which is higher than the threshold of 4]
+                }
+            }
+        }
+    }
+}

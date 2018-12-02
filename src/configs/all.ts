@@ -156,6 +156,7 @@ export const rules = {
     "max-classes-per-file": [true, 1],
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
+    "max-nesting-depth": true,
     "no-default-export": true,
     "no-duplicate-imports": true,
     "no-irregular-whitespace": true,

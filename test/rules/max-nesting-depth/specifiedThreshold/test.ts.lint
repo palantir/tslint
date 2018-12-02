@@ -1,0 +1,270 @@
+// Test each function type.
+
+const validFunctionExpression = function() {
+    const condition = false ? "true" : false ? "true" : "false";
+}
+
+const invalidFunctionExpression = function() {
+    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+}
+
+const validArrowFunction = () => {
+    const condition = false ? "true" : false ? "true" : "false";
+}
+
+const invalidArrowFunction = () => {
+    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+}
+
+class MyClass {
+    get validGet(): string {
+        return false ? "true" : false ? "true" : "false";
+    }
+
+    get invalidGet(): string {
+        return false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                 ~~~~~~~~~~~~~~~~                      [The function invalidGet has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+
+    set validSet(newValue: string) {
+        const condition = false ? "true" : false ? "true" : "false";
+    }
+
+    set invalidSet(newValue: string) {
+        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~                      [The function invalidSet has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+
+    validMethod() {
+        const condition = false ? "true" : false ? "true" : "false";
+    }
+
+    invalidMethod() {
+        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~                      [The function invalidMethod has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+}
+
+class validConstructor {
+    constructor() {
+        const condition = false ? "true" : false ? "true" : "false";
+    }
+}
+
+class invalidConstructor {
+    constructor() {
+        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+}
+
+// Test each remaining expression type.
+
+function validSwitch() {
+    switch(0) {
+        case 1:
+            return 1;
+        default:
+            switch(0) {
+                case 1:
+                    return 1;
+                default:
+                    return 0;
+            }
+    }
+}
+
+function invalidSwitch() {
+    switch(0) {
+        case 1:
+            return 1;
+        default:
+            switch(0) {
+                case 1:
+                    switch(0) {
+                    ~~~~~~~~~~~
+                        case 1:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            return 1;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        default:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            return 0;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    }
+~~~~~~~~~~~~~~~~~~~~~ [The function invalidSwitch has a nesting depth of at least 3 which is higher than the threshold of 2]
+                default:
+                    return 0;
+            }
+    }
+}
+
+function validTryCatchFinally() {
+    try {
+        try { } catch (error) { } finally { }
+    } catch (error) {
+        try { } catch (error) { } finally { }
+    } finally {
+        try { } catch (error) { } finally { }
+    }
+}
+
+function invalidTryCatchFinally() {
+    try {
+        try {
+            try { } catch (error) { } finally { }
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    } catch (error) {
+        try {
+            try { } catch (error) { } finally { }
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    } finally {
+        try {
+            try { } catch (error) { } finally { }
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+function validDo() {
+    do {
+        do { }
+        while (false)
+    }
+    while (false)
+}
+
+function invalidDo() {
+    do {
+        do {
+            do { }
+            ~~~~~~
+            while (false)
+~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidDo has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+        while (false)
+    }
+    while (false)
+}
+
+function validWhile() {
+    while(false) {
+        while(false) { }
+    }
+}
+
+function invalidWhile() {
+    while(false) {
+        while(false) {
+            while(false) { }
+            ~~~~~~~~~~~~~~~~ [The function invalidWhile has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+function validFor() {
+    for(;;) {
+        for(;;) { }
+    }
+}
+
+function invalidFor() {
+    for(;;) {
+        for(;;) {
+            for(;;) { }
+            ~~~~~~~~~~~ [The function invalidFor has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+function validForIn() {
+    for(let i in [0,1,2]) {
+        for(let i in [0,1,2]) { }
+    }
+}
+
+function invalidForIn() {
+    for(let i in [0,1,2]) {
+        for(let i in [0,1,2]) {
+            for(let i in [0,1,2]) { }
+            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForIn has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+function validForOf() {
+    for(let i of [0,1,2]) {
+        for(let i of [0,1,2]) { }
+    }
+}
+
+function invalidForOf() {
+    for(let i of [0,1,2]) {
+        for(let i of [0,1,2]) {
+            for(let i of [0,1,2]) { }
+            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForOf has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+function validIf() {
+    if(true) {
+        if(true) { } else { }
+    } else {
+        if(true) { } else { }
+    }
+}
+
+function invalidIf() {
+    if(true) {
+        if(true) {
+            if(true) { } else { }
+            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3 which is higher than the threshold of 2]
+        } else {
+            if(true) { } else { }
+            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3 which is higher than the threshold of 2]
+        }
+    }
+}
+
+// Test that the rule behaves correctly for nested functions.
+
+// Valid outer function, invalid inner function.
+function outer1() {
+    const condition = false ? "true" : false ? "true" : "false";
+    function inner1() {
+        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~            [The function inner1 has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+}
+
+// Invalid outer function, valid inner function.
+function outer2() {
+    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~            [The function outer2 has a nesting depth of at least 3 which is higher than the threshold of 2]
+    function inner2() {
+        const condition = false ? "true" : false ? "true" : "false";
+    }
+}
+
+// Both valid.
+function outer3() {
+    const condition = false ? "true" : false ? "true" : "false";
+    function inner3() {
+        const condition = false ? "true" : false ? "true" : "false";
+    }
+}
+
+// Both invalid.
+function outer4() {
+    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~            [The function outer4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+   function inner4() {
+        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~            [The function inner4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+    }
+}
