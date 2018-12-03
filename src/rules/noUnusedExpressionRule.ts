@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Detects potential errors where an assignment or function call was intended.`,
         optionsDescription: Lint.Utils.dedent`
-            Two arguments may be optionally provided:
+            Three arguments may be optionally provided:
 
             * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
             method or function calls for side effects (e.g. \`e && e.preventDefault()\`).
