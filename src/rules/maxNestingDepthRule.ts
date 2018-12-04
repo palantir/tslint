@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
+import { isFunctionWithBody, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -28,21 +28,28 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "max-nesting-depth",
         description: "Enforces a maximum threshold of nesting depth.",
         descriptionDetails: Lint.Utils.dedent`
-            The nesting depth of the code blocks is a metric determined for each method.
-            It is computed by determining the nesting levels of the control statements within the method.
-            A starting value of 0 is assigned, then this value is
-            incremented each time a new block is entered, and decremented
-            each time a block is left.
-            The following statements contribute to nesting depth:
+            The nesting depth metric is assessed for each function of any type. It is computed by
+            determining the nesting levels of the control statements within the function. A starting
+            value of 0 is assigned, this value is incremented each time a new control statement is
+            entered, then the value is decremented when the control statement is left. The following
+            control statements contribute to the nesting depth computation:
             * \`if\` statements
+            * \`?:\` ternary operators
             * \`switch\` statements
             * \`for\`, \`for in\` and \`for of\` loops
             * \`while\` and \`do while\` loops
-            * \`try\` \`catch\` and \`finally\` blocks`,
+            * \`try\` \`catch\` and \`finally\` blocks
+
+            The [\`max-nesting-depth\`](../max-nesting-depth) metric and the
+            [\`cyclomatic-complexity\`](../cyclomatic-complexity) metric are both computed using the
+            control statements. The cyclomatic complexity metric simply counts the control statements
+            of the function until its threshold is reached whereas the nesting depth metric increase
+            and decrease each time a control statement is entered and left in the function until its
+            threshold is reached.`,
         rationale: Lint.Utils.dedent`
-            Maximum nesting depth is a code metric which indicates the level of imbrication in a
-            function. This metric quickly reveals the methods whose code is made difficult to read
-            by an excessive nesting of the control statements.
+            Maximum nesting depth is a code metric which indicates how deep control statements are
+            nested in a function. This metric quickly reveals the functions whose code is made
+            difficult to read by an excessive nesting of the control statements.
 
             It's better to have smaller, single-purpose functions with self-documenting names.`,
         optionsDescription: Lint.Utils.dedent`
@@ -72,7 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         return super.isEnabled() && isThresholdValid;
     }
 
-    public get threshold(): number {
+    private get threshold(): number {
         if (this.ruleArguments[0] !== undefined) {
             return this.ruleArguments[0] as number;
         }
@@ -95,7 +102,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
     const nestingDepthStack: number[] = [];
     const functionNameStack: string[] = [];
     const cbNode = (node: ts.Node): void => {
-        if (isFunctionScopeBoundary(node)) {
+        if (isFunctionWithBody(node)) {
             nestingDepthStack.push(0);
             functionNameStack.push(getFunctionName(node as ts.FunctionLikeDeclaration));
             ts.forEachChild(node, cbNode);

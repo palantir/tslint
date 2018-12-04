@@ -1,5 +1,5 @@
 // Check that rule is not applied for invalid config values by checking a
-// function with complexity higher than the dafault threshold.
+// function with complexity higher than the default threshold.
 
 function invalidThreshold() {
     const condition1 = true ? "true" : "false";

@@ -5,8 +5,8 @@ const validFunctionExpression = function() {
 }
 
 const invalidFunctionExpression = function() {
-    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+    const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
 }
 
 const validArrowFunction = () => {
@@ -14,8 +14,8 @@ const validArrowFunction = () => {
 }
 
 const invalidArrowFunction = () => {
-    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+    const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
 }
 
 class MyClass {
@@ -24,8 +24,8 @@ class MyClass {
     }
 
     get invalidGet(): string {
-        return false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                 ~~~~~~~~~~~~~~~~                      [The function invalidGet has a nesting depth of at least 3 which is higher than the threshold of 2]
+        return false ? "true" : false ? "true" : false ? "true" : "false";
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidGet has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 
     set validSet(newValue: string) {
@@ -33,8 +33,8 @@ class MyClass {
     }
 
     set invalidSet(newValue: string) {
-        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~                      [The function invalidSet has a nesting depth of at least 3 which is higher than the threshold of 2]
+        const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidSet has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 
     validMethod() {
@@ -42,8 +42,8 @@ class MyClass {
     }
 
     invalidMethod() {
-        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~                      [The function invalidMethod has a nesting depth of at least 3 which is higher than the threshold of 2]
+        const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidMethod has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 }
 
@@ -55,8 +55,8 @@ class validConstructor {
 
 class invalidConstructor {
     constructor() {
-        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~                      [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+        const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 }
 
@@ -237,15 +237,15 @@ function invalidIf() {
 function outer1() {
     const condition = false ? "true" : false ? "true" : "false";
     function inner1() {
-        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~            [The function inner1 has a nesting depth of at least 3 which is higher than the threshold of 2]
+        const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner1 has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 }
 
 // Invalid outer function, valid inner function.
 function outer2() {
-    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~            [The function outer2 has a nesting depth of at least 3 which is higher than the threshold of 2]
+    const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer2 has a nesting depth of at least 3 which is higher than the threshold of 2]
     function inner2() {
         const condition = false ? "true" : false ? "true" : "false";
     }
@@ -261,10 +261,10 @@ function outer3() {
 
 // Both invalid.
 function outer4() {
-    const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~            [The function outer4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+    const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer4 has a nesting depth of at least 3 which is higher than the threshold of 2]
    function inner4() {
-        const condition = false ? "true" : false ? "true" : false ? : "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~            [The function inner4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+        const condition = false ? "true" : false ? "true" : false ? "true" : "false";
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner4 has a nesting depth of at least 3 which is higher than the threshold of 2]
     }
 }

@@ -1,5 +1,5 @@
 // Check that rule is not applied for invalid config values by checking a
-// function with complexity higher than the dafault threshold.
+// function with nesting depth higher than the default threshold.
 
 function invalidThresholdPass() {
     const condition1: boolean = false;
