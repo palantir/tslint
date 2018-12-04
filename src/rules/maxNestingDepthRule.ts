@@ -104,7 +104,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
     const cbNode = (node: ts.Node): void => {
         if (isFunctionWithBody(node)) {
             nestingDepthStack.push(0);
-            functionNameStack.push(getFunctionName(node as ts.FunctionLikeDeclaration));
+            functionNameStack.push(getFunctionName(node));
             ts.forEachChild(node, cbNode);
             nestingDepthStack.pop();
             functionNameStack.pop();
