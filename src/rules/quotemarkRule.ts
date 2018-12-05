@@ -37,6 +37,10 @@ interface Options {
     avoidTemplate: boolean;
 }
 
+function isQuoteMark(value: QUOTE_MARK | any): value is QUOTE_MARK {
+    return ["'", '"', "`"].indexOf(value) > -1;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -120,7 +124,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     : options.quoteMark;
             const actualQuoteMark = sourceFile.text[node.end - 1];
 
-            if (actualQuoteMark === expectedQuoteMark) {
+            if (actualQuoteMark === expectedQuoteMark || !isQuoteMark(actualQuoteMark)) {
                 return;
             }
 
