@@ -37,7 +37,7 @@ interface Options {
     avoidTemplate: boolean;
 }
 
-function isQuoteMark(value: QUOTE_MARK | any): value is QUOTE_MARK {
+function isQuoteMark(value: QUOTE_MARK | string): value is QUOTE_MARK {
     return ["'", '"', "`"].indexOf(value) > -1;
 }
 
