@@ -624,6 +624,41 @@ describe("Configuration", () => {
             assertRulesEqual(config.jsRules, expectedRules);
         });
 
+        it("can load .yaml files with merge key", () => {
+            const config = loadConfigurationFromPath("./test/config/tslint-with-merge.yaml");
+
+            const expectedRules = getEmptyRules();
+            expectedRules.set("rule-one", {
+                ruleArguments: undefined,
+                ruleSeverity: "warning",
+            });
+            expectedRules.set("rule-two", {
+                ruleArguments: ["common rule"],
+                ruleSeverity: "error",
+            });
+            expectedRules.set("rule-three", {
+                ruleArguments: ["ts rule"],
+                ruleSeverity: "error",
+            });
+
+            const expectedJsRules = getEmptyRules();
+            expectedJsRules.set("rule-one", {
+                ruleArguments: undefined,
+                ruleSeverity: "error",
+            });
+            expectedJsRules.set("rule-two", {
+                ruleArguments: ["common rule"],
+                ruleSeverity: "error",
+            });
+            expectedJsRules.set("rule-three", {
+                ruleArguments: ["js rule"],
+                ruleSeverity: "error",
+            });
+
+            assertRulesEqual(config.rules, expectedRules);
+            assertRulesEqual(config.jsRules, expectedJsRules);
+        });
+
         it("can load a built-in configuration", () => {
             const config = loadConfigurationFromPath("tslint:recommended");
             assert.strictEqual<RuleSeverity | undefined>(
