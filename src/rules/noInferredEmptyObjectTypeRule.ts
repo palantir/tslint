@@ -107,14 +107,13 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
             objType.getProperties().length === 0 &&
             objType.getNumberIndexType() === undefined &&
             objType.getStringIndexType() === undefined &&
-            objType.getCallSignatures().every(signature => {
-                const type = this.checker.getReturnTypeOfSignature(signature);
-                return isObjectType(type) && this.isEmptyObjectInterface(type);
-            }) &&
-            objType.getConstructSignatures().every(signature => {
-                const type = this.checker.getReturnTypeOfSignature(signature);
-                return isObjectType(type) && this.isEmptyObjectInterface(type);
-            })
+            objType.getCallSignatures().every(this.isSignatureEmptyObjectInterface) &&
+            objType.getConstructSignatures().every(this.isSignatureEmptyObjectInterface)
         );
+    }
+
+    private isSignatureEmptyObjectInterface(signature: ts.Signature): boolean {
+        const type = this.checker.getReturnTypeOfSignature(signature);
+        return isObjectType(type) && this.isEmptyObjectInterface(type);
     }
 }
