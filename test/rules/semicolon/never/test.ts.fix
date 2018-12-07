@@ -217,5 +217,11 @@ var foo = () => {}
 var bar; var foo = function() {};
 []
 
+var
+[]
+
 const
+[]
+
+let
 []

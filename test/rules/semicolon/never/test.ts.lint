@@ -269,7 +269,13 @@ var foo = () => {};
 var bar; var foo = function() {};
 []
 
+var
+[]
+
 const
+[]
+
+let
 []
 
 [0]: Unnecessary semicolon
