@@ -60,7 +60,7 @@ class MyClass {
     }
 
     public initializedMethodPropertyWithoutSemicolon = () => {
-        return "hi again" 
+        return "hi again"
     }
 
     public initializedMethodProperty1Line = () => { return "hi" }
@@ -215,4 +215,13 @@ function *gen() {
 var foo = () => {}
 []
 var bar; var foo = function() {};
+[]
+
+var
+[]
+
+const
+[]
+
+let
 []
