@@ -357,8 +357,8 @@ class SemicolonNeverWalker extends SemicolonWalker {
     }
 
     private checkVariableStatement(node: ts.VariableStatement) {
-        const declarations = node.declarationList.declarations;
-        if (declarations[declarations.length - 1].initializer === undefined) {
+        const declaration = last(node.declarationList.declarations);
+        if (declaration === undefined || declaration.initializer === undefined) {
             // variable declaration does not continue on the next line if it has no initializer
             return this.checkSemicolonOrLineBreak(node);
         }
@@ -377,4 +377,11 @@ class SemicolonNeverWalker extends SemicolonWalker {
             this.checkSemicolonOrLineBreak(member);
         }
     }
+}
+
+/**
+ * Returns the last element of an array (or undefined if the array is empty).
+ */
+function last<T>(array: ArrayLike<T>): T | undefined {
+    return array[array.length - 1];
 }
