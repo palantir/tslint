@@ -382,6 +382,6 @@ class SemicolonNeverWalker extends SemicolonWalker {
 /**
  * Returns the last element of an array (or undefined if the array is empty).
  */
-function last<T>(array: ArrayLike<T>): T | undefined {
+function last<T>(array: ReadonlyArray<T>): T | undefined {
     return array[array.length - 1];
 }
