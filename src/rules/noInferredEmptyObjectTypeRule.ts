@@ -96,11 +96,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
         }
 
         const retType = this.checker.getReturnTypeOfSignature(callSig);
-        if (
-            isObjectType(retType) &&
-            this.isEmptyObjectInterface(retType) &&
-            this.hasTypeParameters(retType)
-        ) {
+        if (isObjectType(retType) && this.isEmptyObjectInterface(retType)) {
             this.addFailureAtNode(node, Rule.EMPTY_INTERFACE_FUNCTION);
         }
     }
@@ -116,12 +112,5 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
                 return isObjectType(type) && this.isEmptyObjectInterface(type);
             })
         );
-    }
-
-    private hasTypeParameters(objType: ts.ObjectType): boolean {
-        return objType.getConstructSignatures().every(signature => {
-            const parameters = signature.getTypeParameters();
-            return parameters !== undefined;
-        });
     }
 }
