@@ -46,9 +46,9 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
-// TODO: Enabling the `callable-types` rule below produces a lint error
-// in several locations complaining about the `no-inferred-empty-object-type`
-// rule. As far as I can tell, this is a bug and requires further investigation.
+// TODO: Enable the `callable-types` rule below. Currently, it
+// produces a lint error in several locations complaining about the
+// `no-inferred-empty-object-type` rule.
 export interface FormatterConstructor {
     // tslint:disable-next-line:callable-types
     new (): IFormatter;
