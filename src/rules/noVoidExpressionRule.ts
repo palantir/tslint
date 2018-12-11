@@ -99,6 +99,10 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 return true;
             case ts.SyntaxKind.ArrowFunction:
                 return ignoreArrowFunctionShorthand;
+
+            // Something like "x && console.log(x)".
+            case ts.SyntaxKind.BinaryExpression:
+                return isParentAllowedVoid(node.parent!);
             default:
                 return false;
         }
