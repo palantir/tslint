@@ -46,6 +46,7 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
+// See https://github.com/palantir/tslint/issues/4364
 // TODO: Enable the `callable-types` rule below. Currently, it
 // produces a lint error in several locations complaining about the
 // `no-inferred-empty-object-type` rule.
