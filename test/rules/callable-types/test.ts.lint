@@ -54,9 +54,14 @@ interface K {
 }
 
 // handle modifiers
-export interface I {
+export interface I0 {
     (): void;
-    ~~~~~~~~~ [interface % ('type I = () => void;')]
+    ~~~~~~~~~ [interface % ('type I0 = () => void;')]
+}
+
+export interface I1 {
+    new (): void;
+    ~~~~~~~~~~~~~ [interface % ('type I1 = new () => void;')]
 }
 
 export type T = {
