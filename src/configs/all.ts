@@ -252,6 +252,7 @@ export const rules = {
     "space-within-parens": [true, 0],
     "switch-final-break": true,
     "type-literal-delimiter": true,
+    "unnecessary-bind": true,
     "variable-name": [true, "ban-keywords", "check-format"],
     whitespace: [
         true,
