@@ -17,6 +17,5 @@ x as T;
 
 <unknown> {};
 ~~~~~~~~~~~~ [0]
-// Remove previous line once TSLint requires TS 3.0 or above
 
 [0]: Type assertion on object literals is forbidden, use a type annotation instead.
