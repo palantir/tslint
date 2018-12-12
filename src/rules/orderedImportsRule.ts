@@ -245,9 +245,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = this.options.importSourcesOrderTransform(
-            removeQuotes(node.moduleSpecifier.text),
-        );
+        const source = removeQuotes(node.moduleSpecifier.text);
         this.checkSource(source, node);
 
         const { importClause } = node;
@@ -275,14 +273,16 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = this.options.importSourcesOrderTransform(removeQuotes(expression.text));
+        const source = removeQuotes(expression.text);
         this.checkSource(source, node);
     }
 
-    private checkSource(source: string, node: ImportDeclaration["node"]) {
+    private checkSource(originalSource: string, node: ImportDeclaration["node"]) {
+        const type = getImportType(originalSource);
+        const source = this.options.importSourcesOrderTransform(originalSource);
         const currentSource = this.options.moduleSourcePath(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource);
+        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource, type);
 
         if (previousSource !== null && compare(currentSource, previousSource) === -1) {
             this.lastFix = [];
@@ -432,11 +432,11 @@ class ImportsBlock {
         sourceFile: ts.SourceFile,
         node: ImportDeclaration["node"],
         sourcePath: string,
+        type: ImportType,
     ) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
         const text = sourceFile.text.substring(start, end);
-        const type = this.getImportType(sourcePath);
 
         if (start > node.getStart() || end === 0) {
             // skip block if any statements don't end with a newline to simplify implementation
@@ -510,17 +510,17 @@ class ImportsBlock {
     private getLastImportDeclaration(): ImportDeclaration | undefined {
         return this.importDeclarations[this.importDeclarations.length - 1];
     }
+}
 
-    private getImportType(sourcePath: string): ImportType {
-        if (sourcePath.charAt(0) === ".") {
-            if (sourcePath.charAt(1) === ".") {
-                return ImportType.PARENT_DIRECTORY_IMPORT;
-            } else {
-                return ImportType.CURRENT_DIRECTORY_IMPORT;
-            }
+function getImportType(sourcePath: string): ImportType {
+    if (sourcePath.charAt(0) === ".") {
+        if (sourcePath.charAt(1) === ".") {
+            return ImportType.PARENT_DIRECTORY_IMPORT;
         } else {
-            return ImportType.LIBRARY_IMPORT;
+            return ImportType.CURRENT_DIRECTORY_IMPORT;
         }
+    } else {
+        return ImportType.LIBRARY_IMPORT;
     }
 }
 
