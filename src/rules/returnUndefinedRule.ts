@@ -118,7 +118,7 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
     }
 
     // Handle generator functions/methods:
-    if (node.asteriskToken) {
+    if (node.asteriskToken !== undefined) {
         return ReturnKind.Void;
     }
 
