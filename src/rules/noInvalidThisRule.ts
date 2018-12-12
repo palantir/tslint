@@ -61,19 +61,19 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-const enum parentType {
+const enum ParentType {
     None,
     Class,
     ClassMethod,
     BoundRegularFunction,
     UnboundRegularFunction,
 }
-const thisAllowedParents = new Set([parentType.ClassMethod, parentType.BoundRegularFunction]);
+const thisAllowedParents = new Set([ParentType.ClassMethod, ParentType.BoundRegularFunction]);
 
 function walk(ctx: Lint.WalkContext<boolean>): void {
     const { sourceFile, options: checkFuncInMethod } = ctx;
 
-    let currentParent: parentType = parentType.None;
+    let currentParent: ParentType = ParentType.None;
     let inClass = false;
 
     ts.forEachChild(sourceFile, function cb(node: ts.Node) {
@@ -83,7 +83,7 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
                 inClass = true;
-                currentParent = parentType.Class;
+                currentParent = ParentType.Class;
                 ts.forEachChild(node, cb);
                 currentParent = originalParent;
                 inClass = originalInClass;
@@ -96,16 +96,16 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
-                if (currentParent === parentType.Class) {
-                    currentParent = parentType.ClassMethod;
+                if (currentParent === ParentType.Class) {
+                    currentParent = ParentType.ClassMethod;
                     ts.forEachChild(node, cb);
                     currentParent = originalParent;
                     return;
                 } else {
                     currentParent
                         = (node as ts.FunctionLikeDeclaration).parameters.some(isThisParameter)
-                        ? parentType.BoundRegularFunction
-                        : parentType.UnboundRegularFunction;
+                        ? ParentType.BoundRegularFunction
+                        : ParentType.UnboundRegularFunction;
                     ts.forEachChild(node, cb);
                     currentParent = originalParent;
                     return;
