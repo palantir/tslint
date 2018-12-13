@@ -131,6 +131,7 @@ export async function run(options: Options, logger: Logger): Promise<Status> {
             logger.error(`${error.message}\n`);
             return Status.FatalError;
         }
+
         throw error;
     }
 }

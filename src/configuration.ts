@@ -271,6 +271,7 @@ export function readConfigurationFile(filepath: string): RawConfigFile {
             }
         } catch (e) {
             const error = e as Error;
+
             // include the configuration file being parsed in the error since it may differ from the directly referenced config
             throw new Error(`${error.message} in ${filepath}`);
         }

@@ -43,5 +43,6 @@ export function createTempFile(extension: string) {
             return attempt;
         }
     }
+
     throw new Error("Couldn't create temp file");
 }

@@ -395,6 +395,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 return name;
             }
         }
+
         throw new Error("Expected to find a name");
     }
 

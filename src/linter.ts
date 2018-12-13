@@ -312,6 +312,7 @@ export class Linter {
                 const INVALID_SOURCE_ERROR = dedent`
                     Invalid source file: ${fileName}. Ensure that the files supplied to lint have a .ts, .tsx, .d.ts, .js or .jsx extension.
                 `;
+
                 throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
