@@ -1,0 +1,114 @@
+function foo(bar) {
+    if (!bar) {
+        throw new Error();
+    }
+    throw new Error();
+    ~nil  [0]
+}
+
+function foo(bar) {
+    if (!bar) {
+        var e = new Error();
+        throw e;
+        ~nil  [0]
+    }
+
+    throw bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+        throw new Error();
+    }
+    /* multi-line
+    ~nil  [0]
+    comment */
+    throw new Error();
+}
+
+var fn = () => null;
+function foo() {
+    fn();
+    throw new Error();
+    ~nil  [0]
+}
+
+function foo(fn) {
+    fn(); throw new Error();
+          ~nil [0]
+}
+
+function foo() {
+    throw new Error();
+}
+
+function foo() {
+
+    throw new Error();
+}
+
+function foo(bar) {
+    if (!bar) throw new Error();
+}
+
+function foo(bar) {
+    let someCall;
+    if (!bar) throw new Error();
+}
+
+function foo(bar) {
+    if (!bar) { throw new Error() };
+}
+
+function foo(bar) {
+    if (!bar) {
+        throw new Error();
+    }
+}
+
+function foo(bar) {
+    if (!bar) {
+        throw new Error();
+    }
+
+    throw bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+
+        throw new Error();
+    }
+}
+
+function foo() {
+
+    // comment
+    throw new Error();
+}
+
+function test() {
+    console.log("Any statement");
+    // Any comment
+
+    throw new Error();
+}
+
+function foo() {
+    fn();
+    // comment
+
+    // comment
+    throw new Error();
+}
+
+function bar() {
+    "some statement";
+    //comment
+    ~nil [0]
+    //comment
+    //comment
+    throw new Error();
+}
+
+[0]: Missing blank line before throw
