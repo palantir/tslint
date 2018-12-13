@@ -99,6 +99,7 @@ export const rules = {
     "ban-comma-operator": true,
     curly: true,
     forin: true,
+    "function-constructor": true,
     // "import-blacklist": no sensible default
     "label-position": true,
     "no-arg": true,
