@@ -1,5 +1,8 @@
 [![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
 [![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
+[![Dependency Status](https://david-dm.org/palantir/tslint.svg)](https://david-dm.org/palantir/tslint)
+[![devDependency Status](https://david-dm.org/palantir/tslint/dev-status.svg)](https://david-dm.org/palantir/tslint/?type=dev)
+[![peerDependency Status](https://david-dm.org/palantir/tslint/peer-status.svg)](https://david-dm.org/palantir/tslint/?type=peer)
 [![Circle CI](https://circleci.com/gh/palantir/tslint.svg?style=svg)](https://circleci.com/gh/palantir/tslint)
 
 # TSLint

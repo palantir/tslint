@@ -26,7 +26,9 @@ interface K {
 }
 
 // handle modifiers
-export type I = () => void;
+export type I0 = () => void;
+
+export type I1 = new () => void;
 
 export type T = () => void
 

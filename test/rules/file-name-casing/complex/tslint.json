@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "file-name-casing": [true, {
+      ".component.ts": "pascal-case",
+      ".tsx": "pascal-case",
+      ".ts": "camel-case"
+    }]
+  }
+}

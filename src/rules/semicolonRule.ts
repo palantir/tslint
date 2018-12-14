@@ -358,7 +358,10 @@ class SemicolonNeverWalker extends SemicolonWalker {
 
     private checkVariableStatement(node: ts.VariableStatement) {
         const declarations = node.declarationList.declarations;
-        if (declarations[declarations.length - 1].initializer === undefined) {
+        if (
+            declarations.length !== 0 &&
+            declarations[declarations.length - 1].initializer === undefined
+        ) {
             // variable declaration does not continue on the next line if it has no initializer
             return this.checkSemicolonOrLineBreak(node);
         }
