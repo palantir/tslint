@@ -76,8 +76,8 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
                 OPTION_IGNORE_CASE,
                 OPTION_LOCALE_COMPARE,
                 OPTION_MATCH_DECLARATION_ORDER,
-                OPTION_SHORTHAND_FIRST
-            ]
+                OPTION_SHORTHAND_FIRST,
+            ],
         },
         optionExamples: [
             true,
@@ -86,12 +86,12 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
                 OPTION_IGNORE_CASE,
                 OPTION_LOCALE_COMPARE,
                 OPTION_MATCH_DECLARATION_ORDER,
-                OPTION_SHORTHAND_FIRST
-            ]
+                OPTION_SHORTHAND_FIRST,
+            ],
         ],
         type: "maintainability",
         typescriptOnly: false,
-        codeExamples
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -126,7 +126,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             sourceFile,
             walk,
             parseOptions(this.ruleArguments),
-            program.getTypeChecker()
+            program.getTypeChecker(),
         );
     }
 }
@@ -136,7 +136,7 @@ function parseOptions(ruleArguments: any[]): Options {
         ignoreCase: has(OPTION_IGNORE_CASE),
         localeCompare: has(OPTION_LOCALE_COMPARE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
-        shorthandFirst: has(OPTION_SHORTHAND_FIRST)
+        shorthandFirst: has(OPTION_SHORTHAND_FIRST),
     };
 
     function has(name: string) {
@@ -147,7 +147,7 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, localeCompare, matchDeclarationOrder, shorthandFirst }
+        options: { ignoreCase, localeCompare, matchDeclarationOrder, shorthandFirst },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -231,7 +231,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                         if (keyOrderDescending && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(
                                 property.name,
-                                Rule.FAILURE_STRING_ALPHABETICAL(property.name.text)
+                                Rule.FAILURE_STRING_ALPHABETICAL(property.name.text),
                             );
                             return; // only show warning on first out-of-order property
                         }
@@ -244,7 +244,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     function checkMatchesDeclarationOrder(
         { properties }: ts.ObjectLiteralExpression,
         type: TypeLike,
-        members: ReadonlyArray<{ name: ts.PropertyName }>
+        members: ReadonlyArray<{ name: ts.PropertyName }>,
     ): void {
         let memberIndex = 0;
         outer: for (const prop of properties) {

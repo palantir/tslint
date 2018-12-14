@@ -2011,13 +2011,6 @@ tsutils@^2.27.2:
   dependencies:
     tslib "^1.8.1"
 
-tsutils@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.3.1.tgz#b7f34e23efbff41f729a712f0bfc628550c7119c"
-  integrity sha512-reuFQ3/EoMy70YvBPrxe9p7LvA4dCQnvMn+LV8Tv2NKkLCKRHgfB4qFTA9NtWlyYSldTu1dukuquQ3o0mLvsPw==
-  dependencies:
-    tslib "^1.8.1"
-
 type-detect@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-0.1.1.tgz#0ba5ec2a885640e470ea4e8505971900dac58822"

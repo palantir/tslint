@@ -28,7 +28,7 @@ export const codeExamples = [
         `,
         pass: Lint.Utils.dedent`
             let doesNothing = () => {};
-        `
+        `,
     },
     {
         config: Lint.Utils.dedent`
@@ -40,6 +40,6 @@ export const codeExamples = [
         `,
         pass: Lint.Utils.dedent`
             let addNumbers = (a, b) => a + b;
-        `
-    }
+        `,
+    },
 ];

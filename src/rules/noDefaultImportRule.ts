@@ -56,9 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 properties: {
                     [fromModulesConfigOptionName]: { type: "string" },
                 },
-                required: [
-                    "fromModules",
-                ],
+                required: ["fromModules"],
             },
         },
         optionExamples: [
@@ -69,11 +67,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Import of default members from this module is forbidden. Import named member instead";
+    public static FAILURE_STRING =
+        "Import of default members from this module is forbidden. Import named member instead";
 
     public static getNamedDefaultImport(namedBindings: ts.NamedImports): ts.Identifier | null {
         for (const importSpecifier of namedBindings.elements) {
-            if (importSpecifier.propertyName !== undefined && importSpecifier.propertyName.text === "default") {
+            if (
+                importSpecifier.propertyName !== undefined &&
+                importSpecifier.propertyName.text === "default"
+            ) {
                 return importSpecifier.propertyName;
             }
         }
@@ -83,14 +85,23 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.getRuleOptions(this.ruleArguments));
     }
-    private isFromModulesConfigOption(option: boolean | RawConfigOptions): option is RawConfigOptions {
+    private isFromModulesConfigOption(
+        option: boolean | RawConfigOptions,
+    ): option is RawConfigOptions {
         return typeof option === "object" && option[fromModulesConfigOptionName] !== undefined;
     }
     private getRuleOptions(options: ReadonlyArray<boolean | RawConfigOptions>): Options {
-        const fromModuleConfigOption = options.find<RawConfigOptions>(this.isFromModulesConfigOption);
-        if (fromModuleConfigOption !== undefined && typeof fromModuleConfigOption[fromModulesConfigOptionName] === "string") {
+        const fromModuleConfigOption = options.find<RawConfigOptions>(
+            this.isFromModulesConfigOption,
+        );
+        if (
+            fromModuleConfigOption !== undefined &&
+            typeof fromModuleConfigOption[fromModulesConfigOptionName] === "string"
+        ) {
             return {
-                [fromModulesConfigOptionName]: new RegExp(fromModuleConfigOption[fromModulesConfigOptionName]),
+                [fromModulesConfigOptionName]: new RegExp(
+                    fromModuleConfigOption[fromModulesConfigOptionName],
+                ),
             };
         } else {
             return {
@@ -108,16 +119,19 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (isImportDeclaration(statement)) {
             const { importClause, moduleSpecifier } = statement;
             if (
-                importClause !== undefined
-                && isStringLiteral(moduleSpecifier)
-                && ctx.options[fromModulesConfigOptionName].test(moduleSpecifier.text)
+                importClause !== undefined &&
+                isStringLiteral(moduleSpecifier) &&
+                ctx.options[fromModulesConfigOptionName].test(moduleSpecifier.text)
             ) {
                 // module name matches specified in rule config
                 if (importClause.name !== undefined) {
                     // `import Foo...` syntax
                     const defaultImportedName = importClause.name;
                     ctx.addFailureAtNode(defaultImportedName, Rule.FAILURE_STRING);
-                } else if (importClause.namedBindings !== undefined && isNamedImports(importClause.namedBindings)) {
+                } else if (
+                    importClause.namedBindings !== undefined &&
+                    isNamedImports(importClause.namedBindings)
+                ) {
                     // `import { default...` syntax
                     const defaultMember = Rule.getNamedDefaultImport(importClause.namedBindings);
                     if (defaultMember !== null) {

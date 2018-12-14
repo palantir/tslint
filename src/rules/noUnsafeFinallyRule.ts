@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -132,7 +133,10 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
             }
 
             default:
-                if (utils.isFunctionScopeBoundary(parent) !== utils.ScopeBoundary.None) {
+                // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+                // requires tsutils > 3.0.
+                if (isFunctionScopeBoundary(parent)) {
+                    // tslint:enable:deprecation
                     // Haven't seen TryStatement yet, so the function is inside it.
                     // No jump statement can escape a function, so the jump is local.
                     return true;

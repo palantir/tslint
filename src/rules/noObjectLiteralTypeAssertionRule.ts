@@ -59,9 +59,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
             isAssertionExpression(node) &&
             node.type.kind !== ts.SyntaxKind.AnyKeyword &&
             // Compare with UnknownKeyword if using TS 3.0 or above
-            (!!(ts.SyntaxKind as any).UnknownKeyword ?
-             (node.type.kind !== (ts.SyntaxKind as any).UnknownKeyword) :
-             node.type.getText(ctx.sourceFile) !== "unknown") &&
+            (!!(ts.SyntaxKind as any).UnknownKeyword
+                ? node.type.kind !== (ts.SyntaxKind as any).UnknownKeyword
+                : node.type.getText(ctx.sourceFile) !== "unknown") &&
             isObjectLiteralExpression(
                 isParenthesizedExpression(node.expression)
                     ? node.expression.expression
