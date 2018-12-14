@@ -7,5 +7,6 @@ import {bar} from '../bar';
 
 import './baa';
 import './baz'; // required
+import './caa';
 
 export class Test {}

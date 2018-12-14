@@ -17,9 +17,8 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as resolve from "resolve";
 import { FormatterConstructor } from "./index";
-import { camelize } from "./utils";
+import { camelize, tryResolvePackage } from "./utils";
 
 const CORE_FORMATTERS_DIRECTORY = path.resolve(__dirname, "formatters");
 
@@ -79,17 +78,17 @@ function loadFormatter(
 }
 
 function loadFormatterModule(name: string): FormatterConstructor | undefined {
-    let src: string;
+    let src: string | undefined;
     try {
         // first try to find a module in the dependencies of the currently linted project
-        src = resolve.sync(name, { basedir: process.cwd() });
-    } catch {
-        try {
+        src = tryResolvePackage(name, process.cwd());
+        if (src === undefined) {
             // if there is no local module, try relative to the installation of TSLint (might be global)
             src = require.resolve(name);
-        } catch {
-            return undefined;
         }
+    } catch {
+        return undefined;
     }
+
     return (require(src) as { Formatter: FormatterConstructor }).Formatter;
 }

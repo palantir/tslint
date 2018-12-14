@@ -72,7 +72,7 @@
         "chai": "^3.5.0",
         "github": "^8.2.1",
         "husky": "^0.14.3",
-        "json-stringify-pretty-compact": "^1.0.3",
+        "json-stringify-pretty-compact": "^1.2.0",
         "mocha": "^3.2.0",
         "npm-run-all": "^4.0.2",
         "nyc": "^10.2.0",
