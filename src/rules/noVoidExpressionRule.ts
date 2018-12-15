@@ -94,7 +94,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
     });
 
     function isParentAllowedVoid(node: ts.Node): boolean {
-        switch (node.parent!.kind) {
+        switch (node.parent.kind) {
             case ts.SyntaxKind.ExpressionStatement:
                 return true;
             case ts.SyntaxKind.ArrowFunction:
@@ -102,7 +102,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
 
             // Something like "x && console.log(x)".
             case ts.SyntaxKind.BinaryExpression:
-                return isParentAllowedVoid(node.parent!);
+                return isParentAllowedVoid(node.parent);
             default:
                 return false;
         }

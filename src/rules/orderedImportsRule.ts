@@ -338,12 +338,17 @@ class Walker extends Lint.AbstractWalker<Options> {
             [ImportType.CURRENT_DIRECTORY_IMPORT, false],
         ]);
 
-        const nonEmptyBlocks = this.importsBlocks.filter((block) => block.getImportDeclarations().length > 0);
-        nonEmptyBlocks.forEach((block) => {
+        const nonEmptyBlocks = this.importsBlocks.filter(
+            block => block.getImportDeclarations().length > 0,
+        );
+        nonEmptyBlocks.forEach(block => {
             // assume the whole block is of the same type, hence use the first one as the representing one
             const firstInBlock = block.getImportDeclarations()[0];
             if (typesEncountered.get(firstInBlock.type)) {
-                this.addFailureAtNode(firstInBlock.node, Rule.IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP);
+                this.addFailureAtNode(
+                    firstInBlock.node,
+                    Rule.IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP,
+                );
             } else {
                 typesEncountered.set(firstInBlock.type, true);
             }

@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         `,
         ruleName: "function-constructor",
         type: "functionality",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
 
     public static FAILURE = "Do not use the Function constructor to create functions.";

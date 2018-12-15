@@ -20,7 +20,7 @@ import {
     ImportKind,
     isExportDeclaration,
     isImportDeclaration,
-    isNamedImports
+    isNamedImports,
 } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 oneOf: [
                     {
                         type: "string",
-                        minLength: 1
+                        minLength: 1,
                     },
                     {
                         type: "object",
@@ -54,20 +54,20 @@ export class Rule extends Lint.Rules.AbstractRule {
                             minItems: 1,
                             items: {
                                 type: "string",
-                                minLength: 1
-                            }
-                        }
-                    }
-                ]
-            }
+                                minLength: 1,
+                            },
+                        },
+                    },
+                ],
+            },
         },
         optionExamples: [
             true,
             [true, "rxjs", "lodash"],
-            [true, "lodash", { lodash: ["pull", "pullAll"] }]
+            [true, "lodash", { lodash: ["pull", "pullAll"] }],
         ],
         type: "functionality",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
 
     public static WHOLE_MODULE_FAILURE_STRING =
@@ -120,7 +120,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             }
             return acc;
         },
-        Object.create(null) as BannedImports
+        Object.create(null) as BannedImports,
     );
 
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
@@ -137,7 +137,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 ctx.addFailure(
                     name.getStart(ctx.sourceFile) + 1,
                     name.end - 1,
-                    Rule.WHOLE_MODULE_FAILURE_STRING
+                    Rule.WHOLE_MODULE_FAILURE_STRING,
                 );
                 continue;
             }
@@ -210,17 +210,17 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     ...(importsDefaultExport ? ["default"] : []),
                     ...(importsSpecificNamedExports
                         ? (importClause!.namedBindings as ts.NamedImports).elements.map(
-                              toExportName
+                              toExportName,
                           )
                         : []),
-                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : [])
+                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : []),
                 ];
 
                 for (const importName of namedImportsOrReExports) {
                     if (bansForModule.has(importName)) {
                         ctx.addFailureAtNode(
                             exportClause !== undefined ? exportClause : importClause!,
-                            Rule.MAKE_NAMED_IMPORT_FAILURE_STRING(importName)
+                            Rule.MAKE_NAMED_IMPORT_FAILURE_STRING(importName),
                         );
                     }
                 }
@@ -229,7 +229,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 ctx.addFailure(
                     name.getStart(ctx.sourceFile) + 1,
                     name.end - 1,
-                    Rule.IMPLICIT_NAMED_IMPORT_FAILURE_STRING
+                    Rule.IMPLICIT_NAMED_IMPORT_FAILURE_STRING,
                 );
             }
         }

@@ -93,7 +93,7 @@ function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
 }
 
 function isBlockUnnecessary(node: ts.Block): boolean {
-    const parent = node.parent!;
+    const parent = node.parent;
     if (node.statements.length !== 1) {
         return false;
     }

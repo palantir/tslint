@@ -59,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.VariableDeclaration:
                 if (
                     !isBindingPattern((node as ts.VariableDeclaration).name) &&
-                    !isNodeFlagSet(node.parent!, ts.NodeFlags.Const)
+                    !isNodeFlagSet(node.parent, ts.NodeFlags.Const)
                 ) {
                     checkInitializer(node as ts.VariableDeclaration);
                 }
