@@ -104,7 +104,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
     private checkNumericLiteral(node: ts.Node, num: string) {
         /* Using Object.is() to differentiate between pos/neg zero */
         if (
-            !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
+            !Rule.ALLOWED_NODES.has(node.parent.kind) &&
             !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num)))
         ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING(num));

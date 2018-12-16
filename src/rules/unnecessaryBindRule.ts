@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         requiresTypeInfo: true,
         ruleName: "unnecessary-bind",
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
 
     public static FAILURE_STRING_FUNCTION =
@@ -64,7 +64,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
 
     function canFunctionExpressionBeFixed(
         callExpression: ts.CallExpression,
-        valueDeclaration: ts.FunctionExpression
+        valueDeclaration: ts.FunctionExpression,
     ): boolean {
         if (
             callExpression.arguments.length !== 1 ||
@@ -86,7 +86,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
 
     function checkFunctionExpression(
         callExpression: ts.CallExpression,
-        valueDeclaration: ts.FunctionExpression
+        valueDeclaration: ts.FunctionExpression,
     ): void {
         if (!canFunctionExpressionBeFixed(callExpression, valueDeclaration)) {
             return;
@@ -157,7 +157,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
 }
 
 function isBindPropertyAccess(
-    node: ts.LeftHandSideExpression
+    node: ts.LeftHandSideExpression,
 ): node is ts.PropertyAccessExpression {
     return ts.isPropertyAccessExpression(node) && node.name.text === "bind";
 }

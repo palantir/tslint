@@ -47,6 +47,7 @@ export const rules = {
     "cyclomatic-complexity": false,
     eofline: true,
     forin: true,
+    "function-constructor": true,
     "import-spacing": true,
     indent: {
         options: ["spaces"],

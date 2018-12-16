@@ -72,7 +72,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 
 function needsParens(node: ts.TypeAssertion): boolean {
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         isBinaryExpression(parent) &&
         (parent.operatorToken.kind === ts.SyntaxKind.AmpersandToken ||

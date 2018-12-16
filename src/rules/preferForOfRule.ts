@@ -86,7 +86,7 @@ function isNonSimpleIncrementorUse(
     sourceFile: ts.SourceFile,
 ): boolean {
     // check if iterator is used for something other than reading data from array
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         !utils.isElementAccessExpression(parent) ||
         // `a[i] = ...` or similar

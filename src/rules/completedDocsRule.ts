@@ -326,7 +326,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 break;
 
             case ts.SyntaxKind.MethodDeclaration:
-                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
                     checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
                 }
                 break;
@@ -350,7 +350,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             case ts.SyntaxKind.VariableStatement:
                 // Only check variables at the namespace/module-level or file-level
                 // and not variables declared inside functions and other things.
-                switch (node.parent!.kind) {
+                switch (node.parent.kind) {
                     case ts.SyntaxKind.SourceFile:
                     case ts.SyntaxKind.ModuleBlock:
                         for (const declaration of (node as ts.VariableStatement).declarationList
@@ -362,7 +362,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
-                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
                     checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
                 }
         }

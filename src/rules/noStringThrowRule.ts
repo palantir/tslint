@@ -71,7 +71,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isThrowStatement(node)) {
             const { expression } = node;
-            if (isString(expression)) {
+            if (expression !== undefined && isString(expression)) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
                     Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
                     Lint.Replacement.appendText(expression.getEnd(), ")"),
