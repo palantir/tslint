@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-floating-promises",
         description: "Promises returned by functions must be handled appropriately.",
-        descriptionDetails: "Use `no-unused-expression` in addition to this rule to reveal even more floating promises.",
+        descriptionDetails:
+            "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
         optionsDescription: Lint.Utils.dedent`
             A list of \'string\' names of any additional classes that should also be handled as Promises.
         `,
@@ -33,11 +34,18 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             listType: {
                 type: "array",
-                items: {type: "string"},
+                items: { type: "string" },
             },
         },
         optionExamples: [true, [true, "JQueryPromise"]],
-        rationale: "Unhandled Promises can cause unexpected behavior, such as resolving at unexpected times.",
+        rationale: Lint.Utils.dedent`
+            Creating a Promise and not storing or returning it may let other code run independently of its result.
+            This can cause unexpected and/or non-deterministic behavior depending on external timing factors.
+
+            It's typically better to return Promises from functions that start them, then handle them in calling code.
+
+            Use \`no-unused-expression\` in addition to this rule to reveal even more floating promises.
+        `,
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
@@ -50,7 +58,7 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithFunction(
             sourceFile,
             walk,
-            ["Promise", ...this.ruleArguments as string[]],
+            ["Promise", ...(this.ruleArguments as string[])],
             program.getTypeChecker(),
         );
     }
@@ -60,9 +68,11 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isExpressionStatement(node)) {
             const { expression } = node;
-            if (isCallExpression(expression) &&
+            if (
+                isCallExpression(expression) &&
                 !isPromiseCatchCall(expression) &&
-                !isPromiseThenCallWithRejectionHandler(expression)) {
+                !isPromiseThenCallWithRejectionHandler(expression)
+            ) {
                 const { symbol } = tc.getTypeAtLocation(expression);
                 if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
                     ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
@@ -74,11 +84,16 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
 }
 
 function isPromiseCatchCall(expression: ts.CallExpression): boolean {
-    return isPropertyAccessExpression(expression.expression) && expression.expression.name.text === "catch";
+    return (
+        isPropertyAccessExpression(expression.expression) &&
+        expression.expression.name.text === "catch"
+    );
 }
 
 function isPromiseThenCallWithRejectionHandler(expression: ts.CallExpression): boolean {
-    return isPropertyAccessExpression(expression.expression) &&
+    return (
+        isPropertyAccessExpression(expression.expression) &&
         expression.expression.name.text === "then" &&
-        expression.arguments.length >= 2;
+        expression.arguments.length >= 2
+    );
 }

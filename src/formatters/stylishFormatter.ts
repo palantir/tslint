@@ -33,7 +33,7 @@ export class Formatter extends AbstractFormatter {
             Its readability is enhanced through spacing and colouring.`,
         sample: Utils.dedent`
         myFile.ts
-        1:14  semicolon  Missing semicolon`,
+        Error: 1:14  semicolon  Missing semicolon`,
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -55,38 +55,38 @@ export class Formatter extends AbstractFormatter {
             return [];
         }
         const outputLines: string[] = [];
-        const positionMaxSize       = this.getPositionMaxSize(failures);
-        const ruleMaxSize           = this.getRuleMaxSize(failures);
+        const positionMaxSize = this.getPositionMaxSize(failures);
+        const ruleMaxSize = this.getRuleMaxSize(failures);
 
         let currentFile: string | undefined;
 
         for (const failure of failures) {
             const fileName = failure.getFileName();
+            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
+            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
 
             // Output the name of each file once
             if (currentFile !== fileName) {
                 outputLines.push("");
-                outputLines.push(fileName);
+                outputLines.push(`${fileName}${chalk.hidden(`:${positionTuple}`)}`);
                 currentFile = fileName;
             }
 
             let failureString = failure.getFailure();
-            failureString     = chalk.yellow(failureString);
+            failureString = chalk.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
-            ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = chalk.grey(ruleName);
+            ruleName = this.pad(ruleName, ruleMaxSize);
+            ruleName = chalk.grey(ruleName);
 
             // Lines
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-
-            let positionTuple = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`;
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            positionTuple = failure.getRuleSeverity() === "warning"
-                ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
-                : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
+            positionTuple =
+                failure.getRuleSeverity() === "warning"
+                    ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
+                    : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
@@ -108,7 +108,8 @@ export class Formatter extends AbstractFormatter {
         for (const failure of failures) {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
-            const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`.length;
+            const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`
+                .length;
 
             if (positionSize > positionMaxSize) {
                 positionMaxSize = positionSize;

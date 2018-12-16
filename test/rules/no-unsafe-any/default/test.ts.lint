@@ -1,0 +1,348 @@
+import importEquals = require("./commonjsModule");
+import importAlias = importEquals;
+namespace N { export const x: any = 0; }
+import importQualifiedName = N.x;
+import * as namespaceImport from "./es6Module";
+import defaultExport, { namedExport, NS } from "./es6Module";
+import namedExportAlias = namespaceImport.namedExport;
+
+const num: namespaceImport.T = 0;
+
+{
+    const { x: { y, z } } = { x: { y: 1, z: 2 } };
+    function f(a: any, b: { x: any }) {
+        const { g } = a;
+              ~~~~~ [0]
+                      ~ [0]
+        const { x } = b;
+    }
+}
+
+// Ignore number/string literal in type
+function returnsA(): 0 | "a" | null | undefined {
+    return null;
+}
+
+label: for (const x of [1]) {
+    continue label;
+}
+label: while(true) {
+    break label;
+}
+
+importAlias.property;
+
+namespaceImport.namedExport;
+
+namedExport.foo;
+~~~~~~~~~~~ [0]
+namedExportAlias.foo;
+~~~~~~~~~~~~~~~~ [0]
+namedExport, namedExportAlias;
+
+
+declare const x: any;
+declare const hasProp: { x: any };
+
+hasProp.x(1);
+~~~~~~~~~ [0]
+
+declare function takesAny(a: any, ...bs: any[]): void;
+declare function takesNumber(a: number, ...bs: number[]): void;
+
+takesAny(x, x);
+takesNumber(x, x);
+            ~ [0]
+               ~ [0]
+
+declare function templateTakesAny(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
+declare function templateTakesNumber(arr: TemplateStringsArray, a: number, ...bs: number[]): any;
+
+templateTakesAny`${x}${x}`;
+templateTakesNumber`${x}${x}`;
+                      ~ [0]
+                          ~ [0]
+templateTakesAny`${x}`.prop;
+~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+declare function decoratorTakesAny(value: any): Function;
+declare function decoratorTakesNumber(value: number): Function;
+declare const decoratorIsAny: any;
+
+class C {
+    @decoratorTakesAny(x) f() {}
+    @decoratorTakesNumber(x) g() {}
+                          ~ [0]
+    @decoratorIsAny h() {}
+     ~~~~~~~~~~~~~~ [0]
+}
+
+x instanceof Date;
+Date instanceof x;
+                ~ [0]
+
+const retBool: () => boolean = x;
+                               ~ [0]
+
+function params(a: any = x, b: boolean = x) {}
+                                         ~ [0]
+
+function f(x: any, retAny: () => any): any {
+    x;
+    (x);
+
+    x.foo;
+    ~ [0]
+    x(0);
+    ~ [0]
+    x``;
+    ~ [0]
+    x + 3;
+    ~ [0]
+    new x();
+        ~ [0]
+
+    retAny();
+    retAny()[0];
+    ~~~~~~~~ [0]
+
+    // Same for constructors
+    new X(x);
+    new Y(x);
+          ~ [0]
+
+    // Assignment: assign to 'any' OK, assign to other not OK.
+    const v0: any = x;
+    const v1: boolean = x;
+                        ~ [0]
+    let v2: any, v3: boolean;
+    v2 = x;
+    v3 = x;
+         ~ [0]
+
+    // Return OK if return type is 'any'
+    return x;
+}
+
+function f2(x: any): boolean {
+    return x;
+           ~ [0]
+}
+
+class X {
+    constructor(y: any) {}
+
+    prop0: any = x;
+    prop1: number = x;
+                    ~ [0]
+
+}
+class Y {
+    constructor(x: number) {}
+}
+
+function g(x: any): string {
+    if (x === undefined) {
+        return "undefined";
+    }
+    if (typeof x === "string") {
+        return `string: ${x}`;
+    }
+    if (x instanceof Array) {
+        // Once it's been tested, OK to use it as an array.
+        return `Array, length ${x.length}`;
+    }
+    if (Math.random() > 0.5) {
+        // Allow explicit cast to 'any'
+        (x as any).whatchamacallit;
+        // Allow explicit cast
+        return (<string> x).toLowerCase() + (x as string).toUpperCase();
+    }
+
+    "" + x;
+    x + "";
+    let s = "";
+    s += x;
+    x += s;
+    ~ [0]
+
+    return `other: ${x}`;
+}
+
+function deleteOk(obj: { x: any }) {
+    delete obj.x;
+}
+
+const obj: { x: number, y: number } = {
+    x: "number" as any, // Cast OK, and doesn't warn for LHS either.
+    [x]: 1,
+};
+
+switch (x) {}
+switch (x.y) {
+        ~ [0]
+    case x:
+        x.y;
+        ~ [0]
+        break;
+    case x.y:
+         ~ [0]
+        break;
+}
+
+declare global {}
+
+if (x) {}
+if (!x) {}
+if (!x || x) {}
+for (;x;) {}
+while (x) {}
+do {} while (x);
+
+takesNumber(x ? x : x);
+                ~ [0]
+                    ~ [0]
+typeof x.prop;
+       ~ [0]
+
+function *gen1(): any {
+    yield x;
+    (yield).foo;
+     ~~~~~ [0]
+}
+
+function *gen2() {
+    yield x;
+}
+
+function *gen3(): IterableIterator<number> {
+    yield x;
+          ~ [0]
+}
+
+function *gen4(): IterableIterator<any> {
+    yield x;
+}
+
+void x;
+
+{
+    let { a = x, b = x, c: d = x }: { a: number, b: any, c: string } = { a: 1, b: true, c: '' };
+              ~ [0]
+                               ~ [0]
+}
+{
+    let {a, b} = x;
+        ~~~~~~ [0]
+                 ~ [0]
+    let {c, d}: any = x;
+        ~~~~~~ [0]
+    let {x: {e, f}} = {x};
+            ~~~~~~ [0]
+                       ~ [0]
+    let {x: {g, h}}: {x: any} = {x};
+            ~~~~~~ [0]
+    ({a, b} = x);
+              ~ [0]
+    ({x: {a, b}} = {x});
+                    ~ [0]
+}
+{
+    let obj = {x};
+    let {x: {a, b}} = obj;
+            ~~~~~~ [0]
+    ({x: {a, b}} = obj); // TODO show error on the inner destructuring
+}
+{
+    let { a = x, b = x, c: d = x } = { a: 1, b: true, c: '' };
+              ~ [0]
+                     ~ [0]
+                               ~ [0]
+}
+{
+    let obj: {a: any, b: any} = null!;
+    let {a = x, b = x}: {a: number, b: any} = obj;
+             ~ [0]
+}
+{
+    let a: number;
+    let b: any;
+    let c: string;
+    ({a = x, b: b = x, d: c = x} = {a: 1, b: x, d: ''});
+          ~ [0]
+                              ~ [0]
+}
+{
+    class C {
+        prop: number = x;
+                       ~ [0]
+        prop2 = x;
+        prop3: any = x;
+    }
+    class D extends C {
+        prop = x;
+               ~ [0]
+        prop2 = x;
+        prop3 = x;
+    }
+}
+{
+    let obj = {x};
+    let arr = [x];
+}
+for (const {prop} of [x]) {}
+           ~~~~~~ [0]
+
+function predicate(x: any): x is number {
+    return typeof x === 'number';
+}
+
+function hasThisParameter(this: any) {
+    const v: number = this;
+                      ~~~~ [0]
+}
+
+(async function() {
+    return x;
+});
+(async function(): Promise<any> {
+    return x;
+});
+(async function(): Promise<number> {
+    return x;
+           ~ [0]
+})
+
+{
+    let obj = {...x};
+    ({...obj} = x);
+         ~~~ [0]
+    let arr = [...x];
+                  ~ [0]
+    predicate(...x);
+                 ~ [0]
+}
+
+namespace TestNS {
+    export interface ITest {}
+}
+namespace TestNS2 {
+    "";
+    export interface ITest {}
+}
+{
+    class Test implements TestNS.ITest {}
+    type T = any;
+    class Test2 implements T {}
+                           ~ [0]
+    let C = null as any;
+    class Test3 extends C {}
+                        ~ [0]
+
+    interface I {}
+    class Test4 implements I {}
+    class Test5 implements TestNS2.ITest {}
+    class Test6 implements NS.ITest {}
+}
+
+[0]: Unsafe use of expression of type 'any'.

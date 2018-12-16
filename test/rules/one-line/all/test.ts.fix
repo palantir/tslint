@@ -30,9 +30,10 @@ for(var x= 0; x < 1; ++x) {
 }
 
 switch(y) {
-    case 0:
+    case 0: {
         x--;
         break;
+    }
     default:
         x++;
         break;
@@ -135,4 +136,17 @@ if (true) {
     true;
 } else {
     false;
+}
+
+// don't crash on parse error
+interface InvalidInterface = {
+  foo: string,
+}
+
+class InvalidClass = {
+  foo: string,
+}
+
+foo = class InvalidClassExpression = {
+  foo: string,
 }

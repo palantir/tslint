@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { isVariableDeclarationList, isVariableStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -55,7 +54,8 @@ export const VISIBILITY_INTERNAL = "internal";
 
 export type All = typeof ALL;
 
-export type DocType = All
+export type DocType =
+    | All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
     | typeof ARGUMENT_ENUM_MEMBERS
@@ -67,18 +67,15 @@ export type DocType = All
     | typeof ARGUMENT_TYPES
     | typeof ARGUMENT_VARIABLES;
 
-export type Location = All
-    | typeof LOCATION_INSTANCE
-    | typeof LOCATION_STATIC;
+export type Location = All | typeof LOCATION_INSTANCE | typeof LOCATION_STATIC;
 
-export type Privacy = All
+export type Privacy =
+    | All
     | typeof PRIVACY_PRIVATE
     | typeof PRIVACY_PROTECTED
     | typeof PRIVACY_PUBLIC;
 
-export type Visibility = All
-    | typeof VISIBILITY_EXPORTED
-    | typeof VISIBILITY_INTERNAL;
+export type Visibility = All | typeof VISIBILITY_EXPORTED | typeof VISIBILITY_INTERNAL;
 
 export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
@@ -91,10 +88,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 [TAGS_FOR_CONTENT]: {
                     see: ".*",
                 },
-                [TAGS_FOR_EXISTENCE]: [
-                    "deprecated",
-                    "inheritdoc",
-                ],
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
             },
         },
         [ARGUMENT_PROPERTIES]: {
@@ -102,10 +96,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 [TAGS_FOR_CONTENT]: {
                     see: ".*",
                 },
-                [TAGS_FOR_EXISTENCE]: [
-                    "deprecated",
-                    "inheritdoc",
-                ],
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
             },
         },
     };
@@ -129,11 +120,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 },
             },
             [DESCRIPTOR_VISIBILITIES]: {
-                enum: [
-                    ALL,
-                    VISIBILITY_EXPORTED,
-                    VISIBILITY_INTERNAL,
-                ],
+                enum: [ALL, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL],
                 type: "string",
             },
         },
@@ -159,20 +146,11 @@ export class Rule extends Lint.Rules.TypedRule {
                 },
             },
             [DESCRIPTOR_LOCATIONS]: {
-                enum: [
-                    ALL,
-                    LOCATION_INSTANCE,
-                    LOCATION_STATIC,
-                ],
+                enum: [ALL, LOCATION_INSTANCE, LOCATION_STATIC],
                 type: "string",
             },
             [DESCRIPTOR_PRIVACIES]: {
-                enum: [
-                    ALL,
-                    PRIVACY_PRIVATE,
-                    PRIVACY_PROTECTED,
-                    PRIVACY_PUBLIC,
-                ],
+                enum: [ALL, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC],
                 type: "string",
             },
         },
@@ -182,9 +160,9 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "completed-docs",
-        description: "Enforces documentation for important items be filled out.",
+        description: "Enforces JSDoc comments for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for [${Object.keys(Rule.defaultArguments).join(", ")}]],
+            \`true\` to enable for \`[${Object.keys(Rule.defaultArguments).join(", ")}]\`,
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
@@ -270,16 +248,23 @@ export class Rule extends Lint.Rules.TypedRule {
                         [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
                         [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
                     },
-                    [DESCRIPTOR_TAGS]: {
-                        [TAGS_FOR_CONTENT]: {
-                            see: ["#.*"],
+                    [ARGUMENT_PROPERTIES]: {
+                        [DESCRIPTOR_TAGS]: {
+                            [TAGS_FOR_CONTENT]: {
+                                see: ["#.*"],
+                            },
+                            [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                         },
-                        [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
                     },
                 },
             ],
         ],
+        rationale: Lint.Utils.dedent`
+            Helps ensure important components are documented.
 
+            Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+            Comments that only restate the names of variables add nothing to code, and can easily become outdated.
+        `,
         type: "style",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -295,7 +280,9 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithFunction(sourceFile, walk, exclusionsMap, program.getTypeChecker());
     }
 
-    private getExclusionsMap(ruleArguments: Array<DocType | IInputExclusionDescriptors>): ExclusionsMap {
+    private getExclusionsMap(
+        ruleArguments: Array<DocType | IInputExclusionDescriptors>,
+    ): ExclusionsMap {
         if (ruleArguments.length === 0) {
             ruleArguments = [Rule.defaultArguments];
         }
@@ -319,12 +306,11 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
             case ts.SyntaxKind.EnumDeclaration:
                 checkNode(node as ts.EnumDeclaration, ARGUMENT_ENUMS);
-                break;
-
-            case ts.SyntaxKind.EnumMember:
-                // Enum members don't have modifiers, so use the parent
-                // enum declaration when checking the requirements.
-                checkNode(node as ts.EnumMember, ARGUMENT_ENUM_MEMBERS, node.parent);
+                for (const member of (node as ts.EnumDeclaration).members) {
+                    // Enum members don't have modifiers, so use the parent
+                    // enum declaration when checking the requirements.
+                    checkNode(member, ARGUMENT_ENUM_MEMBERS, node);
+                }
                 break;
 
             case ts.SyntaxKind.FunctionDeclaration:
@@ -335,12 +321,22 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
                 break;
 
+            case ts.SyntaxKind.MethodSignature:
+                checkNode(node as ts.MethodSignature, ARGUMENT_METHODS);
+                break;
+
             case ts.SyntaxKind.MethodDeclaration:
-                checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                }
                 break;
 
             case ts.SyntaxKind.ModuleDeclaration:
                 checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
+                break;
+
+            case ts.SyntaxKind.PropertySignature:
+                checkNode(node as ts.PropertySignature, ARGUMENT_PROPERTIES);
                 break;
 
             case ts.SyntaxKind.PropertyDeclaration:
@@ -351,14 +347,34 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
                 checkNode(node as ts.TypeAliasDeclaration, ARGUMENT_TYPES);
                 break;
 
-            case ts.SyntaxKind.VariableDeclaration:
-                checkVariable(node as ts.VariableDeclaration);
+            case ts.SyntaxKind.VariableStatement:
+                // Only check variables at the namespace/module-level or file-level
+                // and not variables declared inside functions and other things.
+                switch (node.parent!.kind) {
+                    case ts.SyntaxKind.SourceFile:
+                    case ts.SyntaxKind.ModuleBlock:
+                        for (const declaration of (node as ts.VariableStatement).declarationList
+                            .declarations) {
+                            checkNode(declaration, ARGUMENT_VARIABLES, node);
+                        }
+                }
+                break;
+
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+                if (node.parent!.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                }
         }
 
         return ts.forEachChild(node, cb);
     }
 
-    function checkNode(node: ts.NamedDeclaration, nodeType: DocType, requirementNode: ts.Node = node): void {
+    function checkNode(
+        node: ts.NamedDeclaration,
+        nodeType: DocType,
+        requirementNode: ts.Node = node,
+    ): void {
         const { name } = node;
         if (name === undefined) {
             return;
@@ -380,39 +396,31 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             return;
         }
 
-        const comments = symbol.getDocumentationComment();
+        const comments = symbol.getDocumentationComment(typeChecker);
         checkComments(node, describeNode(nodeType), comments, requirementNode);
     }
 
-    function checkVariable(node: ts.VariableDeclaration) {
-        // Only check variables in variable declaration lists
-        // and not variables in catch clauses and for loops.
-        const list = node.parent!;
-        if (!isVariableDeclarationList(list)) {
-            return;
-        }
-
-        const statement = list.parent!;
-        if (!isVariableStatement(statement)) {
-            return;
-        }
-
-        // Only check variables at the namespace/module-level or file-level
-        // and not variables declared inside functions and other things.
-        switch (statement.parent!.kind) {
-            case ts.SyntaxKind.SourceFile:
-            case ts.SyntaxKind.ModuleBlock:
-                checkNode(node, ARGUMENT_VARIABLES, statement);
-        }
-    }
-
-    function checkComments(node: ts.Node, nodeDescriptor: string, comments: ts.SymbolDisplayPart[], requirementNode: ts.Node) {
-        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
+    function checkComments(
+        node: ts.Node,
+        nodeDescriptor: string,
+        comments: ts.SymbolDisplayPart[],
+        requirementNode: ts.Node,
+    ) {
+        if (
+            comments
+                .map((comment: ts.SymbolDisplayPart) => comment.text)
+                .join("")
+                .trim() === ""
+        ) {
             addDocumentationFailure(node, nodeDescriptor, requirementNode);
         }
     }
 
-    function addDocumentationFailure(node: ts.Node, nodeType: string, requirementNode: ts.Node): void {
+    function addDocumentationFailure(
+        node: ts.Node,
+        nodeType: string,
+        requirementNode: ts.Node,
+    ): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
         const description = describeDocumentationFailure(requirementNode, nodeType);
@@ -425,7 +433,9 @@ function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
     let description = Rule.FAILURE_STRING_EXIST;
 
     if (node.modifiers !== undefined) {
-        description += `${node.modifiers.map((modifier) => describeModifier(modifier.kind)).join(" ")} `;
+        description += `${node.modifiers
+            .map(modifier => describeModifier(modifier.kind))
+            .join(" ")} `;
     }
 
     return `${description}${nodeType}.`;

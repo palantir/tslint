@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBindingPattern } from "tsutils";
+import { getChildOfKind, isBindingPattern, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,11 +24,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-unnecessary-initializer",
-        description: "Forbids a 'var'/'let' statement or destructuring initializer to be initialized to 'undefined'.",
+        description:
+            "Forbids a 'var'/'let' statement or destructuring initializer to be initialized to 'undefined'.",
         hasFix: true,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Values in JavaScript default to \`undefined\`.
+            There's no need to do so manually.
+        `,
         type: "style",
         typescriptOnly: false,
     };
@@ -52,7 +57,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 break;
 
             case ts.SyntaxKind.VariableDeclaration:
-                if (!isBindingPattern((node as ts.VariableDeclaration).name) && !Lint.isNodeFlagSet(node.parent!, ts.NodeFlags.Const)) {
+                if (
+                    !isBindingPattern((node as ts.VariableDeclaration).name) &&
+                    !isNodeFlagSet(node.parent!, ts.NodeFlags.Const)
+                ) {
                     checkInitializer(node as ts.VariableDeclaration);
                 }
                 break;
@@ -82,15 +90,21 @@ function walk(ctx: Lint.WalkContext<void>): void {
         }
     }
 
-    function failWithFix(node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration) {
+    function failWithFix(
+        node: ts.VariableDeclaration | ts.BindingElement | ts.ParameterDeclaration,
+    ) {
         const fix = Lint.Replacement.deleteFromTo(
-            Lint.childOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
-            node.end);
+            getChildOfKind(node, ts.SyntaxKind.EqualsToken)!.pos,
+            node.end,
+        );
         ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
     }
 }
 
-function parametersAllOptionalAfter(parameters: ReadonlyArray<ts.ParameterDeclaration>, idx: number): boolean {
+function parametersAllOptionalAfter(
+    parameters: ReadonlyArray<ts.ParameterDeclaration>,
+    idx: number,
+): boolean {
     for (let i = idx + 1; i < parameters.length; i++) {
         if (parameters[i].questionToken !== undefined) {
             return true;
@@ -103,7 +117,9 @@ function parametersAllOptionalAfter(parameters: ReadonlyArray<ts.ParameterDeclar
 }
 
 function isUndefined(node: ts.Node | undefined): boolean {
-    return node !== undefined &&
+    return (
+        node !== undefined &&
         node.kind === ts.SyntaxKind.Identifier &&
-        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword;
+        (node as ts.Identifier).originalKeywordKind === ts.SyntaxKind.UndefinedKeyword
+    );
 }

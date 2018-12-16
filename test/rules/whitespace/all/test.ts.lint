@@ -120,6 +120,13 @@ import moduleD, {importD}from "libD";
 import {importD, importE} from "libD";
         ~                    [missing whitespace]
                         ~    [missing whitespace]
+import {importF as F} from "libF";
+        ~                    [missing whitespace]
+                    ~    [missing whitespace]
+import {importF as F,importG as G} from "libF";
+        ~                             [missing whitespace]
+                     ~                [missing whitespace]
+                                 ~    [missing whitespace]
 
 import {
   importA,
@@ -192,3 +199,13 @@ type C = {result: string}&{type: "A"|"B"};
                           ~                [missing whitespace]
                                     ~      [missing whitespace]
                                      ~     [missing whitespace]
+
+class a {
+    private x= 1;
+             ~     [missing whitespace]
+    y= 1;
+     ~     [missing whitespace]
+    public z=0;
+            ~     [missing whitespace]
+             ~     [missing whitespace]
+}

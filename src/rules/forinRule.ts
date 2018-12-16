@@ -35,7 +35,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`\`\`
             Prevents accidental iteration over properties inherited from an object's prototype.
             See [MDN's \`for...in\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in)
-            documentation for more information about \`for...in\` loops.`,
+            documentation for more information about \`for...in\` loops.
+
+            Also consider using a [\`Map\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
+            or [\`Set\`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set)
+            if you're storing collections of objects.
+            Using \`Object\`s can cause occasional edge case bugs, such as if a key is named "hasOwnProperty".
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -44,7 +50,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "for (... in ...) statements must be filtered with an if statement";
+    public static FAILURE_STRING =
+        "for (... in ...) statements must be filtered with an if statement";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -60,16 +67,25 @@ function walk(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function isFiltered({statements}: ts.Block): boolean {
+function isFiltered({ statements }: ts.Block): boolean {
     switch (statements.length) {
-        case 0: return true;
-        case 1: return statements[0].kind === ts.SyntaxKind.IfStatement;
+        case 0:
+            return true;
+        case 1:
+            return statements[0].kind === ts.SyntaxKind.IfStatement;
         default:
-            return statements[0].kind === ts.SyntaxKind.IfStatement && nodeIsContinue((statements[0] as ts.IfStatement).thenStatement);
+            return (
+                statements[0].kind === ts.SyntaxKind.IfStatement &&
+                nodeIsContinue((statements[0] as ts.IfStatement).thenStatement)
+            );
     }
 }
 
 function nodeIsContinue(node: ts.Node) {
-    return node.kind === ts.SyntaxKind.ContinueStatement ||
-        isBlock(node) && node.statements.length === 1 && node.statements[0].kind === ts.SyntaxKind.ContinueStatement;
+    return (
+        node.kind === ts.SyntaxKind.ContinueStatement ||
+        (isBlock(node) &&
+            node.statements.length === 1 &&
+            node.statements[0].kind === ts.SyntaxKind.ContinueStatement)
+    );
 }

@@ -67,6 +67,8 @@ import { importB } from "libB";
 import { importC } from "libC";
 import moduleD, { importD } from "libD";
 import { importD, importE } from "libD";
+import { importF as F } from "libF";
+import { importF as F, importG as G } from "libF";
 
 import {
   importA,
@@ -121,3 +123,9 @@ type A = number | string;
 type B = number | string | {result: string};
 
 type C = {result: string} & {type: "A" | "B"};
+
+class a {
+    private x = 1;
+    y = 1;
+    public z = 0;
+}

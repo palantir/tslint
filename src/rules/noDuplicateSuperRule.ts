@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration } from "tsutils";
+import { isConstructorDeclaration, isIterationStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -34,7 +34,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_DUPLICATE = "Multiple calls to 'super()' found. It must be called only once.";
+    public static FAILURE_STRING_DUPLICATE =
+        "Multiple calls to 'super()' found. It must be called only once.";
     public static FAILURE_STRING_LOOP = "'super()' called in a loop. It must be called only once.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -44,14 +45,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-       if (isConstructorDeclaration(node) && node.body !== undefined) {
-           getSuperForNode(node.body);
-       }
-       return ts.forEachChild(node, cb);
+        if (isConstructorDeclaration(node) && node.body !== undefined) {
+            getSuperForNode(node.body);
+        }
+        return ts.forEachChild(node, cb);
     });
 
     function getSuperForNode(node: ts.Node): Super {
-        if (Lint.isLoop(node)) {
+        if (isIterationStatement(node)) {
             const bodySuper = combineSequentialChildren(node);
             if (typeof bodySuper === "number") {
                 return Kind.NoSuper;
@@ -76,13 +77,27 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 return Kind.NoSuper;
 
             case ts.SyntaxKind.SuperKeyword:
-                return node.parent!.kind === ts.SyntaxKind.CallExpression && (node.parent as ts.CallExpression).expression === node
+                return node.parent!.kind === ts.SyntaxKind.CallExpression &&
+                    (node.parent as ts.CallExpression).expression === node
                     ? { node: node.parent! as ts.CallExpression, break: false }
                     : Kind.NoSuper;
 
+            case ts.SyntaxKind.ConditionalExpression: {
+                const { condition, whenTrue, whenFalse } = node as ts.ConditionalExpression;
+                const inCondition = getSuperForNode(condition);
+                const inBranches = worse(getSuperForNode(whenTrue), getSuperForNode(whenFalse));
+                if (typeof inCondition !== "number" && typeof inBranches !== "number") {
+                    addDuplicateFailure(inCondition.node, inBranches.node);
+                }
+                return worse(inCondition, inBranches);
+            }
+
             case ts.SyntaxKind.IfStatement: {
                 const { thenStatement, elseStatement } = node as ts.IfStatement;
-                return worse(getSuperForNode(thenStatement), elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper);
+                return worse(
+                    getSuperForNode(thenStatement),
+                    elseStatement !== undefined ? getSuperForNode(elseStatement) : Kind.NoSuper,
+                );
             }
 
             case ts.SyntaxKind.SwitchStatement:
@@ -131,7 +146,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
      */
     function combineSequentialChildren(node: ts.Node): Super {
         let seenSingle: Single | undefined;
-        const res = ts.forEachChild<Super | undefined>(node, (child) => {
+        const res = ts.forEachChild<Super | undefined>(node, child => {
             const childSuper = getSuperForNode(child);
             switch (childSuper) {
                 case Kind.NoSuper:
@@ -183,6 +198,14 @@ interface Single {
 // If/else run separately, so return the branch more likely to result in eventual errors.
 function worse(a: Super, b: Super): Super {
     return typeof a === "number"
-        ? typeof b === "number" ? (a < b ? b : a) : b
-        : typeof b === "number" ? a : a.break ? b : a;
+        ? typeof b === "number"
+            ? a < b
+                ? b
+                : a
+            : b
+        : typeof b === "number"
+            ? a
+            : a.break
+                ? b
+                : a;
 }

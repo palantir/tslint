@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import {
     isPropertyAssignment,
     isReassignmentTarget,
     isShorthandPropertyAssignment,
+    isSymbolFlagSet,
     isTaggedTemplateExpression,
     isVariableDeclaration,
     isVariableDeclarationList,
@@ -44,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
         rationale: "Deprecated APIs should be avoided, and usage updated.",
         optionsDescription: "",
         options: null,
-        optionExamples: [],
+        optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -109,12 +110,16 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.ImportEqualsDeclaration:
             return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.PropertyAssignment:
-            return (parent as ts.PropertyAssignment).name === identifier &&
-                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression);
+            return (
+                (parent as ts.PropertyAssignment).name === identifier &&
+                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression)
+            );
         case ts.SyntaxKind.BindingElement:
             // return true for `b` in `const {a: b} = obj"`
-            return (parent as ts.BindingElement).name === identifier &&
-                (parent as ts.BindingElement).propertyName !== undefined;
+            return (
+                (parent as ts.BindingElement).name === identifier &&
+                (parent as ts.BindingElement).propertyName !== undefined
+            );
         default:
             return false;
     }
@@ -126,7 +131,8 @@ function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefine
         node = parent;
         parent = node.parent!;
     }
-    return isTaggedTemplateExpression(parent) || (isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node
+    return isTaggedTemplateExpression(parent) ||
+        ((isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node)
         ? parent
         : undefined;
 }
@@ -143,20 +149,26 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
     const parent = node.parent!;
     if (parent.kind === ts.SyntaxKind.BindingElement) {
         symbol = tc.getTypeAtLocation(parent.parent!).getProperty(node.text);
-    } else if (isPropertyAssignment(parent) && parent.name === node ||
-               isShorthandPropertyAssignment(parent) && parent.name === node && isReassignmentTarget(node)) {
+    } else if (
+        (isPropertyAssignment(parent) && parent.name === node) ||
+        (isShorthandPropertyAssignment(parent) &&
+            parent.name === node &&
+            isReassignmentTarget(node))
+    ) {
         symbol = tc.getPropertySymbolOfDestructuringAssignment(node);
     } else {
         symbol = tc.getSymbolAtLocation(node);
     }
 
-    if (symbol !== undefined && Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
+    if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
-    if (symbol === undefined ||
+    if (
+        symbol === undefined ||
         // if this is a CallExpression and the declaration is a function or method,
         // stop here to avoid collecting JsDoc of all overload signatures
-        callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
+        (callExpression !== undefined && isFunctionOrMethod(symbol.declarations))
+    ) {
         return undefined;
     }
     return getSymbolDeprecation(symbol);
@@ -165,7 +177,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
 function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
     for (const tag of tags) {
         if (tag.name === "deprecated") {
-            return tag.text;
+            return tag.text === undefined ? "" : tag.text;
         }
     }
     return undefined;
@@ -188,7 +200,9 @@ function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
     }
 
     // for compatibility with typescript@<2.3.0
-    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
+    return signature.declaration === undefined
+        ? undefined
+        : getDeprecationFromDeclaration(signature.declaration);
 }
 
 function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {

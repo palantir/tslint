@@ -49,8 +49,11 @@ switch(y)
 {
 ~ [misplaced opening brace]
     case 0:
+    {
+    ~ [misplaced opening brace]
         x--;
         break;
+    }
     default:
         x++;
         break;
@@ -178,4 +181,17 @@ if (true) {
 }else {
  ~~~~   [missing whitespace]
     false;
+}
+
+// don't crash on parse error
+interface InvalidInterface = {
+  foo: string,
+}
+
+class InvalidClass = {
+  foo: string,
+}
+
+foo = class InvalidClassExpression = {
+  foo: string,
 }

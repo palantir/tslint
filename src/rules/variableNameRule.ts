@@ -17,14 +17,25 @@
 
 // tslint:disable object-literal-sort-keys
 
+import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { isLowerCase, isUpperCase } from "../utils";
 
-const BANNED_KEYWORDS = ["any", "Number", "number", "String", "string", "Boolean", "boolean", "Undefined", "undefined"];
+const BANNED_KEYWORDS = [
+    "any",
+    "Number",
+    "number",
+    "String",
+    "string",
+    "Boolean",
+    "boolean",
+    "Undefined",
+    "undefined",
+];
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
-const bannedKeywordsStr = BANNED_KEYWORDS.map((kw) => `\`${kw}\``).join(", ");
+const bannedKeywordsStr = BANNED_KEYWORDS.map(kw => `\`${kw}\``).join(", ");
 
 const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
@@ -110,7 +121,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     handleVariableNameKeyword(name);
                     // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
                     // Only check if the name is rebound (`var {Foo: bar} = ...;`).
-                    if (node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern || propertyName !== undefined) {
+                    if (
+                        node.parent!.kind !== ts.SyntaxKind.ObjectBindingPattern ||
+                        propertyName !== undefined
+                    ) {
                         handleVariableNameFormat(name, initializer);
                     }
                 }
@@ -119,7 +133,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
             case ts.SyntaxKind.VariableStatement:
                 // skip 'declare' keywords
-                if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
+                if (hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword)) {
                     return;
                 }
                 break;
@@ -127,7 +141,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             case ts.SyntaxKind.Parameter:
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.VariableDeclaration: {
-                const { name, initializer } = node as ts.ParameterDeclaration | ts.PropertyDeclaration | ts.VariableDeclaration;
+                const { name, initializer } = node as
+                    | ts.ParameterDeclaration
+                    | ts.PropertyDeclaration
+                    | ts.VariableDeclaration;
                 if (name.kind === ts.SyntaxKind.Identifier) {
                     handleVariableNameFormat(name, initializer);
                     // do not check property declarations for keywords, they are allowed to be keywords

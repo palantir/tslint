@@ -5,19 +5,18 @@
             "name": "Debug CLI",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/build/src/tslint-cli.js",
+            "program": "${workspaceRoot}/build/src/tslintCli.js",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -31,13 +30,12 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -51,13 +49,12 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -71,13 +68,12 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*/js"]
         }

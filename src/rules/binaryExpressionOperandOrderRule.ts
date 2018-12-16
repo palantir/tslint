@@ -31,12 +31,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale: Lint.Utils.dedent`
+            Expressions like \`1 + x\` are sometimes referred to as "Yoda" expressions because they read
+            opposite to how we would normally speak the expression.
+
+            Sticking to a consistent grammar for conditions helps keep code readable and understandable.
+        `,
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Literal expression should be on the right-hand side of a binary expression.";
+    public static FAILURE_STRING =
+        "Literal expression should be on the right-hand side of a binary expression.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -45,7 +52,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
-        if (isBinaryExpression(node) && isLiteral(node.left) && !isLiteral(node.right) && !isAllowedOrderedOperator(node)) {
+        if (
+            isBinaryExpression(node) &&
+            isLiteral(node.left) &&
+            !isLiteral(node.right) &&
+            !isAllowedOrderedOperator(node)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         ts.forEachChild(node, cb);

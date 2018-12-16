@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
-
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
 
@@ -42,7 +41,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a
             function. High cyclomatic complexity indicates confusing code which may be prone to
-            errors or difficult to modify.`,
+            errors or difficult to modify.
+
+            It's better to have smaller, single-purpose functions with self-documenting names.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
             is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,
@@ -57,8 +58,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
-        return `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
-            `${actual} which is higher than the threshold of ${expected}`;
+        return (
+            `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
+            `${actual} which is higher than the threshold of ${expected}`
+        );
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -67,7 +70,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
-        const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+        const isThresholdValid =
+            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
     }
 
@@ -80,7 +84,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-    const { options: { threshold } } = ctx;
+    const {
+        options: { threshold },
+    } = ctx;
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {

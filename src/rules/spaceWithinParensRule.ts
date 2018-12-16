@@ -28,7 +28,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "space-within-parens",
-        description: "Enforces spaces within parentheses or disallow them.",
+        description:
+            "Enforces spaces within parentheses or disallow them.  Empty parentheses () are always allowed.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
             You may enforce the amount of whitespace within parentheses.
@@ -41,14 +42,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_NO_SPACE = "Whitespace within parentheses is not allowed";
     public static FAILURE_NEEDS_SPACE(count: number): string {
-         return `Needs ${count} whitespace${count > 1 ? "s" : ""} within parentheses`;
+        return `Needs ${count} whitespace${count > 1 ? "s" : ""} within parentheses`;
     }
     public static FAILURE_NO_EXTRA_SPACE(count: number): string {
         return `No more than ${count} whitespace${count > 1 ? "s" : ""} within parentheses allowed`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new SpaceWithinParensWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments[0])));
+        return this.applyWithWalker(
+            new SpaceWithinParensWalker(
+                sourceFile,
+                this.ruleName,
+                parseOptions(this.ruleArguments[0]),
+            ),
+        );
     }
 }
 
@@ -73,9 +80,13 @@ class SpaceWithinParensWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         forEachToken(sourceFile, (token: ts.Node) => {
             if (token.kind === ts.SyntaxKind.OpenParenToken) {
-                this.checkOpenParenToken(token);
+                if (sourceFile.text.charAt(token.end) !== ")") {
+                    this.checkOpenParenToken(token);
+                }
             } else if (token.kind === ts.SyntaxKind.CloseParenToken) {
-                this.checkCloseParenToken(token);
+                if (sourceFile.text.charAt(token.end - 2) !== "(") {
+                    this.checkCloseParenToken(token);
+                }
             }
         });
     }

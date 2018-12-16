@@ -5,6 +5,9 @@ function print(strs) {}
 [].forEach(x => console.log(x));
                 ~~~~~~~~~~~~~~ [0]
 
+[].forEach(x => x && console.log(x));
+                     ~~~~~~~~~~~~~~ [0]
+
 async function f(): Promise<void> {
     const x = doIt();
               ~~~~~~  [0]
@@ -13,6 +16,9 @@ async function f(): Promise<void> {
     return print``;
            ~~~~~~~  [0]
 }
+
+true && console.log(0);
+false || console.log(0);
 
 declare function doIt(): void;
 declare function doAsync(): Promise<void>;

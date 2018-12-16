@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isNamespaceImport } from "tsutils";
+import { getChildOfKind, isImportDeclaration, isNamespaceImport } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -83,7 +83,10 @@ class Walker extends Lint.AbstractWalker<void> {
             this.addFailure(nodeStart, importClauseStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
         }
 
-        const fromString = text.substring(importClauseEnd - nodeStart, moduleSpecifierStart - nodeStart);
+        const fromString = text.substring(
+            importClauseEnd - nodeStart,
+            moduleSpecifierStart - nodeStart,
+        );
 
         if (/from$/.test(fromString)) {
             this.addFailureAt(importClauseEnd, fromString.length, Rule.ADD_SPACE_AFTER_FROM);
@@ -125,7 +128,10 @@ class Walker extends Lint.AbstractWalker<void> {
         if (nodeStart + "import".length + 1 < moduleSpecifierStart) {
             this.addFailure(nodeStart, moduleSpecifierStart, Rule.TOO_MANY_SPACES_AFTER_IMPORT);
         } else if (nodeStart + "import".length === moduleSpecifierStart) {
-            this.addFailureAtNode(Lint.childOfKind(node, ts.SyntaxKind.ImportKeyword)!, Rule.ADD_SPACE_AFTER_IMPORT);
+            this.addFailureAtNode(
+                getChildOfKind(node, ts.SyntaxKind.ImportKeyword, this.sourceFile)!,
+                Rule.ADD_SPACE_AFTER_IMPORT,
+            );
         }
 
         if (LINE_BREAK_REGEX.test(node.getText())) {

@@ -17,6 +17,7 @@ function f(x: string | (() => void)): void;
 function f(x: (() => string) | (() => number)): void;
 function f(x: string & (() => void)): void;
 function f(x: (() => string) & (() => number)): void;
+function f(x: (() => string)[]): void;
 
 // Overloads OK
 interface K {
@@ -25,6 +26,9 @@ interface K {
 }
 
 // handle modifiers
-export type I = () => void;
+export type I0 = () => void;
+
+export type I1 = new () => void;
 
 export type T = () => void
+

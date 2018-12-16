@@ -19,19 +19,26 @@ import { isClassLikeDeclaration, isInterfaceDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "../utils";
+import { isPascalCased } from "../utils";
+import { codeExamples } from "./code-examples/className.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "class-name",
         description: "Enforces PascalCased class and interface names.",
-        rationale: "Makes it easy to differentiate classes from regular variables at a glance.",
+        rationale: Lint.Utils.dedent`
+            Makes it easy to differentiate classes from regular variables at a glance.
+
+            JavaScript and general programming convention is to refer to classes in PascalCase.
+            It's confusing to use camelCase or other conventions for class names.
+        `,
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -44,16 +51,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isClassLikeDeclaration(node) && node.name !== undefined ||
-            isInterfaceDeclaration(node)) {
+        if (
+            (isClassLikeDeclaration(node) && node.name !== undefined) ||
+            isInterfaceDeclaration(node)
+        ) {
             if (!isPascalCased(node.name!.text)) {
                 ctx.addFailureAtNode(node.name!, Rule.FAILURE_STRING);
             }
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function isPascalCased(name: string): boolean {
-    return isUpperCase(name[0]) && !name.includes("_");
 }

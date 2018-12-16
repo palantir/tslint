@@ -79,8 +79,28 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${ALLOW_THIS_DESTRUCTURING}\` allows using destructuring to access members of \`this\` (e.g. \`{ foo, bar } = this;\`).
             * \`${ALLOWED_THIS_NAMES}\` may be specified as a list of regular expressions to match allowed variable names.`,
-        rationale: "Assigning a variable to `this` instead of properly using arrow lambdas "
-            + "may be a symptom of pre-ES6 practices or not manging scope well.",
+        rationale: Lint.Utils.dedent`
+            Assigning a variable to \`this\` instead of properly using arrow lambdas may be a symptom of pre-ES6 practices
+            or not managing scope well.
+
+            Instead of storing a reference to \`this\` and using it inside a \`function () {\`:
+
+            \`\`\`
+            const self = this;
+
+            setTimeout(function () {
+                self.doWork();
+            });
+            \`\`\`
+
+            Use \`() =>\` arrow lambdas, as they preserve \`this\` scope for you:
+
+            \`\`\`
+            setTimeout(() => {
+                this.doWork();
+            });
+            \`\`\`
+        `,
         ruleName: "no-this-assignment",
         type: "functionality",
         typescriptOnly: false,
@@ -94,7 +114,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseConfigOptions((this.ruleArguments as [ConfigOptions])[0]);
-        const noThisAssignmentWalker = new NoThisAssignmentWalker(sourceFile, this.ruleName, options);
+        const noThisAssignmentWalker = new NoThisAssignmentWalker(
+            sourceFile,
+            this.ruleName,
+            options,
+        );
 
         return this.applyWithWalker(noThisAssignmentWalker);
     }
@@ -102,19 +126,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
     private readonly allowedThisNameTesters = this.options.allowedNames.map(
-        (allowedThisName) => new RegExp(allowedThisName));
+        allowedThisName => new RegExp(allowedThisName),
+    );
 
     public walk(sourceFile: ts.SourceFile): void {
         ts.forEachChild(sourceFile, this.visitNode);
     }
 
-    private visitNode = (node: ts.Node): void => {
+    private readonly visitNode = (node: ts.Node): void => {
         if (utils.isVariableDeclaration(node)) {
             this.visitVariableDeclaration(node);
         }
 
         ts.forEachChild(node, this.visitNode);
-    }
+    };
 
     private visitVariableDeclaration(node: ts.VariableDeclaration): void {
         if (node.initializer === undefined || node.initializer.kind !== ts.SyntaxKind.ThisKeyword) {
@@ -124,7 +149,10 @@ class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
         switch (node.name.kind) {
             case ts.SyntaxKind.Identifier:
                 if (this.variableNameIsBanned(node.name.text)) {
-                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY_IDENTIFIERS(node.name.text));
+                    this.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING_FACTORY_IDENTIFIERS(node.name.text),
+                    );
                 }
                 break;
 
