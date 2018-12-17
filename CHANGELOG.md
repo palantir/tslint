@@ -44,7 +44,7 @@
 -   [bugfix][`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) Don't require space between import and paren with in type imports (#4243)
 -   [bugfix] remove [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) from `tslint:all` (#4079)
 -   [bugfix][`callable-types`](https://palantir.github.io/tslint/rules/callable-types/) support interfaces containing a single construct signature (#4291) (#4352)
--   [bugfix] `import-sources-order`: Setting `import-sources-order: any` no longer invalidates `grouped-imports: true` (#4374)
+-   [bugfix][`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/): Setting `import-sources-order: any` no longer invalidates `grouped-imports: true` (#4374)
 -   [develop] Add issue templates (#4028)
 -   [develop] Add test for 3.0 (#4119)
 -   [develop] Changes the node version from 4 to 6 for TS 2.1 tests. (#4282)
