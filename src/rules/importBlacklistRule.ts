@@ -88,13 +88,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         "(or re-exporting). Import/re-export only the specific values you want, " +
         "instead of the whole module.";
 
+    public static FAILURE_STRING_REGEX = "This import is blacklisted by ";
+
     public static MAKE_NAMED_IMPORT_FAILURE_STRING(importName: string) {
         return importName === "default"
             ? "Importing (or re-exporting) the default export is blacklisted."
             : `The export "${importName}" is blacklisted.`;
     }
-
-    public static FAILURE_STRING_REGEX = "This import is blacklisted by ";
 
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
@@ -105,7 +105,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Array<string | { [moduleName: string]: string[] } | Array<string>>;
+type Options = Array<string | { [moduleName: string]: string[] } | string[]>;
 
 function walk(ctx: Lint.WalkContext<Options>) {
     interface BannedImports {
