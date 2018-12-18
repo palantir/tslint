@@ -1,6 +1,6 @@
 ---
 formatterName: junit
-description: Formats errors as through they were JUnit output.
+description: Formats errors as though they were JUnit output.
 descriptionDetails: |-
 
   Imitates the JUnit XML Output
@@ -9,8 +9,8 @@ sample: |
   <?xml version="1.0" encoding="utf-8"?>
   <testsuites package="tslint">
     <testsuite name="myFile.ts">
-      <testcase name="Line 1, Column 14: semicolon">
-        <failure type="warning">Missing semicolon</failure>
+      <testcase name="semicolon" classname="myFile.ts">
+        <failure type="warning">Missing semicolon Line 1, Column 14</failure>
       </testcase>
     </testsuite>
   </testsuites>

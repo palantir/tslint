@@ -4,13 +4,33 @@ description: |-
 
   Checks that type literal members are separated by semicolons.
   Enforces a trailing semicolon for multiline type literals.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: '`{singleLine: "always"}` enforces semicolon for one liners'
+options:
+  type: object
+  properties:
+    singleLine:
+      type: string
+      enum:
+        - always
+        - never
+hasFix: true
 optionExamples:
   - 'true'
 type: style
 typescriptOnly: true
 layout: rule
 title: 'Rule: type-literal-delimiter'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "singleLine": {
+        "type": "string",
+        "enum": [
+          "always",
+          "never"
+        ]
+      }
+    }
+  }
 ---

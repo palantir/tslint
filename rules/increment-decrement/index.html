@@ -1,0 +1,41 @@
+---
+description: Enforces using explicit += 1 or -= 1 operators.
+optionExamples:
+  - 'true'
+  - '[true, "allow-post"]'
+options:
+  items:
+    enum:
+      - allow-post
+    type: string
+  maxLength: 1
+  minLength: 0
+  type: array
+optionsDescription: |-
+
+  If no arguments are provided, both pre- and post-unary operators are banned.
+  If `"allow-post"` is provided, post-unary operators will be allowed.
+          
+rationale: |-
+
+  It's easy to type +i or -i instead of --i or ++i, and won't always result in invalid code.
+  Prefer standardizing small arithmetic operations with the explicit += and -= operators.
+          
+ruleName: increment-decrement
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: increment-decrement'
+optionsJSON: |-
+  {
+    "items": {
+      "enum": [
+        "allow-post"
+      ],
+      "type": "string"
+    },
+    "maxLength": 1,
+    "minLength": 0,
+    "type": "array"
+  }
+---

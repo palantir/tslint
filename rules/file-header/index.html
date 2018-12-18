@@ -6,16 +6,19 @@ optionsDescription: |-
   The first option, which is mandatory, is a regular expression that all headers should match.
   The second argument, which is optional, is a string that should be inserted as a header comment
   if fixing is enabled and no header that matches the first argument is found.
+  The third argument, which is optional, is a string that denotes whether or not a newline should
+  exist on the header.
 options:
   type: array
   items:
     - type: string
     - type: string
+    - type: string
   additionalItems: false
   minLength: 1
-  maxLength: 2
+  maxLength: 3
 optionExamples:
-  - '[true, "Copyright \\d{4}", "Copyright 2017"]'
+  - '[true, "Copyright \\d{4}", "Copyright 2018", "enforce-trailing-newline"]'
 hasFix: true
 type: style
 typescriptOnly: false
@@ -30,10 +33,13 @@ optionsJSON: |-
       },
       {
         "type": "string"
+      },
+      {
+        "type": "string"
       }
     ],
     "additionalItems": false,
     "minLength": 1,
-    "maxLength": 2
+    "maxLength": 3
   }
 ---

@@ -1,0 +1,19 @@
+---
+description: Prevents unnecessary and/or misleading scope bindings on functions.
+optionExamples:
+  - 'true'
+options: null
+optionsDescription: Not configurable.
+rationale: |-
+
+  `function` expressions that are immediately bound to `this` are equivalent to `() =>` arrow lambdas.
+  Additionally, there's no use in binding a scope to an arrow lambda, as it already has one.
+          
+requiresTypeInfo: true
+ruleName: unnecessary-bind
+type: style
+typescriptOnly: false
+layout: rule
+title: 'Rule: unnecessary-bind'
+optionsJSON: 'null'
+---
