@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             due to a number of required reviewers; longer build time due to a number of affected packages)
             and could result in ignored \`"no-default-export"\` rule in \`utils'\`.
 
-            Unlike \`"no-default-export"\`, the rule requires you to repalce default _import_ with named only in \`A\` you work on,
+            Unlike \`"no-default-export"\`, the rule requires you to replace default _import_ with named only in \`A\` you work on,
             and \`utils\` you import from.`,
         optionsDescription: "optionsDescription",
         options: {
