@@ -1,0 +1,50 @@
+---
+codeExamples:
+  - config: |-
+      ```json
+      "rules": { "function-constructor": true }
+      ```
+    description: Use inline lambdas instead of calling Function
+    fail: |-
+      ```ts
+      let doesNothing = new Function();
+      ```
+    pass: |-
+      ```ts
+      let doesNothing = () => {};
+      ```
+  - config: |-
+      ```json
+      "rules": { "function-constructor": true }
+      ```
+    description: Use parameters instead of constructor strings
+    fail: |-
+      ```ts
+      let addNumbers = new Function("a", "b", "return a + b");
+      ```
+    pass: |-
+      ```ts
+      let addNumbers = (a, b) => a + b;
+      ```
+description: |-
+
+  Prevents using the built-in Function constructor.
+          
+optionExamples:
+  - 'true'
+options: null
+optionsDescription: Not configurable.
+rationale: |-
+
+  Calling the constructor directly is similar to `eval`, which is a symptom of design issues.
+  String inputs don't receive type checking and can cause performance issues, particularly when dynamically created.
+
+  If you need to dynamically create functions, use "factory" functions that themselves return functions.
+          
+ruleName: function-constructor
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: function-constructor'
+optionsJSON: 'null'
+---

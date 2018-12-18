@@ -10,7 +10,7 @@ optionsDescription: |
     * the name of the function in an array with one element: `["functionName"]`
     * an object in the following format: `{"name": "functionName", "message": "optional explanation message"}`
   * banning methods:
-    * an array with the object name, method name and optional message: `["functionName", "methodName", "optional message"]`
+    * an array with the object name, method name and optional message: `["objectName", "methodName", "optional message"]`
     * an object in the following format: `{"name": ["objectName", "methodName"], "message": "optional message"}`
       * you can also ban deeply nested methods: `{"name": ["foo", "bar", "baz"]}` bans `foo.bar.baz()`
       * the first element can contain a wildcard (`*`) that matches everything. `{"name": ["*", "forEach"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.

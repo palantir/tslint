@@ -15,7 +15,8 @@ optionsDescription: |-
   * `"check-type"` checks for whitespace before a variable type specification.
   * `"check-typecast"` checks for whitespace between a typecast and its target.
   * `"check-type-operator"` checks for whitespace between type operators `|` and `&`.
-  * `"check-preblock"` checks for whitespace before the opening brace of a block
+  * `"check-preblock"` checks for whitespace before the opening brace of a block.
+  * `"check-postbrace"` checks for whitespace after an opening brace.
 options:
   type: array
   items:
@@ -31,8 +32,9 @@ options:
       - check-typecast
       - check-type-operator
       - check-preblock
+      - check-postbrace
   minLength: 0
-  maxLength: 10
+  maxLength: 11
 optionExamples:
   - '[true, "check-branch", "check-operator", "check-typecast"]'
 type: style
@@ -55,10 +57,11 @@ optionsJSON: |-
         "check-type",
         "check-typecast",
         "check-type-operator",
-        "check-preblock"
+        "check-preblock",
+        "check-postbrace"
       ]
     },
     "minLength": 0,
-    "maxLength": 10
+    "maxLength": 11
   }
 ---

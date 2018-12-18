@@ -6,6 +6,22 @@ optionsDescription: Not configurable.
 options: null
 type: typescript
 typescriptOnly: true
+codeExamples:
+  - description: Disallows empty interfaces.
+    config: |-
+      ```json
+      "rules": { "no-empty-interface": true }
+      ```
+    pass: |-
+      ```ts
+      interface I {
+          foo: string;
+      }
+      ```
+    fail: |-
+      ```ts
+      interface I { }
+      ```
 layout: rule
 title: 'Rule: no-empty-interface'
 optionsJSON: 'null'

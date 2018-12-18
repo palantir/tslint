@@ -8,6 +8,20 @@ optionExamples:
   - 'true'
 type: functionality
 typescriptOnly: false
+codeExamples:
+  - description: Disallows sparse arrays
+    config: |-
+      ```json
+      "rules": { "no-sparse-arrays": true }
+      ```
+    pass: |-
+      ```ts
+      const arr: string[] = ['elemenet1', 'element2'];
+      ```
+    fail: |-
+      ```ts
+      const arr: string[] = ['elemenet1',, 'element2'];
+      ```
 layout: rule
 title: 'Rule: no-sparse-arrays'
 optionsJSON: 'null'

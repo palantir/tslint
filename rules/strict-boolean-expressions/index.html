@@ -22,6 +22,8 @@ optionsDescription: |-
   * `allow-string` allows strings.
     - It does *not* allow unions containing `string`.
     - It does *not* allow string literal types.
+  * `allow-enum` allows enums.
+    - It does *not* allow unions containing `enum`.
   * `allow-number` allows numbers.
     - It does *not* allow unions containing `number`.
     - It does *not* allow enums or number literal types.
@@ -41,6 +43,7 @@ options:
       - allow-null-union
       - allow-undefined-union
       - allow-string
+      - allow-enum
       - allow-number
       - allow-boolean-or-undefined
   minLength: 0
@@ -53,6 +56,7 @@ optionExamples:
       "allow-null-union",
       "allow-undefined-union",
       "allow-string",
+      "allow-enum",
       "allow-number"
     ]
   - '[true, "allow-boolean-or-undefined"]'
@@ -70,6 +74,7 @@ optionsJSON: |-
         "allow-null-union",
         "allow-undefined-union",
         "allow-string",
+        "allow-enum",
         "allow-number",
         "allow-boolean-or-undefined"
       ]

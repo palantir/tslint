@@ -9,18 +9,38 @@ optionsDescription: |-
   * `camel-case`: File names must be camel-cased: `fileName.ts`.
   * `pascal-case`: File names must be Pascal-cased: `FileName.ts`.
   * `kebab-case`: File names must be kebab-cased: `file-name.ts`.
+  * `snake-case`: File names must be snake-cased: `file_name.ts`.
+
+  Or an object, where the key represents a regular expression that
+  matches the file name, and the value is the file name rule from
+  the previous list.
+
+  * { ".tsx": "pascal-case", ".ts": "camel-case" }
+          
 options:
   type: array
   items:
-    - type: string
-      enum:
-        - camel-case
-        - pascal-case
-        - kebab-case
+    anyOf:
+      - type: array
+        items:
+          - type: string
+            enum: &ref_0
+              - camel-case
+              - pascal-case
+              - kebab-case
+              - snake-case
+      - type: object
+        additionalProperties:
+          type: string
+          enum: *ref_0
+        minProperties: 1
 optionExamples:
   - '[true, "camel-case"]'
   - '[true, "pascal-case"]'
   - '[true, "kebab-case"]'
+  - '[true, "snake-case"]'
+  - '[true, {".tsx": "pascal-case", ".ts": "camel-case"}]'
+  - '[true, {".style.ts": "kebab-case", ".tsx": "pascal-case", ".*": "camel-case"}]'
 hasFix: false
 type: style
 typescriptOnly: false
@@ -29,15 +49,36 @@ title: 'Rule: file-name-casing'
 optionsJSON: |-
   {
     "type": "array",
-    "items": [
-      {
-        "type": "string",
-        "enum": [
-          "camel-case",
-          "pascal-case",
-          "kebab-case"
-        ]
-      }
-    ]
+    "items": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": [
+            {
+              "type": "string",
+              "enum": [
+                "camel-case",
+                "pascal-case",
+                "kebab-case",
+                "snake-case"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "camel-case",
+              "pascal-case",
+              "kebab-case",
+              "snake-case"
+            ]
+          },
+          "minProperties": 1
+        }
+      ]
+    }
   }
 ---

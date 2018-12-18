@@ -1,0 +1,33 @@
+---
+ruleName: ban-ts-ignore
+description: Bans "// @ts-ignore" comments from being used.
+optionsDescription: Not configurable.
+options: null
+optionExamples:
+  - 'true'
+type: typescript
+typescriptOnly: true
+codeExamples:
+  - description: Disallows the use of "@ts-ignore"
+    config: |-
+      ```json
+      "rules": { "ban-ts-ignore": true }
+      ```
+    pass: |-
+      ```ts
+      if (false) {
+          // Compiler warns about unreachable code error
+          console.log("hello");
+      }
+      ```
+    fail: |-
+      ```ts
+      if (false) {
+          // @ts-ignore: Unreachable code error
+          console.log("hello");
+      }
+      ```
+layout: rule
+title: 'Rule: ban-ts-ignore'
+optionsJSON: 'null'
+---

@@ -13,27 +13,95 @@ optionsDescription: |
   By default, this rule checks that keys are in alphabetical order.
   The following may optionally be passed:
 
-  * "ignore-case" will compare keys in a case insensitive way.
-  * "match-declaration-order" will prefer to use the key ordering of the contextual type of the object literal, as in:
+  * `ignore-case` will compare keys in a case insensitive way.
+  * `locale-compare` will compare keys using the expected sort order of special characters, such as accents.
+  * `match-declaration-order` will prefer to use the key ordering of the contextual type of the object literal, as in:
 
+      ```
       interface I { foo: number; bar: number; }
       const obj: I = { foo: 1, bar: 2 };
+      ```
 
-  If a contextual type is not found, alphabetical ordering will be used instead.
-  * "shorthand-first" will enforce shorthand properties to appear first, as in:
+      If a contextual type is not found, alphabetical ordering will be used instead.
+  * `shorthand-first` will enforce shorthand properties to appear first, as in:
 
+      ```
       const obj = { a, c, b: true };
+      ```
 options:
   type: string
   enum:
     - ignore-case
+    - locale-compare
     - match-declaration-order
     - shorthand-first
 optionExamples:
   - 'true'
-  - '[true, "ignore-case", "match-declaration-order", "shorthand-first"]'
+  - |-
+    [
+      true,
+      "ignore-case",
+      "locale-compare",
+      "match-declaration-order",
+      "shorthand-first"
+    ]
 type: maintainability
 typescriptOnly: false
+codeExamples:
+  - description: Requires that an object literal's keys be sorted alphabetically.
+    config: |-
+      ```json
+      "rules": { "object-literal-sort-keys": true }
+      ```
+    pass: |-
+      ```ts
+      let o = {
+          bar: 2,
+          foo: 1
+      };
+      ```
+    fail: |-
+      ```ts
+      let o = {
+          foo: 1,
+          bar: 2
+      };
+      ```
+  - description: |-
+      Requires that an object literal's keys be sorted by interface-definition.
+                  If there is no interface fallback to alphabetically.
+    config: |-
+      ```json
+      "rules": {
+          "object-literal-sort-keys": {
+              "options": "match-declaration-order"
+          }
+      }
+      ```
+    pass: |-
+      ```ts
+      interface I {
+          foo: number;
+          bar: number;
+      }
+
+      let o: I = {
+          foo: 1,
+          bar: 2
+      };
+      ```
+    fail: |-
+      ```ts
+      interface I {
+          foo: number;
+          bar: number;
+      }
+
+      let o: I = {
+          bar: 2,
+          foo: 1
+      };
+      ```
 layout: rule
 title: 'Rule: object-literal-sort-keys'
 optionsJSON: |-
@@ -41,6 +109,7 @@ optionsJSON: |-
     "type": "string",
     "enum": [
       "ignore-case",
+      "locale-compare",
       "match-declaration-order",
       "shorthand-first"
     ]

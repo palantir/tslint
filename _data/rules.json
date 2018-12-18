@@ -16,7 +16,7 @@
     "description": "Enforces vertical alignment.",
     "hasFix": true,
     "rationale": "\nHelps maintain a readable, consistent style in your codebase.\n\nConsistent alignment for code statements helps keep code readable and clear.\nStatements misaligned from the standard can be harder to read and understand.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.\n* `\"members\"` checks alignment of members of classes, interfaces, type literal, object literals and\nobject destructuring.\n* `\"elements\"` checks alignment of elements of array iterals, array destructuring and tuple types.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"parameters\"` checks alignment of function parameters.\n* `\"arguments\"` checks alignment of function call arguments.\n* `\"statements\"` checks alignment of statements.\n* `\"members\"` checks alignment of members of classes, interfaces, type literal, object literals and\nobject destructuring.\n* `\"elements\"` checks alignment of elements of array literals, array destructuring and tuple types.",
     "options": {
       "type": "array",
       "items": {
@@ -114,7 +114,21 @@
     ],
     "rationale": "\nIt's unnecessary to include `return` and `{}` brackets in arrow lambdas.\nLeaving them out results in simpler and easier to read code.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces usage of the shorthand return syntax when an arrow function's body does not span multiple lines.",
+        "config": "```json\n\"rules\": { \"arrow-return-shorthand\": true }\n```",
+        "pass": "```ts\nconst calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```",
+        "fail": "```ts\nconst calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```"
+      },
+      {
+        "description": "Enforces usage of the shorthand return syntax even when an arrow function's body spans multiple lines.",
+        "config": "```json\n\"rules\": { \"arrow-return-shorthand\": [true, \"multiline\"] }\n```",
+        "pass": "```ts\nconst calc = (x: number, y: number) => ({ add: x + y, sub: x - y, mul: x * y });\nconst calc2 = (x: number, y: number) =>\n    ({ add: x + y, sub: x - y, mul: x * y });\n```",
+        "fail": "```ts\nconst calc = (x: number, y: number) => { return { add: x + y, sub: x - y, mul: x * y } };\nconst calc2 = (x: number, y: number) => {\n    return { add: x + y, sub: x - y, mul: x * y }\n};\n```"
+      }
+    ]
   },
   {
     "ruleName": "await-promise",
@@ -157,7 +171,7 @@
   {
     "ruleName": "ban",
     "description": "Bans the use of specific functions or global methods.",
-    "optionsDescription": "\nA list of banned functions or methods in the following format:\n\n* banning functions:\n  * just the name of the function: `\"functionName\"`\n  * the name of the function in an array with one element: `[\"functionName\"]`\n  * an object in the following format: `{\"name\": \"functionName\", \"message\": \"optional explanation message\"}`\n* banning methods:\n  * an array with the object name, method name and optional message: `[\"functionName\", \"methodName\", \"optional message\"]`\n  * an object in the following format: `{\"name\": [\"objectName\", \"methodName\"], \"message\": \"optional message\"}`\n    * you can also ban deeply nested methods: `{\"name\": [\"foo\", \"bar\", \"baz\"]}` bans `foo.bar.baz()`\n    * the first element can contain a wildcard (`*`) that matches everything. `{\"name\": [\"*\", \"forEach\"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.\n",
+    "optionsDescription": "\nA list of banned functions or methods in the following format:\n\n* banning functions:\n  * just the name of the function: `\"functionName\"`\n  * the name of the function in an array with one element: `[\"functionName\"]`\n  * an object in the following format: `{\"name\": \"functionName\", \"message\": \"optional explanation message\"}`\n* banning methods:\n  * an array with the object name, method name and optional message: `[\"objectName\", \"methodName\", \"optional message\"]`\n  * an object in the following format: `{\"name\": [\"objectName\", \"methodName\"], \"message\": \"optional message\"}`\n    * you can also ban deeply nested methods: `{\"name\": [\"foo\", \"bar\", \"baz\"]}` bans `foo.bar.baz()`\n    * the first element can contain a wildcard (`*`) that matches everything. `{\"name\": [\"*\", \"forEach\"]}` bans                  `[].forEach(...)`, `$(...).forEach(...)`, `arr.forEach(...)`, etc.\n",
     "options": {
       "type": "list",
       "listType": {
@@ -241,6 +255,25 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "ban-ts-ignore",
+    "description": "Bans \"// @ts-ignore\" comments from being used.",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "typescript",
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallows the use of \"@ts-ignore\"",
+        "config": "```json\n\"rules\": { \"ban-ts-ignore\": true }\n```",
+        "pass": "```ts\nif (false) {\n    // Compiler warns about unreachable code error\n    console.log(\"hello\");\n}\n```",
+        "fail": "```ts\nif (false) {\n    // @ts-ignore: Unreachable code error\n    console.log(\"hello\");\n}\n```"
+      }
+    ]
+  },
+  {
     "ruleName": "ban-types",
     "description": "\nBans specific types from being used. Does not ban the\ncorresponding runtime objects from being used.",
     "options": {
@@ -302,7 +335,15 @@
       true
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces PascalCased class and interface names.",
+        "config": "```json\n\"rules\": { \"class-name\": true }\n```",
+        "pass": "```ts\nclass MyClass { }\ninterface MyInterface { }\n```",
+        "fail": "```ts\nclass myClass { }\ninterface myInterface { }\n```"
+      }
+    ]
   },
   {
     "ruleName": "comment-format",
@@ -369,6 +410,42 @@
     "type": "style",
     "typescriptOnly": false,
     "hasFix": true
+  },
+  {
+    "ruleName": "comment-type",
+    "description": "Allows a limited set of comment types",
+    "optionsDescription": "\nOne or more of the following mutually exclusive comment types may be provided:\n\n* `singleline`: Comments starting with `//`\n* `multiline`:  Comments between `/*` and `*/` but are not doc comments\n* `doc`:        Multiline comments that start with `/**`\n* 'directive':  Triple-slash directives that are singleline comments starting with `///`",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "singleline",
+          "multiline",
+          "doc",
+          "directive"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "optionExamples": [
+      [
+        true,
+        "doc",
+        "singleline"
+      ],
+      [
+        true,
+        "singleline"
+      ],
+      [
+        true,
+        "multiline"
+      ]
+    ],
+    "hasFix": false,
+    "type": "style",
+    "typescriptOnly": false
   },
   {
     "ruleName": "completed-docs",
@@ -864,10 +941,13 @@
   {
     "ruleName": "file-header",
     "description": "Enforces a certain header comment for all files, matched by a regular expression.",
-    "optionsDescription": "\nThe first option, which is mandatory, is a regular expression that all headers should match.\nThe second argument, which is optional, is a string that should be inserted as a header comment\nif fixing is enabled and no header that matches the first argument is found.",
+    "optionsDescription": "\nThe first option, which is mandatory, is a regular expression that all headers should match.\nThe second argument, which is optional, is a string that should be inserted as a header comment\nif fixing is enabled and no header that matches the first argument is found.\nThe third argument, which is optional, is a string that denotes whether or not a newline should\nexist on the header.",
     "options": {
       "type": "array",
       "items": [
+        {
+          "type": "string"
+        },
         {
           "type": "string"
         },
@@ -877,13 +957,14 @@
       ],
       "additionalItems": false,
       "minLength": 1,
-      "maxLength": 2
+      "maxLength": 3
     },
     "optionExamples": [
       [
         true,
         "Copyright \\d{4}",
-        "Copyright 2017"
+        "Copyright 2018",
+        "enforce-trailing-newline"
       ]
     ],
     "hasFix": true,
@@ -894,19 +975,40 @@
     "ruleName": "file-name-casing",
     "description": "Enforces a consistent file naming convention",
     "rationale": "Helps maintain a consistent style across a file hierarchy",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.\n\nOr an object, where the key represents a regular expression that\nmatches the file name, and the value is the file name rule from\nthe previous list.\n\n* { \".tsx\": \"pascal-case\", \".ts\": \"camel-case\" }\n        ",
     "options": {
       "type": "array",
-      "items": [
-        {
-          "type": "string",
-          "enum": [
-            "camel-case",
-            "pascal-case",
-            "kebab-case"
-          ]
-        }
-      ]
+      "items": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": [
+              {
+                "type": "string",
+                "enum": [
+                  "camel-case",
+                  "pascal-case",
+                  "kebab-case",
+                  "snake-case"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "camel-case",
+                "pascal-case",
+                "kebab-case",
+                "snake-case"
+              ]
+            },
+            "minProperties": 1
+          }
+        ]
+      }
     },
     "optionExamples": [
       [
@@ -920,6 +1022,25 @@
       [
         true,
         "kebab-case"
+      ],
+      [
+        true,
+        "snake-case"
+      ],
+      [
+        true,
+        {
+          ".tsx": "pascal-case",
+          ".ts": "camel-case"
+        }
+      ],
+      [
+        true,
+        {
+          ".style.ts": "kebab-case",
+          ".tsx": "pascal-case",
+          ".*": "camel-case"
+        }
       ]
     ],
     "hasFix": false,
@@ -939,16 +1060,57 @@
     "typescriptOnly": false
   },
   {
+    "codeExamples": [
+      {
+        "config": "```json\n\"rules\": { \"function-constructor\": true }\n```",
+        "description": "Use inline lambdas instead of calling Function",
+        "fail": "```ts\nlet doesNothing = new Function();\n```",
+        "pass": "```ts\nlet doesNothing = () => {};\n```"
+      },
+      {
+        "config": "```json\n\"rules\": { \"function-constructor\": true }\n```",
+        "description": "Use parameters instead of constructor strings",
+        "fail": "```ts\nlet addNumbers = new Function(\"a\", \"b\", \"return a + b\");\n```",
+        "pass": "```ts\nlet addNumbers = (a, b) => a + b;\n```"
+      }
+    ],
+    "description": "\nPrevents using the built-in Function constructor.\n        ",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "\nCalling the constructor directly is similar to `eval`, which is a symptom of design issues.\nString inputs don't receive type checking and can cause performance issues, particularly when dynamically created.\n\nIf you need to dynamically create functions, use \"factory\" functions that themselves return functions.\n        ",
+    "ruleName": "function-constructor",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "import-blacklist",
-    "description": "\nDisallows importing the specified modules directly via `import` and `require`.\nInstead only sub modules may be imported from that module.",
-    "rationale": "\nSome libraries allow importing their submodules instead of the entire module.\nThis is good practise as it avoids loading unused modules.",
-    "optionsDescription": "A list of blacklisted modules.",
+    "description": "\nDisallows importing the specified modules via `import` and `require`,\nor importing specific named exports of the specified modules.",
+    "rationale": "\nFor some libraries, importing the library directly can cause unused\nsubmodules to be loaded, so you may want to block these imports and\nrequire that users directly import only the submodules they need.\nIn other cases, you may simply want to ban an import because using\nit is undesirable or unsafe.",
+    "optionsDescription": "A list of blacklisted modules or named imports.",
     "options": {
       "type": "array",
       "items": {
-        "type": "string"
-      },
-      "minLength": 1
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        ]
+      }
     },
     "optionExamples": [
       true,
@@ -956,6 +1118,16 @@
         true,
         "rxjs",
         "lodash"
+      ],
+      [
+        true,
+        "lodash",
+        {
+          "lodash": [
+            "pull",
+            "pullAll"
+          ]
+        }
       ]
     ],
     "type": "functionality",
@@ -969,6 +1141,32 @@
     "optionExamples": [
       true
     ],
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "description": "Enforces using explicit += 1 or -= 1 operators.",
+    "optionExamples": [
+      true,
+      [
+        true,
+        "allow-post"
+      ]
+    ],
+    "options": {
+      "items": {
+        "enum": [
+          "allow-post"
+        ],
+        "type": "string"
+      },
+      "maxLength": 1,
+      "minLength": 0,
+      "type": "array"
+    },
+    "optionsDescription": "\nIf no arguments are provided, both pre- and post-unary operators are banned.\nIf `\"allow-post\"` is provided, post-unary operators will be allowed.\n        ",
+    "rationale": "\nIt's easy to type +i or -i instead of --i or ++i, and won't always result in invalid code.\nPrefer standardizing small arithmetic operations with the explicit += and -= operators.\n        ",
+    "ruleName": "increment-decrement",
     "type": "style",
     "typescriptOnly": false
   },
@@ -1192,7 +1390,7 @@
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
     "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
-    "optionsDescription": "\nIt can take one argument, which can be any of the following:\n* integer indicating maximum length of lines.\n* object with keys:\n  * `limit` - number < 0 defining max line length\n  * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.\n    For example:\n     * `// ` pattern will ignore all in-line comments.\n     * `^import ` pattern will ignore all import statements.\n     * `^export {(.*?)}` pattern will ignore all multiple export statements.\n     * `class [a-zA-Z]+ implements ` pattern will ignore all class declarations implementing interfaces.\n     * `^import |^export {(.*?)}|class [a-zA-Z]+ implements |// ` pattern will ignore all the cases listed above.\n ",
+    "optionsDescription": "\nIt can take one argument, which can be any of the following:\n* integer indicating maximum length of lines.\n* object with keys:\n  * `limit` - number greater than 0 defining the max line length\n  * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.\n    For example:\n     * `// ` pattern will ignore all in-line comments.\n     * `^import ` pattern will ignore all import statements.\n     * `^export {(.*?)}` pattern will ignore all multiple export statements.\n     * `class [a-zA-Z]+ implements ` pattern will ignore all class declarations implementing interfaces.\n     * `^import |^export {(.*?)}|class [a-zA-Z]+ implements |// ` pattern will ignore all the cases listed above.\n ",
     "options": {
       "type": "array",
       "items": {
@@ -1272,7 +1470,7 @@
     "description": "Enforces member ordering.",
     "hasFix": true,
     "rationale": "\nA consistent ordering for class members can make classes easier to read, navigate, and edit.\n\nA common opposite practice to `member-ordering` is to keep related groups of classes together.\nInstead of creating classes with multiple separate groups, consider splitting class responsibilities\napart across multiple single-responsibility classes.\n        ",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` maybe be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\nAlternatively, the value for `order` may be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
     "options": {
       "type": "object",
       "properties": {
@@ -1416,7 +1614,15 @@
       true
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallows usages of `any` as a type declaration.",
+        "config": "```json\n\"rules\": { \"no-any\": true }\n```",
+        "pass": "```ts\nlet foo: object;\n```",
+        "fail": "```ts\nlet foo: any;\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-arg",
@@ -1550,6 +1756,37 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "no-default-import",
+    "description": "Disallows importing default members from certain ES6-style modules.",
+    "descriptionDetails": "Import named members instead.",
+    "rationale": "\nNamed imports/exports [promote clarity](https://github.com/palantir/tslint/issues/1182#issue-151780453).\nIn addition, current tooling differs on the correct way to handle default imports/exports.\nAvoiding them all together can help avoid tooling bugs and conflicts.\n\nThe rule supposed to narrow the scope of your changes in the case of monorepo.\nSay, you have packages `A`, `B`, `C` and `utils`, where `A`, `B`, `C` dependends on `utils`,\nwhich is full of default exports.\n`\"no-default-export\"` requires you to remove default _export_ from `utils`, which leads to changes\nin packages `A`, `B`, `C`. It's harder to get merged bigger changeset by various reasons (harder to get your code approved\ndue to a number of required reviewers; longer build time due to a number of affected packages)\nand could result in ignored `\"no-default-export\"` rule in `utils'`.\n\nUnlike `\"no-default-export\"`, the rule requires you to repalce default _import_ with named only in `A` you work on,\nand `utils` you import from.",
+    "optionsDescription": "optionsDescription",
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fromModules": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fromModules"
+        ]
+      }
+    },
+    "optionExamples": [
+      [
+        true,
+        {
+          "fromModules": "^palantir-|^_internal-*|^\\./|^\\.\\./"
+        }
+      ]
+    ],
+    "type": "maintainability",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-duplicate-imports",
     "description": "\nDisallows multiple import statements from the same module.",
     "rationale": "\nUsing a single import statement per module will make the code clearer because you can see everything being imported\nfrom that module on one line.",
@@ -1625,7 +1862,15 @@
     "optionsDescription": "Not configurable.",
     "options": null,
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallows empty interfaces.",
+        "config": "```json\n\"rules\": { \"no-empty-interface\": true }\n```",
+        "pass": "```ts\ninterface I {\n    foo: string;\n}\n```",
+        "fail": "```ts\ninterface I { }\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-empty",
@@ -2005,7 +2250,7 @@
   },
   {
     "ruleName": "no-object-literal-type-assertion",
-    "description": "\nForbids an object literal to appear in a type assertion expression.\nCasting to `any` is still allowed.",
+    "description": "\nForbids an object literal to appear in a type assertion expression.\nCasting to `any` or to `unknown` is still allowed.",
     "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\nThe compiler will warn for excess properties with this syntax, but not missing required fields.\nFor example: `const x: { foo: number } = {}` will fail to compile, but\n`const x = {} as { foo: number }` will succeed.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -2097,7 +2342,7 @@
   {
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
-    "rationale": "\nShadowing a variable masks access to it and obscures to what value an identifier actually refers.\nFor example, in the following code, it can be confusing why the filter is likely never true:\n\n```\nconst findNeighborsWithin = (instance: MyClass, instances: MyClass[]): MyClass[] => {\n    return instances.filter((instance) => instance.neighbors.includes(instance));\n};\n```\n        ",
+    "rationale": "\nWhen a variable in a local scope and a variable in the containing scope have the same name, shadowing occurs.\nShadowing makes it impossible to access the variable in the containing scope and\nobscures to what value an identifier actually refers. Compare the following snippets:\n\n```\nconst a = 'no shadow';\nfunction print() {\n    console.log(a);\n}\nprint(); // logs 'no shadow'.\n```\n\n```\nconst a = 'no shadow';\nfunction print() {\n    const a = 'shadow'; // TSLint will complain here.\n    console.log(a);\n}\nprint(); // logs 'shadow'.\n```\n\nESLint has [an equivalent rule](https://eslint.org/docs/rules/no-shadow).\nFor more background information, refer to\n[this MDN closure doc](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping).\n        ",
     "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n\nThe option `\"temporalDeadZone\"` defaults to `true` which shows errors when shadowing block scoped declarations in their\ntemporal dead zone. When set to `false` parameters, classes, enums and variables declared\nwith `let` or `const` are not considered shadowed if the shadowing occurs within their\n[temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).\n\nThe following example shows how the `\"temporalDeadZone\"` option changes the linting result:\n\n```ts\nfunction fn(value) {\n    if (value) {\n        const tmp = value; // no error on this line if \"temporalDeadZone\" is false\n        return tmp;\n    }\n    let tmp = undefined;\n    if (!value) {\n        const tmp = value; // this line always contains an error\n        return tmp;\n    }\n}\n```\n        ",
     "options": {
       "type": "object",
@@ -2159,7 +2404,15 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows sparse arrays",
+        "config": "```json\n\"rules\": { \"no-sparse-arrays\": true }\n```",
+        "pass": "```ts\nconst arr: string[] = ['elemenet1', 'element2'];\n```",
+        "fail": "```ts\nconst arr: string[] = ['elemenet1',, 'element2'];\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-string-literal",
@@ -2328,7 +2581,15 @@
     ],
     "rationale": "\nThere's generally no reason to wrap a function with a callback wrapper if it's directly called anyway.\nDoing so creates extra inline lambdas that slow the runtime down.\n        ",
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows unnecessary callback wrappers",
+        "config": "```json\n\"rules\": { \"no-unnecessary-callback-wrapper\": true }\n```",
+        "pass": "```ts\nconst handleContent = (content) => console.log('Handle content:', content);\nconst handleError = (error) => console.log('Handle error:', error);\npromise.then(handleContent).catch(handleError);\n```",
+        "fail": "```ts\nconst handleContent = (content) => console.log('Handle content:', content);\nconst handleError = (error) => console.log('Handle error:', error);\npromise.then((content) => handleContent(content)).catch((error) => handleError(error));\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-unnecessary-class",
@@ -2428,7 +2689,7 @@
     "description": "Disallows unused expression statements.",
     "descriptionDetails": "\nUnused expressions are expression statements which are not assignments or function calls\n(and thus usually no-ops).",
     "rationale": "\nDetects potential errors where an assignment or function call was intended.",
-    "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).\n* `allow-new` allows 'new' expressions for side effects (e.g. `new ModifyGlobalState();`.\n* `allow-tagged-template` allows tagged templates for side effects (e.g. `this.add\\`foo\\`;`.",
+    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `allow-fast-null-checks` allows to use logical operators to perform fast null checks and perform\nmethod or function calls for side effects (e.g. `e && e.preventDefault()`).\n* `allow-new` allows 'new' expressions for side effects (e.g. `new ModifyGlobalState();`.\n* `allow-tagged-template` allows tagged templates for side effects (e.g. `this.add\\`foo\\`;`.",
     "options": {
       "type": "array",
       "items": {
@@ -2630,11 +2891,12 @@
     "ruleName": "object-literal-sort-keys",
     "description": "\nChecks ordering of keys in object literals.\n\nWhen using the default alphabetical ordering, additional blank lines may be used to group\nobject properties together while keeping the elements within each group in alphabetical order.\n        ",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* \"ignore-case\" will compare keys in a case insensitive way.\n* \"match-declaration-order\" will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n* \"shorthand-first\" will enforce shorthand properties to appear first, as in:\n\n    const obj = { a, c, b: true };\n",
+    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* `ignore-case` will compare keys in a case insensitive way.\n* `locale-compare` will compare keys using the expected sort order of special characters, such as accents.\n* `match-declaration-order` will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    ```\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n    ```\n\n    If a contextual type is not found, alphabetical ordering will be used instead.\n* `shorthand-first` will enforce shorthand properties to appear first, as in:\n\n    ```\n    const obj = { a, c, b: true };\n    ```\n",
     "options": {
       "type": "string",
       "enum": [
         "ignore-case",
+        "locale-compare",
         "match-declaration-order",
         "shorthand-first"
       ]
@@ -2644,12 +2906,27 @@
       [
         true,
         "ignore-case",
+        "locale-compare",
         "match-declaration-order",
         "shorthand-first"
       ]
     ],
     "type": "maintainability",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires that an object literal's keys be sorted alphabetically.",
+        "config": "```json\n\"rules\": { \"object-literal-sort-keys\": true }\n```",
+        "pass": "```ts\nlet o = {\n    bar: 2,\n    foo: 1\n};\n```",
+        "fail": "```ts\nlet o = {\n    foo: 1,\n    bar: 2\n};\n```"
+      },
+      {
+        "description": "Requires that an object literal's keys be sorted by interface-definition.\n            If there is no interface fallback to alphabetically.",
+        "config": "```json\n\"rules\": {\n    \"object-literal-sort-keys\": {\n        \"options\": \"match-declaration-order\"\n    }\n}\n```",
+        "pass": "```ts\ninterface I {\n    foo: number;\n    bar: number;\n}\n\nlet o: I = {\n    foo: 1,\n    bar: 2\n};\n```",
+        "fail": "```ts\ninterface I {\n    foo: number;\n    bar: number;\n}\n\nlet o: I = {\n    bar: 2,\n    foo: 1\n};\n```"
+      }
+    ]
   },
   {
     "ruleName": "one-line",
@@ -2705,12 +2982,26 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows multiple variable definitions in the same declaration statement.",
+        "config": "```json\n\"rules\": { \"one-variable-per-declaration\": true }\n```",
+        "pass": "```ts\nconst foo = 1;\nconst bar = '2';\n```",
+        "fail": "```ts\nconst foo = 1, bar = '2';\n```"
+      },
+      {
+        "description": "Disallows multiple variable definitions in the same declaration statement but allows them in for-loops.",
+        "config": "```json\n\"rules\": { \"one-variable-per-declaration\": [true, \"ignore-for-loop\"] }\n```",
+        "pass": "```ts\nfor (let i = 0, j = 10; i < 10; i++) {\n    doSomething(j, i);\n}\n```"
+      }
+    ]
   },
   {
     "ruleName": "only-arrow-functions",
     "description": "Disallows traditional (non-arrow) function expressions.",
     "rationale": "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
+    "descriptionDetails": "\nNote that non-arrow functions are allowed if 'this' appears somewhere in its body\n(as such functions cannot be converted to arrow functions).\n        ",
     "optionsDescription": "\nTwo arguments may be optionally provided:\n\n* `\"allow-declarations\"` allows standalone function declarations.\n* `\"allow-named-functions\"` allows the expression `function foo() {}` but not `function() {}`.\n        ",
     "options": {
       "type": "array",
@@ -2733,7 +3024,15 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows functions with the function keyword",
+        "config": "```json\n\"rules\": { \"only-arrow-functions\": true }\n```",
+        "pass": "```ts\nconst myFunc = () => {\n    // do something ...\n};\n\nconst myFunc = function() {\n    this.doSomething();\n};\n```",
+        "fail": "```ts\nfunction myFunc() {\n    // do something ...\n};\n\nconst myFunc = function() {\n    // do something ...\n};\n```"
+      }
+    ]
   },
   {
     "ruleName": "ordered-imports",
@@ -2887,7 +3186,7 @@
   },
   {
     "ruleName": "prefer-object-spread",
-    "description": "Enforces the use of the ES2015 object spread operator over `Object.assign()` where appropriate.",
+    "description": "Enforces the use of the ES2018 object spread operator over `Object.assign()` where appropriate.",
     "rationale": "Object spread allows for better type checking and inference.",
     "optionsDescription": "Not configurable.",
     "options": null,
@@ -2963,7 +3262,21 @@
       ]
     ],
     "type": "style",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces the use of template strings whenever possible.",
+        "config": "```json\n\"rules\": { \"prefer-template\": true }\n```",
+        "pass": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = `${x} is equals ${y}`;\n```",
+        "fail": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals ' + y;\n```"
+      },
+      {
+        "description": "Enforces the use of template strings, but allows up to one concatenation.",
+        "config": "```json\n\"rules\": { \"prefer-template\": [true, \"allow-single-concat\"] }\n```",
+        "pass": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals 1';\nconst myString: string = `${x} is equals ${y}`;\n```",
+        "fail": "```ts\nconst x: number = 1;\nconst y: number = 1;\nconst myString: string = x + ' is equals ' + y;\n```"
+      }
+    ]
   },
   {
     "ruleName": "prefer-while",
@@ -3019,9 +3332,9 @@
   },
   {
     "ruleName": "quotemark",
-    "description": "Requires single or double quotes for string literals.",
+    "description": "Enforces quote character for string literals.",
     "hasFix": true,
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-template\"` forbids single-line untagged template strings that do not contain string interpolations.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
+    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"single\"` enforces single quotes.\n* `\"double\"` enforces double quotes.\n* `\"backtick\"` enforces backticks.\n* `\"jsx-single\"` enforces single quotes for JSX attributes.\n* `\"jsx-double\"` enforces double quotes for JSX attributes.\n* `\"avoid-template\"` forbids single-line untagged template strings that do not contain string interpolations.\n* `\"avoid-escape\"` allows you to use the \"other\" quotemark in cases where escaping would normally be required.\nFor example, `[true, \"double\", \"avoid-escape\"]` would not report a failure on the string literal\n`'Hello \"World\"'`.",
     "options": {
       "type": "array",
       "items": {
@@ -3029,6 +3342,7 @@
         "enum": [
           "single",
           "double",
+          "backtick",
           "jsx-single",
           "jsx-double",
           "avoid-escape",
@@ -3064,7 +3378,15 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires the inclusion of the radix parameter when calling `parseInt`.",
+        "config": "```json\n\"rules\": { \"radix\": true }\n```",
+        "pass": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x, 10);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```",
+        "fail": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```"
+      }
+    ]
   },
   {
     "ruleName": "restrict-plus-operands",
@@ -3219,7 +3541,7 @@
   {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n        ",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-enum` allows enums.\n  - It does *not* allow unions containing `enum`.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n        ",
     "options": {
       "type": "array",
       "items": {
@@ -3228,6 +3550,7 @@
           "allow-null-union",
           "allow-undefined-union",
           "allow-string",
+          "allow-enum",
           "allow-number",
           "allow-boolean-or-undefined"
         ]
@@ -3242,6 +3565,7 @@
         "allow-null-union",
         "allow-undefined-union",
         "allow-string",
+        "allow-enum",
         "allow-number"
       ],
       [
@@ -3274,7 +3598,15 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Requires a `default` case in `switch` statements.",
+        "config": "```json\n\"rules\": { \"switch-default\": true }\n```",
+        "pass": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n    default:\n        console.log('default');\n        break;\n}\n```",
+        "fail": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n}\n```"
+      }
+    ]
   },
   {
     "ruleName": "switch-final-break",
@@ -3525,7 +3857,63 @@
       ]
     ],
     "type": "typescript",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Requires type definitions for call signatures",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"call-signature\"] }\n```",
+        "pass": "```ts\nfunction add(x, y): number {\n    return x + y;\n}\n```",
+        "fail": "```ts\nfunction add(x, y) {\n    return x + y;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for arrow call signatures",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"arrow-call-signature\"] }\n```",
+        "pass": "```ts\nconst add = (x, y): number => x + y;\n```",
+        "fail": "```ts\nconst add = (x, y) => x + y;\n```"
+      },
+      {
+        "description": "Requires type definitions for parameters",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"parameter\"] }\n```",
+        "pass": "```ts\nfunction add(x: number, y: number) {\n    return x + y;\n}\n```",
+        "fail": "```ts\nfunction add(x, y) {\n    return x + y;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for arrow function parameters",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"arrow-parameter\"] }\n```",
+        "pass": "```ts\nconst add = (x: number, y: number) => x + y;\n```",
+        "fail": "```ts\nconst add = (x, y) => x + y;\n```"
+      },
+      {
+        "description": "Requires type definitions for property declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"property-declaration\"] }\n```",
+        "pass": "```ts\ninterface I {\n    foo: number;\n    bar: string;\n}\n```",
+        "fail": "```ts\ninterface I {\n    foo;\n    bar;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions for variable declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"variable-declaration\"] }\n```",
+        "pass": "```ts\nlet x: number;\n```",
+        "fail": "```ts\nlet x;\n```"
+      },
+      {
+        "description": "Requires type definitions for member variable declarations",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"member-variable-declaration\"] }\n```",
+        "pass": "```ts\nclass MyClass {\n    x: number;\n}\n```",
+        "fail": "```ts\nclass MyClass {\n    x;\n}\n```"
+      },
+      {
+        "description": "Requires type definitions when destructuring objects.",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"object-destructuring\"] }\n```",
+        "pass": "```ts\ninterface FooBar {\n    foo: number;\n    bar: string;\n}\nconst foobar = { foo: 1, bar: '2' };\nconst { foo, bar }: FooBar = foobar;\n```",
+        "fail": "```ts\ninterface FooBar {\n    foo: number;\n    bar: string;\n}\nconst foobar = { foo: 1, bar: '2' };\nconst { foo, bar } = foobar;\n```"
+      },
+      {
+        "description": "Requires type definitions when destructuring arrays.",
+        "config": "```json\n\"rules\": { \"typedef\": [true, \"array-destructuring\"] }\n```",
+        "pass": "```ts\nconst foobar = [1, '2'];\nconst [foo, bar]: Array<number | string> = foobar;\n```",
+        "fail": "```ts\nconst foobar = [1, '2'];\nconst [foo, bar] = foobar;\n```"
+      }
+    ]
   },
   {
     "ruleName": "typedef-whitespace",
@@ -3656,8 +4044,20 @@
   {
     "ruleName": "type-literal-delimiter",
     "description": "\nChecks that type literal members are separated by semicolons.\nEnforces a trailing semicolon for multiline type literals.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "`{singleLine: \"always\"}` enforces semicolon for one liners",
+    "options": {
+      "type": "object",
+      "properties": {
+        "singleLine": {
+          "type": "string",
+          "enum": [
+            "always",
+            "never"
+          ]
+        }
+      }
+    },
+    "hasFix": true,
     "optionExamples": [
       true
     ],
@@ -3688,6 +4088,31 @@
     "typescriptOnly": true
   },
   {
+    "description": "Prevents unnecessary and/or misleading scope bindings on functions.",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "\n`function` expressions that are immediately bound to `this` are equivalent to `() =>` arrow lambdas.\nAdditionally, there's no use in binding a scope to an arrow lambda, as it already has one.\n        ",
+    "requiresTypeInfo": true,
+    "ruleName": "unnecessary-bind",
+    "type": "style",
+    "typescriptOnly": false
+  },
+  {
+    "description": "Prevents blank constructors, as they are redundant.",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "\nJavaScript implicitly adds a blank constructor when there isn't one.\nIt's not necessary to manually add one in.\n        ",
+    "ruleName": "unnecessary-constructor",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "use-default-type-parameter",
     "description": "Warns if an explicitly specified type argument is the default for that type parameter.",
     "optionsDescription": "Not configurable.",
@@ -3709,7 +4134,15 @@
       true
     ],
     "type": "functionality",
-    "typescriptOnly": false
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Enforces usage of `isNan()`.",
+        "config": "```json\n\"rules\": { \"use-isnan\": true }\n```",
+        "pass": "```ts\nif (isNaN(parseInt('_4711'))) {\n    doSomething();\n}\n```",
+        "fail": "```ts\nif (parseInt('_4711') === NaN) {\n    doSomething();\n}\n```"
+      }
+    ]
   },
   {
     "ruleName": "variable-name",
@@ -3746,7 +4179,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nTen arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-rest-spread\"` checks that there is no whitespace after rest/spread operator (`...`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-type-operator\"` checks for whitespace between type operators `|` and `&`.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block",
+    "optionsDescription": "\nTen arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-rest-spread\"` checks that there is no whitespace after rest/spread operator (`...`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-type-operator\"` checks for whitespace between type operators `|` and `&`.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block.\n* `\"check-postbrace\"` checks for whitespace after an opening brace.",
     "options": {
       "type": "array",
       "items": {
@@ -3761,11 +4194,12 @@
           "check-type",
           "check-typecast",
           "check-type-operator",
-          "check-preblock"
+          "check-preblock",
+          "check-postbrace"
         ]
       },
       "minLength": 0,
-      "maxLength": 10
+      "maxLength": 11
     },
     "optionExamples": [
       [

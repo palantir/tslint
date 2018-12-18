@@ -2,6 +2,11 @@
 ruleName: only-arrow-functions
 description: Disallows traditional (non-arrow) function expressions.
 rationale: 'Traditional functions don''t bind lexical scope, which can lead to unexpected behavior when accessing ''this''.'
+descriptionDetails: |-
+
+  Note that non-arrow functions are allowed if 'this' appears somewhere in its body
+  (as such functions cannot be converted to arrow functions).
+          
 optionsDescription: |-
 
   Two arguments may be optionally provided:
@@ -23,6 +28,32 @@ optionExamples:
   - '[true, "allow-declarations", "allow-named-functions"]'
 type: typescript
 typescriptOnly: false
+codeExamples:
+  - description: Disallows functions with the function keyword
+    config: |-
+      ```json
+      "rules": { "only-arrow-functions": true }
+      ```
+    pass: |-
+      ```ts
+      const myFunc = () => {
+          // do something ...
+      };
+
+      const myFunc = function() {
+          this.doSomething();
+      };
+      ```
+    fail: |-
+      ```ts
+      function myFunc() {
+          // do something ...
+      };
+
+      const myFunc = function() {
+          // do something ...
+      };
+      ```
 layout: rule
 title: 'Rule: only-arrow-functions'
 optionsJSON: |-
