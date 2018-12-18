@@ -40,8 +40,16 @@ import { pull as notPull } from "lodash";
 import test from "dummy";
        ~~~~ [3]
 
+import {myFunc} from './my.temp';
+                      ~~~~~~~~~ [4]
+
+import {myFunc} from './my.tmp';
+                      ~~~~~~~~ [5]
+
 
 [0]: Importing this module is blacklisted. Try importing a submodule instead.
 [1]: Some named exports from this module are blacklisted for importing (or re-exporting). Import/re-export only the specific values you want, instead of the whole module.
 [2]: The export "pull" is blacklisted.
 [3]: Importing (or re-exporting) the default export is blacklisted.
+[4]: This import is blacklisted by /.*\.temp$/
+[5]: This import is blacklisted by /.*\.tmp$/

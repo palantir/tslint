@@ -31,14 +31,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "import-blacklist",
         description: Lint.Utils.dedent`
             Disallows importing the specified modules via \`import\` and \`require\`,
-            or importing specific named exports of the specified modules.`,
+            or importing specific named exports of the specified modules,
+            or using imports matching specified regular expression patterns.`,
         rationale: Lint.Utils.dedent`
             For some libraries, importing the library directly can cause unused
             submodules to be loaded, so you may want to block these imports and
             require that users directly import only the submodules they need.
             In other cases, you may simply want to ban an import because using
             it is undesirable or unsafe.`,
-        optionsDescription: "A list of blacklisted modules or named imports.",
+        optionsDescription:
+            "A list of blacklisted modules, named imports, or regular expression patterns.",
         options: {
             type: "array",
             items: {
@@ -58,6 +60,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                             },
                         },
                     },
+                    {
+                        type: "array",
+                        items: {
+                            type: "string",
+                        },
+                        minLength: 1,
+                    },
                 ],
             },
         },
@@ -65,6 +74,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             true,
             [true, "rxjs", "lodash"],
             [true, "lodash", { lodash: ["pull", "pullAll"] }],
+            [true, "rxjs", { lodash: ["pull", "pullAll"] }, [".*\\.temp$", ".*\\.tmp$"]],
         ],
         type: "functionality",
         typescriptOnly: false,
@@ -84,6 +94,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             : `The export "${importName}" is blacklisted.`;
     }
 
+    public static FAILURE_STRING_REGEX = "This import is blacklisted by ";
+
     public isEnabled(): boolean {
         return super.isEnabled() && this.ruleArguments.length > 0;
     }
@@ -93,7 +105,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type Options = Array<string | { [moduleName: string]: string[] }>;
+type Options = Array<string | { [moduleName: string]: string[] } | Array<string>>;
 
 function walk(ctx: Lint.WalkContext<Options>) {
     interface BannedImports {
@@ -107,7 +119,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         (acc, it) => {
             if (typeof it === "string") {
                 acc[it] = true;
-            } else {
+            } else if (!Array.isArray(it)) {
                 Object.keys(it).forEach(moduleName => {
                     if (acc[moduleName] instanceof Set) {
                         it[moduleName].forEach(bannedImport => {
@@ -122,6 +134,15 @@ function walk(ctx: Lint.WalkContext<Options>) {
         },
         Object.create(null) as BannedImports,
     );
+
+    const regexOptions = [];
+    for (const option of ctx.options) {
+        if (Array.isArray(option)) {
+            for (const pattern of option) {
+                regexOptions.push(RegExp(pattern));
+            }
+        }
+    }
 
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         // TODO #3963: Resolve/normalize relative file imports to a canonical path?
@@ -230,6 +251,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     name.getStart(ctx.sourceFile) + 1,
                     name.end - 1,
                     Rule.IMPLICIT_NAMED_IMPORT_FAILURE_STRING,
+                );
+            }
+        }
+
+        for (const regex of regexOptions) {
+            if (regex.test(name.text)) {
+                ctx.addFailure(
+                    name.getStart(ctx.sourceFile) + 1,
+                    name.end - 1,
+                    Rule.FAILURE_STRING_REGEX + regex.toString(),
                 );
             }
         }
