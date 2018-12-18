@@ -39,7 +39,7 @@ const dummyLogger: Logger = {
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
-    this.timeout(4000);
+    this.timeout(10000);
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", done => {
