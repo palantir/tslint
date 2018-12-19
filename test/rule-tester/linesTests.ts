@@ -43,5 +43,24 @@ describe("Rule Test Lines", () => {
             const errorMarkup2 = `${lines.ZERO_LENGTH_ERROR} [foo]`;
             assert.strictEqual(lines.printLine("fileName.ts", errorLine2, code2), errorMarkup2);
         });
+
+        it("should correctly throw an error when code is not supplied", () => {
+            const errorLine = new lines.EndErrorLine(0, 0, "foo");
+            assert.throws(
+                () => lines.printLine("fileName.ts", errorLine),
+                Error,
+                "Must supply argument for code parameter when line is an ErrorLine",
+            );
+        });
+
+        it("should correctly throw an when the error marker is off", () => {
+            const code = "";
+            const errorLine = new lines.EndErrorLine(0, 2, "foo");
+            assert.throws(
+                () => lines.printLine("fileName.ts", errorLine, code),
+                Error,
+                `Bad error marker in fileName.ts at {"startCol":0,"endCol":2,"message":"foo"}`,
+            );
+        });
     });
 });
