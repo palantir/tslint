@@ -24,6 +24,7 @@ import {
 } from "tsutils";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
@@ -108,18 +109,31 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments);
-        if (options.matchDeclarationOrder) {
-            throw new Error(
-                `${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}".`,
+        if (options.matchDeclarationOrder || options.matchDeclarationOrderOnly) {
+            showWarningOnce(
+                Lint.Utils.dedent`
+                    ${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}" or
+                    "${OPTION_MATCH_DECLARATION_ORDER_ONLY}".
+                    See https://palantir.github.io/tslint/usage/type-checking/ for documentation on
+                    how to enable this feature.
+                `,
             );
+            return [];
         }
-        if (options.matchDeclarationOrderOnly) {
-            throw new Error(`${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER_ONLY}".`);
-        }
+
         return this.applyWithFunction(sourceFile, walk, options);
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const options = parseOptions(this.ruleArguments);
+        if (options.matchDeclarationOrder && options.matchDeclarationOrderOnly) {
+            showWarningOnce(
+                `"${OPTION_MATCH_DECLARATION_ORDER}" will be ignored since ` +
+                `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${this.ruleName}.`
+            );
+            return [];
+        }
+
         return this.applyWithFunction(
             sourceFile,
             walk,
