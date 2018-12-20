@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ const dummyLogger: Logger = {
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
-    this.timeout(4000);
+    this.timeout(10000);
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", done => {

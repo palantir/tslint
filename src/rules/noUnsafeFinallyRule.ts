@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -99,7 +100,7 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
     let node: ts.Node = jump;
     // This should only be called inside a finally block, so we'll eventually reach the TryStatement case and return.
     while (true) {
-        const parent = node.parent!;
+        const parent = node.parent;
         switch (parent.kind) {
             case ts.SyntaxKind.TryStatement:
                 if ((parent as ts.TryStatement).finallyBlock === node) {
@@ -132,7 +133,10 @@ function jumpIsLocalToFinallyBlock(jump: JumpStatement): boolean {
             }
 
             default:
-                if (utils.isFunctionScopeBoundary(parent)) {
+                // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+                // requires tsutils > 3.0.
+                if (isFunctionScopeBoundary(parent)) {
+                    // tslint:enable:deprecation
                     // Haven't seen TryStatement yet, so the function is inside it.
                     // No jump statement can escape a function, so the jump is local.
                     return true;

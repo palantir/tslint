@@ -188,7 +188,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                     });
                 }
             } else if (node.kind === ts.SyntaxKind.Parameter) {
-                if (node.parent!.kind !== ts.SyntaxKind.IndexSignature) {
+                if (node.parent.kind !== ts.SyntaxKind.IndexSignature) {
                     this.handleBindingName((node as ts.ParameterDeclaration).name, {
                         canBeConst: false,
                         isBlockScoped: true,
@@ -284,7 +284,7 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         if (
             kind === utils.VariableDeclarationKind.Const ||
             utils.hasModifier(
-                declarationList.parent!.modifiers,
+                declarationList.parent.modifiers,
                 ts.SyntaxKind.ExportKeyword,
                 ts.SyntaxKind.DeclareKeyword,
             )
@@ -296,8 +296,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
         } else {
             declarationInfo = {
                 allInitialized:
-                    declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement ||
-                    declarationList.parent!.kind === ts.SyntaxKind.ForInStatement ||
+                    declarationList.parent.kind === ts.SyntaxKind.ForOfStatement ||
+                    declarationList.parent.kind === ts.SyntaxKind.ForInStatement ||
                     declarationList.declarations.every(
                         declaration => declaration.initializer !== undefined,
                     ),
@@ -305,8 +305,8 @@ class PreferConstWalker extends Lint.AbstractWalker<Options> {
                 declarationList,
                 isBlockScoped: kind === utils.VariableDeclarationKind.Let,
                 isForLoop:
-                    declarationList.parent!.kind === ts.SyntaxKind.ForStatement ||
-                    declarationList.parent!.kind === ts.SyntaxKind.ForOfStatement,
+                    declarationList.parent.kind === ts.SyntaxKind.ForStatement ||
+                    declarationList.parent.kind === ts.SyntaxKind.ForOfStatement,
                 reassignedSiblings: false,
             };
         }

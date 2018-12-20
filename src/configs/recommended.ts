@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ export const rules = {
     "cyclomatic-complexity": false,
     eofline: true,
     forin: true,
+    "function-constructor": true,
     "import-spacing": true,
     indent: {
         options: ["spaces"],

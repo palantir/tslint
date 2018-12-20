@@ -97,7 +97,7 @@ function createFix(
     expr: ts.Expression,
     text: string,
 ): Lint.Fix | undefined {
-    const statement = expr.parent!;
+    const statement = expr.parent;
     const returnKeyword = utils.getChildOfKind(statement, ts.SyntaxKind.ReturnKeyword)!;
     const arrow = utils.getChildOfKind(arrowFunction, ts.SyntaxKind.EqualsGreaterThanToken)!;
     const openBrace = utils.getChildOfKind(body, ts.SyntaxKind.OpenBraceToken)!;

@@ -117,6 +117,11 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Value;
     }
 
+    // Handle generator functions/methods:
+    if (node.asteriskToken !== undefined) {
+        return ReturnKind.Void;
+    }
+
     const contextual =
         isFunctionExpressionLike(node) && node.type === undefined
             ? tryGetReturnType(checker.getContextualType(node), checker)

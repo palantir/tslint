@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
         const space =
             parens === 0 &&
-            parent!.kind === ts.SyntaxKind.AsExpression &&
+            parent.kind === ts.SyntaxKind.AsExpression &&
             node.getStart() === node.getFullStart();
         const fix = [
             new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),

@@ -267,13 +267,7 @@ export function readConfigurationFile(filepath: string): RawConfigFile {
             if (resolvedConfigFileExt === ".json") {
                 return JSON.parse(stripComments(fileContent)) as RawConfigFile;
             } else {
-                return yaml.safeLoad(fileContent, {
-                    // Note: yaml.LoadOptions expects a schema value of type "any",
-                    // but this trips up the no-unsafe-any rule.
-                    // tslint:disable-next-line:no-unsafe-any
-                    schema: yaml.JSON_SCHEMA,
-                    strict: true,
-                }) as RawConfigFile;
+                return yaml.safeLoad(fileContent) as RawConfigFile;
             }
         } catch (e) {
             const error = e as Error;

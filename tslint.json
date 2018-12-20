@@ -1,73 +1,63 @@
 {
-  "lintOptions": {
-    "typeCheck": true
-  },
-  "extends": ["tslint:all", "tslint-config-prettier"],
-  "rules": {
-    // Don't want these
-    "cyclomatic-complexity": false,
-    "increment-decrement": false,
-    "newline-before-return": false,
-    "no-parameter-properties": false,
-    "no-parameter-reassignment": false,
-    "no-unused-variable": false,
-    // TODO: Enable stricter options for these
-    "comment-format": [
-        true,
-        "check-space"
-    ],
-    "member-access": true,
-    "only-arrow-functions": [
-        true,
-        "allow-declarations",
-        "allow-named-functions"
-    ],
-
-    // TODO: Enable these
-    "completed-docs": false,
-    "no-any": false,
-    "no-magic-numbers": false,
-    "no-non-null-assertion": false,
-    "no-null-keyword": false,
-    "no-require-imports": false,
-    "no-unbound-method": false,
-    "no-unnecessary-qualifier": false,
-    "no-use-before-declare": false,
-    "no-void-expression": false,
-    "prefer-function-over-method": false,
-    "strict-type-predicates": false,
-    "triple-equals": [true, "allow-undefined-check"],
-    "typedef": false,
-
-    "ban": [true,
-      ["describe", "only"],
-      ["it", "only"]
-    ],
-
-    "interface-name": false,
-    "file-header": [true,
-      "Copyright \\d{4} Palantir Technologies, Inc."
-    ],
-    "max-classes-per-file": false,
-    "max-line-length": [true, 140],
-    "member-ordering": [true,
-      "public-before-private",
-      "static-before-instance",
-      "variables-before-functions"
-    ],
-    "newline-per-chained-call": false,
-    "no-console": {
-      "options": ["log"]
+    "lintOptions": {
+        "typeCheck": true
     },
-    "no-switch-case-fall-through": true,
-    "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
-    "switch-default": false,
-    "variable-name": [true,
-      "ban-keywords",
-      "check-format",
-      "allow-leading-underscore",
-      "allow-pascal-case"
-    ],
-    "linebreak-style": false
-  }
+    "extends": ["tslint:all", "tslint-config-prettier"],
+    "rules": {
+        // Don't want these
+        "cyclomatic-complexity": false,
+        "increment-decrement": false,
+        "newline-before-return": false,
+        "no-parameter-properties": false,
+        "no-parameter-reassignment": false,
+        "no-unused-variable": false,
+        // TODO: Enable stricter options for these
+        "comment-format": [true, "check-space"],
+        "member-access": true,
+        "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
+
+        // TODO: Enable these
+        "completed-docs": false,
+        "no-any": false,
+        "no-magic-numbers": false,
+        "no-non-null-assertion": false,
+        "no-null-keyword": false,
+        "no-require-imports": false,
+        "no-unbound-method": false,
+        "no-unnecessary-qualifier": false,
+        "no-use-before-declare": false,
+        "no-void-expression": false,
+        "prefer-function-over-method": false,
+        "strict-type-predicates": false,
+        "triple-equals": [true, "allow-undefined-check"],
+        "typedef": false,
+
+        "ban": [true, ["describe", "only"], ["it", "only"]],
+
+        "interface-name": false,
+        "file-header": [true, "Copyright \\d{4} Palantir Technologies, Inc."],
+        "max-classes-per-file": false,
+        "max-line-length": [true, 140],
+        "member-ordering": [
+            true,
+            "public-before-private",
+            "static-before-instance",
+            "variables-before-functions"
+        ],
+        "newline-per-chained-call": false,
+        "no-console": {
+            "options": ["log"]
+        },
+        "no-switch-case-fall-through": true,
+        "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
+        "switch-default": false,
+        "variable-name": [
+            true,
+            "ban-keywords",
+            "check-format",
+            "allow-leading-underscore",
+            "allow-pascal-case"
+        ],
+        "linebreak-style": false
+    }
 }

@@ -147,20 +147,20 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkArrowFunction({ parent, parameters, type }: ts.ArrowFunction): void {
-        if (parent!.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent!)) {
+        if (parent.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent)) {
             this.checkTypeAnnotation("arrow-call-signature", parameters, type);
         }
     }
 
     private checkParameter({ parent, name, type }: ts.ParameterDeclaration): void {
-        const isArrowFunction = parent!.kind === ts.SyntaxKind.ArrowFunction;
+        const isArrowFunction = parent.kind === ts.SyntaxKind.ArrowFunction;
 
         const option = (() => {
             if (!isArrowFunction) {
                 return "parameter";
-            } else if (isTypedPropertyDeclaration(parent!.parent!)) {
+            } else if (isTypedPropertyDeclaration(parent.parent)) {
                 return undefined;
-            } else if (utils.isPropertyDeclaration(parent!.parent!)) {
+            } else if (utils.isPropertyDeclaration(parent.parent)) {
                 return "member-variable-declaration";
             } else {
                 return "arrow-parameter";
@@ -185,9 +185,9 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (
-            parent!.kind === ts.SyntaxKind.CatchClause ||
-            parent!.parent!.kind === ts.SyntaxKind.ForInStatement ||
-            parent!.parent!.kind === ts.SyntaxKind.ForOfStatement
+            parent.kind === ts.SyntaxKind.CatchClause ||
+            parent.parent.kind === ts.SyntaxKind.ForInStatement ||
+            parent.parent.kind === ts.SyntaxKind.ForOfStatement
         ) {
             return;
         }

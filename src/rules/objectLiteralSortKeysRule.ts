@@ -29,12 +29,14 @@ import * as Lint from "../index";
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
+const OPTION_LOCALE_COMPARE = "locale-compare";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
 const OPTION_MATCH_DECLARATION_ORDER_ONLY = "match-declaration-order-only";
 const OPTION_SHORTHAND_FIRST = "shorthand-first";
 
 interface Options {
     ignoreCase: boolean;
+    localeCompare: boolean;
     matchDeclarationOrder: boolean;
     matchDeclarationOrderOnly: boolean;
     shorthandFirst: boolean;
@@ -56,6 +58,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             The following may optionally be passed:
 
             * \`${OPTION_IGNORE_CASE}\` will compare keys in a case insensitive way.
+            * \`${OPTION_LOCALE_COMPARE}\` will compare keys using the expected sort order of special characters, such as accents.
             * \`${OPTION_MATCH_DECLARATION_ORDER}\` will prefer to use the key ordering of the contextual type of the object literal, as in:
 
                 \`\`\`
@@ -78,12 +81,23 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             `,
         options: {
             type: "string",
-            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_MATCH_DECLARATION_ORDER_ONLY, OPTION_SHORTHAND_FIRST],
+            enum: [
+                OPTION_IGNORE_CASE,
+                OPTION_LOCALE_COMPARE,
+                OPTION_MATCH_DECLARATION_ORDER,
+                OPTION_MATCH_DECLARATION_ORDER_ONLY,
+                OPTION_SHORTHAND_FIRST,
+            ],
         },
         optionExamples: [
             true,
-            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
-            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER_ONLY, OPTION_SHORTHAND_FIRST],
+            [
+                true,
+                OPTION_IGNORE_CASE,
+                OPTION_LOCALE_COMPARE,
+                OPTION_MATCH_DECLARATION_ORDER,
+                OPTION_SHORTHAND_FIRST,
+            ],
         ],
         type: "maintainability",
         typescriptOnly: false,
@@ -146,6 +160,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 function parseOptions(ruleArguments: any[]): Options {
     return {
         ignoreCase: has(OPTION_IGNORE_CASE),
+        localeCompare: has(OPTION_LOCALE_COMPARE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
         matchDeclarationOrderOnly: has(OPTION_MATCH_DECLARATION_ORDER_ONLY),
         shorthandFirst: has(OPTION_SHORTHAND_FIRST),
@@ -159,7 +174,7 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, matchDeclarationOrder, matchDeclarationOrderOnly, shorthandFirst },
+        options: { ignoreCase, localeCompare, matchDeclarationOrder, matchDeclarationOrderOnly, shorthandFirst },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -236,7 +251,13 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                             ? property.name.text.toLowerCase()
                             : property.name.text;
                         // comparison with undefined is expected
-                        if (lastKey! > key && !hasBlankLineBefore(ctx.sourceFile, property)) {
+                        const keyOrderDescending =
+                            lastKey === undefined
+                                ? false
+                                : localeCompare
+                                    ? lastKey.localeCompare(key) === 1
+                                    : lastKey > key;
+                        if (keyOrderDescending && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(
                                 property.name,
                                 Rule.FAILURE_STRING_ALPHABETICAL(property.name.text),
@@ -320,7 +341,7 @@ function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
 }
 
 function getTypeName(t: TypeLike): string | undefined {
-    const parent = t.parent!;
+    const parent = t.parent;
     return t.kind === ts.SyntaxKind.InterfaceDeclaration
         ? t.name.text
         : isTypeAliasDeclaration(parent)
