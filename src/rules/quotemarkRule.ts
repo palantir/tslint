@@ -155,6 +155,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
             }
 
+            if (actualQuoteMark === fixQuoteMark) {
+                return;
+            }
+
             const start = node.getStart(sourceFile);
             let text = sourceFile.text.substring(start + 1, node.end - 1);
 
