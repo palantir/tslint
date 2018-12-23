@@ -65,6 +65,10 @@ export const rules = {
     "no-duplicate-switch-case": true,
     "no-implicit-dependencies": true,
     "no-return-await": true,
+
+    // added in v5.12
+    "function-constructor": true,
+    "unnecessary-bind": true,
 };
 // tslint:enable object-literal-sort-keys
 
