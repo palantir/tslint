@@ -20,7 +20,12 @@ import * as ts from "typescript";
 import { IOptions } from "../rule/rule";
 import { RuleWalker } from "./ruleWalker";
 
-// tslint:disable-next-line:deprecation
+/**
+ * @deprecated
+ * RuleWalker-based rules are slow,
+ * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
+ * @see https://github.com/palantir/tslint/issues/2522
+ */
 export class ProgramAwareRuleWalker extends RuleWalker {
     private readonly typeChecker: ts.TypeChecker;
 
