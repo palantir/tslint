@@ -49,7 +49,7 @@ describe("Rule Test Lines", () => {
             assert.throws(
                 () => lines.printLine("fileName.ts", errorLine),
                 Error,
-                "Must supply argument for code parameter when line is an ErrorLine",
+                "fileName.ts: Must supply argument for code parameter when line is an ErrorLine",
             );
         });
 
