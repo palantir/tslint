@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
         Marking a function as \`async\` without using \`await\` or returning a value inside it can lead to an unintended promise return and a larger transpiled output.
         Often the function can be synchronous and the \`async\` keyword is there by mistake.
-        Return statements are allowed has sometimes it is desirable to wrap the returned value in promise`,
+        Return statements are allowed as sometimes it is desirable to wrap the returned value in a Promise`,
         /* tslint:enable:max-line-length */
         ruleName: "no-async-without-await",
         type: "functionality",
@@ -86,15 +86,13 @@ class Walk extends Lint.RuleWalker {
             return true;
         }
 
-        // tslint:disable-next-line:no-unsafe-any
         if (node.kind === ts.SyntaxKind.ArrowFunction
             || node.kind === ts.SyntaxKind.FunctionDeclaration) {
             return false;
         }
 
-        const awaitInChildren = node.getChildren()
-            .map((functionBlockNode: ts.Node) => this.functionBlockHasAwait(functionBlockNode));
-        return awaitInChildren.some(Boolean);
+        // tslint:disable-next-line:no-unsafe-any
+        return node.getChildren().some(this.functionBlockHasAwait.bind(this));
     }
 
     private functionBlockHasReturn(node: ts.Node): boolean {
@@ -102,7 +100,6 @@ class Walk extends Lint.RuleWalker {
             return true;
         }
 
-        // tslint:disable-next-line:no-unsafe-any
         if (node.kind === ts.SyntaxKind.ArrowFunction
             || node.kind === ts.SyntaxKind.FunctionDeclaration) {
             return false;
@@ -117,16 +114,24 @@ class Walk extends Lint.RuleWalker {
         return node.kind === ts.SyntaxKind.ArrowFunction && node.body.kind !== ts.SyntaxKind.Block;
     }
 
+    private reportFailure(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
+        const asyncModifier = this.getAsyncModifier(node);
+        if (asyncModifier !== undefined) {
+            this.addFailureAt(asyncModifier.getStart(), asyncModifier.getEnd() - asyncModifier.getStart(), Rule.FAILURE_STRING);
+        }
+    }
+
     private addFailureIfAsyncFunctionHasNoAwait(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
+        if (node.body === undefined) {
+            this.reportFailure(node);
+            return;
+        }
         if (!this.isShortArrowReturn(node)
             && this.isAsyncFunction(node)
             && !this.functionBlockHasAwait(node.body as ts.Node)
             && !this.functionBlockHasReturn(node.body as ts.Node)
             ) {
-            const asyncModifier = this.getAsyncModifier(node);
-            if (asyncModifier !== undefined) {
-                this.addFailureAt(asyncModifier.getStart(), asyncModifier.getEnd() - asyncModifier.getStart(), Rule.FAILURE_STRING);
-            }
+            this.reportFailure(node);
         }
     }
 }

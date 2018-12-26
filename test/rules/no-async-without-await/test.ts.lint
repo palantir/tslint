@@ -82,4 +82,7 @@ async function a() {
    }
 }
 
+async function foo;
+~~~~~ [Functions marked async must contain an await or return statement.]
+
 [0]: Functions marked async must contain an await or return statement.
