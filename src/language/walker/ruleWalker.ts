@@ -21,6 +21,12 @@ import { Fix, IOptions, Replacement, RuleFailure } from "../rule/rule";
 import { SyntaxWalker } from "./syntaxWalker";
 import { IWalker } from "./walker";
 
+/**
+ * @deprecated
+ * RuleWalker-based rules are slow,
+ * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
+ * @see https://github.com/palantir/tslint/issues/2522
+ */
 export class RuleWalker extends SyntaxWalker implements IWalker {
     private readonly limit: number;
     private readonly options?: any[];

@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import { IOptions } from "../rule/rule";
 import { RuleWalker } from "./ruleWalker";
 
+// tslint:disable-next-line:deprecation
 export class ProgramAwareRuleWalker extends RuleWalker {
     private readonly typeChecker: ts.TypeChecker;
 
