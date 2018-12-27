@@ -19,6 +19,8 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { codeExamples } from "./code-examples/noAsyncWithoutAwait.examples";
 
+type FunctionNodeType = ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration | ts.FunctionExpression;
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Functions marked async must contain an await or return statement.";
 
@@ -61,8 +63,9 @@ class Walk extends Lint.RuleWalker {
         super.visitMethodDeclaration(node);
     }
 
-    private isAsyncFunction(node: ts.Node): boolean {
-        return this.getAsyncModifier(node) !== undefined;
+    protected visitFunctionExpression(node: ts.FunctionExpression) {
+        this.addFailureIfAsyncFunctionHasNoAwait(node);
+        super.visitFunctionExpression(node);
     }
 
     private getAsyncModifier(node: ts.Node) {
@@ -110,28 +113,27 @@ class Walk extends Lint.RuleWalker {
         return returnInChildren.some(Boolean);
     }
 
-    private isShortArrowReturn(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
+    private isShortArrowReturn(node: FunctionNodeType) {
         return node.kind === ts.SyntaxKind.ArrowFunction && node.body.kind !== ts.SyntaxKind.Block;
     }
 
-    private reportFailure(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
+    private reportFailureIfAsyncFunction(node: FunctionNodeType) {
         const asyncModifier = this.getAsyncModifier(node);
         if (asyncModifier !== undefined) {
             this.addFailureAt(asyncModifier.getStart(), asyncModifier.getEnd() - asyncModifier.getStart(), Rule.FAILURE_STRING);
         }
     }
 
-    private addFailureIfAsyncFunctionHasNoAwait(node: ts.ArrowFunction | ts.FunctionDeclaration | ts.MethodDeclaration) {
+    private addFailureIfAsyncFunctionHasNoAwait(node: FunctionNodeType) {
         if (node.body === undefined) {
-            this.reportFailure(node);
+            this.reportFailureIfAsyncFunction(node);
             return;
         }
         if (!this.isShortArrowReturn(node)
-            && this.isAsyncFunction(node)
             && !this.functionBlockHasAwait(node.body as ts.Node)
             && !this.functionBlockHasReturn(node.body as ts.Node)
             ) {
-            this.reportFailure(node);
+            this.reportFailureIfAsyncFunction(node);
         }
     }
 }

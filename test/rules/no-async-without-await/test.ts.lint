@@ -57,6 +57,36 @@ class A {
     }
 }
 
+class A {
+     public a = async function b() {
+         await b();
+     }
+ }
+
+class A {
+     public a = async function b() {
+                ~~~~~ [Functions marked async must contain an await or return statement.]
+         b();
+     }
+ }
+
+class A {
+     public a = async () => {
+         await b();
+     }
+ }
+
+class A {
+     public a = async () => {
+                ~~~~~ [Functions marked async must contain an await or return statement.]
+         b();
+     }
+ }
+
+class A {
+     public a = async () => 1;
+ }
+
 async () => {
     await a();
     class A {
@@ -84,5 +114,9 @@ async function a() {
 
 async function foo;
 ~~~~~ [Functions marked async must contain an await or return statement.]
+
+function * foo() {
+    return 1;
+}
 
 [0]: Functions marked async must contain an await or return statement.
