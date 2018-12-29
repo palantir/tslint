@@ -26,6 +26,9 @@ numType && boolType;
 ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
 boolType && strType;
 boolType && objType && enumType;
+#if typescript < 2.2.0
+~~~~~~~~~~~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+#endif
 bwrapType && boolType;
 ~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 
