@@ -22,8 +22,8 @@ import {
     isTypeFlagSet,
     isUnionType,
 } from "tsutils";
-
 import * as ts from "typescript";
+
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 

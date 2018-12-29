@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import { IOptions } from "../rule/rule";
 import { isScopeBoundary } from "../utils";
+
 import { RuleWalker } from "./ruleWalker";
 
 /**

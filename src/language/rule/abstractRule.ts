@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import { IWalker, WalkContext } from "../walker";
+
 import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export type NoInfer<T> = T & { [K in keyof T]: T[K] };

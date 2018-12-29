@@ -24,6 +24,7 @@ import {
     isTypeNodeKind,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { isLowerCase } from "../utils";
 

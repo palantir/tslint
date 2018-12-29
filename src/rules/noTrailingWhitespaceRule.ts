@@ -19,6 +19,7 @@ import { forEachComment, forEachTokenWithTrivia, getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 
 const OPTION_IGNORE_COMMENTS = "ignore-comments";

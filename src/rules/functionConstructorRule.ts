@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isNewExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "..";
+
 import { codeExamples } from "./code-examples/functionConstructor.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {

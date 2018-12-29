@@ -17,6 +17,7 @@
 import { assert } from "chai";
 
 import * as parse from "../../src/verify/parse";
+
 import * as testData from "./testData";
 
 describe("Rule Test Parse", () => {

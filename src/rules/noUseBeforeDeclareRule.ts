@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
+import { isBindingElement } from "tsutils";
 import * as ts from "typescript";
 
-import { isBindingElement } from "tsutils";
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noUseBeforeDeclare.examples";
 
 export class Rule extends Lint.Rules.TypedRule {

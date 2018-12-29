@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
-import * as Lint from "../index";
-
 import * as utils from "tsutils";
+import * as ts from "typescript";
+
+import * as Lint from "../index";
 
 const OPTION_DESTRUCTURING_ALL = "all";
 const OPTION_DESTRUCTURING_ANY = "any";

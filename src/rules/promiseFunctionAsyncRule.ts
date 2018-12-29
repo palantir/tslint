@@ -17,6 +17,7 @@
 
 import { hasModifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_FUNCTION_DECLARATION = "check-function-declaration";
