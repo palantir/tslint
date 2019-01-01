@@ -54,7 +54,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_AVOID_TEMPLATE}"\` forbids single-line untagged template strings that do not contain string interpolations.
             * \`"${OPTION_AVOID_ESCAPE}"\` allows you to use the "other" quotemark in cases where escaping would normally be required.
             For example, \`[true, "${OPTION_DOUBLE}", "${OPTION_AVOID_ESCAPE}"]\` would not report a failure on the string literal
-            \`'Hello "World"'\`.`,
+            \`'Hello "World"'\`.
+            
+            Options above do not apply to json files, and tslint enforces double quotes for json files.`,
         options: {
             type: "array",
             items: {
@@ -90,6 +92,15 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         const quoteMark = getQuotemarkPreference(args);
         const jsxQuoteMark = getJSXQuotemarkPreference(args);
+
+        if (sourceFile.fileName.endsWith(".json")) {
+            return this.applyWithFunction(sourceFile, walk, {
+                avoidEscape: true,
+                avoidTemplate: true,
+                jsxQuoteMark: '"',
+                quoteMark: '"',
+            });
+        }
 
         return this.applyWithFunction(sourceFile, walk, {
             avoidEscape: hasArg(OPTION_AVOID_ESCAPE),
