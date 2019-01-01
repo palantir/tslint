@@ -1,0 +1,6 @@
+{
+    "a": "A",
+    'b': 'B'
+    ~~~      [' should be "]
+         ~~~ [' should be "]
+}
