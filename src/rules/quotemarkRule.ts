@@ -56,7 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             For example, \`[true, "${OPTION_DOUBLE}", "${OPTION_AVOID_ESCAPE}"]\` would not report a failure on the string literal
             \`'Hello "World"'\`.
             
-            Options above do not apply to json files, and tslint enforces double quotes for json files.`,
+            This rule does not apply to json files.`,
         options: {
             type: "array",
             items: {
@@ -94,12 +94,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         const jsxQuoteMark = getJSXQuotemarkPreference(args);
 
         if (sourceFile.fileName.endsWith(".json")) {
-            return this.applyWithFunction(sourceFile, walk, {
-                avoidEscape: true,
-                avoidTemplate: true,
-                jsxQuoteMark: '"',
-                quoteMark: '"',
-            });
+            return [];
         }
 
         return this.applyWithFunction(sourceFile, walk, {

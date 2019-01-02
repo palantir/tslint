@@ -1,6 +1,5 @@
+// ensures tslint doesn't lint json file
 {
     "a": "A",
     'b': 'B'
-    ~~~      [' should be "]
-         ~~~ [' should be "]
 }
