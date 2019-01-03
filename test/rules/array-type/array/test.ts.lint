@@ -4,6 +4,8 @@ let y: string[] = <Array<string>>["2"];
                    ~~~~~~~~~~~~~        [0]
 let z: Array = [3, "4"];
        ~~~~~             [0]
+let u: Array<unknown> = [];
+       ~~~~~~~~~~~~~~       [0]
 
 let xx: Array<Array<number>> = [[1, 2], [3]];
         ~~~~~~~~~~~~~~~~~~~~                  [0]
