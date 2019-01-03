@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_ARRAY_SIMPLE}"\` enforces use of \`T[]\` if \`T\` is a simple type (primitive or type reference).`,
         options: {
             type: "string",
-            enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE]
+            enum: [OPTION_ARRAY, OPTION_GENERIC, OPTION_ARRAY_SIMPLE],
         },
         optionExamples: [[true, OPTION_ARRAY], [true, OPTION_GENERIC], [true, OPTION_ARRAY_SIMPLE]],
         type: "style",
-        typescriptOnly: true
+        typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -85,12 +85,12 @@ function walk(ctx: Lint.WalkContext<Option>): void {
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
         const space =
             parens === 0 &&
-            parent!.kind === ts.SyntaxKind.AsExpression &&
+            parent.kind === ts.SyntaxKind.AsExpression &&
             node.getStart() === node.getFullStart();
         const fix = [
             new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
-            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">")
+            Lint.Replacement.replaceFromTo(elementType.getEnd() - parens, node.getEnd(), ">"),
         ];
         ctx.addFailureAtNode(node, failureString, fix);
     }
@@ -109,7 +109,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
             ctx.addFailureAtNode(
                 node,
                 failureString,
-                Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]")
+                Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"),
             );
             return;
         }
@@ -127,7 +127,7 @@ function walk(ctx: Lint.WalkContext<Option>): void {
             // Delete 'Array<'
             Lint.Replacement.replaceFromTo(node.getStart(), type.getStart(), parens ? "(" : ""),
             // Delete '>' and replace with '[]
-            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]")
+            Lint.Replacement.replaceFromTo(type.getEnd(), node.getEnd(), parens ? ")[]" : "[]"),
         ]);
     }
 }
@@ -162,8 +162,6 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
         case ts.SyntaxKind.ThisType:
-        // Forwards-compatibility with TS3
-        case (ts.SyntaxKind as any).UnknownKeyword:
             return true;
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type
