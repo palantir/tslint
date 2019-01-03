@@ -70,4 +70,9 @@ interface FooInterface {
     '.bar': {baz: string[];};
 }
 
+// Test an unknown Array
+let t: unknown[] = [];
+let u: Array<unknown> = [];
+       ~~~~~~~~~~~~~~       [0]
+
 [0]: Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.
