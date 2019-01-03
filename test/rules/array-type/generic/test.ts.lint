@@ -57,4 +57,9 @@ interface FooInterface {
                   ~~~~~~~~    [0]
 }
 
+// Test an unknown Array
+let t: unknown[] = [];
+       ~~~~~~~~~       [0]
+let u: Array<unknown> = [];
+
 [0]: Array type using 'T[]' is forbidden. Use 'Array<T>' instead.

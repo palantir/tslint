@@ -114,7 +114,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseConfigOptions((this.ruleArguments as [ConfigOptions])[0]);
-        const noThisAssignmentWalker = new NoThisAssignmentWalker(sourceFile, this.ruleName, options);
+        const noThisAssignmentWalker = new NoThisAssignmentWalker(
+            sourceFile,
+            this.ruleName,
+            options,
+        );
 
         return this.applyWithWalker(noThisAssignmentWalker);
     }
@@ -122,7 +126,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
     private readonly allowedThisNameTesters = this.options.allowedNames.map(
-        (allowedThisName) => new RegExp(allowedThisName));
+        allowedThisName => new RegExp(allowedThisName),
+    );
 
     public walk(sourceFile: ts.SourceFile): void {
         ts.forEachChild(sourceFile, this.visitNode);
@@ -134,7 +139,7 @@ class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
         }
 
         ts.forEachChild(node, this.visitNode);
-    }
+    };
 
     private visitVariableDeclaration(node: ts.VariableDeclaration): void {
         if (node.initializer === undefined || node.initializer.kind !== ts.SyntaxKind.ThisKeyword) {
@@ -144,7 +149,10 @@ class NoThisAssignmentWalker extends Lint.AbstractWalker<Options> {
         switch (node.name.kind) {
             case ts.SyntaxKind.Identifier:
                 if (this.variableNameIsBanned(node.name.text)) {
-                    this.addFailureAtNode(node, Rule.FAILURE_STRING_FACTORY_IDENTIFIERS(node.name.text));
+                    this.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING_FACTORY_IDENTIFIERS(node.name.text),
+                    );
                 }
                 break;
 

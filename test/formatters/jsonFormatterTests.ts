@@ -36,11 +36,24 @@ describe("JSON Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
             createFailure(
-                sourceFile, 0, maxPosition, "full failure", "full-name",
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
                 new Replacement(0, 0, ""),
-                "error"),
+                "error",
+            ),
         ];
 
         /* tslint:disable:object-literal-sort-keys */

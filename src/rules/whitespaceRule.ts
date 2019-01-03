@@ -68,16 +68,16 @@ export class Rule extends Lint.Rules.AbstractRule {
                     "check-typecast",
                     "check-type-operator",
                     "check-preblock",
-                    "check-postbrace"
-                ]
+                    "check-postbrace",
+                ],
             },
             minLength: 0,
-            maxLength: 11
+            maxLength: 11,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
         type: "style",
         typescriptOnly: false,
-        hasFix: true
+        hasFix: true,
     };
 
     public static FAILURE_STRING_MISSING = "missing whitespace";
@@ -115,7 +115,7 @@ function parseOptions(ruleArguments: string[]): Options {
         typecast: has(OPTION_TYPECAST),
         typeOperator: has(OPTION_TYPE_OPERATOR),
         preblock: has(OPTION_PREBLOCK),
-        postbrace: has(OPTION_POSTBRACE)
+        postbrace: has(OPTION_POSTBRACE),
     };
 
     function has(option: string): boolean {
@@ -187,11 +187,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
                                 const internalName = element.name;
                                 if (internalName !== undefined) {
                                     if (idx === arr.length - 1) {
-                                        const token = namedBindings.getLastToken();
+                                        const token = namedBindings.getLastToken()!;
                                         checkForTrailingWhitespace(token.getFullStart());
                                     }
                                     if (idx === 0) {
-                                        const startPos = internalName.getStart() - 1;
+                                        const startPos = element.getStart() - 1;
                                         checkForTrailingWhitespace(startPos, startPos + 1);
                                     }
                                 }
@@ -335,10 +335,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
             case ts.SyntaxKind.ImportKeyword:
                 if (
-                    parent.kind === ts.SyntaxKind.CallExpression &&
-                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword
+                    utils.isCallExpression(parent) &&
+                    parent.expression.kind === ts.SyntaxKind.ImportKeyword
                 ) {
                     return; // Don't check ImportCall
+                }
+                if (utils.isImportTypeNode(parent)) {
+                    return; // Don't check TypeQuery
                 }
             // falls through
             case ts.SyntaxKind.ExportKeyword:
@@ -357,7 +360,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         const equalsGreaterThanToken = utils.getChildOfKind(
             node,
             ts.SyntaxKind.EqualsGreaterThanToken,
-            sourceFile
+            sourceFile,
         );
         // condition so we don't crash if the arrow is somehow missing
         if (equalsGreaterThanToken === undefined) {

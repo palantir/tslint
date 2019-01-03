@@ -55,3 +55,7 @@ interface FooInterface {
     '.bar': {baz: string[];};
 }
 
+// Test an unknown Array
+let t: unknown[] = [];
+let u: unknown[] = [];
+

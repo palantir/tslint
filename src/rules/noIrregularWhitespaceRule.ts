@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 /* Inspired by: https://github.com/eslint/eslint/blob/master/lib/rules/no-irregular-whitespace.js */
 /* tslint:disable:max-line-length */
-export const IRREGULAR_WHITESPACE_REGEX = /[\u000b\u000c\u0085\ufeff\u00a0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u202f\u205f\u3000\u2028\u2029]+/mg;
+export const IRREGULAR_WHITESPACE_REGEX = /[\u000b\u000c\u0085\ufeff\u00a0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u202f\u205f\u3000\u2028\u2029]+/gm;
 /* tslint:enable:max-line-length */
 
 function walk(ctx: Lint.WalkContext<void>): void {

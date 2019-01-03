@@ -2,11 +2,11 @@
 title: TSLint
 email: your-email@domain.com
 description: > # this means to ignore newlines until "baseurl:"
-  TSLint documentation. A linter for the TypeScript language.
+    TSLint documentation. A linter for the TypeScript language.
 baseurl: "/tslint" # the subpath of your site, e.g. /blog/
 url: "https://palantir.github.io/" # the base hostname & protocol for your site
 twitter_username: PalantirTech
-github_username:  palantir/tslint
+github_username: palantir/tslint
 
 # Build settings
 markdown: kramdown
@@ -14,7 +14,7 @@ markdown_ext: md
 exclude: [vendor]
 
 page_gen:
-  - data: rules
-    template: rule
-    name: ruleName
-    dir: rules
+    - data: rules
+      template: rule
+      name: ruleName
+      dir: rules
