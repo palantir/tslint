@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
+import { isBindingElement, isComputedPropertyName, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         options: {
             type: "list",
-            items: {type: "string"},
+            items: { type: "string" },
         },
         optionExamples: [
             [
@@ -80,18 +80,25 @@ export class Rule extends Lint.Rules.TypedRule {
 }
 
 function walk(ctx: Lint.WalkContext<Set<string>>, checker: ts.TypeChecker): void {
-    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.ObjectBindingPattern:
-            case ts.SyntaxKind.TypeReference:
-                return;
-            case ts.SyntaxKind.PropertyAccessExpression:
-                // Ignore `y` in `x.y`, but recurse to `x`.
-                return recur((node as ts.PropertyAccessExpression).expression);
-            case ts.SyntaxKind.Identifier:
-                return checkIdentifier(node as ts.Identifier);
-            default:
-                return ts.forEachChild(node, recur);
+    return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node | undefined): void {
+        if (node == undefined) {
+            return;
+        }
+
+        // Handles `const { bar, length: { x: y = () => event } } = foo`
+        if (isBindingElement(node)) {
+            recur(node.initializer);
+            recur(node.name);
+            if (node.propertyName != undefined && isComputedPropertyName(node.propertyName)) {
+                recur(node.propertyName);
+            }
+        } else if (isPropertyAccessExpression(node)) {
+            // Ignore `y` in `x.y`, but recurse to `x`.
+            recur(node.expression);
+        } else if (isIdentifier(node)) {
+            checkIdentifier(node);
+        } else {
+            ts.forEachChild(node, recur);
         }
     });
 
