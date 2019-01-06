@@ -169,9 +169,9 @@ function isSafeUse(node: ts.Node, tc: ts.TypeChecker): boolean {
                 arrayMethodsWithSecondArgAsContext.indexOf(name.getText()) > -1
             ) {
                 const type = tc.getTypeAtLocation(expression);
-                const typeNode = type === undefined ? undefined : tc.typeToTypeNode(type);
+                const symbol = type === undefined ? undefined : type.symbol;
 
-                return typeNode === undefined ? false : typeNode.kind === ts.SyntaxKind.ArrayType;
+                return symbol === undefined ? false : symbol.name === "Array";
             }
 
             return parentExpression === node;
