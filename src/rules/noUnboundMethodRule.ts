@@ -82,6 +82,21 @@ export class Rule extends Lint.Rules.TypedRule {
             logArrowBound();
             logManualBind();
             \`\`\`
+            
+            You may pass a context as argument in Array built-in methods
+            \`\`\`
+            class Some {
+                private _definitions: number[] = [];
+            
+                public updateDefinition(def: number): number {
+                    return def * 2;
+                }
+            
+                public updateDefinitions(): void {
+                    this._definitions = this._definitions.map(this.updateDefinition, this);
+                }
+            }
+            \`\`\`
         `,
         type: "functionality",
         typescriptOnly: true,
