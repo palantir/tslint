@@ -43,6 +43,14 @@ for (c.method; c.method; c.method) {}
                         ~~~~~ [0]
 [0].forEach(c.method.bind(c));
 
+[0].every(c.method, c);
+[0].find(c.method, c);
+[0].findIndex(c.method, c);
+[0].flatMap(c.method, c);
+[0].forEach(c.method, c);
+[0].map(c.method, c);
+[0].some(c.method, c);
+
 <button onClick={c.method}>Click me!</button>;
                  ~~~~~~~~ [0]
 

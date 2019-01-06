@@ -20,6 +20,15 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
+const arrayMethodsWithSecondArgAsContext: string[] = [
+    "every",
+    "find",
+    "findIndex",
+    "flatMap",
+    "forEach",
+    "map",
+    "some",
+];
 
 interface Options {
     ignoreStatic: boolean;
@@ -97,7 +106,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isPropertyAccessExpression(node) && !isSafeUse(node)) {
+        if (isPropertyAccessExpression(node) && !isSafeUse(node, tc)) {
             const symbol = tc.getSymbolAtLocation(node);
             const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
             if (declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic)) {
@@ -118,11 +127,38 @@ function isMethod(node: ts.Node, ignoreStatic: boolean): boolean {
     }
 }
 
-function isSafeUse(node: ts.Node): boolean {
+function isSafeUse(node: ts.Node, tc: ts.TypeChecker): boolean {
     const parent = node.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.CallExpression:
-            return (parent as ts.CallExpression).expression === node;
+            const {
+                expression: parentExpression,
+                arguments: parentArgs,
+            } = parent as ts.CallExpression;
+            const { name, expression } = parentExpression as ts.PropertyAccessExpression;
+
+            /**
+             * @description
+             *  1. Check that method's name is in the list of Array methods with a second argument as context: map, forEach, etc.
+             *  2. Check that method has a second argument - it's a context
+             *  3. Check that expression has a type Array to prevent handling the custom methods on objects
+             * @example
+             *  [1, 2, 3].find(this.method, this) - built-in Array.prototype.find
+             *  {...}.find(this.method, contextOrSmthElse) - custom method `find` on non-array object
+             */
+            if (
+                name &&
+                parentArgs &&
+                parentArgs[1] &&
+                arrayMethodsWithSecondArgAsContext.indexOf(name.getText()) > -1
+            ) {
+                const type = tc.getTypeAtLocation(expression);
+                const typeNode = type && tc.typeToTypeNode(type);
+
+                return Boolean(typeNode && typeNode.kind === ts.SyntaxKind.ArrayType);
+            }
+
+            return parentExpression === node;
         case ts.SyntaxKind.TaggedTemplateExpression:
             return (parent as ts.TaggedTemplateExpression).tag === node;
         // E.g. `obj.method.bind(obj) or obj.method["prop"]`.
@@ -136,7 +172,7 @@ function isSafeUse(node: ts.Node): boolean {
         case ts.SyntaxKind.AsExpression:
         case ts.SyntaxKind.TypeAssertionExpression:
         case ts.SyntaxKind.ParenthesizedExpression:
-            return isSafeUse(parent);
+            return isSafeUse(parent, tc);
         // Allow use in conditions
         case ts.SyntaxKind.ConditionalExpression:
             return (parent as ts.ConditionalExpression).condition === node;

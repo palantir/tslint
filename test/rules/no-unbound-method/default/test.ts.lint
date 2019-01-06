@@ -12,3 +12,23 @@ function f(i: I) {
 }
 
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
+
+class Some {
+	private _definitions: number[] = [];
+
+	public updateDefinition(def: number): number {
+		return def * 2;
+	}
+
+	public testMethod () {}
+
+	public updateDefinitions(): void {
+		this._definitions = this._definitions.map(this.updateDefinition, this);
+		this._definitions.forEach(this.testMethod, this);
+		this._definitions.some(this.testMethod, this);
+		this._definitions.every(this.testMethod, this);
+		this._definitions.find(this.testMethod, this);
+		this._definitions.findIndex(this.testMethod, this);
+		this._definitions.flatMap(this.testMethod, this);
+	}
+}
