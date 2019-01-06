@@ -163,15 +163,15 @@ function isSafeUse(node: ts.Node, tc: ts.TypeChecker): boolean {
              *  {...}.find(this.method, contextOrSmthElse) - custom method `find` on non-array object
              */
             if (
-                name &&
-                parentArgs &&
-                parentArgs[1] &&
+                name !== undefined &&
+                parentArgs !== undefined &&
+                parentArgs[1] !== undefined &&
                 arrayMethodsWithSecondArgAsContext.indexOf(name.getText()) > -1
             ) {
                 const type = tc.getTypeAtLocation(expression);
-                const typeNode = type && tc.typeToTypeNode(type);
+                const typeNode = type === undefined ? undefined : tc.typeToTypeNode(type);
 
-                return Boolean(typeNode && typeNode.kind === ts.SyntaxKind.ArrayType);
+                return typeNode === undefined ? false : typeNode.kind === ts.SyntaxKind.ArrayType;
             }
 
             return parentExpression === node;
