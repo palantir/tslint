@@ -34,6 +34,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: Lint.Utils.dedent`
             Warns when using an expression of type 'any' in a dynamic way.
             Uses are only allowed if they would work for \`{} | null | undefined\`.
+            Downcasting to unknown is always safe.
             Type casts and tests are allowed.
             Expressions that work on all values (such as \`"" + x\`) are allowed.`,
         optionsDescription: "Not configurable.",
