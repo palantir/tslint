@@ -244,8 +244,6 @@ function getTypePredicateForKind(kind: string): Predicate | undefined {
             return flagPredicate(ts.TypeFlags.ESSymbol);
         case "function":
             return isFunction;
-        case "unknown":
-            return flagPredicate(ts.TypeFlags.Unknown);
         case "object":
             // It's an object if it's not any of the above.
             const allFlags =
@@ -254,7 +252,6 @@ function getTypePredicateForKind(kind: string): Predicate | undefined {
                 ts.TypeFlags.BooleanLike |
                 ts.TypeFlags.NumberLike |
                 ts.TypeFlags.StringLike |
-                ts.TypeFlags.Unknown |
                 ts.TypeFlags.ESSymbol;
             return type => !isTypeFlagSet(type, allFlags) && !isFunction(type);
         default:
