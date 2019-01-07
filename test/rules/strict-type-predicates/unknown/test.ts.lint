@@ -32,3 +32,11 @@ declare function get<T>(): T;
         typeof t === "boolean";
     }
 }
+
+const body: unknown = 'test';
+if (typeof body === 'object')
+    console.log('a');
+
+let test: unknown = undefined;
+if (test !== undefined)
+    console.log('b');

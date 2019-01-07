@@ -99,7 +99,12 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         const exprType = checker.getTypeAtLocation(exprPred.expression);
         // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
-        if (isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
+        if (
+            isTypeFlagSet(
+                exprType,
+                ts.TypeFlags.Any | ts.TypeFlags.TypeParameter | ts.TypeFlags.Unknown,
+            )
+        ) {
             return;
         }
 
@@ -239,6 +244,8 @@ function getTypePredicateForKind(kind: string): Predicate | undefined {
             return flagPredicate(ts.TypeFlags.ESSymbol);
         case "function":
             return isFunction;
+        case "unknown":
+            return flagPredicate(ts.TypeFlags.Unknown);
         case "object":
             // It's an object if it's not any of the above.
             const allFlags =
@@ -247,6 +254,7 @@ function getTypePredicateForKind(kind: string): Predicate | undefined {
                 ts.TypeFlags.BooleanLike |
                 ts.TypeFlags.NumberLike |
                 ts.TypeFlags.StringLike |
+                ts.TypeFlags.Unknown |
                 ts.TypeFlags.ESSymbol;
             return type => !isTypeFlagSet(type, allFlags) && !isFunction(type);
         default:
