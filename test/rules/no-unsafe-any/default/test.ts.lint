@@ -49,30 +49,36 @@ hasProp.x(1);
 
 declare function takesAny(a: any, ...bs: any[]): void;
 declare function takesNumber(a: number, ...bs: number[]): void;
+declare function takesUnknown(a: any, ...bs: any[]): void;
 
 takesAny(x, x);
 takesNumber(x, x);
             ~ [0]
                ~ [0]
+takesUnknown(x, x);
 
 declare function templateTakesAny(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
 declare function templateTakesNumber(arr: TemplateStringsArray, a: number, ...bs: number[]): any;
+declare function templateTakesUnknown(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
 
 templateTakesAny`${x}${x}`;
 templateTakesNumber`${x}${x}`;
                       ~ [0]
                           ~ [0]
+templateTakesUnknown`${x}${x}`;
 templateTakesAny`${x}`.prop;
 ~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 declare function decoratorTakesAny(value: any): Function;
 declare function decoratorTakesNumber(value: number): Function;
+declare function decoratorTakesUnknown(value: unknown): Function;
 declare const decoratorIsAny: any;
 
 class C {
     @decoratorTakesAny(x) f() {}
     @decoratorTakesNumber(x) g() {}
                           ~ [0]
+    @decoratorTakesUnknown(x) f() {}
     @decoratorIsAny h() {}
      ~~~~~~~~~~~~~~ [0]
 }
@@ -115,10 +121,12 @@ function f(x: any, retAny: () => any): any {
     const v0: any = x;
     const v1: boolean = x;
                         ~ [0]
-    let v2: any, v3: boolean;
-    v2 = x;
+    const v2: unknown = x;
+    let v3: any, v4: boolean, v5: unknown;
     v3 = x;
+    v4 = x;
          ~ [0]
+    v5 = x;
 
     // Return OK if return type is 'any'
     return x;
@@ -129,12 +137,17 @@ function f2(x: any): boolean {
            ~ [0]
 }
 
+function f3(x: any): unknown {
+    return x;
+}
+
 class X {
     constructor(y: any) {}
 
     prop0: any = x;
     prop1: number = x;
                     ~ [0]
+    prop2: unknown = x;
 
 }
 class Y {
@@ -202,6 +215,8 @@ do {} while (x);
 takesNumber(x ? x : x);
                 ~ [0]
                     ~ [0]
+takesUnknown(x ? x : x);
+
 typeof x.prop;
        ~ [0]
 
@@ -221,6 +236,10 @@ function *gen3(): IterableIterator<number> {
 }
 
 function *gen4(): IterableIterator<any> {
+    yield x;
+}
+
+function *gen5(): IterableIterator<unknown> {
     yield x;
 }
 
@@ -278,12 +297,14 @@ void x;
                        ~ [0]
         prop2 = x;
         prop3: any = x;
+        prop4: unknown = x;
     }
     class D extends C {
         prop = x;
                ~ [0]
         prop2 = x;
         prop3 = x;
+        prop4 = x;
     }
 }
 {
@@ -300,6 +321,7 @@ function predicate(x: any): x is number {
 function hasThisParameter(this: any) {
     const v: number = this;
                       ~~~~ [0]
+    const u: unknown = this;
 }
 
 (async function() {
@@ -311,7 +333,10 @@ function hasThisParameter(this: any) {
 (async function(): Promise<number> {
     return x;
            ~ [0]
-})
+});
+(async function(): Promise<unknown> {
+    return x;
+});
 
 {
     let obj = {...x};
@@ -343,6 +368,30 @@ namespace TestNS2 {
     class Test4 implements I {}
     class Test5 implements TestNS2.ITest {}
     class Test6 implements NS.ITest {}
+}
+
+const obj = { property: "value" } as any;
+const result: unknown = json;
+
+const hasUnknownProp: { prop: unknown, obj: unknown } = { prop: obj, obj };
+hasUnknownProp.prop = obj;
+
+function acceptsUnknown(a: unknown, b: unknown = x) { }
+
+acceptsUnknown(obj);
+
+interface ContainsUnknownProperty {
+    e: unknown;
+}
+
+const p: ContainsUnknownProperty = { e };
+
+function f() {
+    try {
+
+    } catch (e) {
+        acceptsUnknown(e);
+    }
 }
 
 [0]: Unsafe use of expression of type 'any'.
