@@ -1,0 +1,82 @@
+[typescript]: >= 3.0.0
+
+import importEquals = require("./commonjsModule");
+import importAlias = importEquals;
+namespace N { export const x: any = 0; }
+import importQualifiedName = N.x;
+import * as namespaceImport from "./es6Module";
+
+declare function takesUnknown(a: any, ...bs: any[]): void;
+takesUnknown(x, x);
+
+declare function templateTakesUnknown(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
+templateTakesUnknown`${x}${x}`;
+
+declare function decoratorTakesUnknown(value: unknown): Function;
+
+class C {
+    @decoratorTakesUnknown(x) f() {}
+}
+
+function f(x: any, retAny: () => any): unknown {
+    const v2: unknown = x;
+    let v5: unknown;
+    v5 = x;
+
+    // Return OK if return type is 'any'
+    return x;
+}
+
+class X {
+    constructor(y: any) {}
+    prop: unknown = x;
+}
+
+takesUnknown(x ? x : x);
+
+function *gen(): IterableIterator<unknown> {
+    yield x;
+}
+
+void x;
+
+{
+    class C {
+        prop: unknown = x;
+    }
+    class D extends C {
+        prop = x;
+    }
+}
+
+function hasThisParameter(this: any) {
+    const u: unknown = this;
+}
+
+(async function(): Promise<unknown> {
+    return x;
+});
+
+const obj = { property: "value" } as any;
+const result: unknown = json;
+
+const hasUnknownProp: { prop: unknown, obj: unknown } = { prop: obj, obj };
+hasUnknownProp.prop = obj;
+
+function acceptsUnknown(a: unknown, b: unknown = x) { }
+
+acceptsUnknown(obj);
+
+interface ContainsUnknownProperty {
+    e: unknown;
+}
+
+const p: ContainsUnknownProperty = { e };
+
+function f() {
+    try {
+
+    } catch (e) {
+        acceptsUnknown(e);
+    }
+}
