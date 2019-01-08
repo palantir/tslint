@@ -154,7 +154,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                     initializer !== undefined &&
                     this.visitNode(
                         initializer,
-                        isPropertyAny(node as ts.PropertyDeclaration, this.checker, true),
+                        isPropertyAnyOrUnknown(node as ts.PropertyDeclaration, this.checker),
                     )
                 );
             }
@@ -416,13 +416,9 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 }
 
 /** Check if property has no type annotation in this class and the base class */
-function isPropertyAny(
-    node: ts.PropertyDeclaration,
-    checker: ts.TypeChecker,
-    orUnknown: boolean = false,
-) {
+function isPropertyAnyOrUnknown(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
     if (
-        !isNodeAny(node.name, checker, orUnknown) ||
+        !isNodeAny(node.name, checker, true) ||
         node.name.kind === ts.SyntaxKind.ComputedPropertyName
     ) {
         return false;
@@ -432,7 +428,7 @@ function isPropertyAny(
     ) as ts.InterfaceType)) {
         const prop = base.getProperty(node.name.text);
         if (prop !== undefined && prop.declarations !== undefined) {
-            return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]), orUnknown);
+            return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]), true);
         }
     }
     return true;
