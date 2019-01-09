@@ -43,7 +43,7 @@ export class Formatter extends AbstractFormatter {
         const groupedFailures: { [k: string]: RuleFailure[] } = {};
         for (const failure of failures) {
             const fileName = failure.getFileName();
-            if (fileName in groupedFailures) {
+            if (groupedFailures[fileName] !== undefined) {
                 groupedFailures[fileName].push(failure);
             } else {
                 groupedFailures[fileName] = [failure];
@@ -52,7 +52,7 @@ export class Formatter extends AbstractFormatter {
 
         const formattedFiles = fileNames.map(fileName => {
             const formattedFailures =
-                fileName in groupedFailures
+                groupedFailures[fileName] !== undefined
                     ? groupedFailures[fileName].map(f => this.formatFailure(f))
                     : [];
             const joinedFailures = formattedFailures.join(""); // may be empty
