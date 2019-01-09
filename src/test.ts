@@ -205,8 +205,16 @@ export function runTest(testDirectory: string, rulesDirectory?: string | string[
             errorsFromMarkup,
             fixesFromLinter: newFileText,
             fixesFromMarkup: fixedFileText,
-            markupFromLinter: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromMarkup),
-            markupFromMarkup: parse.createMarkupFromErrors(fileTextWithoutMarkup, errorsFromLinter),
+            markupFromLinter: parse.createMarkupFromErrors(
+                fileToLint,
+                fileTextWithoutMarkup,
+                errorsFromMarkup,
+            ),
+            markupFromMarkup: parse.createMarkupFromErrors(
+                fileToLint,
+                fileTextWithoutMarkup,
+                errorsFromLinter,
+            ),
             skipped: false,
         };
     }
