@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     import * as foo from "a";
                     import * as bar from "b";
             - Groups of imports are delineated by blank lines. You can use these to group imports
-                however you like, e.g. by first- vs. third-party or thematically or can you can
+                however you like, e.g. by first- vs. third-party or thematically or you can
                 enforce a grouping of third-party, parent directories and the current directory.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
