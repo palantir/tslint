@@ -255,7 +255,7 @@ function parseFormatArguments(text: string): string[] | undefined {
     return result.length === 0 ? undefined : result;
 }
 
-export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
+export function createMarkupFromErrors(fileName: string, code: string, lintErrors: LintError[]) {
     lintErrors.sort(errorComparator);
 
     const codeText = code.split("\n");
@@ -281,7 +281,7 @@ export function createMarkupFromErrors(code: string, lintErrors: LintError[]) {
 
     return flatMap(codeText, (line, i) => [
         line,
-        ...mapDefined(errorLinesForCodeText[i], err => printLine(err, line)),
+        ...mapDefined(errorLinesForCodeText[i], err => printLine(fileName, err, line)),
     ]).join("\n");
 }
 /* tslint:enable:object-literal-sort-keys */
