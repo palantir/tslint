@@ -55,7 +55,7 @@ export interface IFormatter {
      * Formats linter results
      * @param failures Linter failures that were not fixed
      * @param fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
-     * @param fileNames All of file paths that were linted
+     * @param fileNames All of the file paths that were linted
      */
     format(failures: RuleFailure[], fixes?: RuleFailure[], fileNames?: string[]): string;
 }
