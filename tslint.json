@@ -22,7 +22,6 @@
         "no-magic-numbers": false,
         "no-non-null-assertion": false,
         "no-null-keyword": false,
-        "no-require-imports": false,
         "no-unbound-method": false,
         "no-unnecessary-qualifier": false,
         "no-use-before-declare": false,

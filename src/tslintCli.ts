@@ -17,7 +17,7 @@
 
 // tslint:disable no-console object-literal-sort-keys
 
-import commander = require("commander");
+import * as commander from "commander";
 import * as fs from "fs";
 
 import { Linter } from "./linter";
@@ -247,7 +247,8 @@ commander.on("--help", () => {
 
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
 const parsed = commander.parseOptions(process.argv.slice(2));
-commander.args = parsed.args;
+// tslint:disable-next-line:no-unnecessary-type-assertion
+(commander as typeof commander).args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }

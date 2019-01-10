@@ -19,7 +19,9 @@ import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
 
+// tslint:disable-next-line:no-require-imports
 import codeFrame = require("babel-code-frame");
+
 import chalk from "chalk";
 
 import * as Utils from "../utils";
