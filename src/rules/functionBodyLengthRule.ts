@@ -224,7 +224,7 @@ function walk(context: Lint.WalkContext<MaxFunctionLengthRuleOptions>) {
     ): string {
         const functionKindText: string = functionKindTexts[node.kind];
 
-        return `public Maximum public ${functionKindText} body length exceeded: ${bodyLength} lines instead of <= ${maxLength}.`;
+        return `Maximum ${functionKindText} body length exceeded: ${bodyLength} lines instead of <= ${maxLength}.`;
     }
 
     function calculateBodyLength(node: ts.FunctionLikeDeclaration): number {
