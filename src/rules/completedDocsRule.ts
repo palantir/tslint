@@ -474,11 +474,11 @@ function getApparentJsDoc(node: ts.Node): ts.JSDoc[] | undefined {
             return undefined;
         }
 
-        node = node.parent!;
+        node = node.parent;
     }
 
     if (ts.isVariableDeclarationList(node)) {
-        node = node.parent!;
+        node = node.parent;
     }
 
     return tsutils.getJsDoc(node);
