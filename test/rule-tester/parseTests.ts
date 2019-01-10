@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,14 +67,22 @@ describe("Rule Test Parse", () => {
     describe("createMarkupFromErrors", () => {
         it("should generate correct markup", () => {
             assert.strictEqual(
-                parse.createMarkupFromErrors(testData.codeStr5, testData.resultErrs5),
+                parse.createMarkupFromErrors(
+                    "fileName.ts",
+                    testData.codeStr5,
+                    testData.resultErrs5,
+                ),
                 testData.lintStr5,
             );
         });
 
         it("should generate correct markup with nil-length errors", () => {
             assert.strictEqual(
-                parse.createMarkupFromErrors(testData.codeStr7, testData.resultErrs7),
+                parse.createMarkupFromErrors(
+                    "fileName.ts",
+                    testData.codeStr7,
+                    testData.resultErrs7,
+                ),
                 testData.lintStr7,
             );
         });

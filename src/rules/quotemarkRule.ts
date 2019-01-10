@@ -111,11 +111,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
             isStringLiteral(node) ||
             (options.avoidTemplate &&
                 isNoSubstitutionTemplateLiteral(node) &&
-                node.parent!.kind !== ts.SyntaxKind.TaggedTemplateExpression &&
+                node.parent.kind !== ts.SyntaxKind.TaggedTemplateExpression &&
                 isSameLine(sourceFile, node.getStart(sourceFile), node.end))
         ) {
             const expectedQuoteMark =
-                node.parent!.kind === ts.SyntaxKind.JsxAttribute
+                node.parent.kind === ts.SyntaxKind.JsxAttribute
                     ? options.jsxQuoteMark
                     : options.quoteMark;
             const actualQuoteMark = sourceFile.text[node.end - 1];

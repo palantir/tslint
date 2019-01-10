@@ -1,22 +1,12 @@
 {
     "name": "tslint",
-    "version": "5.11.0",
+    "version": "5.12.0",
     "description": "An extensible static analysis linter for the TypeScript language",
     "bin": {
         "tslint": "./bin/tslint"
     },
     "main": "./lib/index.js",
     "typings": "./lib/index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/palantir/tslint.git"
-    },
-    "keywords": [
-        "cli",
-        "typescript",
-        "linter"
-    ],
-    "homepage": "https://palantir.github.io/tslint",
     "scripts": {
         "clean": "npm-run-all -p clean:core clean:test",
         "clean:core": "rimraf lib",
@@ -31,7 +21,7 @@
         "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
         "precommit": "npm-run-all precommit:prettier",
         "precommit:prettier": "pretty-quick --staged",
-        "prettier": "prettier --write ./**/*.{js,ts,css,scss,md,yml} --ignore-path ./.prettierignore",
+        "prettier": "prettier --write './**/*.{js,ts,css,scss,md,yml}' --ignore-path ./.prettierignore",
         "publish:local": "./scripts/npmPublish.sh",
         "test": "npm-run-all test:pre -p test:mocha test:rules",
         "test:pre": "cd ./test/config && npm install --no-save",
@@ -55,7 +45,7 @@
         "tsutils": "^2.27.2"
     },
     "peerDependencies": {
-        "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev"
+        "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev"
     },
     "devDependencies": {
         "@types/babel-code-frame": "^6.20.0",
@@ -72,7 +62,7 @@
         "chai": "^3.5.0",
         "github": "^8.2.1",
         "husky": "^0.14.3",
-        "json-stringify-pretty-compact": "^1.0.3",
+        "json-stringify-pretty-compact": "^1.2.0",
         "mocha": "^3.2.0",
         "npm-run-all": "^4.0.2",
         "nyc": "^10.2.0",
@@ -80,13 +70,23 @@
         "pretty-quick": "^1.6.0",
         "rimraf": "^2.5.4",
         "ts-node": "^3.3.0",
-        "tslint": "^5.8.0",
+        "tslint": "^5.12.0",
         "tslint-config-prettier": "^1.13.0",
         "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-        "typescript": "~2.9.2"
+        "typescript": "~3.1.6"
     },
-    "license": "Apache-2.0",
     "engines": {
         "node": ">=4.8.0"
-    }
+    },
+    "homepage": "https://palantir.github.io/tslint",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/palantir/tslint.git"
+    },
+    "keywords": [
+        "cli",
+        "typescript",
+        "linter"
+    ],
+    "license": "Apache-2.0"
 }

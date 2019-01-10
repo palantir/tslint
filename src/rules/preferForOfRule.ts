@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ function isNonSimpleIncrementorUse(
     sourceFile: ts.SourceFile,
 ): boolean {
     // check if iterator is used for something other than reading data from array
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         !utils.isElementAccessExpression(parent) ||
         // `a[i] = ...` or similar

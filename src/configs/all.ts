@@ -99,6 +99,7 @@ export const rules = {
     "ban-comma-operator": true,
     curly: true,
     forin: true,
+    "function-constructor": true,
     // "import-blacklist": no sensible default
     "label-position": true,
     "no-arg": true,
@@ -144,6 +145,7 @@ export const rules = {
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,
+    "unnecessary-constructor": true,
     "use-default-type-parameter": true,
     "use-isnan": true,
 
@@ -157,6 +159,7 @@ export const rules = {
     "max-file-line-count": [true, 1000],
     "max-line-length": [true, 120],
     "no-default-export": true,
+    "no-default-import": true,
     "no-duplicate-imports": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
@@ -251,6 +254,7 @@ export const rules = {
     "space-within-parens": [true, 0],
     "switch-final-break": true,
     "type-literal-delimiter": true,
+    "unnecessary-bind": true,
     "variable-name": [true, "ban-keywords", "check-format"],
     whitespace: [
         true,
