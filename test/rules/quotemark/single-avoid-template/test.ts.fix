@@ -1,4 +1,4 @@
-"fo`o";
+'fo`o';
 
 "a 'quote'";
 
@@ -15,4 +15,6 @@ bar
 // Allow tagged templates and templates with substitutions
 foo``;
 `${foo}`;
+
+this.toastCtrl.present('Please tick "Yes" to confirm');
 
