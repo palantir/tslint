@@ -198,7 +198,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             return;
         }
 
-        const declarationList = node.parent!;
+        const declarationList = node.parent;
         const text = node.name.text;
 
         if (isUpperCase(text) && !tsutils.isNodeFlagSet(declarationList, ts.NodeFlags.Const)) {
