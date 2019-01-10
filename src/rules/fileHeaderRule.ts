@@ -167,6 +167,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         );
 
         const NEW_LINE_FOLLOWING_HEADER = /^.*((\r)?\n){2,}$/gm;
-        return entireComment !== undefined && NEW_LINE_FOLLOWING_HEADER.test(entireComment);
+        return entireComment !== undefined && !NEW_LINE_FOLLOWING_HEADER.test(entireComment);
     }
 }
