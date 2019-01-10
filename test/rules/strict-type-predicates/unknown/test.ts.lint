@@ -1,0 +1,42 @@
+[typescript]: >= 3.0.0
+
+declare function get<T>(): T;
+
+// typeof
+{
+    typeof get<unknown>() === "undefined";
+    typeof get<unknown>() === "boolean";
+    typeof get<unknown>() === "number";
+    typeof get<unknown>() === "string";
+    typeof get<unknown>() === "symbol";
+    typeof get<unknown>() === "function";
+    typeof get<unknown>() === "object";
+}
+
+// negation
+{
+    get<unknown>() !== null;
+    get<unknown>() !== undefined;
+}
+
+// reverse left/right
+{
+    "string" === typeof get<unknown>();
+
+    undefined === get<unknown>();
+}
+
+// type parameters
+{
+    function f<T>(t: T) {
+        typeof t === "boolean";
+    }
+}
+
+const body: unknown = 'test';
+if (typeof body === 'object')
+    console.log('a');
+
+let test: unknown = undefined;
+if (test !== undefined)
+    console.log('b');
