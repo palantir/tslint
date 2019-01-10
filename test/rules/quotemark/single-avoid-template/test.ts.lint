@@ -2,10 +2,10 @@
 ~~~~~~~ [0]
 
 `a 'quote'`;
-~~~~~~~~~~~ [0]
+~~~~~~~~~~~ [1]
 
 `a "quote"`;
-~~~~~~~~~~~ [1]
+~~~~~~~~~~~ [0]
 
 `a "quote" 'quote'`;
 
@@ -19,5 +19,8 @@ bar
 foo``;
 `${foo}`;
 
-[0]: ` should be "
-[1]: ` should be '
+this.toastCtrl.present(`Please tick "Yes" to confirm`);
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+[0]: ` should be '
+[1]: ` should be "
