@@ -693,7 +693,7 @@ function getEmptyRules(): Map<string, Partial<IOptions>> {
     return new Map<string, Partial<IOptions>>();
 }
 
-function demap<T>(map: Map<string, T>) {
+function demap<T>(map: Map<string, T> | undefined) {
     if (map == undefined) {
         return map;
     }
