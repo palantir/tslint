@@ -12,4 +12,8 @@ x as T;
 {} as any;
 <any> {};
 
+// Allow cast to 'unknown'
+{} as unknown;
+<unknown> {};
+
 [0]: Type assertion on object literals is forbidden, use a type annotation instead.

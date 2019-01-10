@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ interface Options {
 const OPTION_EXCLUDE_CLASS_EXPRESSIONS = "exclude-class-expressions";
 
 export class Rule extends Lint.Rules.AbstractRule {
-
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "max-classes-per-file",
@@ -70,14 +69,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         const argument = this.ruleArguments[0] as number;
         const maxClasses = isNaN(argument) || argument > 0 ? argument : 1;
         return this.applyWithFunction(sourceFile, walk, {
-            excludeClassExpressions: this.ruleArguments.indexOf(OPTION_EXCLUDE_CLASS_EXPRESSIONS) !== -1,
+            excludeClassExpressions:
+                this.ruleArguments.indexOf(OPTION_EXCLUDE_CLASS_EXPRESSIONS) !== -1,
             maxClasses,
         });
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { maxClasses, excludeClassExpressions } } = ctx;
+    const {
+        sourceFile,
+        options: { maxClasses, excludeClassExpressions },
+    } = ctx;
     let classes = 0;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isClassDeclaration(node) || (!excludeClassExpressions && isClassExpression(node))) {

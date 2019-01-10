@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "no-default-import": [
+      true,
+      {
+        "fromModules": "^tslint-|^\\./|^\\.\\./"
+      }
+    ]
+  }
+}

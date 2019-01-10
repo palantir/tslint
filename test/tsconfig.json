@@ -14,12 +14,6 @@
         "lib": ["es6"],
         "outDir": "../build"
     },
-    "include": [
-        "../src/**/*",
-        "**/*"
-    ],
-    "exclude": [
-        "./files",
-        "./rules"
-    ]
+    "include": ["../src/**/*", "**/*"],
+    "exclude": ["./files", "./rules"]
 }
