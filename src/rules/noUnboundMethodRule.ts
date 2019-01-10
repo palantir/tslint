@@ -20,9 +20,13 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
+const OPTION_WHITELIST_METHOD = "whitelist-method";
+const OPTION_WHITELIST_OPERATOR = "whitelist-operator";
 
 interface Options {
     ignoreStatic: boolean;
+    whitelistMethod: string[];
+    whitelistOperator: string[];
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -32,8 +36,28 @@ export class Rule extends Lint.Rules.TypedRule {
         description: "Warns when a method is used outside of a method call.",
         optionsDescription: `You may optionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods.`,
         options: {
-            type: "string",
-            enum: [OPTION_IGNORE_STATIC],
+            anyOf: [
+                {
+                    type: "string",
+                    enum: [OPTION_IGNORE_STATIC],
+                },
+                {
+                    type: "object",
+                    properties: {
+                        [OPTION_IGNORE_STATIC]: { type: "boolean" },
+                        [OPTION_WHITELIST_METHOD]: {
+                            type: "array",
+                            items: { type: "string" },
+                            minLength: 1,
+                        },
+                        [OPTION_WHITELIST_OPERATOR]: {
+                            type: "array",
+                            items: { type: "string" },
+                            minLength: 1,
+                        },
+                    },
+                },
+            ],
         },
         optionExamples: [true, [true, OPTION_IGNORE_STATIC]],
         rationale: Lint.Utils.dedent`
@@ -87,12 +111,38 @@ export class Rule extends Lint.Rules.TypedRule {
         return this.applyWithFunction(
             sourceFile,
             walk,
-            {
-                ignoreStatic: this.ruleArguments.indexOf(OPTION_IGNORE_STATIC) !== -1,
-            },
+            parseArguments(this.ruleArguments),
             program.getTypeChecker(),
         );
     }
+}
+
+function parseArguments(args: any[]): Options {
+    const options: Options = {
+        ignoreStatic: false,
+        whitelistMethod: [],
+        whitelistOperator: [],
+    };
+
+    for (const arg of args) {
+        if (typeof arg === "string") {
+            if (arg === OPTION_IGNORE_STATIC) {
+                options.ignoreStatic = true;
+            }
+        } else {
+            if (arg.hasOwnProperty(OPTION_IGNORE_STATIC)) {
+                options.ignoreStatic = arg[OPTION_IGNORE_STATIC];
+            }
+            if (arg.hasOwnProperty(OPTION_WHITELIST_METHOD)) {
+                options.whitelistMethod.push(arg[OPTION_WHITELIST_METHOD]);
+            }
+            if (arg.hasOwnProperty(OPTION_WHITELIST_OPERATOR)) {
+                options.whitelistOperator.push(arg[OPTION_WHITELIST_OPERATOR]);
+            }
+        }
+    }
+
+    return options;
 }
 
 function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
