@@ -1,0 +1,9 @@
+import { getOr } from 'lodash/fp'
+
+import { Request } from 'express'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+import { getStatusCode } from './errors'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [grouped-imports]
+
+[grouped-imports]: Import sources of different groups must be sorted by: libraries, parent directories, current directory.
+[1]: Import sources of the same type (package, same folder, different folder) must be grouped together.

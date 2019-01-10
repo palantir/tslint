@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "function-body-length": true
+    }
+}

@@ -19,7 +19,7 @@ import * as path from "path";
 import {
     isBlockScopedVariableDeclarationList,
     isIdentifier,
-    isPrefixUnaryExpression
+    isPrefixUnaryExpression,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -31,16 +31,16 @@ export function getSourceFile(fileName: string, source: string): ts.SourceFile {
         normalizedName,
         source,
         ts.ScriptTarget.ES5,
-        /*setParentNodes*/ true
+        /*setParentNodes*/ true,
     );
 }
 
 /** @deprecated See IDisabledInterval. */
 export function doesIntersect(
     failure: RuleFailure,
-    disabledIntervals: IDisabledInterval[]
+    // tslint:disable-next-line:deprecation
+    disabledIntervals: IDisabledInterval[],
 ): boolean {
-    // tslint:disable-line deprecation
     return disabledIntervals.some(interval => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
@@ -71,10 +71,10 @@ export function hasModifier(
  * @deprecated use `isBlockScopedVariableDeclarationList` from `tsutils`
  */
 export function isBlockScopedVariable(
-    node: ts.VariableDeclaration | ts.VariableStatement
+    node: ts.VariableDeclaration | ts.VariableStatement,
 ): boolean {
     if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-        const parent = node.parent!;
+        const parent = node.parent;
         return (
             parent.kind === ts.SyntaxKind.CatchClause ||
             isBlockScopedVariableDeclarationList(parent)
@@ -93,9 +93,9 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
 
 /** @deprecated use `getDeclarationOfBindingElement` from `tsutils` */
 export function getBindingElementVariableDeclaration(
-    node: ts.BindingElement
+    node: ts.BindingElement,
 ): ts.VariableDeclaration | null {
-    let currentParent = node.parent! as ts.Node;
+    let currentParent = node.parent as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
@@ -127,7 +127,7 @@ export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean):
 
 export function ancestorWhere<T extends ts.Node = ts.Node>(
     node: ts.Node,
-    predicate: ((n: ts.Node) => n is T) | ((n: ts.Node) => boolean)
+    predicate: ((n: ts.Node) => n is T) | ((n: ts.Node) => boolean),
 ): T | undefined {
     let cur: ts.Node | undefined = node;
     do {
@@ -177,7 +177,10 @@ export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags):
  *
  * @deprecated no longer used
  */
-export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+export function isCombinedModifierFlagSet(
+    node: ts.Declaration,
+    flagToCheck: ts.ModifierFlags,
+): boolean {
     // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
 }
@@ -321,12 +324,12 @@ export type ForEachTokenCallback = (
     fullText: string,
     kind: ts.SyntaxKind,
     pos: TokenPosition,
-    parent: ts.Node
+    parent: ts.Node,
 ) => void;
 export type ForEachCommentCallback = (
     fullText: string,
     kind: ts.SyntaxKind,
-    pos: TokenPosition
+    pos: TokenPosition,
 ) => void;
 export type FilterCallback = (node: ts.Node) => boolean;
 
@@ -346,7 +349,7 @@ export function forEachToken(
     node: ts.Node,
     skipTrivia: boolean,
     cb: ForEachTokenCallback,
-    filter?: FilterCallback
+    filter?: FilterCallback,
 ) {
     // this function will most likely be called with SourceFile anyways, so there is no need for an additional parameter
     const sourceFile = node.getSourceFile();
@@ -392,7 +395,7 @@ export function forEachToken(
             fullText,
             token.kind,
             { tokenStart, fullStart: token.pos, end: token.end },
-            token.parent!
+            token.parent,
         );
     }
 }
@@ -403,14 +406,14 @@ function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback
         sourceFile.languageVersion,
         false,
         sourceFile.languageVariant,
-        fullText
+        fullText,
     );
     /**
      * Scan the specified range to get all trivia tokens.
      * This includes trailing trivia of the last token and the leading trivia of the current token
      */
     function handleTrivia(start: number, end: number, token: ts.Node) {
-        const parent = token.parent!;
+        const parent = token.parent;
         // prevent false positives by not scanning inside JsxText
         if (!canHaveLeadingTrivia(token.kind, parent)) {
             return;
@@ -425,7 +428,7 @@ function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback
                 fullText,
                 kind,
                 { tokenStart: scanner.getTokenPos(), end: position, fullStart: start },
-                parent
+                parent,
             );
         } while (position < end);
     }
@@ -444,8 +447,8 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
        forEachToken also does intentionally not pay attention to the correct comment ownership of nodes as it always
        scans all trivia before each token, which could include trailing comments of the previous token.
        Comment onwership is done right in this function*/
+    // tslint:disable-next-line:deprecation
     return forEachToken(node, true, (fullText, tokenKind, pos, parent) => {
-        // tslint:disable-line:deprecation
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
@@ -453,9 +456,9 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
             if (comments !== undefined) {
                 for (const comment of comments) {
                     cb(fullText, comment.kind, {
+                        end: comment.end,
                         fullStart: pos.fullStart,
                         tokenStart: comment.pos,
-                        end: comment.end
                     });
                 }
             }
@@ -465,9 +468,9 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
             if (comments !== undefined) {
                 for (const comment of comments) {
                     cb(fullText, comment.kind, {
+                        end: comment.end,
                         fullStart: pos.fullStart,
                         tokenStart: comment.pos,
-                        end: comment.end
                     });
                 }
             }
@@ -485,7 +488,7 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
             // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
             return (
                 parent.kind !== ts.SyntaxKind.JsxExpression ||
-                parent.parent!.kind !== ts.SyntaxKind.JsxElement
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
             );
 
         case ts.SyntaxKind.LessThanToken:
@@ -495,7 +498,7 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
                 case ts.SyntaxKind.JsxOpeningElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be leading trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
                 default:
                     return true;
             }
@@ -516,7 +519,7 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
             // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
             return (
                 parent.kind !== ts.SyntaxKind.JsxExpression ||
-                parent.parent!.kind !== ts.SyntaxKind.JsxElement
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
             );
 
         case ts.SyntaxKind.GreaterThanToken:
@@ -526,7 +529,7 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
                 case ts.SyntaxKind.JsxClosingElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be trailing trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
 
                 default:
                     return true;
@@ -579,7 +582,7 @@ export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean 
 }
 
 export function isNegativeNumberLiteral(
-    node: ts.Node
+    node: ts.Node,
 ): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
     return (
         isPrefixUnaryExpression(node) &&

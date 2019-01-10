@@ -36,8 +36,8 @@
 
         "interface-name": false,
         "file-header": [true, "Copyright \\d{4} Palantir Technologies, Inc."],
+        "function-body-length": false,
         "max-classes-per-file": false,
-        "max-function-body-length": false,
         "max-line-length": [true, 140],
         "member-ordering": [
             true,

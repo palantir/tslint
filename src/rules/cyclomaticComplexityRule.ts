@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
+import { isIdentifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
-
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
 
@@ -59,8 +59,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
-        return `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
-            `${actual} which is higher than the threshold of ${expected}`;
+        return (
+            `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
+            `${actual} which is higher than the threshold of ${expected}`
+        );
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -69,7 +71,8 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
-        const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+        const isThresholdValid =
+            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
     }
 
@@ -82,11 +85,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-    const { options: { threshold } } = ctx;
+    const {
+        options: { threshold },
+    } = ctx;
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+        // requires tsutils > 3.0.
         if (isFunctionScopeBoundary(node)) {
+            // tslint:enable:deprecation
             const old = complexity;
             complexity = 1;
             ts.forEachChild(node, cb);

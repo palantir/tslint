@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "function-body-length": [
+            true,
+            {
+                "arrow-function-body-length": 2,
+                "ignore-parameters-to-functions": "^describe|it$"
+            }
+        ]
+    }
+}
