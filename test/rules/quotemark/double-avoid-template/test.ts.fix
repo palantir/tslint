@@ -16,5 +16,5 @@ bar
 foo``;
 `${foo}`;
 
-this.toastCtrl.present('Please tick "Yes, I'm sure" to confirm');
+this.toastCtrl.present('Please tick "Yes" to confirm');
 

@@ -19,8 +19,8 @@ bar
 foo``;
 `${foo}`;
 
-this.toastCtrl.present(`Please tick "Yes, I'm sure" to confirm`);
-                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [1]
+this.toastCtrl.present(`Please tick "Yes" to confirm`);
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
 
 [0]: ` should be "
 [1]: ` should be '
