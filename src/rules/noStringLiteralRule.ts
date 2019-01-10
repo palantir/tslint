@@ -55,7 +55,13 @@ function walk(ctx: Lint.WalkContext<void>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
-            if (isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
+            if (
+                // Compatibility for TypeScript <= 2.4
+                // tslint:disable-next-line:strict-type-predicates
+                argument !== undefined &&
+                isStringLiteral(argument) &&
+                isValidPropertyAccess(argument.text)
+            ) {
                 const unescapeIdentifier: typeof Rule["id"] =
                     // typescript@<2.5.0 has an extra underscore in escaped identifier text content,
                     // to avoid fixing issue `expr['__foo'] → expr.___foo`, unescapeIdentifier() is to be used
