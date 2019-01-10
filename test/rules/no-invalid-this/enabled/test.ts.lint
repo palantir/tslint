@@ -1,3 +1,23 @@
+function setSomeProperty(this: { someProperty: number }) {
+    this.someProperty = 7;
+}
+
+function bindProperty(this: { someProperty: number }, fn: Function) {
+    return fn.bind(this);
+}
+
+const objectLiteralStyle = {
+    bindProperty: function(this: { someProperty: number }, fn: Function) {
+        return fn.bind(this);
+    },
+};
+
+const objectMethodStyle = {
+    bindProperty(this: { someProperty: number }, fn: Function) {
+        return fn.bind(this);
+    },
+};
+
 export function f<T>(this: Observable<T>): Observable<T> {
     const nestedFunction = function(this) => {
         console.log(this)
@@ -10,6 +30,7 @@ class ContextualThisClass {
         let nestedFunction: (this: number[]) => number[] = function(this) {
             [3,4].forEach(function(nr){
                 console.log(this);
+                            ~~~~           [the "this" keyword is disallowed in function bodies inside class methods, use arrow functions instead]
             });
             return this.map(i=>i);
         };
@@ -66,6 +87,25 @@ class AClass {
     public eMethod() {
         [3,4].forEach(badFunction);
         let badFunction = nr => console.log(this.x === nr);
+    }
+
+    public fMethod() {
+        const objectLiteralStyle = {
+            bindProperty: function(this: { someProperty: number }, fn: Function) {
+                return fn.bind(this);
+            },
+        };
+
+        const objectMethodStyle = {
+            bindProperty(this: { someProperty: number }, fn: Function) {
+                return fn.bind(this);
+            },
+        };
+
+        return {
+            objectLiteralStyle,
+            objectMethodStyle,
+        };
     }
 }
 

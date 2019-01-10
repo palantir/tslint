@@ -64,7 +64,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
 
     private getDocumentationNode(node: ts.Node) {
         if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-            return node.parent!;
+            return node.parent;
         }
 
         return node;

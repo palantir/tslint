@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,41 +61,64 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
+const enum ParentType {
+    None,
+    Class,
+    ClassMethod,
+    BoundRegularFunction,
+    UnboundRegularFunction,
+}
+const thisAllowedParents = new Set([ParentType.ClassMethod, ParentType.BoundRegularFunction]);
+
 function walk(ctx: Lint.WalkContext<boolean>): void {
     const { sourceFile, options: checkFuncInMethod } = ctx;
+
+    let currentParent: ParentType = ParentType.None;
     let inClass = false;
-    let inFunctionInClass = false;
 
     ts.forEachChild(sourceFile, function cb(node: ts.Node) {
+        const originalParent = currentParent;
+        const originalInClass = inClass;
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
             case ts.SyntaxKind.ClassExpression:
-                if (!inClass) {
-                    inClass = true;
-                    ts.forEachChild(node, cb);
-                    inClass = false;
-                    return;
-                }
-                break;
+                inClass = true;
+                currentParent = ParentType.Class;
+                ts.forEachChild(node, cb);
+                currentParent = originalParent;
+                inClass = originalInClass;
+                return;
 
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+            case ts.SyntaxKind.Constructor:
+            case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.FunctionExpression:
-                if ((node as ts.FunctionLikeDeclaration).parameters.some(isThisParameter)) {
-                    return;
-                }
-                if (inClass) {
-                    inFunctionInClass = true;
+                if (currentParent === ParentType.Class) {
+                    currentParent = ParentType.ClassMethod;
                     ts.forEachChild(node, cb);
-                    inFunctionInClass = false;
+                    currentParent = originalParent;
+                    return;
+                } else {
+                    currentParent = (node as ts.FunctionLikeDeclaration).parameters.some(
+                        isThisParameter,
+                    )
+                        ? ParentType.BoundRegularFunction
+                        : ParentType.UnboundRegularFunction;
+                    ts.forEachChild(node, cb);
+                    currentParent = originalParent;
                     return;
                 }
-                break;
 
             case ts.SyntaxKind.ThisKeyword:
-                if (!inClass) {
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
-                } else if (checkFuncInMethod && inFunctionInClass) {
-                    ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INSIDE);
+                if (!thisAllowedParents.has(currentParent)) {
+                    if (!inClass) {
+                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING_OUTSIDE);
+                    } else if (checkFuncInMethod) {
+                        ctx.addFailureAtNode(node, Rule.FAILURE_STRING_INSIDE);
+                    }
                 }
                 return;
         }

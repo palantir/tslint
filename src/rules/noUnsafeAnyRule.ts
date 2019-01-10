@@ -113,7 +113,6 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.TypeAssertionExpression:
             case ts.SyntaxKind.AsExpression:
             case ts.SyntaxKind.TemplateSpan: // Allow stringification (works on all values). Note: tagged templates handled differently.
-            case ts.SyntaxKind.ThrowStatement:
             case ts.SyntaxKind.TypeOfExpression:
             case ts.SyntaxKind.VoidExpression:
                 return this.visitNode(
@@ -121,11 +120,14 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                         | ts.ExpressionStatement
                         | ts.AssertionExpression
                         | ts.TemplateSpan
-                        | ts.ThrowStatement
                         | ts.TypeOfExpression
                         | ts.VoidExpression).expression,
                     true,
                 );
+            case ts.SyntaxKind.ThrowStatement: {
+                const { expression } = node as ts.ThrowStatement;
+                return expression !== undefined ? this.visitNode(expression, true) : false;
+            }
             case ts.SyntaxKind.PropertyAssignment: {
                 const { name, initializer } = node as ts.PropertyAssignment;
                 this.visitNode(name, /*anyOk*/ true);

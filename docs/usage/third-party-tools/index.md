@@ -20,6 +20,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [tslint.tmbundle][17] ([TextMate][18])
 * [generator-tslint][19]
 * [Flycheck][20] ([Emacs][21])
+* [Gitpod][22]
 
 
 [0]: https://github.com/palantir/grunt-tslint
@@ -36,7 +37,7 @@ _Note: Most of these tools are not maintained by TSLint._
 [11]: http://www.vim.org/
 [12]: https://visualstudiogallery.msdn.microsoft.com/6edc26d4-47d8-4987-82ee-7c820d79be1d
 [13]: https://www.visualstudio.com/
-[14]: https://www.jetbrains.com/help/webstorm/2016.1/tslint.html
+[14]: https://www.jetbrains.com/help/webstorm/tslint.html
 [15]: https://github.com/t-sauer/mocha-tslint
 [16]: https://mochajs.org/
 [17]: https://github.com/natesilva/tslint.tmbundle
@@ -44,3 +45,4 @@ _Note: Most of these tools are not maintained by TSLint._
 [19]: https://github.com/greybax/generator-tslint
 [20]: http://www.flycheck.org/
 [21]: https://www.gnu.org/software/emacs/
+[22]: https://gitpod.io

@@ -25,7 +25,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "pmd",
-        description: "Formats errors as through they were PMD output.",
+        description: "Formats errors as though they were PMD output.",
         descriptionDetails: "Imitates the XML output from PMD. All errors have a priority of 1.",
         sample: Utils.dedent`
         <pmd version="tslint">

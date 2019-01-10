@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext<void>): void {
     collectVariableUsage(ctx.sourceFile).forEach((variable, identifier) => {
-        if (!isParameter(identifier.parent!)) {
+        if (!isParameter(identifier.parent)) {
             return;
         }
         for (const use of variable.uses) {

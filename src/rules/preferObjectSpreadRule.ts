@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "prefer-object-spread",
         description:
-            "Enforces the use of the ES2015 object spread operator over `Object.assign()` where appropriate.",
+            "Enforces the use of the ES2018 object spread operator over `Object.assign()` where appropriate.",
         rationale: "Object spread allows for better type checking and inference.",
         optionsDescription: "Not configurable.",
         options: null,
@@ -92,7 +92,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
     const args = node.arguments;
-    const objectNeedsParens = node.parent!.kind === ts.SyntaxKind.ArrowFunction;
+    const objectNeedsParens = node.parent.kind === ts.SyntaxKind.ArrowFunction;
     const fix = [
         Lint.Replacement.replaceFromTo(
             node.getStart(sourceFile),

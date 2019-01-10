@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
+import { isIdentifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_THRESHOLD = 20;
@@ -90,7 +91,10 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+        // requires tsutils > 3.0.
         if (isFunctionScopeBoundary(node)) {
+            // tslint:enable:deprecation
             const old = complexity;
             complexity = 1;
             ts.forEachChild(node, cb);

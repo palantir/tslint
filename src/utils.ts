@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import * as fs from "fs";
+import * as resolve from "resolve";
+import * as ts from "typescript";
 
 /**
  * Enforces the invariant that the input is an array.
@@ -260,4 +264,68 @@ export function isKebabCased(name: string): boolean {
 
 export function isSnakeCased(name: string): boolean {
     return isSeparatorCased(name, "-");
+}
+
+/**
+ * Tries to resolve a package by name, optionally relative to a file path. If the
+ * file path is under a symlink, it tries to resolve the package under both the real path and under
+ * the symlink path.
+ */
+export function tryResolvePackage(packageName: string, relativeTo?: string): string | undefined {
+    const realRelativeToPath: string | undefined =
+        relativeTo !== undefined ? fs.realpathSync(relativeTo) : undefined;
+
+    let resolvedPath: string | undefined = tryResolveSync(packageName, realRelativeToPath);
+    if (resolvedPath === undefined) {
+        resolvedPath = tryResolveSync(packageName, relativeTo);
+    }
+
+    return resolvedPath;
+}
+
+/**
+ * Calls `resolve.sync` and if it fails, it returns `undefined`
+ */
+function tryResolveSync(packageName: string, relativeTo?: string): string | undefined {
+    try {
+        return resolve.sync(packageName, { basedir: relativeTo });
+    } catch {
+        return undefined;
+    }
+}
+
+/**
+ * @deprecated Copied from tsutils 2.27.2. This will be removed once TSLint requires tsutils > 3.0.
+ */
+export function isFunctionScopeBoundary(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.ArrowFunction:
+        case ts.SyntaxKind.Constructor:
+        case ts.SyntaxKind.ModuleDeclaration:
+        case ts.SyntaxKind.ClassDeclaration:
+        case ts.SyntaxKind.ClassExpression:
+        case ts.SyntaxKind.EnumDeclaration:
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+        case ts.SyntaxKind.InterfaceDeclaration:
+        case ts.SyntaxKind.TypeAliasDeclaration:
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.ConstructorType:
+        case ts.SyntaxKind.FunctionType:
+        case ts.SyntaxKind.MappedType:
+        case ts.SyntaxKind.ConditionalType:
+            return true;
+        case ts.SyntaxKind.SourceFile:
+            // if SourceFile is no module, it contributes to the global scope and is therefore no scope boundary
+            // tslint:disable:no-angle-bracket-type-assertion Code copied as from tsutils as is.
+            return ts.isExternalModule(<ts.SourceFile>node);
+        // tslint:enable:no-angle-bracket-type-assertopn
+        default:
+            return false;
+    }
 }

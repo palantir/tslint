@@ -78,5 +78,19 @@ test(async () => {
          ~~~~~~~~~~~~~~~~~ [VOID]
 });
 
+
+function * generator(returnNothing: boolean) {
+    if (returnNothing) return;
+    yield 1;
+    return yield * [2, 3];
+}
+
+class ClassWithGeneratorMethod {
+    * generatorMethod(returnNothing: boolean) {
+        if (returnNothing) return;
+        yield 1;
+    }
+}
+
 [VOID]: `void` function should use `return;`, not `return undefined;`.
 [UNDEFINED]: Value-returning function should use `return undefined;`, not just `return;`.

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     import * as foo from "a";
                     import * as bar from "b";
             - Groups of imports are delineated by blank lines. You can use these to group imports
-                however you like, e.g. by first- vs. third-party or thematically or can you can
+                however you like, e.g. by first- vs. third-party or thematically or you can
                 enforce a grouping of third-party, parent directories and the current directory.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
@@ -122,6 +122,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Import sources of different groups must be sorted by: libraries, parent directories, current directory.";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
+    public static IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP =
+        "Import sources of the same type (package, same folder, different folder) must be grouped together.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
@@ -245,9 +247,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = this.options.importSourcesOrderTransform(
-            removeQuotes(node.moduleSpecifier.text),
-        );
+        const source = removeQuotes(node.moduleSpecifier.text);
         this.checkSource(source, node);
 
         const { importClause } = node;
@@ -275,14 +275,16 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = this.options.importSourcesOrderTransform(removeQuotes(expression.text));
+        const source = removeQuotes(expression.text);
         this.checkSource(source, node);
     }
 
-    private checkSource(source: string, node: ImportDeclaration["node"]) {
+    private checkSource(originalSource: string, node: ImportDeclaration["node"]) {
+        const type = getImportType(originalSource);
+        const source = this.options.importSourcesOrderTransform(originalSource);
         const currentSource = this.options.moduleSourcePath(source);
         const previousSource = this.currentImportsBlock.getLastImportSource();
-        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource);
+        this.currentImportsBlock.addImportDeclaration(this.sourceFile, node, currentSource, type);
 
         if (previousSource !== null && compare(currentSource, previousSource) === -1) {
             this.lastFix = [];
@@ -325,7 +327,32 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkBlocksGrouping(): void {
+        this.checkBlocksUniqueness();
         this.importsBlocks.some(this.checkBlockGroups, this);
+    }
+
+    private checkBlocksUniqueness(): void {
+        const typesEncountered = new Map<ImportType, boolean>([
+            [ImportType.LIBRARY_IMPORT, false],
+            [ImportType.PARENT_DIRECTORY_IMPORT, false],
+            [ImportType.CURRENT_DIRECTORY_IMPORT, false],
+        ]);
+
+        const nonEmptyBlocks = this.importsBlocks.filter(
+            block => block.getImportDeclarations().length > 0,
+        );
+        nonEmptyBlocks.forEach(block => {
+            // assume the whole block is of the same type, hence use the first one as the representing one
+            const firstInBlock = block.getImportDeclarations()[0];
+            if (typesEncountered.get(firstInBlock.type)) {
+                this.addFailureAtNode(
+                    firstInBlock.node,
+                    Rule.IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP,
+                );
+            } else {
+                typesEncountered.set(firstInBlock.type, true);
+            }
+        });
     }
 
     private checkBlockGroups(importsBlock: ImportsBlock): boolean {
@@ -432,11 +459,11 @@ class ImportsBlock {
         sourceFile: ts.SourceFile,
         node: ImportDeclaration["node"],
         sourcePath: string,
+        type: ImportType,
     ) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
         const text = sourceFile.text.substring(start, end);
-        const type = this.getImportType(sourcePath);
 
         if (start > node.getStart() || end === 0) {
             // skip block if any statements don't end with a newline to simplify implementation
@@ -510,17 +537,17 @@ class ImportsBlock {
     private getLastImportDeclaration(): ImportDeclaration | undefined {
         return this.importDeclarations[this.importDeclarations.length - 1];
     }
+}
 
-    private getImportType(sourcePath: string): ImportType {
-        if (sourcePath.charAt(0) === ".") {
-            if (sourcePath.charAt(1) === ".") {
-                return ImportType.PARENT_DIRECTORY_IMPORT;
-            } else {
-                return ImportType.CURRENT_DIRECTORY_IMPORT;
-            }
+function getImportType(sourcePath: string): ImportType {
+    if (sourcePath.charAt(0) === ".") {
+        if (sourcePath.charAt(1) === ".") {
+            return ImportType.PARENT_DIRECTORY_IMPORT;
         } else {
-            return ImportType.LIBRARY_IMPORT;
+            return ImportType.CURRENT_DIRECTORY_IMPORT;
         }
+    } else {
+        return ImportType.LIBRARY_IMPORT;
     }
 }
 

@@ -153,17 +153,17 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
             return;
         }
         const lastToken = utils.getPreviousToken(
-            node.getLastToken(this.sourceFile),
+            node.getLastToken(this.sourceFile)!,
             this.sourceFile,
         )!;
         // yield does not continue on the next line if there is no yielded expression
         if (
             (lastToken.kind === ts.SyntaxKind.YieldKeyword &&
-                lastToken.parent!.kind === ts.SyntaxKind.YieldExpression) ||
+                lastToken.parent.kind === ts.SyntaxKind.YieldExpression) ||
             // arrow functions with block as body don't continue on the next line
             (lastToken.kind === ts.SyntaxKind.CloseBraceToken &&
-                lastToken.parent!.kind === ts.SyntaxKind.Block &&
-                lastToken.parent!.parent!.kind === ts.SyntaxKind.ArrowFunction)
+                lastToken.parent.kind === ts.SyntaxKind.Block &&
+                lastToken.parent.parent.kind === ts.SyntaxKind.ArrowFunction)
         ) {
             return this.checkSemicolonOrLineBreak(node);
         }
@@ -192,8 +192,8 @@ abstract class SemicolonWalker extends Lint.AbstractWalker<Options> {
 
     private checkEmptyStatement(node: ts.Node) {
         // An empty statement is only ever useful when it is the only statement inside a loop
-        if (!utils.isIterationStatement(node.parent!)) {
-            const parentKind = node.parent!.kind;
+        if (!utils.isIterationStatement(node.parent)) {
+            const parentKind = node.parent.kind;
             // don't remove empty statement if it is a direct child of if, with or a LabeledStatement
             // otherwise this would unintentionally change control flow
             const noFix =
@@ -358,7 +358,10 @@ class SemicolonNeverWalker extends SemicolonWalker {
 
     private checkVariableStatement(node: ts.VariableStatement) {
         const declarations = node.declarationList.declarations;
-        if (declarations[declarations.length - 1].initializer === undefined) {
+        if (
+            declarations.length !== 0 &&
+            declarations[declarations.length - 1].initializer === undefined
+        ) {
             // variable declaration does not continue on the next line if it has no initializer
             return this.checkSemicolonOrLineBreak(node);
         }
