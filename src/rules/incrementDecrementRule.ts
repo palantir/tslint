@@ -71,7 +71,7 @@ function walk(context: Lint.WalkContext<Options>) {
     ): Lint.Replacement {
         let text = `${node.operand.getText(context.sourceFile)} ${newOperatorText}`;
 
-        if (node.parent !== undefined && tsutils.isBinaryExpression(node.parent)) {
+        if (tsutils.isBinaryExpression(node.parent)) {
             text = `(${text})`;
         }
 

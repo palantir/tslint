@@ -73,7 +73,8 @@ function walk(ctx: Lint.WalkContext<string[]>, tc: ts.TypeChecker) {
                 !isPromiseCatchCall(expression) &&
                 !isPromiseThenCallWithRejectionHandler(expression)
             ) {
-                const { symbol } = tc.getTypeAtLocation(expression);
+                const type = tc.getTypeAtLocation(expression);
+                const symbol = type.getSymbol();
                 if (symbol !== undefined && ctx.options.indexOf(symbol.name) !== -1) {
                     ctx.addFailureAtNode(expression, Rule.FAILURE_STRING);
                 }

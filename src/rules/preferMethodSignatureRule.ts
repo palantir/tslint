@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (questionToken !== undefined) {
             result += "?";
         }
-        if (type !== undefined && isFunctionTypeNode(type) && type.type !== undefined) {
+        if (type !== undefined && isFunctionTypeNode(type)) {
             if (type.typeParameters !== undefined) {
                 const tps = type.typeParameters.map(tp => tp.getText()).join(", ");
                 result += `<${tps}>`;
@@ -66,13 +66,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (isPropertySignature(node)) {
             const { type } = node;
             if (type !== undefined && isFunctionTypeNode(type)) {
-                ctx.addFailureAtNode(
-                    node.name,
-                    Rule.FAILURE_STRING,
-                    type.type === undefined
-                        ? undefined
-                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))],
-                );
+                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, [
+                    Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node)),
+                ]);
             }
         }
         return ts.forEachChild(node, cb);

@@ -27,7 +27,7 @@ export interface ITagExclusionDescriptor {
 }
 
 export interface IContentTags {
-    [i: string]: string;
+    [i: string]: string | undefined;
 }
 
 export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
@@ -35,9 +35,7 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
         this.descriptor.tags === undefined ? {} : this.descriptor.tags.content;
 
     private readonly existenceTags = new Set(
-        this.descriptor.tags !== undefined && this.descriptor.tags.existence !== undefined
-            ? this.descriptor.tags.existence
-            : undefined,
+        this.descriptor.tags !== undefined ? this.descriptor.tags.existence : undefined,
     );
 
     public excludes(node: ts.Node) {

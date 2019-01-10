@@ -72,8 +72,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let whitelist = this.ruleArguments.find(arg => Array.isArray(arg)) as string[];
-        if (whitelist === null || whitelist === undefined) {
+        let whitelist = this.ruleArguments.find(arg => Array.isArray(arg)) as string[] | undefined;
+        if (whitelist === undefined) {
             whitelist = [];
         }
 

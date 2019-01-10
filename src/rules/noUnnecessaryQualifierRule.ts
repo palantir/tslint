@@ -131,6 +131,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
     }
 
     function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
+        // Compatibility with older TypeScript versions from before getExportSymbolOfSymbol
+        // tslint:disable-next-line:strict-type-predicates
         if (checker.getExportSymbolOfSymbol !== undefined) {
             inScope = checker.getExportSymbolOfSymbol(inScope);
             return accessed === inScope;

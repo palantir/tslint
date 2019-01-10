@@ -143,7 +143,9 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         if (options.matchDeclarationOrder && options.matchDeclarationOrderOnly) {
             showWarningOnce(
                 `"${OPTION_MATCH_DECLARATION_ORDER}" will be ignored since ` +
-                `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${this.ruleName}.`
+                    `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${
+                        this.ruleName
+                    }.`,
             );
             return [];
         }
@@ -174,7 +176,13 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, localeCompare, matchDeclarationOrder, matchDeclarationOrderOnly, shorthandFirst },
+        options: {
+            ignoreCase,
+            localeCompare,
+            matchDeclarationOrder,
+            matchDeclarationOrderOnly,
+            shorthandFirst,
+        },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -352,13 +360,18 @@ function getTypeName(t: TypeLike): string | undefined {
 type TypeLike = ts.InterfaceDeclaration | ts.TypeLiteralNode;
 
 function getContextualType(node: ts.Expression, checker: ts.TypeChecker): TypeLike | undefined {
-    const c = checker.getContextualType(node);
-    if (c === undefined || c.symbol === undefined) {
+    const type = checker.getContextualType(node);
+    if (type === undefined) {
         return undefined;
     }
 
-    const { declarations } = c.symbol;
-    if (declarations === undefined || declarations.length !== 1) {
+    const symbol = type.getSymbol();
+    if (symbol === undefined) {
+        return undefined;
+    }
+
+    const { declarations } = symbol;
+    if (declarations.length !== 1) {
         return undefined;
     }
 

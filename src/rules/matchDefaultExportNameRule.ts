@@ -61,7 +61,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
         }
 
         const { declarations } = tc.getAliasedSymbol(symbol);
-        if (declarations !== undefined && declarations.length !== 0) {
+        if (declarations.length !== 0) {
             const { name } = declarations[0] as ts.NamedDeclaration;
             if (
                 name !== undefined &&

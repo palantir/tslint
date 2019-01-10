@@ -291,7 +291,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-const modifierAliases: { [i: string]: string } = {
+const modifierAliases: { [i: string]: string | undefined } = {
     export: "exported",
 };
 

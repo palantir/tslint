@@ -47,7 +47,7 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        if (typeof failures[0] === "undefined") {
+        if (failures.length === 0) {
             return "\n";
         }
         failures = this.sortFailures(failures);

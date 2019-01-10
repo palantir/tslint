@@ -202,9 +202,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                 return anyOk ? false : this.check(node as ts.Expression);
             case ts.SyntaxKind.ElementAccessExpression: {
                 const { expression, argumentExpression } = node as ts.ElementAccessExpression;
-                if (argumentExpression !== undefined) {
-                    this.visitNode(argumentExpression, true);
-                }
+                this.visitNode(argumentExpression, true);
                 if (this.visitNode(expression)) {
                     return true;
                 }
@@ -424,7 +422,7 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
         node.parent,
     ) as ts.InterfaceType)) {
         const prop = base.getProperty(node.name.text);
-        if (prop !== undefined && prop.declarations !== undefined) {
+        if (prop !== undefined) {
             return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]));
         }
     }
@@ -461,7 +459,7 @@ const jsxElementTypes = new Set<ts.SyntaxKind>([
 ]);
 
 function isJsxNativeElement(node: ts.Node): boolean {
-    if (!isIdentifier(node) || node.parent === undefined) {
+    if (!isIdentifier(node)) {
         return false;
     }
 

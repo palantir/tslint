@@ -28,30 +28,33 @@ export function findFormatter(
 ): FormatterConstructor | undefined {
     if (typeof name === "function") {
         return name;
-    } else if (typeof name === "string") {
-        name = name.trim();
-        const camelizedName = camelize(`${name}Formatter`);
+    }
 
-        // first check for core formatters
-        let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName, true);
+    // If an something else is passed as a name (e.g. object)
+    // tslint:disable-next-line:strict-type-predicates
+    if (typeof name !== "string") {
+        throw new Error(`Name of type ${typeof name} is not supported.`);
+    }
+
+    name = name.trim();
+    const camelizedName = camelize(`${name}Formatter`);
+
+    // first check for core formatters
+    let Formatter = loadFormatter(CORE_FORMATTERS_DIRECTORY, camelizedName, true);
+    if (Formatter !== undefined) {
+        return Formatter;
+    }
+
+    // then check for rules within the first level of rulesDirectory
+    if (formattersDirectory !== undefined) {
+        Formatter = loadFormatter(formattersDirectory, camelizedName);
         if (Formatter !== undefined) {
             return Formatter;
         }
-
-        // then check for rules within the first level of rulesDirectory
-        if (formattersDirectory !== undefined) {
-            Formatter = loadFormatter(formattersDirectory, camelizedName);
-            if (Formatter !== undefined) {
-                return Formatter;
-            }
-        }
-
-        // else try to resolve as module
-        return loadFormatterModule(name);
-    } else {
-        // If an something else is passed as a name (e.g. object)
-        throw new Error(`Name of type ${typeof name} is not supported.`);
     }
+
+    // else try to resolve as module
+    return loadFormatterModule(name);
 }
 
 function loadFormatter(

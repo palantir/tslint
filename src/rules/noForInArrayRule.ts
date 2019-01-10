@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -57,10 +58,11 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (node.kind === ts.SyntaxKind.ForInStatement) {
-            const type = checker.getTypeAtLocation((node as ts.ForInStatement).expression);
+        if (tsutils.isForInStatement(node)) {
+            const type = checker.getTypeAtLocation(node.expression);
+            const symbol = type.getSymbol();
             if (
-                (type.symbol !== undefined && type.symbol.name === "Array") ||
+                (symbol !== undefined && symbol.name === "Array") ||
                 // tslint:disable-next-line:no-bitwise
                 (type.flags & ts.TypeFlags.StringLike) !== 0
             ) {

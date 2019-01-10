@@ -87,7 +87,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
             }
         }
 
-        const [num, exp] = text.split(/e/i);
+        const [num, exp] = text.split(/e/i) as [string, string?];
         if (exp !== undefined && (exp.startsWith("-0") || exp.startsWith("0"))) {
             ctx.addFailureAt(node.getEnd() - exp.length, exp.length, Rule.FAILURE_STRING_LEADING_0);
         }

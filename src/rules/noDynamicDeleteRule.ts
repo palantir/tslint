@@ -53,7 +53,7 @@ function walk(context: Lint.WalkContext<void>) {
         }
 
         const { argumentExpression } = node;
-        if (argumentExpression === undefined || isNecessaryDynamicAccess(argumentExpression)) {
+        if (isNecessaryDynamicAccess(argumentExpression)) {
             return;
         }
 

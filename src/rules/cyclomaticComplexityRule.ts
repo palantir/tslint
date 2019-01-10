@@ -72,7 +72,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
         const isThresholdValid =
-            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+            typeof (this.threshold as any) === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
     }
 

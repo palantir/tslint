@@ -417,10 +417,12 @@ function getKind(type: ts.Type): TypeKind {
 
 function numberLiteralIsZero(type: ts.NumberLiteralType): boolean {
     // for compatibility with typescript@<2.4.0
+    // tslint:disable-next-line:strict-type-predicates
     return type.value !== undefined ? type.value === 0 : (type as any).text === "0";
 }
 function stringLiteralIsEmpty(type: ts.StringLiteralType): boolean {
     // for compatibility with typescript@<2.4.0
+    // tslint:disable-next-line:strict-type-predicates
     return (type.value !== undefined ? type.value : (type as any).text) === "";
 }
 

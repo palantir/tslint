@@ -184,10 +184,11 @@ function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
 }
 
 function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
+    // for compatibility with typescript@<2.3.0
+    // tslint:disable-next-line:strict-type-predicates
     if (symbol.getJsDocTags !== undefined) {
         return findDeprecationTag(symbol.getJsDocTags());
     }
-    // for compatibility with typescript@<2.3.0
     return getDeprecationFromDeclarations(symbol.declarations);
 }
 
@@ -195,6 +196,9 @@ function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
     if (signature === undefined) {
         return undefined;
     }
+
+    // For compatibility with older TypeScript versions
+    // tslint:disable-next-line:strict-type-predicates
     if (signature.getJsDocTags !== undefined) {
         return findDeprecationTag(signature.getJsDocTags());
     }

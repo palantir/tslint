@@ -97,6 +97,7 @@ export function getBindingElementVariableDeclaration(
 ): ts.VariableDeclaration | null {
     let currentParent = node.parent as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
+        // tslint:disable-next-line:strict-type-predicates
         if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
         } else {
@@ -122,7 +123,8 @@ export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undef
  * @deprecated no longer used, use a `while` loop instead
  */
 export function someAncestor(node: ts.Node, predicate: (n: ts.Node) => boolean): boolean {
-    return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate)); // tslint:disable-line:deprecation
+    // tslint:disable-next-line:deprecation strict-type-predicates
+    return predicate(node) || (node.parent !== undefined && someAncestor(node.parent, predicate));
 }
 
 export function ancestorWhere<T extends ts.Node = ts.Node>(
@@ -134,7 +136,7 @@ export function ancestorWhere<T extends ts.Node = ts.Node>(
         if (predicate(cur)) {
             return cur;
         }
-        cur = cur.parent;
+        cur = cur.parent as ts.Node | undefined;
     } while (cur !== undefined);
     return undefined;
 }
@@ -264,6 +266,7 @@ export function isBlockScopeBoundary(node: ts.Node): boolean {
         isLoop(node) || // tslint:disable-line:deprecation
         node.kind === ts.SyntaxKind.WithStatement ||
         node.kind === ts.SyntaxKind.SwitchStatement ||
+        // tslint:disable-next-line:strict-type-predicates
         (node.parent !== undefined &&
             (node.parent.kind === ts.SyntaxKind.TryStatement ||
                 node.parent.kind === ts.SyntaxKind.IfStatement))

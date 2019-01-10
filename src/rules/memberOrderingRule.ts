@@ -544,7 +544,9 @@ function parseOptions(options: any[]): Options {
     );
     return { order, alphabetize };
 }
-function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
+function getOptionsJson(
+    allOptions?: any[] | null,
+): { order: MemberCategoryJson[]; alphabetize: boolean } {
     if (allOptions == undefined || allOptions.length === 0 || allOptions[0] == undefined) {
         throw new Error("Got empty options");
     }

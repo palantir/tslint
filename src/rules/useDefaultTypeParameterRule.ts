@@ -129,7 +129,7 @@ function typeParamsFromType(
     checker: ts.TypeChecker,
 ): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
-    if (sym === undefined || sym.declarations === undefined) {
+    if (sym === undefined) {
         return undefined;
     }
 

@@ -22,7 +22,7 @@ import * as ts from "typescript";
 /**
  * Enforces the invariant that the input is an array.
  */
-export function arrayify<T>(arg?: T | T[]): T[] {
+export function arrayify<T>(arg?: T | T[] | null): T[] {
     if (Array.isArray(arg)) {
         return arg;
     } else if (arg != undefined) {
@@ -101,7 +101,7 @@ export function stripComments(content: string): string {
     const regexp: RegExp = /("(?:[^\\\"]*(?:\\.)?)*")|('(?:[^\\\']*(?:\\.)?)*')|(\/\*(?:\r?\n|.)*?\*\/)|(\/{2,}.*?(?:(?:\r?\n)|$))/g;
     const result = content.replace(
         regexp,
-        (match: string, _m1: string, _m2: string, m3: string, m4: string) => {
+        (match: string, _m1?: string, _m2?: string, m3?: string, m4?: string) => {
             // Only one of m1, m2, m3, m4 matches
             if (m3 !== undefined) {
                 // A block comment. Replace with nothing

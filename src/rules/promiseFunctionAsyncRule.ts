@@ -129,5 +129,7 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
 
 function returnsPromise(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
     const type = tc.getReturnTypeOfSignature(tc.getTypeAtLocation(node).getCallSignatures()[0]);
-    return type.symbol !== undefined && type.symbol.name === "Promise";
+    const symbol = type.getSymbol();
+
+    return symbol !== undefined && symbol.name === "Promise";
 }

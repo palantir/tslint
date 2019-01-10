@@ -28,7 +28,6 @@
         "no-use-before-declare": false,
         "no-void-expression": false,
         "prefer-function-over-method": false,
-        "strict-type-predicates": false,
         "triple-equals": [true, "allow-undefined-check"],
         "typedef": false,
 

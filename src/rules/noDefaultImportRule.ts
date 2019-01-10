@@ -88,6 +88,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     private isFromModulesConfigOption(
         option: boolean | RawConfigOptions,
     ): option is RawConfigOptions {
+        // tslint:disable-next-line:strict-type-predicates
         return typeof option === "object" && option[fromModulesConfigOptionName] !== undefined;
     }
     private getRuleOptions(options: ReadonlyArray<boolean | RawConfigOptions>): Options {
@@ -96,6 +97,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         );
         if (
             fromModuleConfigOption !== undefined &&
+            // tslint:disable-next-line:strict-type-predicates
             typeof fromModuleConfigOption[fromModulesConfigOptionName] === "string"
         ) {
             return {

@@ -121,6 +121,7 @@ const validate = (
         return validateWithSimpleConfig(sourceFile, casingConfig);
     }
 
+    // tslint:disable-next-line:strict-type-predicates
     if (typeof casingConfig === "object") {
         return validateWithRegexConfig(sourceFile, casingConfig);
     }

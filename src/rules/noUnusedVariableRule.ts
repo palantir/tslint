@@ -242,12 +242,12 @@ function addImportSpecifierFailures(
                         continue;
                     }
 
-                    const prevElement = elements[i - 1];
-                    const nextElement = elements[i + 1];
+                    const prevElement = i === 0 ? undefined : elements[i - 1];
+                    const nextElement = i === elements.length - 1 ? undefined : elements[i + 1];
                     const start =
                         prevElement !== undefined ? prevElement.getEnd() : element.getStart();
                     const end =
-                        nextElement !== undefined && prevElement == undefined
+                        nextElement !== undefined && prevElement === undefined
                             ? nextElement.getStart()
                             : element.getEnd();
                     const fix = Lint.Replacement.deleteFromTo(start, end);

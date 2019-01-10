@@ -18,7 +18,12 @@
 import * as ts from "typescript";
 
 export const typeIsOrHasBaseType = (type: ts.Type, parentType: ts.Type) => {
-    if (type.symbol === undefined || parentType.symbol === undefined) {
+    if (type.getSymbol() === undefined) {
+        return false;
+    }
+
+    const parentTypeSymbol = parentType.getSymbol();
+    if (parentTypeSymbol === undefined) {
         return false;
     }
 
@@ -30,7 +35,8 @@ export const typeIsOrHasBaseType = (type: ts.Type, parentType: ts.Type) => {
     }
 
     for (const baseType of typeAndBaseTypes) {
-        if (baseType.symbol !== undefined && baseType.symbol.name === parentType.symbol.name) {
+        const baseTypeSymbol = baseType.getSymbol();
+        if (baseTypeSymbol !== undefined && baseTypeSymbol.name === parentTypeSymbol.name) {
             return true;
         }
     }

@@ -184,16 +184,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     if (namedBindings !== undefined) {
                         if (namedBindings.kind !== ts.SyntaxKind.NamespaceImport) {
                             namedBindings.elements.forEach((element, idx, arr) => {
-                                const internalName = element.name;
-                                if (internalName !== undefined) {
-                                    if (idx === arr.length - 1) {
-                                        const token = namedBindings.getLastToken()!;
-                                        checkForTrailingWhitespace(token.getFullStart());
-                                    }
-                                    if (idx === 0) {
-                                        const startPos = element.getStart() - 1;
-                                        checkForTrailingWhitespace(startPos, startPos + 1);
-                                    }
+                                if (idx === arr.length - 1) {
+                                    const token = namedBindings.getLastToken()!;
+                                    checkForTrailingWhitespace(token.getFullStart());
+                                }
+                                if (idx === 0) {
+                                    const startPos = element.getStart() - 1;
+                                    checkForTrailingWhitespace(startPos, startPos + 1);
                                 }
                             });
                         }

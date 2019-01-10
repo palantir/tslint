@@ -105,10 +105,6 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
      * var { x: y } = { x: 43 };
      */
     function isPropNameInBinding(node: ts.Node): boolean {
-        return (
-            node.parent !== undefined &&
-            isBindingElement(node.parent) &&
-            node.parent.propertyName === node
-        );
+        return isBindingElement(node.parent) && node.parent.propertyName === node;
     }
 }

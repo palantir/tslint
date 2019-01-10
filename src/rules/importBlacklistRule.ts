@@ -109,7 +109,7 @@ type Options = Array<string | { [moduleName: string]: string[] } | string[]>;
 
 function walk(ctx: Lint.WalkContext<Options>) {
     interface BannedImports {
-        [moduleName: string]: true | Set<string>;
+        [moduleName: string]: true | Set<string> | undefined;
     }
 
     // Merge/normalize options.

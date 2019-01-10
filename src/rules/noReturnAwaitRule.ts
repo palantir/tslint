@@ -95,11 +95,11 @@ function isUnnecessaryAwait(node: ts.Node): boolean {
 }
 
 function isInsideTryBlock(node: ts.Node): boolean {
+    // tslint:disable-next-line:strict-type-predicates
     while (node.parent !== undefined) {
-        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
-        // requires tsutils > 3.0.
+        // This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint requires tsutils > 3.0.
+        // tslint:disable-next-line:deprecation
         if (isFunctionScopeBoundary(node)) {
-            // tslint:enable:deprecation
             return false;
         }
         if (isTryStatement(node.parent)) {

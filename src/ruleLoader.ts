@@ -19,7 +19,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { FatalError, showWarningOnce } from "./error";
-import { IOptions, IRule, RuleConstructor } from "./language/rule/rule";
+import { IOptions, IRule, IRuleMetadata, RuleConstructor } from "./language/rule/rule";
 import { arrayify, camelize, dedent, find } from "./utils";
 
 const CORE_RULES_DIRECTORY = path.resolve(__dirname, "rules");
@@ -44,7 +44,11 @@ export function loadRules(
         const Rule = findRule(ruleName, rulesDirectories);
         if (Rule === undefined) {
             notFoundRules.push(ruleName);
-        } else if (isJs && Rule.metadata !== undefined && Rule.metadata.typescriptOnly) {
+            continue;
+        }
+
+        const metadata = Rule.metadata as IRuleMetadata | undefined;
+        if (isJs && metadata !== undefined && Rule.metadata.typescriptOnly) {
             notAllowedInJsRules.push(ruleName);
         } else {
             const rule = new Rule(ruleOptions);
@@ -52,9 +56,9 @@ export function loadRules(
                 rules.push(rule);
             }
 
-            if (Rule.metadata !== undefined && Boolean(Rule.metadata.deprecationMessage)) {
+            if (metadata !== undefined && Boolean(metadata.deprecationMessage)) {
                 showWarningOnce(
-                    `${Rule.metadata.ruleName} is deprecated. ${Rule.metadata.deprecationMessage}`,
+                    `${metadata.ruleName} is deprecated. ${metadata.deprecationMessage}`,
                 );
             }
         }

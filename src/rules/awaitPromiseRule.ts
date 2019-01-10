@@ -99,7 +99,8 @@ function containsType(type: ts.Type, predicate: (name: string) => boolean): bool
     if (isTypeReference(type)) {
         type = type.target;
     }
-    if (type.symbol !== undefined && predicate(type.symbol.name)) {
+    const symbol = type.getSymbol();
+    if (symbol !== undefined && predicate(symbol.name)) {
         return true;
     }
     if (isUnionOrIntersectionType(type)) {

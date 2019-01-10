@@ -22,7 +22,7 @@ import * as os from "os";
 import * as path from "path";
 import { FatalError, showWarningOnce } from "./error";
 
-import { IOptions, RuleSeverity } from "./language/rule/rule";
+import { IOptions, RuleConstructor, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
 
@@ -150,7 +150,7 @@ export function findConfigurationPath(
     suppliedConfigFilePath: string | null,
     inputFilePath?: string,
 ): string | undefined {
-    if (suppliedConfigFilePath != undefined) {
+    if (suppliedConfigFilePath !== null) {
         if (!fs.existsSync(suppliedConfigFilePath)) {
             throw new FatalError(
                 `Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`,
@@ -244,7 +244,7 @@ function findup(filenames: string[], directory: string): string | undefined {
  * @returns a configuration object for TSLint loaded from the file at configFilePath
  */
 export function loadConfigurationFromPath(configFilePath?: string, _originalFilePath?: string) {
-    if (configFilePath == undefined) {
+    if (configFilePath === undefined) {
         return DEFAULT_CONFIG;
     } else {
         const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
@@ -413,10 +413,8 @@ export function getRulesDirectories(
 
         const absolutePath =
             relativeTo === undefined ? path.resolve(dir) : path.resolve(relativeTo, dir);
-        if (absolutePath !== undefined) {
-            if (!fs.existsSync(absolutePath)) {
-                throw new FatalError(`Could not find custom rule directory: ${dir}`);
-            }
+        if (!fs.existsSync(absolutePath)) {
+            throw new FatalError(`Could not find custom rule directory: ${dir}`);
         }
         return absolutePath;
     });
@@ -464,7 +462,7 @@ function parseRuleOptions(
         // old style: boolean
         ruleArguments = [];
         ruleSeverity = ruleConfigValue ? defaultRuleSeverity : "off";
-    } else if (typeof ruleConfigValue === "object") {
+    } else {
         if (ruleConfigValue.severity !== undefined) {
             switch (ruleConfigValue.severity.toLowerCase()) {
                 case "default":
@@ -593,7 +591,9 @@ export function parseConfigFile(
         if (copyRulestoJsRules) {
             rules.forEach((ruleOptions, ruleName) => {
                 if (ruleOptions.ruleSeverity !== "off") {
-                    const Rule = findRule(ruleName, rulesDirectory);
+                    const Rule = findRule(ruleName, rulesDirectory) as
+                        | Partial<RuleConstructor>
+                        | undefined;
                     if (
                         Rule !== undefined &&
                         (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
@@ -642,9 +642,9 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
     ruleConfiguration.forEach(({ ruleArguments, ruleSeverity }, ruleName) => {
         const options: IOptions = {
             disabledIntervals: [], // deprecated, so just provide an empty array.
-            ruleArguments: ruleArguments != undefined ? ruleArguments : [],
+            ruleArguments: ruleArguments !== undefined ? ruleArguments : [],
             ruleName,
-            ruleSeverity: ruleSeverity != undefined ? ruleSeverity : "error",
+            ruleSeverity: ruleSeverity !== undefined ? ruleSeverity : "error",
         };
         output.push(options);
     });
@@ -654,8 +654,8 @@ export function convertRuleOptions(ruleConfiguration: Map<string, Partial<IOptio
 export function isFileExcluded(filepath: string, configFile?: IConfigurationFile) {
     if (
         configFile === undefined ||
-        configFile.linterOptions == undefined ||
-        configFile.linterOptions.exclude == undefined
+        configFile.linterOptions === undefined ||
+        configFile.linterOptions.exclude === undefined
     ) {
         return false;
     }

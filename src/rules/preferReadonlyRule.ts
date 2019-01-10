@@ -91,6 +91,7 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
                 break;
 
             case ts.SyntaxKind.PropertyAccessExpression:
+                // tslint:disable-next-line:strict-type-predicates
                 if (scope !== undefined) {
                     handlePropertyAccessExpression(
                         node as ts.PropertyAccessExpression,
@@ -112,6 +113,7 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
     }
 
     function handleFunctionScopeBoundary(node: ts.Node) {
+        // tslint:disable-next-line:strict-type-predicates
         if (scope === undefined) {
             ts.forEachChild(node, visitNode);
             return;
@@ -268,10 +270,7 @@ class ClassScope {
 
     public addVariableModification(node: ts.PropertyAccessExpression) {
         const modifierType = this.typeChecker.getTypeAtLocation(node.expression);
-        if (
-            modifierType.symbol === undefined ||
-            !typeIsOrHasBaseType(modifierType, this.classType)
-        ) {
+        if (!typeIsOrHasBaseType(modifierType, this.classType)) {
             return;
         }
 

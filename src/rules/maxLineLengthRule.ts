@@ -101,7 +101,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             options.limit = argument;
         } else {
             options = argument as MaxLineLengthRuleOptions;
-            const ignorePattern = (argument as { [key: string]: string })["ignore-pattern"];
+            const ignorePattern = (argument as { [key: string]: string | RegExp })[
+                "ignore-pattern"
+            ];
             options.ignorePattern =
                 typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined;
         }

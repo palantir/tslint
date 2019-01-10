@@ -178,7 +178,7 @@ interface JsonOptions {
 }
 
 function parseOptions(ruleArguments: any[]): Options {
-    const optionSet = (ruleArguments as JsonOptions[])[0];
+    const optionSet = (ruleArguments as Array<JsonOptions | undefined>)[0];
     const {
         "grouped-imports": isGrouped = false,
         "import-sources-order": sources = "case-insensitive",
@@ -271,7 +271,7 @@ class Walker extends Lint.AbstractWalker<Options> {
 
         const { expression } = moduleReference;
 
-        if (expression === undefined || !isStringLiteral(expression)) {
+        if (!isStringLiteral(expression)) {
             return;
         }
 

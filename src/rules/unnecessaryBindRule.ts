@@ -100,16 +100,13 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
             return undefined;
         }
 
-        const { symbol } = typeChecker.getTypeAtLocation(node);
+        const type = typeChecker.getTypeAtLocation(node);
+        const symbol = type.getSymbol();
         if (symbol === undefined) {
             return undefined;
         }
 
         const { valueDeclaration } = symbol;
-        if (valueDeclaration === undefined) {
-            return undefined;
-        }
-
         if (!tsutils.isArrowFunction(valueDeclaration)) {
             return undefined;
         }
@@ -118,11 +115,7 @@ function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
     }
 
     function isDecoratedPropertyMember(node: ts.CallExpression): boolean {
-        return (
-            node.parent !== undefined &&
-            tsutils.isPropertyDeclaration(node.parent) &&
-            node.parent.decorators !== undefined
-        );
+        return tsutils.isPropertyDeclaration(node.parent) && node.parent.decorators !== undefined;
     }
 
     function checkCallExpression(node: ts.CallExpression): void {
