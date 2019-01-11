@@ -1,15 +1,16 @@
 [typescript]: >= 3.0.0
 
-import importEquals = require("./commonjsModule");
-import importAlias = importEquals;
-namespace N { export const x: any = 0; }
-import importQualifiedName = N.x;
-import * as namespaceImport from "./es6Module";
+/*
+ * It is not unsafe to pass any where unknown is allowed. This file checks
+ * these uses.
+ */
 
-declare function takesUnknown(a: any, ...bs: any[]): void;
+declare const x: any;
+
+declare function takesUnknown(a: unknown, ...bs: unknown[]): void;
 takesUnknown(x, x);
 
-declare function templateTakesUnknown(arr: TemplateStringsArray, a: any, ...bs: any[]): any;
+declare function templateTakesUnknown(arr: TemplateStringsArray, a: unknown, ...bs: unknown[]): any;
 templateTakesUnknown`${x}${x}`;
 
 declare function decoratorTakesUnknown(value: unknown): Function;
@@ -58,7 +59,7 @@ function hasThisParameter(this: any) {
 });
 
 const obj = { property: "value" } as any;
-const result: unknown = json;
+const result: unknown = JSON.parse("{}");
 
 const hasUnknownProp: { prop: unknown, obj: unknown } = { prop: obj, obj };
 hasUnknownProp.prop = obj;
@@ -71,9 +72,9 @@ interface ContainsUnknownProperty {
     e: unknown;
 }
 
-const p: ContainsUnknownProperty = { e };
+const p: ContainsUnknownProperty = { e: (123 as any) };
 
-function f() {
+function g() {
     try {
 
     } catch (e) {
