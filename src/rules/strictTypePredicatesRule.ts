@@ -99,7 +99,12 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
 
         const exprType = checker.getTypeAtLocation(exprPred.expression);
         // TODO: could use checker.getBaseConstraintOfType to help with type parameters, but it's not publicly exposed.
-        if (isTypeFlagSet(exprType, ts.TypeFlags.Any | ts.TypeFlags.TypeParameter)) {
+        if (
+            isTypeFlagSet(
+                exprType,
+                ts.TypeFlags.Any | ts.TypeFlags.TypeParameter | ts.TypeFlags.Unknown,
+            )
+        ) {
             return;
         }
 
