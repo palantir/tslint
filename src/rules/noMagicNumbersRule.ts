@@ -21,6 +21,8 @@ import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
+const IGNORE_JSX_OPTION = "ignore-jsx";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -36,11 +38,19 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "array",
             items: {
-                type: "number",
+                anyOf: [
+                    {
+                        type: "number",
+                        minLength: 1,
+                    },
+                    {
+                        type: "string",
+                        options: [IGNORE_JSX_OPTION],
+                    },
+                ],
             },
-            minLength: 1,
         },
-        optionExamples: [true, [true, 1, 2, 3]],
+        optionExamples: [true, [true, 1, 2, 3], [true, "ignore-jsx"]],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -76,7 +86,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<number | string>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (
@@ -105,7 +115,8 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
         /* Using Object.is() to differentiate between pos/neg zero */
         if (
             !Rule.ALLOWED_NODES.has(node.parent.kind) &&
-            !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num)))
+            !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num))) &&
+            this.options.indexOf(IGNORE_JSX_OPTION) === -1
         ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING(num));
         }
