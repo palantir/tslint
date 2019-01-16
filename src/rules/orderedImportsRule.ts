@@ -209,16 +209,30 @@ enum ImportType {
 }
 
 interface Options {
-    groupedImports: boolean;
+    /** Transform to use when sorting import source names. */
     importSourcesOrderTransform: Transform;
+
+    /** Transform to use to determine the part of the module path to use for ordering. */
     moduleSourceTransform: Transform;
+
+    /** Transform to use when sorting import names. */
     namedImportsOrderTransform: Transform;
+
+    /** If true the rule will check import grouping. */
+    groupedImports: boolean;
+
+    /** Groups used for group import ordering. */
     groups: GroupOption[];
 }
 
 interface GroupOption {
+    /** Name of the group for display in lint messages. */
     name: string;
+
+    /** If import names match this regex, they belong to this group. */
     match: RegExp;
+
+    /** numerical ordering to use. Ordered sequentially. */
     order: number;
 }
 
@@ -239,6 +253,7 @@ interface JsonGroupOption {
 function parseOptions(ruleArguments: any[]): Options {
     const optionSet = (ruleArguments as JsonOptions[])[0];
 
+    // Use default groups to order by third-party, parent, local
     const defaultGroups: JsonGroupOption[] = [
         { name: "parent directories", match: "^\\.\\.", order: 20 },
         { name: "current directory", match: "^\\.", order: 30 },
@@ -279,7 +294,8 @@ function parseOptions(ruleArguments: any[]): Options {
 
 class Walker extends Lint.AbstractWalker<Options> {
     private readonly importsBlocks = [new ImportsBlock()];
-    // keep a reference to the last Fix object so when the entire block is replaced, the replacement can be added
+    // keep a reference to the last Fix object so when the entire
+    // block is replaced, the replacement can be added
     private lastFix: Lint.Replacement[] | undefined;
 
     // group to use when no other group matches
@@ -294,10 +310,14 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     public walk(sourceFile: ts.SourceFile): void {
+        // Walk through all statements checking import statements
+        // and building up ImportsBlocks along the way (with replacements)
         for (const statement of sourceFile.statements) {
             this.checkStatement(statement);
         }
         this.endBlock();
+
+        // Optionally check the ImportsBlocks for grouping
         if (this.options.groupedImports) {
             this.checkBlocksGrouping();
         }
@@ -332,14 +352,16 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkImportDeclaration(node: ts.ImportDeclaration) {
+        // ex:  import {name1, name2 } from 'import/path';
         if (!isStringLiteral(node.moduleSpecifier)) {
             // Ignore grammar error
             return;
         }
 
-        const source = removeQuotes(node.moduleSpecifier.text);
-        this.checkSource(source, node);
+        const importPath = removeQuotes(node.moduleSpecifier.text);
+        this.checkImport(importPath, node);
 
+        // check the names in the import are ordered correctly
         const { importClause } = node;
         if (
             importClause !== undefined &&
@@ -365,25 +387,35 @@ class Walker extends Lint.AbstractWalker<Options> {
             return;
         }
 
-        const source = removeQuotes(expression.text);
-        this.checkSource(source, node);
+        const importPath = removeQuotes(expression.text);
+        this.checkImport(importPath, node);
     }
 
-    private checkSource(originalSource: string, node: ImportDeclaration["node"]) {
-        const type = getImportType(originalSource);
-        const source = this.options.importSourcesOrderTransform(originalSource);
-        const matchingGroup = this.getMatchingGroup(source);
-        const currentSource = this.options.moduleSourceTransform(source);
-        const previousSource = this.currentImportsBlock.getLastImportSource();
+    /**
+     * Check the given import to see if we have valid import ordering.
+     */
+    private checkImport(fullImportPath: string, node: ImportDeclaration["node"]) {
+        // from this point forward we use the transformed import paths
+        // - group lookup is based upon the full import path with no transform
+        const matchingGroup = this.getMatchingGroup(fullImportPath);
+
+        // determine the module name to use for sorting after the required transforms
+        const importPath = this.options.importSourcesOrderTransform(
+            this.options.moduleSourceTransform(fullImportPath),
+        );
+
+        const prevImportPath = this.currentImportsBlock.getLastImportSource();
+        const type = getImportType(fullImportPath);
+
         this.currentImportsBlock.addImportDeclaration(
             this.sourceFile,
             node,
-            currentSource,
+            importPath,
             matchingGroup,
             type,
         );
 
-        if (previousSource !== null && compare(currentSource, previousSource) === -1) {
+        if (prevImportPath !== null && compare(importPath, prevImportPath) === -1) {
             this.lastFix = [];
             this.addFailureAtNode(node, Rule.IMPORT_SOURCES_UNORDERED, this.lastFix);
         }
@@ -400,6 +432,11 @@ class Walker extends Lint.AbstractWalker<Options> {
         this.importsBlocks.push(new ImportsBlock());
     }
 
+    /**
+     * Check that names within the given import are ordered correctly as required.
+     * If not, adds a failure and updates import blocks with correct order
+     * for replacement.
+     */
     private checkNamedImports(node: ts.NamedImports): void {
         const imports = node.elements;
 
@@ -439,6 +476,8 @@ class Walker extends Lint.AbstractWalker<Options> {
             this.addFailureAtNode(decl.node, msg, this.getGroupOrderReplacements());
         };
 
+        // Check if each import group block is in order
+        // If not, then return failure with replacement for all groups in the file
         for (const block of this.importsBlocks) {
             const importDeclarations = block.getImportDeclarations();
             if (importDeclarations.length === 0) {
@@ -554,12 +593,19 @@ class Walker extends Lint.AbstractWalker<Options> {
 }
 
 interface ImportDeclaration {
+    /** node with details of the import */
     node: ts.ImportDeclaration | ts.ImportEqualsDeclaration;
-    nodeEndOffset: number; // end position of node within source file
-    nodeStartOffset: number; // start position of node within source file
-    text: string; // initialized with original import text; modified if the named imports are reordered
-    sourcePath: string; // the source path in transformed format for sorting
-    group: GroupOption; // details for the group that we match
+    /** end position of node within source file */
+    nodeEndOffset: number;
+    /** start position of node within source file */
+    nodeStartOffset: number;
+    /** initialized with original import text; modified if the named imports are reordered */
+    text: string;
+    /** the importPath path in transformed format for sorting */
+    importPath: string;
+    /** details for the group that we match */
+    group: GroupOption;
+    // XXX: May be unused
     type: ImportType;
 }
 
@@ -570,10 +616,13 @@ interface ImportDeclaration {
 class ImportsBlock {
     private importDeclarations: ImportDeclaration[] = [];
 
+    /**
+     * Add a new import declaration to the block
+     */
     public addImportDeclaration(
         sourceFile: ts.SourceFile,
         node: ImportDeclaration["node"],
-        sourcePath: string,
+        importPath: string,
         group: GroupOption,
         type: ImportType,
     ) {
@@ -589,10 +638,10 @@ class ImportsBlock {
 
         this.importDeclarations.push({
             group,
+            importPath,
             node,
             nodeEndOffset: end,
             nodeStartOffset: start,
-            sourcePath,
             text,
             type,
         });
@@ -602,7 +651,11 @@ class ImportsBlock {
         return this.importDeclarations;
     }
 
-    // replaces the named imports on the most recent import declaration
+    /**
+     * Replaces the named imports on the most recent import declaration.
+     * Updates the imports in place so the getReplacement method below can
+     * return full fixes for the entire import block.
+     */
     public replaceNamedImports(fileOffset: number, length: number, replacement: string) {
         const importDeclaration = this.getLastImportDeclaration();
         if (importDeclaration === undefined) {
@@ -620,14 +673,19 @@ class ImportsBlock {
             initialText.substring(0, start) + replacement + initialText.substring(start + length);
     }
 
+    /**
+     * Return the source path of the most recently added import.
+     */
     public getLastImportSource() {
         if (this.importDeclarations.length === 0) {
             return null;
         }
-        return this.getLastImportDeclaration()!.sourcePath;
+        return this.getLastImportDeclaration()!.importPath;
     }
 
-    // creates a Lint.Replacement object with ordering fixes for the entire block
+    /**
+     * Return a Lint.Replacement object with ordering fixes for the entire block.
+     */
     public getReplacement() {
         if (this.importDeclarations.length === 0) {
             return undefined;
@@ -656,9 +714,9 @@ class ImportsBlock {
     }
 }
 
-function getImportType(sourcePath: string): ImportType {
-    if (sourcePath.charAt(0) === ".") {
-        if (sourcePath.charAt(1) === ".") {
+function getImportType(importPath: string): ImportType {
+    if (importPath.charAt(0) === ".") {
+        if (importPath.charAt(1) === ".") {
             return ImportType.PARENT_DIRECTORY_IMPORT;
         } else {
             return ImportType.CURRENT_DIRECTORY_IMPORT;
@@ -721,7 +779,7 @@ function removeQuotes(value: string): string {
 }
 
 function getSortedImportDeclarationsAsText(importDeclarations: ImportDeclaration[]): string {
-    const sortedDeclarations = sortByKey(importDeclarations.slice(), x => x.sourcePath);
+    const sortedDeclarations = sortByKey(importDeclarations.slice(), x => x.importPath);
     return sortedDeclarations.map(x => x.text).join("");
 }
 
