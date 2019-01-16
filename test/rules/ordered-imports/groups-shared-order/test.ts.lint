@@ -11,6 +11,7 @@ import {a} from '@pkg/foo';
 
 import {b} from '@pkg/bar';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app_b, ^app_a, ^@pkg .]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import {o} from 'other/bar';
 

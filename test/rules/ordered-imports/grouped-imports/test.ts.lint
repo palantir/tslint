@@ -11,9 +11,9 @@ import './baa';
 ~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import './caa';
-~~~~~~~~~~~~~~~ [Import sources of the same type (package, same folder, different folder) must be grouped together.]
+~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import x = require('y');
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of the same type (package, same folder, different folder) must be grouped together.]
+~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 export class Test {}

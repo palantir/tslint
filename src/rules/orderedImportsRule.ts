@@ -167,8 +167,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Import sources of different groups must be sorted by:";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
-    public static IMPORT_SOURCES_OF_SAME_TYPE_NOT_IN_ONE_GROUP =
-        "Import sources of the same type (package, same folder, different folder) must be grouped together.";
+    public static IMPORT_GROUPS_MUST_BE_TOGETHER =
+        "Import sources with same group order must be grouped together.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
@@ -201,12 +201,6 @@ const TRANSFORMS = new Map<string, Transform>([
         },
     ],
 ]);
-
-enum ImportType {
-    LIBRARY_IMPORT = 1,
-    PARENT_DIRECTORY_IMPORT = 2, // starts with "../"
-    CURRENT_DIRECTORY_IMPORT = 3, // starts with "./"
-}
 
 interface Options {
     /** Transform to use when sorting import source names. */
@@ -405,14 +399,12 @@ class Walker extends Lint.AbstractWalker<Options> {
         );
 
         const prevImportPath = this.currentImportsBlock.getLastImportSource();
-        const type = getImportType(fullImportPath);
 
         this.currentImportsBlock.addImportDeclaration(
             this.sourceFile,
             node,
             importPath,
             matchingGroup,
-            type,
         );
 
         if (prevImportPath !== null && compare(importPath, prevImportPath) === -1) {
@@ -476,13 +468,27 @@ class Walker extends Lint.AbstractWalker<Options> {
             this.addFailureAtNode(decl.node, msg, this.getGroupOrderReplacements());
         };
 
+        const blocksWithContent = this.importsBlocks.filter(
+            b => b.getImportDeclarations().length > 0,
+        );
+
+        // Check for groups that are not all together
+        // - note: replacements for this are handled by the later checks below
+        const groupOrdersSeen = new Set<number>();
+
+        for (const block of blocksWithContent) {
+            const firstImport = block.getImportDeclarations()[0];
+            const blockOrder = firstImport.group.order;
+            if (groupOrdersSeen.has(blockOrder)) {
+                this.addFailureAtNode(firstImport.node, Rule.IMPORT_GROUPS_MUST_BE_TOGETHER);
+            }
+            groupOrdersSeen.add(blockOrder);
+        }
+
         // Check if each import group block is in order
         // If not, then return failure with replacement for all groups in the file
-        for (const block of this.importsBlocks) {
+        for (const block of blocksWithContent) {
             const importDeclarations = block.getImportDeclarations();
-            if (importDeclarations.length === 0) {
-                continue;
-            }
 
             // check if group is out of order
             const blockOrder = importDeclarations[0].group.order;
@@ -492,6 +498,7 @@ class Walker extends Lint.AbstractWalker<Options> {
             }
 
             // check if all declarations have the same order value
+            // and mark the first one that is out of order
             for (const decl of importDeclarations) {
                 if (decl.group.order !== blockOrder) {
                     addFailingImportDecl(decl);
@@ -605,8 +612,6 @@ interface ImportDeclaration {
     importPath: string;
     /** details for the group that we match */
     group: GroupOption;
-    // XXX: May be unused
-    type: ImportType;
 }
 
 /**
@@ -624,7 +629,6 @@ class ImportsBlock {
         node: ImportDeclaration["node"],
         importPath: string,
         group: GroupOption,
-        type: ImportType,
     ) {
         const start = this.getStartOffset(node);
         const end = this.getEndOffset(sourceFile, node);
@@ -643,7 +647,6 @@ class ImportsBlock {
             nodeEndOffset: end,
             nodeStartOffset: start,
             text,
-            type,
         });
     }
 
@@ -711,18 +714,6 @@ class ImportsBlock {
 
     private getLastImportDeclaration(): ImportDeclaration | undefined {
         return this.importDeclarations[this.importDeclarations.length - 1];
-    }
-}
-
-function getImportType(importPath: string): ImportType {
-    if (importPath.charAt(0) === ".") {
-        if (importPath.charAt(1) === ".") {
-            return ImportType.PARENT_DIRECTORY_IMPORT;
-        } else {
-            return ImportType.CURRENT_DIRECTORY_IMPORT;
-        }
-    } else {
-        return ImportType.LIBRARY_IMPORT;
     }
 }
 

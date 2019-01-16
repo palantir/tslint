@@ -5,11 +5,13 @@ import { app_f } from "app/foo";
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg, ^\.\., ^\. .]
 
 import { a } from "@pkg/bar";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 import { app_b } from "app/bar";
 
 import { xbar } from "../xbar";
 
 import { bar } from "../bar";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import { foo } from "foo";
 

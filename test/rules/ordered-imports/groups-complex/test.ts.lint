@@ -7,6 +7,7 @@ import {x} from '@pkg/foo';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import {app_b} from 'app/bar';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 // comment pkg/bar
 import {a} from '@pkg/bar';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
@@ -14,11 +15,13 @@ import {a} from '@pkg/bar';
 import {xbar} from '../xbar';
 
 import {bar} from '../bar';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import {foo, afoo} from 'foo';
         ~~~~~~~~~              [Named imports must be alphabetized.]
 
 import x = require('y');
+~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import './baz'; // required
 import './baa';
