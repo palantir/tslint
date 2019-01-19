@@ -14,5 +14,66 @@ function processTag(tag: Tag) {
   case 'bar': return 2;
 ~~~~~~~~~~~~~~~~~~~~~~~
   }
-~~~ [Switch statement should include a 'default' case, at least the 'foo' case is missing]
+~~~ [Switch statement is not exhaustive. Add the missing case `'foo'` or a `default` case.]
+}
+
+// valid
+const ABC = 'abc';
+
+function literalVariables(value: 'abc' | 1, one: 1) {
+  switch (value) {
+    case ABC: return;
+    case one: return;
+  }
+}
+
+// valid
+function oneCase(value: 'foo') {
+  switch (value) {
+    case 'foo': return;
+  }
+}
+
+// valid
+function boolean(value: boolean) {
+  switch (value) {
+    case true: return;
+    case false: return;
+  }
+}
+
+function nonExhaustiveType(value: 'foo' | number) {
+  switch (value) {
+  ~~~~~~~~~~~~~~~~
+    case 'foo': return;
+~~~~~~~~~~~~~~~~~~~~~~~
+    case 0: return;
+~~~~~~~~~~~~~~~~~~~
+    case 1: return;
+~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [Switch statement should include a `default` case]
+}
+
+type LotsOfCases = 'foo' | 'bar' | 1 | true | false | null | undefined;
+
+function missingTwoCases(value: LotsOfCases) {
+  switch(value) {
+  ~~~~~~~~~~~~~~~
+    case 'foo': return;
+~~~~~~~~~~~~~~~~~~~~~~~
+    // case 'bar': return;
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    case 1: return;
+~~~~~~~~~~~~~~~~~~~
+    case true: return;
+~~~~~~~~~~~~~~~~~~~~~~
+    case false: return;
+~~~~~~~~~~~~~~~~~~~~~~~
+    case null: return;
+~~~~~~~~~~~~~~~~~~~~~~
+    // case undefined: return;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  }
+~~~ [Switch statement is not exhaustive. Add the missing cases `undefined` and `'bar'` or a `default` case.]
 }

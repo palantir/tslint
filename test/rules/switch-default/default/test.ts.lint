@@ -7,7 +7,7 @@ case 1:
     break;
 ~~~~~~~~~~
 }
-~ [Switch statement should include a 'default' case]
+~ [Switch statement should include a `default` case]
 
 switch (foo) {
 ~~~~~~~~~~~~~~
@@ -30,7 +30,7 @@ case 3:
     break;
 ~~~~~~~~~~
 }
-~ [Switch statement should include a 'default' case]
+~ [Switch statement should include a `default` case]
 
 // valid
 switch (foo) {
@@ -84,5 +84,5 @@ function processTag(tag: Tag) {
   case 'bar': return 2;
 ~~~~~~~~~~~~~~~~~~~~~~~
   }
-~~~ [Switch statement should include a 'default' case]
+~~~ [Switch statement should include a `default` case]
 }
