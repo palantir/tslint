@@ -41,12 +41,18 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(context: Lint.WalkContext<void>) {
     const cb = (node: ts.Node): void => {
         if (tsutils.isBinaryExpression(node)) {
-            // Simple textual comparison of both sides
-            if (node.left.getText() === node.right.getText()) {
-                context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
+            if (isLiteral(node.left) && isLiteral(node.right)) {
+                // Simple textual comparison of both sides
+                if (node.left.getText() === node.right.getText()) {
+                    context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
+                }
             }
         }
         return ts.forEachChild(node, cb);
     };
     return ts.forEachChild(context.sourceFile, cb);
+}
+
+function isLiteral(node: ts.Node): boolean {
+    return tsutils.isStringLiteral(node) || tsutils.isNumericLiteral(node);
 }
