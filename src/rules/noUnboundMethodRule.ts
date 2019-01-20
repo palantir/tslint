@@ -20,13 +20,11 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
-const OPTION_WHITELIST_METHOD = "whitelist-method";
-const OPTION_WHITELIST_OPERATOR = "whitelist-operator";
+const OPTION_WHITELIST = "whitelist";
 
 interface Options {
     ignoreStatic: boolean;
-    whitelistMethod: string[];
-    whitelistOperator: string[];
+    whitelist: string[];
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -45,12 +43,7 @@ export class Rule extends Lint.Rules.TypedRule {
                     type: "object",
                     properties: {
                         [OPTION_IGNORE_STATIC]: { type: "boolean" },
-                        [OPTION_WHITELIST_METHOD]: {
-                            type: "array",
-                            items: { type: "string" },
-                            minLength: 1,
-                        },
-                        [OPTION_WHITELIST_OPERATOR]: {
+                        [OPTION_WHITELIST]: {
                             type: "array",
                             items: { type: "string" },
                             minLength: 1,
@@ -120,8 +113,7 @@ export class Rule extends Lint.Rules.TypedRule {
 function parseArguments(args: any[]): Options {
     const options: Options = {
         ignoreStatic: false,
-        whitelistMethod: [],
-        whitelistOperator: [],
+        whitelist: [],
     };
 
     for (const arg of args) {
@@ -133,11 +125,8 @@ function parseArguments(args: any[]): Options {
             if (arg.hasOwnProperty(OPTION_IGNORE_STATIC)) {
                 options.ignoreStatic = arg[OPTION_IGNORE_STATIC];
             }
-            if (arg.hasOwnProperty(OPTION_WHITELIST_METHOD)) {
-                options.whitelistMethod.push(arg[OPTION_WHITELIST_METHOD]);
-            }
-            if (arg.hasOwnProperty(OPTION_WHITELIST_OPERATOR)) {
-                options.whitelistOperator.push(arg[OPTION_WHITELIST_OPERATOR]);
+            if (arg.hasOwnProperty(OPTION_WHITELIST)) {
+                options.whitelist = options.whitelist.concat(arg[OPTION_WHITELIST]);
             }
         }
     }
