@@ -139,7 +139,11 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
         if (isPropertyAccessExpression(node) && !isSafeUse(node)) {
             const symbol = tc.getSymbolAtLocation(node);
             const declaration = symbol === undefined ? undefined : symbol.valueDeclaration;
-            if (declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic)) {
+
+            const isMethodAccess =
+                declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic);
+            const shouldBeReported = isMethodAccess && !isWhitelisted(node, ctx.options.whitelist);
+            if (shouldBeReported) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }
@@ -189,3 +193,11 @@ function isSafeUse(node: ts.Node): boolean {
             return false;
     }
 }
+
+function isWhitelisted(node: ts.Node, whitelist: string[]): boolean {
+    if (node.parent.kind === ts.SyntaxKind.TypeOfExpression) {
+        return whitelist.indexOf("typeof") !== -1;
+    }
+    return false;
+}
+
