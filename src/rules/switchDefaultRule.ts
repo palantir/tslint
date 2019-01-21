@@ -17,7 +17,16 @@
 
 import { inspect } from "util";
 
-import { isDefaultClause, isTypeFlagSet, unionTypeParts } from "tsutils";
+import * as semver from "semver";
+
+import {
+    isDefaultClause,
+    isLiteralType,
+    isSwitchStatement,
+    isTypeFlagSet,
+    unionTypeParts,
+} from "tsutils";
+
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
@@ -95,6 +104,14 @@ are covered by existing \`case\` labels. Requires type information.`,
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const options = parseOptions(this.ruleArguments);
+
+        if (options.allowExhaustive && semver.lt(ts.version, "2.4.0")) {
+            throw Error(
+                `${this.ruleName} option ${OPTION_ALLOW_EXHAUSTIVE} requires TypeScript >= 2.4.0`,
+            );
+        }
+
         return this.applyWithFunction(
             sourceFile,
             walk,
@@ -114,7 +131,7 @@ function parseOptions(ruleArguments: any[]): Options {
 
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (ts.isSwitchStatement(node) && !node.caseBlock.clauses.some(isDefaultClause)) {
+        if (isSwitchStatement(node) && !node.caseBlock.clauses.some(isDefaultClause)) {
             if (!ctx.options.allowExhaustive) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             } else if (checker === undefined) {
@@ -207,7 +224,7 @@ function singletonValueOfType(type: ts.Type): { value: SingletonValue } | undefi
                     `Expected boolean literal type to be "true" or "false", found "${name}"`,
                 );
         }
-    } else if (type.isLiteral()) {
+    } else if (isLiteralType(type)) {
         return { value: type.value };
     } else {
         return undefined;
