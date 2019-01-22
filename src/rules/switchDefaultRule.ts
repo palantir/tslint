@@ -17,8 +17,6 @@
 
 import { inspect } from "util";
 
-import * as semver from "semver";
-
 import {
     isDefaultClause,
     isLiteralType,
@@ -31,6 +29,7 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
+import { hasOwnProperty } from "../utils";
 import { codeExamples } from "./code-examples/switchDefault.examples";
 
 const OPTION_ALLOW_EXHAUSTIVE = "allow-exhaustive";
@@ -104,14 +103,6 @@ are covered by existing \`case\` labels. Requires type information.`,
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const options = parseOptions(this.ruleArguments);
-
-        if (options.allowExhaustive && semver.lt(ts.version, "2.4.0")) {
-            throw Error(
-                `${this.ruleName} option ${OPTION_ALLOW_EXHAUSTIVE} requires TypeScript >= 2.4.0`,
-            );
-        }
-
         return this.applyWithFunction(
             sourceFile,
             walk,
@@ -225,7 +216,14 @@ function singletonValueOfType(type: ts.Type): { value: SingletonValue } | undefi
                 );
         }
     } else if (isLiteralType(type)) {
-        return { value: type.value };
+        if (hasOwnProperty(type, "value")) {
+            return { value: type.value };
+            // In TypeScript 2.0 - 2.3, this field was named "text" because it only supported string literals
+        } else if (hasOwnProperty(type, "text")) {
+            return { value: (type as ts.LiteralType & { text: string }).text };
+        } else {
+            throw Error("could not locate value of LiteralType");
+        }
     } else {
         return undefined;
     }
