@@ -149,7 +149,7 @@ function parseArguments(args: Array<string | OptionsInput>): Options {
             }
         } else {
             options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
-            (arg[OPTION_WHITELIST] || []).forEach(options.whitelist.add);
+            options.whitelist = new Set(arg[OPTION_WHITELIST] || []);
         }
     }
 
