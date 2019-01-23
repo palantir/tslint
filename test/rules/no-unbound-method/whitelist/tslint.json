@@ -3,6 +3,6 @@
     "typeCheck": true
   },
   "rules": {
-    "no-unbound-method": [true, { "whitelist": ["expect", "typeof"] }]
+    "no-unbound-method": [true, { "whitelist": ["expect"], "allow-typeof": true }]
   }
 }

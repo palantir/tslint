@@ -26,20 +26,25 @@ import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
 const OPTION_WHITELIST = "whitelist";
+const OPTION_ALLOW_TYPEOF = "allow-typeof";
 
 const OPTION_WHITELIST_EXAMPLE = [
     true,
     {
-        [OPTION_WHITELIST]: ["expect", "typeof"],
+        [OPTION_IGNORE_STATIC]: true,
+        [OPTION_WHITELIST]: ["expect"],
+        [OPTION_ALLOW_TYPEOF]: true,
     },
 ];
 
 interface Options {
+    allowTypeof: boolean;
     ignoreStatic: boolean;
     whitelist: Set<string>;
 }
 
 interface OptionsInput {
+    [OPTION_ALLOW_TYPEOF]?: boolean;
     [OPTION_IGNORE_STATIC]?: boolean;
     [OPTION_WHITELIST]?: string[];
 }
@@ -52,12 +57,12 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: Lint.Utils.dedent`
             You may additionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods, or an options object.
             
-            The object may have two properties:
+            The object may have three properties:
             
             * "${OPTION_IGNORE_STATIC}" - to ignore static methods.
-            * "${OPTION_WHITELIST}" - list of method names and keywords where method reference should be ignored, e.g.
-              * when method is referenced as a parameter to whitelisted method.
-              * when method is referenced in a typeof expression.
+            * "${OPTION_ALLOW_TYPEOF}" - ignore methods referenced in a typeof expression.
+            * "${OPTION_WHITELIST}" - ignore method references in parameters of specifed function calls.
+            
             `,
         options: {
             anyOf: [
@@ -68,6 +73,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 {
                     type: "object",
                     properties: {
+                        [OPTION_ALLOW_TYPEOF]: { type: "boolean" },
                         [OPTION_IGNORE_STATIC]: { type: "boolean" },
                         [OPTION_WHITELIST]: {
                             type: "array",
@@ -138,6 +144,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function parseArguments(args: Array<string | OptionsInput>): Options {
     const options: Options = {
+        allowTypeof: false,
         ignoreStatic: false,
         whitelist: new Set(),
     };
@@ -148,6 +155,7 @@ function parseArguments(args: Array<string | OptionsInput>): Options {
                 options.ignoreStatic = true;
             }
         } else {
+            options.allowTypeof = arg[OPTION_ALLOW_TYPEOF] || false;
             options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
             options.whitelist = new Set(arg[OPTION_WHITELIST] || []);
         }
@@ -164,7 +172,9 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
 
             const isMethodAccess =
                 declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic);
-            const shouldBeReported = isMethodAccess && !isWhitelisted(node, ctx.options.whitelist);
+            const shouldBeReported =
+                isMethodAccess &&
+                !isWhitelisted(node, ctx.options.whitelist, ctx.options.allowTypeof);
             if (shouldBeReported) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -216,9 +226,9 @@ function isSafeUse(node: ts.Node): boolean {
     }
 }
 
-function isWhitelisted(node: ts.Node, whitelist: Set<string>): boolean {
+function isWhitelisted(node: ts.Node, whitelist: Set<string>, allowTypeof: boolean): boolean {
     if (isTypeOfExpression(node.parent)) {
-        return whitelist.has("typeof");
+        return allowTypeof;
     }
     if (isCallExpression(node.parent)) {
         const expression = node.parent.expression as ts.Identifier;
