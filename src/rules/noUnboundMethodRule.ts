@@ -157,7 +157,7 @@ function parseArguments(args: Array<string | OptionsInput>): Options {
         } else {
             options.allowTypeof = arg[OPTION_ALLOW_TYPEOF] || false;
             options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
-            options.whitelist = new Set(arg[OPTION_WHITELIST] || []);
+            options.whitelist = new Set(arg[OPTION_WHITELIST]);
         }
     }
 
