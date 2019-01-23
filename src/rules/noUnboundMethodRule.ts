@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 
-import { hasModifier, isPropertyAccessExpression } from "tsutils";
+import {
+    hasModifier,
+    isCallExpression,
+    isPropertyAccessExpression,
+    isTypeOfExpression,
+} from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
@@ -210,13 +215,12 @@ function isSafeUse(node: ts.Node): boolean {
     }
 }
 
-function isWhitelisted(node: ts.Node, whitelist: string[]): boolean {
-    if (node.parent.kind === ts.SyntaxKind.TypeOfExpression) {
+function isWhitelisted(node: ts.Node, whitelist: Set<string>): boolean {
+    if (isTypeOfExpression(node.parent)) {
         return whitelist.indexOf("typeof") !== -1;
     }
-    if (node.parent.kind === ts.SyntaxKind.CallExpression) {
-        const parent = node.parent as ts.CallExpression;
-        const expression = parent.expression as ts.Identifier;
+    if (isCallExpression(node.parent)) {
+        const expression = node.parent.expression as ts.Identifier;
         const callingMethodName = expression.escapedText as string;
         return whitelist.indexOf(callingMethodName) !== -1;
     }
