@@ -36,7 +36,12 @@ const OPTION_WHITELIST_EXAMPLE = [
 
 interface Options {
     ignoreStatic: boolean;
-    whitelist: string[];
+    whitelist: Set<string>;
+}
+
+interface OptionsInput {
+    [OPTION_IGNORE_STATIC]?: boolean;
+    [OPTION_WHITELIST]?: string[];
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -131,10 +136,10 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function parseArguments(args: any[]): Options {
+function parseArguments(args: Array<string | OptionsInput>): Options {
     const options: Options = {
         ignoreStatic: false,
-        whitelist: [],
+        whitelist: new Set(),
     };
 
     for (const arg of args) {
@@ -143,12 +148,8 @@ function parseArguments(args: any[]): Options {
                 options.ignoreStatic = true;
             }
         } else {
-            if (arg.hasOwnProperty(OPTION_IGNORE_STATIC)) {
-                options.ignoreStatic = arg[OPTION_IGNORE_STATIC];
-            }
-            if (arg.hasOwnProperty(OPTION_WHITELIST)) {
-                options.whitelist = options.whitelist.concat(arg[OPTION_WHITELIST]);
-            }
+            options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
+            (arg[OPTION_WHITELIST] || []).forEach(options.whitelist.add);
         }
     }
 
@@ -217,12 +218,12 @@ function isSafeUse(node: ts.Node): boolean {
 
 function isWhitelisted(node: ts.Node, whitelist: Set<string>): boolean {
     if (isTypeOfExpression(node.parent)) {
-        return whitelist.indexOf("typeof") !== -1;
+        return whitelist.has("typeof");
     }
     if (isCallExpression(node.parent)) {
         const expression = node.parent.expression as ts.Identifier;
         const callingMethodName = expression.escapedText as string;
-        return whitelist.indexOf(callingMethodName) !== -1;
+        return whitelist.has(callingMethodName);
     }
     return false;
 }
