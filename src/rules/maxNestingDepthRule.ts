@@ -20,8 +20,9 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
-    public static DEFAULT_THRESHOLD = 4;
     public static MINIMUM_THRESHOLD = 0;
+    public static DEFAULT_THRESHOLD = 4;
+    public static THRESHOLD_EXAMPLE = 7;
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -59,7 +60,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "number",
             minimum: Rule.MINIMUM_THRESHOLD,
         },
-        optionExamples: [true, [true, 5]],
+        optionExamples: [true, [true, Rule.THRESHOLD_EXAMPLE]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -72,10 +73,69 @@ export class Rule extends Lint.Rules.AbstractRule {
         );
     }
 
+    public static getFunctionName(node: ts.FunctionLikeDeclaration): string {
+        return node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
+    }
+
+    public static isNestingDepthStatement(node: ts.Node): boolean {
+        switch (node.kind) {
+            case ts.SyntaxKind.ConditionalExpression:
+            case ts.SyntaxKind.IfStatement:
+            case ts.SyntaxKind.SwitchStatement:
+            case ts.SyntaxKind.DoStatement:
+            case ts.SyntaxKind.WhileStatement:
+            case ts.SyntaxKind.ForStatement:
+            case ts.SyntaxKind.ForInStatement:
+            case ts.SyntaxKind.ForOfStatement:
+            case ts.SyntaxKind.TryStatement:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
+        const {
+            options: { threshold },
+        } = ctx;
+        const nestingDepthStack: number[] = [];
+        const functionNameStack: string[] = [];
+        const cbNode: (node: ts.Node) => void = (node: ts.Node): void => {
+            if (isFunctionWithBody(node)) {
+                nestingDepthStack.push(0);
+                functionNameStack.push(Rule.getFunctionName(node));
+                ts.forEachChild(node, cbNode);
+                nestingDepthStack.pop();
+                functionNameStack.pop();
+            } else if (Rule.isNestingDepthStatement(node)) {
+                nestingDepthStack[nestingDepthStack.length - 1]++;
+                // Report at the outer depth and stop walking the AST
+                if (nestingDepthStack[nestingDepthStack.length - 1] === threshold + 1) {
+                    ctx.addFailureAtNode(
+                        node,
+                        Rule.FAILURE_STRING(
+                            threshold,
+                            nestingDepthStack[nestingDepthStack.length - 1],
+                            functionNameStack[functionNameStack.length - 1],
+                        ),
+                    );
+                } else {
+                    ts.forEachChild(node, cbNode);
+                }
+                nestingDepthStack[nestingDepthStack.length - 1]--;
+            } else {
+                return ts.forEachChild(node, cbNode);
+            }
+        };
+
+        return ts.forEachChild(ctx.sourceFile, cbNode);
+    }
+
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
-        const isThresholdValid =
+        const isThresholdValid: boolean =
             typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+
         return super.isEnabled() && isThresholdValid;
     }
 
@@ -83,67 +143,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         if (this.ruleArguments[0] !== undefined) {
             return this.ruleArguments[0] as number;
         }
+
         return Rule.DEFAULT_THRESHOLD;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
-    }
-}
-
-function getFunctionName(node: ts.FunctionLikeDeclaration): string {
-    return node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
-}
-
-function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-    const {
-        options: { threshold },
-    } = ctx;
-    const nestingDepthStack: number[] = [];
-    const functionNameStack: string[] = [];
-    const cbNode = (node: ts.Node): void => {
-        if (isFunctionWithBody(node)) {
-            nestingDepthStack.push(0);
-            functionNameStack.push(getFunctionName(node));
-            ts.forEachChild(node, cbNode);
-            nestingDepthStack.pop();
-            functionNameStack.pop();
-        } else if (isNestingDepthStatement(node)) {
-            nestingDepthStack[nestingDepthStack.length - 1]++;
-            // Report at the outer depth and stop walking the AST
-            if (nestingDepthStack[nestingDepthStack.length - 1] === threshold + 1) {
-                ctx.addFailureAtNode(
-                    node,
-                    Rule.FAILURE_STRING(
-                        threshold,
-                        nestingDepthStack[nestingDepthStack.length - 1],
-                        functionNameStack[functionNameStack.length - 1],
-                    ),
-                );
-            } else {
-                ts.forEachChild(node, cbNode);
-            }
-            nestingDepthStack[nestingDepthStack.length - 1]--;
-        } else {
-            return ts.forEachChild(node, cbNode);
-        }
-    };
-    return ts.forEachChild(ctx.sourceFile, cbNode);
-}
-
-function isNestingDepthStatement(node: ts.Node) {
-    switch (node.kind) {
-        case ts.SyntaxKind.ConditionalExpression:
-        case ts.SyntaxKind.IfStatement:
-        case ts.SyntaxKind.SwitchStatement:
-        case ts.SyntaxKind.DoStatement:
-        case ts.SyntaxKind.WhileStatement:
-        case ts.SyntaxKind.ForStatement:
-        case ts.SyntaxKind.ForInStatement:
-        case ts.SyntaxKind.ForOfStatement:
-        case ts.SyntaxKind.TryStatement:
-            return true;
-        default:
-            return false;
+        return this.applyWithFunction(sourceFile, Rule.walk, { threshold: this.threshold });
     }
 }
