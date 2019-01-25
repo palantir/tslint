@@ -1,0 +1,33 @@
+const expr = "someStr" === "someStr";
+             ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+const expr = 123 === 123;
+             ~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+const someVar = 100;
+const expr = someVar === someVar;
+             ~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+
+const someFunc = () => {
+    if ("SomeStr" === "SomeStr") {
+        ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (100 === 100) {
+        ~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    let someVar = 100;
+    if (someVar === someVar) {
+        ~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        return true;
+    }
+}
+
+const someVar = 3 + 3;
+
+
