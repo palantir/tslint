@@ -26,6 +26,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "newline-before-return",
         description: "Enforces blank line before return when not the only line in the block.",
         rationale: "Helps maintain a readable style in your codebase.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: {},
         optionExamples: [true],
@@ -54,6 +55,12 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
+    private getIndentation(node: ts.Node): string {
+        const text = this.sourceFile.text.substr(node.pos, node.getStart() - node.pos);
+        const matches = text.match(/([ \t]*)$/);
+        return matches !== null ? matches[1] : "";
+    }
+
     private visitReturnStatement(node: ts.ReturnStatement) {
         const prev = getPreviousStatement(node);
         if (prev === undefined) {
@@ -78,10 +85,18 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
             }
         }
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
-
         if (prevLine >= line - 1) {
+            const indentationCurrent = this.getIndentation(node);
+            const indentationPrev = this.getIndentation(prev);
+
+            const fixer = Lint.Replacement.replaceFromTo(
+                start - indentationCurrent.length,
+                start,
+                line === prevLine ? `\n\n${indentationPrev}` : `\n${indentationCurrent}`,
+            );
+
             // Previous statement is on the same or previous line
-            this.addFailure(start, start, Rule.FAILURE_STRING);
+            this.addFailure(start, start, Rule.FAILURE_STRING, fixer);
         }
     }
 }
