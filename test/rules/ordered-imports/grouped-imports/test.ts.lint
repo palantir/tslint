@@ -4,7 +4,7 @@
 import {bar} from '../bar';
 
 import {foo, afoo} from 'foo';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: libraries, parent directories, current directory.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: libraries, parent directories, current directory.]
         ~~~~~~~~~              [Named imports must be alphabetized.]
 
 import './baz'; // required
@@ -12,9 +12,7 @@ import './baa';
 ~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import './caa';
-~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import x = require('y');
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 export class Test {}

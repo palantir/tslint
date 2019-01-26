@@ -6,10 +6,8 @@ import './baa';
 import './baz';
 
 import './caa';
-~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: libraries, parent directories, current directory.]
-~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
+~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: libraries, parent directories, current directory.]
 
 import x = require('y');
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 export class Test {}

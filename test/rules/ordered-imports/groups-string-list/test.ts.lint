@@ -3,16 +3,14 @@
 
 import { x } from "@pkg/foo";
 import { app_f } from "app/foo";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: /^app/, /^@pkg/, /^\.\./, /^\./.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: /^app/, /^@pkg/, /^\.\./, /^\./.]
 
 import { a } from "@pkg/bar";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 import { app_b } from "app/bar";
 
 import { xbar } from "../xbar";
 
 import { bar } from "../bar";
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import { foo } from "foo";
 

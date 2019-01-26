@@ -4,11 +4,10 @@
 // comment outside of imports
 import {app_f} from 'app/foo';
 import {x} from '@pkg/foo';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: extra, /^app/, /^@pkg/, current dir, parent_dir.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: extra, /^app/, /^@pkg/, current dir, parent_dir.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import {app_b} from 'app/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 // comment pkg/bar
 import {a} from '@pkg/bar';
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
@@ -16,13 +15,11 @@ import {a} from '@pkg/bar';
 import {xbar} from '../xbar';
 
 import {bar} from '../bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import {foo, afoo} from 'foo';
         ~~~~~~~~~              [Named imports must be alphabetized.]
 
 import x = require('y');
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import './baz'; // required
 import './baa';

@@ -164,11 +164,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static IMPORT_SOURCES_NOT_GROUPED_PREFIX =
-        "Imports from this modules are not allowed in this group.  The expected groups (in order) are:";
+        "Imports from this module are not allowed in this group.  The expected groups (in order) are:";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
-    public static IMPORT_GROUPS_MUST_BE_TOGETHER =
-        "Import sources with same group order must be grouped together.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
@@ -472,26 +470,12 @@ class Walker extends Lint.AbstractWalker<Options> {
             b => b.getImportDeclarations().length > 0,
         );
 
-        // Check for groups that are not all together
-        // - note: replacements for this are handled by the later checks below
-        const groupOrdersSeen = new Set<number>();
-
-        for (const block of blocksWithContent) {
-            const firstImport = block.getImportDeclarations()[0];
-            const blockOrder = firstImport.group.order;
-            if (groupOrdersSeen.has(blockOrder)) {
-                this.addFailureAtNode(firstImport.node, Rule.IMPORT_GROUPS_MUST_BE_TOGETHER);
-            }
-            groupOrdersSeen.add(blockOrder);
-        }
-
-        // Check if each import group block is in order
-        // If not, then return failure with replacement for all groups in the file
+        // Check if each block is out of order
         for (const block of blocksWithContent) {
             const importDeclarations = block.getImportDeclarations();
+            const blockOrder = importDeclarations[0].group.order;
 
             // check if group is out of order
-            const blockOrder = importDeclarations[0].group.order;
             if (blockOrder <= prevBlockOrder) {
                 addFailingImportDecl(importDeclarations[0]);
                 return;

@@ -11,8 +11,7 @@ import {y} from 'app_a/bar';
 import {a} from '@pkg/foo';
 
 import {b} from '@pkg/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: /^app_b/, /^app_a/, /^@pkg/.]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: /^app_b/, /^app_a/, /^@pkg/.]
 
 import {o} from 'other/bar';
 

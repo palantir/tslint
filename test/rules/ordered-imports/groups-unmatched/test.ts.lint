@@ -6,16 +6,13 @@ import {app_f} from 'app/foo';
 import {x} from '@pkg/foo';
 
 import {app_b} from 'app/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: /^app/, /^@pkg/.]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: /^app/, /^@pkg/.]
 
 import {a} from '@pkg/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import {xbar} from '../xbar';
 
 import {foo} from 'foo';
-~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 import {b} from './ybar';
 
 export class Test {}
