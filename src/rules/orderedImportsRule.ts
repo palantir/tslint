@@ -164,7 +164,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static IMPORT_SOURCES_NOT_GROUPED_PREFIX =
-        "Import sources of different groups must be sorted by:";
+        "Imports from this modules are not allowed in this group.  The expected groups (in order) are:";
     public static IMPORT_SOURCES_UNORDERED = "Import sources within a group must be alphabetized.";
     public static NAMED_IMPORTS_UNORDERED = "Named imports must be alphabetized.";
     public static IMPORT_GROUPS_MUST_BE_TOGETHER =
@@ -267,11 +267,11 @@ function parseOptions(ruleArguments: any[]): Options {
     //   vs a full group object
     const compiledGroups = groups.map((g, idx) => {
         if (typeof g === "string") {
-            return { name: g, match: new RegExp(g), order: idx };
+            return { name: `/${g}/`, match: new RegExp(g), order: idx };
         } else {
             return {
                 match: new RegExp(g.match),
-                name: g.name !== undefined ? g.name : g.match,
+                name: g.name !== undefined ? g.name : `/${g.match}/`,
                 order: g.order,
             };
         }
@@ -463,7 +463,7 @@ class Walker extends Lint.AbstractWalker<Options> {
                 .sort((a, b) => a.order - b.order)
                 .map(g => g.name)
                 .join(", ");
-            const msg = `${Rule.IMPORT_SOURCES_NOT_GROUPED_PREFIX} ${groupsMsg} .`;
+            const msg = `${Rule.IMPORT_SOURCES_NOT_GROUPED_PREFIX} ${groupsMsg}.`;
 
             this.addFailureAtNode(decl.node, msg, this.getGroupOrderReplacements());
         };

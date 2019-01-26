@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* Test a more complex set of split up groups. */
 
 // comment outside of imports
 import {afoo, foo} from 'foo';

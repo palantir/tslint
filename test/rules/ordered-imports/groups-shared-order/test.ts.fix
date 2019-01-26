@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* Test the case where multiple matches have the same order value. */
 
 import {y} from 'app_a/bar';
 import {x} from 'app_a/foo';

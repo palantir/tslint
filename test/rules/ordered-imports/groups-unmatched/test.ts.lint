@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+/* Test to check that all unmatched imports end up in unmatched group at end.*/
 
 import {app_f} from 'app/foo';
 
 import {x} from '@pkg/foo';
 
 import {app_b} from 'app/bar';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: ^app, ^@pkg .]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: /^app/, /^@pkg/.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 
 import {a} from '@pkg/bar';

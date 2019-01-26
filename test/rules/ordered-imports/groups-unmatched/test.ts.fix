@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* Test to check that all unmatched imports end up in unmatched group at end.*/
 
 import {app_b} from 'app/bar';
 import {app_f} from 'app/foo';

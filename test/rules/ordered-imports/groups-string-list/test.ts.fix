@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* Test import grouping where only a list or regex strings is passed to config. */
 
 import { app_b } from "app/bar";
 import { app_f } from "app/foo";

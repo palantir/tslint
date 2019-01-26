@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+/* Test a more complex set of split up groups. */
 
 // comment outside of imports
 import {app_f} from 'app/foo';
 import {x} from '@pkg/foo';
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: extra, ^app, ^@pkg, current dir, parent_dir .]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: extra, /^app/, /^@pkg/, current dir, parent_dir.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
 
 import {app_b} from 'app/bar';

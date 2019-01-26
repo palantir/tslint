@@ -1,6 +1,6 @@
 import { getOr } from 'lodash/fp'
 
 import { Request } from 'express'
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources of different groups must be sorted by: libraries, parent directories, current directory .]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this modules are not allowed in this group.  The expected groups (in order) are: libraries, parent directories, current directory.]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources with same group order must be grouped together.]
 import { getStatusCode } from './errors'
