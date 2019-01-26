@@ -21,7 +21,18 @@ import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
+interface AllowedNumbersType {
+    "allowed-numbers": number[];
+    [key: string]: number[];
+}
+interface IgnoreJsxType {
+    "ignore-jsx": boolean;
+    [key: string]: boolean;
+}
+type OptionsType = IgnoreJsxType | AllowedNumbersType;
+
 const IGNORE_JSX_OPTION = "ignore-jsx";
+const ALLOWED_NUMBERS_OPTION = "allowed-numbers";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,23 +45,36 @@ export class Rule extends Lint.Rules.AbstractRule {
             Magic numbers should be avoided as they often lack documentation.
             Forcing them to be stored in variables gives them implicit documentation.
         `,
-        optionsDescription: "A list of allowed numbers.",
+        optionsDescription: Lint.Utils.dedent`
+            \`${IGNORE_JSX_OPTION}\` specifies that jsx attributes with magic numbers should be ignored.
+            \`${ALLOWED_NUMBERS_OPTION}\` is a list of allowed numbers.`,
         options: {
             type: "array",
             items: {
-                anyOf: [
-                    {
-                        type: "number",
-                        minLength: 1,
-                    },
-                    {
-                        type: "string",
-                        options: [IGNORE_JSX_OPTION],
-                    },
-                ],
+                type: "number",
             },
+            properties: {
+                type: "object",
+                [ALLOWED_NUMBERS_OPTION]: {
+                    type: "array",
+                },
+                [IGNORE_JSX_OPTION]: {
+                    type: "boolean",
+                },
+            },
+            minLength: 1,
         },
-        optionExamples: [true, [true, 1, 2, 3], [true, "ignore-jsx"]],
+
+        optionExamples: [
+            [true, 1, 2, 3],
+            [
+                true,
+                {
+                    [ALLOWED_NUMBERS_OPTION]: [1, 2, 3],
+                    [IGNORE_JSX_OPTION]: true,
+                },
+            ],
+        ],
         type: "typescript",
         typescriptOnly: false,
     };
@@ -86,7 +110,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<number | string>> {
+class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<OptionsType | number>> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (
@@ -111,12 +135,29 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<number | string>> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private checkNumericLiteral(node: ts.Node, num: string) {
+    private isAllowedNumber(num: string): boolean {
         /* Using Object.is() to differentiate between pos/neg zero */
+        const compareNumbers = (allowedNum: number) => Object.is(allowedNum, parseFloat(num));
+        return this.options.some(option => {
+            if (typeof option === "number") {
+                return compareNumbers(option);
+            }
+            if (option.hasOwnProperty(ALLOWED_NUMBERS_OPTION)) {
+                return (option as AllowedNumbersType)[ALLOWED_NUMBERS_OPTION].some(compareNumbers);
+            }
+            return false;
+        });
+    }
+
+    private checkNumericLiteral(node: ts.Node, num: string) {
+        const shouldIgnoreJsxExpression =
+            node.parent.kind === ts.SyntaxKind.JsxExpression &&
+            this.options.some(option => (option as IgnoreJsxType)[IGNORE_JSX_OPTION]);
+
         if (
             !Rule.ALLOWED_NODES.has(node.parent.kind) &&
-            !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num))) &&
-            this.options.indexOf(IGNORE_JSX_OPTION) === -1
+            !this.isAllowedNumber(num) &&
+            !shouldIgnoreJsxExpression
         ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING(num));
         }

@@ -30,11 +30,3 @@ class A {
 enum Test {
     key = 1337,
 }
-
-import * as React from "react";
-class App extends React.Component {
-    render() {
-        return <Component width={200} height={200} />;
-                                 ~~~    ['magic numbers' are not allowed: 200]
-    }
-}

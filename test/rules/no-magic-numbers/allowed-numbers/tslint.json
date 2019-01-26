@@ -1,7 +1,7 @@
 {
   "rules": {
     "no-magic-numbers": [true, {
-      "ignore-jsx": true
+      "allowed-numbers": [1337, 1337.7, -1337, -0]
     }]
   }
 }
