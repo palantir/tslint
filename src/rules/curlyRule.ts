@@ -19,6 +19,7 @@ import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutil
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { newLineWithIndentation } from "../utils";
 
 import { codeExamples } from "./code-examples/curly.examples";
 
@@ -172,29 +173,10 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
                 Lint.Replacement.appendText(statement.end, " }"),
             ];
         } else {
-            const match = /\n([\t ])/.exec(node.getFullText(this.sourceFile)); // determine which character to use (tab or space)
-            const indentation =
-                match === null
-                    ? ""
-                    : // indentation should match start of statement
-                      match[1].repeat(
-                          ts.getLineAndCharacterOfPosition(
-                              this.sourceFile,
-                              node.getStart(this.sourceFile),
-                          ).character,
-                      );
-
-            const maybeCarriageReturn =
-                this.sourceFile.text[this.sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r"
-                    ? "\r"
-                    : "";
-
+            const newLine = newLineWithIndentation(node, this.sourceFile);
             return [
                 Lint.Replacement.appendText(statement.pos, " {"),
-                Lint.Replacement.appendText(
-                    statement.end,
-                    `${maybeCarriageReturn}\n${indentation}}`,
-                ),
+                Lint.Replacement.appendText(statement.end, `${newLine}}`),
             ];
         }
     }

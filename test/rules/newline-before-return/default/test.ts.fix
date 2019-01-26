@@ -39,6 +39,18 @@ function foo(fn) {
     return;
 }
 
+function foo(fn) {
+    fn();
+
+    return;
+}
+
+function foo(fn) {
+    fn();
+
+    return;
+}
+
 function foo() {
     return;
 }

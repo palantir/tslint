@@ -19,6 +19,7 @@ import { getPreviousStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { newLineWithIndentation } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -55,12 +56,6 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private getIndentation(node: ts.Node): string {
-        const text = this.sourceFile.text.substr(node.pos, node.getStart() - node.pos);
-        const matches = text.match(/([ \t]*)$/);
-        return matches !== null ? matches[1] : "";
-    }
-
     private visitReturnStatement(node: ts.ReturnStatement) {
         const prev = getPreviousStatement(node);
         if (prev === undefined) {
@@ -86,13 +81,12 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
         }
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
         if (prevLine >= line - 1) {
-            const indentationCurrent = this.getIndentation(node);
-            const indentationPrev = this.getIndentation(prev);
-
             const fixer = Lint.Replacement.replaceFromTo(
-                start - indentationCurrent.length,
+                line === prevLine ? node.pos : node.pos + 1,
                 start,
-                line === prevLine ? `\n\n${indentationPrev}` : `\n${indentationCurrent}`,
+                line === prevLine
+                    ? newLineWithIndentation(prev, this.sourceFile, 2)
+                    : newLineWithIndentation(prev, this.sourceFile),
             );
 
             // Previous statement is on the same or previous line
