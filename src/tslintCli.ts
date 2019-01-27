@@ -19,6 +19,7 @@
 
 import commander = require("commander");
 import * as fs from "fs";
+import * as os from "os";
 
 import { Linter } from "./linter";
 import { run } from "./runner";
@@ -37,6 +38,7 @@ interface Argv {
     rulesDir?: string;
     formattersDir: string;
     format?: string;
+    parallel?: boolean;
     typeCheck?: boolean;
     test?: boolean;
     version?: boolean;
@@ -196,6 +198,16 @@ const options: Option[] = [
             (deprecated) Checks for type errors before linting a project.
             --project must be specified in order to enable type checking.`,
     },
+    {
+        name: "parallel",
+        type: "boolean", // TODO: specify number of workers
+        describe: "run lint in parallel",
+        description: dedent`
+            Run the lint process in parallel.
+            By default workers count is os.cpus().length - 1.
+            Cannot be used together with --fix option.
+        `,
+    },
 ];
 
 const builtinOptions: Option[] = [
@@ -297,6 +309,7 @@ run(
         rulesDirectory: argv.rulesDir,
         test: argv.test,
         typeCheck: argv.typeCheck,
+        parallel: argv.parallel ? os.cpus().length - 1 : undefined,
     },
     {
         log(m) {

@@ -17,6 +17,7 @@
 
 // tslint:disable strict-boolean-expressions (TODO: Fix up options)
 
+import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as glob from "glob";
 import { filter as createMinimatchFilter, Minimatch } from "minimatch";
@@ -26,13 +27,15 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
-    isFileExcluded,
+    IConfigurationFile,
     JSON_CONFIG_FILENAME,
 } from "./configuration";
+import { doAllLinting, doTypedLinting } from "./doLinting";
 import { FatalError } from "./error";
-import { LintResult } from "./index";
+import { ILinterOptions, LintResult } from "./index";
 import { Linter } from "./linter";
 import { Logger } from "./logger";
+import { WorkerData, WorkerLintResult } from "./nonTypedLinterWorker";
 import { flatMap } from "./utils";
 
 export interface Options {
@@ -111,6 +114,11 @@ export interface Options {
      * Whether to enable type checking when linting a project.
      */
     typeCheck?: boolean;
+
+    /**
+     * Number of parallel workers to lint to speedup execution time. `undefined` means disabled.
+     */
+    parallel?: number;
 }
 
 export const enum Status {
@@ -154,6 +162,11 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
         throw new FatalError(`Invalid option for configuration: ${options.config}`);
     }
 
+    if (options.parallel !== undefined && options.fix) {
+        // TODO: how we can apply fixes in we'll lint in parallel in separate processes?
+        throw new FatalError(`Cannot apply fixes while running in parallel`);
+    }
+
     const { output, errorCount } = await runLinter(options, logger);
     if (output && output.trim()) {
         logger.log(`${output}\n`);
@@ -161,7 +174,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
-async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
+async function runLinter(options: Options, logger: Logger): Promise<WorkerLintResult> {
     const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
     if (program && options.typeCheck) {
@@ -248,13 +261,74 @@ function resolveGlobs(
     );
 }
 
+async function runExternalWorker(
+    files: string[],
+    configFile: IConfigurationFile | undefined,
+    linterOptions: ILinterOptions,
+): Promise<WorkerLintResult> {
+    return new Promise((resolve: (lintResult: LintResult) => void, reject: () => void) => {
+        const child = childProcess.fork(path.resolve(__dirname, "nonTypedLinterWorker.js"));
+
+        child.on("message", resolve);
+        child.on("error", reject);
+
+        const data: WorkerData = {
+            configFile,
+            files,
+            linterOptions,
+        };
+
+        child.send(data);
+    });
+}
+
+async function doLintingInParallel(
+    files: string[],
+    configFile: IConfigurationFile | undefined,
+    linterOptions: ILinterOptions,
+    program: ts.Program | undefined,
+    workersCount: number,
+): Promise<WorkerLintResult> {
+    const promises = [];
+    const filesPerWorker = Math.ceil(files.length / workersCount);
+    for (let index = 0; index < workersCount; ++index) {
+        const startIndex = index * filesPerWorker;
+        promises.push(
+            runExternalWorker(
+                files.slice(startIndex, startIndex + filesPerWorker),
+                configFile,
+                linterOptions,
+            ),
+        );
+    }
+
+    // BEWARE: make sure that this code is after run workers
+    if (program !== undefined) {
+        promises.push(doTypedLinting(files, configFile, linterOptions, program));
+    }
+
+    const results = await Promise.all(promises);
+
+    const result: WorkerLintResult = {
+        errorCount: 0,
+        output: "",
+    };
+
+    for (const workerResult of results) {
+        result.errorCount += workerResult.errorCount;
+        result.output += workerResult.output;
+    }
+
+    return result;
+}
+
 async function doLinting(
     options: Options,
     files: string[],
     program: ts.Program | undefined,
     logger: Logger,
-): Promise<LintResult> {
-    let configFile =
+): Promise<WorkerLintResult> {
+    const configFile =
         options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
     let formatter = options.format;
@@ -265,70 +339,19 @@ async function doLinting(
                 : "prose";
     }
 
-    const linter = new Linter(
-        {
-            fix: !!options.fix,
-            formatter,
-            formattersDirectory: options.formattersDirectory,
-            quiet: !!options.quiet,
-            rulesDirectory: options.rulesDirectory,
-        },
-        program,
-    );
+    const linterOptions: ILinterOptions = {
+        fix: !!options.fix,
+        formatter,
+        formattersDirectory: options.formattersDirectory,
+        quiet: !!options.quiet,
+        rulesDirectory: options.rulesDirectory,
+    };
 
-    let lastFolder: string | undefined;
-
-    for (const file of files) {
-        if (options.config === undefined) {
-            const folder = path.dirname(file);
-            if (lastFolder !== folder) {
-                configFile = findConfiguration(null, folder).results;
-                lastFolder = folder;
-            }
-        }
-        if (isFileExcluded(file, configFile)) {
-            continue;
-        }
-
-        let contents: string | undefined;
-        if (program !== undefined) {
-            const sourceFile = program.getSourceFile(file);
-            if (sourceFile !== undefined) {
-                contents = sourceFile.text;
-            }
-        } else {
-            contents = await tryReadFile(file, logger);
-        }
-
-        if (contents !== undefined) {
-            linter.lint(file, contents, configFile);
-        }
+    if (options.parallel !== undefined) {
+        return doLintingInParallel(files, configFile, linterOptions, program, options.parallel);
+    } else {
+        return doAllLinting(files, configFile, linterOptions, program, logger);
     }
-
-    return linter.getResult();
-}
-
-/** Read a file, but return undefined if it is an MPEG '.ts' file. */
-async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
-    if (!fs.existsSync(filename)) {
-        throw new FatalError(`Unable to open file: ${filename}`);
-    }
-    const buffer = Buffer.allocUnsafe(256);
-    const fd = fs.openSync(filename, "r");
-    try {
-        fs.readSync(fd, buffer, 0, 256, 0);
-        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-            // TypeScript source, so tslint ignores files with the specific pattern.
-            logger.error(`${filename}: ignoring MPEG transport stream\n`);
-            return undefined;
-        }
-    } finally {
-        fs.closeSync(fd);
-    }
-
-    return fs.readFileSync(filename, "utf8");
 }
 
 function showDiagnostic(
