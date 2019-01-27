@@ -25,6 +25,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "static-this",
         description: "Ban the use of `this` in static methods.",
+        hasFix: true,
         options: null,
         optionsDescription: "",
         optionExamples: [true],
@@ -33,7 +34,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Unallowed `this` usage in static context";
+    public static FAILURE_STRING = (className?: string) => {
+        let message =
+            "`this` usage in static context could be a potential reason of runtime errors.";
+        if (undefined !== className) {
+            message = "`this` should be replaced with `" + className + "`.";
+        }
+
+        return message;
+    };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(new StaticThisWalker(sourceFile, this.getOptions()));
@@ -49,18 +58,27 @@ const enum ParentType {
 class StaticThisWalker extends Lint.RuleWalker {
     public walk(sourceFile: ts.SourceFile) {
         let currentParent: ParentType = ParentType.None;
+        let currentClassName: string | undefined;
 
         const cb = (node: ts.Node): void => {
             const originalParent = currentParent;
+            const originalClassName = currentClassName;
+
+            if (utils.isClassLikeDeclaration(node)) {
+                currentParent = ParentType.Class;
+
+                if (undefined !== node.name) {
+                    currentClassName = node.name!.text;
+                }
+
+                ts.forEachChild(node, cb);
+
+                currentParent = originalParent;
+                currentClassName = originalClassName;
+                return;
+            }
 
             switch (node.kind) {
-                case ts.SyntaxKind.ClassDeclaration:
-                case ts.SyntaxKind.ClassExpression:
-                    currentParent = ParentType.Class;
-                    ts.forEachChild(node, cb);
-                    currentParent = originalParent;
-                    return;
-
                 case ts.SyntaxKind.MethodDeclaration:
                 case ts.SyntaxKind.GetAccessor:
                 case ts.SyntaxKind.SetAccessor:
@@ -79,7 +97,16 @@ class StaticThisWalker extends Lint.RuleWalker {
 
                 case ts.SyntaxKind.ThisKeyword:
                     if (ParentType.ClassEntity === currentParent) {
-                        return this.addFailureAtNode(node, Rule.FAILURE_STRING);
+                        let fix: Lint.Fix | undefined;
+                        if (undefined !== currentClassName) {
+                            fix = Lint.Replacement.replaceNode(node, currentClassName);
+                        }
+
+                        return this.addFailureAtNode(
+                            node,
+                            Rule.FAILURE_STRING(currentClassName),
+                            fix,
+                        );
                     }
             }
 

@@ -1,9 +1,10 @@
 class StaticThis {
     static const staticValue = this.value;
-                               ~~~~ [Unallowed `this` usage in static context]
+                               ~~~~ [`this` should be replaced with `StaticThis`.]
+
     static getInstance() {
         return this;
-               ~~~~ [Unallowed `this` usage in static context]
+               ~~~~ [`this` should be replaced with `StaticThis`.]
     }
 
     const value = 5;
