@@ -199,6 +199,10 @@ export class Linter {
         };
     }
 
+    protected filterRules(rules: IRule[]): IRule[] {
+        return rules;
+    }
+
     private getAllFailures(sourceFile: ts.SourceFile, enabledRules: IRule[]): RuleFailure[] {
         const failures = flatMap(enabledRules, rule => this.applyRule(rule, sourceFile));
         return removeDisabledFailures(sourceFile, failures);
@@ -305,7 +309,7 @@ export class Linter {
         const rulesDirectories = arrayify(this.options.rulesDirectory).concat(
             arrayify(configuration.rulesDirectory),
         );
-        return loadRules(ruleOptionsList, rulesDirectories, isJs);
+        return this.filterRules(loadRules(ruleOptionsList, rulesDirectories, isJs));
     }
 
     private getSourceFile(fileName: string, source: string) {
