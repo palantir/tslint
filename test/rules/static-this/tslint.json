@@ -1,5 +1,5 @@
 {
   "rules": {
-    "static-this": 1
+    "static-this": true
   }
 }
