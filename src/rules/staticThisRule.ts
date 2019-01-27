@@ -37,7 +37,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = (className?: string) => {
         let message =
             "`this` usage in static context could be a potential reason of runtime errors.";
-        if (undefined !== className) {
+        if (className !== undefined) {
+            /* tslint:disable-next-line:prefer-template */
             message = "`this` should be replaced with `" + className + "`.";
         }
 
@@ -67,8 +68,8 @@ class StaticThisWalker extends Lint.RuleWalker {
             if (utils.isClassLikeDeclaration(node)) {
                 currentParent = ParentType.Class;
 
-                if (undefined !== node.name) {
-                    currentClassName = node.name!.text;
+                if (node.name !== undefined) {
+                    currentClassName = node.name.text;
                 }
 
                 ts.forEachChild(node, cb);
@@ -98,7 +99,7 @@ class StaticThisWalker extends Lint.RuleWalker {
                 case ts.SyntaxKind.ThisKeyword:
                     if (ParentType.ClassEntity === currentParent) {
                         let fix: Lint.Fix | undefined;
-                        if (undefined !== currentClassName) {
+                        if (currentClassName !== undefined) {
                             fix = Lint.Replacement.replaceNode(node, currentClassName);
                         }
 
