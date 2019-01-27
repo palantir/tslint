@@ -32,6 +32,7 @@ import {
 import { FatalError } from "./error";
 import { LintResult } from "./index";
 import { Linter } from "./linter";
+import { Logger } from "./logger";
 import { flatMap } from "./utils";
 
 export interface Options {
@@ -116,11 +117,6 @@ export const enum Status {
     Ok = 0,
     FatalError = 1,
     LintError = 2,
-}
-
-export interface Logger {
-    log(message: string): void;
-    error(message: string): void;
 }
 
 export async function run(options: Options, logger: Logger): Promise<Status> {

@@ -25,7 +25,7 @@ import * as ts from "typescript";
 
 import { Replacement } from "./language/rule/rule";
 import { Linter } from "./linter";
-import { Logger } from "./runner";
+import { Logger } from "./logger";
 import { denormalizeWinPath, mapDefined, readBufferWithDetectedEncoding } from "./utils";
 import { LintError } from "./verify/lintError";
 import * as parse from "./verify/parse";
