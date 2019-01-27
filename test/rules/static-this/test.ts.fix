@@ -1,13 +1,43 @@
 class StaticThis {
-    static const staticValue = StaticThis.value;
+    static value = 0;
+    static staticValue = StaticThis.value;
 
-    static getInstance() {
+    static getTypeOf() {
         return StaticThis;
     }
 
-    const value = 5;
+    private _value = 5;
 
     getValue() {
-        return this.value;
+        return this._value;
+    }
+
+    get length() {
+        return this._value;
+    }
+
+    set length(value) {
+        this._value = value;
+    }
+}
+
+class Child extends StaticThis {
+    static word = 'Hello';
+    static staticValue = Child.word;
+
+    static getTypeOf() {
+        return Child;
+    }
+}
+
+const AnonymClass = class {
+    static getTypeOf() {
+        return this;
+    }
+}
+
+const NamedClass = class Name {
+    static getTypeOf() {
+        return Name;
     }
 }

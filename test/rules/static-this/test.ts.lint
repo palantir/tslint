@@ -1,15 +1,49 @@
 class StaticThis {
-    static const staticValue = this.value;
-                               ~~~~ [`this` should be replaced with `StaticThis`.]
+    static value = 0;
+    static staticValue = this.value;
+                         ~~~~ [`this` should be replaced with `StaticThis`.]
 
-    static getInstance() {
+    static getTypeOf() {
         return this;
                ~~~~ [`this` should be replaced with `StaticThis`.]
     }
 
-    const value = 5;
+    private _value = 5;
 
     getValue() {
-        return this.value;
+        return this._value;
+    }
+
+    get length() {
+        return this._value;
+    }
+
+    set length(value) {
+        this._value = value;
+    }
+}
+
+class Child extends StaticThis {
+    static word = 'Hello';
+    static staticValue = this.word;
+                         ~~~~ [`this` should be replaced with `Child`.]
+
+    static getTypeOf() {
+        return this;
+               ~~~~ [`this` should be replaced with `Child`.]
+    }
+}
+
+const AnonymClass = class {
+    static getTypeOf() {
+        return this;
+               ~~~~ [`this` usage in static context could be a potential reason of runtime errors.]
+    }
+}
+
+const NamedClass = class Name {
+    static getTypeOf() {
+        return this;
+               ~~~~ [`this` should be replaced with `Name`.]
     }
 }
