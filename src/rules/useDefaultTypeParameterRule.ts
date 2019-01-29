@@ -22,6 +22,7 @@ import {
     isTypeAliasDeclaration,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { find } from "../utils";
 

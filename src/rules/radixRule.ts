@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsut
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/radix.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {

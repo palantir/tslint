@@ -17,6 +17,7 @@
 
 import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const ALWAYS_OR_NEVER = {

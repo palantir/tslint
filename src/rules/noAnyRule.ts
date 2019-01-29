@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noAny.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {

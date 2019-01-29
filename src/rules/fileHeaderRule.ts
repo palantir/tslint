@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";

@@ -17,6 +17,7 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { unwrapParentheses } from "../language/utils";
 

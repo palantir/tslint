@@ -16,10 +16,10 @@
 
 import { assert } from "chai";
 import chalk from "chalk";
-
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("CodeFrame Formatter", () => {

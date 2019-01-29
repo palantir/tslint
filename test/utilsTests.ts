@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+
 import { arrayify, dedent, escapeRegExp } from "../src/utils";
 
 describe("Utils", () => {

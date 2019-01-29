@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import { RuleFailure } from "../rule/rule";
+
 import { WalkContext } from "./walkContext";
 
 export interface IWalker {
