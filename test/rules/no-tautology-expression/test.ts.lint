@@ -1,21 +1,22 @@
+
 const expr = "someStr" === "someStr";
-             ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+             ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
 const expr = 123 === 123;
-             ~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+             ~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
 const someVar = 100;
 const expr = someVar === someVar;
-             ~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+             ~~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
 
 const someFunc = () => {
     if ("SomeStr" === "SomeStr") {
-        ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        ~~~~~~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
         return true;
     }
 }
 
 const someFunc = () => {
     if (100 === 100) {
-        ~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        ~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
         return true;
     }
 }
@@ -23,11 +24,85 @@ const someFunc = () => {
 const someFunc = () => {
     let someVar = 100;
     if (someVar === someVar) {
-        ~~~~~~~~~~~~~~~~~~~  [Expression is a tautology. Comparison is redundant.]
+        ~~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
         return true;
     }
 }
 
-const someVar = 3 + 3;
+const someFunc = () => {
+    if (1 !== 1) {
+        ~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (1 > 1) {
+        ~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = 123;
+    if (someVar < someVar) {
+        ~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" == "str") {
+        ~~~~~~~~~~~~~~ [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (123 != 123) {
+        ~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" <= "str") {
+        ~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" >= "str") {
+        ~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = true;
+    if (someVar || someVar) {
+        ~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = true;
+    if (someVar && someVar) {
+        ~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someVar1 = 3 + 3;
+const someVar2 = 3 - 3;
+const someVar3 = 3 * 3;
+const someVar4 = 3 % 3;
+const someVar5 = 3 / 3;
+
+
+
+
 
 

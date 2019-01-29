@@ -20,12 +20,13 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const TAUTOLOGY_DISCOVERED_ERROR_STRING = "Expression is a tautology. Comparison is redundant.";
+const TAUTOLOGY_DISCOVERED_ERROR_STRING =
+    "Expression is either a tautology or a contradiction. Binary expression is redundant.";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
-        Enforces that two equal variables or literals are not compared. Expression like 3 === 3 or
-        someVar === someVar will are tautologies, and will produce an error.
+        Enforces that relational/equality binary operators does not take two equal variables/literals as operands.
+        Expression like 3 === 3, someVar === someVar, "1" > "1" are either a tautology or contradiction, and will produce an error.
         `,
         optionExamples: [true],
         options: null,
@@ -43,7 +44,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(context: Lint.WalkContext<void>) {
     const cb = (node: ts.Node): void => {
-        if (tsutils.isBinaryExpression(node) && isRationalOrEqualityOperator(node.operatorToken)) {
+        if (
+            tsutils.isBinaryExpression(node) &&
+            isRelationalOrOrLogicalOperator(node.operatorToken)
+        ) {
             if (isLiteral(node.left) && isLiteral(node.right)) {
                 if (node.left.text === node.right.text) {
                     context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
@@ -66,7 +70,7 @@ function isLiteral(node: ts.Node): node is ts.StringLiteral | ts.NumericLiteral 
     return (node as ts.StringLiteral) !== undefined || (node as ts.NumericLiteral) !== undefined;
 }
 
-function isRationalOrEqualityOperator(operator: ts.BinaryOperatorToken): boolean {
+function isRelationalOrOrLogicalOperator(operator: ts.BinaryOperatorToken): boolean {
     return new Set([
         ts.SyntaxKind.LessThanToken,
         ts.SyntaxKind.GreaterThanToken,
@@ -76,5 +80,7 @@ function isRationalOrEqualityOperator(operator: ts.BinaryOperatorToken): boolean
         ts.SyntaxKind.EqualsEqualsEqualsToken,
         ts.SyntaxKind.ExclamationEqualsToken,
         ts.SyntaxKind.ExclamationEqualsEqualsToken,
+        ts.SyntaxKind.AmpersandAmpersandToken,
+        ts.SyntaxKind.BarBarToken,
     ]).has(operator.kind);
 }
