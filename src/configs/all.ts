@@ -29,10 +29,7 @@ export const rules = {
     "ban-types": {
         options: [
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
-            [
-                "Function",
-                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
-            ],
+            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
@@ -40,19 +37,22 @@ export const rules = {
         ],
     },
     "ban-ts-ignore": true,
-    "member-access": [true, "check-accessor", "check-constructor", "check-parameter-property"],
-    "member-ordering": [
-        true,
-        {
+    "member-access": {
+        options: ["check-accessor", "check-constructor", "check-parameter-property"],
+    },
+    "member-ordering": {
+        options: {
             order: "statics-first",
             alphabetize: true,
         },
-    ],
+    },
     "no-any": true,
     "no-empty-interface": true,
     "no-import-side-effect": true,
     // Technically this is not the strictest setting, but don't want to conflict with "typedef"
-    "no-inferrable-types": [true, "ignore-params"],
+    "no-inferrable-types": {
+        options: ["ignore-params"],
+    },
     "no-internal-module": true,
     "no-magic-numbers": true,
     "no-namespace": true,
@@ -64,33 +64,35 @@ export const rules = {
     "prefer-for-of": true,
     "prefer-readonly": true,
     "promise-function-async": true,
-    typedef: [
-        true,
-        "call-signature",
-        "arrow-call-signature",
-        "parameter",
-        "arrow-parameter",
-        "property-declaration",
-        "variable-declaration",
-        "member-variable-declaration",
-    ],
-    "typedef-whitespace": [
-        true,
-        {
-            "call-signature": "nospace",
-            "index-signature": "nospace",
-            parameter: "nospace",
-            "property-declaration": "nospace",
-            "variable-declaration": "nospace",
-        },
-        {
-            "call-signature": "onespace",
-            "index-signature": "onespace",
-            parameter: "onespace",
-            "property-declaration": "onespace",
-            "variable-declaration": "onespace",
-        },
-    ],
+    typedef: {
+        options: [
+            "call-signature",
+            "arrow-call-signature",
+            "parameter",
+            "arrow-parameter",
+            "property-declaration",
+            "variable-declaration",
+            "member-variable-declaration",
+        ],
+    },
+    "typedef-whitespace": {
+        options: [
+            {
+                "call-signature": "nospace",
+                "index-signature": "nospace",
+                parameter: "nospace",
+                "property-declaration": "nospace",
+                "variable-declaration": "nospace",
+            },
+            {
+                "call-signature": "onespace",
+                "index-signature": "onespace",
+                parameter: "onespace",
+                "property-declaration": "onespace",
+                "variable-declaration": "onespace",
+            },
+        ],
+    },
     "unified-signatures": true,
 
     // Functionality
@@ -110,7 +112,9 @@ export const rules = {
     "no-debugger": true,
     "no-duplicate-super": true,
     "no-duplicate-switch-case": true,
-    "no-duplicate-variable": [true, "check-parameters"],
+    "no-duplicate-variable": {
+        options: ["check-parameters"],
+    },
     "no-dynamic-delete": true,
     "no-empty": true,
     "no-eval": true,
@@ -215,14 +219,7 @@ export const rules = {
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
-    "one-line": [
-        true,
-        "check-catch",
-        "check-else",
-        "check-finally",
-        "check-open-brace",
-        "check-whitespace",
-    ],
+    "one-line": [true, "check-catch", "check-else", "check-finally", "check-open-brace", "check-whitespace"],
     "one-variable-per-declaration": true,
     "ordered-imports": [
         true,
