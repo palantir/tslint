@@ -30,7 +30,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showRuleCrashWarning } from "./error";
+import { FatalError, isError, showRuleCrashWarning, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
@@ -142,6 +142,11 @@ export class Linter {
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
+        if (enabledRules.length === 0) {
+            showWarningOnce(
+                `Tried to lint ${fileName} but found no valid, enabled rules for this file type and file path in the resolved configuration.`,
+            );
+        }
 
         let fileFailures = this.getAllFailures(sourceFile, enabledRules);
         if (fileFailures.length === 0) {
