@@ -604,7 +604,9 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
 
         if (semver.satisfies(tsVersion, ">=2.9")) {
             it("does not try to parse JSON files with --resolveJsonModule with TS >= 2.9", async () => {
-                const status = await execRunner({project: "test/files/tsconfig-resolve-json-module/tsconfig.json"});
+                const status = await execRunner({
+                    project: "test/files/tsconfig-resolve-json-module/tsconfig.json",
+                });
                 assert.equal(status, Status.Ok, "process should exit without an error");
             });
         }

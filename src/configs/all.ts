@@ -29,7 +29,10 @@ export const rules = {
     "ban-types": {
         options: [
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
-            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+            [
+                "Function",
+                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
+            ],
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
@@ -219,7 +222,14 @@ export const rules = {
     "number-literal-format": true,
     "object-literal-key-quotes": [true, "consistent-as-needed"],
     "object-literal-shorthand": true,
-    "one-line": [true, "check-catch", "check-else", "check-finally", "check-open-brace", "check-whitespace"],
+    "one-line": [
+        true,
+        "check-catch",
+        "check-else",
+        "check-finally",
+        "check-open-brace",
+        "check-whitespace",
+    ],
     "one-variable-per-declaration": true,
     "ordered-imports": [
         true,

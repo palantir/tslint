@@ -49,9 +49,6 @@ export class Linter {
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
 
-    private failures: RuleFailure[] = [];
-    private fixes: RuleFailure[] = [];
-
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
      */
@@ -118,6 +115,9 @@ export class Linter {
                     : file.fileName,
         );
     }
+
+    private failures: RuleFailure[] = [];
+    private fixes: RuleFailure[] = [];
 
     constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {

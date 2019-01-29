@@ -195,7 +195,10 @@ function getQuotemarkPreference(ruleArguments: any[]): QUOTEMARK {
     return '"';
 }
 
-function getJSXQuotemarkPreference(ruleArguments: any[], regularQuotemarkPreference: QUOTEMARK): JSX_QUOTEMARK {
+function getJSXQuotemarkPreference(
+    ruleArguments: any[],
+    regularQuotemarkPreference: QUOTEMARK,
+): JSX_QUOTEMARK {
     for (const arg of ruleArguments) {
         switch (arg) {
             case OPTION_JSX_SINGLE:
