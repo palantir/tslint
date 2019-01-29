@@ -8,6 +8,9 @@ interface I {
 interface IDBFactory {
 }
 
+interface I18nFactory {
+}
+
 interface ABC {
 }
 

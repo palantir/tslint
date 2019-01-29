@@ -74,6 +74,10 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    // Allow IndexedDB interfaces
-    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !name.startsWith("IDB");
+    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !isSpecialCase(name);
+}
+
+function isSpecialCase(name: string): boolean {
+    // Allow IndexedDB and I18n interfaces
+    return name.startsWith("IDB") || name.startsWith("I18n");
 }
