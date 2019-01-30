@@ -21,9 +21,23 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 import { isFunctionScopeBoundary } from "../utils";
 
+type clausesNames =
+    | "caseClause"
+    | "catchClause"
+    | "conditionalExpression"
+    | "doStatement"
+    | "forStatement"
+    | "forInStatement"
+    | "forOfStatement"
+    | "ifStatement"
+    | "whileStatement"
+    | "binaryExpression";
+type Options = Set<clausesNames>;
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
+    public static DEFAULT_IGNORED_CLAUSE = new Set();
 
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -67,7 +81,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
+        return this.applyWithFunction(sourceFile, walk, {
+            threshold: this.threshold,
+            ignoredClause: this.ignoredClause,
+        });
     }
 
     public isEnabled(): boolean {
@@ -83,11 +100,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
         return Rule.DEFAULT_THRESHOLD;
     }
+
+    private get ignoredClause(): Options {
+        if (this.ruleArguments[1] !== undefined) {
+            return new Set(this.ruleArguments[1].ignoredClause);
+        }
+        return Rule.DEFAULT_IGNORED_CLAUSE;
+    }
 }
 
-function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
+function walk(ctx: Lint.WalkContext<{ threshold: number; ignoredClause: Options }>): void {
     const {
-        options: { threshold },
+        options: { threshold, ignoredClause },
     } = ctx;
     let complexity = 0;
 
@@ -106,7 +130,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
             }
             complexity = old;
         } else {
-            if (increasesComplexity(node)) {
+            if (increasesComplexity(node, ignoredClause)) {
                 complexity++;
             }
             return ts.forEachChild(node, cb);
@@ -114,29 +138,46 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
     });
 }
 
-function increasesComplexity(node: ts.Node): boolean {
+function hasIgnoredClause(ignoredClause: Options, ClauseName: clausesNames): boolean {
+    // Check whether an element with the specified value exists in a Set object or not.
+    return ignoredClause.has(ClauseName);
+}
+
+function increasesComplexity(node: ts.Node, ignoredClause: Options): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.CaseClause:
-            return (node as ts.CaseClause).statements.length > 0;
+            return (
+                hasIgnoredClause(ignoredClause, "caseClause") &&
+                (node as ts.CaseClause).statements.length > 0
+            );
         case ts.SyntaxKind.CatchClause:
+            return hasIgnoredClause(ignoredClause, "catchClause");
         case ts.SyntaxKind.ConditionalExpression:
+            return hasIgnoredClause(ignoredClause, "conditionalExpression");
         case ts.SyntaxKind.DoStatement:
+            return hasIgnoredClause(ignoredClause, "doStatement");
         case ts.SyntaxKind.ForStatement:
+            return hasIgnoredClause(ignoredClause, "forStatement");
         case ts.SyntaxKind.ForInStatement:
+            return hasIgnoredClause(ignoredClause, "forInStatement");
         case ts.SyntaxKind.ForOfStatement:
+            return hasIgnoredClause(ignoredClause, "forOfStatement");
         case ts.SyntaxKind.IfStatement:
+            return hasIgnoredClause(ignoredClause, "ifStatement");
         case ts.SyntaxKind.WhileStatement:
-            return true;
+            return hasIgnoredClause(ignoredClause, "whileStatement");
 
         case ts.SyntaxKind.BinaryExpression:
-            switch ((node as ts.BinaryExpression).operatorToken.kind) {
-                case ts.SyntaxKind.BarBarToken:
-                case ts.SyntaxKind.AmpersandAmpersandToken:
-                    return true;
-                default:
-                    return false;
+            if (hasIgnoredClause(ignoredClause, "binaryExpression")) {
+                switch ((node as ts.BinaryExpression).operatorToken.kind) {
+                    case ts.SyntaxKind.BarBarToken:
+                    case ts.SyntaxKind.AmpersandAmpersandToken:
+                        return true;
+                    default:
+                        return false;
+                }
             }
-
+            return false;
         default:
             return false;
     }
