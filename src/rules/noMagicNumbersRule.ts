@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { isCallExpression, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 
-import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 

@@ -24,6 +24,7 @@ import {
     isTypeNodeKind,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { isLowerCase } from "../utils";
 
@@ -34,6 +35,7 @@ export class Rule extends Lint.Rules.TypedRule {
         description: Lint.Utils.dedent`
             Warns when using an expression of type 'any' in a dynamic way.
             Uses are only allowed if they would work for \`{} | null | undefined\`.
+            Downcasting to unknown is always safe.
             Type casts and tests are allowed.
             Expressions that work on all values (such as \`"" + x\`) are allowed.`,
         optionsDescription: "Not configurable.",
@@ -153,7 +155,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
                     initializer !== undefined &&
                     this.visitNode(
                         initializer,
-                        isPropertyAny(node as ts.PropertyDeclaration, this.checker),
+                        isPropertyAnyOrUnknown(node as ts.PropertyDeclaration, this.checker),
                     )
                 );
             }
@@ -315,7 +317,8 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 
     private checkContextualType(node: ts.Expression, allowIfNoContextualType?: boolean) {
         const type = this.checker.getContextualType(node);
-        return this.visitNode(node, (type === undefined && allowIfNoContextualType) || isAny(type));
+        const anyOk = (type === undefined && allowIfNoContextualType) || isAny(type, true);
+        return this.visitNode(node, anyOk);
     }
 
     // Allow `const x = foo;` and `const x: any = foo`, but not `const x: Foo = foo;`.
@@ -325,17 +328,15 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
         initializer,
     }: ts.VariableDeclaration | ts.ParameterDeclaration) {
         this.checkBindingName(name);
-        // Always allow the LHS to be `any`. Just don't allow RHS to be `any` when LHS isn't.
-        return (
-            initializer !== undefined &&
-            this.visitNode(
-                initializer,
-                /*anyOk*/
-                (name.kind === ts.SyntaxKind.Identifier &&
-                    (type === undefined || type.kind === ts.SyntaxKind.AnyKeyword)) ||
-                    (type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword),
-            )
-        );
+        // Always allow the LHS to be `any`. Just don't allow RHS to be `any` when LHS isn't `any` or `unknown`.
+        const anyOk =
+            (name.kind === ts.SyntaxKind.Identifier &&
+                (type === undefined ||
+                    type.kind === ts.SyntaxKind.AnyKeyword ||
+                    type.kind === ts.SyntaxKind.UnknownKeyword)) ||
+            (type !== undefined && type.kind === ts.SyntaxKind.AnyKeyword) ||
+            (type !== undefined && type.kind === ts.SyntaxKind.UnknownKeyword);
+        return initializer !== undefined && this.visitNode(initializer, anyOk);
     }
 
     private checkBinaryExpression(node: ts.BinaryExpression, anyOk: boolean | undefined) {
@@ -357,7 +358,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
             case ts.SyntaxKind.EqualsToken:
                 // Allow assignment if the lhs is also *any*.
                 allowAnyLeft = true;
-                allowAnyRight = isNodeAny(node.left, this.checker);
+                allowAnyRight = isNodeAny(node.left, this.checker, true);
                 break;
             case ts.SyntaxKind.PlusToken: // Allow implicit stringification
             case ts.SyntaxKind.PlusEqualsToken:
@@ -416,8 +417,11 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
 }
 
 /** Check if property has no type annotation in this class and the base class */
-function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
-    if (!isNodeAny(node.name, checker) || node.name.kind === ts.SyntaxKind.ComputedPropertyName) {
+function isPropertyAnyOrUnknown(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
+    if (
+        !isNodeAny(node.name, checker, true) ||
+        node.name.kind === ts.SyntaxKind.ComputedPropertyName
+    ) {
         return false;
     }
     for (const base of checker.getBaseTypes(checker.getTypeAtLocation(
@@ -425,13 +429,16 @@ function isPropertyAny(node: ts.PropertyDeclaration, checker: ts.TypeChecker) {
     ) as ts.InterfaceType)) {
         const prop = base.getProperty(node.name.text);
         if (prop !== undefined && prop.declarations !== undefined) {
-            return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]));
+            return isAny(checker.getTypeOfSymbolAtLocation(prop, prop.declarations[0]), true);
         }
     }
     return true;
 }
 
-function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
+/**
+ * @param orUnknown If true, this function will also return true when the node is unknown.
+ */
+function isNodeAny(node: ts.Node, checker: ts.TypeChecker, orUnknown: boolean = false): boolean {
     let symbol = checker.getSymbolAtLocation(node);
     if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = checker.getAliasedSymbol(symbol);
@@ -442,7 +449,7 @@ function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
             return false;
         }
         if (isSymbolFlagSet(symbol, ts.SymbolFlags.Type)) {
-            return isAny(checker.getDeclaredTypeOfSymbol(symbol));
+            return isAny(checker.getDeclaredTypeOfSymbol(symbol), orUnknown);
         }
     }
 
@@ -451,7 +458,7 @@ function isNodeAny(node: ts.Node, checker: ts.TypeChecker): boolean {
         return false;
     }
 
-    return isAny(checker.getTypeAtLocation(node));
+    return isAny(checker.getTypeAtLocation(node), orUnknown);
 }
 
 const jsxElementTypes = new Set<ts.SyntaxKind>([
@@ -477,6 +484,10 @@ function isStringLike(expr: ts.Expression, checker: ts.TypeChecker): boolean {
     return isTypeFlagSet(checker.getTypeAtLocation(expr), ts.TypeFlags.StringLike);
 }
 
-function isAny(type: ts.Type | undefined): boolean {
-    return type !== undefined && isTypeFlagSet(type, ts.TypeFlags.Any);
+function isAny(type: ts.Type | undefined, orUnknown: boolean = false): boolean {
+    return (
+        type !== undefined &&
+        (isTypeFlagSet(type, ts.TypeFlags.Any) ||
+            (orUnknown && isTypeFlagSet(type, ts.TypeFlags.Unknown)))
+    );
 }

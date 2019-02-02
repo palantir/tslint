@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
 import { ExclusionFactory, ExclusionsMap } from "./completed-docs/exclusionFactory";
 

@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/typedef.examples";
 
 interface Options {

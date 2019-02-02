@@ -262,18 +262,18 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private readonly fileName: string;
-    private readonly startPosition: RuleFailurePosition;
-    private readonly endPosition: RuleFailurePosition;
-    private readonly rawLines: string;
-    private ruleSeverity: RuleSeverity;
-
     public static compare(a: RuleFailure, b: RuleFailure): number {
         if (a.fileName !== b.fileName) {
             return a.fileName < b.fileName ? -1 : 1;
         }
         return a.startPosition.getPosition() - b.startPosition.getPosition();
     }
+
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
+    private ruleSeverity: RuleSeverity;
 
     constructor(
         private readonly sourceFile: ts.SourceFile,

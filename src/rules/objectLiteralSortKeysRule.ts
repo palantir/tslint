@@ -26,6 +26,7 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";

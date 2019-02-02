@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import { IOptions } from "../rule/rule";
+
 import { RuleWalker } from "./ruleWalker";
 
 export class ProgramAwareRuleWalker extends RuleWalker {

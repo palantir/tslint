@@ -17,6 +17,7 @@
 
 import { hasModifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";

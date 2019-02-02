@@ -1,9 +1,19 @@
 {
-    "lintOptions": {
-        "typeCheck": true
-    },
-    "extends": ["tslint:all", "tslint-config-prettier"],
+    "extends": [
+        "tslint:all",
+        "tslint-config-prettier",
+        "tslint-plugin-prettier"
+    ],
     "rules": {
+        // Formatting rules
+        "prettier": {
+            "options": {
+                "printWidth": 100,
+                "tabWidth": 4,
+                "trailingComma": "all"
+            }
+        },
+
         // Don't want these
         "cyclomatic-complexity": false,
         "increment-decrement": false,
@@ -11,10 +21,21 @@
         "no-parameter-properties": false,
         "no-parameter-reassignment": false,
         "no-unused-variable": false,
+        "typedef": false,
+
         // TODO: Enable stricter options for these
-        "comment-format": [true, "check-space"],
+        "comment-format": {
+            "options": [
+                "check-space"
+            ]
+        },
         "member-access": true,
-        "only-arrow-functions": [true, "allow-declarations", "allow-named-functions"],
+        "only-arrow-functions": {
+            "options": [
+                "allow-declarations",
+                "allow-named-functions"
+            ]
+        },
 
         // TODO: Enable these
         "completed-docs": false,
@@ -29,35 +50,57 @@
         "no-void-expression": false,
         "prefer-function-over-method": false,
         "strict-type-predicates": false,
-        "triple-equals": [true, "allow-undefined-check"],
-        "typedef": false,
+        "triple-equals": {
+            "options": [
+                "allow-undefined-check"
+            ]
+        },
 
-        "ban": [true, ["describe", "only"], ["it", "only"]],
-
+        // Misc
+        "ban": {
+            "options": [
+                [
+                    "describe",
+                    "only"
+                ],
+                [
+                    "it",
+                    "only"
+                ]
+            ]
+        },
         "interface-name": false,
-        "file-header": [true, "Copyright \\d{4} Palantir Technologies, Inc."],
+        "file-header": {
+            "options": [
+                "Copyright \\d{4} Palantir Technologies, Inc."
+            ]
+        },
         "max-classes-per-file": false,
-        "max-line-length": [true, 140],
-        "member-ordering": [
-            true,
-            "public-before-private",
-            "static-before-instance",
-            "variables-before-functions"
-        ],
-        "newline-per-chained-call": false,
+        "member-ordering": {
+            "options": {
+                "order": "statics-first"
+            }
+        },
         "no-console": {
-            "options": ["log"]
+            "options": [
+                "log"
+            ]
         },
         "no-switch-case-fall-through": true,
-        "strict-boolean-expressions": [true, "allow-boolean-or-undefined"],
+        "strict-boolean-expressions": {
+            "options": [
+                "allow-boolean-or-undefined"
+            ]
+        },
         "switch-default": false,
-        "variable-name": [
-            true,
-            "ban-keywords",
-            "check-format",
-            "allow-leading-underscore",
-            "allow-pascal-case"
-        ],
+        "variable-name": {
+            "options": [
+                "ban-keywords",
+                "check-format",
+                "allow-leading-underscore",
+                "allow-pascal-case"
+            ]
+        },
         "linebreak-style": false
     }
 }

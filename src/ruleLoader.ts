@@ -79,10 +79,7 @@ export function loadRules(
 
         showWarningOnce(warning);
     }
-    if (rules.length === 0) {
-        const fileType = isJs ? "JavaScript" : "TypeScript";
-        showWarningOnce(`No valid rules have been specified for ${fileType} files`);
-    }
+
     return rules;
 }
 

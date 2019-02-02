@@ -19,6 +19,7 @@ import { assert } from "chai";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("Checkstyle Formatter", () => {

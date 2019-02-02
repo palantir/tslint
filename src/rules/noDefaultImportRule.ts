@@ -17,6 +17,7 @@
 
 import { isImportDeclaration, isNamedImports, isStringLiteral } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const fromModulesConfigOptionName = "fromModules";

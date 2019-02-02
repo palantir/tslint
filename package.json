@@ -1,6 +1,6 @@
 {
     "name": "tslint",
-    "version": "5.12.0",
+    "version": "5.12.1",
     "description": "An extensible static analysis linter for the TypeScript language",
     "bin": {
         "tslint": "./bin/tslint"
@@ -17,11 +17,8 @@
         "compile:scripts": "tsc -p scripts",
         "compile:test": "tsc -p test",
         "lint": "npm-run-all -p lint:global lint:from-bin",
-        "lint:global": "tslint --project test/tsconfig.json --format stylish",
-        "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format stylish",
-        "precommit": "npm-run-all precommit:prettier",
-        "precommit:prettier": "pretty-quick --staged",
-        "prettier": "prettier --write './**/*.{js,ts,css,scss,md,yml}' --ignore-path ./.prettierignore",
+        "lint:global": "tslint --project test/tsconfig.json --format codeFrame",
+        "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format codeFrame",
         "publish:local": "./scripts/npmPublish.sh",
         "test": "npm-run-all test:pre -p test:mocha test:rules",
         "test:pre": "cd ./test/config && npm install --no-save",
@@ -67,11 +64,11 @@
         "npm-run-all": "^4.0.2",
         "nyc": "^10.2.0",
         "prettier": "1.14.3",
-        "pretty-quick": "^1.6.0",
         "rimraf": "^2.5.4",
         "ts-node": "^3.3.0",
-        "tslint": "^5.12.0",
-        "tslint-config-prettier": "^1.13.0",
+        "tslint": "~5.12.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.1",
         "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
         "typescript": "~3.1.6"
     },

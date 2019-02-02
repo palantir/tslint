@@ -27,7 +27,8 @@ import {
     parseConfigFile,
     RawConfigFile,
 } from "../src/configuration";
-import { IOptions, RuleSeverity } from "./../src/language/rule/rule";
+import { IOptions, RuleSeverity } from "../src/language/rule/rule";
+
 import { createTempFile } from "./utils";
 
 describe("Configuration", () => {

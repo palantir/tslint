@@ -47,7 +47,7 @@
             "stopOnEntry": false,
             "args": ["run", "test"],
             "cwd": "${workspaceRoot}",
-            "preLaunchTask": "tsc",
+            "preLaunchTask": "compile_tests",
             "runtimeExecutable": null,
             "runtimeArgs": ["--nolazy"],
             "env": {

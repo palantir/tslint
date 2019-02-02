@@ -1,5 +1,22 @@
 # Change Log
 
+## v5.12.1
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] Revert breaking change to tslint:recommended, update tslint:latest (#4404)
+- [bugfix] Correcting fixer for the [`increment-decrement`](https://palantir.github.io/tslint/rules/increment-decrement/) rule (#4415)
+- [bugfix] Fix [`strict-type-predicates`](https://palantir.github.io/tslint/rules/strict-type-predicates/) with `unknown` (#4444)
+- [bugfix] Skip linting of `.json` files to avoid problems with `--resolveJsonModule` compiler option (#4001)
+- [bugfix] fix some [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) issues when using backticks with the `avoid-template` option (#4408)
+- [enhancement] Mention file names in test script parse failures (#4397)
+
+Thanks to our contributors!
+- Young Min Kim
+- Enes SOYLU
+- Thomas den Hollander
+- Adrian Leonhard
+
 ## v5.12.0
 
 ## :tada: Features

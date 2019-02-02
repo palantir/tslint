@@ -17,7 +17,9 @@
 
 import { isBlock, isIfStatement, isIterationStatement, isSameLine } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/curly.examples";
 
 const OPTION_AS_NEEDED = "as-needed";

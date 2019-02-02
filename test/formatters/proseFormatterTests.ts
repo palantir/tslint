@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import { dedent } from "../../src/utils";
 import { IFormatter, RuleFailure, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("Prose Formatter", () => {

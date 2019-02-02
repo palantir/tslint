@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import { showWarningOnce } from "../../error";
+
 import { AbstractRule } from "./abstractRule";
 import { ITypedRule, RuleFailure } from "./rule";
 

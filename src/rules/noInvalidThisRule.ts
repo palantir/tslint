@@ -17,6 +17,7 @@
 
 import { isThisParameter } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 const OPTION_FUNCTION_IN_METHOD = "check-function-in-method";

@@ -17,6 +17,7 @@
 
 import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_UNION = "allow-null-union";
