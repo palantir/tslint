@@ -22,6 +22,7 @@ import {
     isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -53,11 +54,7 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
             if (
                 isCallExpression(node) &&
                 isPropertyAccessExpression(node.expression) &&
-                isSameLine(
-                    sourceFile,
-                    node.expression.expression.end,
-                    node.expression.name.pos,
-                ) &&
+                isSameLine(sourceFile, node.expression.expression.end, node.expression.name.pos) &&
                 hasChildCall(node.expression)
             ) {
                 this.addFailure(
@@ -74,10 +71,7 @@ class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
 
 function hasChildCall(node: ts.PropertyAccessExpression): boolean {
     let { expression } = node;
-    while (
-        isPropertyAccessExpression(expression) ||
-        isElementAccessExpression(expression)
-    ) {
+    while (isPropertyAccessExpression(expression) || isElementAccessExpression(expression)) {
         ({ expression } = expression);
     }
     return expression.kind === ts.SyntaxKind.CallExpression;

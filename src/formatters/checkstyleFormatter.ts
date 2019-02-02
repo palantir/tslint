@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "checkstyle",
-        description: "Formats errors as through they were Checkstyle output.",
+        description: "Formats errors as though they were Checkstyle output.",
         descriptionDetails: Utils.dedent`
             Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.`,
         sample: Utils.dedent`
@@ -43,8 +42,9 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
 
         if (failures.length !== 0) {
-            const failuresSorted = failures.sort(
-                (a, b) => a.getFileName().localeCompare(b.getFileName()));
+            const failuresSorted = failures.sort((a, b) =>
+                a.getFileName().localeCompare(b.getFileName()),
+            );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const severity = failure.getRuleSeverity();
@@ -55,8 +55,10 @@ export class Formatter extends AbstractFormatter {
                     previousFilename = failure.getFileName();
                     output += `<file name="${this.escapeXml(failure.getFileName())}">`;
                 }
-                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line + 1}" `;
-                output += `column="${failure.getStartPosition().getLineAndCharacter().character + 1}" `;
+                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line +
+                    1}" `;
+                output += `column="${failure.getStartPosition().getLineAndCharacter().character +
+                    1}" `;
                 output += `severity="${severity}" `;
                 output += `message="${this.escapeXml(failure.getFailure())}" `;
                 // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>

@@ -17,6 +17,7 @@
 
 import { hasModifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
@@ -80,7 +81,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
+    public static FAILURE_STRING =
+        "Avoid referencing unbound methods which may cause unintentional scoping of 'this'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(
@@ -118,7 +120,7 @@ function isMethod(node: ts.Node, ignoreStatic: boolean): boolean {
 }
 
 function isSafeUse(node: ts.Node): boolean {
-    const parent = node.parent!;
+    const parent = node.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.CallExpression:
             return (parent as ts.CallExpression).expression === node;

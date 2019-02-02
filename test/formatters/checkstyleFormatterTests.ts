@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import { assert } from "chai";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("Checkstyle Formatter", () => {
@@ -41,15 +42,46 @@ describe("Checkstyle Formatter", () => {
 
         const failures = [
             createFailure(sourceFile1, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile1, 2, 3, "&<>'\" should be escaped", "escape", undefined, "error"),
-            createFailure(sourceFile1, maxPosition1 - 1, maxPosition1, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile1,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error",
+            ),
+            createFailure(
+                sourceFile1,
+                maxPosition1 - 1,
+                maxPosition1,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
             createFailure(sourceFile2, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile2, 2, 3, "&<>'\" should be escaped", "escape", undefined, "warning"),
-            createFailure(sourceFile2, maxPosition2 - 1, maxPosition2, "last failure", "last-name", undefined, "warning"),
+            createFailure(
+                sourceFile2,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "warning",
+            ),
+            createFailure(
+                sourceFile2,
+                maxPosition2 - 1,
+                maxPosition2,
+                "last failure",
+                "last-name",
+                undefined,
+                "warning",
+            ),
         ];
         // tslint:disable max-line-length
-        const expectedResult =
-            `<?xml version="1.0" encoding="utf-8"?>
+        const expectedResult = `<?xml version="1.0" encoding="utf-8"?>
             <checkstyle version="4.3">
             <file name="${TEST_FILE_1}">
                 <error line="1" column="1" severity="error" message="first failure" source="failure.tslint.first-name" />
@@ -68,6 +100,9 @@ describe("Checkstyle Formatter", () => {
 
     it("handles no failures", () => {
         const result = formatter.format([]);
-        assert.deepEqual(result, '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3"></checkstyle>');
+        assert.deepEqual(
+            result,
+            '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3"></checkstyle>',
+        );
     });
 });

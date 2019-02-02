@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noAny.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -46,7 +47,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.";
+    public static FAILURE_STRING =
+        "Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);

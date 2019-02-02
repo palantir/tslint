@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
@@ -36,23 +37,23 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: [
                 {
-                    type: "string"
+                    type: "string",
                 },
                 {
-                    type: "string"
+                    type: "string",
                 },
                 {
-                    type: "string"
-                }
+                    type: "string",
+                },
             ],
             additionalItems: false,
             minLength: 1,
-            maxLength: 3
+            maxLength: 3,
         },
         optionExamples: [[true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE]],
         hasFix: true,
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -70,7 +71,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
         // returns the text of the first comment or undefined
         const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) =>
-            text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2)
+            text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2),
         );
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
@@ -89,8 +90,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                               sourceFile,
                               textToInsert,
                               leadingNewlines,
-                              trailingNewlines
-                          )
+                              trailingNewlines,
+                          ),
                       )
                     : undefined;
             return [
@@ -100,8 +101,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     offset,
                     Rule.MISSING_HEADER_FAILURE_STRING,
                     this.ruleName,
-                    fix
-                )
+                    fix,
+                ),
             ];
         }
 
@@ -126,8 +127,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     offset,
                     Rule.MISSING_NEW_LINE_FAILURE_STRING,
                     this.ruleName,
-                    fix
-                )
+                    fix,
+                ),
             ];
         }
 
@@ -138,7 +139,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         sourceFile: ts.SourceFile,
         commentText: string,
         leadingNewlines = 1,
-        trailingNewlines = 1
+        trailingNewlines = 1,
     ) {
         const lineEnding = this.generateLineEnding(sourceFile);
         return (
@@ -149,7 +150,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 // but are working in files with \r\n line endings
                 // Trim trailing spaces to play nice with `no-trailing-whitespace` rule
                 ...commentText.split(/\r?\n/g).map(line => ` * ${line}`.replace(/\s+$/, "")),
-                " */"
+                " */",
             ].join(lineEnding) +
             lineEnding.repeat(trailingNewlines)
         );
@@ -163,7 +164,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private doesNewLineEndingViolationExist(text: string, offset: number): boolean {
         const entireComment = ts.forEachLeadingCommentRange(text, offset, (pos, end) =>
-            text.substring(pos, end + 2)
+            text.substring(pos, end + 2),
         );
 
         const NEW_LINE_FOLLOWING_HEADER = /^.*((\r)?\n){2,}$/gm;

@@ -27,7 +27,6 @@ const q = {
 };
 const t = {
   hello: 123,
-  bye-bye: 45,
   nested: {
           ~ [All property names in this object literal must be consistently quoted or unquoted.]
     "bird": 2,

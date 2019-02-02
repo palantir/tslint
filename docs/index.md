@@ -12,7 +12,7 @@ TSLint is an extensible static analysis tool that checks [TypeScript][0] code fo
 # Install the global CLI and its peer dependency
 yarn global add tslint typescript
 
-# Navigate to to your sources folder
+# Navigate to your sources folder
 cd path/to/project
 
 # Generate a basic configuration file

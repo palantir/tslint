@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,21 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "junit",
-        description: "Formats errors as through they were JUnit output.",
+        description: "Formats errors as though they were JUnit output.",
         descriptionDetails: Utils.dedent`
             Imitates the JUnit XML Output`,
         sample: Utils.dedent`
         <?xml version="1.0" encoding="utf-8"?>
         <testsuites package="tslint">
           <testsuite name="myFile.ts">
-            <testcase name="Line 1, Column 14: semicolon">
-              <failure type="warning">Missing semicolon</failure>
+            <testcase name="semicolon" classname="myFile.ts">
+              <failure type="warning">Missing semicolon Line 1, Column 14</failure>
             </testcase>
           </testsuite>
         </testsuites>
@@ -46,8 +45,9 @@ export class Formatter extends AbstractFormatter {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
         if (failures.length !== 0) {
-            const failuresSorted = failures.sort(
-                (a, b) => a.getFileName().localeCompare(b.getFileName()));
+            const failuresSorted = failures.sort((a, b) =>
+                a.getFileName().localeCompare(b.getFileName()),
+            );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
@@ -63,9 +63,12 @@ export class Formatter extends AbstractFormatter {
                     output += `<testsuite name="${this.escapeXml(failure.getFileName())}">`;
                 }
 
-                output += `<testcase name="Line ${lineAndCharacter.line + 1}, `;
-                output += `Column ${lineAndCharacter.character + 1}: ${rule}">`;
-                output += `<failure type="${severity}">${message}</failure>`;
+                output += `<testcase name="${rule}" `;
+                output += `classname="${this.escapeXml(failure.getFileName())}">`;
+                output += `<failure type="${severity}">${message} `;
+                output += `Line ${lineAndCharacter.line + 1}, `;
+                output += `Column ${lineAndCharacter.character + 1}`;
+                output += `</failure>`;
                 output += "</testcase>";
             }
             if (previousFilename !== null) {

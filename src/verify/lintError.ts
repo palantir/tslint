@@ -1,6 +1,6 @@
 /*
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
  */
 
 export interface PositionInFile {
-   line: number;
-   col: number;
+    line: number;
+    col: number;
 }
 
 export interface LintError {
-   startPos: PositionInFile;
-   endPos: PositionInFile;
-   message: string;
+    startPos: PositionInFile;
+    endPos: PositionInFile;
+    message: string;
 }
 
 export function errorComparator(err1: LintError, err2: LintError) {

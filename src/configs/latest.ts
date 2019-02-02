@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,8 @@
 // tslint:disable:object-literal-key-quotes
 export const rules = {
     // added in v5.1
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-            "members",
-        ],
+    align: {
+        options: ["parameters", "statements", "members"],
     },
     "no-invalid-template-strings": true,
     "no-sparse-arrays": true,
@@ -37,21 +33,18 @@ export const rules = {
     "prefer-object-spread": true,
 
     // added in v5.4
-    "no-duplicate-variable": [
-        true,
-        "check-parameters",
-    ],
+    "no-duplicate-variable": { options: "check-parameters" },
 
     // added in v5.5
     "no-this-assignment": true,
 
     // added in v5.6
     "no-duplicate-imports": true,
-    "space-within-parens": [true, 0],
+    "space-within-parens": { options: 0 },
     "no-submodule-imports": true,
 
     // added in v5.7
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",
@@ -66,12 +59,14 @@ export const rules = {
 
     // added in v5.8
     "ban-comma-operator": true,
-    "jsdoc-format": {
-        options: "check-multiline-start",
-    },
+    "jsdoc-format": { options: "check-multiline-start" },
     "no-duplicate-switch-case": true,
     "no-implicit-dependencies": true,
     "no-return-await": true,
+
+    // added in v5.12
+    "function-constructor": true,
+    "unnecessary-bind": true,
 };
 // tslint:enable object-literal-sort-keys
 
