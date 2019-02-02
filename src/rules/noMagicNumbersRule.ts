@@ -23,11 +23,13 @@ import { isNegativeNumberLiteral } from "../language/utils";
 
 interface AllowedNumbersType {
     "allowed-numbers": number[];
-    [key: string]: number[];
 }
 interface IgnoreJsxType {
     "ignore-jsx": boolean;
-    [key: string]: boolean;
+}
+interface ParsedOptionsType {
+    "allowed-numbers": number[];
+    "ignore-jsx"?: boolean;
 }
 type OptionsType = IgnoreJsxType | AllowedNumbersType;
 
@@ -46,8 +48,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             Forcing them to be stored in variables gives them implicit documentation.
         `,
         optionsDescription: Lint.Utils.dedent`
-            \`${IGNORE_JSX_OPTION}\` specifies that jsx attributes with magic numbers should be ignored.
-            \`${ALLOWED_NUMBERS_OPTION}\` is a list of allowed numbers.`,
+            Options may either be a list of numbers to ignore (not consider 'magic'), or an object containing up to two properties:
+            * \`${ALLOWED_NUMBERS_OPTION}\` as the list of numbers to ignore.
+            * \`${IGNORE_JSX_OPTION}\` to specify that 'magic' numbers should be allowed as JSX attributes.`,
         options: {
             type: "array",
             items: {
@@ -104,13 +107,36 @@ export class Rule extends Lint.Rules.AbstractRule {
             new NoMagicNumbersWalker(
                 sourceFile,
                 this.ruleName,
-                this.ruleArguments.length > 0 ? this.ruleArguments : Rule.DEFAULT_ALLOWED,
+                this.ruleArguments.length > 0
+                    ? parseOptions(this.ruleArguments)
+                    : parseOptions(Rule.DEFAULT_ALLOWED),
             ),
         );
     }
 }
 
-class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<OptionsType | number>> {
+function parseOptions(options: Array<OptionsType | number>): ParsedOptionsType {
+    const parsedOptions: ParsedOptionsType = { [ALLOWED_NUMBERS_OPTION]: [] };
+    for (const option of options) {
+        if (typeof option === "number") {
+            parsedOptions[ALLOWED_NUMBERS_OPTION].push(option);
+        }
+        if (option.hasOwnProperty(ALLOWED_NUMBERS_OPTION)) {
+            const numberOptions = (option as AllowedNumbersType)[ALLOWED_NUMBERS_OPTION];
+            if (Array.isArray(numberOptions) && numberOptions.length > 0) {
+                numberOptions.forEach((num: number) =>
+                    parsedOptions[ALLOWED_NUMBERS_OPTION].push(num),
+                );
+            }
+        }
+        if (option.hasOwnProperty(IGNORE_JSX_OPTION)) {
+            parsedOptions[IGNORE_JSX_OPTION] = (option as IgnoreJsxType)[IGNORE_JSX_OPTION];
+        }
+    }
+    return parsedOptions;
+}
+
+class NoMagicNumbersWalker extends Lint.AbstractWalker<ParsedOptionsType | number[]> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (
@@ -136,23 +162,20 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Array<OptionsType | numbe
     }
 
     private isAllowedNumber(num: string): boolean {
-        /* Using Object.is() to differentiate between pos/neg zero */
-        const compareNumbers = (allowedNum: number) => Object.is(allowedNum, parseFloat(num));
-        return this.options.some(option => {
-            if (typeof option === "number") {
-                return compareNumbers(option);
-            }
-            if (option.hasOwnProperty(ALLOWED_NUMBERS_OPTION)) {
-                return (option as AllowedNumbersType)[ALLOWED_NUMBERS_OPTION].some(compareNumbers);
-            }
-            return false;
-        });
+        const numberOptions = (this.options as ParsedOptionsType)[ALLOWED_NUMBERS_OPTION];
+        if (numberOptions.length > 0) {
+            return numberOptions.some((allowedNum: number) =>
+                /* Using Object.is() to differentiate between pos/neg zero */
+                Object.is(allowedNum, parseFloat(num)),
+            );
+        }
+        return false;
     }
 
     private checkNumericLiteral(node: ts.Node, num: string) {
         const shouldIgnoreJsxExpression =
             node.parent.kind === ts.SyntaxKind.JsxExpression &&
-            this.options.some(option => (option as IgnoreJsxType)[IGNORE_JSX_OPTION]);
+            (this.options as ParsedOptionsType)[IGNORE_JSX_OPTION];
 
         if (
             !Rule.ALLOWED_NODES.has(node.parent.kind) &&

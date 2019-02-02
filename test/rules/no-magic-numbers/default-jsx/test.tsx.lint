@@ -6,4 +6,3 @@ class App extends React.Component {
                                               ~~~       ['magic numbers' are not allowed: 200]
     }
 }
-
