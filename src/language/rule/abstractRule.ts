@@ -25,9 +25,9 @@ export type NoInfer<T> = T & { [K in keyof T]: T[K] };
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
+    public ruleName: string;
     protected readonly ruleArguments: any[];
     protected readonly ruleSeverity: RuleSeverity;
-    public ruleName: string;
 
     constructor(private readonly options: IOptions) {
         this.ruleName = options.ruleName;
