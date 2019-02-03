@@ -233,7 +233,7 @@ function isWhitelisted(node: ts.Node, whitelist: Set<string>, allowTypeof: boole
     }
     if (isCallExpression(node.parent) && isIdentifier(node.parent.expression)) {
         const expression = node.parent.expression;
-        const callingMethodName = expression.text as string;
+        const callingMethodName = expression.text;
         return whitelist.has(callingMethodName);
     }
     return false;
