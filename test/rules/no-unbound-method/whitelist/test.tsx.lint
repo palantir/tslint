@@ -62,6 +62,11 @@ class Validators {
 Validators.compose(Validators.required);
                    ~~~~~~~~~~~~~~~~~~~ [0]
 
-
+(condition ? expectA : expectB)(c.method);
+                                ~~~~~~~~ [0]
+(await someObject)(c.method);
+                   ~~~~~~~~ [0]
+(await someMethod())(c.method);
+                     ~~~~~~~~ [0]
 
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.

@@ -18,6 +18,7 @@
 import {
     hasModifier,
     isCallExpression,
+    isIdentifier,
     isPropertyAccessExpression,
     isTypeOfExpression,
 } from "tsutils";
@@ -230,8 +231,8 @@ function isWhitelisted(node: ts.Node, whitelist: Set<string>, allowTypeof: boole
     if (isTypeOfExpression(node.parent)) {
         return allowTypeof;
     }
-    if (isCallExpression(node.parent)) {
-        const expression = node.parent.expression as ts.Identifier;
+    if (isCallExpression(node.parent) && isIdentifier(node.parent.expression)) {
+        const expression = node.parent.expression;
         const callingMethodName = expression.text as string;
         return whitelist.has(callingMethodName);
     }
