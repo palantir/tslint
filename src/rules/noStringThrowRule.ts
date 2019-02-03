@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import { isThrowStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noStringThrowRule.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -71,7 +72,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isThrowStatement(node)) {
             const { expression } = node;
-            if (isString(expression)) {
+            if (expression !== undefined && isString(expression)) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
                     Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
                     Lint.Replacement.appendText(expression.getEnd(), ")"),

@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows shadowing variable declarations.",
         rationale: Lint.Utils.dedent`
             When a variable in a local scope and a variable in the containing scope have the same name, shadowing occurs.
-            Shadowing makes it impossible to access the variable in the containing scope and 
+            Shadowing makes it impossible to access the variable in the containing scope and
             obscures to what value an identifier actually refers. Compare the following snippets:
 
             \`\`\`
@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             \`\`\`
 
             ESLint has [an equivalent rule](https://eslint.org/docs/rules/no-shadow).
-            For more background information, refer to 
+            For more background information, refer to
             [this MDN closure doc](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping).
         `,
         optionsDescription: Lint.Utils.dedent`
@@ -297,9 +297,9 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.Parameter:
                     if (
-                        node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                        node.parent.kind !== ts.SyntaxKind.IndexSignature &&
                         !isThisParameter(node as ts.ParameterDeclaration) &&
-                        isFunctionWithBody(node.parent!)
+                        isFunctionWithBody(node.parent)
                     ) {
                         this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
@@ -307,7 +307,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ModuleDeclaration:
                     if (
                         this.options.namespace &&
-                        node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
+                        node.parent.kind !== ts.SyntaxKind.ModuleDeclaration &&
                         (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
                         !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
                     ) {

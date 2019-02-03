@@ -17,6 +17,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+
 import { FormatterConstructor } from "./index";
 import { camelize, tryResolvePackage } from "./utils";
 

@@ -17,6 +17,7 @@
 
 import { hasModifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_IGNORE_STATIC = "ignore-static";
@@ -119,7 +120,7 @@ function isMethod(node: ts.Node, ignoreStatic: boolean): boolean {
 }
 
 function isSafeUse(node: ts.Node): boolean {
-    const parent = node.parent!;
+    const parent = node.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.CallExpression:
             return (parent as ts.CallExpression).expression === node;

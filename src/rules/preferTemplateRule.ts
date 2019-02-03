@@ -19,6 +19,7 @@ import { isBinaryExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/preferTemplate.examples";
 
 const OPTION_SINGLE_CONCAT = "allow-single-concat";

@@ -79,7 +79,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (
             node.kind === ts.SyntaxKind.Block &&
             (node as ts.Block).statements.length === 0 &&
-            !isExcluded(node.parent!, ctx.options)
+            !isExcluded(node.parent, ctx.options)
         ) {
             const start = node.getStart(ctx.sourceFile);
             // Block always starts with open brace. Adding 1 to its start gives us the end of the brace,

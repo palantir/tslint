@@ -1,5 +1,167 @@
 # Change Log
 
+## v5.12.1
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+- [bugfix] Revert breaking change to tslint:recommended, update tslint:latest (#4404)
+- [bugfix] Correcting fixer for the [`increment-decrement`](https://palantir.github.io/tslint/rules/increment-decrement/) rule (#4415)
+- [bugfix] Fix [`strict-type-predicates`](https://palantir.github.io/tslint/rules/strict-type-predicates/) with `unknown` (#4444)
+- [bugfix] Skip linting of `.json` files to avoid problems with `--resolveJsonModule` compiler option (#4001)
+- [bugfix] fix some [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) issues when using backticks with the `avoid-template` option (#4408)
+- [enhancement] Mention file names in test script parse failures (#4397)
+
+Thanks to our contributors!
+- Young Min Kim
+- Enes SOYLU
+- Thomas den Hollander
+- Adrian Leonhard
+
+## v5.12.0
+
+## :tada: Features
+
+-   [feature] Configure format from file (#4155)
+-   [feature] Make cli expect array for rules dir (#3788)
+-   [feature] Set js rules to all valid active rules (#3641)
+-   [improvement] Add tests for typescript@2.9 and typescript@3.0 (#4053)
+-   [new-fixer][`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/) (#3964)
+-   [new-rule-option][`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) Add whitespace rule for open braces (#4068)
+-   [new-rule-option][`file-name-casing`](https://palantir.github.io/tslint/rules/file-name-casing/): Add file name whitelist (#4206)
+-   [new-rule-option][`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): `locale-compare` (#4193)
+-   [new-rule-option][`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) adds `allow-enum` to allow using enums in boolean expressions (#3604)
+-   [new-rule-option][`import-blacklist`](https://palantir.github.io/tslint/rules/import-blacklist/): support blacklisting specific named exports (#3926)
+-   [new-rule-option][`type-literal-delimiter`](https://palantir.github.io/tslint/rules/type-literal-delimiter/): Add `{ singleLine: "always" | "never"}` (#3964)
+-   [new-rule-option][`file-name-casing`](https://palantir.github.io/tslint/rules/file-name-casing/): Add `snake-case` option (#4081)
+-   [new-rule-option][`file-header`](https://palantir.github.io/tslint/rules/file-header/): Enforce Blank Line after File Header (#3740)
+-   [new-rule][`ban-ts-ignore`](https://palantir.github.io/tslint/rules/ban-ts-ignore/) (#3728)
+-   [new-rule][`function-constructor`](https://palantir.github.io/tslint/rules/function-constructor/) (#4198)
+-   [new-rule][`increment-decrement`](https://palantir.github.io/tslint/rules/increment-decrement/) (#3575)
+-   [new-rule][`no-default-import`](https://palantir.github.io/tslint/rules/no-default-import/) (#4023)
+-   [new-rule][`unnecessary-constructor`](https://palantir.github.io/tslint/rules/unnecessary-constructor/) (#3647)
+-   [new-rule][`comment-type`](https://palantir.github.io/tslint/rules/comment-type/) (#4008)
+-   [new-rule][`unnecessary-bind`](https://palantir.github.io/tslint/rules/unnecessary-bind/) (#3588)
+
+## :hammer_and_wrench: Bugfixes & enhancements
+
+-   [api] Allow `exclude` to work with node API (#4143)
+-   [api] Upgrade TSLint to support TS 3.1 (#4274)
+-   [bugfix] Allow whitelisted modules to start with `@` symbol (#4192)
+-   [bugfix] Added exception for generators in [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/) rule (#4370)
+-   [bugfix] Allow unknown in 'no-object-literal-type-assertion' rule. (#4362)
+-   [bugfix] Completed docs rule can check single-line comments (#3841)
+-   [bugfix][`prefer-method-signature`](https://palantir.github.io/tslint/rules/prefer-method-signature/): Correct the auto-fix code of rule, now capable to handle multiline signature. (#4066)
+-   [bugfix] Default logger.error should log to stderr. (#3982)
+-   [bugfix] Fixes an issue where TSLint doesn't correctly resolve packages in a `node_modules` folder that are symlinked to another location where their dependencies are satisfied. (#4295)
+-   [bugfix] Fix configuration tests when comparing rules (#4346)
+-   [bugfix] Fix semicolon: Cannot read property 'initializer' of undefined (#4351)
+-   [bugfix] Fix whitespace rule in importClause with 'as' statement (#4249)
+-   [bugfix][`no-invalid-this`](https://palantir.github.io/tslint/rules/no-invalid-this/): fixes false positives on method-like syntax and false negatives on nested functions (#4034)
+-   [bugfix][`one-line`](https://palantir.github.io/tslint/rules/one-line/): Check block in a case clause (#3619)
+-   [bugfix][`whitespace`](https://palantir.github.io/tslint/rules/whitespace/) Don't require space between import and paren with in type imports (#4243)
+-   [bugfix] remove [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) from `tslint:all` (#4079)
+-   [bugfix][`callable-types`](https://palantir.github.io/tslint/rules/callable-types/) support interfaces containing a single construct signature (#4291) (#4352)
+-   [bugfix][`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/): Setting `import-sources-order: any` no longer invalidates `grouped-imports: true` (#4374)
+-   [develop] Add issue templates (#4028)
+-   [develop] Add test for 3.0 (#4119)
+-   [develop] Changes the node version from 4 to 6 for TS 2.1 tests. (#4282)
+-   [develop] Fix prettier command in package.json (#4275)
+-   [develop] Fix semantic merge break from #4374 and #3733 (#4378)
+-   [develop] Fix typo in launch.json (#4287)
+-   [develop] Prettier (#4012)
+-   [develop] Re-ran Prettier on source files again, with some more ignores (#4270)
+-   [develop] Update 'json-stringify-pretty-compact' to 1.2.0 and remove unnecessary type declaration (#4371)
+-   [develop] Upgrade prettier and run over all files (#4214)
+-   [docs] "< 0" means less than zero, not greater than (#4183)
+-   [docs] Added badges for dependencies status (#4160)
+-   [docs] Additional code examples for rules (#3869)
+-   [docs] Clarify no-shadowed-variable doc (#4347)
+-   [docs] Fix docs typo (#4165)
+-   [docs] Fix docs typo (#4182)
+-   [docs] Fix typo in index.md (#4242)
+-   [docs] Fix typos in formatter descriptions (#4288)
+-   [docs] Fixed typo in documentation (#4047)
+-   [docs] Includes new name Azure DevOps for VSO (#4289)
+-   [docs] Typo correction in no-unused-expression (#4322)
+-   [docs] Update documentation to reflect changes made in #2229. (#4336)
+-   [docs] Update stylish example (#4095)
+-   [docs] Use latest docs deps to avoid vulnerable libs (#4366)
+-   [docs] prefer-object-spread: this is new to ES2018, not ES2015 (#4321)
+-   [documentation] Update configuration documentation to include array syntax (#4258)
+-   [enhancement] Add `homepage` to package.json (#4101)
+-   [enhancement] Add esSpecCompliant: true to recommended trailing-comma config (#4072)
+-   [enhancement] Add new tests to workflows (#4054)
+-   [enhancement] Add quiet flag to hide warnings (#4025)
+-   [enhancement] Don't flag unmatched ${ in no-invalid-template-strings (#3769)
+-   [enhancement] Show offending value in 'no-magic-numbers' error message (#4332)
+-   [enhancement][`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/): When `grouped-imports` option of the rule is set, the fact that imports of the same type are all in one group is also checked. (#3733)
+-   [enhancement] Yaml parser now uses default schema, allowing for `<<:` to be used to merge anchors (#4350)
+-   [enhancement] Improve JUnit formatter (#4327)
+-   [enhancement] completed-docs: check properties and methods in interfaces (#4032)
+-   [enhancement] file-name-casing-rule supports regex expression for matching file (#4284)
+-   [enhancement] prose formatter uses `line:column` instead of `[line, column]` (#4222)
+-   [rule-change] Add "backtick" option for quotemark (#4029)
+-   [rule-change] Allow void expressions in binary expressions (#4323)
+
+Thanks to our contributors!
+
+-   Shinigami
+-   Matthew Herbst
+-   Joshua R
+-   John Wiseheart
+-   Mitchell Wills
+-   Eric Ferreira
+-   Daniel Reichhart
+-   Rui
+-   Pavel Birukov
+-   Brian Schlenker
+-   Michael Black
+-   Andy Hanson
+-   atsu85
+-   PomanoB
+-   Oleg Vaskevich
+-   Daniel McNab
+-   Jan Pilzer
+-   Sebastian Silbermann
+-   Michael Lavina
+-   reduckted
+-   Ryan Waskiewicz
+-   Bowen Ni
+-   Josh Goldberg
+-   Erik
+-   Nathan
+-   Kevin Verdieck
+-   Joe Chung
+-   Peter Safranek
+-   Xavier Downs
+-   Igor Ovsiannikov
+-   RyosukeFukushima
+-   Andrew Boyton
+-   samuela
+-   stefanhamburger
+-   Carsten Dietzel
+-   Jakob Warkotsch
+-   Karthick Manoharan
+-   Ian Clanton-Thuon
+-   Yordis Prieto
+-   Mike Frysinger
+-   Dario Banfi
+-   Gérôme Grignon
+-   Antony74
+-   Morgan Zolob
+-   Young Min Kim
+-   rrogowski
+-   Eric Anderson
+-   Simon Marchi
+-   ulrichb
+-   Marvin Altemeier
+-   Ifiok Jr
+-   Andrew MacLeay
+-   Ethan
+-   Dan Homola
+-   NN
+-   Roman Rogowski
+
 ## v5.11.0
 
 ## :warning: Deprecations

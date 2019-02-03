@@ -92,7 +92,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function createFix(node: ts.CallExpression, sourceFile: ts.SourceFile): Lint.Fix {
     const args = node.arguments;
-    const objectNeedsParens = node.parent!.kind === ts.SyntaxKind.ArrowFunction;
+    const objectNeedsParens = node.parent.kind === ts.SyntaxKind.ArrowFunction;
     const fix = [
         Lint.Replacement.replaceFromTo(
             node.getStart(sourceFile),

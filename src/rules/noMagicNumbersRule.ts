@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
+import { isCallExpression, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 
-import { isCallExpression, isIdentifier } from "tsutils";
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
 
@@ -104,7 +104,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<number[]> {
     private checkNumericLiteral(node: ts.Node, num: string) {
         /* Using Object.is() to differentiate between pos/neg zero */
         if (
-            !Rule.ALLOWED_NODES.has(node.parent!.kind) &&
+            !Rule.ALLOWED_NODES.has(node.parent.kind) &&
             !this.options.some(allowedNum => Object.is(allowedNum, parseFloat(num)))
         ) {
             this.addFailureAtNode(node, Rule.FAILURE_STRING(num));
