@@ -120,14 +120,17 @@ function parseOptions(options: Array<OptionsType | number>): ParsedOptionsType {
     for (const option of options) {
         if (typeof option === "number") {
             parsedOptions[ALLOWED_NUMBERS_OPTION].push(option);
-        } else if (option.hasOwnProperty(ALLOWED_NUMBERS_OPTION)) {
+            continue;
+        }
+        if (option.hasOwnProperty(ALLOWED_NUMBERS_OPTION)) {
             const numberOptions = (option as AllowedNumbersType)[ALLOWED_NUMBERS_OPTION];
             if (Array.isArray(numberOptions) && numberOptions.length > 0) {
                 numberOptions.forEach((num: number) =>
                     parsedOptions[ALLOWED_NUMBERS_OPTION].push(num),
                 );
             }
-        } else if (option.hasOwnProperty(IGNORE_JSX_OPTION)) {
+        }
+        if (option.hasOwnProperty(IGNORE_JSX_OPTION)) {
             parsedOptions[IGNORE_JSX_OPTION] = (option as IgnoreJsxType)[IGNORE_JSX_OPTION];
         }
     }
