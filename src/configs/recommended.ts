@@ -91,6 +91,7 @@ export const rules = {
     "no-string-throw": true,
     "no-switch-case-fall-through": false,
     "no-trailing-whitespace": true,
+    "no-unnecessary-else": true,
     "no-unnecessary-initializer": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,

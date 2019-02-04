@@ -1,0 +1,107 @@
+const testReturn = () => {
+    if () {
+       return;
+       ~~~~~~~  [return]
+    } else {
+       return;
+    }
+}
+
+//valid
+const testReturn = () => {
+    if () {
+       return;
+    }
+    return;
+}
+
+const testReturn = () => {
+    if () {
+       return;
+       ~~~~~~~  [return]
+    } else if {
+        if () {
+            return ;
+        } else {
+            return ;
+        }
+    }
+    return;
+}
+
+const testReturn = () => {
+    if () {
+       return;
+    }
+    if () {
+        return ;
+        ~~~~~~~~  [return]
+    } else {
+        return ;
+    }
+}
+
+//valid
+const testReturn = () => {
+    if () {
+       return;
+    }
+    if () {
+        return ;
+    }
+    return ;
+}
+
+function testThrow () {
+   if () {
+       throw "error";
+       ~~~~~~~~~~~~~~  [throw]
+   } else {
+   }
+}
+
+//valid
+function testThrow () {
+   if () {
+       throw "error";
+   }
+}
+
+function testContinue () {
+    for ( ) { 
+        if () {
+            continue ;
+            ~~~~~~~~~~  [continue]
+        } else {
+        }
+    }
+}
+
+//valid
+function testContinue () {
+    for ( ) { 
+        if () {
+            continue ;
+        }
+    }
+}
+
+function testBreak () {
+   if () {
+       break ;
+       ~~~~~~~  [break]
+   } else {
+   }
+}
+
+//valid
+function testBreak () {
+   if () {
+       break ;
+   }
+}
+
+[return]: If block contains `return` statement. Consider replacing the contents of else block outside of the block.
+[throw]: If block contains `throw` statement. Consider replacing the contents of else block outside of the block.
+[break]: If block contains `break` statement. Consider replacing the contents of else block outside of the block.
+[continue]: If block contains `continue` statement. Consider replacing the contents of else block outside of the block.
