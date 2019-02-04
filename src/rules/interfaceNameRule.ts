@@ -19,7 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isLowerCase } from "../utils";
+import { isLowerCase, isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -74,10 +74,5 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    return name.length >= 2 && name[0] === "I" && !isLowerCase(name[1]) && !isSpecialCase(name);
-}
-
-function isSpecialCase(name: string): boolean {
-    // Allow IndexedDB
-    return name.startsWith("IDB");
+    return name.length >= 3 && name[0] === "I" && !isLowerCase(name[1]) && !isUpperCase(name[2]);
 }
