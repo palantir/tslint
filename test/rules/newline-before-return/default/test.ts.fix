@@ -2,15 +2,15 @@ function foo(bar) {
     if (!bar) {
         return;
     }
+
     return bar;
-    ~nil  [0]
 }
 
 function foo(bar) {
     if (!bar) {
         var statement = '';
+
         return statement;
-        ~nil  [0]
     }
 
     return bar;
@@ -20,8 +20,8 @@ function foo(bar) {
     if (!bar) {
         return;
     }
+
     /* multi-line
-    ~nil  [0]
     comment */
     return bar;
 }
@@ -29,23 +29,26 @@ function foo(bar) {
 var fn = () => null;
 function foo() {
     fn();
+
     return;
-    ~nil  [0]
 }
 
 function foo(fn) {
-    fn(); return;
-          ~nil [0]
+    fn();
+
+    return;
 }
 
 function foo(fn) {
-    fn();   return;
-            ~nil [0]
+    fn();
+
+    return;
 }
 
 function foo(fn) {
-    fn();          return;
-                   ~nil [0]
+    fn();
+
+    return;
 }
 
 function foo() {
@@ -114,11 +117,10 @@ function foo() {
 
 function bar() {
     "some statement";
+
     //comment
-    ~nil [0]
     //comment
     //comment
     return;
 }
 
-[0]: Missing blank line before return
