@@ -101,10 +101,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
         const [num, exp = ""] = text.split(/e/i);
         const [integer, float = ""] = num.split(".");
-        const match = /(\.)([1-9]*)(0+)/.exec(num);
-        const [dot = "", numbers = "", zeroes = ""] = Array.isArray(match) ? match.slice(1) : [];
+        const matchedNumeric = /(\.)([1-9]*)(0+)/.exec(num);
+        const [dot = "", numbers = "", zeroes = ""] = Array.isArray(matchedNumeric) ? matchedNumeric.slice(1) : [];
 
-        if (exp !== undefined && (exp.startsWith("-0") || exp.startsWith("0"))) {
+        if (exp.startsWith("-0") || exp.startsWith("0")) {
             const expStart = start + num.length + 1; // position of exp part
             const expNumberStart = /\D/.test(exp.charAt(0)) ? expStart + 1 : expStart; // do not remove "-" or "+"
             ctx.addFailureAt(
@@ -120,7 +120,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
         if (!num.includes(".")) {
             return;
-        } else if (num.startsWith(".")) {
+        }
+
+        if (num.startsWith(".")) {
             // .1 -> 0.1
             fail(Rule.FAILURE_STRING_LEADING_DECIMAL, Lint.Replacement.appendText(start, "0"));
         } else if (num.endsWith(".")) {
