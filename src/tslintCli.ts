@@ -280,8 +280,7 @@ if (argv.typeCheck) {
 let outputStream: NodeJS.WritableStream = process.stdout;
 
 if (argv.out !== undefined) {
-    const targetDir = path.dirname(argv.out);
-    mkdirp.sync(targetDir, { mode: 420 });
+    mkdirp.sync(path.dirname(argv.out), { mode: 420 });
     outputStream = fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
 }
 
