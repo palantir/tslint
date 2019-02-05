@@ -102,7 +102,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
         const [num, exp = ""] = text.split(/e/i);
         const [integer, float = ""] = num.split(".");
         const matchedNumeric = /(\.)([1-9]*)(0+)/.exec(num);
-        const [dot = "", numbers = "", zeroes = ""] = Array.isArray(matchedNumeric) ? matchedNumeric.slice(1) : [];
+        const [dot = "", numbers = "", zeroes = ""] = Array.isArray(matchedNumeric)
+            ? matchedNumeric.slice(1)
+            : [];
 
         if (exp.startsWith("-0") || exp.startsWith("0")) {
             const expStart = start + num.length + 1; // position of exp part
