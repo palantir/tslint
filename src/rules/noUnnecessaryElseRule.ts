@@ -19,22 +19,24 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
+    /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
             Disallows else block when the If block contains control flow statements, such as \`return\`, \`continue\`,
-            \`break\` and \`throws\`.`,
+            \`break\` or \`throw\`.`,
         descriptionDetails: "",
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
         rationale: Lint.Utils.dedent`
             When control flow statements,
-            such as \`return\`, \`continue\`, \`break\` and \`throws\` are written inside \`if\` block,
+            such as \`return\`, \`continue\`, \`break\` or \`throw\` is written inside \`if\` block,
             Then \`else\` block becomes unnecessary.`,
         ruleName: "no-unnecessary-else",
         type: "functionality",
         typescriptOnly: false,
     };
+    /* tslint:disable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string): string {
         return `If block contains \`${name}\` statement. Consider replacing the contents of else block outside of the block.`;

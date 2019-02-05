@@ -7,6 +7,17 @@ const testReturn = () => {
     }
 }
 
+const testReturn = () => {
+    if () {
+        if () {
+        return;
+        ~~~~~~~  [return]
+        } else {
+            return;
+        }
+    }
+}
+
 //valid
 const testReturn = () => {
     if () {
@@ -60,6 +71,22 @@ function testThrow () {
    }
 }
 
+const testThrow = () => {
+    switch () {
+        case :
+            break;
+        case :
+            if () {
+                throw "error";
+                ~~~~~~~~~~~~~~  [throw]
+            } else {
+                break;
+            }
+        default :
+            break;
+    }
+}
+
 //valid
 function testThrow () {
    if () {
@@ -92,6 +119,22 @@ function testBreak () {
        ~~~~~~~  [break]
    } else {
    }
+}
+
+const testBreak = () => {
+    switch () {
+        case :
+            break;
+        case :
+            if () {
+                break;
+                ~~~~~~  [break]
+            } else {
+
+            }
+        default :
+            break;
+    }
 }
 
 //valid
