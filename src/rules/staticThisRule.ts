@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { codeExamples } from "./code-examples/staticThis.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,8 +30,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionsDescription: "",
         optionExamples: [true],
+        /* tslint:disable:max-line-length */
+        rationale: Lint.Utils.dedent`
+            Static \`this\` usage can be confusing for newcomers.
+            It can also become imprecise when used with extended classes when a static \`this\` of a parent class no longer specifically refers to the parent class.
+        `,
+        /* tslint:enable:max-line-length */
         type: "functionality",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
