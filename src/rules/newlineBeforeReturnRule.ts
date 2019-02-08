@@ -19,6 +19,7 @@ import { getPreviousStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { newLineWithIndentation } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -26,6 +27,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "newline-before-return",
         description: "Enforces blank line before return when not the only line in the block.",
         rationale: "Helps maintain a readable style in your codebase.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: {},
         optionExamples: [true],
@@ -78,10 +80,17 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
             }
         }
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
-
         if (prevLine >= line - 1) {
+            const fixer = Lint.Replacement.replaceFromTo(
+                line === prevLine ? node.pos : node.pos + 1,
+                start,
+                line === prevLine
+                    ? newLineWithIndentation(prev, this.sourceFile, 2)
+                    : newLineWithIndentation(prev, this.sourceFile),
+            );
+
             // Previous statement is on the same or previous line
-            this.addFailure(start, start, Rule.FAILURE_STRING);
+            this.addFailure(start, start, Rule.FAILURE_STRING, fixer);
         }
     }
 }
