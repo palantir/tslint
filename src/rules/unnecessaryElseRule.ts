@@ -18,6 +18,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { codeExamples } from "./code-examples/unnecessaryElse.examples";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -34,11 +36,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "unnecessary-else",
         type: "functionality",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:disable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string): string {
-        return `The preceding \`if\` block ends with a \`${name}\` statement. This \`else\` blockis unnecessary.`;
+        return `The preceding \`if\` block ends with a \`${name}\` statement. This \`else\` block is unnecessary.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
