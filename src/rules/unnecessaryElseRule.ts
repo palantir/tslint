@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             When control flow statements,
             such as \`return\`, \`continue\`, \`break\` or \`throw\` is written inside \`if\` block,
             Then \`else\` block becomes unnecessary.`,
-        ruleName: "no-unnecessary-else",
+        ruleName: "unnecessary-else",
         type: "functionality",
         typescriptOnly: false,
     };

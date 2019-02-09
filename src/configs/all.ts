@@ -151,7 +151,7 @@ export const rules = {
     "unnecessary-constructor": true,
     "use-default-type-parameter": true,
     "use-isnan": true,
-    "no-unnecessary-else": true,
+    "unnecessary-else": true,
 
     // Maintainability
 

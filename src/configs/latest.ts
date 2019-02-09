@@ -67,7 +67,7 @@ export const rules = {
     // added in v5.12
     "function-constructor": true,
     "unnecessary-bind": true,
-    "no-unnecessary-else": true,
+    "unnecessary-else": true,
 };
 // tslint:enable object-literal-sort-keys
 

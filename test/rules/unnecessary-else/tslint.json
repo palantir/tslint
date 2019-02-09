@@ -1,0 +1,6 @@
+{
+    "rules": {
+      "unnecessary-else": true
+    }
+  }
+  
