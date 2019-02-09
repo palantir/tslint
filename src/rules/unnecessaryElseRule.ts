@@ -22,16 +22,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
-            Disallows else block when the If block contains control flow statements, such as \`return\`, \`continue\`,
-            \`break\` or \`throw\`.`,
+        Disallows \`else\` blocks following \`if\` blocks ending with a \`break\`, \`continue\`, \`return\`, or \`throw\` statement.`,
         descriptionDetails: "",
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
         rationale: Lint.Utils.dedent`
-            When control flow statements,
-            such as \`return\`, \`continue\`, \`break\` or \`throw\` is written inside \`if\` block,
-            Then \`else\` block becomes unnecessary.`,
+        When an \`if\` block is guaranteed to exit control flow when entered,
+        it is unnecessary to add an \`else\` statement.
+        The contents that would be in the \`else\` block can be placed after the end of the \`if\` block.`,
         ruleName: "unnecessary-else",
         type: "functionality",
         typescriptOnly: false,
@@ -39,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string): string {
-        return `If block contains \`${name}\` statement. Consider replacing the contents of else block outside of the block.`;
+        return `The preceding \`if\` block ends with a \`${name}\` statement. This \`else\` blockis unnecessary.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
