@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -49,44 +50,27 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-type JumpStatement =
-    | ts.BreakStatement
-    | ts.ContinueStatement
-    | ts.ThrowStatement
-    | ts.ReturnStatement;
-
 function walk(ctx: Lint.WalkContext<void>): void {
-    let inElse = false;
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.IfStatement:
-                const { thenStatement, elseStatement } = node as ts.IfStatement;
-                if (elseStatement !== undefined) {
-                    inElse = true;
-                }
-                ts.forEachChild(thenStatement, cb);
-                break;
-
-            case ts.SyntaxKind.BreakStatement:
-            case ts.SyntaxKind.ContinueStatement:
-            case ts.SyntaxKind.ThrowStatement:
-            case ts.SyntaxKind.ReturnStatement:
-                if (inElse) {
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING(printJumpKind(node as JumpStatement)),
-                    );
-                    inElse = false;
-                }
-                break;
-
-            default:
-                return ts.forEachChild(node, cb);
+        if (utils.isIfStatement(node)) {
+            const jumpStatement = getJumpStatement(
+                getLastStatement(node.thenStatement as ts.Block),
+            );
+            if (jumpStatement !== undefined && node.elseStatement !== undefined) {
+                ctx.addFailureAtNode(
+                    node.elseStatement.getChildAt(0),
+                    Rule.FAILURE_STRING(jumpStatement),
+                );
+                ts.forEachChild(node.elseStatement, cb);
+            }
+            ts.forEachChild(node.thenStatement, cb);
+        } else {
+            return ts.forEachChild(node, cb);
         }
     });
 }
 
-function printJumpKind(node: JumpStatement): string {
+function getJumpStatement(node: ts.Statement): string | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.BreakStatement:
             return "break";
@@ -96,5 +80,21 @@ function printJumpKind(node: JumpStatement): string {
             return "throw";
         case ts.SyntaxKind.ReturnStatement:
             return "return";
+        default:
+            return undefined;
     }
+}
+
+function getLastStatement(clause: ts.Block): ts.Statement {
+    const block = clause.statements[0];
+    const statements =
+        clause.statements.length === 1 && utils.isBlock(block)
+            ? block.statements
+            : clause.statements;
+
+    return last(statements);
+}
+
+function last<T>(arr: ReadonlyArray<T>): T {
+    return arr[arr.length - 1];
 }

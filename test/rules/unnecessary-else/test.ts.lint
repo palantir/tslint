@@ -1,83 +1,90 @@
-const testReturn = () => {
-    if () {
-       return;
-       ~~~~~~~  [return]
+const testReturn = (a) => {
+    if (a===0) {
+       return 0;
     } else {
-       return;
+           ~  [return]
+       return a;
     }
 }
 
-const testReturn = () => {
-    if () {
-        if () {
-        return;
-        ~~~~~~~  [return]
+const testReturn = (a) => {
+    if (a>0) {
+        if (a%2 ===0) {
+        return "even" ;
         } else {
-            return;
+               ~  [return]
+            return "odd";
         }
     }
+    return "negative";
 }
 
-const testReturn = () => {
-    if () {
+const testReturn = (a) => {
+    if (a===0) {
+       return 0;
+    }
+    return a;
+}
+
+const testReturn = (a) => {
+    if (a<0) {
        return;
+    } else if (a>0) {
+           ~~  [return]
+        if (a%2 === 0) {
+            return ;
+        } else {
+               ~  [return]
+            return ;
+        }
     }
     return;
 }
 
-const testReturn = () => {
-    if () {
+const testReturn = (a) => {
+    if (a<0) {
        return;
-       ~~~~~~~  [return]
-    } else if {
-        if () {
-            return ;
+    }
+    if (a===1) {
+        return ;
+    } else {
+           ~  [return]
+        return ;
+    }
+}
+
+const testReturn = (a) => {
+    if (a>0) {
+       if (a%3===0) {
+           return;
         } else {
-            return ;
+               ~  [return]
+            console.log(a)
         }
     }
-    return;
-}
-
-const testReturn = () => {
-    if () {
-       return;
-    }
-    if () {
-        return ;
-        ~~~~~~~~  [return]
-    } else {
-        return ;
+    else {
+        console.log("negative");
     }
 }
 
-const testReturn = () => {
-    if () {
-       return;
-    }
-    if () {
-        return ;
-    }
-    return ;
-}
-
-function testThrow () {
-   if () {
+const testThrow = (a) => {
+   if ( a===0 ) {
        throw "error";
-       ~~~~~~~~~~~~~~  [throw]
    } else {
+          ~  [throw]
+        return 100/a;
    }
 }
 
-const testThrow = () => {
-    switch () {
-        case :
+const testThrow = (a) => {
+    switch (a) {
+        case 1:
             break;
-        case :
-            if () {
+        case 2:
+            if (true) {
                 throw "error";
-                ~~~~~~~~~~~~~~  [throw]
             } else {
+                   ~  [throw]
                 break;
             }
         default :
@@ -85,61 +92,88 @@ const testThrow = () => {
     }
 }
 
-function testThrow () {
-   if () {
+const testThrow = (a) => {
+    let i = 1;
+    do  {
+            if (a-i === 0) {
+                throw "error;
+            } else {
+                   ~  [throw]
+                console.log(i/a-i);
+            }
+        ++i;
+    }
+}
+
+const testThrow = (a) => {
+   if (a===0) {
        throw "error";
    }
+   return 100/a;
 }
 
-function testContinue () {
-    for ( ) { 
-        if () {
+const testContinue = () => {
+    for (let i = 1; i < 10; i++) { 
+        if (i===8) {
             continue ;
-            ~~~~~~~~~~  [continue]
         } else {
+               ~ [continue]
+            console.log(i);
         }
     }
 }
 
-function testContinue () {
-    for ( ) { 
-        if () {
+const testContinue = () => {
+    for (let i = 1; i < 10; i++) { 
+        if (i===4) {
             continue ;
         }
+        console.log(i);
     }
 }
 
-function testBreak () {
-   if () {
-       break ;
-       ~~~~~~~  [break]
-   } else {
-   }
+const testBreak = (a) => {
+    let i = 0;
+    while(i < 20) {
+        if (i === a) {
+            break ;
+        } else {
+               ~ [break]
+            i++;
+        }
+    }
+    return i-1;
 }
 
-const testBreak = () => {
-    switch () {
-        case :
-            break;
-        case :
-            if () {
-                break;
-                ~~~~~~  [break]
+const testBreak = (a) => {
+    let i = 0;
+    while(i !== a) {
+        if (i % 2 === 0) {
+            if (i % 5 === 0) {
+                return i;
             } else {
-
+                   ~ [return]
+                return i/2;
             }
-        default :
-            break;
+        } else {
+            i++;
+        }
     }
+    return i-1;
 }
 
-function testBreak () {
-   if () {
-       break ;
-   }
+const testBreak = (a) => {
+    let i = 0;
+    while(i < 20) {
+        if (i === a) {
+            break ;
+        }
+        i++;
+    }
+    return i-1;
 }
 
-[return]: If block contains `return` statement. Consider replacing the contents of else block outside of the block.
-[throw]: If block contains `throw` statement. Consider replacing the contents of else block outside of the block.
-[break]: If block contains `break` statement. Consider replacing the contents of else block outside of the block.
-[continue]: If block contains `continue` statement. Consider replacing the contents of else block outside of the block.
+[return]: The preceding `if` block ends with a `return` statement. This `else` block is unnecessary.
+[throw]: The preceding `if` block ends with a `throw` statement. This `else` block is unnecessary.
+[break]: The preceding `if` block ends with a `break` statement. This `else` block is unnecessary.
+[continue]: The preceding `if` block ends with a `continue` statement. This `else` block is unnecessary.
