@@ -592,14 +592,12 @@ export function parseConfigFile(
         const validJsRules = new Map<string, Partial<IOptions>>();
         if (copyRulestoJsRules) {
             rules.forEach((ruleOptions, ruleName) => {
-                if (ruleOptions.ruleSeverity !== "off") {
-                    const Rule = findRule(ruleName, rulesDirectory);
-                    if (
-                        Rule !== undefined &&
-                        (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
-                    ) {
-                        validJsRules.set(ruleName, ruleOptions);
-                    }
+                const Rule = findRule(ruleName, rulesDirectory);
+                if (
+                    Rule !== undefined &&
+                    (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
+                ) {
+                    validJsRules.set(ruleName, ruleOptions);
                 }
             });
         }
