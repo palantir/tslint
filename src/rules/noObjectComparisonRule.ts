@@ -92,6 +92,10 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
             ) &&
             !(
                 isEqualityOperator(node) &&
+                (isEnumType(node.left, checker) || isEnumType(node.right, checker))
+            ) &&
+            !(
+                isEqualityOperator(node) &&
                 (isNullOrUndefinedType(node.left, checker) ||
                     isNullOrUndefinedType(node.right, checker))
             ) &&
@@ -157,6 +161,13 @@ function isBooleanType(node: ts.Expression, checker: ts.TypeChecker) {
     return (
         node.kind === ts.SyntaxKind.BooleanKeyword ||
         isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.BooleanLike)
+    );
+}
+
+function isEnumType(node: ts.Expression, checker: ts.TypeChecker) {
+    return (
+        node.kind === ts.SyntaxKind.EnumMember ||
+        isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.EnumLike)
     );
 }
 

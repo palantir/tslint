@@ -98,4 +98,13 @@ const d1: any = 'string'
 const d2: any = 2
 if (d1 === d2) {}
 
+enum Test {
+    One = 1,
+    Two = 2,
+}
+
+const e1: Test = Test.One
+
+if (e1 === Test.Two) {}
+
 [0]: Invalid comparison
