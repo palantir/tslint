@@ -36,8 +36,8 @@ export const rules = {
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
-            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"],
-        ],
+            ["Symbol", "Avoid using the `Symbol` type. Did you mean `symbol`?"]
+        ]
     },
     "ban-ts-ignore": true,
     "member-access": {
@@ -125,6 +125,7 @@ export const rules = {
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
+    "no-object-comparison": true,
     "no-object-literal-type-assertion": true,
     "no-return-await": true,
     "no-shadowed-variable": true,
