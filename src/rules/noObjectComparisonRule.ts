@@ -39,10 +39,10 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_ALLOW_EQUAL]
+                enum: [OPTION_ALLOW_EQUAL],
             },
             minLength: 0,
-            maxLength: 1
+            maxLength: 1,
         },
         optionExamples: [true, [true, OPTION_ALLOW_EQUAL]],
         rationale: Lint.Utils.dedent`
@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,
-        codeExamples
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -66,9 +66,9 @@ export class Rule extends Lint.Rules.TypedRule {
             sourceFile,
             walk,
             {
-                allowEquals: this.ruleArguments.indexOf(OPTION_ALLOW_EQUAL) !== -1
+                allowEquals: this.ruleArguments.indexOf(OPTION_ALLOW_EQUAL) !== -1,
             },
-            program
+            program,
         );
     }
 }

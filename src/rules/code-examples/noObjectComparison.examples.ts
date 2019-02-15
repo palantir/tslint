@@ -33,7 +33,7 @@ export const codeExamples = [
             const object1 = {};
             const object2 = {};
             if (object1 === object2) {}
-        `
+        `,
     },
     {
         description:
@@ -50,6 +50,6 @@ export const codeExamples = [
             const object1 = {};
             const object2 = {};
             if (object1 < object2) {}
-        `
-    }
+        `,
+    },
 ];
