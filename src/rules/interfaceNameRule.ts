@@ -64,7 +64,7 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
             const { name } = node;
             if (never && hasPrefixI(name.text)) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-            } else if (!never && name.text[0] !== "I") {
+            } else if (!never && !hasPrefixI(name.text) && !isEdgeCase(name.text)) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
             }
         } else {
@@ -75,4 +75,8 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 
 function hasPrefixI(name: string): boolean {
     return name.length >= 3 && name[0] === "I" && !isLowerCase(name[1]) && !isUpperCase(name[2]);
+}
+
+function isEdgeCase(name: string): boolean {
+    return name.length === 2 && name[0] === "I" && !isLowerCase(name[1]);
 }
