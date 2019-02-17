@@ -24,6 +24,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_ALLOW_ARGUMENTS = "allow-arguments";
+
+interface Options {
+    allowArguments: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -37,9 +43,18 @@ export class Rule extends Lint.Rules.AbstractRule {
             The compiler will warn for excess properties with this syntax, but not missing required fields.
             For example: \`const x: { foo: number } = {}\` will fail to compile, but
             \`const x = {} as { foo: number }\` will succeed.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            One argument may be optionally provided:
+
+            * \`${OPTION_ALLOW_ARGUMENTS}\` allows type assertions to be used on object literals inside call expressions.`,
+        options: {
+            type: "array",
+            items: {
+                type: "string",
+                enum: [OPTION_ALLOW_ARGUMENTS],
+            },
+        },
+        optionExamples: [true, [true, OPTION_ALLOW_ARGUMENTS]],
         type: "functionality",
         typescriptOnly: true,
     };
@@ -49,11 +64,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            allowArguments: this.ruleArguments.indexOf(OPTION_ALLOW_ARGUMENTS) !== -1,
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (
             isAssertionExpression(node) &&
@@ -66,10 +83,15 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 isParenthesizedExpression(node.expression)
                     ? node.expression.expression
                     : node.expression,
-            )
+            ) &&
+            !(ctx.options.allowArguments && isArgument(node))
         ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isArgument(node: ts.Node): boolean {
+    return ts.isCallLikeExpression(node.parent);
 }
