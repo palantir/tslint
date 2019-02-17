@@ -19,12 +19,12 @@ import { isBinaryExpression, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { codeExamples } from "./code-examples/noObjectComparison.examples";
+import { codeExamples } from "./code-examples/objectComparison.examples";
 
 const OPTION_ALLOW_EQUAL = "allow-equal";
 
 interface Options {
-    allowEquals: boolean;
+    [OPTION_ALLOW_EQUAL]?: boolean;
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -36,15 +36,22 @@ export class Rule extends Lint.Rules.TypedRule {
                 One argument may be optionally provided:
                 * \`${OPTION_ALLOW_EQUAL}\` allows \`!=\` \`==\` \`!==\` \`===\` comparison between any types.`,
         options: {
-            type: "array",
-            items: {
-                type: "string",
-                enum: [OPTION_ALLOW_EQUAL],
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_EQUAL]: {
+                    type: "boolean",
+                },
             },
-            minLength: 0,
-            maxLength: 1,
         },
-        optionExamples: [true, [true, OPTION_ALLOW_EQUAL]],
+        optionExamples: [
+            true,
+            [
+                true,
+                {
+                    [OPTION_ALLOW_EQUAL]: true,
+                },
+            ],
+        ],
         rationale: Lint.Utils.dedent`
                 When using comparison operators to compare objects, they compare references and not values.
                 This is often done accidentally.
@@ -62,21 +69,24 @@ export class Rule extends Lint.Rules.TypedRule {
     public static INVALID_COMPARISON = `Invalid comparison`;
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(
-            sourceFile,
-            walk,
-            {
-                allowEquals: this.ruleArguments.indexOf(OPTION_ALLOW_EQUAL) !== -1,
-            },
-            program,
-        );
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions(), program);
+    }
+
+    private getRuleOptions(): Options {
+        if (this.ruleArguments[0] === undefined) {
+            return {};
+        } else {
+            return this.ruleArguments[0] as Options;
+        }
     }
 }
 
 function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
+    const { sourceFile, options } = ctx;
+
     const checker = program.getTypeChecker();
 
-    return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+    return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (
             isBinaryExpression(node) &&
             isComparisonOperator(node) &&
@@ -99,7 +109,7 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                 (isNullOrUndefinedType(node.left, checker) ||
                     isNullOrUndefinedType(node.right, checker))
             ) &&
-            !(ctx.options.allowEquals && isEqualityOperator(node))
+            !(options[OPTION_ALLOW_EQUAL] && isEqualityOperator(node))
         ) {
             ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
         }
