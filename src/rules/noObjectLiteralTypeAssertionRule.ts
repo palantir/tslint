@@ -24,6 +24,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { codeExamples } from "./code-examples/noObjectLiteralTypeAssertion.examples";
+
 const OPTION_ALLOW_ARGUMENTS = "allow-arguments";
 
 interface Options {
@@ -57,6 +59,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_ALLOW_ARGUMENTS]],
         type: "functionality",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
