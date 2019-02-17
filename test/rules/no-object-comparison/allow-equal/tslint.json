@@ -1,5 +1,5 @@
 {
     "rules": {
-        "no-object-comparison": [true, "allow-equal"]
+        "object-comparison": [true, "allow-equal"]
     }
 }

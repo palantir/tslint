@@ -30,7 +30,7 @@ interface Options {
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-object-comparison",
+        ruleName: "object-comparison",
         description: "Only allow comparisons between primitives.",
         optionsDescription: Lint.Utils.dedent`
                 One argument may be optionally provided:

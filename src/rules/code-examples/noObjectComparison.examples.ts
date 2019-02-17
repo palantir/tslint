@@ -22,7 +22,7 @@ export const codeExamples = [
     {
         description: "Disallows usage of comparison operators with non-primitive types.",
         config: Lint.Utils.dedent`
-            "rules": { "no-object-comparison": true }
+            "rules": { "object-comparison": true }
         `,
         pass: Lint.Utils.dedent`
             const object1 = {};
@@ -39,7 +39,7 @@ export const codeExamples = [
         description:
             "Allows equality operators to be used with non-primitive types, while still disallowing the use of greater than and less than.",
         config: Lint.Utils.dedent`
-            "rules": { "no-object-comparison": [true, "allow-equal"] }
+            "rules": { "object-comparison": [true, "allow-equal"] }
         `,
         pass: Lint.Utils.dedent`
             const object1 = {};
