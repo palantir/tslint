@@ -1,0 +1,12 @@
+// Allow object literals to be asserted when used as arguments.
+const pick = <T, K extends keyof T>(source: T, configuration: Partial<Record<keyof T, boolean>>): Pick<T, K> =>
+  (Object.keys(source) as K[])
+    .reduce(
+      (cumulus, property) =>
+        (configuration[property] === true)
+          ? Object.assign(cumulus, {
+            [property]: source[property],
+          })
+          : cumulus,
+      {} as Pick<T, K>,
+    );
