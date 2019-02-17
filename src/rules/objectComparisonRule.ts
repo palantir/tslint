@@ -87,33 +87,30 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
     const checker = program.getTypeChecker();
 
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
-        if (
-            isBinaryExpression(node) &&
-            isComparisonOperator(node) &&
-            !(isAnyType(node.left, checker) || isAnyType(node.right, checker)) &&
-            !(isNumericType(node.left, checker) || isNumericType(node.right, checker)) &&
-            !(
-                isEqualityOperator(node) &&
-                (isStringType(node.left, checker) || isStringType(node.right, checker))
-            ) &&
-            !(
-                isEqualityOperator(node) &&
-                (isBooleanType(node.left, checker) || isBooleanType(node.right, checker))
-            ) &&
-            !(
-                isEqualityOperator(node) &&
-                (isEnumType(node.left, checker) || isEnumType(node.right, checker))
-            ) &&
-            !(
-                isEqualityOperator(node) &&
-                (isNullOrUndefinedType(node.left, checker) ||
-                    isNullOrUndefinedType(node.right, checker))
-            ) &&
-            !(options[OPTION_ALLOW_EQUAL] && isEqualityOperator(node))
-        ) {
-            ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
-        }
+        if (isBinaryExpression(node) && isComparisonOperator(node)) {
+            const leftKind = getKind(node.left, checker);
+            const rightKind = getKind(node.right, checker);
+            const isEquality = isEqualityOperator(node);
 
+            if (
+                !(leftKind === TypeKind.Any || rightKind === TypeKind.Any) &&
+                !(leftKind === TypeKind.Number || rightKind === TypeKind.Number) &&
+                !(isEquality && (leftKind === TypeKind.String || rightKind === TypeKind.String)) &&
+                !(
+                    isEquality &&
+                    (leftKind === TypeKind.Boolean || rightKind === TypeKind.Boolean)
+                ) &&
+                !(isEquality && (leftKind === TypeKind.Enum || rightKind === TypeKind.Enum)) &&
+                !(
+                    isEquality &&
+                    (leftKind === TypeKind.NullOrUndefined ||
+                        rightKind === TypeKind.NullOrUndefined)
+                ) &&
+                !(options[OPTION_ALLOW_EQUAL] && isEquality)
+            ) {
+                ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+            }
+        }
         return ts.forEachChild(node, cb);
     });
 }
@@ -146,6 +143,40 @@ function isEqualityOperator(node: ts.BinaryExpression): boolean {
     }
 }
 
+const enum TypeKind {
+    String,
+    Number,
+    Boolean,
+    NullOrUndefined,
+    Enum,
+    Any,
+    Object,
+}
+
+function getKind(node: ts.Expression, checker: ts.TypeChecker): TypeKind {
+    const type = checker.getTypeAtLocation(node);
+
+    return node.kind === ts.SyntaxKind.StringLiteral || is(ts.TypeFlags.String)
+        ? TypeKind.String
+        : is(ts.TypeFlags.Number) || node.kind === ts.SyntaxKind.NumericLiteral
+            ? TypeKind.Number
+            : is(ts.TypeFlags.BooleanLike) || node.kind === ts.SyntaxKind.BooleanKeyword
+                ? TypeKind.Boolean // tslint:disable-next-line:no-bitwise
+                : is(ts.TypeFlags.Null | ts.TypeFlags.Undefined | ts.TypeFlags.Void) ||
+                  node.kind === ts.SyntaxKind.NullKeyword ||
+                  node.kind === ts.SyntaxKind.UndefinedKeyword
+                    ? TypeKind.NullOrUndefined
+                    : is(ts.TypeFlags.EnumLike) || node.kind === ts.SyntaxKind.EnumMember
+                        ? TypeKind.Enum
+                        : is(ts.TypeFlags.Any) || node.kind === ts.SyntaxKind.AnyKeyword
+                            ? TypeKind.Any
+                            : TypeKind.Object;
+
+    function is(flags: ts.TypeFlags) {
+        return isTypeFlagSet(type, flags);
+    }
+}
+/*
 function isAnyType(node: ts.Expression, checker: ts.TypeChecker) {
     return (
         node.kind === ts.SyntaxKind.AnyKeyword ||
@@ -175,6 +206,12 @@ function isBooleanType(node: ts.Expression, checker: ts.TypeChecker) {
 }
 
 function isEnumType(node: ts.Expression, checker: ts.TypeChecker) {
+    if (
+        node.kind === ts.SyntaxKind.EnumMember ||
+        isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.EnumLike)
+    ) {
+        console.log("checking enum", node.getText());
+    }
     return (
         node.kind === ts.SyntaxKind.EnumMember ||
         isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.EnumLike)
@@ -189,3 +226,4 @@ function isNullOrUndefinedType(node: ts.Expression, checker: ts.TypeChecker) {
         isTypeFlagSet(checker.getTypeAtLocation(node), ts.TypeFlags.Null)
     );
 }
+*/
