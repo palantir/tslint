@@ -16,17 +16,10 @@ x as T;
 {} as unknown;
 <unknown> {};
 
-const pick = <T, K extends keyof T>(source: T, configuration: Partial<Record<keyof T, boolean>>): Pick<T, K> =>
-  (Object.keys(source) as K[])
-    .reduce(
-      (cumulus, property) =>
-        (configuration[property] === true)
-          ? Object.assign(cumulus, {
-            [property]: source[property],
-          })
-          : cumulus,
-      {} as Pick<T, K>,
-      ~~~~~~~~~~~~~~~~ [0]
-    );
+foo({} as T);
+    ~~~~~~~ [0]
+
+foo(<T>{});
+    ~~~~~ [0]
 
 [0]: Type assertion on object literals is forbidden, use a type annotation instead.
