@@ -41,7 +41,7 @@ export const codeExamples: ICodeExample[] = [
     {
         description: "Allow using a type assertion when the object literal is used as an argument.",
         config: Lint.Utils.dedent`
-            "rules": { "no-object-literal-type-assertion": [true, "allow-arguments"] }
+            "rules": { "no-object-literal-type-assertion": [true, { "allow-arguments": true }] }
         `,
         pass: Lint.Utils.dedent`
             bar({} as Foo)

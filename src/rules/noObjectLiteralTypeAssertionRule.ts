@@ -28,8 +28,12 @@ import { codeExamples } from "./code-examples/noObjectLiteralTypeAssertion.examp
 
 const OPTION_ALLOW_ARGUMENTS = "allow-arguments";
 
+const DEFAULT_OPTIONS: Options = {
+    [OPTION_ALLOW_ARGUMENTS]: false,
+};
+
 interface Options {
-    allowArguments: boolean;
+    [OPTION_ALLOW_ARGUMENTS]: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -46,17 +50,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             For example: \`const x: { foo: number } = {}\` will fail to compile, but
             \`const x = {} as { foo: number }\` will succeed.`,
         optionsDescription: Lint.Utils.dedent`
-            One argument may be optionally provided:
+            One option may be configured:
 
             * \`${OPTION_ALLOW_ARGUMENTS}\` allows type assertions to be used on object literals inside call expressions.`,
         options: {
             type: "array",
             items: {
-                type: "string",
-                enum: [OPTION_ALLOW_ARGUMENTS],
+                type: "object",
+                properties: {
+                    [OPTION_ALLOW_ARGUMENTS]: {
+                        type: "boolean",
+                    },
+                },
+                additionalProperties: false,
             },
+            maxLength: 1,
+            minLength: 0,
         },
-        optionExamples: [true, [true, OPTION_ALLOW_ARGUMENTS]],
+        optionExamples: [true, [true, { [OPTION_ALLOW_ARGUMENTS]: true }]],
         type: "functionality",
         typescriptOnly: true,
         codeExamples,
@@ -67,9 +78,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
-            allowArguments: this.ruleArguments.indexOf(OPTION_ALLOW_ARGUMENTS) !== -1,
-        });
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            parseOptions(this.ruleArguments[0] as Partial<Options> | undefined),
+        );
     }
 }
 
@@ -87,7 +100,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                     ? node.expression.expression
                     : node.expression,
             ) &&
-            !(ctx.options.allowArguments && isArgument(node))
+            !(ctx.options[OPTION_ALLOW_ARGUMENTS] && isArgument(node))
         ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
@@ -97,4 +110,11 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
 function isArgument(node: ts.Node): boolean {
     return ts.isCallLikeExpression(node.parent);
+}
+
+function parseOptions(options: Partial<Options> | undefined): Options {
+    return {
+        ...DEFAULT_OPTIONS,
+        ...options,
+    };
 }
