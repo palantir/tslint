@@ -1,0 +1,7 @@
+{
+    "rules": {
+        "object-comparison": [true, {
+            "allow-string-comparison": true
+        }]
+    }
+}

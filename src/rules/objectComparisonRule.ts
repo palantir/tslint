@@ -22,9 +22,11 @@ import * as Lint from "../index";
 import { codeExamples } from "./code-examples/objectComparison.examples";
 
 const OPTION_ALLOW_EQUAL = "allow-equal";
+const OPTION_ALLOW_STRING_COMPARISON = "allow-string-comparison";
 
 interface Options {
     [OPTION_ALLOW_EQUAL]?: boolean;
+    [OPTION_ALLOW_STRING_COMPARISON]?: boolean;
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -33,12 +35,16 @@ export class Rule extends Lint.Rules.TypedRule {
         ruleName: "object-comparison",
         description: "Only allow comparisons between primitives.",
         optionsDescription: Lint.Utils.dedent`
-                One argument may be optionally provided:
-                * \`${OPTION_ALLOW_EQUAL}\` allows \`!=\` \`==\` \`!==\` \`===\` comparison between any types.`,
+                One of the following arguments may be optionally provided:
+                * \`${OPTION_ALLOW_EQUAL}\` allows \`!=\` \`==\` \`!==\` \`===\` comparison between any types.
+                * \`${OPTION_ALLOW_STRING_COMPARISON}\` allows \`>\` \`<\` \`>=\` \`<=\` comparison between strings.`,
         options: {
             type: "object",
             properties: {
                 [OPTION_ALLOW_EQUAL]: {
+                    type: "boolean",
+                },
+                [OPTION_ALLOW_STRING_COMPARISON]: {
                     type: "boolean",
                 },
             },
@@ -48,7 +54,8 @@ export class Rule extends Lint.Rules.TypedRule {
             [
                 true,
                 {
-                    [OPTION_ALLOW_EQUAL]: true,
+                    [OPTION_ALLOW_EQUAL]: false,
+                    [OPTION_ALLOW_STRING_COMPARISON]: false,
                 },
             ],
         ],
@@ -88,31 +95,53 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
 
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node) && isComparisonOperator(node)) {
+            const isEquality = isEqualityOperator(node);
             const leftKind = getKind(node.left, checker);
             const rightKind = getKind(node.right, checker);
-            const isEquality = isEqualityOperator(node);
 
-            if (
-                !(leftKind === TypeKind.Any || rightKind === TypeKind.Any) &&
-                !(leftKind === TypeKind.Number || rightKind === TypeKind.Number) &&
-                !(isEquality && (leftKind === TypeKind.String || rightKind === TypeKind.String)) &&
-                !(
-                    isEquality &&
-                    (leftKind === TypeKind.Boolean || rightKind === TypeKind.Boolean)
-                ) &&
-                !(isEquality && (leftKind === TypeKind.Enum || rightKind === TypeKind.Enum)) &&
-                !(
-                    isEquality &&
-                    (leftKind === TypeKind.NullOrUndefined ||
-                        rightKind === TypeKind.NullOrUndefined)
-                ) &&
-                !(options[OPTION_ALLOW_EQUAL] && isEquality)
-            ) {
-                ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+            const operandKind = getStricterKind(leftKind, rightKind);
+
+            if (isEquality) {
+                // Check !=, ==, !==, ===
+                if (options[OPTION_ALLOW_EQUAL]) {
+                    // With this option all equality checks are valid
+                    return ts.forEachChild(node, cb);
+                } else {
+                    switch (operandKind) {
+                        case TypeKind.Any:
+                        case TypeKind.Number:
+                        case TypeKind.String:
+                        case TypeKind.Boolean:
+                        case TypeKind.Enum:
+                        case TypeKind.NullOrUndefined:
+                            break;
+                        default:
+                            ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+                    }
+                }
+            } else {
+                // Check >, <, >=, <=
+                switch (operandKind) {
+                    case TypeKind.Any:
+                    case TypeKind.Number:
+                        break;
+                    case TypeKind.String:
+                        if (options[OPTION_ALLOW_STRING_COMPARISON]) {
+                            break;
+                        }
+                        ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+                        break;
+                    default:
+                        ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+                }
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function getStricterKind(left: TypeKind, right: TypeKind) {
+    return Math.min(right, left);
 }
 
 function isComparisonOperator(node: ts.BinaryExpression): boolean {
@@ -144,11 +173,11 @@ function isEqualityOperator(node: ts.BinaryExpression): boolean {
 }
 
 const enum TypeKind {
-    String,
-    Number,
     Boolean,
-    NullOrUndefined,
+    String,
     Enum,
+    Number,
+    NullOrUndefined,
     Any,
     Object,
 }

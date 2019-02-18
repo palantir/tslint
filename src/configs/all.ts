@@ -105,7 +105,11 @@ export const rules = {
     "function-constructor": true,
     // "import-blacklist": no sensible default
     "label-position": true,
-    "object-comparison": true,
+    "object-comparison": {
+        options: {
+            "allow-string-comparison": true,
+        },
+    },
     "no-arg": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
