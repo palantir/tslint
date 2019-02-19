@@ -19,8 +19,11 @@ import { isFunctionWithBody, isIdentifier } from "tsutils";
 import * as ts from "typescript";
 import * as Lint from "../index";
 
+/**
+ * Rule max-nesting-depth
+ */
 export class Rule extends Lint.Rules.AbstractRule {
-    public static MINIMUM_THRESHOLD = 0;
+    public static MINIMUM_THRESHOLD = 1;
     public static DEFAULT_THRESHOLD = 4;
     public static THRESHOLD_EXAMPLE = 7;
 
@@ -66,6 +69,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
+    /**
+     * Builds and returns the failure string
+     * @param expected Rule threshold
+     * @param actual Depth of current function
+     * @param name Function name
+     */
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
         return (
             `The function${name === "" ? "" : ` ${name}`} has a nesting depth of at least ` +
@@ -73,10 +82,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         );
     }
 
+    /**
+     *  Returns the provided function's name
+     * @param node The function
+     */
     public static getFunctionName(node: ts.FunctionLikeDeclaration): string {
         return node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
     }
 
+    /**
+     * Returns true if the nesting depth rule is applicable to the current node
+     */
     public static isNestingDepthStatement(node: ts.Node): boolean {
         switch (node.kind) {
             case ts.SyntaxKind.ConditionalExpression:
@@ -94,6 +110,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
+    /**
+     * Walks the AST
+     * @param ctx Walk context
+     */
     public static walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
         const {
             options: { threshold },
@@ -131,6 +151,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         return ts.forEachChild(ctx.sourceFile, cbNode);
     }
 
+    /**
+     * Returns true if the rule is enabled
+     */
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
         const isThresholdValid: boolean =
@@ -139,6 +162,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         return super.isEnabled() && isThresholdValid;
     }
 
+    /**
+     * Returns the configured or default rule threshold
+     */
     private get threshold(): number {
         if (this.ruleArguments[0] !== undefined) {
             return this.ruleArguments[0] as number;
@@ -147,6 +173,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         return Rule.DEFAULT_THRESHOLD;
     }
 
+    /**
+     * Analyze the provided source file
+     * @param sourceFile The source file to be analyzed
+     */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, Rule.walk, { threshold: this.threshold });
     }
