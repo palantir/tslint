@@ -107,7 +107,8 @@ export const rules = {
     "label-position": true,
     "object-comparison": {
         options: {
-            "allow-string-comparison": true,
+            "allow-object-equal-comparison": true,
+            "allow-string-order-comparison": true,
         },
     },
     "no-arg": true,

@@ -39,7 +39,7 @@ export const codeExamples = [
         description:
             "Allows equality operators to be used with non-primitive types, while still disallowing the use of greater than and less than.",
         config: Lint.Utils.dedent`
-            "rules": { "object-comparison": [true, {  "allow-equal": true }] }
+            "rules": { "object-comparison": [true, {  "allow-object-equal-comparison": true }] }
         `,
         pass: Lint.Utils.dedent`
             const object1 = {};

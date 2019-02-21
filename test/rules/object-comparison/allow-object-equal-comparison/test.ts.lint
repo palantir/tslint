@@ -8,9 +8,13 @@ if (2 === 1) {}
 if (2 != 1) {}
 if (2 !== 1) {}
 if (2 > undefined) {}
+    ~~~~~~~~~~~~~          [0]
 if (undefined === 1) {}
+    ~~~~~~~~~~~~~~~        [0]
 if (2 > undefined) {}
+    ~~~~~~~~~~~~~          [0]
 if (undefined === 1) {}
+    ~~~~~~~~~~~~~~~        [0]
 if (true) {}
 if (true > false) {}
     ~~~~~~~~~~~~           [0]
@@ -26,9 +30,13 @@ if (true != false) {}
 if (true !== false) {}
 if ('') {}
 if ('' > '') {}
+    ~~~~~~~                [0]
 if ('' < '') {}
+    ~~~~~~~                [0]
 if ('' >= '') {}
+    ~~~~~~~~               [0]
 if ('' <= '') {}
+    ~~~~~~~~               [0]
 if ('' == '') {}
 if ('' === '') {}
 if ('' != '') {}
@@ -43,20 +51,17 @@ if ({} >= {}) {}
 if ({} <= {}) {}
     ~~~~~~~~               [0]
 if ({} == {}) {}
-    ~~~~~~~~               [0]
 if ({} === {}) {}
-    ~~~~~~~~~              [0]
 if ({} != {}) {}
-    ~~~~~~~~               [0]
 if ({} !== {}) {}
-    ~~~~~~~~~              [0]
 if ([] === []) {}
-    ~~~~~~~~~              [0]
 
 if (3 > 2 || 2 > 1 && true === true) {}
 if ('' > '' || 2 > 1 || {} > {}) {}
+    ~~~~~~~                                [0]
                         ~~~~~~~            [0]
 if ('' > '' && 2 > 1 && {} > {}) {}
+    ~~~~~~~                                [0]
                         ~~~~~~~            [0]
 
 if ({} === null) {}
@@ -66,7 +71,6 @@ if (undefined === {}) {}
 
 function sameObject<T>(a: T, b: T): boolean {
     return a === b;
-           ~~~~~~~                         [0]
 }
 
 function sameObject<T>(a: any, b: any): boolean {
@@ -78,31 +82,66 @@ const a1: myNumber = 1
 const a2: myNumber = 2
 
 if (a1 < a2) {}
+if (a2 < a1) {}
 
 type myString = string;
 const b1: myString = ''
 const b2: myString = ''
 
 if (b1 === b2) {}
+if (b2 === b1) {}
 
 type myObject = Object;
 const c1: myObject = {}
 const c2: myObject = {}
 
 if (c1 === c2) {}
-    ~~~~~~~~~              [0]
+if (c2 === c1) {}
 
 const d1: any = 'string'
 const d2: any = 2
 if (d1 === d2) {}
+if (d2 === d1) {}
 
-enum Test {
+enum TestNumericEnum {
     One = 1,
     Two = 2,
 }
 
-const e1: Test = Test.One
+const e1: TestNumericEnum = TestNumericEnum.One
 
-if (e1 === Test.Two) {}
+if (e1 === TestNumericEnum.Two) {}
+if (TestNumericEnum.Two === e1) {}
+if (e1 > TestNumericEnum.Two) {}
+if (TestNumericEnum.Two > e1) {}
+
+const f1: TestNumericEnum | undefined
+const f2: TestNumericEnum | undefined
+
+if (f1 === f2) {}
+if (f2 === f1) {}
+
+enum TestStringEnum {
+    One = 'one',
+    Two = 'two',
+}
+
+const g1: TestStringEnum = TestStringEnum.One
+
+if (g1 === TestStringEnum.Two) {}
+if (TestStringEnum.Two === g1) {}
+if (g1 > TestStringEnum.Two) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~              [0]
+if (TestStringEnum.Two > g1) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~              [0]
+
+const h1: boolean | number = true;
+const h2: boolean | number = 2;
+if (h1 > h2) {}
+    ~~~~~~~              [0]
+if (h2 > h1) {}
+    ~~~~~~~              [0]
+if (h1 === h2) {}
+if (h2 === h1) {}
 
 [0]: Invalid comparison

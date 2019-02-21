@@ -30,13 +30,9 @@ if (true != false) {}
 if (true !== false) {}
 if ('') {}
 if ('' > '') {}
-    ~~~~~~~                [0]
 if ('' < '') {}
-    ~~~~~~~                [0]
 if ('' >= '') {}
-    ~~~~~~~~               [0]
 if ('' <= '') {}
-    ~~~~~~~~               [0]
 if ('' == '') {}
 if ('' === '') {}
 if ('' != '') {}
@@ -63,10 +59,8 @@ if ([] === []) {}
 
 if (3 > 2 || 2 > 1 && true === true) {}
 if ('' > '' || 2 > 1 || {} > {}) {}
-    ~~~~~~~                                [0]
                         ~~~~~~~            [0]
 if ('' > '' && 2 > 1 && {} > {}) {}
-    ~~~~~~~                                [0]
                         ~~~~~~~            [0]
 
 if ({} === null) {}
@@ -143,9 +137,7 @@ const g1: TestStringEnum = TestStringEnum.One
 if (g1 === TestStringEnum.Two) {}
 if (TestStringEnum.Two === g1) {}
 if (g1 > TestStringEnum.Two) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~              [0]
 if (TestStringEnum.Two > g1) {}
-    ~~~~~~~~~~~~~~~~~~~~~~~              [0]
 
 const h1: boolean | number = true;
 const h2: boolean | number = 2;
