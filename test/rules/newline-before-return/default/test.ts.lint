@@ -38,6 +38,16 @@ function foo(fn) {
           ~nil [0]
 }
 
+function foo(fn) {
+    fn();   return;
+            ~nil [0]
+}
+
+function foo(fn) {
+    fn();          return;
+                   ~nil [0]
+}
+
 function foo() {
     return;
 }

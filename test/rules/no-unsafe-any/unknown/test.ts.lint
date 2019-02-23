@@ -1,0 +1,83 @@
+[typescript]: >= 3.0.0
+
+/*
+ * It is not unsafe to pass any where unknown is allowed. This file checks
+ * these uses.
+ */
+
+declare const x: any;
+
+declare function takesUnknown(a: unknown, ...bs: unknown[]): void;
+takesUnknown(x, x);
+
+declare function templateTakesUnknown(arr: TemplateStringsArray, a: unknown, ...bs: unknown[]): any;
+templateTakesUnknown`${x}${x}`;
+
+declare function decoratorTakesUnknown(value: unknown): Function;
+
+class C {
+    @decoratorTakesUnknown(x) f() {}
+}
+
+function f(x: any, retAny: () => any): unknown {
+    const v2: unknown = x;
+    let v5: unknown;
+    v5 = x;
+
+    // Return OK if return type is 'any'
+    return x;
+}
+
+class X {
+    constructor(y: any) {}
+    prop: unknown = x;
+}
+
+takesUnknown(x ? x : x);
+
+function *gen(): IterableIterator<unknown> {
+    yield x;
+}
+
+void x;
+
+{
+    class C {
+        prop: unknown = x;
+    }
+    class D extends C {
+        prop = x;
+    }
+}
+
+function hasThisParameter(this: any) {
+    const u: unknown = this;
+}
+
+(async function(): Promise<unknown> {
+    return x;
+});
+
+const obj = { property: "value" } as any;
+const result: unknown = JSON.parse("{}");
+
+const hasUnknownProp: { prop: unknown, obj: unknown } = { prop: obj, obj };
+hasUnknownProp.prop = obj;
+
+function acceptsUnknown(a: unknown, b: unknown = x) { }
+
+acceptsUnknown(obj);
+
+interface ContainsUnknownProperty {
+    e: unknown;
+}
+
+const p: ContainsUnknownProperty = { e: (123 as any) };
+
+function g() {
+    try {
+
+    } catch (e) {
+        acceptsUnknown(e);
+    }
+}

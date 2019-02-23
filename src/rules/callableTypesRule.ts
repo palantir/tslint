@@ -18,6 +18,7 @@
 import {
     getChildOfKind,
     isCallSignatureDeclaration,
+    isConstructSignatureDeclaration,
     isIdentifier,
     isInterfaceDeclaration,
     isTypeLiteralNode,
@@ -58,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         ) {
             const member = node.members[0];
             if (
-                isCallSignatureDeclaration(member) &&
+                (isConstructSignatureDeclaration(member) || isCallSignatureDeclaration(member)) &&
                 // avoid bad parse
                 member.type !== undefined
             ) {
@@ -96,7 +97,7 @@ function noSupertype(node: ts.InterfaceDeclaration): boolean {
 }
 
 function renderSuggestion(
-    call: ts.CallSignatureDeclaration,
+    call: ts.CallSignatureDeclaration | ts.ConstructSignatureDeclaration,
     parent: ts.InterfaceDeclaration | ts.TypeLiteralNode,
     sourceFile: ts.SourceFile,
 ): string {
@@ -105,7 +106,7 @@ function renderSuggestion(
     const text = sourceFile.text.substring(start, call.end);
 
     let suggestion = `${text.substr(0, colonPos)} =>${text.substr(colonPos + 1)}`;
-    if (shouldWrapSuggestion(parent.parent!)) {
+    if (shouldWrapSuggestion(parent.parent)) {
         suggestion = `(${suggestion})`;
     }
     if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {

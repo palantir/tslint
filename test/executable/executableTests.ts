@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import * as semver from "semver";
+
 import { Logger, Options, run, Status } from "../../src/runner";
 import { denormalizeWinPath } from "../../src/utils";
+import { getNormalizedTypescriptVersion } from "../../src/verify/parse";
 import { createTempFile } from "../utils";
 
 // when tests are run with mocha from npm scripts CWD points to project root
@@ -39,7 +42,9 @@ const dummyLogger: Logger = {
 
 describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
-    this.timeout(4000);
+    this.timeout(10000);
+
+    const tsVersion = getNormalizedTypescriptVersion();
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", done => {
@@ -596,6 +601,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
             );
         }).timeout(8000);
+
+        if (semver.satisfies(tsVersion, ">=2.9")) {
+            it("does not try to parse JSON files with --resolveJsonModule with TS >= 2.9", async () => {
+                const status = await execRunner({
+                    project: "test/files/tsconfig-resolve-json-module/tsconfig.json",
+                });
+                assert.equal(status, Status.Ok, "process should exit without an error");
+            });
+        }
     });
 
     describe("--type-check", () => {

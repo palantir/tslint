@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND = "ignore-arrow-function-shorthand";
@@ -94,11 +95,15 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
     });
 
     function isParentAllowedVoid(node: ts.Node): boolean {
-        switch (node.parent!.kind) {
+        switch (node.parent.kind) {
             case ts.SyntaxKind.ExpressionStatement:
                 return true;
             case ts.SyntaxKind.ArrowFunction:
                 return ignoreArrowFunctionShorthand;
+
+            // Something like "x && console.log(x)".
+            case ts.SyntaxKind.BinaryExpression:
+                return isParentAllowedVoid(node.parent);
             default:
                 return false;
         }

@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/onlyArrowFunctions.examples";
 
 const OPTION_ALLOW_DECLARATIONS = "allow-declarations";
@@ -31,6 +32,10 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Disallows traditional (non-arrow) function expressions.",
         rationale:
             "Traditional functions don't bind lexical scope, which can lead to unexpected behavior when accessing 'this'.",
+        descriptionDetails: Lint.Utils.dedent`
+            Note that non-arrow functions are allowed if 'this' appears somewhere in its body
+            (as such functions cannot be converted to arrow functions).
+        `,
         optionsDescription: Lint.Utils.dedent`
             Two arguments may be optionally provided:
 

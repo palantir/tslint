@@ -19,6 +19,7 @@ import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import { ALL, Visibility, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL } from "../completedDocsRule";
+
 import { Exclusion } from "./exclusion";
 
 export interface IBlockExclusionDescriptor {

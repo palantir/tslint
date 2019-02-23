@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+
 import { Options, run, Status } from "../../src/runner";
 
 const customRulesOptions: Options = {

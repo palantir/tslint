@@ -16,8 +16,8 @@
  */
 
 import { forEachToken } from "tsutils";
-
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 interface Options {

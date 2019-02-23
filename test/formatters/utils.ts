@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import * as ts from "typescript";
+
 import { Fix, RuleFailure, RuleSeverity } from "../../src/language/rule/rule";
 
 export function createFailure(

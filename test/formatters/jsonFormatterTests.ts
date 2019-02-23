@@ -18,6 +18,7 @@ import { assert } from "chai";
 import * as ts from "typescript";
 
 import { IFormatter, IRuleFailureJson, Replacement, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("JSON Formatter", () => {

@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-import * as ts from "typescript";
-import * as Lint from "../index";
-
 import {
     getChildOfKind,
     hasModifier,
@@ -25,6 +22,9 @@ import {
     isConstructorDeclaration,
     isParameterProperty,
 } from "tsutils";
+import * as ts from "typescript";
+
+import * as Lint from "../index";
 
 interface Options {
     allowConstructorOnly: boolean;

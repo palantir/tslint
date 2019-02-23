@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+/* Test a more complex set of split up groups. */
+
+// comment outside of imports
+import {afoo, foo} from 'foo';
+import x = require('y');
+
+import {app_b} from 'app/bar';
+import {app_f} from 'app/foo';
+
+// comment pkg/bar
+import {a} from '@pkg/bar';
+import {x} from '@pkg/foo';
+
+import './baa';
+import './baz'; // required
+
+import {bar} from '../bar';
+import {xbar} from '../xbar';
+
+
+export class Test {}

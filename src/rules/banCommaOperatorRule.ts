@@ -78,7 +78,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 
 function isForLoopIncrementor(node: ts.Node) {
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         parent.kind === ts.SyntaxKind.ForStatement &&
         (parent as ts.ForStatement).incrementor === node

@@ -77,9 +77,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 return Kind.NoSuper;
 
             case ts.SyntaxKind.SuperKeyword:
-                return node.parent!.kind === ts.SyntaxKind.CallExpression &&
+                return node.parent.kind === ts.SyntaxKind.CallExpression &&
                     (node.parent as ts.CallExpression).expression === node
-                    ? { node: node.parent! as ts.CallExpression, break: false }
+                    ? { node: node.parent as ts.CallExpression, break: false }
                     : Kind.NoSuper;
 
             case ts.SyntaxKind.ConditionalExpression: {

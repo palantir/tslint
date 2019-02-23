@@ -17,6 +17,7 @@
 
 import { hasOwnProperty } from "../../utils";
 import { DocType } from "../completedDocsRule";
+
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
 import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
 import { Exclusion } from "./exclusion";

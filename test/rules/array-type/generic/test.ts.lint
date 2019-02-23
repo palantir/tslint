@@ -3,6 +3,8 @@ let x: Array<number> = [1] as number[];
 let y: string[] = <Array<string>>["2"];
        ~~~~~~~~                         [0]
 let z: Array = [3, "4"];
+let u: unknown[] = [];
+       ~~~~~~~~~       [0]
 
 let xx: Array<Array<number>> = [[1, 2], [3]];
 let yy: number[][] = [[4, 5], [6]];
@@ -54,5 +56,10 @@ interface FooInterface {
     '.bar': {baz: string[];};
                   ~~~~~~~~    [0]
 }
+
+// Test an unknown Array
+let t: unknown[] = [];
+       ~~~~~~~~~       [0]
+let u: Array<unknown> = [];
 
 [0]: Array type using 'T[]' is forbidden. Use 'Array<T>' instead.

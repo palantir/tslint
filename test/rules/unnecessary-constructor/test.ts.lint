@@ -1,0 +1,76 @@
+export class ExportedClass {
+    constructor() { }
+    ~~~~~~~~~~~~~~~~~       [0]
+}
+
+class PublicConstructor {
+    public constructor() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+}
+
+class ProtectedConstructor {
+    protected constructor() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+}
+
+class PrivateConstructor {
+    private constructor() { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+}
+
+class SameLine { constructor() { } }
+                 ~~~~~~~~~~~~~~~~~       [0]
+
+class WithPrecedingMember {
+    public member: string;
+    constructor() {}
+    ~~~~~~~~~~~~~~~~       [0]
+}
+
+class WithFollowingMethod {
+    constructor() {}
+    ~~~~~~~~~~~~~~~~       [0]
+    public method() {}
+}
+
+const classExpression = class {
+    constructor() { }
+    ~~~~~~~~~~~~~~~~~       [0]
+}
+
+class ContainsContents {
+    constructor() {
+        console.log("Hello!");
+    }
+}
+
+class CallsSuper extends PublicConstructor {
+    constructor() {
+        super();
+    }
+}
+
+class ContainsParameter {
+    constructor(x: number) { }
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
+
+class ContainsParameterDeclaration {
+    constructor(public x: number) { }
+}
+
+class ContainsParameterAndParameterDeclaration {
+    constructor(x: number, public y: number) { }
+}
+
+class ConstructorOverload {
+  constructor(x: number);
+  constructor(x: number, y?: number) { }
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
+
+interface IConstructorSignature {
+    new(): {};
+}
+
+[0]: Remove unnecessary empty constructor.
