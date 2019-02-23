@@ -55,7 +55,7 @@ import { RuleWalker } from "./ruleWalker";
  *     });
  * }
  */
-export abstract class ScopeAwareRuleWalker<T> extends RuleWalker {
+export abstract class ScopeAwareRuleWalker<T> extends RuleWalker { // tslint:disable-line deprecation
     private readonly scopeStack: T[];
 
     constructor(sourceFile: ts.SourceFile, options: IOptions) {
