@@ -122,7 +122,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     : options.quotemark;
             const actualQuotemark = sourceFile.text[node.end - 1];
 
-            // Don't use backticks when it breaks TypeScript syntax.
+            // Don't use backticks instead of single/double quotes when it breaks TypeScript syntax.
             if (expectedQuotemark === '`' &&
                 (isImportDeclaration(node.parent) ||
                     isPropertyAssignment(node.parent))
