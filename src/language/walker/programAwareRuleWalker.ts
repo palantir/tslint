@@ -21,7 +21,13 @@ import { IOptions } from "../rule/rule";
 
 import { RuleWalker } from "./ruleWalker";
 
-export class ProgramAwareRuleWalker extends RuleWalker {
+/**
+ * @deprecated
+ * RuleWalker-based rules are slow,
+ * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
+ * @see https://github.com/palantir/tslint/issues/2522
+ */
+export class ProgramAwareRuleWalker extends RuleWalker { // tslint:disable-line deprecation
     private readonly typeChecker: ts.TypeChecker;
 
     constructor(
