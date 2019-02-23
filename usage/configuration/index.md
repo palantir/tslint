@@ -31,7 +31,7 @@ configure which rules get run and each of their options.
     -   Legacy: A boolean value may be specified instead of the above object, and is equivalent to setting no options with default severity.
     -   Any rules specified in this block will override those configured in any base configuration being extended.
     -   [Check out the full rules list here][3].
--   `jsRules?: any | boolean`: Same format as `rules` or explicit `true` to copy all valid active rules from rules. These rules are applied to `.js` and `.jsx` files.
+-   `jsRules?: any | boolean`: Same format as `rules` or explicit `true` to copy all rule configurations for JS-compatible rules from `rules`. These rules are applied to `.js` and `.jsx` files.
 -   `defaultSeverity?: "error" | "warning" | "off"`: The severity level that is applied to rules in this config file as well as rules in any inherited config files which have their severity set to "default". If undefined, "error" is used as the defaultSeverity.
 -   `linterOptions?: { exclude?: string[] }`:
     -   `exclude: string[]`: An array of globs. Any file matching these globs will not be linted. All exclude patterns are relative to the configuration file they were specified in.

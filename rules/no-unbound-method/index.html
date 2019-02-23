@@ -1,14 +1,36 @@
 ---
 ruleName: no-unbound-method
 description: Warns when a method is used outside of a method call.
-optionsDescription: You may optionally pass "ignore-static" to ignore static methods.
+optionsDescription: |+
+
+  You may additionally pass "ignore-static" to ignore static methods, or an options object.
+
+  The object may have three properties:
+
+  * "ignore-static" - to ignore static methods.
+  * "allow-typeof" - ignore methods referenced in a typeof expression.
+  * "whitelist" - ignore method references in parameters of specifed function calls.
+
 options:
-  type: string
-  enum:
-    - ignore-static
+  anyOf:
+    - type: string
+      enum:
+        - ignore-static
+    - type: object
+      properties:
+        allow-typeof:
+          type: boolean
+        ignore-static:
+          type: boolean
+        whitelist:
+          type: array
+          items:
+            type: string
+          minLength: 1
 optionExamples:
   - 'true'
   - '[true, "ignore-static"]'
+  - '[true, {"ignore-static": true, "whitelist": ["expect"], "allow-typeof": true}]'
 rationale: |-
 
   Class functions don't preserve the class scope when passed as standalone variables.
@@ -55,9 +77,31 @@ layout: rule
 title: 'Rule: no-unbound-method'
 optionsJSON: |-
   {
-    "type": "string",
-    "enum": [
-      "ignore-static"
+    "anyOf": [
+      {
+        "type": "string",
+        "enum": [
+          "ignore-static"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "allow-typeof": {
+            "type": "boolean"
+          },
+          "ignore-static": {
+            "type": "boolean"
+          },
+          "whitelist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minLength": 1
+          }
+        }
+      }
     ]
   }
 ---
