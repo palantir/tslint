@@ -1,5 +1,66 @@
 # Change Log
 
+## v5.13.0
+
+- [deprecation] Mark `RuleWalker` and `ProgramAwareRuleWalker` as deprecated (#4413)
+- [bugfix] Create output directory when the output path (specified by `--out` CLI flag) does not exist. (#4507)
+- [bugfix] Explicit disabling of rules is now copied over to jsRules when using `jsRules: true` (#4517)
+- [bugfix] `unknown` is recognized as simple type in [`array-type`](https://palantir.github.io/tslint/rules/array-type/) (#4433)
+- [bugfix] [`ban`](https://palantir.github.io/tslint/rules/ban/): Fix a false positive which would occur when banning method calls nested inside objects. Previously, banning `["a", "b", "c"]` would trigger lint failures on the syntax `b.c()`, which was not the intent of this rule.  (#4383)
+- [bugfix] Fixed single-line comment parsing for completed-docs (#3557)
+- [bugfix] [`trailing-comma`](https://palantir.github.io/tslint/rules/trailing-comma/) no longer crashes if it cannot find the closing parenthesis of a function declaration (#4457)
+- [bugfix] [`no-unsafe-any`](https://palantir.github.io/tslint/rules/no-unsafe-any/): allow implicitly downcasting `any` to `unknown` (#4442)
+- [bugfix] Add `grouped-imports` to `tslint:all` (#4420)
+- [docs] Fix docs typo (#4395)
+- [enhancement] Add "formatting" rule category (#2832)
+- [enhancement] [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/) now supports a groups option to provide custom grouping rules. (#4134)
+- [enhancement] Convert `completed-docs` to an untyped rule (#3557)
+- [enhancement] Checkstyle formatter includes every file linted regardless of lint errors. (#3838)
+- [enhancement] Formatters now receive the full list of of linted file paths as a third argument. (#3838)
+- [enhancement] [`array-type`](https://palantir.github.io/tslint/rules/array-type/) rule handles Typescript 3.0's unknown type properly (#4219)
+- [enhancement] [`import-blacklist`](https://palantir.github.io/tslint/rules/import-blacklist/) now supports regular expression patterns for blacklisting (#3504)
+- [new-rule] `no-restricted-globals` (#3824)
+- [new-fixer] added fixer for `newline-before-return` rule (#4482)
+- [new-fixer] [`number-literal-format`](https://palantir.github.io/tslint/rules/number-literal-format/) now includes auto fix (#4496)
+- [new-rule-option] Added `whitelist` option to [`no-unbound-method`](https://palantir.github.io/tslint/rules/no-unbound-method/) (#4472)
+- [new-rule-option] added `jsx-ignore` option to [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers/) rule (#4460)
+- [new-rule-option]: [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/): Add `match-declaration-order-only` option (#3748)
+- [new-rule-option] [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) accepts `ignore-rhs` option to disable checking the right-hand side of the `&&` and `||` operators as strictly boolean. (#4159)
+
+Thanks to our contributors!
+
+- Enes SOYLU
+- jbsingh
+- Sven Efftinge
+- James C. Davis
+- Norio Suzuki
+- Thomas den Hollander
+- Retsam
+- Dobes Vandermeer
+- Young Min Kim
+- Grant Wu
+- Felix Schindler
+- Lydia
+- Adrian Leonhard
+- James Jensen
+- Athene Noctua
+- Allen
+- Vincent Langlet
+- Paul Medynski
+- Liz
+- Piotr Gajowniczek
+- Max Sysoev
+- Jakub Beneš
+- Ian Mobley
+- 周昊宇
+- Nazanin Delam
+- Matt R. Wilson
+- Andy Hanson
+- Zen
+- Josh Goldberg
+- Jeff Lau
+
+
 ## v5.12.1
 
 ## :hammer_and_wrench: Bugfixes & enhancements
