@@ -75,7 +75,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 11,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
-        type: "format",
+        type: "formatting",
         typescriptOnly: false,
         hasFix: true,
     };

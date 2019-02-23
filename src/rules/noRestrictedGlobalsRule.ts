@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
-import { isBindingElement, isComputedPropertyName, isIdentifier, isPropertyAccessExpression } from "tsutils";
+import {
+    isBindingElement,
+    isComputedPropertyName,
+    isIdentifier,
+    isPropertyAccessExpression,
+} from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -50,14 +56,7 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             items: { type: "string" },
         },
-        optionExamples: [
-            [
-                true,
-                "name",
-                "length",
-                "event",
-            ],
-        ],
+        optionExamples: [[true, "name", "length", "event"]],
         type: "functionality",
         typescriptOnly: false,
         requiresTypeInfo: true,
@@ -69,12 +68,18 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const bannedList = this.ruleArguments.length > 0 ? this.ruleArguments : ["event", "name", "length"];
+        const bannedList =
+            this.ruleArguments.length > 0 ? this.ruleArguments : ["event", "name", "length"];
         const bannedGlobals = new Set(bannedList);
         if (sourceFile.isDeclarationFile) {
             return [];
         } else {
-            return this.applyWithFunction(sourceFile, walk, bannedGlobals, program.getTypeChecker());
+            return this.applyWithFunction(
+                sourceFile,
+                walk,
+                bannedGlobals,
+                program.getTypeChecker(),
+            );
         }
     }
 }
@@ -113,7 +118,7 @@ function walk(ctx: Lint.WalkContext<Set<string>>, checker: ts.TypeChecker): void
             return;
         }
 
-        const isAmbientGlobal = declarations.some((decl) => decl.getSourceFile().isDeclarationFile);
+        const isAmbientGlobal = declarations.some(decl => decl.getSourceFile().isDeclarationFile);
 
         if (isAmbientGlobal) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING(node.text));

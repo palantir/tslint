@@ -96,7 +96,7 @@ export interface IRuleMetadata {
     codeExamples?: ICodeExample[];
 }
 
-export type RuleType = "functionality" | "maintainability" | "style" | "typescript" | "format";
+export type RuleType = "functionality" | "maintainability" | "style" | "typescript" | "formatting";
 
 export type RuleSeverity = "warning" | "error" | "off";
 

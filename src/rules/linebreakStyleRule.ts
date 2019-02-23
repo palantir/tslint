@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: [OPTION_LINEBREAK_STYLE_LF, OPTION_LINEBREAK_STYLE_CRLF],
         },
         optionExamples: [[true, OPTION_LINEBREAK_STYLE_LF], [true, OPTION_LINEBREAK_STYLE_CRLF]],
-        type: "format",
+        type: "formatting",
         typescriptOnly: false,
         hasFix: true,
     };
