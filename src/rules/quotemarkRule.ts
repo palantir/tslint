@@ -79,7 +79,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE, OPTION_AVOID_TEMPLATE],
             [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
         ],
-        type: "format",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

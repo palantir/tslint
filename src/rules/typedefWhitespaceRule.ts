@@ -90,7 +90,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             ],
         ],
-        type: "format",
+        type: "formatting",
         typescriptOnly: true,
         hasFix: true,
     };
