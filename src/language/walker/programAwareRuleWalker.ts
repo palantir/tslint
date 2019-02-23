@@ -27,7 +27,8 @@ import { RuleWalker } from "./ruleWalker";
  * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
  * @see https://github.com/palantir/tslint/issues/2522
  */
-export class ProgramAwareRuleWalker extends RuleWalker { // tslint:disable-line deprecation
+// tslint:disable-next-line deprecation
+export class ProgramAwareRuleWalker extends RuleWalker {
     private readonly typeChecker: ts.TypeChecker;
 
     constructor(
