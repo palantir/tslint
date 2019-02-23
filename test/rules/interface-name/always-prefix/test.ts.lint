@@ -2,7 +2,20 @@
 interface IOptions {
 }
 
+interface ID {
+}
+
+interface IABC {
+}
+
+interface IDBFactory {
+}
+
 // invalid code
 interface Options {
           ~~~~~~~   [interface name must start with a capitalized I]
+}
+
+interface Incomplete {
+          ~~~~~~~~~~   [interface name must start with a capitalized I]
 }

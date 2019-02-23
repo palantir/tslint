@@ -5,6 +5,12 @@ interface Index {
 interface I {
 }
 
+interface ID {
+}
+
+interface IABC {
+}
+
 interface IDBFactory {
 }
 

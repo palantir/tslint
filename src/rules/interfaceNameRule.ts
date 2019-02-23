@@ -62,10 +62,12 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isInterfaceDeclaration(node)) {
             const { name } = node;
-            if (never && hasPrefixI(name.text)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-            } else if (!never && !hasPrefixI(name.text) && !isEdgeCase(name.text)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+            if (!cantDecide(name.text)) {
+                if (never && hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
+                } else if (!never && !hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+                }
             }
         } else {
             return ts.forEachChild(node, cb);
@@ -77,6 +79,9 @@ function hasPrefixI(name: string): boolean {
     return name.length >= 3 && name[0] === "I" && !isLowerCase(name[1]) && !isUpperCase(name[2]);
 }
 
-function isEdgeCase(name: string): boolean {
-    return name.length === 2 && name[0] === "I" && !isLowerCase(name[1]);
+function cantDecide(name: string): boolean {
+    return (
+        (name.length === 2 && name[0] === "I" && !isLowerCase(name[1])) ||
+        (name.length >= 2 && name[0] === "I" && !isLowerCase(name[1]) && !isLowerCase(name[2]))
+    );
 }
