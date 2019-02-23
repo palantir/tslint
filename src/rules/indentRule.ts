@@ -69,7 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
         hasFix: true,
-        type: "maintainability",
+        type: "format",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

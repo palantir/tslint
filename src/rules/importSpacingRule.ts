@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
-        type: "style",
+        type: "format",
         typescriptOnly: false,
     };
 

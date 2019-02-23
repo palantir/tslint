@@ -76,7 +76,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_ALWAYS, OPTION_IGNORE_INTERFACES],
             [true, OPTION_ALWAYS, OPTION_IGNORE_BOUND_CLASS_METHODS],
         ],
-        type: "style",
+        type: "format",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

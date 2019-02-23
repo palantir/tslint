@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [true, [true, OPTION_CHECK_MULTILINE_START]],
-        type: "style",
+        type: "format",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
