@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+
 import { Options, run, Status } from "../../src/runner";
 
 const customRulesOptions: Options = {
@@ -26,7 +27,10 @@ const customRulesOptions: Options = {
 
 describe("Runner Tests", () => {
     it("outputs absolute path with --outputAbsolutePaths", async () => {
-        const { status, stdout, stderr } = await runLint({ ...customRulesOptions, outputAbsolutePaths: true });
+        const { status, stdout, stderr } = await runLint({
+            ...customRulesOptions,
+            outputAbsolutePaths: true,
+        });
         assert.equal(status, 2);
         // match either a path starting with `/` or something like `C:`
         assert.isTrue(/ERROR: (\/|\w:)/.test(stdout));
@@ -41,9 +45,18 @@ describe("Runner Tests", () => {
     });
 });
 
-async function runLint(options: Options): Promise<{ status: Status; stdout: string; stderr: string }> {
+async function runLint(
+    options: Options,
+): Promise<{ status: Status; stdout: string; stderr: string }> {
     let stdout = "";
     let stderr = "";
-    const status = await run(options, { log(m) { stdout += m; }, error(m) { stderr += m; } });
+    const status = await run(options, {
+        log(m) {
+            stdout += m;
+        },
+        error(m) {
+            stderr += m;
+        },
+    });
     return { status, stdout, stderr };
 }

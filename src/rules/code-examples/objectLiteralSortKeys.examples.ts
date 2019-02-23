@@ -38,7 +38,8 @@ export const codeExamples = [
         `,
     },
     {
-        description: Lint.Utils.dedent`Requires that an object literal's keys be sorted by interface-definition.
+        description: Lint.Utils
+            .dedent`Requires that an object literal's keys be sorted by interface-definition.
             If there is no interface fallback to alphabetically.`,
         config: Lint.Utils.dedent`
             "rules": {

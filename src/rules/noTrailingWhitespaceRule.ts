@@ -19,6 +19,7 @@ import { forEachComment, forEachTokenWithTrivia, getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
@@ -38,7 +39,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-trailing-whitespace",
         description: "Disallows trailing whitespace at the end of a line.",
-        rationale: "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
+        rationale:
+            "Keeps version control diffs clean as it prevents accidental whitespace from being committed.",
         optionsDescription: Lint.Utils.dedent`
             Possible settings are:
 
@@ -51,14 +53,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [OPTION_IGNORE_COMMENTS, OPTION_IGNORE_JSDOC, OPTION_IGNORE_TEMPLATE_STRINGS, OPTION_IGNORE_BLANK_LINES],
+                enum: [
+                    OPTION_IGNORE_COMMENTS,
+                    OPTION_IGNORE_JSDOC,
+                    OPTION_IGNORE_TEMPLATE_STRINGS,
+                    OPTION_IGNORE_BLANK_LINES,
+                ],
             },
         },
-        optionExamples: [
-            true,
-            [true, OPTION_IGNORE_COMMENTS],
-            [true, OPTION_IGNORE_JSDOC],
-        ],
+        optionExamples: [true, [true, OPTION_IGNORE_COMMENTS], [true, OPTION_IGNORE_JSDOC]],
         type: "format",
         typescriptOnly: false,
     };
@@ -96,12 +99,22 @@ function walk(ctx: Lint.WalkContext<Options>) {
         return;
     }
     const excludedRanges = ctx.options.ignoreTemplates
-        ? ctx.options.ignoreJsDoc ? getExcludedRanges(sourceFile, ctx.options) : getTemplateRanges(sourceFile)
-        : ctx.options.ignoreJsDoc ? getExcludedComments(sourceFile, ctx.options) : [];
+        ? ctx.options.ignoreJsDoc
+            ? getExcludedRanges(sourceFile, ctx.options)
+            : getTemplateRanges(sourceFile)
+        : ctx.options.ignoreJsDoc
+            ? getExcludedComments(sourceFile, ctx.options)
+            : [];
     for (const possibleFailure of possibleFailures) {
-        if (!excludedRanges.some((range) => range.pos < possibleFailure.pos && possibleFailure.pos < range.end)) {
+        if (
+            !excludedRanges.some(
+                range => range.pos < possibleFailure.pos && possibleFailure.pos < range.end,
+            )
+        ) {
             ctx.addFailure(
-                possibleFailure.pos, possibleFailure.end, Rule.FAILURE_STRING,
+                possibleFailure.pos,
+                possibleFailure.end,
+                Rule.FAILURE_STRING,
                 Lint.Replacement.deleteFromTo(possibleFailure.pos, possibleFailure.end),
             );
         }
@@ -114,7 +127,10 @@ function getExcludedRanges(sourceFile: ts.SourceFile, options: Options): ts.Text
         if (kind >= ts.SyntaxKind.FirstTemplateToken && kind <= ts.SyntaxKind.LastTemplateToken) {
             intervals.push(range);
         } else if (options.ignoreComments) {
-            if (kind === ts.SyntaxKind.SingleLineCommentTrivia || kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+            if (
+                kind === ts.SyntaxKind.SingleLineCommentTrivia ||
+                kind === ts.SyntaxKind.MultiLineCommentTrivia
+            ) {
                 intervals.push(range);
             }
         } else if (options.ignoreJsDoc) {
@@ -129,8 +145,10 @@ function getExcludedRanges(sourceFile: ts.SourceFile, options: Options): ts.Text
 function getExcludedComments(sourceFile: ts.SourceFile, options: Options): ts.TextRange[] {
     const intervals: ts.TextRange[] = [];
     forEachComment(sourceFile, (text, comment) => {
-        if (options.ignoreComments ||
-            options.ignoreJsDoc && isJsDoc(text, comment.kind, comment)) {
+        if (
+            options.ignoreComments ||
+            (options.ignoreJsDoc && isJsDoc(text, comment.kind, comment))
+        ) {
             intervals.push(comment);
         }
     });
@@ -138,5 +156,9 @@ function getExcludedComments(sourceFile: ts.SourceFile, options: Options): ts.Te
 }
 
 function isJsDoc(sourceText: string, kind: ts.SyntaxKind, range: ts.TextRange) {
-    return kind === ts.SyntaxKind.MultiLineCommentTrivia && sourceText[range.pos + 2] === "*" && sourceText[range.pos + 3] !== "*";
+    return (
+        kind === ts.SyntaxKind.MultiLineCommentTrivia &&
+        sourceText[range.pos + 2] === "*" &&
+        sourceText[range.pos + 3] !== "*"
+    );
 }

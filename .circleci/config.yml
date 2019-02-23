@@ -1,153 +1,167 @@
 version: 2
 jobs:
-  build:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run:
-          name: Install dependencies
-          command: yarn
-      - save_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-          paths:
-            - node_modules
-      - run: yarn compile
-      - persist_to_workspace:
-          root: '.'
-          paths:
-            - lib
-            - build
-            - yarn.lock
-  lint:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn lint
-  test:
-    docker:
-      - image: circleci/node:8
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn test
-  test2.1:
-    docker:
-      - image: circleci/node:4
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.1
-      - run: yarn test
-  test2.4:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.4
-      - run: yarn test
-  test2.7:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.7
-      - run: yarn test
-  test2.8:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.8
-      - run: yarn test
-  test2.9:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.9
-      - run: yarn test
-  testRc:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@rc
-      - run: yarn test
-  testNext:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@next
-      - run: yarn test
+    build:
+        docker:
+            - image: circleci/node:latest
+        steps:
+            - checkout
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run:
+                  name: Install dependencies
+                  command: yarn
+            - save_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+                  paths:
+                      - node_modules
+            - run: yarn compile
+            - persist_to_workspace:
+                  root: "."
+                  paths:
+                      - lib
+                      - build
+                      - yarn.lock
+    lint:
+        docker:
+            - image: circleci/node:latest
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn lint
+    test:
+        docker:
+            - image: circleci/node:8
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn test
+    test2.1:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@2.1
+            - run: yarn test
+    test2.4:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@2.4
+            - run: yarn test
+    test2.7:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@2.7
+            - run: yarn test
+    test2.8:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@2.8
+            - run: yarn test
+    test2.9:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@2.9
+            - run: yarn test
+    test3.0:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@3.0.1
+            - run: yarn test
+    testRc:
+        docker:
+            - image: circleci/node:6
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@rc
+            - run: yarn test
+    testNext:
+        docker:
+            - image: circleci/node:latest
+        steps:
+            - checkout
+            - attach_workspace:
+                  at: "."
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "yarn.lock" }}
+            - run: yarn add typescript@next
+            - run: yarn test
 
 workflows:
-  version: 2
-  build_lint_test:
-    jobs:
-      - build
-      - lint:
-          requires:
+    version: 2
+    build_lint_test:
+        jobs:
             - build
-      - test:
-          requires:
-            - build
-      - test2.1:
-          requires:
-            - build
-      - test2.4:
-          requires:
-            - build
-      - test2.7:
-          requires:
-            - build
-      - test2.8:
-          requires:
-            - build
-      - test2.9:
-          requires:
-            - build
-      - testRc:
-          requires:
-            - build
-      - testNext:
-          requires:
-            - build
+            - lint:
+                  requires:
+                      - build
+            - test:
+                  requires:
+                      - build
+            - test2.1:
+                  requires:
+                      - build
+            - test2.4:
+                  requires:
+                      - build
+            - test2.7:
+                  requires:
+                      - build
+            - test2.8:
+                  requires:
+                      - build
+            - test2.9:
+                  requires:
+                      - build
+            - test3.0:
+                  requires:
+                      - build
+            - testRc:
+                  requires:
+                      - build
+            - testNext:
+                  requires:
+                      - build

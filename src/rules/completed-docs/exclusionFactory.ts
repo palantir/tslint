@@ -17,6 +17,7 @@
 
 import { hasOwnProperty } from "../../utils";
 import { DocType } from "../completedDocsRule";
+
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
 import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
 import { Exclusion } from "./exclusion";
@@ -44,7 +45,10 @@ export class ExclusionFactory {
 
         for (const docType in descriptors) {
             if (hasOwnProperty(descriptors, docType)) {
-                exclusionsMap.set(docType as DocType, this.createRequirementsForDocType(docType as DocType, descriptors[docType]));
+                exclusionsMap.set(
+                    docType as DocType,
+                    this.createRequirementsForDocType(docType as DocType, descriptors[docType]),
+                );
             }
         }
     }

@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -38,12 +39,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(lineCount: number, lineLimit: number) {
-        return `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
-            "Consider breaking this file up into smaller parts";
+        return (
+            `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
+            "Consider breaking this file up into smaller parts"
+        );
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] as number > 0;
+        return super.isEnabled() && (this.ruleArguments[0] as number) > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -54,6 +57,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const len = sourceFile.text.length;
-        return [new Lint.RuleFailure(sourceFile, len - 1, len, Rule.FAILURE_STRING(lineCount, lineLimit), this.ruleName)];
+        return [
+            new Lint.RuleFailure(
+                sourceFile,
+                len - 1,
+                len,
+                Rule.FAILURE_STRING(lineCount, lineLimit),
+                this.ruleName,
+            ),
+        ];
     }
 }
