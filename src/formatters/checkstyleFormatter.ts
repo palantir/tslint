@@ -26,7 +26,7 @@ export class Formatter extends AbstractFormatter {
         formatterName: "checkstyle",
         description: "Formats errors as though they were Checkstyle output.",
         descriptionDetails: Utils.dedent`
-            Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity.`,
+            Imitates the XMLLogger from Checkstyle 4.3. All failures have the 'warning' severity. Files without errors are still included.`,
         sample: Utils.dedent`
         <?xml version="1.0" encoding="utf-8"?>
         <checkstyle version="4.3">
@@ -38,39 +38,38 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
-        let output = '<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">';
-
-        if (failures.length !== 0) {
-            const failuresSorted = failures.sort((a, b) =>
-                a.getFileName().localeCompare(b.getFileName()),
-            );
-            let previousFilename: string | null = null;
-            for (const failure of failuresSorted) {
-                const severity = failure.getRuleSeverity();
-                if (failure.getFileName() !== previousFilename) {
-                    if (previousFilename !== null) {
-                        output += "</file>";
-                    }
-                    previousFilename = failure.getFileName();
-                    output += `<file name="${this.escapeXml(failure.getFileName())}">`;
-                }
-                output += `<error line="${failure.getStartPosition().getLineAndCharacter().line +
-                    1}" `;
-                output += `column="${failure.getStartPosition().getLineAndCharacter().character +
-                    1}" `;
-                output += `severity="${severity}" `;
-                output += `message="${this.escapeXml(failure.getFailure())}" `;
-                // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
-                output += `source="failure.tslint.${this.escapeXml(failure.getRuleName())}" />`;
-            }
-            if (previousFilename !== null) {
-                output += "</file>";
+    public format(failures: RuleFailure[], _fixes: RuleFailure[], fileNames: string[]): string {
+        const groupedFailures: { [k: string]: RuleFailure[] } = {};
+        for (const failure of failures) {
+            const fileName = failure.getFileName();
+            if (groupedFailures[fileName] !== undefined) {
+                groupedFailures[fileName].push(failure);
+            } else {
+                groupedFailures[fileName] = [failure];
             }
         }
 
-        output += "</checkstyle>";
-        return output;
+        const formattedFiles = fileNames.map(fileName => {
+            const formattedFailures =
+                groupedFailures[fileName] !== undefined
+                    ? groupedFailures[fileName].map(f => this.formatFailure(f))
+                    : [];
+            const joinedFailures = formattedFailures.join(""); // may be empty
+            return `<file name="${this.escapeXml(fileName)}">${joinedFailures}</file>`;
+        });
+        const joinedFiles = formattedFiles.join("");
+        return `<?xml version="1.0" encoding="utf-8"?><checkstyle version="4.3">${joinedFiles}</checkstyle>`;
+    }
+
+    private formatFailure(failure: RuleFailure): string {
+        const line = failure.getStartPosition().getLineAndCharacter().line + 1;
+        const column = failure.getStartPosition().getLineAndCharacter().character + 1;
+        const severity = failure.getRuleSeverity();
+        const message = this.escapeXml(failure.getFailure());
+        // checkstyle parser wants "source" to have structure like <anything>dot<category>dot<type>
+        const source = `failure.tslint.${this.escapeXml(failure.getRuleName())}`;
+
+        return `<error line="${line}" column="${column}" severity="${severity}" message="${message}" source="${source}" />`;
     }
 
     private escapeXml(str: string): string {
