@@ -22,7 +22,13 @@ optionsDescription: |
       const obj: I = { foo: 1, bar: 2 };
       ```
 
-      If a contextual type is not found, alphabetical ordering will be used instead.
+  If a contextual type is not found, alphabetical ordering will be used instead.
+  * "match-declaration-order-only" exactly like "match-declaration-order",
+      but don't fall back to alphabetical if a contextual type is not found.
+
+      Note: If both match-declaration-order-only and match-declaration-order options are present,
+            match-declaration-order-only will take precedence and alphabetical fallback will not occur.
+
   * `shorthand-first` will enforce shorthand properties to appear first, as in:
 
       ```
@@ -34,6 +40,7 @@ options:
     - ignore-case
     - locale-compare
     - match-declaration-order
+    - match-declaration-order-only
     - shorthand-first
 optionExamples:
   - 'true'
@@ -111,6 +118,7 @@ optionsJSON: |-
       "ignore-case",
       "locale-compare",
       "match-declaration-order",
+      "match-declaration-order-only",
       "shorthand-first"
     ]
   }

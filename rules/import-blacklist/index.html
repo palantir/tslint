@@ -3,7 +3,8 @@ ruleName: import-blacklist
 description: |-
 
   Disallows importing the specified modules via `import` and `require`,
-  or importing specific named exports of the specified modules.
+  or importing specific named exports of the specified modules,
+  or using imports matching specified regular expression patterns.
 rationale: |-
 
   For some libraries, importing the library directly can cause unused
@@ -11,7 +12,7 @@ rationale: |-
   require that users directly import only the submodules they need.
   In other cases, you may simply want to ban an import because using
   it is undesirable or unsafe.
-optionsDescription: A list of blacklisted modules or named imports.
+optionsDescription: 'A list of blacklisted modules, named imports, or regular expression patterns.'
 options:
   type: array
   items:
@@ -25,10 +26,15 @@ options:
           items:
             type: string
             minLength: 1
+      - type: array
+        items:
+          type: string
+        minLength: 1
 optionExamples:
   - 'true'
   - '[true, "rxjs", "lodash"]'
   - '[true, "lodash", {"lodash": ["pull", "pullAll"]}]'
+  - '[true, "rxjs", {"lodash": ["pull", "pullAll"]}, [".*\\.temp$", ".*\\.tmp$"]]'
 type: functionality
 typescriptOnly: false
 layout: rule
@@ -52,6 +58,13 @@ optionsJSON: |-
               "minLength": 1
             }
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 1
         }
       ]
     }

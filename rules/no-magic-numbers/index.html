@@ -9,15 +9,25 @@ rationale: |-
   Magic numbers should be avoided as they often lack documentation.
   Forcing them to be stored in variables gives them implicit documentation.
           
-optionsDescription: A list of allowed numbers.
+optionsDescription: |-
+
+  Options may either be a list of numbers to ignore (not consider 'magic'), or an object containing up to two properties:
+  * `allowed-numbers` as the list of numbers to ignore.
+  * `ignore-jsx` to specify that 'magic' numbers should be allowed as JSX attributes.
 options:
   type: array
   items:
     type: number
+  properties:
+    type: object
+    allowed-numbers:
+      type: array
+    ignore-jsx:
+      type: boolean
   minLength: 1
 optionExamples:
-  - 'true'
   - '[true, 1, 2, 3]'
+  - '[true, {"allowed-numbers": [1, 2, 3], "ignore-jsx": true}]'
 type: typescript
 typescriptOnly: false
 layout: rule
@@ -27,6 +37,15 @@ optionsJSON: |-
     "type": "array",
     "items": {
       "type": "number"
+    },
+    "properties": {
+      "type": "object",
+      "allowed-numbers": {
+        "type": "array"
+      },
+      "ignore-jsx": {
+        "type": "boolean"
+      }
     },
     "minLength": 1
   }
