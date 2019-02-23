@@ -59,6 +59,7 @@ export const rules = {
     "no-namespace": true,
     "no-non-null-assertion": true,
     "no-reference": true,
+    "no-restricted-globals": true,
     "no-this-assignment": true,
     "no-var-requires": true,
     "only-arrow-functions": true,
