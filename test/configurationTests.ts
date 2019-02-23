@@ -141,6 +141,7 @@ describe("Configuration", () => {
             rawConfig = {
                 jsRules: true,
                 rules: {
+                    // valid rule for JS
                     eofline: true,
                 },
             };
@@ -151,7 +152,9 @@ describe("Configuration", () => {
             rawConfig = {
                 jsRules: true,
                 rules: {
-                    eofline: true,
+                    // valid rule for JS, disabled (should be copied over)
+                    eofline: false,
+                    // non-valid rule for JS (should NOT be copied over)
                     typedef: true,
                 },
             };
