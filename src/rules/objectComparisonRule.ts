@@ -128,12 +128,8 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
             const leftType = checker.getTypeAtLocation(node.left);
             const rightType = checker.getTypeAtLocation(node.right);
 
-            const leftKinds: TypeKind[] = isUnionType(leftType)
-                ? Array.from(new Set(leftType.types.map(getKind)))
-                : [getKind(leftType)];
-            const rightKinds: TypeKind[] = isUnionType(rightType)
-                ? Array.from(new Set(rightType.types.map(getKind)))
-                : [getKind(rightType)];
+            const leftKinds: TypeKind[] = getTypes(leftType);
+            const rightKinds: TypeKind[] = getTypes(rightType);
 
             const operandKind = getStrictestComparableType(leftKinds, rightKinds);
 
@@ -185,6 +181,16 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function getTypes(types: ts.Type): TypeKind[] {
+    // Compatibility for TypeScript pre-2.4, which used EnumLiteralType instead of LiteralType
+    const baseType = ((types as any) as { baseType: ts.LiteralType }).baseType;
+    return isUnionType(types)
+        ? Array.from(new Set(types.types.map(getKind)))
+        : isTypeFlagSet(types, ts.TypeFlags.EnumLiteral) && typeof baseType !== "undefined"
+            ? [getKind(baseType)]
+            : [getKind(types)];
 }
 
 function getStrictestComparableType(types1: TypeKind[], types2: TypeKind[]): TypeKind | undefined {
