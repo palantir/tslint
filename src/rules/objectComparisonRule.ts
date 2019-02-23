@@ -35,6 +35,16 @@ const enum TypeKind {
     Object = 6,
 }
 
+const typeNames = {
+    [TypeKind.Any]: "any",
+    [TypeKind.Number]: "number",
+    [TypeKind.Enum]: "enum",
+    [TypeKind.String]: "string",
+    [TypeKind.Boolean]: "boolean",
+    [TypeKind.NullOrUndefined]: "null | undefined",
+    [TypeKind.Object]: "object",
+};
+
 interface Options {
     [OPTION_ALLOW_OBJECT_EQUAL_COMPARISON]?: boolean;
     [OPTION_ALLOW_STRING_ORDER_COMPARISON]?: boolean;
@@ -84,7 +94,16 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INVALID_COMPARISON = `Invalid comparison`;
+    public static INVALID_TYPES(types1: TypeKind[], types2: TypeKind[]) {
+        const types1String = types1.map(type => typeNames[type]).join(" | ");
+        const types2String = types2.map(type => typeNames[type]).join(" | ");
+
+        return `cannot compare type '${types1String}' to type '${types2String}'`;
+    }
+
+    public static INVALID_TYPE_FOR_OPERATOR(type: TypeKind, comparator: string) {
+        return `cannot use '${comparator}' comparator for type '${typeNames[type]}'`;
+    }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.getRuleOptions(), program);
@@ -106,19 +125,29 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
 
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node) && isComparisonOperator(node)) {
-            const isEquality = isEqualityOperator(node);
+            const leftType = checker.getTypeAtLocation(node.left);
+            const rightType = checker.getTypeAtLocation(node.right);
 
-            const leftKind = getKind(checker.getTypeAtLocation(node.left));
-            const rightKind = getKind(checker.getTypeAtLocation(node.right));
+            const leftKinds: TypeKind[] = isUnionType(leftType)
+                ? Array.from(new Set(leftType.types.map(getKind)))
+                : [getKind(leftType)];
+            const rightKinds: TypeKind[] = isUnionType(rightType)
+                ? Array.from(new Set(rightType.types.map(getKind)))
+                : [getKind(rightType)];
 
-            const operandKind = getStrictestKind([leftKind, rightKind]);
+            const operandKind = getStrictestComparableType(leftKinds, rightKinds);
 
-            if (isEquality) {
-                // Check !=, ==, !==, ===
-                if (options[OPTION_ALLOW_OBJECT_EQUAL_COMPARISON]) {
-                    // With this option all equality checks are valid
-                    return ts.forEachChild(node, cb);
-                } else {
+            if (operandKind === undefined) {
+                const failureString = Rule.INVALID_TYPES(leftKinds, rightKinds);
+                ctx.addFailureAtNode(node, failureString);
+            } else {
+                const failureString = Rule.INVALID_TYPE_FOR_OPERATOR(
+                    operandKind,
+                    node.operatorToken.getText(),
+                );
+                const isEquality = isEqualityOperator(node);
+                if (isEquality) {
+                    // Check !=, ==, !==, ===
                     switch (operandKind) {
                         case TypeKind.Any:
                         case TypeKind.Number:
@@ -126,29 +155,67 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                         case TypeKind.String:
                         case TypeKind.Boolean:
                             break;
-                        default:
-                            ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
-                    }
-                }
-            } else {
-                // Check >, <, >=, <=
-                switch (operandKind) {
-                    case TypeKind.Any:
-                    case TypeKind.Number:
-                        break;
-                    case TypeKind.String:
-                        if (options[OPTION_ALLOW_STRING_ORDER_COMPARISON]) {
+                        case TypeKind.NullOrUndefined:
+                        case TypeKind.Object:
+                            if (options[OPTION_ALLOW_OBJECT_EQUAL_COMPARISON]) {
+                                break;
+                            }
+                            ctx.addFailureAtNode(node, failureString);
                             break;
-                        }
-                        ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
-                        break;
-                    default:
-                        ctx.addFailureAtNode(node, Rule.INVALID_COMPARISON);
+                        default:
+                            ctx.addFailureAtNode(node, failureString);
+                    }
+                } else {
+                    // Check >, <, >=, <=
+                    switch (operandKind) {
+                        case TypeKind.Any:
+                        case TypeKind.Number:
+                            break;
+                        case TypeKind.String:
+                            if (options[OPTION_ALLOW_STRING_ORDER_COMPARISON]) {
+                                break;
+                            }
+                            ctx.addFailureAtNode(node, failureString);
+                            break;
+                        default:
+                            ctx.addFailureAtNode(node, failureString);
+                    }
                 }
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function getStrictestComparableType(types1: TypeKind[], types2: TypeKind[]): TypeKind | undefined {
+    const overlappingTypes = types1.filter(type1 => types2.indexOf(type1) >= 0);
+
+    if (overlappingTypes.length > 0) {
+        return getStrictestKind(overlappingTypes);
+    } else {
+        // In case one of the types is "any", get the strictest type of the other array
+        if (arrayContainsKind(types1, TypeKind.Any)) {
+            return getStrictestKind(types2);
+        }
+        if (arrayContainsKind(types2, TypeKind.Any)) {
+            return getStrictestKind(types1);
+        }
+
+        // In case one array contains NullOrUndefined and the other an Object, return Object
+        if (
+            (arrayContainsKind(types1, TypeKind.NullOrUndefined) &&
+                arrayContainsKind(types2, TypeKind.Object)) ||
+            (arrayContainsKind(types2, TypeKind.NullOrUndefined) &&
+                arrayContainsKind(types1, TypeKind.Object))
+        ) {
+            return TypeKind.Object;
+        }
+        return undefined;
+    }
+}
+
+function arrayContainsKind(types: TypeKind[], typeToCheck: TypeKind): boolean {
+    return types.some(type => type === typeToCheck);
 }
 
 function getStrictestKind(types: TypeKind[]): TypeKind {
@@ -194,13 +261,9 @@ function getKind(type: ts.Type): TypeKind {
                 ? TypeKind.Boolean
                 : is(ts.TypeFlags.Null | ts.TypeFlags.Undefined | ts.TypeFlags.Void)
                     ? TypeKind.NullOrUndefined
-                    : isUnionType(type) && !is(ts.TypeFlags.Enum)
-                        ? getStrictestKind(type.types.map(getKind))
-                        : is(ts.TypeFlags.EnumLike)
-                            ? getKind(type)
-                            : is(ts.TypeFlags.Any)
-                                ? TypeKind.Any
-                                : TypeKind.Object;
+                    : is(ts.TypeFlags.Any)
+                        ? TypeKind.Any
+                        : TypeKind.Object;
     // tslint:enable:no-bitwise
 
     function is(flags: ts.TypeFlags) {

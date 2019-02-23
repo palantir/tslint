@@ -8,22 +8,22 @@ if (2 === 1) {}
 if (2 != 1) {}
 if (2 !== 1) {}
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~          [0]
+    ~~~~~~~~~~~~~     [cannot compare type 'number' to type 'null | undefined']
 if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~        [0]
+    ~~~~~~~~~~~~~~~     [cannot compare type 'null | undefined' to type 'number']
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~          [0]
+    ~~~~~~~~~~~~~     [cannot compare type 'number' to type 'null | undefined']
 if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~        [0]
+    ~~~~~~~~~~~~~~~     [cannot compare type 'null | undefined' to type 'number']
 if (true) {}
 if (true > false) {}
-    ~~~~~~~~~~~~           [0]
+    ~~~~~~~~~~~~     [cannot use '>' comparator for type 'boolean']
 if (true < false) {}
-    ~~~~~~~~~~~~           [0]
+    ~~~~~~~~~~~~     [cannot use '<' comparator for type 'boolean']
 if (true >= false) {}
-    ~~~~~~~~~~~~~          [0]
+    ~~~~~~~~~~~~~     [cannot use '>=' comparator for type 'boolean']
 if (true <= false) {}
-    ~~~~~~~~~~~~~          [0]
+    ~~~~~~~~~~~~~     [cannot use '<=' comparator for type 'boolean']
 if (true == false) {}
 if (true === false) {}
 if (true != false) {}
@@ -39,42 +39,42 @@ if ('' != '') {}
 if ('' !== '') {}
 if ({}) {}
 if ({} > {}) {}
-    ~~~~~~~                [0]
+    ~~~~~~~     [cannot use '>' comparator for type 'object']
 if ({} < {}) {}
-    ~~~~~~~                [0]
+    ~~~~~~~     [cannot use '<' comparator for type 'object']
 if ({} >= {}) {}
-    ~~~~~~~~               [0]
+    ~~~~~~~~     [cannot use '>=' comparator for type 'object']
 if ({} <= {}) {}
-    ~~~~~~~~               [0]
+    ~~~~~~~~     [cannot use '<=' comparator for type 'object']
 if ({} == {}) {}
-    ~~~~~~~~               [0]
+    ~~~~~~~~     [cannot use '==' comparator for type 'object']
 if ({} === {}) {}
-    ~~~~~~~~~              [0]
+    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
 if ({} != {}) {}
-    ~~~~~~~~               [0]
+    ~~~~~~~~     [cannot use '!=' comparator for type 'object']
 if ({} !== {}) {}
-    ~~~~~~~~~              [0]
+    ~~~~~~~~~     [cannot use '!==' comparator for type 'object']
 if ([] === []) {}
-    ~~~~~~~~~              [0]
+    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
 
 if (3 > 2 || 2 > 1 && true === true) {}
 if ('' > '' || 2 > 1 || {} > {}) {}
-                        ~~~~~~~            [0]
+                        ~~~~~~~     [cannot use '>' comparator for type 'object']
 if ('' > '' && 2 > 1 && {} > {}) {}
-                        ~~~~~~~            [0]
+                        ~~~~~~~     [cannot use '>' comparator for type 'object']
 
 if ({} === null) {}
-    ~~~~~~~~~~~                [0]
+    ~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
 if (null === {}) {}
-    ~~~~~~~~~~~                [0]
+    ~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
 if ({} === undefined) {}
-    ~~~~~~~~~~~~~~~~           [0]
+    ~~~~~~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
 if (undefined === {}) {}
-    ~~~~~~~~~~~~~~~~           [0]
+    ~~~~~~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
 
 function sameObject<T>(a: T, b: T): boolean {
     return a === b;
-           ~~~~~~~                         [0]
+           ~~~~~~~  [cannot use '===' comparator for type 'object']
 }
 
 function sameObject<T>(a: any, b: any): boolean {
@@ -100,9 +100,9 @@ const c1: myObject = {}
 const c2: myObject = {}
 
 if (c1 === c2) {}
-    ~~~~~~~~~              [0]
+    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
 if (c2 === c1) {}
-    ~~~~~~~~~              [0]
+    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
 
 const d1: any = 'string'
 const d2: any = 2
@@ -139,12 +139,10 @@ if (TestStringEnum.Two === g1) {}
 if (g1 > TestStringEnum.Two) {}
 if (TestStringEnum.Two > g1) {}
 
-const h1: boolean | number = true;
-const h2: boolean | number = 2;
+const h1: string | number = Math.random() > 0.5 ? 'text' : 5;
+const h2: string | number = Math.random() > 0.5 ? 'test' : 2;
 if (h1 > h2) {}
-    ~~~~~~~              [0]
 if (h2 > h1) {}
-    ~~~~~~~              [0]
 if (h1 === h2) {}
 if (h2 === h1) {}
 
