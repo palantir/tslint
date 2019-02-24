@@ -53,21 +53,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext<void>): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isIfStatement(node)) {
-            let jumpStatement;
-            if (
-                node.thenStatement.kind !== ts.SyntaxKind.Block &&
-                !utils.isSameLine(ctx.sourceFile, node.thenStatement.pos, node.thenStatement.end)
-            ) {
-                jumpStatement = getJumpStatement(
-                    node.thenStatement.getChildAt(0, ctx.sourceFile).parent,
-                );
-            } else if (
-                utils.isSameLine(ctx.sourceFile, node.thenStatement.pos, node.thenStatement.end)
-            ) {
-                jumpStatement = getJumpStatement(node.thenStatement);
-            } else {
-                jumpStatement = getJumpStatement(getLastStatement(node.thenStatement as ts.Block));
-            }
+            const jumpStatement = utils.isBlock(node.thenStatement)
+                ? getJumpStatement(getLastStatement(node.thenStatement))
+                : getJumpStatement(node.thenStatement);
+
             if (jumpStatement !== undefined && node.elseStatement !== undefined) {
                 const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
                 ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));
@@ -81,7 +70,7 @@ function getPositionOfElseKeyword(node: ts.Node, kind: ts.SyntaxKind) {
     return node.getChildren().filter(child => child.kind === kind)[0];
 }
 
-function getJumpStatement(node: ts.Statement | ts.Node): string | undefined {
+function getJumpStatement(node: ts.Statement): string | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.BreakStatement:
             return "break";
