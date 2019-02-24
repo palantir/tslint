@@ -14,8 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
+import {
+    isImportDeclaration,
+    isNoSubstitutionTemplateLiteral,
+    isPropertyAssignment,
+    isSameLine,
+    isStringLiteral,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -121,6 +126,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     ? options.jsxQuotemark
                     : options.quotemark;
             const actualQuotemark = sourceFile.text[node.end - 1];
+
+            // Don't use backticks instead of single/double quotes when it breaks TypeScript syntax.
+            if (
+                expectedQuotemark === "`" &&
+                (isImportDeclaration(node.parent) || isPropertyAssignment(node.parent))
+            ) {
+                return;
+            }
 
             if (actualQuotemark === expectedQuotemark) {
                 return;

@@ -1,3 +1,5 @@
+import { Something } from "some-package"
+
 var single = `single`;
     var double = `married`;
 var singleWithinDouble = `'singleWithinDouble'`;
@@ -7,3 +9,5 @@ var tabNewlineWithinSingle = `tab\tNewline\nWithinSingle`;
 
 // "avoid-template" option is not set.
 `foo`;
+
+const object = { "kebab-case": 3 }
