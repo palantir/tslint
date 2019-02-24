@@ -2,6 +2,16 @@ class StaticThis {
     static value = 0;
     static staticValue = StaticThis.value;
 
+    static _color = undefined;
+
+    static get color() {
+        return StaticThis._color;
+    }
+
+    static set color(color) {
+        StaticThis._color = color;
+    }
+
     static getTypeOf() {
         return StaticThis;
     }
@@ -36,8 +46,20 @@ const AnonymClass = class {
     }
 }
 
+class AnonymClassChild extends AnonymClass {
+    static getTypeOf() {
+        return AnonymClassChild;
+    }
+}
+
 const NamedClass = class Name {
     static getTypeOf() {
         return Name;
+    }
+}
+
+class NamedClassChild extends NamedClass {
+    static getTypeOf() {
+        return NamedClassChild;
     }
 }

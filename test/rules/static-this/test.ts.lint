@@ -1,11 +1,23 @@
 class StaticThis {
     static value = 0;
     static staticValue = this.value;
-                         ~~~~ [`this` should be replaced with `StaticThis`.]
+                         ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+
+    static _color = undefined;
+
+    static get color() {
+        return this._color;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+
+    static set color(color) {
+        this._color = color;
+        ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
 
     static getTypeOf() {
         return this;
-               ~~~~ [`this` should be replaced with `StaticThis`.]
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
     }
 
     private _value = 5;
@@ -26,24 +38,38 @@ class StaticThis {
 class Child extends StaticThis {
     static word = 'Hello';
     static staticValue = this.word;
-                         ~~~~ [`this` should be replaced with `Child`.]
+                         ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
 
     static getTypeOf() {
         return this;
-               ~~~~ [`this` should be replaced with `Child`.]
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
     }
 }
 
 const AnonymClass = class {
     static getTypeOf() {
         return this;
-               ~~~~ [`this` usage in static context could be a potential reason of runtime errors.]
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+class AnonymClassChild extends AnonymClass {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
     }
 }
 
 const NamedClass = class Name {
     static getTypeOf() {
         return this;
-               ~~~~ [`this` should be replaced with `Name`.]
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+class NamedClassChild extends NamedClass {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
     }
 }
