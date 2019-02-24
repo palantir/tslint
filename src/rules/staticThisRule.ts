@@ -54,79 +54,41 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk)
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-const enum ParentType {
-    None,
-    Class,
-    ClassEntity,
-}
-
 function walk(ctx: Lint.WalkContext<void>) {
-    let currentParent: ParentType = ParentType.None;
-    let currentClassName: string | undefined;
+    let currentParentClass: ts.ClassLikeDeclaration | undefined;
 
     const cb = (node: ts.Node): void => {
-        const originalParent = currentParent;
-        const originalClassName = currentClassName;
+        const originalParentClass = currentParentClass;
 
-        if (utils.isClassLikeDeclaration(node)) {
-            currentParent = ParentType.Class;
-
-            if (node.name !== undefined) {
-                currentClassName = node.name.text;
-            }
-
+        if (
+            utils.isClassLikeDeclaration(node.parent) &&
+            utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)
+        ) {
+            currentParentClass = node.parent;
             ts.forEachChild(node, cb);
-
-            currentParent = originalParent;
-            currentClassName = originalClassName;
-            return;
+            currentParentClass = originalParentClass;
         }
 
-        switch (node.kind) {
-            case ts.SyntaxKind.MethodDeclaration:
-            case ts.SyntaxKind.GetAccessor:
-            case ts.SyntaxKind.SetAccessor:
-            case ts.SyntaxKind.PropertyDeclaration:
-            case ts.SyntaxKind.FunctionDeclaration:
-            case ts.SyntaxKind.FunctionExpression:
-                if (
-                    ParentType.Class === currentParent &&
-                    utils.hasModifier(
-                        node.modifiers,
-                        ts.SyntaxKind.StaticKeyword
-                    )
-                ) {
-                    currentParent = ParentType.ClassEntity;
-                    ts.forEachChild(node, cb);
-                    currentParent = originalParent;
-                }
-                return;
+        if (node.kind === ts.SyntaxKind.ThisKeyword && currentParentClass) {
+            let className: string | undefined;
+            if (currentParentClass.name !== undefined) {
+                className = currentParentClass.name.text;
+            }
 
-            case ts.SyntaxKind.ThisKeyword:
-                if (ParentType.ClassEntity === currentParent) {
-                    let fix: Lint.Fix | undefined;
-                    if (currentClassName !== undefined) {
-                        fix = Lint.Replacement.replaceNode(
-                            node,
-                            currentClassName
-                        );
-                    }
+            const fix = className
+                ? Lint.Replacement.replaceNode(node, className)
+                : undefined;
 
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING(currentClassName),
-                        fix,
-                    );
-                    return;
-                }
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(className), fix);
+            return;
         }
 
         ts.forEachChild(node, cb);
     };
 
-    return ts.forEachChild(ctx.sourceFile, cb);
+    ts.forEachChild(ctx.sourceFile, cb);
 }
