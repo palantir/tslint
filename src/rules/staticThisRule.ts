@@ -19,6 +19,8 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { Replacement } from "../language/rule/rule";
+
 import { codeExamples } from "./code-examples/staticThis.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -42,7 +44,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = 'Use the parent class name instead of `this` when in a `static` context.';
+    public static FAILURE_STRING =
+        "Use the parent class name instead of `this` when in a `static` context.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -64,15 +67,11 @@ function walk(ctx: Lint.WalkContext<void>) {
             currentParentClass = originalParentClass;
         }
 
-        if (node.kind === ts.SyntaxKind.ThisKeyword && currentParentClass) {
-            let className: string | undefined;
+        if (node.kind === ts.SyntaxKind.ThisKeyword && currentParentClass !== undefined) {
+            let fix: Replacement | undefined;
             if (currentParentClass.name !== undefined) {
-                className = currentParentClass.name.text;
+                fix = Lint.Replacement.replaceNode(node, currentParentClass.name.text);
             }
-
-            const fix = className
-                ? Lint.Replacement.replaceNode(node, className)
-                : undefined;
 
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
             return;
