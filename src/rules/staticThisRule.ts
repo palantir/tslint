@@ -42,16 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = (className?: string) => {
-        let message =
-            "`this` usage in static context could be a potential reason of runtime errors.";
-        if (className !== undefined) {
-            /* tslint:disable-next-line:prefer-template */
-            message = "`this` should be replaced with `" + className + "`.";
-        }
-
-        return message;
-    };
+    public static FAILURE_STRING = 'Use the parent class name instead of `this` when in a `static` context.';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
@@ -83,7 +74,7 @@ function walk(ctx: Lint.WalkContext<void>) {
                 ? Lint.Replacement.replaceNode(node, className)
                 : undefined;
 
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING(className), fix);
+            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
             return;
         }
 
