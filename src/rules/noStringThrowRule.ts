@@ -73,10 +73,20 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (isThrowStatement(node)) {
             const { expression } = node;
             if (expression !== undefined && isString(expression)) {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
+                const fix = [
                     Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
                     Lint.Replacement.appendText(expression.getEnd(), ")"),
-                ]);
+                ];
+
+                const hasWhitespaceAfterThrow = /^throw\s+/.test(node.getText());
+                if (!hasWhitespaceAfterThrow) {
+                    const token = node.getFirstToken() as ts.Node;
+                    if (token !== undefined && token.kind === ts.SyntaxKind.ThrowKeyword) {
+                        fix.push(Lint.Replacement.appendText(token.getEnd(), " "));
+                    }
+                }
+
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
             }
         }
         return ts.forEachChild(node, cb);

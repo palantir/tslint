@@ -1,0 +1,24 @@
+let a: never = () => throw new Error('bla');
+
+let b: never = () => throw new Error('bla');
+
+let c: never = () => throw new Error('string1' + 'string2' + 'string3');
+
+let d: never = () => throw new Error('string' + 1);
+
+let e: never = () => throw new Error('string1' + 1 + {});
+
+let f: never = () => throw new Error(('string'));
+
+let g: never = () => throw new Error(1 + 2 + ('string'));
+
+// no warning because rule does not check for toString()
+const one = 1;
+let h: never = () => throw one.toString();
+
+let i: never = () => throw new Error(`some template string`);
+
+const someVariable = 123;
+let j: never = () => throw new Error(`template with ${someVariable} string`);
+
+throw new Error(('component requires CSS height property'));

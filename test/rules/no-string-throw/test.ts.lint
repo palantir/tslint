@@ -28,3 +28,6 @@ let i: never = () => throw `some template string`;
 const someVariable = 123;
 let j: never = () => throw `template with ${someVariable} string`;
                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+throw('component requires CSS height property');
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
