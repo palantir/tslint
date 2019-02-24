@@ -21,55 +21,55 @@ import * as Lint from "../../index";
 export const codeExamples = [
     {
         description:
-            'Disallows "else" blocks following "if" blocks ending with "return", "break", "continue" or "throw" statement. ',
+            'Disallows "else" following "if" blocks ending with "return", "break", "continue" or "throw" statement. ',
         config: Lint.Utils.dedent`
             "rules": { "unnecessary-else": true }
         `,
         pass: Lint.Utils.dedent`
-            if () {
-                return ;
+            if (someCondition()) {
+                return;
             }
-            return;
+            // some code here
 
-            if () {
+            if (someCondition()) {
                 continue;
             }
             // some code here
 
-            if () {
+            if (someCondition()) {
                 throw;
             }
             // some code here
 
-            if () {
+            if (someCondition()) {
                 break;
             }
             // some code here
 
         `,
         fail: Lint.Utils.dedent`
-            if () {
+            if (someCondition()) {
                 return;
             } else {
-            
+                // some code here
             }
 
-            if () {
+            if (someCondition()) {
                 break;
             } else {
-
+                // some code here
             }
 
-            if () {
+            if (someCondition()) {
                 throw;
             } else {
-
+                // some code here
             }
 
-            if () {
+            if (someCondition()) {
                 continue;
             } else {
-
+                // some code here
             }
         `,
     },
