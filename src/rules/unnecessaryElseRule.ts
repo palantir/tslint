@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
 
     public static FAILURE_STRING(name: string): string {
-        return `The preceding \`if\` block ends with a \`${name}\` statement. This \`else\` block is unnecessary.`;
+        return `The preceding \`if\` block ends with a \`${name}\` statement. This \`else\` is unnecessary.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -72,14 +72,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
                 ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));
             }
-            ts.forEachChild(node.expression, cb);
-            ts.forEachChild(node.thenStatement, cb);
-            if (node.elseStatement !== undefined) {
-                ts.forEachChild(node.elseStatement, cb);
-            }
-        } else {
-            return ts.forEachChild(node, cb);
         }
+        return ts.forEachChild(node, cb);
     });
 }
 

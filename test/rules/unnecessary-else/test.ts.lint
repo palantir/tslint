@@ -252,7 +252,7 @@ const testNoJump = (a) => {
     }
 }
 
-[return]: The preceding `if` block ends with a `return` statement. This `else` block is unnecessary.
-[throw]: The preceding `if` block ends with a `throw` statement. This `else` block is unnecessary.
-[break]: The preceding `if` block ends with a `break` statement. This `else` block is unnecessary.
-[continue]: The preceding `if` block ends with a `continue` statement. This `else` block is unnecessary.
+[return]: The preceding `if` block ends with a `return` statement. This `else` is unnecessary.
+[throw]: The preceding `if` block ends with a `throw` statement. This `else` is unnecessary.
+[break]: The preceding `if` block ends with a `break` statement. This `else` is unnecessary.
+[continue]: The preceding `if` block ends with a `continue` statement. This `else` is unnecessary.
