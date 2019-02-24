@@ -54,9 +54,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 // Ignore LHS of assignments.
                 traverseExpressionsInLHS(node.left, cb);
                 return cb(node.right);
-            } else {
-                return ts.forEachChild(node, cb);
             }
+            return ts.forEachChild(node, cb);
         }
 
         for (const element of node.elements) {

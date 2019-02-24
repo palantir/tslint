@@ -148,13 +148,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     if (fixQuotemark === actualQuotemark) {
                         // We were already using the best quote mark for this scenario
                         return;
-                    } else if (node.text.includes(fixQuotemark)) {
+                    }
+                    if (node.text.includes(fixQuotemark)) {
                         // It contains all of the other kinds of quotes. Escaping is unavoidable, sadly.
                         return;
                     }
-                } else {
-                    fixQuotemark = alternativeFixQuotemark;
                 }
+                fixQuotemark = alternativeFixQuotemark;
             }
 
             const start = node.getStart(sourceFile);
