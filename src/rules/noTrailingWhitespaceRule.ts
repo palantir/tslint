@@ -22,6 +22,8 @@ import * as Lint from "../index";
 
 import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 
+const ZERO_WIDTH_NO_BREAK_SPACE = 0xfeff;
+
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
 const OPTION_IGNORE_JSDOC = "ignore-jsdoc";
 const OPTION_IGNORE_TEMPLATE_STRINGS = "ignore-template-strings";
@@ -87,7 +89,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
     for (const line of getLineRanges(sourceFile)) {
         // \s matches any whitespace character (equal to [\r\n\t\f\v ])
         const match = text.substr(line.pos, line.contentLength).match(/\s+$/);
-        if (match !== null && !(ctx.options.ignoreBlankLines && match.index === 0)) {
+        if (
+            match !== null &&
+            !(ctx.options.ignoreBlankLines && match.index === 0) &&
+            // See https://github.com/palantir/tslint/issues/4518
+            // and https://github.com/ajafff/tsutils/issues/94
+            // TODO: Remove this check once tsutils handles Byte Order Markers correctly.
+            match[0].charCodeAt(0) !== ZERO_WIDTH_NO_BREAK_SPACE
+        ) {
             possibleFailures.push({
                 end: line.pos + line.contentLength,
                 pos: line.pos + match.index!,
