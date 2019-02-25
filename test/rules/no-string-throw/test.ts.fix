@@ -22,3 +22,9 @@ const someVariable = 123;
 let j: never = () => throw new Error(`template with ${someVariable} string`);
 
 throw new Error(('component requires CSS height property'));
+
+throw new Error('component...')
+
+throw new Error((('component...')))
+
+throw/**/new Error('component')

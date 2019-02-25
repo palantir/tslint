@@ -31,3 +31,12 @@ let j: never = () => throw `template with ${someVariable} string`;
 
 throw('component requires CSS height property');
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+throw'component...'
+~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+throw(('component...'))
+~~~~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]
+
+throw/**/'component'
+~~~~~~~~~~~~~~~~~~~~ [Throwing plain strings (not instances of Error) gives no stack traces]

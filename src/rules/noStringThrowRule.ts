@@ -78,8 +78,11 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     Lint.Replacement.appendText(expression.getEnd(), ")"),
                 ];
 
-                const hasWhitespaceAfterThrow = /^throw\s+/.test(node.getText());
-                if (!hasWhitespaceAfterThrow) {
+                // To prevent this fix from creating invalid syntax, we must ensure that the "throw"
+                // token is succeeded by a space if no other characters precede the string literal.
+                const offset = expression.getStart() - node.getStart();
+                const numCharactersBetweenTokens = offset - "throw".length;
+                if (numCharactersBetweenTokens === 0) {
                     const token = node.getFirstToken() as ts.Node;
                     if (token !== undefined && token.kind === ts.SyntaxKind.ThrowKeyword) {
                         fix.push(Lint.Replacement.appendText(token.getEnd(), " "));
