@@ -166,7 +166,7 @@ export interface ReplacementJson {
 }
 export class Replacement {
     public static applyFixes(content: string, fixes: Fix[]): string {
-        return this.applyAll(content, flatMap(fixes, arrayify));
+        return Replacement.applyAll(content, flatMap(fixes, arrayify));
     }
 
     public static applyAll(content: string, replacements: Replacement[]) {
@@ -180,7 +180,7 @@ export class Replacement {
         text: string,
         sourceFile?: ts.SourceFile,
     ): Replacement {
-        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
+        return Replacement.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
     }
 
     public static replaceFromTo(start: number, end: number, text: string) {
