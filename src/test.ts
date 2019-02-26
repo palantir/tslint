@@ -300,9 +300,8 @@ function displayDiffResults(diffResults: diff.IDiffResult[], extension: string, 
                     .split(/\r\n|\r|\n/)
                     // strings end on a newline which we do not want to include the prefix.
                     // tslint:disable-next-line:prefer-template
-                    .map(
-                        (line, index, array) =>
-                            index === array.length - 1 ? line : `${prefix}${line}\n`,
+                    .map((line, index, array) =>
+                        index === array.length - 1 ? line : `${prefix}${line}\n`,
                     )
                     .join(""),
             ),

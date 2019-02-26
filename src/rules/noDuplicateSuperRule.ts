@@ -204,8 +204,8 @@ function worse(a: Super, b: Super): Super {
                 : a
             : b
         : typeof b === "number"
-            ? a
-            : a.break
-                ? b
-                : a;
+        ? a
+        : a.break
+        ? b
+        : a;
 }

@@ -354,27 +354,29 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             }
         }
         if (failureExists) {
-            const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
-                const a = members[ai];
-                const b = members[bi];
+            const sortedMemberIndexes = members
+                .map((_, i) => i)
+                .sort((ai, bi) => {
+                    const a = members[ai];
+                    const b = members[bi];
 
-                // first, sort by member rank
-                const rankDiff = this.memberRank(a) - this.memberRank(b);
-                if (rankDiff !== 0) {
-                    return rankDiff;
-                }
-                // then lexicographically if alphabetize == true
-                if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
-                    const aName = nameString(a.name);
-                    const bName = nameString(b.name);
-                    const nameDiff = aName.localeCompare(bName);
-                    if (nameDiff !== 0) {
-                        return nameDiff;
+                    // first, sort by member rank
+                    const rankDiff = this.memberRank(a) - this.memberRank(b);
+                    if (rankDiff !== 0) {
+                        return rankDiff;
                     }
-                }
-                // finally, sort by position in original NodeArray so the sort remains stable.
-                return ai - bi;
-            });
+                    // then lexicographically if alphabetize == true
+                    if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
+                        const aName = nameString(a.name);
+                        const bName = nameString(b.name);
+                        const nameDiff = aName.localeCompare(bName);
+                        if (nameDiff !== 0) {
+                            return nameDiff;
+                        }
+                    }
+                    // finally, sort by position in original NodeArray so the sort remains stable.
+                    return ai - bi;
+                });
             const splits = getSplitIndexes(members, this.sourceFile.text);
             const sortedMembersText = sortedMemberIndexes.map(i => {
                 const start = splits[i];
@@ -488,8 +490,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     const accessLevel = hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword)
         ? "private"
         : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword)
-            ? "protected"
-            : "public";
+        ? "protected"
+        : "public";
 
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
@@ -536,11 +538,10 @@ interface Options {
 
 function parseOptions(options: any[]): Options {
     const { order: orderJson, alphabetize } = getOptionsJson(options);
-    const order = orderJson.map(
-        cat =>
-            typeof cat === "string"
-                ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
+    const order = orderJson.map(cat =>
+        typeof cat === "string"
+            ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
+            : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
     );
     return { order, alphabetize };
 }
