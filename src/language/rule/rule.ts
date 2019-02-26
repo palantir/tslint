@@ -338,8 +338,8 @@ export class RuleFailure {
                 this.fix === undefined
                     ? undefined
                     : Array.isArray(this.fix)
-                        ? this.fix.map(r => r.toJson())
-                        : this.fix.toJson(),
+                    ? this.fix.map(r => r.toJson())
+                    : this.fix.toJson(),
             name: this.fileName,
             ruleName: this.ruleName,
             ruleSeverity: this.ruleSeverity.toUpperCase(),
