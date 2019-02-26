@@ -29,6 +29,7 @@ import * as Lint from "../index";
 const OPTION_IGNORE_STATIC = "ignore-static";
 const OPTION_WHITELIST = "whitelist";
 const OPTION_ALLOW_TYPEOF = "allow-typeof";
+const OPTION_ALLOW_DELETE = "allow-delete";
 
 const OPTION_WHITELIST_EXAMPLE = [
     true,
@@ -40,12 +41,14 @@ const OPTION_WHITELIST_EXAMPLE = [
 ];
 
 interface Options {
+    allowDelete: boolean;
     allowTypeof: boolean;
     ignoreStatic: boolean;
     whitelist: Set<string>;
 }
 
 interface OptionsInput {
+    [OPTION_ALLOW_DELETE]?: boolean;
     [OPTION_ALLOW_TYPEOF]?: boolean;
     [OPTION_IGNORE_STATIC]?: boolean;
     [OPTION_WHITELIST]?: string[];
@@ -146,6 +149,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function parseArguments(args: Array<string | OptionsInput>): Options {
     const options: Options = {
+        allowDelete: false,
         allowTypeof: false,
         ignoreStatic: false,
         whitelist: new Set(),
@@ -157,6 +161,7 @@ function parseArguments(args: Array<string | OptionsInput>): Options {
                 options.ignoreStatic = true;
             }
         } else {
+            options.allowDelete = arg[OPTION_ALLOW_DELETE] || false;
             options.allowTypeof = arg[OPTION_ALLOW_TYPEOF] || false;
             options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
             options.whitelist = new Set(arg[OPTION_WHITELIST]);
