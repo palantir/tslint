@@ -18,6 +18,7 @@
 import {
     hasModifier,
     isCallExpression,
+    isDeleteExpression,
     isIdentifier,
     isPropertyAccessExpression,
     isTypeOfExpression,
@@ -232,7 +233,10 @@ function isSafeUse(node: ts.Node): boolean {
 }
 
 function isWhitelisted(node: ts.Node, options: Options): boolean {
-    const { whitelist, allowTypeof } = options;
+    const { whitelist, allowTypeof, allowDelete } = options;
+    if (isDeleteExpression(node.parent)) {
+        return allowDelete;
+    }
     if (isTypeOfExpression(node.parent)) {
         return allowTypeof;
     }
