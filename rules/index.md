@@ -6,34 +6,34 @@ menu: main
 order: 2
 ---
 
-Lint _rules_ encode logic for syntactic & semantic checks of TypeScript source code.
+Lint rules encode logic for syntactic & semantic checks of TypeScript source code.
 
 ### TypeScript-specific
 
-_These rules find errors related to TypeScript features_:
+These rules find errors related to TypeScript language features.
 
 {% include rule_list.html ruleType="typescript" %}
 
 ### Functionality
 
-_These rules catch common errors in JS programming or otherwise confusing constructs that are prone to producing bugs_:
+These rules catch common errors in JS programming or otherwise confusing constructs that are prone to producing bugs.
 
 {% include rule_list.html ruleType="functionality" %}
 
 ### Maintainability
 
-_These rules make code maintenance easier_:
+These rules make code maintenance easier.
 
 {% include rule_list.html ruleType="maintainability" %}
 
 ### Style
 
-_These rules enforce consistent style across your codebase_:
+These rules enforce various stylistic conventions which do not affect code functionality.
 
 {% include rule_list.html ruleType="style" %}
 
-### Format
+### Formatting
 
-_These rules enforce consistent use of whitespace and punctuation_:
+These rules enforce consistent code formatting, mostly dealing with whitespace and punctuation. Note that support for this category of rules is deprioritized in TSLint and we recommend using a tool like [Prettier](https://prettier.io) instead ([see this issue thread for more information](https://github.com/palantir/tslint/issues/3592)).
 
 {% include rule_list.html ruleType="formatting" %}
