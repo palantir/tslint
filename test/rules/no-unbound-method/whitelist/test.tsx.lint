@@ -69,4 +69,12 @@ Validators.compose(Validators.required);
 (await someMethod())(c.method);
                      ~~~~~~~~ [0]
 
+const a = {
+  getText() {
+    return 'text';
+  }
+};
+
+delete a.getText;
+
 [0]: Avoid referencing unbound methods which may cause unintentional scoping of 'this'.
