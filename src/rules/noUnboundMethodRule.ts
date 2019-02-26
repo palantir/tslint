@@ -66,6 +66,7 @@ export class Rule extends Lint.Rules.TypedRule {
             The object may have three properties:
             
             * "${OPTION_IGNORE_STATIC}" - to ignore static methods.
+            * "${OPTION_ALLOW_DELETE}" - ignore methods referenced in a delete expression.
             * "${OPTION_ALLOW_TYPEOF}" - ignore methods referenced in a typeof expression.
             * "${OPTION_WHITELIST}" - ignore method references in parameters of specifed function calls.
             
@@ -79,6 +80,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 {
                     type: "object",
                     properties: {
+                        [OPTION_ALLOW_DELETE]: { type: "boolean" },
                         [OPTION_ALLOW_TYPEOF]: { type: "boolean" },
                         [OPTION_IGNORE_STATIC]: { type: "boolean" },
                         [OPTION_WHITELIST]: {
