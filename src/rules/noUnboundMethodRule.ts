@@ -174,9 +174,7 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
 
             const isMethodAccess =
                 declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic);
-            const shouldBeReported =
-                isMethodAccess &&
-                !isWhitelisted(node, ctx.options.whitelist, ctx.options.allowTypeof);
+            const shouldBeReported = isMethodAccess && !isWhitelisted(node, ctx.options);
             if (shouldBeReported) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -228,7 +226,8 @@ function isSafeUse(node: ts.Node): boolean {
     }
 }
 
-function isWhitelisted(node: ts.Node, whitelist: Set<string>, allowTypeof: boolean): boolean {
+function isWhitelisted(node: ts.Node, options: Options): boolean {
+    const { whitelist, allowTypeof } = options;
     if (isTypeOfExpression(node.parent)) {
         return allowTypeof;
     }
