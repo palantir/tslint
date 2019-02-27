@@ -311,12 +311,12 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
     return !anyOther
         ? true
         : anyNull && anyUndefined
-            ? undefined
-            : anyNull
-                ? "null"
-                : anyUndefined
-                    ? "undefined"
-                    : false;
+        ? undefined
+        : anyNull
+        ? "null"
+        : anyUndefined
+        ? "undefined"
+        : false;
 }
 
 function unionParts(type: ts.Type) {

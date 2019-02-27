@@ -102,8 +102,8 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
                 decl.kind === ts.SyntaxKind.TypeReference
                     ? typeParamsFromType(decl.typeName, checker)
                     : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
-                        ? typeParamsFromType(decl.expression, checker)
-                        : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
+                    ? typeParamsFromType(decl.expression, checker)
+                    : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
             return typeParameters === undefined ? undefined : { typeArguments, typeParameters };
         default:
             return undefined;
@@ -134,14 +134,10 @@ function typeParamsFromType(
         return undefined;
     }
 
-    return find(
-        sym.declarations,
-        decl =>
-            isClassLikeDeclaration(decl) ||
-            isTypeAliasDeclaration(decl) ||
-            isInterfaceDeclaration(decl)
-                ? decl.typeParameters
-                : undefined,
+    return find(sym.declarations, decl =>
+        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl)
+            ? decl.typeParameters
+            : undefined,
     );
 }
 

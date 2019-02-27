@@ -105,14 +105,12 @@ export class Linter {
      * `resolveJsonModule`.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return mapDefined(
-            program.getSourceFiles(),
-            file =>
-                file.fileName.endsWith(".d.ts") ||
-                file.fileName.endsWith(".json") ||
-                program.isSourceFileFromExternalLibrary(file)
-                    ? undefined
-                    : file.fileName,
+        return mapDefined(program.getSourceFiles(), file =>
+            file.fileName.endsWith(".d.ts") ||
+            file.fileName.endsWith(".json") ||
+            program.isSourceFileFromExternalLibrary(file)
+                ? undefined
+                : file.fileName,
         );
     }
 

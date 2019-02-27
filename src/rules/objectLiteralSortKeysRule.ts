@@ -264,8 +264,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                             lastKey === undefined
                                 ? false
                                 : localeCompare
-                                    ? lastKey.localeCompare(key) === 1
-                                    : lastKey > key;
+                                ? lastKey.localeCompare(key) === 1
+                                : lastKey > key;
                         if (keyOrderDescending && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(
                                 property.name,
@@ -354,8 +354,8 @@ function getTypeName(t: TypeLike): string | undefined {
     return t.kind === ts.SyntaxKind.InterfaceDeclaration
         ? t.name.text
         : isTypeAliasDeclaration(parent)
-            ? parent.name.text
-            : undefined;
+        ? parent.name.text
+        : undefined;
 }
 
 type TypeLike = ts.InterfaceDeclaration | ts.TypeLiteralNode;
