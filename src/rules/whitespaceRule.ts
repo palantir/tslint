@@ -170,6 +170,22 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
 
+            case ts.SyntaxKind.ExportDeclaration:
+                const { exportClause } = node as ts.ExportDeclaration;
+                if (options.module && exportClause !== undefined) {
+                    exportClause.elements.forEach((element, idx, arr) => {
+                        if (idx === arr.length - 1) {
+                            const token = exportClause.getLastToken()!;
+                            checkForTrailingWhitespace(token.getFullStart());
+                        }
+                        if (idx === 0) {
+                            const startPos = element.getStart() - 1;
+                            checkForTrailingWhitespace(startPos, startPos + 1);
+                        }
+                    });
+                }
+                break;
+
             case ts.SyntaxKind.FunctionType:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
