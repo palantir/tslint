@@ -145,6 +145,7 @@ export const rules = {
     "prefer-conditional-expression": true,
     radix: true,
     "restrict-plus-operands": true,
+    "static-this": true,
     "strict-boolean-expressions": true,
     "strict-type-predicates": true,
     "switch-default": true,

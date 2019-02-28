@@ -91,8 +91,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 this.ruleArguments.indexOf(OPTION_STRICT_BOUND_CLASS_METHODS) !== -1
                     ? BoundClassMethodOption.Strict
                     : this.ruleArguments.indexOf(OPTION_IGNORE_BOUND_CLASS_METHODS) !== -1
-                        ? BoundClassMethodOption.Ignore
-                        : BoundClassMethodOption.Default,
+                    ? BoundClassMethodOption.Ignore
+                    : BoundClassMethodOption.Default,
             interfaces: this.ruleArguments.indexOf(OPTION_IGNORE_INTERFACES) === -1,
         };
         const Walker =

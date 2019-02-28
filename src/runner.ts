@@ -247,8 +247,8 @@ function resolveGlobs(
         }
     }
     const cwd = process.cwd();
-    return results.map(
-        file => (outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file)),
+    return results.map(file =>
+        outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file),
     );
 }
 

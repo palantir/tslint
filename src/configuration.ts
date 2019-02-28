@@ -611,11 +611,8 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(
-                          pattern =>
-                              dir === undefined
-                                  ? path.resolve(pattern)
-                                  : path.resolve(dir, pattern),
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
                       ),
                   }
                 : {}),
