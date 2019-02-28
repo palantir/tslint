@@ -20,6 +20,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
+const ALLOW_MULTILINE = "allow-multiline";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -32,7 +33,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             The second argument, which is optional, is a string that should be inserted as a header comment
             if fixing is enabled and no header that matches the first argument is found.
             The third argument, which is optional, is a string that denotes whether or not a newline should
-            exist on the header.`,
+            exist on the header.
+            The fourth argument, which is optional, is a string that denotes whether or not a header is
+            allowed to consist of consecutive single-line comments.`,
         options: {
             type: "array",
             items: [
@@ -45,12 +48,17 @@ export class Rule extends Lint.Rules.AbstractRule {
                 {
                     type: "string",
                 },
+                {
+                    type: "string",
+                },
             ],
             additionalItems: false,
             minLength: 1,
-            maxLength: 3,
+            maxLength: 4,
         },
-        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE]],
+        optionExamples: [
+            [true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE, ALLOW_MULTILINE],
+        ],
         hasFix: true,
         type: "style",
         typescriptOnly: false,
@@ -66,13 +74,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         const textToInsert = this.ruleArguments[1] as string | undefined;
         const enforceExtraTrailingLine =
             this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1;
+        const allowMultiline = this.ruleArguments.indexOf(ALLOW_MULTILINE) !== -1;
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        // returns the text of the first comment or undefined
-        const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) =>
-            text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2),
-        );
+        const commentText = this.getFileHeaderText(text, offset, allowMultiline);
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
             const isErrorAtStart = offset === 0;
@@ -171,5 +177,27 @@ export class Rule extends Lint.Rules.AbstractRule {
         return (
             entireComment !== undefined && NEW_LINE_FOLLOWING_HEADER.test(entireComment) !== null
         );
+    }
+
+    private getFileHeaderText(
+        text: string,
+        offset: number,
+        allowMultiline: boolean,
+    ): string | undefined {
+        const ranges = ts.getLeadingCommentRanges(text, offset);
+        if (ranges === undefined || ranges.length === 0) {
+            return undefined;
+        }
+
+        const fileHeaderRanges = !allowMultiline ? ranges.slice(0, 1) : ranges;
+        return fileHeaderRanges
+            .map(range => {
+                const { pos, kind, end } = range;
+                return text.substring(
+                    pos + 2,
+                    kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2,
+                );
+            })
+            .join("\n");
     }
 }
