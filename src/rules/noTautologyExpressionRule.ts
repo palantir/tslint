@@ -49,12 +49,18 @@ function walk(context: Lint.WalkContext<void>) {
                 if (node.left.text === node.right.text) {
                     context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
                 }
+            } else if (tsutils.isIdentifier(node.left) && tsutils.isIdentifier(node.right)) {
+                if (node.left.text === node.right.text) {
+                    context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
+                }
             } else if (
                 tsutils.isPropertyAccessExpression(node.left) &&
                 tsutils.isPropertyAccessExpression(node.right)
             ) {
-                if (node.left.name.text === node.right.name.text) {
-                    context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
+                if (node.left.expression.getText() === node.right.expression.getText()) {
+                    if (node.left.name.text === node.right.name.text) {
+                        context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
+                    }
                 }
             }
         }
@@ -64,7 +70,7 @@ function walk(context: Lint.WalkContext<void>) {
 }
 
 function isLiteral(node: ts.Node): node is ts.StringLiteral | ts.NumericLiteral {
-    return (node as ts.StringLiteral) !== undefined || (node as ts.NumericLiteral) !== undefined;
+    return tsutils.isStringLiteral(node) || tsutils.isNumericLiteral(node);
 }
 
 function isRelationalOrLogicalOperator(operator: ts.BinaryOperatorToken): boolean {

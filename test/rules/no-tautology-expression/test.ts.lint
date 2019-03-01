@@ -95,14 +95,31 @@ const someFunc = () => {
     }
 }
 
+const someFunc = () => {
+    const someObj = { "name" : "moses the great" };
+    if (someObj.name === someObj.name) {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Expression is either a tautology or a contradiction. Binary expression is redundant.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someObj = { "name" : "moses the great", "address" : "king's road 10" };
+    if (someObj.name === someObj.address) {
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const objOne = { "name" : "moses the great" };
+    const objTwo = { "name" : "moses the great" };
+    if (objOne.name === objTwo.name) {
+        return true;
+    }
+}
+
 const someVar1 = 3 + 3;
 const someVar2 = 3 - 3;
 const someVar3 = 3 * 3;
 const someVar4 = 3 % 3;
 const someVar5 = 3 / 3;
-
-
-
-
-
-
