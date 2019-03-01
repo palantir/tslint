@@ -61,12 +61,8 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     | ts.ClassDeclaration
                     | ts.TypeLiteralNode;
                 addFailures(
-                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(
-                        members,
-                        member =>
-                            utils.isSignatureDeclaration(member)
-                                ? getOverloadKey(member)
-                                : undefined,
+                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, member =>
+                        utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined,
                     ),
                 );
             }
@@ -77,12 +73,10 @@ function walk(ctx: Lint.WalkContext<void>): void {
 
     function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
         addFailures(
-            getMisplacedOverloads(
-                statements,
-                statement =>
-                    utils.isFunctionDeclaration(statement) && statement.name !== undefined
-                        ? statement.name.text
-                        : undefined,
+            getMisplacedOverloads(statements, statement =>
+                utils.isFunctionDeclaration(statement) && statement.name !== undefined
+                    ? statement.name.text
+                    : undefined,
             ),
         );
     }

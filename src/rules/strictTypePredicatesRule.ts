@@ -22,8 +22,8 @@ import {
     isTypeFlagSet,
     isUnionType,
 } from "tsutils";
-
 import * as ts from "typescript";
+
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
 
@@ -311,12 +311,12 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
     return !anyOther
         ? true
         : anyNull && anyUndefined
-            ? undefined
-            : anyNull
-                ? "null"
-                : anyUndefined
-                    ? "undefined"
-                    : false;
+        ? undefined
+        : anyNull
+        ? "null"
+        : anyUndefined
+        ? "undefined"
+        : false;
 }
 
 function unionParts(type: ts.Type) {

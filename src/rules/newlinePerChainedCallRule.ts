@@ -22,6 +22,7 @@ import {
     isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 export class Rule extends Lint.Rules.AbstractRule {

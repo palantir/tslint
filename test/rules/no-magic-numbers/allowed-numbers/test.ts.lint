@@ -1,0 +1,23 @@
+parseInt();
+parseInt('123', 2);
+parseInt('123', 8);
+parseInt('123', 10);
+parseInt('123', 16);
+console.log(-0);
+console.log(1337);
+console.log(-1337);
+console.log(- 1337);
+console.log(1337.7);
+console.log(1338);
+            ~~~~                      ['magic numbers' are not allowed: 1338]
+console.log(-1338)
+            ~~~~~                     ['magic numbers' are not allowed: -1338]
+parseInt(foo === 4711 ? bar : baz, 10);
+                 ~~~~                 ['magic numbers' are not allowed: 4711]
+parseInt(foo === -0 ? bar : baz, 10);
+export let x = 1337;
+export let x = -1337;
+export let x = 1337.7;
+export let x = 1338;
+export let x = -1338;
+export let x = -0;

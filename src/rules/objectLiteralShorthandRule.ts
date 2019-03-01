@@ -25,6 +25,7 @@ import {
     isShorthandPropertyAssignment,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 const OPTION_NEVER = "never";

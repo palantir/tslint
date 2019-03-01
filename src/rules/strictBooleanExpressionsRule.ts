@@ -17,6 +17,7 @@
 
 import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_UNION = "allow-null-union";
@@ -299,10 +300,10 @@ function handleUnion(type: ts.UnionType, options: Options): TypeFailure | undefi
     return seenFalsy === 0
         ? TypeFailure.AlwaysTruthy
         : !anyTruthy
-            ? TypeFailure.AlwaysFalsy
-            : !options.allowMix && seenFalsy > 1
-                ? TypeFailure.Mixes
-                : undefined;
+        ? TypeFailure.AlwaysFalsy
+        : !options.allowMix && seenFalsy > 1
+        ? TypeFailure.Mixes
+        : undefined;
 }
 
 /** Fails if a kind of falsiness is not allowed. */
@@ -387,28 +388,28 @@ function getKind(type: ts.Type): TypeKind {
     return is(ts.TypeFlags.String)
         ? TypeKind.String
         : is(ts.TypeFlags.Number)
-            ? TypeKind.Number
-            : is(ts.TypeFlags.Boolean)
-                ? TypeKind.Boolean
-                : is(ts.TypeFlags.Null)
-                    ? TypeKind.Null // tslint:disable-next-line:no-bitwise
-                    : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
-                        ? TypeKind.Undefined
-                        : is(ts.TypeFlags.EnumLike)
-                            ? TypeKind.Enum
-                            : is(ts.TypeFlags.NumberLiteral)
-                                ? numberLiteralIsZero(type as ts.NumberLiteralType)
-                                    ? TypeKind.FalseNumberLiteral
-                                    : TypeKind.AlwaysTruthy
-                                : is(ts.TypeFlags.StringLiteral)
-                                    ? stringLiteralIsEmpty(type as ts.StringLiteralType)
-                                        ? TypeKind.FalseStringLiteral
-                                        : TypeKind.AlwaysTruthy
-                                    : is(ts.TypeFlags.BooleanLiteral)
-                                        ? (type as ts.IntrinsicType).intrinsicName === "true"
-                                            ? TypeKind.AlwaysTruthy
-                                            : TypeKind.FalseBooleanLiteral
-                                        : TypeKind.AlwaysTruthy;
+        ? TypeKind.Number
+        : is(ts.TypeFlags.Boolean)
+        ? TypeKind.Boolean
+        : is(ts.TypeFlags.Null)
+        ? TypeKind.Null // tslint:disable-next-line:no-bitwise
+        : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
+        ? TypeKind.Undefined
+        : is(ts.TypeFlags.EnumLike)
+        ? TypeKind.Enum
+        : is(ts.TypeFlags.NumberLiteral)
+        ? numberLiteralIsZero(type as ts.NumberLiteralType)
+            ? TypeKind.FalseNumberLiteral
+            : TypeKind.AlwaysTruthy
+        : is(ts.TypeFlags.StringLiteral)
+        ? stringLiteralIsEmpty(type as ts.StringLiteralType)
+            ? TypeKind.FalseStringLiteral
+            : TypeKind.AlwaysTruthy
+        : is(ts.TypeFlags.BooleanLiteral)
+        ? (type as ts.IntrinsicType).intrinsicName === "true"
+            ? TypeKind.AlwaysTruthy
+            : TypeKind.FalseBooleanLiteral
+        : TypeKind.AlwaysTruthy;
 
     function is(flags: ts.TypeFlags) {
         return isTypeFlagSet(type, flags);

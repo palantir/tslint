@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noSparseArrays.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {

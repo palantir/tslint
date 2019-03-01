@@ -19,6 +19,7 @@ import { forEachComment, forEachTokenWithTrivia, getLineRanges } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { getTemplateRanges } from "./noConsecutiveBlankLinesRule";
 
 const OPTION_IGNORE_COMMENTS = "ignore-comments";
@@ -61,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             },
         },
         optionExamples: [true, [true, OPTION_IGNORE_COMMENTS], [true, OPTION_IGNORE_JSDOC]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -102,8 +103,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
             ? getExcludedRanges(sourceFile, ctx.options)
             : getTemplateRanges(sourceFile)
         : ctx.options.ignoreJsDoc
-            ? getExcludedComments(sourceFile, ctx.options)
-            : [];
+        ? getExcludedComments(sourceFile, ctx.options)
+        : [];
     for (const possibleFailure of possibleFailures) {
         if (
             !excludedRanges.some(

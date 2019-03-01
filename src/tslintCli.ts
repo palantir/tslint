@@ -19,6 +19,8 @@
 
 import commander = require("commander");
 import * as fs from "fs";
+import * as mkdirp from "mkdirp";
+import * as path from "path";
 
 import { Linter } from "./linter";
 import { run } from "./runner";
@@ -275,10 +277,12 @@ if (argv.typeCheck) {
     }
 }
 
-const outputStream: NodeJS.WritableStream =
-    argv.out === undefined
-        ? process.stdout
-        : fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
+let outputStream: NodeJS.WritableStream = process.stdout;
+
+if (argv.out !== undefined) {
+    mkdirp.sync(path.dirname(argv.out));
+    outputStream = fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
+}
 
 run(
     {

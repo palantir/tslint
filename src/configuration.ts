@@ -20,8 +20,8 @@ import * as yaml from "js-yaml";
 import { Minimatch } from "minimatch";
 import * as os from "os";
 import * as path from "path";
-import { FatalError, showWarningOnce } from "./error";
 
+import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
@@ -592,14 +592,12 @@ export function parseConfigFile(
         const validJsRules = new Map<string, Partial<IOptions>>();
         if (copyRulestoJsRules) {
             rules.forEach((ruleOptions, ruleName) => {
-                if (ruleOptions.ruleSeverity !== "off") {
-                    const Rule = findRule(ruleName, rulesDirectory);
-                    if (
-                        Rule !== undefined &&
-                        (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
-                    ) {
-                        validJsRules.set(ruleName, ruleOptions);
-                    }
+                const Rule = findRule(ruleName, rulesDirectory);
+                if (
+                    Rule !== undefined &&
+                    (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
+                ) {
+                    validJsRules.set(ruleName, ruleOptions);
                 }
             });
         }
@@ -617,11 +615,8 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(
-                          pattern =>
-                              dir === undefined
-                                  ? path.resolve(pattern)
-                                  : path.resolve(dir, pattern),
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
                       ),
                   }
                 : {}),

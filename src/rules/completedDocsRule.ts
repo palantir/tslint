@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
 import { ExclusionFactory, ExclusionsMap } from "./completed-docs/exclusionFactory";
 
@@ -77,7 +79,7 @@ export type Privacy =
 
 export type Visibility = All | typeof VISIBILITY_EXPORTED | typeof VISIBILITY_INTERNAL;
 
-export class Rule extends Lint.Rules.TypedRule {
+export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
 
     public static defaultArguments: IInputExclusionDescriptors = {
@@ -267,17 +269,16 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "style",
         typescriptOnly: false,
-        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
     private readonly exclusionFactory = new ExclusionFactory();
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
         const exclusionsMap = this.getExclusionsMap(options.ruleArguments);
 
-        return this.applyWithFunction(sourceFile, walk, exclusionsMap, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, exclusionsMap);
     }
 
     private getExclusionsMap(
@@ -295,7 +296,7 @@ const modifierAliases: { [i: string]: string } = {
     export: "exported",
 };
 
-function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChecker) {
+function walk(context: Lint.WalkContext<ExclusionsMap>) {
     return ts.forEachChild(context.sourceFile, cb);
 
     function cb(node: ts.Node): void {
@@ -363,7 +364,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
                 if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
-                    checkNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                    checkAccessorNode(node as ts.AccessorDeclaration);
                 }
         }
 
@@ -375,45 +376,58 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
         nodeType: DocType,
         requirementNode: ts.Node = node,
     ): void {
+        if (!nodeIsExcluded(node, nodeType, requirementNode) && !nodeHasDocs(node)) {
+            addDocumentationFailure(node, describeNode(nodeType), requirementNode);
+        }
+    }
+
+    function checkAccessorNode(node: ts.AccessorDeclaration): void {
+        if (nodeIsExcluded(node, ARGUMENT_PROPERTIES, node) || nodeHasDocs(node)) {
+            return;
+        }
+
+        const correspondingAccessor = getCorrespondingAccessor(node);
+
+        if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor)) {
+            addDocumentationFailure(node, ARGUMENT_PROPERTIES, node);
+        }
+    }
+
+    function nodeIsExcluded(
+        node: ts.NamedDeclaration,
+        nodeType: DocType,
+        requirementNode: ts.Node,
+    ): boolean {
         const { name } = node;
         if (name === undefined) {
-            return;
+            return true;
         }
 
         const exclusions = context.options.get(nodeType);
         if (exclusions === undefined) {
-            return;
+            return true;
         }
 
         for (const exclusion of exclusions) {
             if (exclusion.excludes(requirementNode)) {
-                return;
+                return true;
             }
         }
 
-        const symbol = typeChecker.getSymbolAtLocation(name);
-        if (symbol === undefined) {
-            return;
-        }
-
-        const comments = symbol.getDocumentationComment(typeChecker);
-        checkComments(node, describeNode(nodeType), comments, requirementNode);
+        return false;
     }
 
-    function checkComments(
-        node: ts.Node,
-        nodeDescriptor: string,
-        comments: ts.SymbolDisplayPart[],
-        requirementNode: ts.Node,
-    ) {
-        if (
-            comments
-                .map((comment: ts.SymbolDisplayPart) => comment.text)
-                .join("")
-                .trim() === ""
-        ) {
-            addDocumentationFailure(node, nodeDescriptor, requirementNode);
+    function nodeHasDocs(node: ts.Node): boolean {
+        const docs = getApparentJsDoc(node);
+        if (docs === undefined) {
+            return false;
         }
+
+        const comments = docs
+            .map(doc => doc.comment)
+            .filter(comment => comment !== undefined && comment.trim() !== "");
+
+        return comments.length !== 0;
     }
 
     function addDocumentationFailure(
@@ -427,6 +441,57 @@ function walk(context: Lint.WalkContext<ExclusionsMap>, typeChecker: ts.TypeChec
 
         context.addFailureAt(start, width, description);
     }
+}
+
+function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
+    const propertyName = tsutils.getPropertyName(node.name);
+    if (propertyName === undefined) {
+        return undefined;
+    }
+
+    const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
+    const correspondingKindCheck =
+        node.kind === ts.SyntaxKind.GetAccessor ? isSetAccessor : isGetAccessor;
+
+    for (const member of parent.members) {
+        if (!correspondingKindCheck(member)) {
+            continue;
+        }
+
+        if (tsutils.getPropertyName(member.name) === propertyName) {
+            return member;
+        }
+    }
+
+    return undefined;
+}
+
+/**
+ * @remarks See https://github.com/ajafff/tsutils/issues/16
+ */
+function getApparentJsDoc(node: ts.Node): ts.JSDoc[] | undefined {
+    if (ts.isVariableDeclaration(node)) {
+        if (variableIsAfterFirstInDeclarationList(node)) {
+            return undefined;
+        }
+
+        node = node.parent;
+    }
+
+    if (ts.isVariableDeclarationList(node)) {
+        node = node.parent;
+    }
+
+    return tsutils.getJsDoc(node);
+}
+
+function variableIsAfterFirstInDeclarationList(node: ts.VariableDeclaration): boolean {
+    const parent = node.parent;
+    if (parent === undefined) {
+        return false;
+    }
+
+    return ts.isVariableDeclarationList(parent) && node !== parent.declarations[0];
 }
 
 function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
@@ -449,4 +514,12 @@ function describeModifier(kind: ts.SyntaxKind) {
 
 function describeNode(nodeType: DocType): string {
     return nodeType.replace("-", " ");
+}
+
+function isGetAccessor(node: ts.Node): node is ts.GetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.GetAccessor;
+}
+
+function isSetAccessor(node: ts.Node): node is ts.SetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.SetAccessor;
 }

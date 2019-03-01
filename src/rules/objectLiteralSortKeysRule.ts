@@ -26,6 +26,7 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
 const OPTION_IGNORE_CASE = "ignore-case";
@@ -143,7 +144,9 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         if (options.matchDeclarationOrder && options.matchDeclarationOrderOnly) {
             showWarningOnce(
                 `"${OPTION_MATCH_DECLARATION_ORDER}" will be ignored since ` +
-                `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${this.ruleName}.`
+                    `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${
+                        this.ruleName
+                    }.`,
             );
             return [];
         }
@@ -174,7 +177,13 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, localeCompare, matchDeclarationOrder, matchDeclarationOrderOnly, shorthandFirst },
+        options: {
+            ignoreCase,
+            localeCompare,
+            matchDeclarationOrder,
+            matchDeclarationOrderOnly,
+            shorthandFirst,
+        },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -255,8 +264,8 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                             lastKey === undefined
                                 ? false
                                 : localeCompare
-                                    ? lastKey.localeCompare(key) === 1
-                                    : lastKey > key;
+                                ? lastKey.localeCompare(key) === 1
+                                : lastKey > key;
                         if (keyOrderDescending && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(
                                 property.name,
@@ -345,8 +354,8 @@ function getTypeName(t: TypeLike): string | undefined {
     return t.kind === ts.SyntaxKind.InterfaceDeclaration
         ? t.name.text
         : isTypeAliasDeclaration(parent)
-            ? parent.name.text
-            : undefined;
+        ? parent.name.text
+        : undefined;
 }
 
 type TypeLike = ts.InterfaceDeclaration | ts.TypeLiteralNode;

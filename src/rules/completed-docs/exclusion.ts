@@ -18,6 +18,7 @@
 import * as ts from "typescript";
 
 import { All, ALL } from "../completedDocsRule";
+
 import { ExclusionDescriptor } from "./exclusionDescriptors";
 
 export abstract class Exclusion<TDescriptor extends ExclusionDescriptor> {

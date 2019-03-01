@@ -14,9 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { isNoSubstitutionTemplateLiteral, isSameLine, isStringLiteral } from "tsutils";
+import {
+    isImportDeclaration,
+    isNoSubstitutionTemplateLiteral,
+    isPropertyAssignment,
+    isSameLine,
+    isStringLiteral,
+} from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_SINGLE = "single";
@@ -78,7 +84,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_SINGLE, OPTION_AVOID_ESCAPE, OPTION_AVOID_TEMPLATE],
             [true, OPTION_SINGLE, OPTION_JSX_DOUBLE],
         ],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -120,6 +126,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
                     ? options.jsxQuotemark
                     : options.quotemark;
             const actualQuotemark = sourceFile.text[node.end - 1];
+
+            // Don't use backticks instead of single/double quotes when it breaks TypeScript syntax.
+            if (
+                expectedQuotemark === "`" &&
+                (isImportDeclaration(node.parent) || isPropertyAssignment(node.parent))
+            ) {
+                return;
+            }
 
             if (actualQuotemark === expectedQuotemark) {
                 return;
@@ -194,7 +208,10 @@ function getQuotemarkPreference(ruleArguments: any[]): QUOTEMARK {
     return '"';
 }
 
-function getJSXQuotemarkPreference(ruleArguments: any[], regularQuotemarkPreference: QUOTEMARK): JSX_QUOTEMARK {
+function getJSXQuotemarkPreference(
+    ruleArguments: any[],
+    regularQuotemarkPreference: QUOTEMARK,
+): JSX_QUOTEMARK {
     for (const arg of ruleArguments) {
         switch (arg) {
             case OPTION_JSX_SINGLE:

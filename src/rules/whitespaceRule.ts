@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Ten arguments may be optionally provided:
+            Several arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -75,7 +75,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 11,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
         hasFix: true,
     };

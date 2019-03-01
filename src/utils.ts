@@ -295,6 +295,31 @@ function tryResolveSync(packageName: string, relativeTo?: string): string | unde
 }
 
 /**
+ * Gets the full indentation of the provided node
+ */
+export function getIndentation(node: ts.Node, sourceFile: ts.SourceFile): string {
+    const text = sourceFile.text.substr(node.pos, node.getStart() - node.pos);
+    const matches = text.match(/([ \t]*)$/);
+    return matches !== null ? matches[1] : "";
+}
+
+/**
+ * Creates x new lines with a proper indentation at the last one based on the provided node
+ */
+export function newLineWithIndentation(
+    node: ts.Node,
+    sourceFile: ts.SourceFile,
+    linesCount: number = 1,
+) {
+    const maybeCarriageReturn =
+        sourceFile.text[sourceFile.getLineEndOfPosition(node.pos) - 1] === "\r" ? "\r" : "";
+
+    const indentation = getIndentation(node, sourceFile);
+
+    return `${`${maybeCarriageReturn}\n`.repeat(linesCount)}${indentation}`;
+}
+
+/**
  * @deprecated Copied from tsutils 2.27.2. This will be removed once TSLint requires tsutils > 3.0.
  */
 export function isFunctionScopeBoundary(node: ts.Node): boolean {

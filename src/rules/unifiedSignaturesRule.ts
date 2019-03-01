@@ -38,17 +38,17 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_OMITTING_SINGLE_PARAMETER(otherLine?: number) {
-        return `${this.FAILURE_STRING_START(otherLine)} with an optional parameter.`;
+        return `${Rule.FAILURE_STRING_START(otherLine)} with an optional parameter.`;
     }
     public static FAILURE_STRING_OMITTING_REST_PARAMETER(otherLine?: number) {
-        return `${this.FAILURE_STRING_START(otherLine)} with a rest parameter.`;
+        return `${Rule.FAILURE_STRING_START(otherLine)} with a rest parameter.`;
     }
     public static FAILURE_STRING_SINGLE_PARAMETER_DIFFERENCE(
         otherLine: number | undefined,
         type1: string,
         type2: string,
     ) {
-        return `${this.FAILURE_STRING_START(otherLine)} taking \`${type1} | ${type2}\`.`;
+        return `${Rule.FAILURE_STRING_START(otherLine)} taking \`${type1} | ${type2}\`.`;
     }
     private static FAILURE_STRING_START(otherLine?: number): string {
         // For only 2 overloads we don't need to specify which is the other one.

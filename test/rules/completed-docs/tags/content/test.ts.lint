@@ -42,7 +42,20 @@ const ContentSingleLineValidVariable = 4;
 /**
  * ...
  */
+const CommentBodyVariableDots = 5;
+
+/**
+ * ...content
+ */
+const CommentBodyVariableDotsAndContent = 6;
+
+/** content */
+const CommentBodyVariableSingleLineContent = 7;
+
+/** ...content */
+const CommentBodyVariableSingleLineDotsAndContent = 8;
 const CommentBodyVariableRofl = 5;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for variables.]
 
 /** ... */
 const CommentBodyVariableRofl = 5;
