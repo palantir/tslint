@@ -21,7 +21,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const TAUTOLOGY_DISCOVERED_ERROR_STRING =
-    "Expression is either a tautology or a contradiction. Binary expression is redundant.";
+    "Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
