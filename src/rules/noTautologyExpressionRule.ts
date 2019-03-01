@@ -44,10 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(context: Lint.WalkContext<void>) {
     const cb = (node: ts.Node): void => {
-        if (
-            tsutils.isBinaryExpression(node) &&
-            isRelationalOrOrLogicalOperator(node.operatorToken)
-        ) {
+        if (tsutils.isBinaryExpression(node) && isRelationalOrLogicalOperator(node.operatorToken)) {
             if (isLiteral(node.left) && isLiteral(node.right)) {
                 if (node.left.text === node.right.text) {
                     context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
@@ -70,7 +67,7 @@ function isLiteral(node: ts.Node): node is ts.StringLiteral | ts.NumericLiteral 
     return (node as ts.StringLiteral) !== undefined || (node as ts.NumericLiteral) !== undefined;
 }
 
-function isRelationalOrOrLogicalOperator(operator: ts.BinaryOperatorToken): boolean {
+function isRelationalOrLogicalOperator(operator: ts.BinaryOperatorToken): boolean {
     return new Set([
         ts.SyntaxKind.LessThanToken,
         ts.SyntaxKind.GreaterThanToken,
