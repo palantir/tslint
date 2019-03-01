@@ -23,8 +23,8 @@ export abstract class AbstractFormatter implements IFormatter {
     public static metadata: IFormatterMetadata;
     public abstract format(
         failures: RuleFailure[],
-        fixes: RuleFailure[],
-        fileNames: string[],
+        fixes?: RuleFailure[],
+        fileNames?: string[],
     ): string;
 
     protected sortFailures(failures: RuleFailure[]): RuleFailure[] {

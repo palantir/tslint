@@ -38,8 +38,8 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[], _fixes: RuleFailure[], fileNames: string[]): string {
-        const groupedFailures: { [k: string]: RuleFailure[] } = {};
+    public format(failures: RuleFailure[], _fixes?: RuleFailure[], fileNames?: string[]): string {
+        const groupedFailures: { [fileName: string]: RuleFailure[] } = {};
         for (const failure of failures) {
             const fileName = failure.getFileName();
             if (groupedFailures[fileName] !== undefined) {
@@ -47,6 +47,10 @@ export class Formatter extends AbstractFormatter {
             } else {
                 groupedFailures[fileName] = [failure];
             }
+        }
+
+        if (fileNames === undefined) {
+            fileNames = Object.keys(groupedFailures);
         }
 
         const formattedFiles = fileNames.map(fileName => {
