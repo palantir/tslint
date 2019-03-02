@@ -16,7 +16,7 @@
  */
 
 import { hasOwnProperty } from "../../utils";
-import { DocType } from "../completedDocsRule";
+import { DESCRIPTOR_OVERLOADS_SEPARATE_DOCS, DocType } from "../completedDocsRule";
 
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
 import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
@@ -24,48 +24,61 @@ import { Exclusion } from "./exclusion";
 import { IInputExclusionDescriptors, InputExclusionDescriptor } from "./exclusionDescriptors";
 import { ITagExclusionDescriptor, TagExclusion } from "./tagExclusion";
 
-export type ExclusionsMap = Map<DocType, Array<Exclusion<any>>>;
+export type ExclusionsMap = Map<DocType, DocTypeExclusions>;
 
-export class ExclusionFactory {
-    public constructExclusionsMap(ruleArguments: IInputExclusionDescriptors[]): ExclusionsMap {
-        const exclusionsMap: ExclusionsMap = new Map();
-
-        for (const ruleArgument of ruleArguments) {
-            this.addRequirements(exclusionsMap, ruleArgument);
-        }
-
-        return exclusionsMap;
-    }
-
-    private addRequirements(exclusionsMap: ExclusionsMap, descriptors: IInputExclusionDescriptors) {
-        if (typeof descriptors === "string") {
-            exclusionsMap.set(descriptors, this.createRequirementsForDocType(descriptors, {}));
-            return;
-        }
-
-        for (const docType in descriptors) {
-            if (hasOwnProperty(descriptors, docType)) {
-                exclusionsMap.set(
-                    docType as DocType,
-                    this.createRequirementsForDocType(docType as DocType, descriptors[docType]),
-                );
-            }
-        }
-    }
-
-    private createRequirementsForDocType(docType: DocType, descriptor: InputExclusionDescriptor) {
-        const requirements = [];
-
-        if (docType === "methods" || docType === "properties") {
-            requirements.push(new ClassExclusion(descriptor as IClassExclusionDescriptor));
-        } else {
-            requirements.push(new BlockExclusion(descriptor as IBlockExclusionDescriptor));
-        }
-
-        if ((descriptor as ITagExclusionDescriptor).tags !== undefined) {
-            requirements.push(new TagExclusion(descriptor as ITagExclusionDescriptor));
-        }
-
-        return requirements;
-    }
+export interface DocTypeExclusions {
+    overloadsSeparateDocs?: boolean;
+    requirements: Array<Exclusion<any>>;
 }
+
+export const constructExclusionsMap = (
+    ruleArguments: IInputExclusionDescriptors[],
+): ExclusionsMap => {
+    const exclusions: ExclusionsMap = new Map();
+
+    for (const ruleArgument of ruleArguments) {
+        addRequirements(exclusions, ruleArgument);
+    }
+
+    return exclusions;
+};
+
+const addRequirements = (exclusionsMap: ExclusionsMap, descriptors: IInputExclusionDescriptors) => {
+    if (typeof descriptors === "string") {
+        exclusionsMap.set(descriptors, createRequirementsForDocType(descriptors, {}));
+        return;
+    }
+
+    for (const docType in descriptors) {
+        if (hasOwnProperty(descriptors, docType)) {
+            exclusionsMap.set(
+                docType as DocType,
+                createRequirementsForDocType(docType as DocType, descriptors[docType]),
+            );
+        }
+    }
+};
+
+const createRequirementsForDocType = (docType: DocType, descriptor: InputExclusionDescriptor) => {
+    const requirements = [];
+    let overloadsSeparateDocs = false;
+
+    if (typeof descriptor === "object" && DESCRIPTOR_OVERLOADS_SEPARATE_DOCS in descriptor) {
+        overloadsSeparateDocs = !!(descriptor as any)[DESCRIPTOR_OVERLOADS_SEPARATE_DOCS];
+    }
+
+    if (docType === "methods" || docType === "properties") {
+        requirements.push(new ClassExclusion(descriptor as IClassExclusionDescriptor));
+    } else {
+        requirements.push(new BlockExclusion(descriptor as IBlockExclusionDescriptor));
+    }
+
+    if ((descriptor as ITagExclusionDescriptor).tags !== undefined) {
+        requirements.push(new TagExclusion(descriptor as ITagExclusionDescriptor));
+    }
+
+    return {
+        overloadsSeparateDocs,
+        requirements,
+    };
+};
