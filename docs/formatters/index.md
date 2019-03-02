@@ -8,8 +8,8 @@ order: 2
 
 Lint _formatters_ allow for transformation of lint results into various forms before outputting to stdout or a file.
 
-Formatters are split into two categories: _human-readable and machine-readable_. Please note that for machine-readable
-formatters all positioning is zero-indexed (Lines start with zero), where as human-readable is not (Lines start with one).
+Formatters are split into two categories: _human-readable_ and _machine-readable_. Please note that for machine-readable
+formatters formatters all positioning is zero-indexed (lines start with zero), whereas human-readable formatters are not (lines start with one).
 
 ### Built-in formatters
 
