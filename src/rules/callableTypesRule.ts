@@ -115,9 +115,8 @@ function renderSuggestion(
                 parent.name.pos,
                 parent.typeParameters.end + 1,
             )} = ${suggestion}`;
-        } else {
-            return `type ${parent.name.text} = ${suggestion}`;
         }
+        return `type ${parent.name.text} = ${suggestion}`;
     }
     return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
 }

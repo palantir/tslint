@@ -114,11 +114,13 @@ function detectAssignment(
         }
         const elze = detectAssignment(statement.elseStatement, sourceFile, checkElseIf, true);
         return elze !== undefined && nodeEquals(then, elze, sourceFile) ? then : undefined;
-    } else if (isBlock(statement)) {
+    }
+    if (isBlock(statement)) {
         return statement.statements.length === 1
             ? detectAssignment(statement.statements[0], sourceFile, checkElseIf, inElse)
             : undefined;
-    } else if (isExpressionStatement(statement) && isBinaryExpression(statement.expression)) {
+    }
+    if (isExpressionStatement(statement) && isBinaryExpression(statement.expression)) {
         const {
             operatorToken: { kind },
             left,
@@ -128,9 +130,8 @@ function detectAssignment(
             isSameLine(sourceFile, right.getStart(sourceFile), right.end)
             ? left
             : undefined;
-    } else {
-        return undefined;
     }
+    return undefined;
 }
 
 function nodeEquals(a: ts.Node, b: ts.Node, sourceFile: ts.SourceFile): boolean {

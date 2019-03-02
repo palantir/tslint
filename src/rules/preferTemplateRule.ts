@@ -89,19 +89,20 @@ function getError(node: ts.Node, allowSingleConcat: boolean): string | undefined
         return containsNewline(left as StringLike) || containsNewline(right as StringLike)
             ? Rule.FAILURE_STRING_MULTILINE
             : undefined;
-    } else if (!l && !r) {
+    }
+    if (!l && !r) {
         // Watch out for `"a" + b + c`. Parsed as `("a" + b) + c`.
         return containsAnyStringLiterals(left) ? Rule.FAILURE_STRING : undefined;
-    } else if (l) {
+    }
+    if (l) {
         // `"x" + y`
         return !allowSingleConcat ? Rule.FAILURE_STRING : undefined;
-    } else {
-        // `? + "b"`
-        // If LHS consists of only string literals (as in `"a" + "b" + "c"`, allow it.)
-        return !containsOnlyStringLiterals(left) && (!allowSingleConcat || isPlusExpression(left))
-            ? Rule.FAILURE_STRING
-            : undefined;
     }
+    // `? + "b"`
+    // If LHS consists of only string literals (as in `"a" + "b" + "c"`, allow it.)
+    return !containsOnlyStringLiterals(left) && (!allowSingleConcat || isPlusExpression(left))
+        ? Rule.FAILURE_STRING
+        : undefined;
 }
 
 type StringLike = ts.StringLiteral | ts.TemplateLiteral;
@@ -109,9 +110,8 @@ type StringLike = ts.StringLiteral | ts.TemplateLiteral;
 function containsNewline(node: StringLike): boolean {
     if (node.kind === ts.SyntaxKind.TemplateExpression) {
         return node.templateSpans.some(({ literal: { text } }) => text.includes("\n"));
-    } else {
-        return node.text.includes("\n");
     }
+    return node.text.includes("\n");
 }
 
 function containsOnlyStringLiterals(node: ts.Expression): boolean {

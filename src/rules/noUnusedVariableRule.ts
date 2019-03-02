@@ -299,9 +299,8 @@ function addImportSpecifierFailures(
             const lineStarts = ctx.sourceFile.getLineStarts();
             if (nextLine < lineStarts.length) {
                 return lineStarts[nextLine];
-            } else {
-                return position;
             }
+            return position;
         }
     });
 
@@ -366,12 +365,12 @@ function getImplicitType(node: ts.Node, checker: ts.TypeChecker): ts.Type | unde
         (utils.isBindingElement(node) && node.name.kind === ts.SyntaxKind.Identifier)
     ) {
         return checker.getTypeAtLocation(node);
-    } else if (utils.isSignatureDeclaration(node) && node.type === undefined) {
+    }
+    if (utils.isSignatureDeclaration(node) && node.type === undefined) {
         const sig = checker.getSignatureFromDeclaration(node);
         return sig === undefined ? undefined : sig.getReturnType();
-    } else {
-        return undefined;
     }
+    return undefined;
 }
 
 type ImportLike = ts.ImportDeclaration | ts.ImportEqualsDeclaration;
@@ -409,58 +408,56 @@ function findImports(
 
         if (i.kind === ts.SyntaxKind.ImportEqualsDeclaration) {
             return [i.name];
-        } else {
-            if (i.importClause === undefined) {
-                // Error node
-                return undefined;
+        }
+        if (i.importClause === undefined) {
+            // Error node
+            return undefined;
+        }
+
+        const { name: defaultName, namedBindings } = i.importClause;
+        if (namedBindings !== undefined && namedBindings.kind === ts.SyntaxKind.NamespaceImport) {
+            return [namedBindings.name];
+        }
+
+        // Starting from TS2.8, when all imports in an import node are not used,
+        // TS emits only 1 diagnostic object for the whole line as opposed
+        // to the previous behavior of outputting a diagnostic with kind == 6192
+        // (UnusedKind.VARIABLE_OR_PARAMETER) for every unused import.
+        // From TS2.8, in the case of none of the imports in a line being used,
+        // the single diagnostic TS outputs are different between the 1 import
+        // and 2+ imports cases:
+        // - 1 import in node:
+        //   - diagnostic has kind == 6133 (UnusedKind.VARIABLE_OR_PARAMETER)
+        //   - the text range is the whole node (`import { ... } from "..."`)
+        //     whereas pre-TS2.8, the text range was for the import node. so
+        //     `name.getStart()` won't equal `pos` like in pre-TS2.8
+        // - 2+ imports in node:
+        //   - diagnostic has kind == 6192 (UnusedKind.DECLARATION)
+        //   - we know that all of these are unused
+        if (kind === UnusedKind.DECLARATION) {
+            const imp: ts.Identifier[] = [];
+            if (defaultName !== undefined) {
+                imp.push(defaultName);
+            }
+            if (namedBindings !== undefined) {
+                imp.push(...namedBindings.elements.map(el => el.name));
+            }
+            return imp.length > 0 ? imp : undefined;
+        }
+        if (
+            defaultName !== undefined &&
+            (isInRange(defaultName, pos) || namedBindings === undefined) // defaultName is the only option
+        ) {
+            return [defaultName];
+        }
+        if (namedBindings !== undefined) {
+            if (namedBindings.elements.length === 1) {
+                return [namedBindings.elements[0].name];
             }
 
-            const { name: defaultName, namedBindings } = i.importClause;
-            if (
-                namedBindings !== undefined &&
-                namedBindings.kind === ts.SyntaxKind.NamespaceImport
-            ) {
-                return [namedBindings.name];
-            }
-
-            // Starting from TS2.8, when all imports in an import node are not used,
-            // TS emits only 1 diagnostic object for the whole line as opposed
-            // to the previous behavior of outputting a diagnostic with kind == 6192
-            // (UnusedKind.VARIABLE_OR_PARAMETER) for every unused import.
-            // From TS2.8, in the case of none of the imports in a line being used,
-            // the single diagnostic TS outputs are different between the 1 import
-            // and 2+ imports cases:
-            // - 1 import in node:
-            //   - diagnostic has kind == 6133 (UnusedKind.VARIABLE_OR_PARAMETER)
-            //   - the text range is the whole node (`import { ... } from "..."`)
-            //     whereas pre-TS2.8, the text range was for the import node. so
-            //     `name.getStart()` won't equal `pos` like in pre-TS2.8
-            // - 2+ imports in node:
-            //   - diagnostic has kind == 6192 (UnusedKind.DECLARATION)
-            //   - we know that all of these are unused
-            if (kind === UnusedKind.DECLARATION) {
-                const imp: ts.Identifier[] = [];
-                if (defaultName !== undefined) {
-                    imp.push(defaultName);
-                }
-                if (namedBindings !== undefined) {
-                    imp.push(...namedBindings.elements.map(el => el.name));
-                }
-                return imp.length > 0 ? imp : undefined;
-            } else if (
-                defaultName !== undefined &&
-                (isInRange(defaultName, pos) || namedBindings === undefined) // defaultName is the only option
-            ) {
-                return [defaultName];
-            } else if (namedBindings !== undefined) {
-                if (namedBindings.elements.length === 1) {
-                    return [namedBindings.elements[0].name];
-                }
-
-                for (const element of namedBindings.elements) {
-                    if (isInRange(element, pos)) {
-                        return [element.name];
-                    }
+            for (const element of namedBindings.elements) {
+                if (isInRange(element, pos)) {
+                    return [element.name];
                 }
             }
         }

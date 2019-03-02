@@ -283,9 +283,8 @@ export class Linter {
         try {
             if (this.program !== undefined && isTypedRule(rule)) {
                 return rule.applyWithProgram(sourceFile, this.program);
-            } else {
-                return rule.apply(sourceFile);
             }
+            return rule.apply(sourceFile);
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
                 showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
@@ -323,9 +322,8 @@ export class Linter {
                 throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
-        } else {
-            return utils.getSourceFile(fileName, source);
         }
+        return utils.getSourceFile(fileName, source);
     }
 }
 

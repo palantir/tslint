@@ -55,9 +55,8 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
                         node,
                         Rule.INVALID_TYPES_ERROR + Rule.SUGGEST_TEMPLATE_LITERALS,
                     );
-                } else {
-                    return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
                 }
+                return ctx.addFailureAtNode(node, Rule.INVALID_TYPES_ERROR);
             }
         }
         return ts.forEachChild(node, cb);
@@ -70,15 +69,18 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
         isTypeFlagSet(type, ts.TypeFlags.String)
     ) {
         return "string";
-    } else if (
+    }
+    if (
         isTypeFlagSet(type, ts.TypeFlags.NumberLiteral) ||
         isTypeFlagSet(type, ts.TypeFlags.Number)
     ) {
         return "number";
-    } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
+    }
+    if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
-    } else if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
+    }
+    if (isTypeFlagSet(type, ts.TypeFlags.EnumLiteral)) {
         // Compatibility for TypeScript pre-2.4, which used EnumLiteralType instead of LiteralType
         getBaseTypeOfLiteralType(((type as any) as { baseType: ts.LiteralType }).baseType);
     }
