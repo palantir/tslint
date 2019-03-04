@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: Lint.Utils.dedent`
             You may additionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods, or an options object.
             
-            The object may have three properties:
+             The object may have the following properties:
             
             * "${OPTION_IGNORE_STATIC}" - to ignore static methods.
             * "${OPTION_ALLOW_DELETE}" - ignore methods referenced in a delete expression.
