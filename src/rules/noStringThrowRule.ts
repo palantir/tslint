@@ -85,7 +85,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 if (numCharactersBetweenTokens === 0) {
                     const token = node.getFirstToken() as ts.Node;
                     if (token !== undefined && token.kind === ts.SyntaxKind.ThrowKeyword) {
-                        fix.push(Lint.Replacement.appendText(expression.pos, " "));
+                        fix.push(Lint.Replacement.appendText(expression.getStart(sourceFile), " "));
                     }
                 }
 
