@@ -106,14 +106,24 @@ describe("JUnit Formatter", () => {
                 </testsuite>
             </testsuites>`.replace(/>\s+/g, ">"); // Remove whitespace between tags;
 
-        assert.equal(formatter.format(failures), expectedResult);
+        assert.equal(formatter.format(failures, [], [TEST_FILE_1, TEST_FILE_2]), expectedResult);
     });
 
     it("handles no failures", () => {
-        const result = formatter.format([]);
-        assert.deepEqual(
-            result,
-            '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint"></testsuites>',
-        );
+        const result = formatter.format([], [], ["test1.ts", "test2.ts", "test3.ts"]);
+        const expectedResult = `<?xml version="1.0" encoding="utf-8"?>
+            <testsuites package="tslint">
+                <testsuite name="test1.ts" errors="0">
+                    <testcase name="test1.ts" />
+                </testsuite>
+                <testsuite name="test2.ts" errors="0">
+                    <testcase name="test2.ts" />
+                </testsuite>
+                <testsuite name="test3.ts" errors="0">
+                    <testcase name="test3.ts" />
+                </testsuite>
+            </testsuites>`.replace(/>\s+/g, ">");
+
+        assert.equal(result, expectedResult);
     });
 });
