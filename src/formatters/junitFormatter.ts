@@ -76,20 +76,20 @@ export class Formatter extends AbstractFormatter {
             }
         }
 
-        if(fileNames && fileNames.length !== 0) {
+        if (fileNames !== undefined && fileNames.length !== 0) {
             // Filter out files which have had a failure associated with them.
-            const filteredFileNames = fileNames.filter((fileName) => {
-                for(const failure of failures) {
-                    if(fileName === failure.getFileName()) {
+            const filteredFileNames = fileNames.filter(fileName => {
+                for (const failure of failures) {
+                    if (fileName === failure.getFileName()) {
                         return false;
                     }
                 }
                 return true;
             });
 
-            for(const fileName of filteredFileNames) {
+            for (const fileName of filteredFileNames) {
                 output += `<testsuite name="${this.escapeXml(fileName)}" errors="0">`;
-                output += `<testcase name="${this.escapeXml(fileName)}" />`
+                output += `<testcase name="${this.escapeXml(fileName)}" />`;
                 output += `</testsuite>`;
             }
         }
