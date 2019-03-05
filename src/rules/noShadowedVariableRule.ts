@@ -63,8 +63,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         `,
         optionsDescription: Lint.Utils.dedent`
             You can optionally pass an object to disable checking for certain kinds of declarations.
-            Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`,
-            \`"typeParameter"\` and \`"underscore"\`. Just set the value to \`false\` for the check you want to disable.
+            Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
+            and \`"typeParameter"\`. You can also pass \`"underscore\`" to ignore variable names that begin with \`_\`.
+            Just set the value to \`false\` for the check you want to disable.
             All checks default to \`true\`, i.e. are enabled by default.
             Note that you cannot disable variables and parameters.
 
@@ -407,7 +408,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                             declaration =>
                                 !declaration.tdz || declaration.identifier.pos < identifier.pos,
                         )) &&
-                    (this.options.underscore || identifier.getText() !== "_")
+                    (this.options.underscore || !identifier.getText().startsWith("_"))
                 ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
                 } else if (parent !== undefined) {
