@@ -92,10 +92,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (
             match !== null &&
             !(ctx.options.ignoreBlankLines && match.index === 0) &&
-            // See https://github.com/palantir/tslint/issues/4518
-            // and https://github.com/ajafff/tsutils/issues/94
-            // TODO: Remove this check once tsutils handles Byte Order Markers correctly.
-            match[0].charCodeAt(0) !== ZERO_WIDTH_NO_BREAK_SPACE
+            (match[0] !== String.fromCharCode(ZERO_WIDTH_NO_BREAK_SPACE))
         ) {
             possibleFailures.push({
                 end: line.pos + line.contentLength,
