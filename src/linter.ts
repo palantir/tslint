@@ -42,7 +42,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 export class Linter {
-    public static VERSION = "5.13.0";
+    public static VERSION = "5.13.1";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -105,14 +105,12 @@ export class Linter {
      * `resolveJsonModule`.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return mapDefined(
-            program.getSourceFiles(),
-            file =>
-                file.fileName.endsWith(".d.ts") ||
-                file.fileName.endsWith(".json") ||
-                program.isSourceFileFromExternalLibrary(file)
-                    ? undefined
-                    : file.fileName,
+        return mapDefined(program.getSourceFiles(), file =>
+            file.fileName.endsWith(".d.ts") ||
+            file.fileName.endsWith(".json") ||
+            program.isSourceFileFromExternalLibrary(file)
+                ? undefined
+                : file.fileName,
         );
     }
 
@@ -285,9 +283,8 @@ export class Linter {
         try {
             if (this.program !== undefined && isTypedRule(rule)) {
                 return rule.applyWithProgram(sourceFile, this.program);
-            } else {
-                return rule.apply(sourceFile);
             }
+            return rule.apply(sourceFile);
         } catch (error) {
             if (isError(error) && error.stack !== undefined) {
                 showRuleCrashWarning(error.stack, rule.getOptions().ruleName, sourceFile.fileName);
@@ -325,9 +322,8 @@ export class Linter {
                 throw new FatalError(INVALID_SOURCE_ERROR);
             }
             return sourceFile;
-        } else {
-            return utils.getSourceFile(fileName, source);
         }
+        return utils.getSourceFile(fileName, source);
     }
 }
 

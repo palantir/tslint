@@ -122,7 +122,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         const symbolDeclarations = symbol.getDeclarations();
         if (symbolDeclarations === undefined) {
             return false;
-        } else if (symbolDeclarations.some(decl => namespacesInScope.some(ns => ns === decl))) {
+        }
+        if (symbolDeclarations.some(decl => namespacesInScope.some(ns => ns === decl))) {
             return true;
         }
 

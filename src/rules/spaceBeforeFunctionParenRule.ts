@@ -147,8 +147,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             return hasName
                 ? options.named
                 : !hasTypeParameters(node)
-                    ? options.anonymous
-                    : undefined;
+                ? options.anonymous
+                : undefined;
         }
 
         case ts.SyntaxKind.MethodDeclaration:

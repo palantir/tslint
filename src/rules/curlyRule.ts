@@ -172,12 +172,11 @@ class CurlyWalker extends Lint.AbstractWalker<Options> {
                 Lint.Replacement.appendText(statement.pos, " {"),
                 Lint.Replacement.appendText(statement.end, " }"),
             ];
-        } else {
-            const newLine = newLineWithIndentation(node, this.sourceFile);
-            return [
-                Lint.Replacement.appendText(statement.pos, " {"),
-                Lint.Replacement.appendText(statement.end, `${newLine}}`),
-            ];
         }
+        const newLine = newLineWithIndentation(node, this.sourceFile);
+        return [
+            Lint.Replacement.appendText(statement.pos, " {"),
+            Lint.Replacement.appendText(statement.end, `${newLine}}`),
+        ];
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "tslint",
-    "version": "5.13.0",
+    "version": "5.13.1",
     "description": "An extensible static analysis linter for the TypeScript language",
     "bin": {
         "tslint": "./bin/tslint"
@@ -16,9 +16,10 @@
         "compile:core": "tsc -p src",
         "compile:scripts": "tsc -p scripts",
         "compile:test": "tsc -p test",
-        "lint": "npm-run-all -p lint:global lint:from-bin",
-        "lint:global": "tslint --project test/tsconfig.json --format codeFrame",
+        "lint": "npm-run-all -p lint:from-installed lint:from-bin",
         "lint:from-bin": "node bin/tslint --project test/tsconfig.json --format codeFrame",
+        "lint:from-installed": "tslint --project test/tsconfig.json --format codeFrame",
+        "lint-fix": "yarn lint:from-installed --fix",
         "publish:local": "./scripts/npmPublish.sh",
         "test": "npm-run-all test:pre -p test:mocha test:rules",
         "test:pre": "cd ./test/config && npm install --no-save",
@@ -40,7 +41,7 @@
         "resolve": "^1.3.2",
         "semver": "^5.3.0",
         "tslib": "^1.8.0",
-        "tsutils": "^2.27.2"
+        "tsutils": "^2.29.0"
     },
     "peerDependencies": {
         "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev"
@@ -65,11 +66,11 @@
         "mocha": "^3.2.0",
         "npm-run-all": "^4.0.2",
         "nyc": "^10.2.0",
-        "prettier": "1.14.3",
+        "prettier": "~1.16.4",
         "rimraf": "^2.5.4",
         "ts-node": "^3.3.0",
-        "tslint": "~5.12.0",
-        "tslint-config-prettier": "^1.15.0",
+        "tslint": "~5.13.0",
+        "tslint-config-prettier": "^1.18.0",
         "tslint-plugin-prettier": "^2.0.1",
         "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
         "typescript": "~3.1.6"

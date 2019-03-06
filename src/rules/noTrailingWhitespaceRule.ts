@@ -112,8 +112,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
             ? getExcludedRanges(sourceFile, ctx.options)
             : getTemplateRanges(sourceFile)
         : ctx.options.ignoreJsDoc
-            ? getExcludedComments(sourceFile, ctx.options)
-            : [];
+        ? getExcludedComments(sourceFile, ctx.options)
+        : [];
     for (const possibleFailure of possibleFailures) {
         if (
             !excludedRanges.some(

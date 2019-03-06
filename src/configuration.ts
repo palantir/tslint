@@ -155,42 +155,40 @@ export function findConfigurationPath(
             throw new FatalError(
                 `Could not find config file at: ${path.resolve(suppliedConfigFilePath)}`,
             );
-        } else {
-            return path.resolve(suppliedConfigFilePath);
         }
-    } else {
-        // convert to dir if it's a file or doesn't exist
-        let useDirName = false;
-        try {
-            const stats = fs.statSync(inputFilePath!);
-            if (stats.isFile()) {
-                useDirName = true;
-            }
-        } catch (e) {
-            // throws if file doesn't exist
+        return path.resolve(suppliedConfigFilePath);
+    }
+    // convert to dir if it's a file or doesn't exist
+    let useDirName = false;
+    try {
+        const stats = fs.statSync(inputFilePath!);
+        if (stats.isFile()) {
             useDirName = true;
         }
-        if (useDirName) {
-            inputFilePath = path.dirname(inputFilePath!);
-        }
-
-        // search for tslint.json from input file location
-        let configFilePath = findup(CONFIG_FILENAMES, path.resolve(inputFilePath!));
-        if (configFilePath !== undefined) {
-            return configFilePath;
-        }
-
-        // search for tslint.json in home directory
-        const homeDir = os.homedir();
-        for (const configFilename of CONFIG_FILENAMES) {
-            configFilePath = path.join(homeDir, configFilename);
-            if (fs.existsSync(configFilePath)) {
-                return path.resolve(configFilePath);
-            }
-        }
-        // no path could be found
-        return undefined;
+    } catch (e) {
+        // throws if file doesn't exist
+        useDirName = true;
     }
+    if (useDirName) {
+        inputFilePath = path.dirname(inputFilePath!);
+    }
+
+    // search for tslint.json from input file location
+    let configFilePath = findup(CONFIG_FILENAMES, path.resolve(inputFilePath!));
+    if (configFilePath !== undefined) {
+        return configFilePath;
+    }
+
+    // search for tslint.json in home directory
+    const homeDir = os.homedir();
+    for (const configFilename of CONFIG_FILENAMES) {
+        configFilePath = path.join(homeDir, configFilename);
+        if (fs.existsSync(configFilePath)) {
+            return path.resolve(configFilePath);
+        }
+    }
+    // no path could be found
+    return undefined;
 }
 
 /**
@@ -246,16 +244,15 @@ function findup(filenames: string[], directory: string): string | undefined {
 export function loadConfigurationFromPath(configFilePath?: string, _originalFilePath?: string) {
     if (configFilePath == undefined) {
         return DEFAULT_CONFIG;
-    } else {
-        const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
-        const rawConfigFile = readConfigurationFile(resolvedConfigFilePath);
-
-        return parseConfigFile(
-            rawConfigFile,
-            path.dirname(resolvedConfigFilePath),
-            readConfigurationFile,
-        );
     }
+    const resolvedConfigFilePath = resolveConfigurationPath(configFilePath);
+    const rawConfigFile = readConfigurationFile(resolvedConfigFilePath);
+
+    return parseConfigFile(
+        rawConfigFile,
+        path.dirname(resolvedConfigFilePath),
+        readConfigurationFile,
+    );
 }
 
 /** Reads the configuration file from disk and parses it as raw JSON, YAML or JS depending on the extension. */
@@ -266,9 +263,8 @@ export function readConfigurationFile(filepath: string): RawConfigFile {
         try {
             if (resolvedConfigFileExt === ".json") {
                 return JSON.parse(stripComments(fileContent)) as RawConfigFile;
-            } else {
-                return yaml.safeLoad(fileContent) as RawConfigFile;
             }
+            return yaml.safeLoad(fileContent) as RawConfigFile;
         } catch (e) {
             const error = e as Error;
             // include the configuration file being parsed in the error since it may differ from the directly referenced config
@@ -615,11 +611,8 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(
-                          pattern =>
-                              dir === undefined
-                                  ? path.resolve(pattern)
-                                  : path.resolve(dir, pattern),
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
                       ),
                   }
                 : {}),

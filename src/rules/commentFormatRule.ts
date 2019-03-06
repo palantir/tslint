@@ -125,8 +125,8 @@ function parseOptions(options: Array<string | IExceptionsObject>): Options {
             options.indexOf(OPTION_LOWERCASE) !== -1
                 ? Case.Lower
                 : options.indexOf(OPTION_UPPERCASE) !== -1
-                    ? Case.Upper
-                    : Case.None,
+                ? Case.Upper
+                : Case.None,
         failureSuffix: "",
         space: options.indexOf(OPTION_SPACE) !== -1,
         ...composeExceptions(options[options.length - 1]),
