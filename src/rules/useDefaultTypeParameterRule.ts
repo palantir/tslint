@@ -76,9 +76,8 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         function createFix(): Lint.Fix {
             if (i === 0) {
                 return Lint.Replacement.deleteFromTo(typeArguments.pos - 1, typeArguments.end + 1);
-            } else {
-                return Lint.Replacement.deleteFromTo(typeArguments[i - 1].end, arg.end);
             }
+            return Lint.Replacement.deleteFromTo(typeArguments[i - 1].end, arg.end);
         }
     }
 }
@@ -102,8 +101,8 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
                 decl.kind === ts.SyntaxKind.TypeReference
                     ? typeParamsFromType(decl.typeName, checker)
                     : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
-                        ? typeParamsFromType(decl.expression, checker)
-                        : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
+                    ? typeParamsFromType(decl.expression, checker)
+                    : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
             return typeParameters === undefined ? undefined : { typeArguments, typeParameters };
         default:
             return undefined;
@@ -134,14 +133,10 @@ function typeParamsFromType(
         return undefined;
     }
 
-    return find(
-        sym.declarations,
-        decl =>
-            isClassLikeDeclaration(decl) ||
-            isTypeAliasDeclaration(decl) ||
-            isInterfaceDeclaration(decl)
-                ? decl.typeParameters
-                : undefined,
+    return find(sym.declarations, decl =>
+        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl)
+            ? decl.typeParameters
+            : undefined,
     );
 }
 

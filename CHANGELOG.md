@@ -1,5 +1,9 @@
 # Change Log
 
+## v5.13.1
+
+- [bugfix] Fix regression in CheckstyleFormatter backwards compatibility (#4561)
+
 ## v5.13.0
 
 - [deprecation] Mark `RuleWalker` and `ProgramAwareRuleWalker` as deprecated (#4413)

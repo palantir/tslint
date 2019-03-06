@@ -159,13 +159,14 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         const option = (() => {
             if (!isArrowFunction) {
                 return "parameter";
-            } else if (isTypedPropertyDeclaration(parent.parent)) {
-                return undefined;
-            } else if (utils.isPropertyDeclaration(parent.parent)) {
-                return "member-variable-declaration";
-            } else {
-                return "arrow-parameter";
             }
+            if (isTypedPropertyDeclaration(parent.parent)) {
+                return undefined;
+            }
+            if (utils.isPropertyDeclaration(parent.parent)) {
+                return "member-variable-declaration";
+            }
+            return "arrow-parameter";
         })();
 
         if (option !== undefined) {

@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Ten arguments may be optionally provided:
+            Several arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -170,6 +170,22 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
 
+            case ts.SyntaxKind.ExportDeclaration:
+                const { exportClause } = node as ts.ExportDeclaration;
+                if (options.module && exportClause !== undefined) {
+                    exportClause.elements.forEach((element, idx, arr) => {
+                        if (idx === arr.length - 1) {
+                            const token = exportClause.getLastToken()!;
+                            checkForTrailingWhitespace(token.getFullStart());
+                        }
+                        if (idx === 0) {
+                            const startPos = element.getStart() - 1;
+                            checkForTrailingWhitespace(startPos, startPos + 1);
+                        }
+                    });
+                }
+                break;
+
             case ts.SyntaxKind.FunctionType:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
@@ -267,14 +283,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     let prevTokenShouldBeFollowedByWhitespace = false;
     utils.forEachTokenWithTrivia(sourceFile, (_text, tokenKind, range, parent) => {
-        if (
-            tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
-            tokenKind === ts.SyntaxKind.NewLineTrivia ||
-            tokenKind === ts.SyntaxKind.EndOfFileToken
-        ) {
-            prevTokenShouldBeFollowedByWhitespace = false;
-            return;
-        } else if (prevTokenShouldBeFollowedByWhitespace) {
+        switch (tokenKind) {
+            case ts.SyntaxKind.WhitespaceTrivia:
+            case ts.SyntaxKind.NewLineTrivia:
+            case ts.SyntaxKind.EndOfFileToken:
+                prevTokenShouldBeFollowedByWhitespace = false;
+                return;
+        }
+        if (prevTokenShouldBeFollowedByWhitespace) {
             addMissingWhitespaceErrorAt(range.pos);
             prevTokenShouldBeFollowedByWhitespace = false;
         }

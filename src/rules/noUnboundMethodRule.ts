@@ -18,6 +18,7 @@
 import {
     hasModifier,
     isCallExpression,
+    isDeleteExpression,
     isIdentifier,
     isPropertyAccessExpression,
     isTypeOfExpression,
@@ -29,6 +30,7 @@ import * as Lint from "../index";
 const OPTION_IGNORE_STATIC = "ignore-static";
 const OPTION_WHITELIST = "whitelist";
 const OPTION_ALLOW_TYPEOF = "allow-typeof";
+const OPTION_ALLOW_DELETE = "allow-delete";
 
 const OPTION_WHITELIST_EXAMPLE = [
     true,
@@ -40,12 +42,14 @@ const OPTION_WHITELIST_EXAMPLE = [
 ];
 
 interface Options {
+    allowDelete: boolean;
     allowTypeof: boolean;
     ignoreStatic: boolean;
     whitelist: Set<string>;
 }
 
 interface OptionsInput {
+    [OPTION_ALLOW_DELETE]?: boolean;
     [OPTION_ALLOW_TYPEOF]?: boolean;
     [OPTION_IGNORE_STATIC]?: boolean;
     [OPTION_WHITELIST]?: string[];
@@ -59,9 +63,10 @@ export class Rule extends Lint.Rules.TypedRule {
         optionsDescription: Lint.Utils.dedent`
             You may additionally pass "${OPTION_IGNORE_STATIC}" to ignore static methods, or an options object.
             
-            The object may have three properties:
+             The object may have the following properties:
             
             * "${OPTION_IGNORE_STATIC}" - to ignore static methods.
+            * "${OPTION_ALLOW_DELETE}" - ignore methods referenced in a delete expression.
             * "${OPTION_ALLOW_TYPEOF}" - ignore methods referenced in a typeof expression.
             * "${OPTION_WHITELIST}" - ignore method references in parameters of specifed function calls.
             
@@ -75,6 +80,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 {
                     type: "object",
                     properties: {
+                        [OPTION_ALLOW_DELETE]: { type: "boolean" },
                         [OPTION_ALLOW_TYPEOF]: { type: "boolean" },
                         [OPTION_IGNORE_STATIC]: { type: "boolean" },
                         [OPTION_WHITELIST]: {
@@ -146,6 +152,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function parseArguments(args: Array<string | OptionsInput>): Options {
     const options: Options = {
+        allowDelete: false,
         allowTypeof: false,
         ignoreStatic: false,
         whitelist: new Set(),
@@ -157,6 +164,7 @@ function parseArguments(args: Array<string | OptionsInput>): Options {
                 options.ignoreStatic = true;
             }
         } else {
+            options.allowDelete = arg[OPTION_ALLOW_DELETE] || false;
             options.allowTypeof = arg[OPTION_ALLOW_TYPEOF] || false;
             options.ignoreStatic = arg[OPTION_IGNORE_STATIC] || false;
             options.whitelist = new Set(arg[OPTION_WHITELIST]);
@@ -174,9 +182,7 @@ function walk(ctx: Lint.WalkContext<Options>, tc: ts.TypeChecker) {
 
             const isMethodAccess =
                 declaration !== undefined && isMethod(declaration, ctx.options.ignoreStatic);
-            const shouldBeReported =
-                isMethodAccess &&
-                !isWhitelisted(node, ctx.options.whitelist, ctx.options.allowTypeof);
+            const shouldBeReported = isMethodAccess && !isWhitelisted(node, ctx.options);
             if (shouldBeReported) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
@@ -228,7 +234,11 @@ function isSafeUse(node: ts.Node): boolean {
     }
 }
 
-function isWhitelisted(node: ts.Node, whitelist: Set<string>, allowTypeof: boolean): boolean {
+function isWhitelisted(node: ts.Node, options: Options): boolean {
+    const { whitelist, allowTypeof, allowDelete } = options;
+    if (isDeleteExpression(node.parent)) {
+        return allowDelete;
+    }
     if (isTypeOfExpression(node.parent)) {
         return allowTypeof;
     }

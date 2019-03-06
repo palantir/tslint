@@ -165,14 +165,13 @@ export function parseErrorsFromMarkup(text: string): LintError[] {
                                 errorStartPos.col
                             } does not end correctly.`,
                         );
-                    } else {
-                        const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
+                    }
+                    const nextErrorLine = errorLinesForCodeLines[nextLineNo].shift();
 
-                        // if end of multiline error, add it it list of errors
-                        if (nextErrorLine instanceof EndErrorLine) {
-                            addError(nextErrorLine, errorStartPos, nextLineNo);
-                            break;
-                        }
+                    // if end of multiline error, add it it list of errors
+                    if (nextErrorLine instanceof EndErrorLine) {
+                        addError(nextErrorLine, errorStartPos, nextLineNo);
+                        break;
                     }
                 }
             }

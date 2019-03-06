@@ -81,10 +81,9 @@ function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number
         casesSeen++;
         if (switchVariable !== undefined) {
             return nodeEquals(expr, switchVariable, sourceFile);
-        } else {
-            switchVariable = expr;
-            return true;
         }
+        switchVariable = expr;
+        return true;
     });
     return couldBeSwitch && casesSeen >= minCases;
 }

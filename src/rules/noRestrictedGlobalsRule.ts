@@ -73,14 +73,8 @@ export class Rule extends Lint.Rules.TypedRule {
         const bannedGlobals = new Set(bannedList);
         if (sourceFile.isDeclarationFile) {
             return [];
-        } else {
-            return this.applyWithFunction(
-                sourceFile,
-                walk,
-                bannedGlobals,
-                program.getTypeChecker(),
-            );
         }
+        return this.applyWithFunction(sourceFile, walk, bannedGlobals, program.getTypeChecker());
     }
 }
 

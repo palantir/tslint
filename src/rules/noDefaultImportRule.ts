@@ -104,11 +104,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                     fromModuleConfigOption[fromModulesConfigOptionName],
                 ),
             };
-        } else {
-            return {
-                [fromModulesConfigOptionName]: new RegExp("^\\./|^\\.\\./"),
-            };
         }
+        return {
+            [fromModulesConfigOptionName]: new RegExp("^\\./|^\\.\\./"),
+        };
     }
 }
 
