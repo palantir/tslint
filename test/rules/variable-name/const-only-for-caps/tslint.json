@@ -1,5 +1,5 @@
 {
   "rules": {
-    "variable-name": [true, "const-only-for-caps"]
+    "variable-name": [true, "require-const-for-all-caps"]
   }
 }
