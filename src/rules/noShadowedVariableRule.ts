@@ -64,7 +64,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             You can optionally pass an object to disable checking for certain kinds of declarations.
             Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
-            and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
+            and \`"typeParameter"\`. You can also pass \`"underscore\`" to ignore variable names that begin with \`_\`.
+            Just set the value to \`false\` for the check you want to disable.
             All checks default to \`true\`, i.e. are enabled by default.
             Note that you cannot disable variables and parameters.
 
@@ -101,6 +102,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 typeAlias: { type: "boolean" },
                 typeParameter: { type: "boolean" },
                 temporalDeadZone: { type: "boolean" },
+                underscore: { type: "boolean" },
             },
         },
         optionExamples: [
@@ -115,6 +117,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     namespace: true,
                     typeAlias: false,
                     typeParameter: false,
+                    underscore: false,
                 },
             ],
         ],
@@ -147,7 +150,8 @@ type Kind =
     | "namespace"
     | "typeParameter"
     | "typeAlias"
-    | "temporalDeadZone";
+    | "temporalDeadZone"
+    | "underscore";
 type Options = Record<Kind, boolean>;
 
 function parseOptions(option: Partial<Options> | undefined): Options {
@@ -161,6 +165,7 @@ function parseOptions(option: Partial<Options> | undefined): Options {
         temporalDeadZone: true,
         typeAlias: true,
         typeParameter: true,
+        underscore: true,
         ...option,
     };
 }
@@ -402,7 +407,8 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                         declarationsInScope.some(
                             declaration =>
                                 !declaration.tdz || declaration.identifier.pos < identifier.pos,
-                        ))
+                        )) &&
+                    (this.options.underscore || !identifier.getText().startsWith("_"))
                 ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
                 } else if (parent !== undefined) {
