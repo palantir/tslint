@@ -44,12 +44,17 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[], _fixes?: RuleFailure[], fileNames?: string[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
+        const failureFileNames: Set<string> = new Set<string>();
+
         if (failures.length !== 0) {
             const failuresSorted = failures.sort((a, b) =>
                 a.getFileName().localeCompare(b.getFileName()),
             );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
+                if (!failureFileNames.has(failure.getFileName())) {
+                    failureFileNames.add(failure.getFileName());
+                }
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
                 const message = this.escapeXml(failure.getFailure());
                 const rule = this.escapeXml(failure.getRuleName());
@@ -78,14 +83,7 @@ export class Formatter extends AbstractFormatter {
 
         if (fileNames !== undefined && fileNames.length !== 0) {
             // Filter out files which have had a failure associated with them.
-            const filteredFileNames = fileNames.filter(fileName => {
-                for (const failure of failures) {
-                    if (fileName === failure.getFileName()) {
-                        return false;
-                    }
-                }
-                return true;
-            });
+            const filteredFileNames = fileNames.filter(fileName => !failureFileNames.has(fileName));
 
             for (const fileName of filteredFileNames) {
                 output += `<testsuite name="${this.escapeXml(fileName)}" errors="0">`;
