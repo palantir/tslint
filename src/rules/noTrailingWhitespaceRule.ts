@@ -92,7 +92,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (
             match !== null &&
             !(ctx.options.ignoreBlankLines && match.index === 0) &&
-            (match[0] !== String.fromCharCode(ZERO_WIDTH_NO_BREAK_SPACE))
+            match[0] !== String.fromCharCode(ZERO_WIDTH_NO_BREAK_SPACE)
         ) {
             possibleFailures.push({
                 end: line.pos + line.contentLength,
