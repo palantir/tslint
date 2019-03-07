@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2019 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(context: Lint.WalkContext<void>) {
     const cb = (node: ts.Node): void => {
         if (tsutils.isBinaryExpression(node) && isRelationalOrLogicalOperator(node.operatorToken)) {
-            if (isLiteral(node.left) && isLiteral(node.right)) {
+            if (
+                (tsutils.isStringLiteral(node.left) && tsutils.isStringLiteral(node.right)) ||
+                (tsutils.isNumericLiteral(node.left) && tsutils.isNumericLiteral(node.right))
+            ) {
                 if (node.left.text === node.right.text) {
                     context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
                 }
@@ -62,6 +65,11 @@ function walk(context: Lint.WalkContext<void>) {
                         context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
                     }
                 }
+            } else if (
+                (isBooleanLiteral(node.left) && isBooleanLiteral(node.right)) ||
+                (isNullLiteral(node.left) && isNullLiteral(node.right))
+            ) {
+                context.addFailureAtNode(node, TAUTOLOGY_DISCOVERED_ERROR_STRING);
             }
         }
         return ts.forEachChild(node, cb);
@@ -69,8 +77,12 @@ function walk(context: Lint.WalkContext<void>) {
     return ts.forEachChild(context.sourceFile, cb);
 }
 
-function isLiteral(node: ts.Node): node is ts.StringLiteral | ts.NumericLiteral {
-    return tsutils.isStringLiteral(node) || tsutils.isNumericLiteral(node);
+function isNullLiteral(node: ts.Node): node is ts.NullLiteral {
+    return node.kind === ts.SyntaxKind.NullKeyword;
+}
+
+function isBooleanLiteral(node: ts.Node): node is ts.BooleanLiteral {
+    return node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword;
 }
 
 function isRelationalOrLogicalOperator(operator: ts.BinaryOperatorToken): boolean {

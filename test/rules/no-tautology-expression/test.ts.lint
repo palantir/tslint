@@ -118,6 +118,40 @@ const someFunc = () => {
     }
 }
 
+const someFunc = () => {
+    if (true === true) {
+        ~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (false === false) {
+        ~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (true === false) {
+        ~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (null === null) {
+        ~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (null === false) {
+        return true;
+    }
+}
+
 const someVar1 = 3 + 3;
 const someVar2 = 3 - 3;
 const someVar3 = 3 * 3;
