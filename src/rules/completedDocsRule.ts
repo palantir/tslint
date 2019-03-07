@@ -21,7 +21,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
-import { constructExclusionsMap, ExclusionsMap } from "./completed-docs/exclusionFactory";
+import { constructExclusionsMap, ExclusionsMap } from "./completed-docs/exclusions";
 
 export const ALL = "all";
 
@@ -38,7 +38,7 @@ export const ARGUMENT_VARIABLES = "variables";
 
 export const DESCRIPTOR_TAGS = "tags";
 export const DESCRIPTOR_LOCATIONS = "locations";
-export const DESCRIPTOR_OVERLOADS_SEPARATE_DOCS = "overloads-separate-docs";
+export const DESCRIPTOR_OVERLOADS = "overloads";
 export const DESCRIPTOR_PRIVACIES = "privacies";
 export const DESCRIPTOR_VISIBILITIES = "visibilities";
 
@@ -163,7 +163,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static ARGUMENT_DESCRIPTOR_FUNCTION = {
         properties: {
             ...Rule.ARGUMENT_DESCRIPTOR_BLOCK.properties,
-            [DESCRIPTOR_OVERLOADS_SEPARATE_DOCS]: {
+            [DESCRIPTOR_OVERLOADS]: {
                 type: "boolean",
             },
         },
@@ -173,7 +173,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static ARGUMENT_DESCRIPTOR_METHOD = {
         properties: {
             ...Rule.ARGUMENT_DESCRIPTOR_CLASS.properties,
-            [DESCRIPTOR_OVERLOADS_SEPARATE_DOCS]: {
+            [DESCRIPTOR_OVERLOADS]: {
                 type: "boolean",
             },
         },
@@ -204,7 +204,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     * \`"${ALL}"\`
                     * \`"${VISIBILITY_EXPORTED}"\`
                     * \`"${VISIBILITY_INTERNAL}"\`
-                * \`"${ARGUMENT_FUNCTIONS}"\` \`"${ARGUMENT_METHODS}"\` may also specify \`"${DESCRIPTOR_OVERLOADS_SEPARATE_DOCS}"\`
+                * \`"${ARGUMENT_FUNCTIONS}"\` \`"${ARGUMENT_METHODS}"\` may also specify \`"${DESCRIPTOR_OVERLOADS}"\`
                   to indicate that each overload should have its own documentation, which is \`false\` by default.
                 * All types may also provide \`"${DESCRIPTOR_TAGS}"\`
                   with members specifying tags that allow the docs to not have a body.

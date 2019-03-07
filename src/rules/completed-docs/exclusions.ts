@@ -16,7 +16,7 @@
  */
 
 import { hasOwnProperty } from "../../utils";
-import { DESCRIPTOR_OVERLOADS_SEPARATE_DOCS, DocType } from "../completedDocsRule";
+import { DESCRIPTOR_OVERLOADS, DocType } from "../completedDocsRule";
 
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
 import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
@@ -63,8 +63,8 @@ const createRequirementsForDocType = (docType: DocType, descriptor: InputExclusi
     const requirements = [];
     let overloadsSeparateDocs = false;
 
-    if (typeof descriptor === "object" && DESCRIPTOR_OVERLOADS_SEPARATE_DOCS in descriptor) {
-        overloadsSeparateDocs = !!(descriptor as any)[DESCRIPTOR_OVERLOADS_SEPARATE_DOCS];
+    if (typeof descriptor === "object" && DESCRIPTOR_OVERLOADS in descriptor) {
+        overloadsSeparateDocs = !!(descriptor as any)[DESCRIPTOR_OVERLOADS];
     }
 
     if (docType === "methods" || docType === "properties") {

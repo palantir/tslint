@@ -2,7 +2,7 @@
   "rules": {
     "completed-docs": [true, {
       "functions": {
-        "overloads-separate-docs": false,
+        "overloads": false,
         "privacies": ["all"]
       }
     }]
