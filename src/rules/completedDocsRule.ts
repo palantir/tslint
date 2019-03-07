@@ -592,7 +592,7 @@ function getSiblings(node: ts.Node) {
         return [...parent.statements];
     }
 
-    return parent.getChildren()!;
+    return parent.getChildren();
 }
 
 function isGetAccessor(node: ts.Node): node is ts.GetAccessorDeclaration {
