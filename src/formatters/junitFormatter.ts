@@ -44,7 +44,7 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[], _fixes?: RuleFailure[], fileNames?: string[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
 
-        const failureFileNames: Set<string> = new Set<string>();
+        const failureFileNames: Set<string> = new Set([...failures.map(f => f.getFileName())]);
 
         if (failures.length !== 0) {
             const failuresSorted = failures.sort((a, b) =>
@@ -52,9 +52,6 @@ export class Formatter extends AbstractFormatter {
             );
             let previousFilename: string | null = null;
             for (const failure of failuresSorted) {
-                if (!failureFileNames.has(failure.getFileName())) {
-                    failureFileNames.add(failure.getFileName());
-                }
                 const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
                 const message = this.escapeXml(failure.getFailure());
                 const rule = this.escapeXml(failure.getRuleName());
