@@ -126,4 +126,55 @@ describe("JUnit Formatter", () => {
 
         assert.equal(result, expectedResult);
     });
+
+    it("handles a mixture of failures and successes", () => {
+        const maxPosition1 = sourceFile1.getFullWidth();
+
+        const failures = [
+            createFailure(sourceFile1, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(
+                sourceFile1,
+                2,
+                3,
+                "&<>'\" should be escaped",
+                "escape",
+                undefined,
+                "error",
+            ),
+            createFailure(
+                sourceFile1,
+                maxPosition1 - 1,
+                maxPosition1,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
+        ];
+
+        const expectedResult = `<?xml version="1.0" encoding="utf-8"?>
+        <testsuites package="tslint">
+            <testsuite name="formatters/jsonFormatter.test.ts">
+                <testcase name="first-name" classname="formatters/jsonFormatter.test.ts">
+                    <failure type="error">first failure Line 1, Column 1</failure>
+                </testcase>
+                <testcase name="escape" classname="formatters/jsonFormatter.test.ts">
+                    <failure type="error">&amp;&lt;&gt;&#39;&quot; should be escaped Line 1, Column 3</failure>
+                </testcase>
+                <testcase name="last-name" classname="formatters/jsonFormatter.test.ts">
+                    <failure type="error">last failure Line 6, Column 3</failure>
+                </testcase>
+            </testsuite>
+            <testsuite name="test1.ts" errors="0">
+                <testcase name="test1.ts" />
+            </testsuite>
+            <testsuite name="test2.ts" errors="0">
+                <testcase name="test2.ts" />
+            </testsuite>
+        </testsuites>`.replace(/>\s+/g, ">");
+
+        const result = formatter.format(failures, [], [TEST_FILE_1, "test1.ts", "test2.ts"]);
+
+        assert.equal(result, expectedResult);
+    });
 });
