@@ -21,7 +21,7 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
-import { ExclusionFactory, ExclusionsMap } from "./completed-docs/exclusionFactory";
+import { constructExclusionsMap, ExclusionsMap } from "./completed-docs/exclusions";
 
 export const ALL = "all";
 
@@ -38,6 +38,7 @@ export const ARGUMENT_VARIABLES = "variables";
 
 export const DESCRIPTOR_TAGS = "tags";
 export const DESCRIPTOR_LOCATIONS = "locations";
+export const DESCRIPTOR_OVERLOADS = "overloads";
 export const DESCRIPTOR_PRIVACIES = "privacies";
 export const DESCRIPTOR_VISIBILITIES = "visibilities";
 
@@ -159,6 +160,26 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "object",
     };
 
+    public static ARGUMENT_DESCRIPTOR_FUNCTION = {
+        properties: {
+            ...Rule.ARGUMENT_DESCRIPTOR_BLOCK.properties,
+            [DESCRIPTOR_OVERLOADS]: {
+                type: "boolean",
+            },
+        },
+        type: "object",
+    };
+
+    public static ARGUMENT_DESCRIPTOR_METHOD = {
+        properties: {
+            ...Rule.ARGUMENT_DESCRIPTOR_CLASS.properties,
+            [DESCRIPTOR_OVERLOADS]: {
+                type: "boolean",
+            },
+        },
+        type: "object",
+    };
+
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "completed-docs",
@@ -183,6 +204,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     * \`"${ALL}"\`
                     * \`"${VISIBILITY_EXPORTED}"\`
                     * \`"${VISIBILITY_INTERNAL}"\`
+                * \`"${ARGUMENT_FUNCTIONS}"\` \`"${ARGUMENT_METHODS}"\` may also specify \`"${DESCRIPTOR_OVERLOADS}"\`
+                  to indicate that each overload should have its own documentation, which is \`false\` by default.
                 * All types may also provide \`"${DESCRIPTOR_TAGS}"\`
                   with members specifying tags that allow the docs to not have a body.
                     * \`"${TAGS_FOR_CONTENT}"\`: Object mapping tags to \`RegExp\` bodies content allowed to count as complete docs.
@@ -224,9 +247,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
-                            [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_FUNCTION,
                             [ARGUMENT_INTERFACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
-                            [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
+                            [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_METHOD,
                             [ARGUMENT_NAMESPACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_PROPERTIES]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
                             [ARGUMENT_TYPES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
@@ -264,15 +287,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Helps ensure important components are documented.
 
-            Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+            Note: use this rule sparingly. It's better to have self-documenting names on components with single, concise responsibilities.
             Comments that only restate the names of variables add nothing to code, and can easily become outdated.
         `,
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
-
-    private readonly exclusionFactory = new ExclusionFactory();
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
@@ -288,7 +309,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             ruleArguments = [Rule.defaultArguments];
         }
 
-        return this.exclusionFactory.constructExclusionsMap(ruleArguments);
+        return constructExclusionsMap(ruleArguments);
     }
 }
 
@@ -364,7 +385,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
             case ts.SyntaxKind.GetAccessor:
             case ts.SyntaxKind.SetAccessor:
                 if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
-                    checkAccessorNode(node as ts.AccessorDeclaration);
+                    checkAccessorNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
                 }
         }
 
@@ -373,29 +394,29 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
 
     function checkNode(
         node: ts.NamedDeclaration,
-        nodeType: DocType,
+        docType: DocType,
         requirementNode: ts.Node = node,
     ): void {
-        if (!nodeIsExcluded(node, nodeType, requirementNode) && !nodeHasDocs(node)) {
-            addDocumentationFailure(node, describeNode(nodeType), requirementNode);
+        if (!nodeIsExcluded(node, docType, requirementNode) && !nodeHasDocs(node, docType)) {
+            addDocumentationFailure(node, describeDocType(docType), requirementNode);
         }
     }
 
-    function checkAccessorNode(node: ts.AccessorDeclaration): void {
-        if (nodeIsExcluded(node, ARGUMENT_PROPERTIES, node) || nodeHasDocs(node)) {
+    function checkAccessorNode(node: ts.AccessorDeclaration, docType: DocType): void {
+        if (nodeIsExcluded(node, ARGUMENT_PROPERTIES, node) || nodeHasDocs(node, docType)) {
             return;
         }
 
         const correspondingAccessor = getCorrespondingAccessor(node);
 
-        if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor)) {
+        if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor, docType)) {
             addDocumentationFailure(node, ARGUMENT_PROPERTIES, node);
         }
     }
 
     function nodeIsExcluded(
         node: ts.NamedDeclaration,
-        nodeType: DocType,
+        docType: DocType,
         requirementNode: ts.Node,
     ): boolean {
         const { name } = node;
@@ -403,13 +424,13 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
             return true;
         }
 
-        const exclusions = context.options.get(nodeType);
+        const exclusions = context.options.get(docType);
         if (exclusions === undefined) {
             return true;
         }
 
-        for (const exclusion of exclusions) {
-            if (exclusion.excludes(requirementNode)) {
+        for (const requirement of exclusions.requirements) {
+            if (requirement.excludes(requirementNode)) {
                 return true;
             }
         }
@@ -417,8 +438,8 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         return false;
     }
 
-    function nodeHasDocs(node: ts.Node): boolean {
-        const docs = getApparentJsDoc(node);
+    function nodeHasDocs(node: ts.Node, docType: DocType): boolean {
+        const docs = getApparentJsDoc(node, docType, context.sourceFile);
         if (docs === undefined) {
             return false;
         }
@@ -430,14 +451,80 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         return comments.length !== 0;
     }
 
+    /**
+     * @see https://github.com/ajafff/tsutils/issues/16
+     */
+    function getApparentJsDoc(
+        node: ts.Node,
+        docType: DocType,
+        sourceFile: ts.SourceFile,
+    ): ts.JSDoc[] | undefined {
+        if (ts.isVariableDeclaration(node)) {
+            if (variableIsAfterFirstInDeclarationList(node)) {
+                return undefined;
+            }
+
+            node = node.parent;
+        }
+
+        if (ts.isVariableDeclarationList(node)) {
+            node = node.parent;
+        }
+
+        const equivalentNodesForDocs: ts.Node[] = getEquivalentNodesForDocs(node, docType);
+
+        return equivalentNodesForDocs
+            .map(docsNode => tsutils.getJsDoc(docsNode, sourceFile))
+            .filter(nodeDocs => nodeDocs !== undefined)
+            .reduce((docs, moreDocs) => [...docs, ...moreDocs], []);
+    }
+
+    /**
+     * @see https://github.com/palantir/tslint/issues/4416
+     */
+    function getEquivalentNodesForDocs(node: ts.Node, docType: DocType): ts.Node[] {
+        const exclusions = context.options.get(docType);
+        if (exclusions === undefined || exclusions.overloadsSeparateDocs) {
+            return [node];
+        }
+
+        if (tsutils.isFunctionDeclaration(node) && node.name !== undefined) {
+            const functionName = node.name.text;
+
+            return getSiblings(node).filter(
+                child =>
+                    tsutils.isFunctionDeclaration(child) &&
+                    child.name !== undefined &&
+                    child.name.text === functionName,
+            );
+        }
+
+        if (
+            tsutils.isMethodDeclaration(node) &&
+            tsutils.isIdentifier(node.name) &&
+            tsutils.isClassDeclaration(node.parent)
+        ) {
+            const methodName = node.name.text;
+
+            return node.parent.members.filter(
+                member =>
+                    tsutils.isMethodDeclaration(member) &&
+                    tsutils.isIdentifier(member.name) &&
+                    member.name.text === methodName,
+            );
+        }
+
+        return [node];
+    }
+
     function addDocumentationFailure(
         node: ts.Node,
-        nodeType: string,
+        docType: string,
         requirementNode: ts.Node,
     ): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = describeDocumentationFailure(requirementNode, nodeType);
+        const description = describeDocumentationFailure(requirementNode, docType);
 
         context.addFailureAt(start, width, description);
     }
@@ -466,25 +553,6 @@ function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
     return undefined;
 }
 
-/**
- * @remarks See https://github.com/ajafff/tsutils/issues/16
- */
-function getApparentJsDoc(node: ts.Node): ts.JSDoc[] | undefined {
-    if (ts.isVariableDeclaration(node)) {
-        if (variableIsAfterFirstInDeclarationList(node)) {
-            return undefined;
-        }
-
-        node = node.parent;
-    }
-
-    if (ts.isVariableDeclarationList(node)) {
-        node = node.parent;
-    }
-
-    return tsutils.getJsDoc(node);
-}
-
 function variableIsAfterFirstInDeclarationList(node: ts.VariableDeclaration): boolean {
     const parent = node.parent;
     if (parent === undefined) {
@@ -494,7 +562,7 @@ function variableIsAfterFirstInDeclarationList(node: ts.VariableDeclaration): bo
     return ts.isVariableDeclarationList(parent) && node !== parent.declarations[0];
 }
 
-function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
+function describeDocumentationFailure(node: ts.Node, docType: string): string {
     let description = Rule.FAILURE_STRING_EXIST;
 
     if (node.modifiers !== undefined) {
@@ -503,7 +571,7 @@ function describeDocumentationFailure(node: ts.Node, nodeType: string): string {
             .join(" ")} `;
     }
 
-    return `${description}${nodeType}.`;
+    return `${description}${docType}.`;
 }
 
 function describeModifier(kind: ts.SyntaxKind) {
@@ -512,8 +580,19 @@ function describeModifier(kind: ts.SyntaxKind) {
     return alias !== undefined ? alias : description;
 }
 
-function describeNode(nodeType: DocType): string {
-    return nodeType.replace("-", " ");
+function describeDocType(docType: DocType): string {
+    return docType.replace("-", " ");
+}
+
+function getSiblings(node: ts.Node) {
+    const { parent } = node;
+
+    // Source files nest their statements within a node for getChildren()
+    if (ts.isSourceFile(parent)) {
+        return [...parent.statements];
+    }
+
+    return parent.getChildren();
 }
 
 function isGetAccessor(node: ts.Node): node is ts.GetAccessorDeclaration {
