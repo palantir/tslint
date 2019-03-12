@@ -54,18 +54,13 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             * \`${OPTION_ALLOW_ARGUMENTS}\` allows type assertions to be used on object literals inside call expressions.`,
         options: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    [OPTION_ALLOW_ARGUMENTS]: {
-                        type: "boolean",
-                    },
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_ARGUMENTS]: {
+                    type: "boolean",
                 },
-                additionalProperties: false,
             },
-            maxLength: 1,
-            minLength: 0,
+            additionalProperties: false,
         },
         optionExamples: [true, [true, { [OPTION_ALLOW_ARGUMENTS]: true }]],
         type: "functionality",
