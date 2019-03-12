@@ -16,4 +16,8 @@ x as T;
 {} as unknown;
 <unknown> {};
 
+// Allow object literals to be asserted when used as arguments.
+foo({} as T);
+foo(<T>{});
+
 [0]: Type assertion on object literals is forbidden, use a type annotation instead.
