@@ -266,7 +266,7 @@ export const rules = {
     "switch-final-break": true,
     "type-literal-delimiter": true,
     "unnecessary-bind": true,
-    "variable-name": { options: ["ban-keywords", "check-format"] },
+    "variable-name": { options: ["ban-keywords", "check-format", "require-const-for-all-caps"] },
     whitespace: {
         options: [
             "check-branch",
