@@ -154,7 +154,6 @@ export const rules = {
     "unnecessary-constructor": true,
     "use-default-type-parameter": true,
     "use-isnan": true,
-    "unnecessary-else": true,
 
     // Maintainability
 
@@ -266,6 +265,7 @@ export const rules = {
     "switch-final-break": true,
     "type-literal-delimiter": true,
     "unnecessary-bind": true,
+    "unnecessary-else": true,
     "variable-name": { options: ["ban-keywords", "check-format", "require-const-for-all-caps"] },
     whitespace: {
         options: [
