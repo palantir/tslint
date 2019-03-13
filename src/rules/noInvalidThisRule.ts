@@ -102,15 +102,16 @@ function walk(ctx: Lint.WalkContext<boolean>): void {
                     ts.forEachChild(node, cb);
                     currentParent = originalParent;
                     return;
+                } else {
+                    currentParent = (node as ts.FunctionLikeDeclaration).parameters.some(
+                        isThisParameter,
+                    )
+                        ? ParentType.BoundRegularFunction
+                        : ParentType.UnboundRegularFunction;
+                    ts.forEachChild(node, cb);
+                    currentParent = originalParent;
+                    return;
                 }
-                currentParent = (node as ts.FunctionLikeDeclaration).parameters.some(
-                    isThisParameter,
-                )
-                    ? ParentType.BoundRegularFunction
-                    : ParentType.UnboundRegularFunction;
-                ts.forEachChild(node, cb);
-                currentParent = originalParent;
-                return;
 
             case ts.SyntaxKind.ThisKeyword:
                 if (!thisAllowedParents.has(currentParent)) {

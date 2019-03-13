@@ -29,8 +29,7 @@ export function findFormatter(
 ): FormatterConstructor | undefined {
     if (typeof name === "function") {
         return name;
-    }
-    if (typeof name === "string") {
+    } else if (typeof name === "string") {
         name = name.trim();
         const camelizedName = camelize(`${name}Formatter`);
 
@@ -50,9 +49,10 @@ export function findFormatter(
 
         // else try to resolve as module
         return loadFormatterModule(name);
+    } else {
+        // If an something else is passed as a name (e.g. object)
+        throw new Error(`Name of type ${typeof name} is not supported.`);
     }
-    // If an something else is passed as a name (e.g. object)
-    throw new Error(`Name of type ${typeof name} is not supported.`);
 }
 
 function loadFormatter(

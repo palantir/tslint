@@ -66,8 +66,9 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     public hasOption(option: string): boolean {
         if (this.options !== undefined) {
             return this.options.indexOf(option) !== -1;
+        } else {
+            return false;
         }
-        return false;
     }
 
     /** @deprecated Prefer `addFailureAt` and its variants. */

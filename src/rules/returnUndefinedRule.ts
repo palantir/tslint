@@ -87,11 +87,11 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
 function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
     if (node.expression === undefined) {
         return ReturnKind.Void;
-    }
-    if (isIdentifier(node.expression) && node.expression.text === "undefined") {
+    } else if (isIdentifier(node.expression) && node.expression.text === "undefined") {
         return ReturnKind.Value;
+    } else {
+        return undefined;
     }
-    return undefined;
 }
 
 enum ReturnKind {

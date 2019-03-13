@@ -25,11 +25,11 @@ import * as ts from "typescript";
 export function arrayify<T>(arg?: T | T[]): T[] {
     if (Array.isArray(arg)) {
         return arg;
-    }
-    if (arg != undefined) {
+    } else if (arg != undefined) {
         return [arg];
+    } else {
+        return [];
     }
-    return [];
 }
 
 /**
@@ -39,8 +39,9 @@ export function arrayify<T>(arg?: T | T[]): T[] {
 export function objectify(arg: any): any {
     if (typeof arg === "object" && arg != undefined) {
         return arg;
+    } else {
+        return {};
     }
-    return {};
 }
 
 export function hasOwnProperty(arg: {}, key: string): boolean {
@@ -105,17 +106,18 @@ export function stripComments(content: string): string {
             if (m3 !== undefined) {
                 // A block comment. Replace with nothing
                 return "";
-            }
-            if (m4 !== undefined) {
+            } else if (m4 !== undefined) {
                 // A line comment. If it ends in \r?\n then keep it.
                 const length = m4.length;
                 if (length > 2 && m4[length - 1] === "\n") {
                     return m4[length - 2] === "\r" ? "\r\n" : "\n";
+                } else {
+                    return "";
                 }
-                return "";
+            } else {
+                // We match a string
+                return match;
             }
-            // We match a string
-            return match;
         },
     );
     return result;

@@ -89,15 +89,15 @@ function fix(node: ts.BinaryExpression, { negate, expression }: Compare): Lint.F
             : Lint.Replacement.deleteFromTo(node.getStart(), node.right.getStart());
     if (!negate) {
         return deleted;
-    }
-    if (needsParenthesesForNegate(expression)) {
+    } else if (needsParenthesesForNegate(expression)) {
         return [
             deleted,
             Lint.Replacement.appendText(node.getStart(), "!("),
             Lint.Replacement.appendText(node.getEnd(), ")"),
         ];
+    } else {
+        return [deleted, Lint.Replacement.appendText(node.getStart(), "!")];
     }
-    return [deleted, Lint.Replacement.appendText(node.getStart(), "!")];
 }
 
 function needsParenthesesForNegate(node: ts.Expression): boolean {

@@ -79,8 +79,9 @@ export function isBlockScopedVariable(
             parent.kind === ts.SyntaxKind.CatchClause ||
             isBlockScopedVariableDeclarationList(parent)
         );
+    } else {
+        return isBlockScopedVariableDeclarationList(node.declarationList);
     }
-    return isBlockScopedVariableDeclarationList(node.declarationList);
 }
 
 /** @deprecated use `isBlockScopedVariableDeclarationList` and `getDeclarationOfBindingElement` from `tsutils` */
@@ -98,8 +99,9 @@ export function getBindingElementVariableDeclaration(
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
+        } else {
+            currentParent = currentParent.parent;
         }
-        currentParent = currentParent.parent;
     }
     return currentParent as ts.VariableDeclaration;
 }
@@ -145,8 +147,9 @@ export function isAssignment(node: ts.Node) {
             binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
             binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment
         );
+    } else {
+        return false;
     }
-    return false;
 }
 
 /**

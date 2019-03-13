@@ -283,14 +283,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
     let prevTokenShouldBeFollowedByWhitespace = false;
     utils.forEachTokenWithTrivia(sourceFile, (_text, tokenKind, range, parent) => {
-        switch (tokenKind) {
-            case ts.SyntaxKind.WhitespaceTrivia:
-            case ts.SyntaxKind.NewLineTrivia:
-            case ts.SyntaxKind.EndOfFileToken:
-                prevTokenShouldBeFollowedByWhitespace = false;
-                return;
-        }
-        if (prevTokenShouldBeFollowedByWhitespace) {
+        if (
+            tokenKind === ts.SyntaxKind.WhitespaceTrivia ||
+            tokenKind === ts.SyntaxKind.NewLineTrivia ||
+            tokenKind === ts.SyntaxKind.EndOfFileToken
+        ) {
+            prevTokenShouldBeFollowedByWhitespace = false;
+            return;
+        } else if (prevTokenShouldBeFollowedByWhitespace) {
             addMissingWhitespaceErrorAt(range.pos);
             prevTokenShouldBeFollowedByWhitespace = false;
         }

@@ -91,12 +91,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (checking) {
             if (isParenthesizedExpression(node) || isVoidExpression(node)) {
                 return cb(node.expression);
-            }
-            if (isConditionalExpression(node)) {
+            } else if (isConditionalExpression(node)) {
                 noCheck(node.condition, cb);
                 return both(node.whenTrue, node.whenFalse);
-            }
-            if (isBinaryExpression(node)) {
+            } else if (isBinaryExpression(node)) {
                 switch (node.operatorToken.kind) {
                     case ts.SyntaxKind.CommaToken:
                         if (isIndirectEval(node)) {
@@ -121,8 +119,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             }
             allowFastNullChecks = true;
             return false;
-        }
-        if (isVoidExpression(node)) {
+        } else if (isVoidExpression(node)) {
             // allow `void 0` and `void(0)`
             if (
                 !isLiteralZero(
@@ -134,8 +131,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 check(node.expression);
             }
             return false;
-        }
-        if (
+        } else if (
             isBinaryExpression(node) &&
             node.operatorToken.kind === ts.SyntaxKind.CommaToken &&
             !isIndirectEval(node)
@@ -171,8 +167,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (cb(one)) {
             if (cb(two)) {
                 return true;
+            } else {
+                ctx.addFailureAtNode(one, Rule.FAILURE_STRING);
             }
-            ctx.addFailureAtNode(one, Rule.FAILURE_STRING);
         } else if (cb(two)) {
             ctx.addFailureAtNode(two, Rule.FAILURE_STRING);
         }

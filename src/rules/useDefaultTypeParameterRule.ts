@@ -76,8 +76,9 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
         function createFix(): Lint.Fix {
             if (i === 0) {
                 return Lint.Replacement.deleteFromTo(typeArguments.pos - 1, typeArguments.end + 1);
+            } else {
+                return Lint.Replacement.deleteFromTo(typeArguments[i - 1].end, arg.end);
             }
-            return Lint.Replacement.deleteFromTo(typeArguments[i - 1].end, arg.end);
         }
     }
 }
