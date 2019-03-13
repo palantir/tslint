@@ -1,0 +1,51 @@
+---
+ruleName: static-this
+description: Ban the use of `this` in static methods.
+hasFix: true
+options: null
+optionsDescription: ''
+optionExamples:
+  - 'true'
+rationale: >-
+
+  Static `this` usage can be confusing for newcomers.
+
+  It can also become imprecise when used with extended classes when a static `this` of a parent class no longer specifically refers to the
+  parent class.
+          
+type: functionality
+typescriptOnly: false
+codeExamples:
+  - description: Disallows the `this` keyword usage in static context.
+    config: |-
+      ```json
+      "rules": { "static-this": true }
+      ```
+    pass: |-
+      ```ts
+      class Pass {
+          static getName() {
+              return 'name'
+          }
+
+          static getFullname() {
+              return `full ${Pass.getName()}`
+          }
+      }
+      ```
+    fail: |-
+      ```ts
+      class Fail {
+          static getName() {
+              return 'name'
+          }
+
+          static getFullname() {
+              return `full ${this.getName()}`
+          }
+      }
+      ```
+layout: rule
+title: 'Rule: static-this'
+optionsJSON: 'null'
+---

@@ -22,6 +22,8 @@ optionsDescription: |-
           * `"all"`
           * `"exported"`
           * `"internal"`
+      * `"functions"` `"methods"` may also specify `"overloads"`
+        to indicate that each overload should have its own documentation, which is `false` by default.
       * All types may also provide `"tags"`
         with members specifying tags that allow the docs to not have a body.
           * `"content"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.
@@ -58,7 +60,7 @@ options:
         properties:
           classes: &ref_0
             properties:
-              tags:
+              tags: &ref_1
                 properties:
                   content:
                     items:
@@ -68,7 +70,7 @@ options:
                     items:
                       type: string
                     type: array
-              visibilities:
+              visibilities: &ref_2
                 enum:
                   - all
                   - exported
@@ -77,11 +79,17 @@ options:
             type: object
           enums: *ref_0
           enum-members: *ref_0
-          functions: *ref_0
-          interfaces: *ref_0
-          methods: &ref_1
+          functions:
             properties:
-              tags:
+              tags: *ref_1
+              visibilities: *ref_2
+              overloads:
+                type: boolean
+            type: object
+          interfaces: *ref_0
+          methods:
+            properties:
+              tags: &ref_3
                 properties:
                   content:
                     items:
@@ -91,22 +99,29 @@ options:
                     items:
                       type: string
                     type: array
-              locations:
+              locations: &ref_4
                 enum:
                   - all
                   - instance
                   - static
                 type: string
-              privacies:
+              privacies: &ref_5
                 enum:
                   - all
                   - private
                   - protected
                   - public
                 type: string
+              overloads:
+                type: boolean
             type: object
           namespaces: *ref_0
-          properties: *ref_1
+          properties:
+            properties:
+              tags: *ref_3
+              locations: *ref_4
+              privacies: *ref_5
+            type: object
           types: *ref_0
           variables: *ref_0
 optionExamples:
@@ -128,7 +143,7 @@ rationale: |-
 
   Helps ensure important components are documented.
 
-  Note: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.
+  Note: use this rule sparingly. It's better to have self-documenting names on components with single, concise responsibilities.
   Comments that only restate the names of variables add nothing to code, and can easily become outdated.
           
 type: style
@@ -269,6 +284,9 @@ optionsJSON: |-
                     "internal"
                   ],
                   "type": "string"
+                },
+                "overloads": {
+                  "type": "boolean"
                 }
               },
               "type": "object"
@@ -336,6 +354,9 @@ optionsJSON: |-
                     "public"
                   ],
                   "type": "string"
+                },
+                "overloads": {
+                  "type": "boolean"
                 }
               },
               "type": "object"

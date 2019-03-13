@@ -32,7 +32,8 @@ optionsDescription: |-
 
   You can optionally pass an object to disable checking for certain kinds of declarations.
   Possible keys are `"class"`, `"enum"`, `"function"`, `"import"`, `"interface"`, `"namespace"`, `"typeAlias"`
-  and `"typeParameter"`. Just set the value to `false` for the check you want to disable.
+  and `"typeParameter"`. You can also pass `"underscore`" to ignore variable names that begin with `_`.
+  Just set the value to `false` for the check you want to disable.
   All checks default to `true`, i.e. are enabled by default.
   Note that you cannot disable variables and parameters.
 
@@ -78,6 +79,8 @@ options:
       type: boolean
     temporalDeadZone:
       type: boolean
+    underscore:
+      type: boolean
 optionExamples:
   - 'true'
   - |-
@@ -90,7 +93,8 @@ optionExamples:
         "interface": false,
         "namespace": true,
         "typeAlias": false,
-        "typeParameter": false
+        "typeParameter": false,
+        "underscore": false
       }
     ]
 type: functionality
@@ -126,6 +130,9 @@ optionsJSON: |-
         "type": "boolean"
       },
       "temporalDeadZone": {
+        "type": "boolean"
+      },
+      "underscore": {
         "type": "boolean"
       }
     }

@@ -11,13 +11,60 @@ rationale: |-
   The compiler will warn for excess properties with this syntax, but not missing required fields.
   For example: `const x: { foo: number } = {}` will fail to compile, but
   `const x = {} as { foo: number }` will succeed.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  One option may be configured:
+
+  * `allow-arguments` allows type assertions to be used on object literals inside call expressions.
+options:
+  type: object
+  properties:
+    allow-arguments:
+      type: boolean
+  additionalProperties: false
 optionExamples:
   - 'true'
+  - '[true, {"allow-arguments": true}]'
 type: functionality
 typescriptOnly: true
+codeExamples:
+  - description: Disallow object literals to appear in type assertion expressions (default). Casing to `any` and `unknown` is allowed.
+    config: |-
+      ```json
+      "rules": { "no-object-literal-type-assertion": true }
+      ```
+    pass: |-
+      ```ts
+      let foo = {} as any;
+      let foo = {} as unknown;
+
+      let foo = {} as any as Foo;
+      let foo = {} as unknown as Foo;
+      ```
+    fail: |-
+      ```ts
+      let foo = {} as Foo;
+      let foo = <Foo>{};
+      ```
+  - description: Allow using a type assertion when the object literal is used as an argument.
+    config: |-
+      ```json
+      "rules": { "no-object-literal-type-assertion": [true, { "allow-arguments": true }] }
+      ```
+    pass: |-
+      ```ts
+      bar({} as Foo)
+      ```
 layout: rule
 title: 'Rule: no-object-literal-type-assertion'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "allow-arguments": {
+        "type": "boolean"
+      }
+    },
+    "additionalProperties": false
+  }
 ---
