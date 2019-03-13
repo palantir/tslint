@@ -29,17 +29,15 @@ export interface LintError {
 export function errorComparator(err1: LintError, err2: LintError) {
     if (err1.startPos.line !== err2.startPos.line) {
         return err1.startPos.line - err2.startPos.line;
-    }
-    if (err1.startPos.col !== err2.startPos.col) {
+    } else if (err1.startPos.col !== err2.startPos.col) {
         return err1.startPos.col - err2.startPos.col;
-    }
-    if (err1.endPos.line !== err2.endPos.line) {
+    } else if (err1.endPos.line !== err2.endPos.line) {
         return err1.endPos.line - err2.endPos.line;
-    }
-    if (err1.endPos.col !== err2.endPos.col) {
+    } else if (err1.endPos.col !== err2.endPos.col) {
         return err1.endPos.col - err2.endPos.col;
+    } else {
+        return err1.message.localeCompare(err2.message);
     }
-    return err1.message.localeCompare(err2.message);
 }
 
 export function lintSyntaxError(message: string) {

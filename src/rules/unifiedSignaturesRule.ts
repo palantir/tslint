@@ -95,8 +95,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     return body === undefined && name !== undefined
                         ? { signature: statement, key: name.text }
                         : undefined;
+                } else {
+                    return undefined;
                 }
-                return undefined;
             }),
         );
     }

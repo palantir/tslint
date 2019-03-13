@@ -110,8 +110,7 @@ export function printLine(fileName: string, line: Line, code?: string): string |
 
             const tildes = "~".repeat(code.length - leadingSpaces.length);
             return `${leadingSpaces}${tildes}`;
-        }
-        if (line instanceof EndErrorLine) {
+        } else if (line instanceof EndErrorLine) {
             let tildes = "~".repeat(line.endCol - line.startCol);
             if (code.length < line.endCol) {
                 // Better than crashing in String.repeat
@@ -126,11 +125,9 @@ export function printLine(fileName: string, line: Line, code?: string): string |
             }
             return `${leadingSpaces}${tildes}${endSpaces} [${line.message}]`;
         }
-    }
-    if (line instanceof MessageSubstitutionLine) {
+    } else if (line instanceof MessageSubstitutionLine) {
         return `[${line.key}]: ${line.message}`;
-    }
-    if (line instanceof CodeLine) {
+    } else if (line instanceof CodeLine) {
         return line.contents;
     }
     return undefined;

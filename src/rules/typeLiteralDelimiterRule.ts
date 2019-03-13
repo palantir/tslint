@@ -61,8 +61,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     private getRuleOptions(): Options {
         if (this.ruleArguments[0] === undefined) {
             return {};
+        } else {
+            return this.ruleArguments[0] as Options;
         }
-        return this.ruleArguments[0] as Options;
     }
 }
 

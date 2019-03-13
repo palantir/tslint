@@ -266,13 +266,13 @@ function parseOptions(ruleArguments: any[]): Options {
     const compiledGroups = groups.map((g, idx) => {
         if (typeof g === "string") {
             return { name: `/${g}/`, match: new RegExp(g), order: idx };
+        } else {
+            return {
+                match: new RegExp(g.match),
+                name: g.name !== undefined ? g.name : `/${g.match}/`,
+                order: g.order,
+            };
         }
-
-        return {
-            match: new RegExp(g.match),
-            name: g.name !== undefined ? g.name : `/${g.match}/`,
-            order: g.order,
-        };
     });
 
     return {
@@ -707,8 +707,7 @@ function flipCase(str: string): string {
         .map(char => {
             if (char >= "a" && char <= "z") {
                 return char.toUpperCase();
-            }
-            if (char >= "A" && char <= "Z") {
+            } else if (char >= "A" && char <= "Z") {
                 return char.toLowerCase();
             }
             return char;
@@ -736,14 +735,11 @@ function compare(a: string, b: string): 0 | 1 | -1 {
     }
     if (isLow(a) && !isLow(b)) {
         return 1;
-    }
-    if (!isLow(a) && isLow(b)) {
+    } else if (!isLow(a) && isLow(b)) {
         return -1;
-    }
-    if (a > b) {
+    } else if (a > b) {
         return 1;
-    }
-    if (a < b) {
+    } else if (a < b) {
         return -1;
     }
     return 0;
