@@ -458,7 +458,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces JSDoc comments for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for `[classes, functions, methods, properties]`,\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"existence\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for `[classes, functions, methods, properties]`,\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * `\"functions\"` `\"methods\"` may also specify `\"overloads\"`\n      to indicate that each overload should have its own documentation, which is `false` by default.\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"existence\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -592,6 +592,9 @@
                       "internal"
                     ],
                     "type": "string"
+                  },
+                  "overloads": {
+                    "type": "boolean"
                   }
                 },
                 "type": "object"
@@ -659,6 +662,9 @@
                       "public"
                     ],
                     "type": "string"
+                  },
+                  "overloads": {
+                    "type": "boolean"
                   }
                 },
                 "type": "object"
@@ -832,7 +838,7 @@
         }
       ]
     ],
-    "rationale": "\nHelps ensure important components are documented.\n\nNote: use this rule sparingly. It's better to have self-documenting names on components with single, consice responsibilities.\nComments that only restate the names of variables add nothing to code, and can easily become outdated.\n        ",
+    "rationale": "\nHelps ensure important components are documented.\n\nNote: use this rule sparingly. It's better to have self-documenting names on components with single, concise responsibilities.\nComments that only restate the names of variables add nothing to code, and can easily become outdated.\n        ",
     "type": "style",
     "typescriptOnly": false
   },
@@ -1823,10 +1829,22 @@
     "ruleName": "no-duplicate-imports",
     "description": "\nDisallows multiple import statements from the same module.",
     "rationale": "\nUsing a single import statement per module will make the code clearer because you can see everything being imported\nfrom that module on one line.",
-    "optionsDescription": "Not configurable",
-    "options": null,
+    "optionsDescription": "\n\"allow-namespace-imports\" allows you to import namespaces on separate lines.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "allow-namespace-imports": {
+          "type": "boolean"
+        }
+      }
+    },
     "optionExamples": [
-      true
+      [
+        true,
+        {
+          "allow-namespace-imports": true
+        }
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": false
@@ -2304,13 +2322,40 @@
     "ruleName": "no-object-literal-type-assertion",
     "description": "\nForbids an object literal to appear in a type assertion expression.\nCasting to `any` or to `unknown` is still allowed.",
     "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\nThe compiler will warn for excess properties with this syntax, but not missing required fields.\nFor example: `const x: { foo: number } = {}` will fail to compile, but\n`const x = {} as { foo: number }` will succeed.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nOne option may be configured:\n\n* `allow-arguments` allows type assertions to be used on object literals inside call expressions.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "allow-arguments": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "allow-arguments": true
+        }
+      ]
     ],
     "type": "functionality",
-    "typescriptOnly": true
+    "typescriptOnly": true,
+    "codeExamples": [
+      {
+        "description": "Disallow object literals to appear in type assertion expressions (default). Casing to `any` and `unknown` is allowed.",
+        "config": "```json\n\"rules\": { \"no-object-literal-type-assertion\": true }\n```",
+        "pass": "```ts\nlet foo = {} as any;\nlet foo = {} as unknown;\n\nlet foo = {} as any as Foo;\nlet foo = {} as unknown as Foo;\n```",
+        "fail": "```ts\nlet foo = {} as Foo;\nlet foo = <Foo>{};\n```"
+      },
+      {
+        "description": "Allow using a type assertion when the object literal is used as an argument.",
+        "config": "```json\n\"rules\": { \"no-object-literal-type-assertion\": [true, { \"allow-arguments\": true }] }\n```",
+        "pass": "```ts\nbar({} as Foo)\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-parameter-properties",
@@ -2419,7 +2464,7 @@
     "ruleName": "no-shadowed-variable",
     "description": "Disallows shadowing variable declarations.",
     "rationale": "\nWhen a variable in a local scope and a variable in the containing scope have the same name, shadowing occurs.\nShadowing makes it impossible to access the variable in the containing scope and\nobscures to what value an identifier actually refers. Compare the following snippets:\n\n```\nconst a = 'no shadow';\nfunction print() {\n    console.log(a);\n}\nprint(); // logs 'no shadow'.\n```\n\n```\nconst a = 'no shadow';\nfunction print() {\n    const a = 'shadow'; // TSLint will complain here.\n    console.log(a);\n}\nprint(); // logs 'shadow'.\n```\n\nESLint has [an equivalent rule](https://eslint.org/docs/rules/no-shadow).\nFor more background information, refer to\n[this MDN closure doc](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping).\n        ",
-    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. Just set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n\nThe option `\"temporalDeadZone\"` defaults to `true` which shows errors when shadowing block scoped declarations in their\ntemporal dead zone. When set to `false` parameters, classes, enums and variables declared\nwith `let` or `const` are not considered shadowed if the shadowing occurs within their\n[temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).\n\nThe following example shows how the `\"temporalDeadZone\"` option changes the linting result:\n\n```ts\nfunction fn(value) {\n    if (value) {\n        const tmp = value; // no error on this line if \"temporalDeadZone\" is false\n        return tmp;\n    }\n    let tmp = undefined;\n    if (!value) {\n        const tmp = value; // this line always contains an error\n        return tmp;\n    }\n}\n```\n        ",
+    "optionsDescription": "\nYou can optionally pass an object to disable checking for certain kinds of declarations.\nPossible keys are `\"class\"`, `\"enum\"`, `\"function\"`, `\"import\"`, `\"interface\"`, `\"namespace\"`, `\"typeAlias\"`\nand `\"typeParameter\"`. You can also pass `\"underscore`\" to ignore variable names that begin with `_`.\nJust set the value to `false` for the check you want to disable.\nAll checks default to `true`, i.e. are enabled by default.\nNote that you cannot disable variables and parameters.\n\nThe option `\"temporalDeadZone\"` defaults to `true` which shows errors when shadowing block scoped declarations in their\ntemporal dead zone. When set to `false` parameters, classes, enums and variables declared\nwith `let` or `const` are not considered shadowed if the shadowing occurs within their\n[temporal dead zone](http://jsrocks.org/2015/01/temporal-dead-zone-tdz-demystified).\n\nThe following example shows how the `\"temporalDeadZone\"` option changes the linting result:\n\n```ts\nfunction fn(value) {\n    if (value) {\n        const tmp = value; // no error on this line if \"temporalDeadZone\" is false\n        return tmp;\n    }\n    let tmp = undefined;\n    if (!value) {\n        const tmp = value; // this line always contains an error\n        return tmp;\n    }\n}\n```\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -2449,6 +2494,9 @@
         },
         "temporalDeadZone": {
           "type": "boolean"
+        },
+        "underscore": {
+          "type": "boolean"
         }
       }
     },
@@ -2463,7 +2511,8 @@
           "interface": false,
           "namespace": true,
           "typeAlias": false,
-          "typeParameter": false
+          "typeParameter": false,
+          "underscore": false
         }
       ]
     ],
@@ -2561,6 +2610,18 @@
     "typescriptOnly": false
   },
   {
+    "description": "\nEnforces that relational/equality binary operators does not take two equal variables/literals as operands.\nExpression like 3 === 3, someVar === someVar, \"1\" > \"1\" are either a tautology or contradiction, and will produce an error.\n",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "Clean redundant code and unnecessary comparison of objects and literals.",
+    "ruleName": "no-tautology-expression",
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
     "description": "Disallows unnecessary references to `this`.",
     "optionExamples": [
       true,
@@ -2628,7 +2689,7 @@
   {
     "ruleName": "no-unbound-method",
     "description": "Warns when a method is used outside of a method call.",
-    "optionsDescription": "\nYou may additionally pass \"ignore-static\" to ignore static methods, or an options object.\n\nThe object may have three properties:\n\n* \"ignore-static\" - to ignore static methods.\n* \"allow-typeof\" - ignore methods referenced in a typeof expression.\n* \"whitelist\" - ignore method references in parameters of specifed function calls.\n\n",
+    "optionsDescription": "\nYou may additionally pass \"ignore-static\" to ignore static methods, or an options object.\n\n The object may have the following properties:\n\n* \"ignore-static\" - to ignore static methods.\n* \"allow-delete\" - ignore methods referenced in a delete expression.\n* \"allow-typeof\" - ignore methods referenced in a typeof expression.\n* \"whitelist\" - ignore method references in parameters of specifed function calls.\n\n",
     "options": {
       "anyOf": [
         {
@@ -2640,6 +2701,9 @@
         {
           "type": "object",
           "properties": {
+            "allow-delete": {
+              "type": "boolean"
+            },
             "allow-typeof": {
               "type": "boolean"
             },
@@ -3677,6 +3741,27 @@
     "typescriptOnly": false
   },
   {
+    "ruleName": "static-this",
+    "description": "Ban the use of `this` in static methods.",
+    "hasFix": true,
+    "options": null,
+    "optionsDescription": "",
+    "optionExamples": [
+      true
+    ],
+    "rationale": "\nStatic `this` usage can be confusing for newcomers.\nIt can also become imprecise when used with extended classes when a static `this` of a parent class no longer specifically refers to the parent class.\n        ",
+    "type": "functionality",
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows the `this` keyword usage in static context.",
+        "config": "```json\n\"rules\": { \"static-this\": true }\n```",
+        "pass": "```ts\nclass Pass {\n    static getName() {\n        return 'name'\n    }\n\n    static getFullname() {\n        return `full ${Pass.getName()}`\n    }\n}\n```",
+        "fail": "```ts\nclass Fail {\n    static getName() {\n        return 'name'\n    }\n\n    static getFullname() {\n        return `full ${this.getName()}`\n    }\n}\n```"
+      }
+    ]
+  },
+  {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
     "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-enum` allows enums.\n  - It does *not* allow unions containing `enum`.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n* `ignore-rhs` ignores the right-hand operand of `&&` and `||'\n        ",
@@ -4252,6 +4337,27 @@
     "typescriptOnly": false
   },
   {
+    "description": "\nDisallows `else` blocks following `if` blocks ending with a `break`, `continue`, `return`, or `throw` statement.",
+    "descriptionDetails": "",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "\nWhen an `if` block is guaranteed to exit control flow when entered,\nit is unnecessary to add an `else` statement.\nThe contents that would be in the `else` block can be placed after the end of the `if` block.",
+    "ruleName": "unnecessary-else",
+    "type": "style",
+    "typescriptOnly": false,
+    "codeExamples": [
+      {
+        "description": "Disallows \"else\" following \"if\" blocks ending with \"return\", \"break\", \"continue\" or \"throw\" statement. ",
+        "config": "```json\n\"rules\": { \"unnecessary-else\": true }\n```",
+        "pass": "```ts\nif (someCondition()) {\n    return;\n}\n// some code here\n\nif (someCondition()) {\n    continue;\n}\n// some code here\n\nif (someCondition()) {\n    throw;\n}\n// some code here\n\nif (someCondition()) {\n    break;\n}\n// some code here\n```",
+        "fail": "```ts\nif (someCondition()) {\n    return;\n} else {\n    // some code here\n}\n\nif (someCondition()) {\n    break;\n} else {\n    // some code here\n}\n\nif (someCondition()) {\n    throw;\n} else {\n    // some code here\n}\n\nif (someCondition()) {\n    continue;\n} else {\n    // some code here\n}\n```"
+      }
+    ]
+  },
+  {
     "ruleName": "use-default-type-parameter",
     "description": "Warns if an explicitly specified type argument is the default for that type parameter.",
     "optionsDescription": "Not configurable.",
@@ -4286,7 +4392,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nFive arguments may be optionally provided:\n\n* `\"check-format\"`: allows only lowerCamelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"allow-pascal-case\"` allows PascalCase in addition to lowerCamelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to lowerCamelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
+    "optionsDescription": "\nSix arguments may be optionally provided:\n\n* `\"check-format\"`: allows only lowerCamelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"require-const-for-all-caps\"`: enforces that all variables with UPPER_CASED names should be `const`.\n  * `\"allow-pascal-case\"` allows PascalCase in addition to lowerCamelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to lowerCamelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
     "options": {
       "type": "array",
       "items": {
@@ -4301,7 +4407,7 @@
         ]
       },
       "minLength": 0,
-      "maxLength": 5
+      "maxLength": 6
     },
     "optionExamples": [
       [
@@ -4318,7 +4424,7 @@
     "ruleName": "whitespace",
     "description": "Enforces whitespace style conventions.",
     "rationale": "Helps maintain a readable, consistent style in your codebase.",
-    "optionsDescription": "\nTen arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-rest-spread\"` checks that there is no whitespace after rest/spread operator (`...`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-type-operator\"` checks for whitespace between type operators `|` and `&`.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block.\n* `\"check-postbrace\"` checks for whitespace after an opening brace.",
+    "optionsDescription": "\nSeveral arguments may be optionally provided:\n\n* `\"check-branch\"` checks branching statements (`if`/`else`/`for`/`while`) are followed by whitespace.\n* `\"check-decl\"`checks that variable declarations have whitespace around the equals token.\n* `\"check-operator\"` checks for whitespace around operator tokens.\n* `\"check-module\"` checks for whitespace in import & export statements.\n* `\"check-separator\"` checks for whitespace after separator tokens (`,`/`;`).\n* `\"check-rest-spread\"` checks that there is no whitespace after rest/spread operator (`...`).\n* `\"check-type\"` checks for whitespace before a variable type specification.\n* `\"check-typecast\"` checks for whitespace between a typecast and its target.\n* `\"check-type-operator\"` checks for whitespace between type operators `|` and `&`.\n* `\"check-preblock\"` checks for whitespace before the opening brace of a block.\n* `\"check-postbrace\"` checks for whitespace after an opening brace.",
     "options": {
       "type": "array",
       "items": {

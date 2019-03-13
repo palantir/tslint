@@ -5,9 +5,10 @@ optionsDescription: |+
 
   You may additionally pass "ignore-static" to ignore static methods, or an options object.
 
-  The object may have three properties:
+   The object may have the following properties:
 
   * "ignore-static" - to ignore static methods.
+  * "allow-delete" - ignore methods referenced in a delete expression.
   * "allow-typeof" - ignore methods referenced in a typeof expression.
   * "whitelist" - ignore method references in parameters of specifed function calls.
 
@@ -18,6 +19,8 @@ options:
         - ignore-static
     - type: object
       properties:
+        allow-delete:
+          type: boolean
         allow-typeof:
           type: boolean
         ignore-static:
@@ -87,6 +90,9 @@ optionsJSON: |-
       {
         "type": "object",
         "properties": {
+          "allow-delete": {
+            "type": "boolean"
+          },
           "allow-typeof": {
             "type": "boolean"
           },

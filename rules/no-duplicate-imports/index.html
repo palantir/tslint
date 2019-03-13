@@ -7,13 +7,27 @@ rationale: |-
 
   Using a single import statement per module will make the code clearer because you can see everything being imported
   from that module on one line.
-optionsDescription: Not configurable
-options: null
+optionsDescription: |-
+
+  "allow-namespace-imports" allows you to import namespaces on separate lines.
+options:
+  type: object
+  properties:
+    allow-namespace-imports:
+      type: boolean
 optionExamples:
-  - 'true'
+  - '[true, {"allow-namespace-imports": true}]'
 type: maintainability
 typescriptOnly: false
 layout: rule
 title: 'Rule: no-duplicate-imports'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "allow-namespace-imports": {
+        "type": "boolean"
+      }
+    }
+  }
 ---

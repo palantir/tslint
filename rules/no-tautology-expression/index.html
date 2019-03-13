@@ -1,0 +1,17 @@
+---
+description: |
+
+  Enforces that relational/equality binary operators does not take two equal variables/literals as operands.
+  Expression like 3 === 3, someVar === someVar, "1" > "1" are either a tautology or contradiction, and will produce an error.
+optionExamples:
+  - 'true'
+options: null
+optionsDescription: Not configurable.
+rationale: Clean redundant code and unnecessary comparison of objects and literals.
+ruleName: no-tautology-expression
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-tautology-expression'
+optionsJSON: 'null'
+---
