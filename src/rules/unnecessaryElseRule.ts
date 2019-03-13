@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         it is unnecessary to add an \`else\` statement.
         The contents that would be in the \`else\` block can be placed after the end of the \`if\` block.`,
         ruleName: "unnecessary-else",
-        type: "functionality",
+        type: "style",
         typescriptOnly: false,
         codeExamples,
     };
