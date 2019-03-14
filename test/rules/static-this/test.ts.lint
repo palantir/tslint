@@ -73,3 +73,15 @@ class NamedClassChild extends NamedClass {
                ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
     }
 }
+
+interface Bar {}
+
+class Foo {
+    public static higherOrderComponent(): any {
+        return class implements Bar {
+            public constructor() {
+                console.log(this);
+            }
+        };
+    }
+}
