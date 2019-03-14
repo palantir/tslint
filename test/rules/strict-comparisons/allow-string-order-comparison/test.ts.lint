@@ -8,22 +8,22 @@ if (2 === 1) {}
 if (2 != 1) {}
 if (2 !== 1) {}
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~     [cannot compare type 'number' to type 'null | undefined']
+    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
 if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~     [cannot compare type 'null | undefined' to type 'number']
+    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~     [cannot compare type 'number' to type 'null | undefined']
+    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
 if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~     [cannot compare type 'null | undefined' to type 'number']
+    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
 if (true) {}
 if (true > false) {}
-    ~~~~~~~~~~~~     [cannot use '>' comparator for type 'boolean']
+    ~~~~~~~~~~~~     [Cannot use '>' comparator for type 'boolean'.]
 if (true < false) {}
-    ~~~~~~~~~~~~     [cannot use '<' comparator for type 'boolean']
+    ~~~~~~~~~~~~     [Cannot use '<' comparator for type 'boolean'.]
 if (true >= false) {}
-    ~~~~~~~~~~~~~     [cannot use '>=' comparator for type 'boolean']
+    ~~~~~~~~~~~~~     [Cannot use '>=' comparator for type 'boolean'.]
 if (true <= false) {}
-    ~~~~~~~~~~~~~     [cannot use '<=' comparator for type 'boolean']
+    ~~~~~~~~~~~~~     [Cannot use '<=' comparator for type 'boolean'.]
 if (true == false) {}
 if (true === false) {}
 if (true != false) {}
@@ -39,42 +39,42 @@ if ('' != '') {}
 if ('' !== '') {}
 if ({}) {}
 if ({} > {}) {}
-    ~~~~~~~     [cannot use '>' comparator for type 'object']
+    ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
 if ({} < {}) {}
-    ~~~~~~~     [cannot use '<' comparator for type 'object']
+    ~~~~~~~     [Cannot use '<' comparator for type 'object'.]
 if ({} >= {}) {}
-    ~~~~~~~~     [cannot use '>=' comparator for type 'object']
+    ~~~~~~~~     [Cannot use '>=' comparator for type 'object'.]
 if ({} <= {}) {}
-    ~~~~~~~~     [cannot use '<=' comparator for type 'object']
+    ~~~~~~~~     [Cannot use '<=' comparator for type 'object'.]
 if ({} == {}) {}
-    ~~~~~~~~     [cannot use '==' comparator for type 'object']
+    ~~~~~~~~     [Cannot use '==' comparator for type 'object'.]
 if ({} === {}) {}
-    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if ({} != {}) {}
-    ~~~~~~~~     [cannot use '!=' comparator for type 'object']
+    ~~~~~~~~     [Cannot use '!=' comparator for type 'object'.]
 if ({} !== {}) {}
-    ~~~~~~~~~     [cannot use '!==' comparator for type 'object']
+    ~~~~~~~~~     [Cannot use '!==' comparator for type 'object'.]
 if ([] === []) {}
-    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 
 if (3 > 2 || 2 > 1 && true === true) {}
 if ('' > '' || 2 > 1 || {} > {}) {}
-                        ~~~~~~~     [cannot use '>' comparator for type 'object']
+                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
 if ('' > '' && 2 > 1 && {} > {}) {}
-                        ~~~~~~~     [cannot use '>' comparator for type 'object']
+                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
 
 if ({} === null) {}
-    ~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if (null === {}) {}
-    ~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if ({} === undefined) {}
-    ~~~~~~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if (undefined === {}) {}
-    ~~~~~~~~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 
 function sameObject<T>(a: T, b: T): boolean {
     return a === b;
-           ~~~~~~~  [cannot use '===' comparator for type 'object']
+           ~~~~~~~  [Cannot use '===' comparator for type 'object'.]
 }
 
 function sameObject<T>(a: any, b: any): boolean {
@@ -100,9 +100,9 @@ const c1: myObject = {}
 const c2: myObject = {}
 
 if (c1 === c2) {}
-    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if (c2 === c1) {}
-    ~~~~~~~~~     [cannot use '===' comparator for type 'object']
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 
 const d1: any = 'string'
 const d2: any = 2
@@ -145,5 +145,3 @@ if (h1 > h2) {}
 if (h2 > h1) {}
 if (h1 === h2) {}
 if (h2 === h1) {}
-
-[0]: Invalid comparison

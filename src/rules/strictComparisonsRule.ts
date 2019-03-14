@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-import { codeExamples } from "./code-examples/objectComparison.examples";
+import { codeExamples } from "./code-examples/strictComparisons.examples";
 
 const OPTION_ALLOW_OBJECT_EQUAL_COMPARISON = "allow-object-equal-comparison";
 const OPTION_ALLOW_STRING_ORDER_COMPARISON = "allow-string-order-comparison";
@@ -31,8 +31,9 @@ const enum TypeKind {
     Enum = 2,
     String = 3,
     Boolean = 4,
-    NullOrUndefined = 5,
-    Object = 6,
+    Null = 5,
+    Undefined = 6,
+    Object = 7,
 }
 
 const typeNames = {
@@ -41,7 +42,8 @@ const typeNames = {
     [TypeKind.Enum]: "enum",
     [TypeKind.String]: "string",
     [TypeKind.Boolean]: "boolean",
-    [TypeKind.NullOrUndefined]: "null | undefined",
+    [TypeKind.Null]: "null",
+    [TypeKind.Undefined]: "undefined",
     [TypeKind.Object]: "object",
 };
 
@@ -53,7 +55,7 @@ interface Options {
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "object-comparison",
+        ruleName: "strict-comparisons",
         description: "Only allow comparisons between primitives.",
         optionsDescription: Lint.Utils.dedent`
                 One of the following arguments may be optionally provided:
@@ -98,11 +100,11 @@ export class Rule extends Lint.Rules.TypedRule {
         const types1String = types1.map(type => typeNames[type]).join(" | ");
         const types2String = types2.map(type => typeNames[type]).join(" | ");
 
-        return `cannot compare type '${types1String}' to type '${types2String}'`;
+        return `Cannot compare type '${types1String}' to type '${types2String}'.`;
     }
 
     public static INVALID_TYPE_FOR_OPERATOR(type: TypeKind, comparator: string) {
-        return `cannot use '${comparator}' comparator for type '${typeNames[type]}'`;
+        return `Cannot use '${comparator}' comparator for type '${typeNames[type]}'.`;
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -151,7 +153,8 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                         case TypeKind.String:
                         case TypeKind.Boolean:
                             break;
-                        case TypeKind.NullOrUndefined:
+                        case TypeKind.Null:
+                        case TypeKind.Undefined:
                         case TypeKind.Object:
                             if (options[OPTION_ALLOW_OBJECT_EQUAL_COMPARISON]) {
                                 break;
@@ -193,26 +196,29 @@ function getTypes(types: ts.Type): TypeKind[] {
             : [getKind(types)];
 }
 
-function getStrictestComparableType(types1: TypeKind[], types2: TypeKind[]): TypeKind | undefined {
-    const overlappingTypes = types1.filter(type1 => types2.indexOf(type1) >= 0);
+function getStrictestComparableType(
+    typesLeft: TypeKind[],
+    typesRight: TypeKind[],
+): TypeKind | undefined {
+    const overlappingTypes = typesLeft.filter(type => typesRight.indexOf(type) >= 0);
 
     if (overlappingTypes.length > 0) {
         return getStrictestKind(overlappingTypes);
     } else {
         // In case one of the types is "any", get the strictest type of the other array
-        if (arrayContainsKind(types1, TypeKind.Any)) {
-            return getStrictestKind(types2);
+        if (arrayContainsKind(typesLeft, [TypeKind.Any])) {
+            return getStrictestKind(typesRight);
         }
-        if (arrayContainsKind(types2, TypeKind.Any)) {
-            return getStrictestKind(types1);
+        if (arrayContainsKind(typesRight, [TypeKind.Any])) {
+            return getStrictestKind(typesLeft);
         }
 
         // In case one array contains NullOrUndefined and the other an Object, return Object
         if (
-            (arrayContainsKind(types1, TypeKind.NullOrUndefined) &&
-                arrayContainsKind(types2, TypeKind.Object)) ||
-            (arrayContainsKind(types2, TypeKind.NullOrUndefined) &&
-                arrayContainsKind(types1, TypeKind.Object))
+            (arrayContainsKind(typesLeft, [TypeKind.Null, TypeKind.Undefined]) &&
+                arrayContainsKind(typesRight, [TypeKind.Object])) ||
+            (arrayContainsKind(typesRight, [TypeKind.Null, TypeKind.Undefined]) &&
+                arrayContainsKind(typesLeft, [TypeKind.Object]))
         ) {
             return TypeKind.Object;
         }
@@ -220,8 +226,8 @@ function getStrictestComparableType(types1: TypeKind[], types2: TypeKind[]): Typ
     }
 }
 
-function arrayContainsKind(types: TypeKind[], typeToCheck: TypeKind): boolean {
-    return types.some(type => type === typeToCheck);
+function arrayContainsKind(types: TypeKind[], typeToCheck: TypeKind[]): boolean {
+    return types.some(type => typeToCheck.indexOf(type) >= 0);
 }
 
 function getStrictestKind(types: TypeKind[]): TypeKind {
@@ -259,17 +265,21 @@ function isEqualityOperator(node: ts.BinaryExpression): boolean {
 
 function getKind(type: ts.Type): TypeKind {
     // tslint:disable:no-bitwise
-    return is(ts.TypeFlags.String | ts.TypeFlags.StringLiteral)
-        ? TypeKind.String
-        : is(ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral)
-            ? TypeKind.Number
-            : is(ts.TypeFlags.BooleanLike)
-                ? TypeKind.Boolean
-                : is(ts.TypeFlags.Null | ts.TypeFlags.Undefined | ts.TypeFlags.Void)
-                    ? TypeKind.NullOrUndefined
-                    : is(ts.TypeFlags.Any)
-                        ? TypeKind.Any
-                        : TypeKind.Object;
+    if (is(ts.TypeFlags.String | ts.TypeFlags.StringLiteral)) {
+        return TypeKind.String;
+    } else if (is(ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral)) {
+        return TypeKind.Number;
+    } else if (is(ts.TypeFlags.BooleanLike)) {
+        return TypeKind.Boolean;
+    } else if (is(ts.TypeFlags.Null)) {
+        return TypeKind.Null;
+    } else if (is(ts.TypeFlags.Undefined)) {
+        return TypeKind.Undefined;
+    } else if (is(ts.TypeFlags.Any)) {
+        return TypeKind.Any;
+    } else {
+        return TypeKind.Object;
+    }
     // tslint:enable:no-bitwise
 
     function is(flags: ts.TypeFlags) {
