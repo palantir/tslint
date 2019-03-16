@@ -58,13 +58,17 @@ function walk(ctx: Lint.WalkContext<void>) {
     const cb = (node: ts.Node): void => {
         const originalParentClass = currentParentClass;
 
-        if (
-            utils.isClassLikeDeclaration(node.parent) &&
-            utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)
-        ) {
-            currentParentClass = node.parent;
+        if (utils.isClassLikeDeclaration(node.parent)) {
+            currentParentClass = undefined;
+
+            if (utils.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
+                currentParentClass = node.parent;
+            }
+
             ts.forEachChild(node, cb);
             currentParentClass = originalParentClass;
+
+            return;
         }
 
         if (node.kind === ts.SyntaxKind.ThisKeyword && currentParentClass !== undefined) {

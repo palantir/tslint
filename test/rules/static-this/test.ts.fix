@@ -63,3 +63,15 @@ class NamedClassChild extends NamedClass {
         return NamedClassChild;
     }
 }
+
+interface Bar {}
+
+class Foo {
+    public static higherOrderComponent(): any {
+        return class implements Bar {
+            public constructor() {
+                console.log(this);
+            }
+        };
+    }
+}
