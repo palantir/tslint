@@ -87,8 +87,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
 function isRestParameterArrayType(anyTypeNode: ts.Node) {
     return (
-        ts.isArrayTypeNode(anyTypeNode.parent) &&
-        ts.isParameter(anyTypeNode.parent.parent) &&
+        anyTypeNode.parent.kind === ts.SyntaxKind.ArrayType &&
+        anyTypeNode.parent.parent.kind === ts.SyntaxKind.Parameter &&
         anyTypeNode.parent.parent.getChildAt(0).kind === ts.SyntaxKind.DotDotDotToken
     );
 }
