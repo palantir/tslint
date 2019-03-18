@@ -540,8 +540,7 @@ class Walker extends Lint.AbstractWalker<Options> {
                 const last = prevItems[prevItems.length - 1];
 
                 const textFragment = this.sourceFile.text.slice(last.nodeEndOffset, start);
-                const isWhitespace = /[\r\n]+/.test(textFragment) && !/\S/.test(textFragment);
-                if (isWhitespace) {
+                if (!/\S/.test(textFragment)) {
                     // remove whitespace between blocks
                     start = last.nodeEndOffset;
                 }
