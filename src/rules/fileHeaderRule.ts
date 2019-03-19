@@ -20,7 +20,13 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
-const ALLOW_MULTILINE = "allow-multiline";
+
+interface FileHeaderRuleOptions {
+    match: string;
+    allowSingleLineComments?: boolean;
+    default?: string;
+    enforceTrailingNewline?: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,35 +35,75 @@ export class Rule extends Lint.Rules.AbstractRule {
         description:
             "Enforces a certain header comment for all files, matched by a regular expression.",
         optionsDescription: Lint.Utils.dedent`
+            A single object may be passed in for configuration that must contain:
+
+            * \`match\`: a regular expression that all headers should match
+
+            Any of the following optional fields may also be provided:
+
+            * \`allowSingleLineComments\`: a boolean for whether \`//\` should be considered file headers in addition to \`/*\` comments
+            * \`default\`: text to add for file headers when running in \`--fix\` mode
+            * \`enforceTrailingNewline\`: a boolean for whether a newline must follow the header
+
+            The rule will also accept array of strings as a legacy form of options, though the object form is recommended.
             The first option, which is mandatory, is a regular expression that all headers should match.
             The second argument, which is optional, is a string that should be inserted as a header comment
             if fixing is enabled and no header that matches the first argument is found.
             The third argument, which is optional, is a string that denotes whether or not a newline should
-            exist on the header.
-            The fourth argument, which is optional, is a string that denotes whether or not a header is
-            allowed to consist of consecutive single-line comments.`,
+            exist on the header.`,
         options: {
-            type: "array",
-            items: [
+            oneOf: [
                 {
-                    type: "string",
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            match: {
+                                type: "string",
+                            },
+                            allowSingleLineComments: {
+                                type: "boolean",
+                            },
+                            default: {
+                                type: "string",
+                            },
+                            enforceTrailingNewline: {
+                                type: "boolean",
+                            },
+                        },
+                        additionalProperties: false,
+                    },
                 },
                 {
-                    type: "string",
-                },
-                {
-                    type: "string",
-                },
-                {
-                    type: "string",
+                    type: "array",
+                    items: [
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "string",
+                        },
+                    ],
+                    additionalItems: false,
+                    minLength: 1,
+                    maxLength: 3,
                 },
             ],
-            additionalItems: false,
-            minLength: 1,
-            maxLength: 4,
         },
         optionExamples: [
-            [true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE, ALLOW_MULTILINE],
+            [
+                true,
+                {
+                    match: "Copyright \\d{4}",
+                    allowSingleLineComments: true,
+                    default: "Copyright 2018",
+                    enforceTrailingNewline: true,
+                },
+            ],
+            [true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE],
         ],
         hasFix: true,
         type: "style",
@@ -69,16 +115,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static MISSING_NEW_LINE_FAILURE_STRING = "missing new line following the file header";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const options = this.getRuleOptions();
+
         const { text } = sourceFile;
-        const headerFormat = new RegExp(this.ruleArguments[0] as string);
-        const textToInsert = this.ruleArguments[1] as string | undefined;
-        const enforceExtraTrailingLine =
-            this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1;
-        const allowMultiline = this.ruleArguments.indexOf(ALLOW_MULTILINE) !== -1;
+        const headerFormat = new RegExp(options.match);
+        const textToInsert = options.default;
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        const commentText = this.getFileHeaderText(text, offset, allowMultiline);
+        const commentText = this.getFileHeaderText(text, offset, !!options.allowSingleLineComments);
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
             const isErrorAtStart = offset === 0;
@@ -113,7 +158,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const trailingNewLineViolation =
-            enforceExtraTrailingLine &&
+            options.enforceTrailingNewline &&
             headerFormat.test(commentText) &&
             this.doesNewLineEndingViolationExist(text, offset);
 
@@ -139,6 +184,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         return [];
+    }
+
+    private getRuleOptions(): FileHeaderRuleOptions {
+        const options = this.ruleArguments;
+        if (options.length === 1 && typeof options[0] === "object") {
+            return options[0] as FileHeaderRuleOptions;
+        }
+
+        // Legacy options
+        const args = this.ruleArguments as string[];
+        return {
+            default: args[1],
+            enforceTrailingNewline:
+                args[2] !== undefined
+                    ? args[2].indexOf(ENFORCE_TRAILING_NEWLINE) !== -1
+                    : undefined,
+            match: args[0],
+        };
     }
 
     private createComment(
@@ -182,14 +245,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     private getFileHeaderText(
         text: string,
         offset: number,
-        allowMultiline: boolean,
+        allowSingleLineComments: boolean,
     ): string | undefined {
         const ranges = ts.getLeadingCommentRanges(text, offset);
         if (ranges === undefined || ranges.length === 0) {
             return undefined;
         }
 
-        const fileHeaderRanges = !allowMultiline ? ranges.slice(0, 1) : ranges;
+        const fileHeaderRanges = !allowSingleLineComments ? ranges.slice(0, 1) : ranges;
         return fileHeaderRanges
             .map(range => {
                 const { pos, kind, end } = range;
