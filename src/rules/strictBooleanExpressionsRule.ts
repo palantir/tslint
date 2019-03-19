@@ -66,7 +66,7 @@ export class Rule extends Lint.Rules.TypedRule {
               - Also allows \`true | false | undefined\`.
               - Does not allow \`false | undefined\`.
               - This option is a subset of \`${OPTION_ALLOW_UNDEFINED_UNION}\`, so you don't need to enable both options at the same time.
-            * \`${OPTION_IGNORE_RHS}\` ignores the right-hand operand of \`&&\` and \`||\'
+            * \`${OPTION_IGNORE_RHS}\` ignores the right-hand operand of \`&&\` and \`||\`.
         `,
         options: {
             type: "array",
