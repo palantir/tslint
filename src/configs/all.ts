@@ -126,6 +126,7 @@ export const rules = {
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
+    "no-null-undefined-union": true,
     "no-object-literal-type-assertion": true,
     "no-return-await": true,
     "no-shadowed-variable": true,
