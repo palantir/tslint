@@ -19,13 +19,16 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
+const OPTION_MATCH = "match";
+const OPTION_ALLOW_SINGLE_LINE_COMMENTS = "allow-single-line-comments";
+const OPTION_DEFAULT = "default";
+const OPTION_ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
 
 interface FileHeaderRuleOptions {
-    match: string;
-    allowSingleLineComments?: boolean;
-    default?: string;
-    enforceTrailingNewline?: boolean;
+    [OPTION_MATCH]: string;
+    [OPTION_ALLOW_SINGLE_LINE_COMMENTS]?: boolean;
+    [OPTION_DEFAULT]?: string;
+    [OPTION_ENFORCE_TRAILING_NEWLINE]?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -37,13 +40,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             A single object may be passed in for configuration that must contain:
 
-            * \`match\`: a regular expression that all headers should match
+            * \`${OPTION_MATCH}\`: a regular expression that all headers should match
 
             Any of the following optional fields may also be provided:
 
-            * \`allowSingleLineComments\`: a boolean for whether \`//\` should be considered file headers in addition to \`/*\` comments
-            * \`default\`: text to add for file headers when running in \`--fix\` mode
-            * \`enforceTrailingNewline\`: a boolean for whether a newline must follow the header
+            * \`${OPTION_ALLOW_SINGLE_LINE_COMMENTS}\`: a boolean for whether \`//\` should be considered file headers in addition to \`/*\` comments
+            * \`${OPTION_DEFAULT}\`: text to add for file headers when running in \`--fix\` mode
+            * \`${OPTION_ENFORCE_TRAILING_NEWLINE}\`: a boolean for whether a newline must follow the header
 
             The rule will also accept array of strings as a legacy form of options, though the object form is recommended.
             The first option, which is mandatory, is a regular expression that all headers should match.
@@ -58,16 +61,16 @@ export class Rule extends Lint.Rules.AbstractRule {
                     items: {
                         type: "object",
                         properties: {
-                            match: {
+                            [OPTION_MATCH]: {
                                 type: "string",
                             },
-                            allowSingleLineComments: {
+                            [OPTION_ALLOW_SINGLE_LINE_COMMENTS]: {
                                 type: "boolean",
                             },
-                            default: {
+                            [OPTION_DEFAULT]: {
                                 type: "string",
                             },
-                            enforceTrailingNewline: {
+                            [OPTION_ENFORCE_TRAILING_NEWLINE]: {
                                 type: "boolean",
                             },
                         },
@@ -97,13 +100,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
-                    match: "Copyright \\d{4}",
-                    allowSingleLineComments: true,
-                    default: "Copyright 2018",
-                    enforceTrailingNewline: true,
+                    [OPTION_MATCH]: "Copyright \\d{4}",
+                    [OPTION_ALLOW_SINGLE_LINE_COMMENTS]: true,
+                    [OPTION_DEFAULT]: "Copyright 2018",
+                    [OPTION_ENFORCE_TRAILING_NEWLINE]: true,
                 },
             ],
-            [true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE],
+            [true, "Copyright \\d{4}", "Copyright 2018", OPTION_ENFORCE_TRAILING_NEWLINE],
         ],
         hasFix: true,
         type: "style",
@@ -123,7 +126,11 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        const commentText = this.getFileHeaderText(text, offset, !!options.allowSingleLineComments);
+        const commentText = this.getFileHeaderText(
+            text,
+            offset,
+            !!options[OPTION_ALLOW_SINGLE_LINE_COMMENTS],
+        );
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
             const isErrorAtStart = offset === 0;
@@ -158,7 +165,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const trailingNewLineViolation =
-            options.enforceTrailingNewline &&
+            options[OPTION_ENFORCE_TRAILING_NEWLINE] &&
             headerFormat.test(commentText) &&
             this.doesNewLineEndingViolationExist(text, offset);
 
@@ -195,12 +202,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         // Legacy options
         const args = this.ruleArguments as string[];
         return {
-            default: args[1],
-            enforceTrailingNewline:
+            [OPTION_DEFAULT]: args[1],
+            [OPTION_ENFORCE_TRAILING_NEWLINE]:
                 args[2] !== undefined
-                    ? args[2].indexOf(ENFORCE_TRAILING_NEWLINE) !== -1
+                    ? args[2].indexOf(OPTION_ENFORCE_TRAILING_NEWLINE) !== -1
                     : undefined,
-            match: args[0],
+            [OPTION_MATCH]: args[0],
         };
     }
 
