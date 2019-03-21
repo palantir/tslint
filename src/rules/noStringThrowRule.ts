@@ -73,23 +73,16 @@ function walk(ctx: Lint.WalkContext<void>): void {
         if (isThrowStatement(node)) {
             const { expression } = node;
             if (expression !== undefined && isString(expression)) {
-                const fix = [
-                    Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
-                    Lint.Replacement.appendText(expression.getEnd(), ")"),
-                ];
-
                 // To prevent this fix from creating invalid syntax, we must ensure that the "throw"
                 // token is succeeded by a space if no other characters precede the string literal.
                 const offset = expression.getStart() - node.getStart();
                 const numCharactersBetweenTokens = offset - "throw".length;
-                if (numCharactersBetweenTokens === 0) {
-                    const token = node.getFirstToken() as ts.Node;
-                    if (token !== undefined && token.kind === ts.SyntaxKind.ThrowKeyword) {
-                        fix.push(Lint.Replacement.appendText(expression.getStart(sourceFile), " "));
-                    }
-                }
+                const newError = numCharactersBetweenTokens === 0 ? ` new Error(` : `new Error(`;
 
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, fix);
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
+                    Lint.Replacement.appendText(expression.getStart(sourceFile), newError),
+                    Lint.Replacement.appendText(expression.getEnd(), ")"),
+                ]);
             }
         }
         return ts.forEachChild(node, cb);
