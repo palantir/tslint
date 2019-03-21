@@ -121,8 +121,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         const options = this.getRuleOptions();
 
         const { text } = sourceFile;
-        const headerFormat = new RegExp(options.match);
-        const textToInsert = options.default;
+        const headerFormat = new RegExp(options[OPTION_MATCH]);
+        const textToInsert = options[OPTION_DEFAULT];
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
