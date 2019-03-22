@@ -538,7 +538,9 @@ class Walker extends Lint.AbstractWalker<Options> {
             if (index > 0) {
                 const prevItems = groupedDeclarations[index - 1];
                 const last = prevItems[prevItems.length - 1];
-                if (/[\r\n]+/.test(this.sourceFile.text.slice(last.nodeEndOffset, start))) {
+
+                const textFragment = this.sourceFile.text.slice(last.nodeEndOffset, start);
+                if (!/\S/.test(textFragment)) {
                     // remove whitespace between blocks
                     start = last.nodeEndOffset;
                 }

@@ -20,6 +20,7 @@ import {foo, afoo} from 'foo';
         ~~~~~~~~~              [Named imports must be alphabetized.]
 
 import x = require('y');
+x.fnCall();
 
 import './baz'; // required
 import './baa';
