@@ -55,7 +55,7 @@ const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean 
     return false;
 };
 
-function walk(context: Lint.WalkContext<void>) {
+function walk(context: Lint.WalkContext) {
     const callback = (node: ts.Node): void => {
         if (
             isConstructorDeclaration(node) &&

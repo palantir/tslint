@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(context: Lint.WalkContext<void>): void {
+function walk(context: Lint.WalkContext): void {
     ts.forEachChild(context.sourceFile, function cb(node): void {
         if (isFunctionCallOrNewExpression(node)) {
             addFailureAtNode(node);

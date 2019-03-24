@@ -42,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(context: Lint.WalkContext<void>) {
+function walk(context: Lint.WalkContext) {
     const cb = (node: ts.Node): void => {
         if (tsutils.isBinaryExpression(node) && isRelationalOrLogicalOperator(node.operatorToken)) {
             if (
