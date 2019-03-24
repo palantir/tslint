@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import {
     isShorthandPropertyAssignment,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 const OPTION_NEVER = "never";
@@ -69,7 +70,10 @@ function disallowShorthandWalker(ctx: Lint.WalkContext) {
                 Rule.SHORTHAND_ASSIGNMENT,
                 Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `),
             );
-        } else if (isMethodDeclaration(node) && node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression) {
+        } else if (
+            isMethodDeclaration(node) &&
+            node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
+        ) {
             ctx.addFailureAtNode(
                 node.name,
                 Rule.SHORTHAND_ASSIGNMENT,
@@ -83,21 +87,30 @@ function disallowShorthandWalker(ctx: Lint.WalkContext) {
 function enforceShorthandWalker(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
-            if (node.name.kind === ts.SyntaxKind.Identifier &&
+            if (
+                node.name.kind === ts.SyntaxKind.Identifier &&
                 isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text) {
+                node.name.text === node.initializer.text
+            ) {
                 ctx.addFailureAtNode(
                     node,
                     `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
                     Lint.Replacement.deleteFromTo(node.name.end, node.end),
                 );
-            } else if (isFunctionExpression(node.initializer) &&
-                       // allow named function expressions
-                       node.initializer.name === undefined) {
-                const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
+            } else if (
+                isFunctionExpression(node.initializer) &&
+                // allow named function expressions
+                node.initializer.name === undefined
+            ) {
+                const [name, fix] = handleLonghandMethod(
+                    node.name,
+                    node.initializer,
+                    ctx.sourceFile,
+                );
                 ctx.addFailure(
                     node.getStart(ctx.sourceFile),
-                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
+                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!
+                        .pos,
                     `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
                     fix,
                 );
@@ -114,13 +127,22 @@ function fixShorthandMethodDeclaration(node: ts.MethodDeclaration, sourceFile: t
     return Lint.Replacement.replaceFromTo(
         node.getStart(sourceFile),
         node.name.end,
-        `${node.name.getText(sourceFile)}:${isAsync ? " async" : ""} function${isGenerator ? "*" : ""}`,
+        `${node.name.getText(sourceFile)}:${isAsync ? " async" : ""} function${
+            isGenerator ? "*" : ""
+        }`,
     );
 }
 
-function handleLonghandMethod(name: ts.PropertyName, initializer: ts.FunctionExpression, sourceFile: ts.SourceFile): [string, Lint.Fix] {
+function handleLonghandMethod(
+    name: ts.PropertyName,
+    initializer: ts.FunctionExpression,
+    sourceFile: ts.SourceFile,
+): [string, Lint.Fix] {
     const nameStart = name.getStart(sourceFile);
-    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(name.end, getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos);
+    let fix: Lint.Fix = Lint.Replacement.deleteFromTo(
+        name.end,
+        getChildOfKind(initializer, ts.SyntaxKind.OpenParenToken)!.pos,
+    );
     let prefix = "";
     if (initializer.asteriskToken !== undefined) {
         prefix = "*";

@@ -17,7 +17,9 @@
 
 import { getPreviousStatement } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
+import { newLineWithIndentation } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -25,10 +27,11 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "newline-before-return",
         description: "Enforces blank line before return when not the only line in the block.",
         rationale: "Helps maintain a readable style in your codebase.",
+        hasFix: true,
         optionsDescription: "Not configurable.",
         options: {},
         optionExamples: [true],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -36,7 +39,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Missing blank line before return";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 
@@ -65,7 +70,8 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker {
         if (comments !== undefined) {
             // check for blank lines between comments
             for (let i = comments.length - 1; i >= 0; --i) {
-                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end).line;
+                const endLine = ts.getLineAndCharacterOfPosition(this.sourceFile, comments[i].end)
+                    .line;
                 if (endLine < line - 1) {
                     return;
                 }
@@ -74,10 +80,17 @@ class NewlineBeforeReturnWalker extends Lint.AbstractWalker {
             }
         }
         const prevLine = ts.getLineAndCharacterOfPosition(this.sourceFile, prev.end).line;
-
         if (prevLine >= line - 1) {
+            const fixer = Lint.Replacement.replaceFromTo(
+                line === prevLine ? node.pos : node.pos + 1,
+                start,
+                line === prevLine
+                    ? newLineWithIndentation(prev, this.sourceFile, 2)
+                    : newLineWithIndentation(prev, this.sourceFile),
+            );
+
             // Previous statement is on the same or previous line
-            this.addFailure(start, start, Rule.FAILURE_STRING);
+            this.addFailure(start, start, Rule.FAILURE_STRING, fixer);
         }
     }
 }

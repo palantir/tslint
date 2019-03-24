@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
-import { isClassLikeDeclaration, isInterfaceDeclaration, isSymbolFlagSet, isTypeAliasDeclaration } from "tsutils";
+import {
+    isClassLikeDeclaration,
+    isInterfaceDeclaration,
+    isSymbolFlagSet,
+    isTypeAliasDeclaration,
+} from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { find } from "../utils";
 
@@ -24,7 +30,8 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "use-default-type-parameter",
-        description: "Warns if an explicitly specified type argument is the default for that type parameter.",
+        description:
+            "Warns if an explicitly specified type argument is the default for that type parameter.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: ["true"],
@@ -34,7 +41,8 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "This is the default value for this type parameter, so it can be omitted.";
+    public static FAILURE_STRING =
+        "This is the default value for this type parameter, so it can be omitted.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
@@ -81,27 +89,37 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
         case ts.SyntaxKind.NewExpression:
         case ts.SyntaxKind.TypeReference:
         case ts.SyntaxKind.ExpressionWithTypeArguments:
-            const decl = node as ts.CallExpression | ts.NewExpression | ts.TypeReferenceNode | ts.ExpressionWithTypeArguments;
+            const decl = node as
+                | ts.CallExpression
+                | ts.NewExpression
+                | ts.TypeReferenceNode
+                | ts.ExpressionWithTypeArguments;
             const { typeArguments } = decl;
             if (typeArguments === undefined) {
                 return undefined;
             }
-            const typeParameters = decl.kind === ts.SyntaxKind.TypeReference
-                ? typeParamsFromType(decl.typeName, checker)
-                : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
-                ? typeParamsFromType(decl.expression, checker)
-                : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
+            const typeParameters =
+                decl.kind === ts.SyntaxKind.TypeReference
+                    ? typeParamsFromType(decl.typeName, checker)
+                    : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
+                    ? typeParamsFromType(decl.expression, checker)
+                    : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
             return typeParameters === undefined ? undefined : { typeArguments, typeParameters };
         default:
             return undefined;
     }
 }
 
-function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
+function typeParamsFromCall(
+    node: ts.CallLikeExpression,
+    checker: ts.TypeChecker,
+): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sig = checker.getResolvedSignature(node);
     const sigDecl = sig === undefined ? undefined : sig.getDeclaration();
     if (sigDecl === undefined) {
-        return node.kind === ts.SyntaxKind.NewExpression ? typeParamsFromType(node.expression, checker) : undefined;
+        return node.kind === ts.SyntaxKind.NewExpression
+            ? typeParamsFromType(node.expression, checker)
+            : undefined;
     }
 
     return sigDecl.typeParameters === undefined ? undefined : sigDecl.typeParameters;
@@ -109,19 +127,28 @@ function typeParamsFromCall(node: ts.CallLikeExpression, checker: ts.TypeChecker
 
 function typeParamsFromType(
     type: ts.EntityName | ts.Expression,
-    checker: ts.TypeChecker): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
+    checker: ts.TypeChecker,
+): ReadonlyArray<ts.TypeParameterDeclaration> | undefined {
     const sym = getAliasedSymbol(checker.getSymbolAtLocation(type), checker);
     if (sym === undefined || sym.declarations === undefined) {
         return undefined;
     }
 
-    return find(sym.declarations, (decl) =>
-        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl) ? decl.typeParameters : undefined);
+    return find(sym.declarations, decl =>
+        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl)
+            ? decl.typeParameters
+            : undefined,
+    );
 }
 
-function getAliasedSymbol(symbol: ts.Symbol | undefined, checker: ts.TypeChecker): ts.Symbol | undefined {
+function getAliasedSymbol(
+    symbol: ts.Symbol | undefined,
+    checker: ts.TypeChecker,
+): ts.Symbol | undefined {
     if (symbol === undefined) {
         return undefined;
     }
-    return isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? checker.getAliasedSymbol(symbol) : symbol;
+    return isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)
+        ? checker.getAliasedSymbol(symbol)
+        : symbol;
 }

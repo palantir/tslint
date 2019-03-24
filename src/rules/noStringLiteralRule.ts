@@ -55,18 +55,27 @@ function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isElementAccessExpression(node)) {
             const argument = node.argumentExpression;
-            if (argument !== undefined && isStringLiteral(argument) && isValidPropertyAccess(argument.text)) {
-                // typescript@<2.5.0 has an extra underscore in escaped identifier text content,
-                // to avoid fixing issue `expr['__foo'] → expr.___foo`, unescapeIdentifier() is to be used
-                // As of typescript@3, unescapeIdentifier() removed, thus check in runtime, if the method exists
-                // tslint:disable-next-line no-unsafe-any strict-boolean-expressions
-                const unescapeIdentifier: typeof Rule["id"] = (ts as any).unescapeIdentifier || Rule.id;
+            if (
+                argument !== undefined &&
+                isStringLiteral(argument) &&
+                isValidPropertyAccess(argument.text)
+            ) {
+                const unescapeIdentifier: typeof Rule["id"] =
+                    // typescript@<2.5.0 has an extra underscore in escaped identifier text content,
+                    // to avoid fixing issue `expr['__foo'] → expr.___foo`, unescapeIdentifier() is to be used
+                    // As of typescript@3, unescapeIdentifier() removed, thus check in runtime, if the method exists
+                    // tslint:disable-next-line no-unsafe-any strict-boolean-expressions
+                    (ts as any).unescapeIdentifier || Rule.id;
                 const propertyName = unescapeIdentifier(argument.text);
                 ctx.addFailureAtNode(
                     argument,
                     Rule.FAILURE_STRING,
                     // expr['foo'] -> expr.foo
-                    Lint.Replacement.replaceFromTo(node.expression.end, node.end, `.${propertyName}`),
+                    Lint.Replacement.replaceFromTo(
+                        node.expression.end,
+                        node.end,
+                        `.${propertyName}`,
+                    ),
                 );
             }
         }

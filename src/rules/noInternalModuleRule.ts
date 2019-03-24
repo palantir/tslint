@@ -17,6 +17,7 @@
 
 import { isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -24,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-internal-module",
         description: "Disallows internal `module`",
-        rationale: "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
+        rationale:
+            "Using `module` leads to a confusion of concepts with external modules. Use the newer `namespace` keyword instead.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -34,10 +36,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.";
+    public static FAILURE_STRING =
+        "The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInternalModuleWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NoInternalModuleWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 
@@ -55,15 +60,22 @@ class NoInternalModuleWalker extends Lint.AbstractWalker {
     }
 
     private checkModuleDeclaration(node: ts.ModuleDeclaration, nested?: boolean): void {
-        if (!nested &&
+        if (
+            !nested &&
             node.name.kind === ts.SyntaxKind.Identifier &&
             !isNodeFlagSet(node, ts.NodeFlags.Namespace) &&
             // augmenting global uses a special syntax that is allowed
             // see https://github.com/Microsoft/TypeScript/pull/6213
-            !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)) {
+            !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
+        ) {
             const end = node.name.pos;
             const start = end - "module".length;
-            this.addFailure(start, end, Rule.FAILURE_STRING, Lint.Replacement.replaceFromTo(start, end, "namespace"));
+            this.addFailure(
+                start,
+                end,
+                Rule.FAILURE_STRING,
+                Lint.Replacement.replaceFromTo(start, end, "namespace"),
+            );
         }
         if (node.body !== undefined) {
             switch (node.body.kind) {

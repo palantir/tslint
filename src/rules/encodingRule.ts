@@ -67,7 +67,13 @@ function detectEncoding(fileName: string): Encoding {
     const fd = fs.openSync(fileName, "r");
     const maxBytesRead = 3; // Only need 3 bytes to detect the encoding.
     const buffer = Buffer.allocUnsafe(maxBytesRead);
-    const bytesRead = fs.readSync(fd, buffer, /*offset*/ 0, /*length*/ maxBytesRead, /*position*/ 0);
+    const bytesRead = fs.readSync(
+        fd,
+        buffer,
+        /*offset*/ 0,
+        /*length*/ maxBytesRead,
+        /*position*/ 0,
+    );
     fs.closeSync(fd);
     return detectBufferEncoding(buffer, bytesRead);
 }

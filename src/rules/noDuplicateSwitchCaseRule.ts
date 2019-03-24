@@ -30,7 +30,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static readonly FAILURE_STRING_FACTORY = (text: string) => `Duplicate switch case: '${text}'.`;
+    public static readonly FAILURE_STRING_FACTORY = (text: string) =>
+        `Duplicate switch case: '${text}'.`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);

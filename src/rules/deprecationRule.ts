@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import {
     isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -84,7 +85,7 @@ function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
 }
 
 function isDeclaration(identifier: ts.Identifier): boolean {
-    const parent = identifier.parent!;
+    const parent = identifier.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.ClassDeclaration:
         case ts.SyntaxKind.ClassExpression:
@@ -110,24 +111,29 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.ImportEqualsDeclaration:
             return (parent as ts.NamedDeclaration).name === identifier;
         case ts.SyntaxKind.PropertyAssignment:
-            return (parent as ts.PropertyAssignment).name === identifier &&
-                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression);
+            return (
+                (parent as ts.PropertyAssignment).name === identifier &&
+                !isReassignmentTarget(identifier.parent.parent as ts.ObjectLiteralExpression)
+            );
         case ts.SyntaxKind.BindingElement:
             // return true for `b` in `const {a: b} = obj"`
-            return (parent as ts.BindingElement).name === identifier &&
-                (parent as ts.BindingElement).propertyName !== undefined;
+            return (
+                (parent as ts.BindingElement).name === identifier &&
+                (parent as ts.BindingElement).propertyName !== undefined
+            );
         default:
             return false;
     }
 }
 
 function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefined {
-    let parent = node.parent!;
+    let parent = node.parent;
     if (isPropertyAccessExpression(parent) && parent.name === node) {
         node = parent;
-        parent = node.parent!;
+        parent = node.parent;
     }
-    return isTaggedTemplateExpression(parent) || (isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node
+    return isTaggedTemplateExpression(parent) ||
+        ((isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node)
         ? parent
         : undefined;
 }
@@ -141,11 +147,15 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         }
     }
     let symbol: ts.Symbol | undefined;
-    const parent = node.parent!;
+    const parent = node.parent;
     if (parent.kind === ts.SyntaxKind.BindingElement) {
-        symbol = tc.getTypeAtLocation(parent.parent!).getProperty(node.text);
-    } else if (isPropertyAssignment(parent) && parent.name === node ||
-               isShorthandPropertyAssignment(parent) && parent.name === node && isReassignmentTarget(node)) {
+        symbol = tc.getTypeAtLocation(parent.parent).getProperty(node.text);
+    } else if (
+        (isPropertyAssignment(parent) && parent.name === node) ||
+        (isShorthandPropertyAssignment(parent) &&
+            parent.name === node &&
+            isReassignmentTarget(node))
+    ) {
         symbol = tc.getPropertySymbolOfDestructuringAssignment(node);
     } else {
         symbol = tc.getSymbolAtLocation(node);
@@ -154,10 +164,12 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
     if (symbol !== undefined && isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)) {
         symbol = tc.getAliasedSymbol(symbol);
     }
-    if (symbol === undefined ||
+    if (
+        symbol === undefined ||
         // if this is a CallExpression and the declaration is a function or method,
         // stop here to avoid collecting JsDoc of all overload signatures
-        callExpression !== undefined && isFunctionOrMethod(symbol.declarations)) {
+        (callExpression !== undefined && isFunctionOrMethod(symbol.declarations))
+    ) {
         return undefined;
     }
     return getSymbolDeprecation(symbol);
@@ -189,7 +201,9 @@ function getSignatureDeprecation(signature?: ts.Signature): string | undefined {
     }
 
     // for compatibility with typescript@<2.3.0
-    return signature.declaration === undefined ? undefined : getDeprecationFromDeclaration(signature.declaration);
+    return signature.declaration === undefined
+        ? undefined
+        : getDeprecationFromDeclaration(signature.declaration);
 }
 
 function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string | undefined {
@@ -202,10 +216,10 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
             declaration = getDeclarationOfBindingElement(declaration);
         }
         if (isVariableDeclaration(declaration)) {
-            declaration = declaration.parent!;
+            declaration = declaration.parent;
         }
         if (isVariableDeclarationList(declaration)) {
-            declaration = declaration.parent!;
+            declaration = declaration.parent;
         }
         const result = getDeprecationFromDeclaration(declaration);
         if (result !== undefined) {

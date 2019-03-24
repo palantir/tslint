@@ -1,26 +1,45 @@
 /**
  * Reset some basic elements
  */
-body, h1, h2, h3, h4, h5, h6,
-p, blockquote, pre, hr,
-dl, dd, ol, ul, figure {
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+hr,
+dl,
+dd,
+ol,
+ul,
+figure {
     margin: 0;
     padding: 0;
 }
 
-
-
 /**
  * Set `margin-bottom` to maintain vertical rhythm
  */
-h1, h2, h3, h4, h5, h6,
-p, blockquote, pre,
-ul, ol, dl, figure,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+ul,
+ol,
+dl,
+figure,
 %vertical-rhythm {
     margin-bottom: 1rem;
 }
-
-
 
 /**
  * Images
@@ -29,8 +48,6 @@ img {
     max-width: 100%;
     vertical-align: middle;
 }
-
-
 
 /**
  * Figures
@@ -58,7 +75,6 @@ figcaption {
  * Icons
  */
 .icon {
-
     > svg {
         display: inline-block;
         width: 16px;
@@ -71,18 +87,17 @@ figcaption {
     }
 }
 
-
 /**
  * Rules & Feature Badges
  */
- .rules-list {
+.rules-list {
     list-style: none;
     margin: 0 !important; //need to override the `main-content ul` selector
 
     > li {
         &:nth-child(odd) {
             a {
-                background-color: rgba(0, 0, 0, .03);
+                background-color: rgba(0, 0, 0, 0.03);
             }
         }
 
@@ -90,27 +105,27 @@ figcaption {
             display: block;
             border-left: 3px solid transparent;
             text-decoration: none;
-            padding: .75rem;
+            padding: 0.75rem;
 
             &:hover {
-                background-color: rgba(0, 0, 0,.075);
+                background-color: rgba(0, 0, 0, 0.075);
                 border-left-color: #159957;
             }
         }
     }
- }
+}
 
- .rule-features {
-     //This is the container for a list of feature badges
+.rule-features {
+    //This is the container for a list of feature badges
     display: -webkit-box;
     display: -moz-box;
     display: -ms-flexbox;
     display: -webkit-flex;
     display: flex;
- }
+}
 
- .feature {
-     //This is the setup for the a feature badge
+.feature {
+    //This is the setup for the a feature badge
     display: inline-block;
     margin-right: 2px;
     padding: 2px 4px;
@@ -120,7 +135,7 @@ figcaption {
     white-space: nowrap;
     vertical-align: baseline;
     border: 1px solid transparent;
-    border-radius: .25rem;
+    border-radius: 0.25rem;
     cursor: help;
 
     &:before {
@@ -137,9 +152,9 @@ figcaption {
 
     &.feature-ts-only {
         //This feature badge is added to rules that are "TypeScript Only"
-        background-color: #FCF8E3;
-        border-color: #FAF2CC;
-        color: #8A6D3B;
+        background-color: #fcf8e3;
+        border-color: #faf2cc;
+        color: #8a6d3b;
 
         &:before {
             content: "\1F4C4"; //"page facing up" icon - http://www.fileformat.info/info/unicode/char/1F4C4/index.htm
@@ -148,9 +163,9 @@ figcaption {
 
     &.feature-fixer {
         //This feature badge is added to rules that have an auto-fixer
-        background-color: #DFF0D8;
-        border-color: #D0E9C6;
-        color: #3C763D;
+        background-color: #dff0d8;
+        border-color: #d0e9c6;
+        color: #3c763d;
 
         &:before {
             content: "\1f527"; //"wrench" icon - http://www.fileformat.info/info/unicode/char/1f527/index.htm
@@ -159,20 +174,20 @@ figcaption {
 
     &.feature-requires-type-info {
         //This feature badge is added to rules that require type information
-        background-color: #F2DEDE;
-        border-color: #EBCCCC;
-        color: #A94442;
+        background-color: #f2dede;
+        border-color: #ebcccc;
+        color: #a94442;
 
         &:before {
             content: "\2139"; //"information source" icon - http://www.fileformat.info/info/unicode/char/2139/index.htm
             //Surround it with a blue circle
             border-radius: 50%;
-            background: #0078D7;
-            color: #FFF;
+            background: #0078d7;
+            color: #fff;
             width: 1em;
         }
     }
- }
+}
 
 .wrapper__code-example {
     margin-bottom: 64px;
@@ -195,7 +210,8 @@ figcaption {
             background-color: #fff5f5;
         }
 
-        pre, .highlight {
+        pre,
+        .highlight {
             background: transparent;
         }
     }

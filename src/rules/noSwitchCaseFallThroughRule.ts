@@ -64,7 +64,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 
@@ -81,10 +83,12 @@ export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker {
 
     private visitSwitchStatement({ caseBlock: { clauses } }: ts.SwitchStatement): void {
         clauses.forEach((clause, i) => {
-            if (i !== clauses.length - 1
-                    && clause.statements.length !== 0
-                    && !utils.endsControlFlow(clause)
-                    && !this.isFallThroughAllowed(clause)) {
+            if (
+                i !== clauses.length - 1 &&
+                clause.statements.length !== 0 &&
+                !utils.endsControlFlow(clause) &&
+                !this.isFallThroughAllowed(clause)
+            ) {
                 const keyword = clauses[i + 1].getChildAt(0);
                 this.addFailureAtNode(keyword, Rule.FAILURE_STRING(keyword.kind));
             }
@@ -93,7 +97,13 @@ export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker {
 
     private isFallThroughAllowed(clause: ts.CaseOrDefaultClause): boolean {
         const comments = ts.getLeadingCommentRanges(this.sourceFile.text, clause.end);
-        return comments !== undefined &&
-            comments.some((comment) => /^\s*falls through\b/i.test(this.sourceFile.text.slice(comment.pos + 2, comment.end)));
+        return (
+            comments !== undefined &&
+            comments.some(comment =>
+                /^\s*falls through\b/i.test(
+                    this.sourceFile.text.slice(comment.pos + 2, comment.end),
+                ),
+            )
+        );
     }
 }

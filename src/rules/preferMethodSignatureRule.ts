@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -71,7 +71,7 @@ function walk(ctx: Lint.WalkContext): void {
                     Rule.FAILURE_STRING,
                     type.type === undefined
                         ? undefined
-                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))]
+                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))],
                 );
             }
         }

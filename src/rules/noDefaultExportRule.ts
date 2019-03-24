@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,12 @@ function walk(ctx: Lint.WalkContext) {
             if (!(statement as ts.ExportAssignment).isExportEquals) {
                 ctx.addFailureAtNode(statement.getChildAt(1, ctx.sourceFile), Rule.FAILURE_STRING);
             }
-        } else if (statement.modifiers !== undefined && statement.modifiers.length >= 2 &&
-                   statement.modifiers[0].kind === ts.SyntaxKind.ExportKeyword &&
-                   statement.modifiers[1].kind === ts.SyntaxKind.DefaultKeyword) {
+        } else if (
+            statement.modifiers !== undefined &&
+            statement.modifiers.length >= 2 &&
+            statement.modifiers[0].kind === ts.SyntaxKind.ExportKeyword &&
+            statement.modifiers[1].kind === ts.SyntaxKind.DefaultKeyword
+        ) {
             ctx.addFailureAtNode(statement.modifiers[1], Rule.FAILURE_STRING);
         }
     }

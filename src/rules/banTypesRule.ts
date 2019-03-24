@@ -51,7 +51,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_FACTORY(typeName: string, messageAddition?: string) {
-        return `Don't use '${typeName}' as a type.${messageAddition !== undefined ? ` ${messageAddition}` : ""}`;
+        return `Don't use '${typeName}' as a type.${
+            messageAddition !== undefined ? ` ${messageAddition}` : ""
+        }`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -60,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function parseOption([pattern, message]: [string, string | undefined]): Option {
-    return {message, pattern: new RegExp(`^${pattern}$`)};
+    return { message, pattern: new RegExp(`^${pattern}$`) };
 }
 
 function walk(ctx: Lint.WalkContext<Option[]>) {

@@ -45,7 +45,9 @@ function walk(ctx: Lint.WalkContext) {
     if (ctx.sourceFile.typeReferenceDirectives.length === 0) {
         return;
     }
-    const imports = new Set(findImports(ctx.sourceFile, ImportKind.AllStaticImports).map((name) => name.text));
+    const imports = new Set(
+        findImports(ctx.sourceFile, ImportKind.AllStaticImports).map(name => name.text),
+    );
     for (const ref of ctx.sourceFile.typeReferenceDirectives) {
         if (imports.has(ref.fileName)) {
             ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));

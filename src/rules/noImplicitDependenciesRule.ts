@@ -36,7 +36,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-implicit-dependencies",
-        description: "Disallows importing modules that are not listed as dependency in the project's package.json",
+        description:
+            "Disallows importing modules that are not listed as dependency in the project's package.json",
         descriptionDetails: Lint.Utils.dedent`
             Disallows importing transient dependencies and modules installed above your package's root directory.
         `,
@@ -60,12 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minItems: 0,
             maxItems: 3,
         },
-        optionExamples: [
-          true,
-          [true, OPTION_DEV],
-          [true, OPTION_OPTIONAL],
-          [true, ["src", "app"]],
-        ],
+        optionExamples: [true, [true, OPTION_DEV], [true, OPTION_OPTIONAL], [true, ["src", "app"]]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -76,13 +72,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        let whitelist = this.ruleArguments.find((arg) => Array.isArray(arg)) as string[];
+        let whitelist = this.ruleArguments.find(arg => Array.isArray(arg)) as string[];
         if (whitelist === null || whitelist === undefined) {
-          whitelist = [];
+            whitelist = [];
         }
 
         return this.applyWithFunction(sourceFile, walk, {
-            dev: this.ruleArguments.indexOf(OPTION_DEV) !== - 1,
+            dev: this.ruleArguments.indexOf(OPTION_DEV) !== -1,
             optional: this.ruleArguments.indexOf(OPTION_OPTIONAL) !== -1,
             whitelist,
         });
@@ -90,13 +86,17 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
-    const {options} = ctx;
+    const { options } = ctx;
     let dependencies: Set<string> | undefined;
     const whitelist = new Set(options.whitelist);
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
-            const packageName = getPackageName(name.text);
-            if (!whitelist.has(packageName) && builtins.indexOf(packageName) === -1 && !hasDependency(packageName)) {
+            const packageName = getPackageName(name.text, whitelist);
+            if (
+                !whitelist.has(packageName) &&
+                builtins.indexOf(packageName) === -1 &&
+                !hasDependency(packageName)
+            ) {
                 ctx.addFailureAtNode(name, Rule.FAILURE_STRING_FACTORY(packageName));
             }
         }
@@ -110,11 +110,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 }
 
-function getPackageName(name: string): string {
+function getPackageName(name: string, whitelist: Set<string>): string {
     const parts = name.split(/\//g);
-    if (name[0] !== "@") {
+    if (name[0] !== "@" || whitelist.has(parts[0])) {
         return parts[0];
     }
+
+    if (whitelist.has(name)) {
+        return name;
+    }
+
     return `${parts[0]}/${parts[1]}`;
 }
 
@@ -136,7 +141,9 @@ function getDependencies(fileName: string, options: Options): Set<string> {
         try {
             // don't use require here to avoid caching
             // remove BOM from file content before parsing
-            const content = JSON.parse(fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, "")) as PackageJson;
+            const content = JSON.parse(
+                fs.readFileSync(packageJsonPath, "utf8").replace(/^\uFEFF/, ""),
+            ) as PackageJson;
             if (content.dependencies !== undefined) {
                 addDependencies(result, content.dependencies);
             }

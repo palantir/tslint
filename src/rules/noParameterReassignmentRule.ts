@@ -15,8 +15,13 @@
  * limitations under the License.
  */
 
-import { collectVariableUsage, getDeclarationOfBindingElement, isReassignmentTarget } from "tsutils";
+import {
+    collectVariableUsage,
+    getDeclarationOfBindingElement,
+    isReassignmentTarget,
+} from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -43,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext): void {
     collectVariableUsage(ctx.sourceFile).forEach((variable, identifier) => {
-        if (!isParameter(identifier.parent!)) {
+        if (!isParameter(identifier.parent)) {
             return;
         }
         for (const use of variable.uses) {
@@ -59,7 +64,10 @@ function isParameter(node: ts.Node): boolean {
         case ts.SyntaxKind.Parameter:
             return true;
         case ts.SyntaxKind.BindingElement:
-            return getDeclarationOfBindingElement(node as ts.BindingElement).kind === ts.SyntaxKind.Parameter;
+            return (
+                getDeclarationOfBindingElement(node as ts.BindingElement).kind ===
+                ts.SyntaxKind.Parameter
+            );
         default:
             return false;
     }

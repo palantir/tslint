@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
-import { AbstractFormatter } from "../language/formatter/abstractFormatter";
-import { IFormatterMetadata } from "../language/formatter/formatter";
-import { RuleFailure } from "../language/rule/rule";
-
 import codeFrame = require("babel-code-frame");
 import chalk from "chalk";
 
+import { AbstractFormatter } from "../language/formatter/abstractFormatter";
+import { IFormatterMetadata } from "../language/formatter/formatter";
+import { RuleFailure } from "../language/rule/rule";
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
@@ -67,7 +66,10 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString = failure.getRuleSeverity() === "warning" ? chalk.yellow(failureString) : chalk.red(failureString);
+            failureString =
+                failure.getRuleSeverity() === "warning"
+                    ? chalk.yellow(failureString)
+                    : chalk.red(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
