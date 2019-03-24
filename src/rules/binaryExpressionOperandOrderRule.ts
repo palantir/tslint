@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (
             isBinaryExpression(node) &&

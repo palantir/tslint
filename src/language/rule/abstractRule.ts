@@ -52,7 +52,7 @@ export abstract class AbstractRule implements IRule {
 
     protected applyWithFunction(
         sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<void>) => void,
+        walkFn: (ctx: WalkContext) => void,
     ): RuleFailure[];
     protected applyWithFunction<T>(
         sourceFile: ts.SourceFile,

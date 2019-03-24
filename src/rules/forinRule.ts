@@ -58,7 +58,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isForInStatement(node) && isBlock(node.statement) && !isFiltered(node.statement)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);

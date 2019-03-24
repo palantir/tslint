@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     let currentParentClass: ts.ClassLikeDeclaration | undefined;
 
     const cb = (node: ts.Node): void => {

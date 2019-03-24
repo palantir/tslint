@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(context: Lint.WalkContext<void>) {
+function walk(context: Lint.WalkContext) {
     function checkDeleteAccessExpression(node: ts.Expression | undefined): void {
         if (node === undefined || !tsutils.isElementAccessExpression(node)) {
             return;

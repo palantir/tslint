@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     for (const name of findImports(ctx.sourceFile, ImportKind.AllRequireLike)) {
         ctx.addFailureAtNode(name.parent, Rule.FAILURE_STRING);
     }

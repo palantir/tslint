@@ -54,7 +54,7 @@ interface ArgsAndParams {
     typeParameters: ReadonlyArray<ts.TypeParameterDeclaration>;
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const argsAndParams = getArgsAndParameters(node, checker);
         if (argsAndParams !== undefined) {

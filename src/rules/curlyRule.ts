@@ -86,7 +86,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walkAsNeeded(ctx: Lint.WalkContext<void>): void {
+function walkAsNeeded(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
         if (isBlock(node) && isBlockUnnecessary(node)) {
             ctx.addFailureAt(node.statements.pos - 1, 1, Rule.FAILURE_STRING_AS_NEEDED);

@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     const namespacesInScope: Array<ts.ModuleDeclaration | ts.EnumDeclaration> = [];
     ts.forEachChild(ctx.sourceFile, cb);
 
