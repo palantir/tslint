@@ -1,5 +1,5 @@
 {
   "rules": {
-    "no-any": [true, "ignore-rest-args"]
+    "no-any": [true, { "ignore-rest-args": true }]
   }
 }

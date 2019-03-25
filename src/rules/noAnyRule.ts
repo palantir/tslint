@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { isArrayTypeNode, isParameterDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -41,13 +42,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             Also see the \`no-unsafe-any\` rule.
         `,
         optionsDescription: Lint.Utils.dedent`
-            If \`"${OPTION_IGNORE_REST_ARGS}"\` is provided rest arguments will be ignored.
+            If \`"${OPTION_IGNORE_REST_ARGS}": true\` is provided rest arguments will be ignored.
         `,
         options: {
-            type: "string",
-            enum: [OPTION_IGNORE_REST_ARGS],
+            type: "object",
+            properties: {
+                [OPTION_IGNORE_REST_ARGS]: { type: "boolean" },
+            },
         },
-        optionExamples: [true, [true, OPTION_IGNORE_REST_ARGS]],
+        optionExamples: [true, [true, { [OPTION_IGNORE_REST_ARGS]: true }]],
         type: "typescript",
         typescriptOnly: true,
         codeExamples,
@@ -58,22 +61,26 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const options: Options = {
-            ignoreRestArguments: this.ruleArguments.indexOf(OPTION_IGNORE_REST_ARGS) >= 0,
-        };
-
+        const options: Options = getOptions(this.ruleArguments[0] as Partial<Options> | undefined);
         return this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
 interface Options {
-    ignoreRestArguments: boolean;
+    [OPTION_IGNORE_REST_ARGS]: boolean;
+}
+
+function getOptions(options: Partial<Options> | undefined): Options {
+    return {
+        [OPTION_IGNORE_REST_ARGS]: false,
+        ...options,
+    };
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.AnyKeyword) {
-            if (ctx.options.ignoreRestArguments && isRestParameterArrayType(node)) {
+            if (ctx.options[OPTION_IGNORE_REST_ARGS] && isRestParameterArrayType(node)) {
                 return;
             }
 
@@ -87,8 +94,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
 function isRestParameterArrayType(anyTypeNode: ts.Node) {
     return (
-        anyTypeNode.parent.kind === ts.SyntaxKind.ArrayType &&
-        anyTypeNode.parent.parent.kind === ts.SyntaxKind.Parameter &&
+        isArrayTypeNode(anyTypeNode.parent) &&
+        isParameterDeclaration(anyTypeNode.parent.parent) &&
         anyTypeNode.parent.parent.getChildAt(0).kind === ts.SyntaxKind.DotDotDotToken
     );
 }

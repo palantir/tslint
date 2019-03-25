@@ -35,7 +35,7 @@ export const codeExamples = [
         description:
             "Disallows usages of `any` as a type declaration except rest spread parameters.",
         config: Lint.Utils.dedent`
-            "rules": { "no-any": [true, "ignore-rest-args"] }
+            "rules": { "no-any": [true, { "ignore-rest-args": true }] }
         `,
         pass: Lint.Utils.dedent`
             function foo(a: number, ...rest: any[]): void {
