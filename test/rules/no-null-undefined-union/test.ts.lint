@@ -7,6 +7,15 @@ interface someInterface {
 const c: string | null | undefined;
       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
+export type SomeType =
+~~~~~~~~~~~~~~~~~~~~~~
+    | null
+~~~~~~~~~~
+    | undefined
+~~~~~~~~~~~~~~~
+    | boolean;
+~~~~~~~~~~~~~~ [0]
+
 const someFunc = (): string | undefined | null => {}
                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 

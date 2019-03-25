@@ -2,9 +2,10 @@
  * @license Copyright 2018 Palantir Technologies, Inc. All rights reserved.
  */
 
-import * as Lint from "tslint";
-import { isTypeReference, isUnionType } from "tsutils";
+import * as utils from "tsutils";
 import * as ts from "typescript";
+
+import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -34,58 +35,40 @@ export class Rule extends Lint.Rules.TypedRule {
 
 function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isFunctionLikeDeclaration(node) && checkFunctionLikeDeclaration(node, tc)) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
-        } else if (isVariableLikeDeclaration(node) && checkVariableLikeDeclaration(node, tc)) {
+        const type = getType(node, tc);
+        if (type !== undefined && isNullUndefinedUnion(type)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
 }
 
-function isFunctionLikeDeclaration(node: ts.Node): node is ts.FunctionLikeDeclaration {
-    return (
-        ts.isFunctionDeclaration(node) ||
-        ts.isMethodDeclaration(node) ||
-        ts.isGetAccessor(node) ||
-        ts.isSetAccessor(node) ||
-        ts.isConstructorDeclaration(node) ||
-        ts.isFunctionExpression(node) ||
-        ts.isArrowFunction(node)
-    );
+function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
+    if (isVariableLikeDeclaration(node) && node.name.kind === ts.SyntaxKind.Identifier) {
+        return tc.getTypeAtLocation(node);
+    } else if (utils.isSignatureDeclaration(node)) {
+        const signature = tc.getSignatureFromDeclaration(node);
+        return signature === undefined ? undefined : signature.getReturnType();
+    } else {
+        return undefined;
+    }
 }
 
 function isVariableLikeDeclaration(node: ts.Node): node is ts.VariableLikeDeclaration {
     return (
-        ts.isVariableDeclaration(node) ||
-        ts.isParameter(node) ||
-        ts.isBindingElement(node) ||
-        ts.isPropertyDeclaration(node) ||
-        ts.isPropertyAssignment(node) ||
-        ts.isPropertySignature(node) ||
-        ts.isJsxAttribute(node) ||
-        ts.isShorthandPropertyAssignment(node) ||
-        ts.isEnumMember(node) ||
-        ts.isJSDocPropertyTag(node) ||
-        ts.isJSDocParameterTag(node)
+        utils.isVariableDeclaration(node) ||
+        utils.isParameterDeclaration(node) ||
+        utils.isPropertySignature(node) ||
+        utils.isTypeAliasDeclaration(node)
     );
 }
 
-function checkFunctionLikeDeclaration(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
-    const signature = tc.getSignatureFromDeclaration(node);
-    return signature !== undefined ? isNullUndefinedUnion(signature.getReturnType()) : false;
-}
-
-function checkVariableLikeDeclaration(node: ts.VariableLikeDeclaration, tc: ts.TypeChecker): boolean {
-    return isNullUndefinedUnion(tc.getTypeAtLocation(node));
-}
-
 function isNullUndefinedUnion(type: ts.Type): boolean {
-    if (isTypeReference(type) && type.typeArguments !== undefined) {
+    if (utils.isTypeReference(type) && type.typeArguments !== undefined) {
         return type.typeArguments.some(isNullUndefinedUnion);
     }
 
-    if (isUnionType(type)) {
+    if (utils.isUnionType(type)) {
         let hasNull = false;
         let hasUndefined = false;
         for (const subType of type.types) {

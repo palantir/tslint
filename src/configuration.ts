@@ -378,6 +378,7 @@ export function extendConfigurationFile(
  *
  * @deprecated use `path.resolve` instead
  */
+// tslint:disable-next-line no-null-undefined-union
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != undefined) {
         const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
@@ -428,6 +429,7 @@ export function getRulesDirectories(
  * @param ruleConfigValue The raw option setting of a rule
  */
 function parseRuleOptions(
+    // tslint:disable-next-line no-null-undefined-union
     ruleConfigValue: RawRuleConfig,
     rawDefaultRuleSeverity: string | undefined,
 ): Partial<IOptions> {
@@ -506,8 +508,11 @@ export interface RawConfigFile {
     jsRules?: RawRulesConfig | boolean;
 }
 export interface RawRulesConfig {
+    // tslint:disable-next-line no-null-undefined-union
     [key: string]: RawRuleConfig;
 }
+
+// tslint:disable-next-line no-null-undefined-union
 export type RawRuleConfig =
     | null
     | undefined
