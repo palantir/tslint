@@ -7,9 +7,25 @@ function foo(a: any) : any { // 2 errors
     return;
 }
 
+const fooArrow(a: any[]) => {
+                  ~~~                    [0]
+    return;
+}
+
+function bar(...a: any[]) {
+                   ~~~                   [0]
+    return;
+}
+
+const barArrow = (...a: any[]): any => {
+                        ~~~              [0]
+                                ~~~      [0]
+    return;
+}
+
 let a: any = 2, // error
        ~~~               [0]
-    b: any = 4; // error
+    b: any[] = 4; // error
        ~~~               [0]
 
 let {a: c, b: d}: {c: any, d: number} = {c: 99, d: 100};  // error
