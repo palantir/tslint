@@ -252,6 +252,85 @@ const testNoJump = (a) => {
     }
 }
 
+const testConsoleLogIf = (a) => {
+    if (a) {
+        // ...
+    } else if (!a) {
+        // ...
+    }
+}
+
+const testNonJumpingElse = (a) => {
+    if (a === 1) {
+        console.log("a");
+    } else if (a === 2) {
+        return;
+    } else {
+        console.log("b");
+    }
+
+    console.log("c");
+}
+
+const testNonJumpingIf = (a) => {
+    if (a === 1) {
+        console.log("a");
+    } else if (a === 2) {
+        return;
+    } else if (a % 2 === 1) {
+        console.log("b");
+    }
+
+    console.log("c");
+}
+
+const testNonJumpingIfNestedJumping = (a) => {
+    if (a === 1) {
+        if (a) {
+            return;
+        }
+        else { }
+        ~~~~     [return]
+    } else if (a === 2) {
+        return;
+    } else if (a % 2 === 1) {
+        console.log("b");
+    }
+
+    console.log("c");
+}
+
+const testNonJumpingIfNestedNonJumping = (a) => {
+    if (a === 1) {
+        if (a) {}
+        else if (a) {
+            return;
+        }
+        else { }
+    } else if (a === 2) {
+        return;
+    } else if (a % 2 === 1) {
+        console.log("b");
+    }
+
+    console.log("c");
+}
+
+const testNonJumpingIfAndUnrelated = (a) => {
+    if (a === 1) {
+        console.log("a");
+        if (a) {}
+        else if (a) { }
+        else { }
+    } else if (a === 2) {
+        return;
+    } else if (a % 2 === 1) {
+        console.log("b");
+    }
+
+    console.log("c");
+}
+
 [return]: The preceding `if` block ends with a `return` statement. This `else` is unnecessary.
 [throw]: The preceding `if` block ends with a `throw` statement. This `else` is unnecessary.
 [break]: The preceding `if` block ends with a `break` statement. This `else` is unnecessary.
