@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
+class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker {
     constructor(
         sourceFile: ts.SourceFile,
         ruleName: string,

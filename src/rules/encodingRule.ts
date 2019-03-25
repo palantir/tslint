@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const encoding = detectEncoding(ctx.sourceFile.fileName);
     if (encoding !== "utf8") {
         ctx.addFailure(0, 1, Rule.FAILURE_STRING(encoding));

@@ -55,7 +55,7 @@ interface IJumpAndIfStatement {
     node: ts.IfStatement;
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const ifStatementStack: IJumpAndIfStatement[] = [];
 
     function visitIfStatement(node: ts.IfStatement) {

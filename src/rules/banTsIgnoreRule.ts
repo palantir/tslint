@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     const ignoreDiagnosticCommentRegEx = /^\s*\/\/\/?\s*@ts-ignore/;
     forEachComment(ctx.sourceFile, (fullText, comment) => {
         const commentText = fullText.slice(comment.pos, comment.end);

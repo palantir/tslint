@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
     }
 }
 
-function walk(context: Lint.WalkContext<void>, typeChecker?: ts.TypeChecker) {
+function walk(context: Lint.WalkContext, typeChecker?: ts.TypeChecker) {
     const variableUsage = tsutils.collectVariableUsage(context.sourceFile);
 
     function checkArrowFunction(node: ts.CallExpression): void {

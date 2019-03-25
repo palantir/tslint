@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class Walker extends Lint.AbstractWalker<void> {
+class Walker extends Lint.AbstractWalker {
     public walk({ statements }: ts.SourceFile): void {
         for (const statement of statements) {
             if (!isImportDeclaration(statement)) {
