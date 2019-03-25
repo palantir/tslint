@@ -1,3 +1,5 @@
+[typescript]: >= 2.4.0
+
 interface someInterface {
     a: number | undefined | null;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
