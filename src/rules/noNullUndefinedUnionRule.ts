@@ -1,8 +1,30 @@
 /**
- * @license Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ * @license
+ * Copyright 2019 Palantir Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import {
+    isParameterDeclaration,
+    isPropertyDeclaration,
+    isPropertySignature,
+    isSignatureDeclaration,
+    isTypeAliasDeclaration,
+    isTypeReference,
+    isUnionType,
+    isVariableDeclaration,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -44,9 +66,18 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker): void {
 }
 
 function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
-    if (isVariableLikeDeclaration(node) && node.name.kind === ts.SyntaxKind.Identifier) {
+    // NOTE: This is a comprehensive intersection between `HasType` and has property `name`.
+    // The node name kind must be identifier, or else this rule will throw errors while descending.
+    if (
+        (isVariableDeclaration(node) ||
+            isParameterDeclaration(node) ||
+            isPropertySignature(node) ||
+            isPropertyDeclaration(node) ||
+            isTypeAliasDeclaration(node)) &&
+        node.name.kind === ts.SyntaxKind.Identifier
+    ) {
         return tc.getTypeAtLocation(node);
-    } else if (utils.isSignatureDeclaration(node)) {
+    } else if (isSignatureDeclaration(node)) {
         const signature = tc.getSignatureFromDeclaration(node);
         return signature === undefined ? undefined : signature.getReturnType();
     } else {
@@ -54,21 +85,12 @@ function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
     }
 }
 
-function isVariableLikeDeclaration(node: ts.Node): node is ts.VariableLikeDeclaration {
-    return (
-        utils.isVariableDeclaration(node) ||
-        utils.isParameterDeclaration(node) ||
-        utils.isPropertySignature(node) ||
-        utils.isTypeAliasDeclaration(node)
-    );
-}
-
 function isNullUndefinedUnion(type: ts.Type): boolean {
-    if (utils.isTypeReference(type) && type.typeArguments !== undefined) {
+    if (isTypeReference(type) && type.typeArguments !== undefined) {
         return type.typeArguments.some(isNullUndefinedUnion);
     }
 
-    if (utils.isUnionType(type)) {
+    if (isUnionType(type)) {
         let hasNull = false;
         let hasUndefined = false;
         for (const subType of type.types) {
