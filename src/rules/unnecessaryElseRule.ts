@@ -50,27 +50,74 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext): void {
-    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isIfStatement(node)) {
-            const jumpStatement = utils.isBlock(node.thenStatement)
-                ? getJumpStatement(getLastStatement(node.thenStatement))
-                : getJumpStatement(node.thenStatement);
+interface IJumpAndIfStatement {
+    jumpStatement: string | undefined;
+    node: ts.IfStatement;
+}
 
-            if (jumpStatement !== undefined && node.elseStatement !== undefined) {
-                const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
-                ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));
+function walk(ctx: Lint.WalkContext): void {
+    const ifStatementStack: IJumpAndIfStatement[] = [];
+
+    function visitIfStatement(node: ts.IfStatement) {
+        const jumpStatement = utils.isBlock(node.thenStatement)
+            ? getJumpStatement(getLastStatement(node.thenStatement))
+            : getJumpStatement(node.thenStatement);
+
+        ifStatementStack.push({ node, jumpStatement });
+
+        if (
+            jumpStatement !== undefined &&
+            node.elseStatement !== undefined &&
+            !recentStackParentMissingJumpStatement()
+        ) {
+            const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
+            ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));
+        }
+
+        ts.forEachChild(node, visitNode);
+        ifStatementStack.pop();
+    }
+
+    function recentStackParentMissingJumpStatement() {
+        if (ifStatementStack.length <= 1) {
+            return false;
+        }
+
+        for (let i = ifStatementStack.length - 2; i >= 0; i -= 1) {
+            const { jumpStatement, node } = ifStatementStack[i];
+
+            if (node.elseStatement !== ifStatementStack[i + 1].node) {
+                return false;
+            }
+
+            if (jumpStatement === undefined) {
+                return true;
             }
         }
-        return ts.forEachChild(node, cb);
-    });
+
+        return false;
+    }
+
+    function visitNode(node: ts.Node): void {
+        if (utils.isIfStatement(node)) {
+            visitIfStatement(node);
+        } else {
+            ts.forEachChild(node, visitNode);
+        }
+    }
+
+    ts.forEachChild(ctx.sourceFile, visitNode);
 }
 
 function getPositionOfElseKeyword(node: ts.Node, kind: ts.SyntaxKind) {
     return node.getChildren().filter(child => child.kind === kind)[0];
 }
 
-function getJumpStatement(node: ts.Statement): string | undefined {
+function getJumpStatement(node: ts.Statement | undefined): string | undefined {
+    if (node === undefined) {
+        return undefined;
+    }
+
     switch (node.kind) {
         case ts.SyntaxKind.BreakStatement:
             return "break";
