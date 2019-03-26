@@ -24,4 +24,6 @@ declare function doIt(): void;
 declare function doAsync(): Promise<void>;
 declare function print(strs: TemplateStringsArray): void;
 
+!!data ? console.info(message, data) : console.info(message);
+
 [0]: Expression has type `void`. Put it on its own line as a statement.

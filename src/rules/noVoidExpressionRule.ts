@@ -104,6 +104,10 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
             // Something like "x && console.log(x)".
             case ts.SyntaxKind.BinaryExpression:
                 return isParentAllowedVoid(node.parent);
+
+            // Something like "!!cond ? console.log(true) : console.log(false)"
+            case ts.SyntaxKind.ConditionalExpression:
+                return true;
             default:
                 return false;
         }
