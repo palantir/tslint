@@ -5,7 +5,16 @@ interface Index {
 interface I {
 }
 
+interface ID {
+}
+
+interface IABC {
+}
+
 interface IDBFactory {
+}
+
+interface I18nFactory {
 }
 
 interface ABC {

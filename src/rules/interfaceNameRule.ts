@@ -19,7 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "../utils";
+import { isLowerCase, isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -62,10 +62,12 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isInterfaceDeclaration(node)) {
             const { name } = node;
-            if (never && hasPrefixI(name.text)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-            } else if (!never && name.text[0] !== "I") {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+            if (!cantDecide(name.text)) {
+                if (never && hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
+                } else if (!never && !hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+                }
             }
         } else {
             return ts.forEachChild(node, cb);
@@ -74,6 +76,12 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    // Allow IndexedDB interfaces
-    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !name.startsWith("IDB");
+    return name.length >= 3 && name[0] === "I" && !isLowerCase(name[1]) && !isUpperCase(name[2]);
+}
+
+function cantDecide(name: string): boolean {
+    return (
+        (name.length === 2 && name[0] === "I" && !isLowerCase(name[1])) ||
+        (name.length >= 2 && name[0] === "I" && !isLowerCase(name[1]) && !isLowerCase(name[2]))
+    );
 }
