@@ -66,7 +66,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker): void {
 }
 
 function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
-    // NOTE: This is a comprehensive intersection between `HasType` and has property `name`.
+    // This is a comprehensive intersection between `HasType` and has property `name`.
     // The node name kind must be identifier, or else this rule will throw errors while descending.
     if (
         (isVariableDeclaration(node) ||
