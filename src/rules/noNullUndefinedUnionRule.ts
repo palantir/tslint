@@ -39,7 +39,7 @@ export class Rule extends Lint.Rules.TypedRule {
             Enforcing the choice between the two allows the \`triple-equals\` rule to exist without
             exceptions, and is essentially a more flexible version of the \`no-null-keyword\` rule.
         `,
-        optionsDescription: "True if the rule should be enabled.",
+        optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
         type: "functionality",
