@@ -10,12 +10,10 @@ class PublicConstructor {
 
 class ProtectedConstructor {
     protected constructor() { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
 }
 
 class PrivateConstructor {
     private constructor() { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
 }
 
 class SameLine { constructor() { } }
@@ -53,6 +51,14 @@ class CallsSuper extends PublicConstructor {
 class ContainsParameter {
     constructor(x: number) { }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+}
+
+class PrivateContainsParameter {
+    private constructor(x: number) { }
+}
+
+class ProtectedContainsParameter {
+    protected constructor(x: number) { }
 }
 
 class ContainsParameterDeclaration {

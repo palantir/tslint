@@ -45,22 +45,23 @@ export class Rule extends Lint.Rules.AbstractRule {
 const isEmptyConstructor = (node: ts.ConstructorDeclaration): boolean =>
     node.body !== undefined && node.body.statements.length === 0;
 
-const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean => {
-    for (const parameter of node.parameters) {
-        if (isParameterProperty(parameter)) {
-            return true;
-        }
-    }
+const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean =>
+    // If this has any parameter properties
+    node.parameters.some(isParameterProperty);
 
-    return false;
-};
+const isAccessRestrictingConstructor = (node: ts.ConstructorDeclaration): boolean =>
+    // No modifiers implies public
+    node.modifiers != undefined &&
+    // If this has any modifier that isn't public, it's doing something
+    node.modifiers.some(modifier => modifier.kind !== ts.SyntaxKind.PublicKeyword);
 
 function walk(context: Lint.WalkContext) {
     const callback = (node: ts.Node): void => {
         if (
             isConstructorDeclaration(node) &&
             isEmptyConstructor(node) &&
-            !containsConstructorParameter(node)
+            !containsConstructorParameter(node) &&
+            !isAccessRestrictingConstructor(node)
         ) {
             context.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else {
