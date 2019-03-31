@@ -1,4 +1,5 @@
 import { Something } from "some-package"
+export { SomethingElse } from "another-package"
 
 var single = 'single';
              ~~~~~~~~  [' should be `]
@@ -10,10 +11,25 @@ var doubleWithinSingle = '"doubleWithinSingle"';
                          ~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
 var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
+var array: Array<"literal string"> = [];
+var hello: "world";
+           ~~~~~~~ [" should be `]
 'escaped\'quotemark';
 ~~~~~~~~~~~~~~~~~~~~ [' should be `]
 
 // "avoid-template" option is not set.
 `foo`;
 
-const object = { "kebab-case": 3 }
+const object: {
+    "hello-kebab"
+    : number
+    "kebab-case": number
+    "another-kebab": "hello-value"
+                     ~~~~~~~~~~~~~ [" should be `]
+} = {
+    "hello-kebab"
+    : 4
+    "kebab-case": 3,
+    "another-kebab": "hello-value"
+                     ~~~~~~~~~~~~~ [" should be `]
+};

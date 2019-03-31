@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const type = getType(node, tc);
         if (type !== undefined && isNullUndefinedUnion(type)) {

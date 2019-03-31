@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 import {
+    isExportDeclaration,
     isImportDeclaration,
     isNoSubstitutionTemplateLiteral,
-    isPropertyAssignment,
     isSameLine,
     isStringLiteral,
 } from "tsutils";
@@ -130,20 +130,37 @@ function walk(ctx: Lint.WalkContext<Options>) {
             // Don't use backticks instead of single/double quotes when it breaks TypeScript syntax.
             if (
                 expectedQuotemark === "`" &&
-                (isImportDeclaration(node.parent) || isPropertyAssignment(node.parent))
+                // This captures `export blah from "package"`
+                (isExportDeclaration(node.parent) ||
+                    // This captures `import blah from "package"`
+                    isImportDeclaration(node.parent) ||
+                    // This captures kebab-case property names in object literals (only when the node is not at the end of the parent node)
+                    (node.parent.kind === ts.SyntaxKind.PropertyAssignment &&
+                        node.end !== node.parent.end) ||
+                    // This captures the kebab-case property names in type definitions
+                    node.parent.kind === ts.SyntaxKind.PropertySignature ||
+                    // This captures literal types in generic type constraints
+                    node.parent.parent.kind === ts.SyntaxKind.TypeReference)
             ) {
                 return;
             }
 
+            // We already have the expected quotemark. Done.
             if (actualQuotemark === expectedQuotemark) {
                 return;
             }
 
+            /** The quotemark we intend to use to fix this node. */
             let fixQuotemark = expectedQuotemark;
-            const needsQuoteEscapes = node.text.includes(expectedQuotemark);
+
+            /**
+             * Whether this node needs to be escaped (because
+             *   it contains the expected quotemark).
+             */
+            const needsToBeEscaped = node.text.includes(expectedQuotemark);
 
             // This string requires escapes to use the expected quote mark, but `avoid-escape` was passed
-            if (needsQuoteEscapes && options.avoidEscape) {
+            if (needsToBeEscaped && options.avoidEscape) {
                 if (node.kind === ts.SyntaxKind.StringLiteral) {
                     return;
                 }
@@ -153,7 +170,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 const alternativeFixQuotemark = expectedQuotemark === '"' ? "'" : '"';
 
                 if (node.text.includes(alternativeFixQuotemark)) {
-                    // It also includes the alternative fix quote mark. Let's try to use single quotes instead,
+                    // It also includes the alternative fix quotemark. Let's try to use single quotes instead,
                     // unless we originally expected single quotes, in which case we will try to use backticks.
                     // This means that we may use backtick even with avoid-template in trying to avoid escaping.
                     fixQuotemark = expectedQuotemark === "'" ? "`" : "'";
@@ -173,7 +190,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             const start = node.getStart(sourceFile);
             let text = sourceFile.text.substring(start + 1, node.end - 1);
 
-            if (needsQuoteEscapes) {
+            if (needsToBeEscaped) {
                 text = text.replace(new RegExp(fixQuotemark, "g"), `\\${fixQuotemark}`);
             }
 
@@ -186,6 +203,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 new Lint.Replacement(start, node.end - start, fixQuotemark + text + fixQuotemark),
             );
         }
+
         ts.forEachChild(node, cb);
     });
 }
