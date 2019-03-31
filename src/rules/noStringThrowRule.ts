@@ -73,8 +73,14 @@ function walk(ctx: Lint.WalkContext): void {
         if (isThrowStatement(node)) {
             const { expression } = node;
             if (expression !== undefined && isString(expression)) {
+                // To prevent this fix from creating invalid syntax, we must ensure that the "throw"
+                // token is succeeded by a space if no other characters precede the string literal.
+                const offset = expression.getStart() - node.getStart();
+                const numCharactersBetweenTokens = offset - "throw".length;
+                const newError = numCharactersBetweenTokens === 0 ? ` new Error(` : `new Error(`;
+
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING, [
-                    Lint.Replacement.appendText(expression.getStart(sourceFile), "new Error("),
+                    Lint.Replacement.appendText(expression.getStart(sourceFile), newError),
                     Lint.Replacement.appendText(expression.getEnd(), ")"),
                 ]);
             }
