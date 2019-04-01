@@ -14,10 +14,18 @@ rationale: |-
 
   Also see the `no-unsafe-any` rule.
           
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If `"ignore-rest-args": true` is provided rest arguments will be ignored.
+          
+options:
+  type: object
+  properties:
+    ignore-rest-args:
+      type: boolean
 optionExamples:
   - 'true'
+  - '[true, {"ignore-rest-args": true}]'
 type: typescript
 typescriptOnly: true
 codeExamples:
@@ -34,7 +42,26 @@ codeExamples:
       ```ts
       let foo: any;
       ```
+  - description: Disallows usages of `any` as a type declaration except rest spread parameters.
+    config: |-
+      ```json
+      "rules": { "no-any": [true, { "ignore-rest-args": true }] }
+      ```
+    pass: |-
+      ```ts
+      function foo(a: number, ...rest: any[]): void {
+          return;
+      }
+      ```
 layout: rule
 title: 'Rule: no-any'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "ignore-rest-args": {
+        "type": "boolean"
+      }
+    }
+  }
 ---

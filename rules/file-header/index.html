@@ -3,21 +3,56 @@ ruleName: file-header
 description: 'Enforces a certain header comment for all files, matched by a regular expression.'
 optionsDescription: |-
 
+  A single object may be passed in for configuration that must contain:
+
+  * `match`: a regular expression that all headers should match
+
+  Any of the following optional fields may also be provided:
+
+  * `allow-single-line-comments`: a boolean for whether `//` should be considered file headers in addition to `/*` comments
+  * `default`: text to add for file headers when running in `--fix` mode
+  * `enforce-trailing-newline`: a boolean for whether a newline must follow the header
+
+  The rule will also accept array of strings as a legacy form of options, though the object form is recommended.
   The first option, which is mandatory, is a regular expression that all headers should match.
   The second argument, which is optional, is a string that should be inserted as a header comment
   if fixing is enabled and no header that matches the first argument is found.
   The third argument, which is optional, is a string that denotes whether or not a newline should
   exist on the header.
 options:
-  type: array
-  items:
-    - type: string
-    - type: string
-    - type: string
-  additionalItems: false
-  minLength: 1
-  maxLength: 3
+  oneOf:
+    - type: array
+      items:
+        type: object
+        properties:
+          match:
+            type: string
+          allow-single-line-comments:
+            type: boolean
+          default:
+            type: string
+          enforce-trailing-newline:
+            type: boolean
+        additionalProperties: false
+    - type: array
+      items:
+        - type: string
+        - type: string
+        - type: string
+      additionalItems: false
+      minLength: 1
+      maxLength: 3
 optionExamples:
+  - |-
+    [
+      true,
+      {
+        "match": "Copyright \\d{4}",
+        "allow-single-line-comments": true,
+        "default": "Copyright 2018",
+        "enforce-trailing-newline": true
+      }
+    ]
   - '[true, "Copyright \\d{4}", "Copyright 2018", "enforce-trailing-newline"]'
 hasFix: true
 type: style
@@ -26,20 +61,45 @@ layout: rule
 title: 'Rule: file-header'
 optionsJSON: |-
   {
-    "type": "array",
-    "items": [
+    "oneOf": [
       {
-        "type": "string"
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "match": {
+              "type": "string"
+            },
+            "allow-single-line-comments": {
+              "type": "boolean"
+            },
+            "default": {
+              "type": "string"
+            },
+            "enforce-trailing-newline": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
       },
       {
-        "type": "string"
-      },
-      {
-        "type": "string"
+        "type": "array",
+        "items": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "string"
+          }
+        ],
+        "additionalItems": false,
+        "minLength": 1,
+        "maxLength": 3
       }
-    ],
-    "additionalItems": false,
-    "minLength": 1,
-    "maxLength": 3
+    ]
   }
 ---

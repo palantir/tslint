@@ -954,25 +954,59 @@
   {
     "ruleName": "file-header",
     "description": "Enforces a certain header comment for all files, matched by a regular expression.",
-    "optionsDescription": "\nThe first option, which is mandatory, is a regular expression that all headers should match.\nThe second argument, which is optional, is a string that should be inserted as a header comment\nif fixing is enabled and no header that matches the first argument is found.\nThe third argument, which is optional, is a string that denotes whether or not a newline should\nexist on the header.",
+    "optionsDescription": "\nA single object may be passed in for configuration that must contain:\n\n* `match`: a regular expression that all headers should match\n\nAny of the following optional fields may also be provided:\n\n* `allow-single-line-comments`: a boolean for whether `//` should be considered file headers in addition to `/*` comments\n* `default`: text to add for file headers when running in `--fix` mode\n* `enforce-trailing-newline`: a boolean for whether a newline must follow the header\n\nThe rule will also accept array of strings as a legacy form of options, though the object form is recommended.\nThe first option, which is mandatory, is a regular expression that all headers should match.\nThe second argument, which is optional, is a string that should be inserted as a header comment\nif fixing is enabled and no header that matches the first argument is found.\nThe third argument, which is optional, is a string that denotes whether or not a newline should\nexist on the header.",
     "options": {
-      "type": "array",
-      "items": [
+      "oneOf": [
         {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "match": {
+                "type": "string"
+              },
+              "allow-single-line-comments": {
+                "type": "boolean"
+              },
+              "default": {
+                "type": "string"
+              },
+              "enforce-trailing-newline": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          }
         },
         {
-          "type": "string"
-        },
-        {
-          "type": "string"
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "additionalItems": false,
+          "minLength": 1,
+          "maxLength": 3
         }
-      ],
-      "additionalItems": false,
-      "minLength": 1,
-      "maxLength": 3
+      ]
     },
     "optionExamples": [
+      [
+        true,
+        {
+          "match": "Copyright \\d{4}",
+          "allow-single-line-comments": true,
+          "default": "Copyright 2018",
+          "enforce-trailing-newline": true
+        }
+      ],
       [
         true,
         "Copyright \\d{4}",
@@ -1647,10 +1681,23 @@
     "description": "Disallows usages of `any` as a type declaration.",
     "hasFix": false,
     "rationale": "\nUsing `any` as a type declaration nullifies the compile-time benefits of the type system.\n\nIf you're dealing with data of unknown or \"any\" types, you shouldn't be accessing members of it.\nEither add type annotations for properties that may exist or change the data type to the empty object type `{}`.\n\nAlternately, if you're creating storage or handling for consistent but unknown types, such as in data structures\nor serialization, use `<T>` template types for generic type handling.\n\nAlso see the `no-unsafe-any` rule.\n        ",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf `\"ignore-rest-args\": true` is provided rest arguments will be ignored.\n        ",
+    "options": {
+      "type": "object",
+      "properties": {
+        "ignore-rest-args": {
+          "type": "boolean"
+        }
+      }
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "ignore-rest-args": true
+        }
+      ]
     ],
     "type": "typescript",
     "typescriptOnly": true,
@@ -1660,6 +1707,11 @@
         "config": "```json\n\"rules\": { \"no-any\": true }\n```",
         "pass": "```ts\nlet foo: object;\n```",
         "fail": "```ts\nlet foo: any;\n```"
+      },
+      {
+        "description": "Disallows usages of `any` as a type declaration except rest spread parameters.",
+        "config": "```json\n\"rules\": { \"no-any\": [true, { \"ignore-rest-args\": true }] }\n```",
+        "pass": "```ts\nfunction foo(a: number, ...rest: any[]): void {\n    return;\n}\n```"
       }
     ]
   },
@@ -2317,6 +2369,19 @@
     "type": "functionality",
     "typescriptOnly": false,
     "hasFix": true
+  },
+  {
+    "ruleName": "no-null-undefined-union",
+    "description": "Disallows union types with both `null` and `undefined` as members.",
+    "rationale": "\nA union type that includes both `null` and `undefined` is either redundant or fragile.\nEnforcing the choice between the two allows the `triple-equals` rule to exist without\nexceptions, and is essentially a more flexible version of the `no-null-keyword` rule.\n        ",
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true
   },
   {
     "ruleName": "no-object-literal-type-assertion",
@@ -3764,7 +3829,7 @@
   {
     "ruleName": "strict-boolean-expressions",
     "description": "\nRestricts the types allowed in boolean expressions. By default only booleans are allowed.\n\nThe following nodes are checked:\n\n* Arguments to the `!`, `&&`, and `||` operators\n* The condition in a conditional expression (`cond ? x : y`)\n* Conditions for `if`, `for`, `while`, and `do-while` statements.",
-    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-enum` allows enums.\n  - It does *not* allow unions containing `enum`.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n* `ignore-rhs` ignores the right-hand operand of `&&` and `||'\n        ",
+    "optionsDescription": "\nThese options may be provided:\n\n* `allow-null-union` allows union types containing `null`.\n  - It does *not* allow `null` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-undefined-union` allows union types containing `undefined`.\n  - It does *not* allow `undefined` itself.\n  - Without the '--strictNullChecks' compiler option, this will allow anything other than a string, number, or enum.\n* `allow-string` allows strings.\n  - It does *not* allow unions containing `string`.\n  - It does *not* allow string literal types.\n* `allow-enum` allows enums.\n  - It does *not* allow unions containing `enum`.\n* `allow-number` allows numbers.\n  - It does *not* allow unions containing `number`.\n  - It does *not* allow enums or number literal types.\n* `allow-mix` allows multiple of the above to appear together.\n  - For example, `string | number` or `RegExp | null | undefined` would normally not be allowed.\n  - A type like `\"foo\" | \"bar\" | undefined` is always allowed, because it has only one way to be false.\n* `allow-boolean-or-undefined` allows `boolean | undefined`.\n  - Also allows `true | false | undefined`.\n  - Does not allow `false | undefined`.\n  - This option is a subset of `allow-undefined-union`, so you don't need to enable both options at the same time.\n* `ignore-rhs` ignores the right-hand operand of `&&` and `||`.\n        ",
     "options": {
       "type": "array",
       "items": {
