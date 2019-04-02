@@ -13,16 +13,16 @@ const x: SomeType;
 
 const someFunc = (): SomeType => {}
 
-function(foo: SomeType) {}
-
-const y: string | null | undefined;
-         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-
-interface someInterface {
+interface SomeInterface {
     foo: number | undefined | null;
          ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
     bar: boolean;
 }
+
+function(foo: SomeInterface) {}
+
+const y: string | null | undefined;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 const someFunc = (): string | undefined | null => {}
                      ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
