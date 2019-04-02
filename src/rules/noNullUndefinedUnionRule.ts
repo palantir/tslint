@@ -15,12 +15,7 @@
  * limitations under the License.
  */
 
-import {
-    isSignatureDeclaration,
-    isTypeReference,
-    isUnionType,
-    isUnionTypeNode,
-} from "tsutils";
+import { isSignatureDeclaration, isTypeReference, isUnionType, isUnionTypeNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
