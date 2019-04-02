@@ -9,7 +9,7 @@ export type SomeType =
     | boolean;
 ~~~~~~~~~~~~~ [0]
 
-const x: SomeType; // Ignore implicit types of variables.
+const x: SomeType;
 
 const someFunc = (): SomeType => {}
 
