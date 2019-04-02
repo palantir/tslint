@@ -180,8 +180,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
             return;
         }
         const commentText = fullText.slice(start, end);
-        // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
-        if (/^(?:#(?:end)?region|noinspection\s)/.test(commentText)) {
+        // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ...", "//region", "//endregion"
+        if (/^(?:#?(?:end)?region|noinspection\s)/.test(commentText)) {
             return;
         }
 
