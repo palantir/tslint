@@ -1,39 +1,45 @@
 [typescript]: >= 2.4.0
 
-interface someInterface {
-    a: number | undefined | null;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-    b: boolean;
-}
-
-const c: string | null | undefined;
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-
 export type SomeType =
-~~~~~~~~~~~~~~~~~~~~~~
+
     | null
-~~~~~~~~~~
+      ~~~~
     | undefined
 ~~~~~~~~~~~~~~~
     | boolean;
-~~~~~~~~~~~~~~ [0]
+~~~~~~~~~~~~~ [0]
+
+const x: SomeType; // Ignore implicit types of variables.
+
+const someFunc = (): SomeType => {}
+
+function(foo: SomeType) {}
+
+const y: string | null | undefined;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+interface someInterface {
+    foo: number | undefined | null;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    bar: boolean;
+}
 
 const someFunc = (): string | undefined | null => {}
-                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 const someFunc = (foo: null | string | undefined, bar: boolean) => {}
-                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 function someFunc(): number | undefined | null {}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 function someFunc(): Promise<number | null | undefined> {} // error
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 function someFunc(bar: boolean, foo: null | number | undefined) {}
-                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-function someFunc() {
+function testFunc() {
 ~~~~~~~~~~~~~~~~~~~~~
     const somePredicate = (): boolean => true;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,5 +57,7 @@ function someFunc() {
 ~~~~~~~~~~~~~~~
 }
 ~ [0]
+
+const z = testFunc();
 
 [0]: Union type cannot include both 'null' and 'undefined'.

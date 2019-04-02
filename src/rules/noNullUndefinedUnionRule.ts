@@ -16,14 +16,10 @@
  */
 
 import {
-    isParameterDeclaration,
-    isPropertyDeclaration,
-    isPropertySignature,
     isSignatureDeclaration,
-    isTypeAliasDeclaration,
     isTypeReference,
     isUnionType,
-    isVariableDeclaration,
+    isUnionTypeNode,
 } from "tsutils";
 import * as ts from "typescript";
 
@@ -66,18 +62,10 @@ function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker): void {
 }
 
 function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
-    // This is a comprehensive intersection between `HasType` and has property `name`.
-    // The node name kind must be identifier, or else this rule will throw errors while descending.
-    if (
-        (isVariableDeclaration(node) ||
-            isParameterDeclaration(node) ||
-            isPropertySignature(node) ||
-            isPropertyDeclaration(node) ||
-            isTypeAliasDeclaration(node)) &&
-        node.name.kind === ts.SyntaxKind.Identifier
-    ) {
+    if (isUnionTypeNode(node)) {
         return tc.getTypeAtLocation(node);
-    } else if (isSignatureDeclaration(node)) {
+    } else if (isSignatureDeclaration(node) && node.type === undefined) {
+        // Explicit types should be handled by the first case.
         const signature = tc.getSignatureFromDeclaration(node);
         return signature === undefined ? undefined : signature.getReturnType();
     } else {
