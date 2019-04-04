@@ -1,39 +1,40 @@
 [typescript]: >= 2.4.0
 
-interface someInterface {
-    a: number | undefined | null;
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
-    b: boolean;
-}
+// Catches explicit union types.
 
-const c: string | null | undefined;
-      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+type SomeType =
 
-export type SomeType =
-~~~~~~~~~~~~~~~~~~~~~~
     | null
-~~~~~~~~~~
+      ~~~~
     | undefined
 ~~~~~~~~~~~~~~~
     | boolean;
-~~~~~~~~~~~~~~ [0]
+~~~~~~~~~~~~~ [0]
+
+const c: string | null | undefined;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 const someFunc = (): string | undefined | null => {}
-                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
 const someFunc = (foo: null | string | undefined, bar: boolean) => {}
-                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-function someFunc(): number | undefined | null {}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+interface SomeInterface {
+    foo: number | null | undefined;
+         ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    bar: boolean;
+}
 
-function someFunc(): Promise<number | null | undefined> {} // error
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+function someFunc(): Promise<number | undefined | null> {} // error
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-function someFunc(bar: boolean, foo: null | number | undefined) {}
-                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+function someFunc(bar: boolean, foo: undefined | number | null) {}
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
-function someFunc() {
+// Catches implicit return types.
+
+function testFunc() {
 ~~~~~~~~~~~~~~~~~~~~~
     const somePredicate = (): boolean => true;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -51,5 +52,34 @@ function someFunc() {
 ~~~~~~~~~~~~~~~
 }
 ~ [0]
+
+// Does not consider ? as shorthand for undefined.
+
+type Text = string | null
+
+interface TextInterface {
+    foo?: Text
+}
+
+interface SuperTextInterface {
+    bar?: Text | number
+}
+
+function someFunc(foo?: Text, bar?: Text | number) {}
+
+// Ignores implicit union types.
+
+const x: SomeType;
+
+const someFunc = (): SomeType => {}
+
+function(foo: SomeInterface) {}
+
+const y = testFunc();
+
+// Unless they are explicitly unioned.
+
+const z: Text | undefined;
+         ~~~~~~~~~~~~~~~~ [0]
 
 [0]: Union type cannot include both 'null' and 'undefined'.
