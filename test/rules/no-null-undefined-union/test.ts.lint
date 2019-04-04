@@ -80,6 +80,6 @@ const y = testFunc();
 // Unless they are explicitly unioned.
 
 const z: Text | undefined;
-         ~~~~~~~~~~~~~~~~ [0];
+         ~~~~~~~~~~~~~~~~ [0]
 
 [0]: Union type cannot include both 'null' and 'undefined'.
