@@ -1,4 +1,5 @@
 version: 2
+
 jobs:
   install_dependencies:
     docker:
@@ -163,32 +164,22 @@ workflows:
           requires:
             - install_dependencies
       - lint:
-          requires:
-            - build
+          requires: [build]
       - test:
-          requires:
-            - build
+          requires: [build]
       - test2.1:
-          requires:
-            - build
+          requires: [build]
       - test2.4:
-          requires:
-            - build
+          requires: [build]
       - test2.7:
-          requires:
-            - build
+          requires: [build]
       - test2.8:
-          requires:
-            - build
+          requires: [build]
       - test2.9:
-          requires:
-            - build
+          requires: [build]
       - test3.0:
-          requires:
-            - build
+          requires: [build]
       - testRc:
-          requires:
-            - build
+          requires: [build]
       - testNext:
-          requires:
-            - build
+          requires: [build]
