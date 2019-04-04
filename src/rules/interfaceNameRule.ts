@@ -19,7 +19,6 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isLowerCase, isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -76,12 +75,19 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    return name.length >= 3 && name[0] === "I" && !isLowerCase(name[1]) && !isUpperCase(name[2]);
+    return (
+        name.length >= 3 && name[0] === "I" && /^[A-Z]*$/.test(name[1]) && !/^[A-Z]*$/.test(name[2])
+    );
 }
 
 function cantDecide(name: string): boolean {
     return (
-        (name.length === 2 && name[0] === "I" && !isLowerCase(name[1])) ||
-        (name.length >= 2 && name[0] === "I" && !isLowerCase(name[1]) && !isLowerCase(name[2]))
+        // Case ID
+        (name.length === 2 && name[0] === "I" && /^[A-Z]*$/.test(name[1])) ||
+        // Case IDB
+        (name.length >= 2 &&
+            name[0] === "I" &&
+            /^[A-Z]*$/.test(name[1]) &&
+            /^[A-Z]*$/.test(name[2]))
     );
 }
