@@ -25,30 +25,8 @@ function test<T extends ("generic" & number)>() {
 
 const callback = <U extends "generic">() => `hi` as number | string
 
-const v = callback()
-
-if (typeof v === `string`) {}
-
-if (typeof `string` === `number`) {}
-
 var hello: `world`;
 `escaped'quotemark`;
 
 // "avoid-template" option is not set.
 `foo`;
-
-const object: {
-    "hello-kebab"
-    : number
-    "kebab-case": number
-    "optional-prop"?: `hello-optional`
-    "optional-function"?(): void
-    "another-kebab": `hello-value`
-} = {
-    "hello-kebab"
-    : 4
-    "kebab-case": 3,
-    "optional-kebab": undefined,
-    "optional-function"() {},
-    "another-kebab": `hello-value`
-};

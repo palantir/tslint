@@ -283,11 +283,18 @@ function isTypeConstraint(node: ts.StringLiteral | ts.NoSubstitutionTemplateLite
  * @return Whether this node is a property/method signature.
  */
 function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+    let parent = node.parent;
+
+    if (ts.version < "2.7.1" && node.parent.kind === ts.SyntaxKind.LastTypeNode) {
+        // In older versions, there's a "LastTypeNode" here
+        parent = parent.parent;
+    }
+
     return (
         // This captures the kebab-case property names in type definitions
-        node.parent.kind === ts.SyntaxKind.PropertySignature ||
+        parent.kind === ts.SyntaxKind.PropertySignature ||
         // This captures the kebab-case method names in type definitions
-        node.parent.kind === ts.SyntaxKind.MethodSignature
+        parent.kind === ts.SyntaxKind.MethodSignature
     );
 }
 
@@ -297,13 +304,17 @@ function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) 
  * @return Whether this node is the name in an assignment/decleration.
  */
 function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
-    // If the node is in a property assignment or method declaration and is not at
-    //   the end of its parent node, it is then the actual prop/method name.
+    if (
+        node.parent.kind !== ts.SyntaxKind.PropertyAssignment &&
+        node.parent.kind !== ts.SyntaxKind.MethodDeclaration
+    ) {
+        // If the node is neither a property assignment or method declaration, it's not a name in an assignment
+        return false;
+    }
+
     return (
-        // If the node is in a property assignment
-        (node.parent.kind === ts.SyntaxKind.PropertyAssignment ||
-            // If the node is in a method declaration
-            node.parent.kind === ts.SyntaxKind.MethodDeclaration) &&
+        // In typescript below 2.7.1, don't change values either
+        ts.version < "2.7.1" ||
         // If this node is not at the end of the parent
         node.end !== node.parent.end
     );
