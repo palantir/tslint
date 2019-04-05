@@ -134,13 +134,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 (isExportDeclaration(node.parent) ||
                     // This captures `import blah from "package"`
                     isImportDeclaration(node.parent) ||
-                    // This captures kebab-case property names in object literals (only when the node is not at the end of the parent node)
-                    (node.parent.kind === ts.SyntaxKind.PropertyAssignment &&
-                        node.end !== node.parent.end) ||
-                    // This captures the kebab-case property names in type definitions
-                    node.parent.kind === ts.SyntaxKind.PropertySignature ||
+                    // This captures quoted names in object literal keys
+                    isNameInAssignment(node) ||
+                    // This captures quoted signatures (property or method)
+                    isSignature(node) ||
                     // This captures literal types in generic type constraints
-                    node.parent.parent.kind === ts.SyntaxKind.TypeReference)
+                    isTypeConstraint(node) ||
+                    // Whether this is the type in a typeof check with older tsc
+                    isTypeCheckWithOldTsc(node))
             ) {
                 return;
             }
@@ -244,4 +245,81 @@ function getJSXQuotemarkPreference(
     // The JSX preference was not found, so try to use the regular preference.
     //   If the regular pref is backtick, use double quotes instead.
     return regularQuotemarkPreference !== "`" ? regularQuotemarkPreference : '"';
+}
+
+/**
+ * Whether this node is a type constraint in a generic type.
+ * @param  node The node to check
+ * @return Whether this node is a type constraint
+ */
+function isTypeConstraint(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+    let parent = node.parent.parent;
+
+    // If this node doesn't have a grandparent, it's not a type constraint
+    if (parent == undefined) {
+        return false;
+    }
+
+    // Iterate through all levels of union, intersection, or parethesized types
+    while (
+        parent.kind === ts.SyntaxKind.UnionType ||
+        parent.kind === ts.SyntaxKind.IntersectionType ||
+        parent.kind === ts.SyntaxKind.ParenthesizedType
+    ) {
+        parent = parent.parent;
+    }
+
+    return (
+        // If the next level is a type reference, the node is a type constraint
+        parent.kind === ts.SyntaxKind.TypeReference ||
+        // If the next level is a type parameter, the node is a type constraint
+        parent.kind === ts.SyntaxKind.TypeParameter
+    );
+}
+
+/**
+ * Whether this node is the signature of a property or method in a type.
+ * @param  node The node to check
+ * @return Whether this node is a property/method signature.
+ */
+function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+    return (
+        // This captures the kebab-case property names in type definitions
+        node.parent.kind === ts.SyntaxKind.PropertySignature ||
+        // This captures the kebab-case method names in type definitions
+        node.parent.kind === ts.SyntaxKind.MethodSignature
+    );
+}
+
+/**
+ * Whether this node is the method or property name in an assignment/declaration.
+ * @param  node The node to check
+ * @return Whether this node is the name in an assignment/decleration.
+ */
+function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+    // If the node is in a property assignment or method declaration and is not at
+    //   the end of its parent node, it is then the actual prop/method name.
+    return (
+        // If the node is in a property assignment
+        (node.parent.kind === ts.SyntaxKind.PropertyAssignment ||
+            // If the node is in a method declaration
+            node.parent.kind === ts.SyntaxKind.MethodDeclaration) &&
+        // If this node is not at the end of the parent
+        node.end !== node.parent.end
+    );
+}
+
+function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+    if (ts.version >= "2.7.1") {
+        // This one only affects older typescript versions (below 2.7.1)
+        return false;
+    }
+
+    if (node.parent.kind !== ts.SyntaxKind.BinaryExpression) {
+        // If this isn't in a binary expression
+        return false;
+    }
+
+    // If this node has a sibling that is a TypeOf
+    return node.parent.getChildren().some(n => n.kind === ts.SyntaxKind.TypeOfExpression);
 }

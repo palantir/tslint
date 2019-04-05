@@ -6,7 +6,31 @@ var single = `single`;
 var singleWithinDouble = `'singleWithinDouble'`;
 var doubleWithinSingle = `"doubleWithinSingle"`;
 var tabNewlineWithinSingle = `tab\tNewline\nWithinSingle`;
+
 var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" | number> = [];
+var arrayThree: Array<"literal string" | "hello world"> = [];
+var arrayFour: Array<"literal string" | "hello world" | "foo bar"> = [];
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" & number> = [];
+var arrayFour: Array<"literal string" | "hello world" & "foo bar"> = [];
+
+function test<T extends "generic">() {
+
+}
+
+function test<T extends ("generic" & number)>() {
+
+}
+
+const callback = <U extends "generic">() => `hi` as number | string
+
+const v = callback()
+
+if (typeof v === `string`) {}
+
+if (typeof `string` === `number`) {}
+
 var hello: `world`;
 `escaped'quotemark`;
 
@@ -17,10 +41,14 @@ const object: {
     "hello-kebab"
     : number
     "kebab-case": number
+    "optional-prop"?: `hello-optional`
+    "optional-function"?(): void
     "another-kebab": `hello-value`
 } = {
     "hello-kebab"
     : 4
     "kebab-case": 3,
+    "optional-kebab": undefined,
+    "optional-function"() {},
     "another-kebab": `hello-value`
 };
