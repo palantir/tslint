@@ -19,13 +19,13 @@ var pair: NumberStringPair = {
 var bad1  = 5 + "10";
             ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + "10". Consider using template literals.]
 var bad2  = [] + 5;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found undefined[] + 5]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + 5]
 var bad3  = [] + {};
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found undefined[] + {}]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + {}]
 var bad4  = [] + [];
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found undefined[] + undefined[]]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + []]
 var bad4  = 5 + [];
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + undefined[]]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + []]
 var bad5  = "5" + {};
             ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found "5" + {}. Consider using template literals.]
 var bad6  = 5.5 + "5";
@@ -39,7 +39,7 @@ var bad9  = y + x;
 var bad10 = x + {};
             ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + {}]
 var bad11 = [] + y;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found undefined[] + string. Consider using template literals.]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + string. Consider using template literals.]
 var bad12 = pair.first + "10";
             ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + "10". Consider using template literals.]
 var bad13 = 5 + pair.second;
