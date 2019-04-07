@@ -30,7 +30,21 @@ export class Rule extends Lint.Rules.AbstractRule {
             In addition, current tooling differs on the correct way to handle default imports/exports.
             Avoiding them all together can help avoid tooling bugs and conflicts.`,
         optionsDescription: "Not configurable.",
-        options: null,
+        options: {
+            type: "list",
+            listType: {
+                anyOf: [
+                    {
+                        type: "object",
+                        properties: {
+                            ignorePattern: {
+                                type: "string",
+                            },
+                        },
+                    },
+                ],
+            },
+        },
         optionExamples: [true],
         type: "maintainability",
         typescriptOnly: false,
@@ -40,12 +54,38 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use of default exports is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-function walk(ctx: Lint.WalkContext) {
-    if (ctx.sourceFile.isDeclarationFile || !ts.isExternalModule(ctx.sourceFile)) {
+interface Options {
+    ignorePattern: RegExp | undefined;
+}
+
+const OPTION_IGNORE_PATTERN = "ignore-pattern";
+
+function parseOptions(options: any[]): Options {
+    let ignorePattern: RegExp | undefined;
+    for (const o of options) {
+        if (typeof o === "object") {
+            // tslint:disable-next-line no-unsafe-any no-null-undefined-union
+            const ignore = o[OPTION_IGNORE_PATTERN] as string | null | undefined;
+            if (ignore != undefined) {
+                ignorePattern = new RegExp(ignore);
+                break;
+            }
+        }
+    }
+
+    return { ignorePattern };
+}
+
+function walk(ctx: Lint.WalkContext<Options>) {
+    if (
+        ctx.sourceFile.isDeclarationFile ||
+        !ts.isExternalModule(ctx.sourceFile) ||
+        (ctx.options.ignorePattern && ctx.sourceFile.fileName.match(ctx.options.ignorePattern))
+    ) {
         return;
     }
     for (const statement of ctx.sourceFile.statements) {
