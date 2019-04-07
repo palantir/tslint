@@ -20,6 +20,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_TRIM_LEFT_PATTERN = "trim-left-pattern";
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED_BLANKS = 1;
 
@@ -40,10 +42,25 @@ export class Rule extends Lint.Rules.AbstractRule {
             An optional number of maximum allowed sequential blanks can be specified. If no value
             is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.`,
         options: {
-            type: "number",
-            minimum: "1",
+            type: "list",
+            listType: {
+                anyOf: [
+                    {
+                        type: "number",
+                        minimum: "1",
+                    },
+                    {
+                        type: "object",
+                        properties: {
+                            trimLeftPattern: {
+                                type: "string",
+                            },
+                        },
+                    },
+                ],
+            },
         },
-        optionExamples: [true, [true, 2]],
+        optionExamples: [true, [true, 2], [true, 2, { "trim-left-pattern": "\\.vue$" }]],
         type: "formatting",
         typescriptOnly: false,
     };
@@ -64,22 +81,51 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const limit = this.ruleArguments[0] as number | undefined;
-        return this.applyWithFunction(
-            sourceFile,
-            walk,
-            limit !== undefined ? limit : Rule.DEFAULT_ALLOWED_BLANKS,
-        );
+        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
 }
 
-function walk(ctx: Lint.WalkContext<number>) {
+
+interface Options {
+    limit: number;
+    trimLeftPattern: RegExp | undefined;
+}
+
+function parseOptions(options: any[]): Options {
+    let trimLeftPattern: RegExp | undefined;
+    let limitStart: number | undefined;
+    for (const o of options) {
+        if (typeof o === "object") {
+            // tslint:disable-next-line no-unsafe-any no-null-undefined-union
+            const ignore = o[OPTION_TRIM_LEFT_PATTERN] as string | null | undefined;
+            if (ignore != undefined) {
+                trimLeftPattern = new RegExp(ignore);
+                break;
+            }
+        } else if (typeof o === "number") {
+            limitStart = o;
+        }
+    }
+    const limit: number =
+        limitStart !== undefined ? (limitStart as number) : Rule.DEFAULT_ALLOWED_BLANKS;
+    return { trimLeftPattern, limit };
+}
+
+function walk(ctx: Lint.WalkContext<Options>) {
     const sourceText = ctx.sourceFile.text;
-    const threshold = ctx.options + 1;
+    const threshold = ctx.options.limit + 1;
     const possibleFailures: ts.TextRange[] = [];
     let consecutiveBlankLines = 0;
 
-    for (const line of utils.getLineRanges(ctx.sourceFile)) {
+    const lineRanges = utils.getLineRanges(ctx.sourceFile);
+    if (ctx.options.trimLeftPattern && ctx.sourceFile.fileName.match(ctx.options.trimLeftPattern)) {
+        const deleteCount = sourceText.search(/\w+/g);
+        if (deleteCount > 0) {
+            lineRanges.splice(0, deleteCount);
+        }
+    }
+
+    for (const line of lineRanges) {
         if (
             line.contentLength === 0 ||
             sourceText.substr(line.pos, line.contentLength).search(/\S/) === -1
@@ -101,7 +147,7 @@ function walk(ctx: Lint.WalkContext<number>) {
     if (possibleFailures.length === 0) {
         return;
     }
-    const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options);
+    const failureString = Rule.FAILURE_STRING_FACTORY(ctx.options.limit);
     const templateRanges = getTemplateRanges(ctx.sourceFile);
     for (const possibleFailure of possibleFailures) {
         if (

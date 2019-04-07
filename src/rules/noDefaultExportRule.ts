@@ -19,6 +19,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_PATTERN = "ignore-pattern";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -45,7 +47,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
         },
-        optionExamples: [true],
+        optionExamples: [
+            [true, { ignorePattern: "\\.vue$", message: "Skip check for file patterns" }],
+        ],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -61,8 +65,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 interface Options {
     ignorePattern: RegExp | undefined;
 }
-
-const OPTION_IGNORE_PATTERN = "ignore-pattern";
 
 function parseOptions(options: any[]): Options {
     let ignorePattern: RegExp | undefined;

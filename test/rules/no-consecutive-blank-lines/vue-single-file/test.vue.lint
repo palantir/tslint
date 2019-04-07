@@ -1,0 +1,15 @@
+
+
+
+
+
+
+import Vue from 'vue';
+
+export default class Clazz extends Vue { // comment
+
+
+
+~nil
+
+~nil [Exceeds the 2 allowed consecutive blank lines]
