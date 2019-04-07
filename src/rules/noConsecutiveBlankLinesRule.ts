@@ -39,8 +39,15 @@ export class Rule extends Lint.Rules.AbstractRule {
             consider splitting your file into smaller files.
         `,
         optionsDescription: Lint.Utils.dedent`
+            Two arguments may be optionally provided:
+            
             An optional number of maximum allowed sequential blanks can be specified. If no value
-            is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.`,
+            is provided, a default of ${Rule.DEFAULT_ALLOWED_BLANKS} will be used.
+            
+            An optional object can be provided with:
+
+                * \`"${OPTION_TRIM_LEFT_PATTERN}"\`  - regex of files patterns which blank lines at the start of the file will be ignored. This can be used to ignore blank lines in .vue templates.
+            `,
         options: {
             type: "list",
             listType: {
@@ -60,7 +67,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ],
             },
         },
-        optionExamples: [true, [true, 2], [true, 2, { "trim-left-pattern": "\\.vue$" }]],
+        optionExamples: [true, [true, 2], [true, 2, { [OPTION_TRIM_LEFT_PATTERN]: "\\.vue$" }]],
         type: "formatting",
         typescriptOnly: false,
     };
