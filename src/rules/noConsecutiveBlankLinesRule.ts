@@ -22,6 +22,11 @@ import * as Lint from "../index";
 
 const OPTION_TRIM_LEFT_PATTERN = "trim-left-pattern";
 
+interface Options {
+    limit: number;
+    trimLeftPattern: RegExp | undefined;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static DEFAULT_ALLOWED_BLANKS = 1;
 
@@ -83,39 +88,33 @@ export class Rule extends Lint.Rules.AbstractRule {
      * Disable the rule if the option is provided but non-numeric or less than the minimum.
      */
     public isEnabled(): boolean {
-        const option = this.ruleArguments[0] as number | undefined;
-        return super.isEnabled() && (option === undefined || option > 0);
+        const limit = this.getRuleOptions().limit;
+        return super.isEnabled() && (limit === undefined || limit > 0);
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions());
     }
-}
 
-
-interface Options {
-    limit: number;
-    trimLeftPattern: RegExp | undefined;
-}
-
-function parseOptions(options: any[]): Options {
-    let trimLeftPattern: RegExp | undefined;
-    let limitStart: number | undefined;
-    for (const o of options) {
-        if (typeof o === "object") {
-            // tslint:disable-next-line no-unsafe-any no-null-undefined-union
-            const ignore = o[OPTION_TRIM_LEFT_PATTERN] as string | null | undefined;
-            if (ignore != undefined) {
-                trimLeftPattern = new RegExp(ignore);
-                break;
+    private getRuleOptions(): Options {
+        let trimLeftPattern: RegExp | undefined;
+        let limitStart: number | undefined;
+        for (const o of this.ruleArguments) {
+            if (typeof o === "object") {
+                // tslint:disable-next-line no-unsafe-any no-null-undefined-union
+                const ignore = o[OPTION_TRIM_LEFT_PATTERN] as string | null | undefined;
+                if (ignore != undefined) {
+                    trimLeftPattern = new RegExp(ignore);
+                    break;
+                }
+            } else if (typeof o === "number") {
+                limitStart = o;
             }
-        } else if (typeof o === "number") {
-            limitStart = o;
         }
+        const limit: number =
+            limitStart !== undefined ? (limitStart as number) : Rule.DEFAULT_ALLOWED_BLANKS;
+        return { trimLeftPattern, limit };
     }
-    const limit: number =
-        limitStart !== undefined ? (limitStart as number) : Rule.DEFAULT_ALLOWED_BLANKS;
-    return { trimLeftPattern, limit };
 }
 
 function walk(ctx: Lint.WalkContext<Options>) {

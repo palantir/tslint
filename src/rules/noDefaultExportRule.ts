@@ -21,6 +21,10 @@ import * as Lint from "../index";
 
 const OPTION_IGNORE_PATTERN = "ignore-pattern";
 
+interface Options {
+    ignorePattern: RegExp | undefined;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -64,10 +68,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments));
     }
-}
-
-interface Options {
-    ignorePattern: RegExp | undefined;
 }
 
 function parseOptions(options: any[]): Options {
