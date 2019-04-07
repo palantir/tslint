@@ -98,7 +98,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private getRuleOptions(): Options {
         let trimLeftPattern: RegExp | undefined;
-        let limitStart: number | undefined;
+        let limitStart: any;
         for (const o of this.ruleArguments) {
             if (typeof o === "object") {
                 // tslint:disable-next-line no-unsafe-any no-null-undefined-union
@@ -124,7 +124,10 @@ function walk(ctx: Lint.WalkContext<Options>) {
     let consecutiveBlankLines = 0;
 
     const lineRanges = utils.getLineRanges(ctx.sourceFile);
-    if (ctx.options.trimLeftPattern && ctx.sourceFile.fileName.match(ctx.options.trimLeftPattern)) {
+    if (
+        ctx.options.trimLeftPattern !== undefined &&
+        ctx.sourceFile.fileName.match(ctx.options.trimLeftPattern) !== null
+    ) {
         const deleteCount = sourceText.search(/\w+/g);
         if (deleteCount > 0) {
             lineRanges.splice(0, deleteCount);

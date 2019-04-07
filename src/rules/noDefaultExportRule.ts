@@ -90,7 +90,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
     if (
         ctx.sourceFile.isDeclarationFile ||
         !ts.isExternalModule(ctx.sourceFile) ||
-        (ctx.options.ignorePattern && ctx.sourceFile.fileName.match(ctx.options.ignorePattern))
+        (ctx.options.ignorePattern !== undefined &&
+            ctx.sourceFile.fileName.match(ctx.options.ignorePattern) !== null)
     ) {
         return;
     }
