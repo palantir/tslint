@@ -107,7 +107,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     trimLeftPattern = new RegExp(ignore);
                     break;
                 }
-            } else if (typeof o === "number") {
+            } else {
                 limitStart = o;
             }
         }
