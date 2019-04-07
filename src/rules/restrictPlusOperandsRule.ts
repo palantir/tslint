@@ -37,7 +37,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static INVALID_TYPES_ERROR =
         "Operands of '+' operation must either be both strings or both numbers";
-    public static SUGGEST_TEMPLATE_LITERALS = ". Consider using template literals.";
+    public static SUGGEST_TEMPLATE_LITERALS = "; consider using template literals.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
