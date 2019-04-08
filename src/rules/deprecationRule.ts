@@ -32,7 +32,6 @@ import {
     isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
-
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -172,6 +171,7 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
     ) {
         return undefined;
     }
+
     return getSymbolDeprecation(symbol);
 }
 
@@ -185,10 +185,6 @@ function findDeprecationTag(tags: ts.JSDocTagInfo[]): string | undefined {
 }
 
 function getSymbolDeprecation(symbol: ts.Symbol): string | undefined {
-    if (symbol.getJsDocTags !== undefined) {
-        return findDeprecationTag(symbol.getJsDocTags());
-    }
-    // for compatibility with typescript@<2.3.0
     return getDeprecationFromDeclarations(symbol.declarations);
 }
 
@@ -210,23 +206,23 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
     if (declarations === undefined) {
         return undefined;
     }
-    let declaration: ts.Node;
-    for (declaration of declarations) {
-        if (isBindingElement(declaration)) {
-            declaration = getDeclarationOfBindingElement(declaration);
-        }
-        if (isVariableDeclaration(declaration)) {
-            declaration = declaration.parent;
-        }
-        if (isVariableDeclarationList(declaration)) {
-            declaration = declaration.parent;
-        }
-        const result = getDeprecationFromDeclaration(declaration);
-        if (result !== undefined) {
-            return result;
-        }
+
+    const deprecations = declarations
+        .map(declaration => getDeprecationFromDeclaration(getRootDeclaration(declaration)))
+        .filter(deprecation => deprecation !== undefined);
+    const allDeclarationsDeprecated = deprecations.length === declarations.length;
+    return allDeclarationsDeprecated ? deprecations.join(", ") : undefined;
+}
+
+function getRootDeclaration(declaration: ts.Node): ts.Node {
+    if (isBindingElement(declaration)) {
+        return getDeclarationOfBindingElement(declaration);
     }
-    return undefined;
+    if (isVariableDeclaration(declaration) || isVariableDeclarationList(declaration)) {
+        return getRootDeclaration(declaration.parent);
+    }
+
+    return declaration;
 }
 
 function getDeprecationFromDeclaration(declaration: ts.Node): string | undefined {
