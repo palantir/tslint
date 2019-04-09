@@ -211,7 +211,8 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
     const deprecations = declarations
         .map(declaration => getDeprecationFromDeclaration(getRootDeclaration(declaration)))
         .filter(deprecation => deprecation !== undefined);
-    const allDeclarationsDeprecated = deprecations.length === declarations.length;
+    const allDeclarationsDeprecated =
+        deprecations.length > 0 && deprecations.length === declarations.length;
     return allDeclarationsDeprecated ? deprecations.join(", ") : undefined;
 }
 
