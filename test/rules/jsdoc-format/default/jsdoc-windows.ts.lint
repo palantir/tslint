@@ -6,7 +6,7 @@
  * This file has all windows line endings "\r\n" and valid jsdoc.
  */
 class MyClass {
-   
+
 }
 
 /**
@@ -14,7 +14,6 @@ class MyClass {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
  to ensure that the error is shown in the right place
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [asterisks]
  *
 */
 ~~ [asterisks]

@@ -73,6 +73,11 @@ one  *
     /** First line of multiline jsdoc
      * should be empty.
      */
+
+    /**
+       missing asterisks
+~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+     */
 }
 
 // Regression test: jsdoc rule shouldn't look inside template strings (https://github.com/palantir/tslint/issues/332)
