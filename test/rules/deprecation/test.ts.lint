@@ -1,3 +1,7 @@
+// don't show an error on imports, because they don't do any harm if not used
+import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
+import * as namespaceImport from './other.test';
+import * as other2 from './other2.test';
 
 other;
 other();
@@ -169,6 +173,11 @@ let {f, g, h} = p;
 /** comment */
 let x = undefined;
 x = null;
+
+/** @deprecated */
+let y = undefined;
+x = y;
+    ~ [err % ('y')]
 
 [err]: %s is deprecated.
 [errmsg]: %s is deprecated: %s
