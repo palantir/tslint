@@ -12,6 +12,9 @@ class MyClass {
 /**
  *here comes some invalid jsdoc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+  *both jsdoc format and asterisk position are incorrect
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [asterisks]
  to ensure that the error is shown in the right place
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [format]
  *

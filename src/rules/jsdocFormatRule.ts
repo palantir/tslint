@@ -102,7 +102,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
             // followed by either a space or the end of the string
             if (!/^\s*\*(?: |$)/.test(line)) {
                 ctx.addFailureAt(lineStart, line.length, Rule.FORMAT_FAILURE_STRING);
-            } else if (line.indexOf("*") !== alignColumn) {
+            }
+            const asterisksIndex = line.indexOf("*");
+            if (asterisksIndex !== alignColumn && asterisksIndex !== -1) {
                 ctx.addFailureAt(lineStart, line.length, Rule.ALIGNMENT_FAILURE_STRING);
             }
             lineStart += lines[i].length + 1; // + 1 for the splitted-out newline
