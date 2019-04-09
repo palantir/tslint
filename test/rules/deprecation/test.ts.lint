@@ -1,7 +1,3 @@
-// don't show an error on imports, because they don't do any harm if not used
-import def, {other, other2 as foobar, notDeprecated, notDeprecated2} from './other.test';
-import * as namespaceImport from './other.test';
-import * as other2 from './other2.test';
 
 other;
 other();
@@ -169,6 +165,10 @@ let {f, g, h} = p;
                   ~ [errmsg % ('h', 'Use g instead.')]
 (function ({foo: {f, g}}: {foo: I}) {})
                   ~ [err % ('f')]
+
+/** comment */
+let x = undefined;
+x = null;
 
 [err]: %s is deprecated.
 [errmsg]: %s is deprecated: %s
