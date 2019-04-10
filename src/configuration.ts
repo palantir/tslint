@@ -429,7 +429,6 @@ export function getRulesDirectories(
  * @param ruleConfigValue The raw option setting of a rule
  */
 function parseRuleOptions(
-    // tslint:disable-next-line no-null-undefined-union
     ruleConfigValue: RawRuleConfig,
     rawDefaultRuleSeverity: string | undefined,
 ): Partial<IOptions> {
@@ -508,12 +507,11 @@ export interface RawConfigFile {
     jsRules?: RawRulesConfig | boolean;
 }
 export interface RawRulesConfig {
-    // tslint:disable-next-line no-null-undefined-union
     [key: string]: RawRuleConfig;
 }
 
-// tslint:disable-next-line no-null-undefined-union
 export type RawRuleConfig =
+    // tslint:disable-next-line no-null-undefined-union
     | null
     | undefined
     | boolean

@@ -9,7 +9,9 @@
 
 TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
-TSLint supports:
+:warning: __TSLint will be deprecated some time in 2019__. See this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534).
+
+TSLint currently supports:
 
 -   an extensive set of core rules
 -   custom lint rules
@@ -29,7 +31,7 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 -   [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
 -   [inline disabling and enabling of rules with comment flags](https://palantir.github.io/tslint/usage/rule-flags/)
 
-## Custom Rules & Plugins
+## Custom rules & plugins
 
 #### Custom rule sets from Palantir
 
@@ -57,7 +59,7 @@ Prerequisites:
 -   `node` v7+
 -   `yarn` v1.0+
 
-#### Quick Start
+#### Quick start
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
@@ -65,15 +67,3 @@ yarn
 yarn compile
 yarn test
 ```
-
-## Creating a new release
-
-1. Bump the version number in `package.json` and `src/linter.ts`
-2. Add release notes in `CHANGELOG.md`
-    - Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a [Github.com personal access token](https://github.com/settings/tokens) to exist at `~/github_token.txt` with "repo" permissions.
-3. Commit with message `Prepare release <version>`
-4. Push your branch to GitHub and make a PR
-5. Once your PR is merged, wait for the tests to pass on CircleCI for develop
-6. Create a "Release" on GitHub with the proper tag version and notes from the changelog.
-    - The tag should be identical to the version in `package.json`
-7. Run `yarn run publish:local`

@@ -11,6 +11,9 @@ interface IABC {
 interface IDBFactory {
 }
 
+interface II18nService {
+}
+
 // invalid code
 interface Options {
           ~~~~~~~   [interface name must start with a capitalized I]

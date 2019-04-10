@@ -15,16 +15,7 @@
  * limitations under the License.
  */
 
-import {
-    isParameterDeclaration,
-    isPropertyDeclaration,
-    isPropertySignature,
-    isSignatureDeclaration,
-    isTypeAliasDeclaration,
-    isTypeReference,
-    isUnionType,
-    isVariableDeclaration,
-} from "tsutils";
+import { isSignatureDeclaration, isTypeReference, isUnionType, isUnionTypeNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -33,11 +24,15 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-null-undefined-union",
-        description: "Disallows union types with both `null` and `undefined` as members.",
+        description: Lint.Utils.dedent`
+            Disallows explicitly declared or implicitly returned union types with both \`null\` and
+            \`undefined\` as members.
+        `,
         rationale: Lint.Utils.dedent`
             A union type that includes both \`null\` and \`undefined\` is either redundant or fragile.
             Enforcing the choice between the two allows the \`triple-equals\` rule to exist without
             exceptions, and is essentially a more flexible version of the \`no-null-keyword\` rule.
+            Optional parameters are not considered to have the type \`undefined\`.
         `,
         optionsDescription: "Not configurable.",
         options: null,
@@ -66,18 +61,10 @@ function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker): void {
 }
 
 function getType(node: ts.Node, tc: ts.TypeChecker): ts.Type | undefined {
-    // This is a comprehensive intersection between `HasType` and has property `name`.
-    // The node name kind must be identifier, or else this rule will throw errors while descending.
-    if (
-        (isVariableDeclaration(node) ||
-            isParameterDeclaration(node) ||
-            isPropertySignature(node) ||
-            isPropertyDeclaration(node) ||
-            isTypeAliasDeclaration(node)) &&
-        node.name.kind === ts.SyntaxKind.Identifier
-    ) {
+    if (isUnionTypeNode(node)) {
         return tc.getTypeAtLocation(node);
-    } else if (isSignatureDeclaration(node)) {
+    } else if (isSignatureDeclaration(node) && node.type === undefined) {
+        // Explicit types should be handled by the first case.
         const signature = tc.getSignatureFromDeclaration(node);
         return signature === undefined ? undefined : signature.getReturnType();
     } else {
