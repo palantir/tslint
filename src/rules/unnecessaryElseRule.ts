@@ -21,21 +21,23 @@ import * as Lint from "../index";
 
 import { codeExamples } from "./code-examples/unnecessaryElse.examples";
 
+const OPTION_ALLOW_ELSE_IF = "allow-else-if";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
         Disallows \`else\` blocks following \`if\` blocks ending with a \`break\`, \`continue\`, \`return\`, or \`throw\` statement.`,
         descriptionDetails: "",
-        optionExamples: [true, [true, { allowElseIf: true }]],
+        optionExamples: [true, [true, { [OPTION_ALLOW_ELSE_IF]: true }]],
         options: {
             type: "object",
             properties: {
-                allowElseIf: { type: "boolean" },
+                [OPTION_ALLOW_ELSE_IF]: { type: "boolean" },
             },
         },
         optionsDescription: Lint.Utils.dedent`
-            You can optionally specify the option \`"allowElseIf"\` to allow "else if" statements.
+            You can optionally specify the option \`"${OPTION_ALLOW_ELSE_IF}"\` to allow "else if" statements.
         `,
         rationale: Lint.Utils.dedent`
         When an \`if\` block is guaranteed to exit control flow when entered,
@@ -67,12 +69,12 @@ interface IJumpAndIfStatement {
 }
 
 interface Options {
-    allowElseIf: boolean;
+    [OPTION_ALLOW_ELSE_IF]: boolean;
 }
 
 function parseOptions(option: Partial<Options> | undefined): Options {
     return {
-        allowElseIf: false,
+        [OPTION_ALLOW_ELSE_IF]: false,
         ...option,
     };
 }
@@ -91,7 +93,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             jumpStatement !== undefined &&
             node.elseStatement !== undefined &&
             !recentStackParentMissingJumpStatement() &&
-            (!utils.isIfStatement(node.elseStatement) || !ctx.options.allowElseIf)
+            (!utils.isIfStatement(node.elseStatement) || !ctx.options[OPTION_ALLOW_ELSE_IF])
         ) {
             const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
             ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));
