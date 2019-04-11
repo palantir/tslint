@@ -24,7 +24,7 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "prose",
         description: "The default formatter which outputs simple human-readable messages.",
-        sample: "ERROR: myFile.ts:1:14 - Missing semicolon",
+        sample: "ERROR: myFile.ts[1, 14]: Missing semicolon",
         consumer: "human",
     };
     /* tslint:enable:object-literal-sort-keys */
