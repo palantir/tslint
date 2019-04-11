@@ -75,19 +75,17 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    return (
-        name.length >= 3 && name[0] === "I" && /^[A-Z]*$/.test(name[1]) && !/^[A-Z]*$/.test(name[2])
-    );
+    return name.length >= 3 && name[0] === "I" && /^[A-Z]*$/.test(name[1]);
 }
 
 function cantDecide(name: string): boolean {
     return (
         // Case ID
         (name.length === 2 && name[0] === "I" && /^[A-Z]*$/.test(name[1])) ||
-        // Case IDB
+        // Case IDB or ID42
         (name.length >= 2 &&
             name[0] === "I" &&
             /^[A-Z]*$/.test(name[1]) &&
-            /^[A-Z]*$/.test(name[2]))
+            !/^[a-z]*$/.test(name[2]))
     );
 }
