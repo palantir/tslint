@@ -17,6 +17,15 @@ interface IDBFactory {
 interface I18nFactory {
 }
 
+interface II18nFactory {
+}
+
+interface IS3Foobar {
+}
+
+interface IIS3Foobar {
+}
+
 interface ABC {
 }
 

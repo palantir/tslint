@@ -14,6 +14,12 @@ interface IDBFactory {
 interface II18nService {
 }
 
+interface IIS3Foobar {
+}
+
+interface IS3Foobar {
+}
+
 // invalid code
 interface Options {
           ~~~~~~~   [interface name must start with a capitalized I]
@@ -21,4 +27,8 @@ interface Options {
 
 interface Incomplete {
           ~~~~~~~~~~   [interface name must start with a capitalized I]
+}
+
+interface I18nService {
+          ~~~~~~~~~~~   [interface name must start with a capitalized I]
 }
