@@ -1,3 +1,4 @@
+[typescript]: <=3.4.x
 let s: string;
 let n: number;
 let o: Object;
