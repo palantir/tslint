@@ -52,7 +52,7 @@ jobs:
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
-            - run: ./node_modules/.bin/yarn-deduplicate --list
+            - run: ./scripts/verifyCleanLockfile.sh
 
     build:
         docker: *docker-node-lts
