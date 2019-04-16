@@ -30,8 +30,9 @@ export class Rule extends Lint.Rules.TypedRule {
         options: null,
         optionExamples: [true],
         rationale: Lint.Utils.dedent`
-            When function or constructor may be called with a type parameter but one isn't supplied or inferrable,
-            TypeScript sometimes defaults to \`{}\`.
+            Prior to TypeScript 3.4, generic type parameters for functions and constructors are inferred as
+            \`{}\` (the empty object type) by default when no type parameter is explicitly supplied or when
+            the compiler cannot infer a more specific type.
             This is often undesirable as the call is meant to be of a more specific type.
         `,
         type: "functionality",
