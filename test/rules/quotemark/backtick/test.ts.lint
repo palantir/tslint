@@ -2,34 +2,41 @@ import { Something } from "some-package"
 export { SomethingElse } from "another-package"
 
 var single = 'single';
-             ~~~~~~~~  [' should be `]
+             ~~~~~~~~  [single]
     var double = "married";
-                 ~~~~~~~~~ [" should be `]
+                 ~~~~~~~~~ [double]
 var singleWithinDouble = "'singleWithinDouble'";
-                         ~~~~~~~~~~~~~~~~~~~~~~ [" should be `]
+                         ~~~~~~~~~~~~~~~~~~~~~~ [double]
 var doubleWithinSingle = '"doubleWithinSingle"';
-                         ~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
+                         ~~~~~~~~~~~~~~~~~~~~~~  [single]
 var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
-                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [single]
+
 var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" | number> = [];
+var arrayThree: Array<"literal string" | "hello world"> = [];
+var arrayFour: Array<"literal string" | "hello world" | "foo bar"> = [];
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" & number> = [];
+var arrayFour: Array<"literal string" | "hello world" & "foo bar"> = [];
+
+function test<T extends "generic">() {
+
+}
+
+function test<T extends ("generic" & number)>() {
+
+}
+
+const callback = <U extends "generic">() => "hi" as number | string
+                                            ~~~~ [double]
+
 var hello: "world";
-           ~~~~~~~ [" should be `]
+           ~~~~~~~ [double]
 'escaped\'quotemark';
-~~~~~~~~~~~~~~~~~~~~ [' should be `]
+~~~~~~~~~~~~~~~~~~~~ [single]
 
 // "avoid-template" option is not set.
 `foo`;
-
-const object: {
-    "hello-kebab"
-    : number
-    "kebab-case": number
-    "another-kebab": "hello-value"
-                     ~~~~~~~~~~~~~ [" should be `]
-} = {
-    "hello-kebab"
-    : 4
-    "kebab-case": 3,
-    "another-kebab": "hello-value"
-                     ~~~~~~~~~~~~~ [" should be `]
-};
+[single]: ' should be `
+[double]: " should be `
