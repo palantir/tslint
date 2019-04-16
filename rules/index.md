@@ -36,4 +36,4 @@ _These rules enforce consistent style across your codebase_:
 
 _These rules enforce consistent use of whitespace and punctuation_:
 
-{% include rule_list.html ruleType="format" %}
+{% include rule_list.html ruleType="formatting" %}

@@ -5,8 +5,16 @@ description: |-
 descriptionDetails: ''
 optionExamples:
   - 'true'
-options: null
-optionsDescription: Not configurable.
+  - '[true, {"allow-else-if": true}]'
+options:
+  type: object
+  properties:
+    allow-else-if:
+      type: boolean
+optionsDescription: |-
+
+  You can optionally specify the option `"allow-else-if"` to allow "else if" statements.
+          
 rationale: |-
 
   When an `if` block is guaranteed to exit control flow when entered,
@@ -71,5 +79,13 @@ codeExamples:
       ```
 layout: rule
 title: 'Rule: unnecessary-else'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "allow-else-if": {
+        "type": "boolean"
+      }
+    }
+  }
 ---

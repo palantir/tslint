@@ -2184,7 +2184,7 @@
     "optionExamples": [
       true
     ],
-    "rationale": "\nWhen function or constructor may be called with a type parameter but one isn't supplied or inferrable,\nTypeScript defaults to `{}`.\nThis is often undesirable as the call is meant to be of a more specific type.\n        ",
+    "rationale": "\nPrior to TypeScript 3.4, generic type parameters for functions and constructors are inferred as\n`{}` (the empty object type) by default when no type parameter is explicitly supplied or when\nthe compiler cannot infer a more specific type.\nThis is often undesirable as the call is meant to be of a more specific type.\n        ",
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true
@@ -2372,8 +2372,8 @@
   },
   {
     "ruleName": "no-null-undefined-union",
-    "description": "Disallows union types with both `null` and `undefined` as members.",
-    "rationale": "\nA union type that includes both `null` and `undefined` is either redundant or fragile.\nEnforcing the choice between the two allows the `triple-equals` rule to exist without\nexceptions, and is essentially a more flexible version of the `no-null-keyword` rule.\n        ",
+    "description": "\nDisallows explicitly declared or implicitly returned union types with both `null` and\n`undefined` as members.\n        ",
+    "rationale": "\nA union type that includes both `null` and `undefined` is either redundant or fragile.\nEnforcing the choice between the two allows the `triple-equals` rule to exist without\nexceptions, and is essentially a more flexible version of the `no-null-keyword` rule.\nOptional parameters are not considered to have the type `undefined`.\n        ",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -2425,7 +2425,7 @@
   {
     "ruleName": "no-parameter-properties",
     "description": "Disallows parameter properties in class constructors.",
-    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.\n\nIt can be cleaner to keep member variable declarations in one list directly only the class\n(instead of mixed between direct class members and constructor parameter properties).\n        ",
+    "rationale": "\nParameter properties can be confusing to those new to TS as they are less explicit\nthan other ways of declaring and initializing class members.\n\nIt can be cleaner to keep member variable declarations in one list directly above the class constructor\n(instead of mixed between direct class members and constructor parameter properties).\n        ",
     "optionsDescription": "Not configurable.",
     "options": null,
     "optionExamples": [
@@ -3892,8 +3892,8 @@
       {
         "description": "Requires a `default` case in `switch` statements.",
         "config": "```json\n\"rules\": { \"switch-default\": true }\n```",
-        "pass": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n    default:\n        console.log('default');\n        break;\n}\n```",
-        "fail": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n}\n```"
+        "pass": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n        break;\n    default:\n        console.log('default');\n}\n```",
+        "fail": "```ts\nlet foo: number = 1;\nswitch (foo) {\n    case 1:\n        doSomething();\n        break;\n    case 2:\n        doSomething2();\n}\n```"
       }
     ]
   },
@@ -4405,10 +4405,23 @@
     "description": "\nDisallows `else` blocks following `if` blocks ending with a `break`, `continue`, `return`, or `throw` statement.",
     "descriptionDetails": "",
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "allow-else-if": true
+        }
+      ]
     ],
-    "options": null,
-    "optionsDescription": "Not configurable.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "allow-else-if": {
+          "type": "boolean"
+        }
+      }
+    },
+    "optionsDescription": "\nYou can optionally specify the option `\"allow-else-if\"` to allow \"else if\" statements.\n        ",
     "rationale": "\nWhen an `if` block is guaranteed to exit control flow when entered,\nit is unnecessary to add an `else` statement.\nThe contents that would be in the `else` block can be placed after the end of the `if` block.",
     "ruleName": "unnecessary-else",
     "type": "style",
