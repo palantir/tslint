@@ -51,8 +51,16 @@ function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
             const leftTypeStr = getBaseTypeOfLiteralType(leftType);
             const rightType = tc.getTypeAtLocation(node.right);
             const rightTypeStr = getBaseTypeOfLiteralType(rightType);
-            if (leftTypeStr === "invalid" || rightTypeStr === "invalid" || leftTypeStr !== rightTypeStr) {
-                const actualTypes = `, but found ${getTypeString(tc, node.left, leftType)} + ${getTypeString(tc, node.right, rightType)}`;
+            if (
+                leftTypeStr === "invalid" ||
+                rightTypeStr === "invalid" ||
+                leftTypeStr !== rightTypeStr
+            ) {
+                const actualTypes = `, but found ${getTypeString(
+                    tc,
+                    node.left,
+                    leftType,
+                )} + ${getTypeString(tc, node.right, rightType)}`;
                 let message = Rule.INVALID_TYPES_ERROR + actualTypes;
                 if (leftTypeStr === "string" || rightTypeStr === "string") {
                     message += Rule.SUGGEST_TEMPLATE_LITERALS;
@@ -66,7 +74,11 @@ function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
 
 function getTypeString(tc: ts.TypeChecker, node: ts.Node, type: ts.Type) {
     const typeString = tc.typeToString(type, node);
-    if (typeString === "undefined[]" && ts.isArrayLiteralExpression(node) && !node.elements.length) {
+    if (
+        typeString === "undefined[]" &&
+        ts.isArrayLiteralExpression(node) &&
+        node.elements.length === 0
+    ) {
         // Special case literal "[]" arrays that would otherwise be emitted as undefined[].
         return "[]";
     }
