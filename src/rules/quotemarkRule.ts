@@ -324,7 +324,7 @@ function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLi
 }
 
 function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
-    if (hasOldTscBacktickBehavior()) {
+    if (!hasOldTscBacktickBehavior()) {
         // This one only affects older typescript versions
         return false;
     }
