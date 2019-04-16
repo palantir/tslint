@@ -1,7 +1,0 @@
-machine:
-    ruby:
-        # see available versions here: https://circleci.com/docs/build-image-precise/#ruby
-        version: 2.3.7
-test:
-    override:
-        - bundle exec jekyll build
