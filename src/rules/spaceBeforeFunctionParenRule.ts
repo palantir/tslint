@@ -17,6 +17,7 @@
 
 import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const ALWAYS_OR_NEVER = {
@@ -146,8 +147,8 @@ function getOption(node: ts.Node, options: Options): Option | undefined {
             return hasName
                 ? options.named
                 : !hasTypeParameters(node)
-                    ? options.anonymous
-                    : undefined;
+                ? options.anonymous
+                : undefined;
         }
 
         case ts.SyntaxKind.MethodDeclaration:

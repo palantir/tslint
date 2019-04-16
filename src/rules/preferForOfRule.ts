@@ -17,6 +17,7 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { unwrapParentheses } from "../language/utils";
 
@@ -44,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     let variables: Map<ts.Identifier, utils.VariableInfo> | undefined;
 

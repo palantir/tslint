@@ -1,0 +1,126 @@
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+        var statement = '';
+
+        return statement;
+    }
+
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+
+    /* multi-line
+    comment */
+    return bar;
+}
+
+var fn = () => null;
+function foo() {
+    fn();
+
+    return;
+}
+
+function foo(fn) {
+    fn();
+
+    return;
+}
+
+function foo(fn) {
+    fn();
+
+    return;
+}
+
+function foo(fn) {
+    fn();
+
+    return;
+}
+
+function foo() {
+    return;
+}
+
+function foo() {
+
+    return;
+}
+
+function foo(bar) {
+    if (!bar) return;
+}
+
+function foo(bar) {
+    let someCall;
+    if (!bar) return;
+}
+
+function foo(bar) {
+    if (!bar) { return };
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+}
+
+function foo(bar) {
+    if (!bar) {
+        return;
+    }
+
+    return bar;
+}
+
+function foo(bar) {
+    if (!bar) {
+
+        return;
+    }
+}
+
+function foo() {
+
+    // comment
+    return;
+}
+
+function test() {
+    console.log("Any statement");
+    // Any comment
+
+    return;
+}
+
+function foo() {
+    fn();
+    // comment
+
+    // comment
+    return;
+}
+
+function bar() {
+    "some statement";
+
+    //comment
+    //comment
+    //comment
+    return;
+}
+

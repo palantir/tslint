@@ -32,6 +32,7 @@ import {
     isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -61,7 +62,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isIdentifier(node)) {
             if (!isDeclaration(node)) {

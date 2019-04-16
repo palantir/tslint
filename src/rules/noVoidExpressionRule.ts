@@ -17,6 +17,7 @@
 
 import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_IGNORE_ARROW_FUNCTION_SHORTHAND = "ignore-arrow-function-shorthand";
@@ -103,6 +104,10 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
             // Something like "x && console.log(x)".
             case ts.SyntaxKind.BinaryExpression:
                 return isParentAllowedVoid(node.parent);
+
+            // Something like "!!cond ? console.log(true) : console.log(false)"
+            case ts.SyntaxKind.ConditionalExpression:
+                return true;
             default:
                 return false;
         }

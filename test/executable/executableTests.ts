@@ -20,6 +20,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
+
 import { Logger } from "../../src/logger";
 import { Options, run, Status } from "../../src/runner";
 import { denormalizeWinPath } from "../../src/utils";

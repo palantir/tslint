@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "completed-docs": [true, {
+      "functions": {
+        "overloads": false,
+        "privacies": ["all"]
+      }
+    }]
+  }
+}

@@ -16,6 +16,7 @@
  */
 
 import { DocType } from "../completedDocsRule";
+
 import { IBlockExclusionDescriptor } from "./blockExclusion";
 import { IClassExclusionDescriptor } from "./classExclusion";
 import { ITagExclusionDescriptor } from "./tagExclusion";

@@ -33,14 +33,14 @@ export const rules = {
     "prefer-object-spread": true,
 
     // added in v5.4
-    "no-duplicate-variable": [true, "check-parameters"],
+    "no-duplicate-variable": { options: "check-parameters" },
 
     // added in v5.5
     "no-this-assignment": true,
 
     // added in v5.6
     "no-duplicate-imports": true,
-    "space-within-parens": [true, 0],
+    "space-within-parens": { options: 0 },
     "no-submodule-imports": true,
 
     // added in v5.7
@@ -59,9 +59,7 @@ export const rules = {
 
     // added in v5.8
     "ban-comma-operator": true,
-    "jsdoc-format": {
-        options: "check-multiline-start",
-    },
+    "jsdoc-format": { options: "check-multiline-start" },
     "no-duplicate-switch-case": true,
     "no-implicit-dependencies": true,
     "no-return-await": true,

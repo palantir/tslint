@@ -1,0 +1,12 @@
+class Foo {
+    emit(event: string, data: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for methods.]
+
+    emit(event: string, data: string): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for methods.]
+ 
+    /**
+     * Exists in one place
+     */
+    emit(event: string, data:any) { }
+}

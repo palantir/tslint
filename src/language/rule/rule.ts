@@ -96,7 +96,7 @@ export interface IRuleMetadata {
     codeExamples?: ICodeExample[];
 }
 
-export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
+export type RuleType = "functionality" | "maintainability" | "style" | "typescript" | "formatting";
 
 export type RuleSeverity = "warning" | "error" | "off";
 
@@ -166,7 +166,7 @@ export interface ReplacementJson {
 }
 export class Replacement {
     public static applyFixes(content: string, fixes: Fix[]): string {
-        return this.applyAll(content, flatMap(fixes, arrayify));
+        return Replacement.applyAll(content, flatMap(fixes, arrayify));
     }
 
     public static applyAll(content: string, replacements: Replacement[]) {
@@ -180,7 +180,7 @@ export class Replacement {
         text: string,
         sourceFile?: ts.SourceFile,
     ): Replacement {
-        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
+        return Replacement.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
     }
 
     public static replaceFromTo(start: number, end: number, text: string) {
@@ -262,18 +262,18 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private readonly fileName: string;
-    private readonly startPosition: RuleFailurePosition;
-    private readonly endPosition: RuleFailurePosition;
-    private readonly rawLines: string;
-    private ruleSeverity: RuleSeverity;
-
     public static compare(a: RuleFailure, b: RuleFailure): number {
         if (a.fileName !== b.fileName) {
             return a.fileName < b.fileName ? -1 : 1;
         }
         return a.startPosition.getPosition() - b.startPosition.getPosition();
     }
+
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
+    private ruleSeverity: RuleSeverity;
 
     constructor(
         private readonly sourceFile: ts.SourceFile,
@@ -338,8 +338,8 @@ export class RuleFailure {
                 this.fix === undefined
                     ? undefined
                     : Array.isArray(this.fix)
-                        ? this.fix.map(r => r.toJson())
-                        : this.fix.toJson(),
+                    ? this.fix.map(r => r.toJson())
+                    : this.fix.toJson(),
             name: this.fileName,
             ruleName: this.ruleName,
             ruleSeverity: this.ruleSeverity.toUpperCase(),

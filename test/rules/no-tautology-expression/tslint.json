@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-tautology-expression": true
+  }
+}

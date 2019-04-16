@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { hasCommentAfterPosition } from "../language/utils";
+
 import { codeExamples } from "./code-examples/arrowReturnShorthand.examples";
 
 const OPTION_MULTILINE = "multiline";

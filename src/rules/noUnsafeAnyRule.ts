@@ -24,6 +24,7 @@ import {
     isTypeNodeKind,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { isLowerCase } from "../utils";
 
@@ -64,7 +65,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
+class NoUnsafeAnyWalker extends Lint.AbstractWalker {
     constructor(
         sourceFile: ts.SourceFile,
         ruleName: string,

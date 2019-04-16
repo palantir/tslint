@@ -30,7 +30,7 @@ import {
     loadConfigurationFromPath,
 } from "./configuration";
 import { removeDisabledFailures } from "./enableDisableRules";
-import { FatalError, isError, showRuleCrashWarning } from "./error";
+import { FatalError, isError, showRuleCrashWarning, showWarningOnce } from "./error";
 import { findFormatter } from "./formatterLoader";
 import { ILinterOptions, LintResult } from "./index";
 import { IRule, isTypedRule, Replacement, RuleFailure, RuleSeverity } from "./language/rule/rule";
@@ -42,15 +42,12 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 export class Linter {
-    public static VERSION = "5.12.1";
+    public static VERSION = "5.15.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
     public static getRulesDirectories = getRulesDirectories;
     public static loadConfigurationFromPath = loadConfigurationFromPath;
-
-    private failures: RuleFailure[] = [];
-    private fixes: RuleFailure[] = [];
 
     /**
      * Creates a TypeScript program object from a tsconfig.json file path and optional project directory.
@@ -108,16 +105,18 @@ export class Linter {
      * `resolveJsonModule`.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return mapDefined(
-            program.getSourceFiles(),
-            file =>
-                file.fileName.endsWith(".d.ts") ||
-                file.fileName.endsWith(".json") ||
-                program.isSourceFileFromExternalLibrary(file)
-                    ? undefined
-                    : file.fileName,
+        return mapDefined(program.getSourceFiles(), file =>
+            file.fileName.endsWith(".d.ts") ||
+            file.fileName.endsWith(".json") ||
+            program.isSourceFileFromExternalLibrary(file)
+                ? undefined
+                : file.fileName,
         );
     }
+
+    private failures: RuleFailure[] = [];
+    private fixes: RuleFailure[] = [];
+    private readonly fileNames: string[] = [];
 
     constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
@@ -139,9 +138,15 @@ export class Linter {
         if (isFileExcluded(fileName, configuration)) {
             return;
         }
+        this.fileNames.push(fileName);
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
+        if (enabledRules.length === 0) {
+            showWarningOnce(
+                `Tried to lint ${fileName} but found no valid, enabled rules for this file type and file path in the resolved configuration.`,
+            );
+        }
 
         let fileFailures = this.getAllFailures(sourceFile, enabledRules);
         if (fileFailures.length === 0) {
@@ -186,7 +191,7 @@ export class Linter {
         }
         const formatter = new Formatter();
 
-        const output = formatter.format(failures, this.fixes);
+        const output = formatter.format(failures, this.fixes, this.fileNames);
 
         const errorCount = errors.length;
         return {

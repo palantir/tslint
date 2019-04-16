@@ -2,4 +2,3 @@ import { getOr } from 'lodash/fp'
 import { Request } from 'express'
 
 import { getStatusCode } from './errors'
-

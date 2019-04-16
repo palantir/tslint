@@ -18,7 +18,6 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
@@ -42,8 +41,10 @@ export class Formatter extends AbstractFormatter {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public format(failures: RuleFailure[]): string {
+    public format(failures: RuleFailure[], _fixes?: RuleFailure[], fileNames?: string[]): string {
         let output = '<?xml version="1.0" encoding="utf-8"?><testsuites package="tslint">';
+
+        const failureFileNames: Set<string> = new Set([...failures.map(f => f.getFileName())]);
 
         if (failures.length !== 0) {
             const failuresSorted = failures.sort((a, b) =>
@@ -74,6 +75,17 @@ export class Formatter extends AbstractFormatter {
             }
             if (previousFilename !== null) {
                 output += "</testsuite>";
+            }
+        }
+
+        if (fileNames !== undefined && fileNames.length !== 0) {
+            // Filter out files which have had a failure associated with them.
+            const filteredFileNames = fileNames.filter(fileName => !failureFileNames.has(fileName));
+
+            for (const fileName of filteredFileNames) {
+                output += `<testsuite name="${this.escapeXml(fileName)}" errors="0">`;
+                output += `<testcase name="${this.escapeXml(fileName)}" />`;
+                output += `</testsuite>`;
             }
         }
 

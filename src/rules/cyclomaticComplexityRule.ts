@@ -17,6 +17,7 @@
 
 import { isIdentifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { isFunctionScopeBoundary } from "../utils";
 

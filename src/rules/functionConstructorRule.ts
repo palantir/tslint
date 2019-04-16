@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isNewExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "..";
+
 import { codeExamples } from "./code-examples/functionConstructor.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -48,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(context: Lint.WalkContext<void>): void {
+function walk(context: Lint.WalkContext): void {
     ts.forEachChild(context.sourceFile, function cb(node): void {
         if (isFunctionCallOrNewExpression(node)) {
             addFailureAtNode(node);
