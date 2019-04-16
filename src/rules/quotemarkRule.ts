@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { lt } from "semver";
 import {
     isExportDeclaration,
     isImportDeclaration,
@@ -24,6 +26,7 @@ import {
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { getNormalizedTypescriptVersion } from "../verify/parse";
 
 const OPTION_SINGLE = "single";
 const OPTION_DOUBLE = "double";
@@ -285,7 +288,7 @@ function isTypeConstraint(node: ts.StringLiteral | ts.NoSubstitutionTemplateLite
 function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
     let parent = node.parent;
 
-    if (ts.version < "2.7.1" && node.parent.kind === ts.SyntaxKind.LastTypeNode) {
+    if (hasOldTscBacktickBehavior() && node.parent.kind === ts.SyntaxKind.LastTypeNode) {
         // In older versions, there's a "LastTypeNode" here
         parent = parent.parent;
     }
@@ -313,16 +316,16 @@ function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLi
     }
 
     return (
-        // In typescript below 2.7.1, don't change values either
-        ts.version < "2.7.1" ||
+        // In old typescript versions, don't change values either
+        hasOldTscBacktickBehavior() ||
         // If this node is not at the end of the parent
         node.end !== node.parent.end
     );
 }
 
 function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
-    if (ts.version >= "2.7.1") {
-        // This one only affects older typescript versions (below 2.7.1)
+    if (hasOldTscBacktickBehavior()) {
+        // This one only affects older typescript versions
         return false;
     }
 
@@ -333,4 +336,8 @@ function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplat
 
     // If this node has a sibling that is a TypeOf
     return node.parent.getChildren().some(n => n.kind === ts.SyntaxKind.TypeOfExpression);
+}
+
+function hasOldTscBacktickBehavior() {
+    return lt(getNormalizedTypescriptVersion(), "2.7.1");
 }
