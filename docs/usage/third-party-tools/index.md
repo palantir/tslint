@@ -12,7 +12,7 @@ _Note: Most of these tools are not maintained by TSLint._
 * [gulp-tslint][2] ([Gulp][3])
 * [eclipse-tslint][4] ([Eclipse][5])
 * [linter-tslint][6] ([Atom][7])
-* [vscode-tslint][8] ([Visual Studio Code][9])
+* [vscode-typescript-tslint-plugin][8] ([Visual Studio Code][9])
 * [syntastic][10] ([VIM][11])
 * [Web Analyzer][12] ([Visual Studio][13])
 * [Webstorm][14]
@@ -32,7 +32,7 @@ _Note: Most of these tools are not maintained by TSLint._
 [5]: http://www.eclipse.org/
 [6]: https://github.com/AtomLinter/linter-tslint
 [7]: https://atom.io/
-[8]: https://github.com/Microsoft/vscode-tslint/tree/master/tslint
+[8]: https://github.com/Microsoft/vscode-typescript-tslint-plugin
 [9]: https://code.visualstudio.com/
 [10]: https://github.com/scrooloose/syntastic
 [11]: http://www.vim.org/
