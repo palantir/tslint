@@ -23,17 +23,17 @@
 
 // tslint:disable:no-console
 
-import GitHubApi = require("github");
+import * as Octokit from "@octokit/rest";
 import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 
 import { camelize } from "../lib/utils";
 
-const github = new GitHubApi({
+const octokit = new Octokit({
     host: "api.github.com",
     protocol: "https",
-    timeout: 5000,
+    request: {
+        timeout: 5000
+    }
 });
 
 const repoInfo = {
@@ -41,37 +41,22 @@ const repoInfo = {
     repo: "tslint",
 };
 
-const tokenFile = path.join(os.homedir(), "github_token.txt");
-
-// authenticate
-const auth: GitHubApi.Auth = {
-    token: fs
-        .readFileSync(tokenFile, "utf8")
-        .toString()
-        .trim(),
-    type: "oauth",
-};
-console.log("Using OAuth token " + auth.token + "\n");
-
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // ignores TLS certificate error
-github.authenticate(auth);
-
-const commits: ICommit[] = [];
-github.repos
+const commitList: ICommit[] = [];
+octokit.repos
     .getLatestRelease(repoInfo)
-    .then(value => {
-        console.log("Getting commits " + value.tag_name + "..master");
+    .then(({ data: { tag_name } }) => {
+        console.log("Getting commits " + tag_name + "..master");
         // get the commits between the most recent release and the head of master
-        return github.repos.compareCommits({
-            base: value.tag_name,
+        return octokit.repos.compareCommits({
+            base: tag_name,
             head: "master",
             ...repoInfo,
         });
     })
-    .then(value => {
+    .then(({ data: { commits } }) => {
         // for each commit, get the PR, and extract changelog entries
         const promises: Array<Promise<any>> = [];
-        for (const commitInfo of value.commits) {
+        for (const commitInfo of commits) {
             const commit: ICommit = {
                 fields: [],
                 sha: commitInfo.sha,
@@ -81,7 +66,7 @@ github.repos
                         : commitInfo.author.login,
                 title: commitInfo.commit.message,
             };
-            commits.push(commit);
+            commitList.push(commit);
 
             // check for a pull request number in the commit title
             const match = (commitInfo.commit.message as string).match(/\(#(\d+)\)/);
@@ -90,14 +75,14 @@ github.repos
 
                 // get the PR text
                 promises.push(
-                    github.issues
+                    octokit.issues
                         .get({
-                            number: commit.pushRequestNum,
+                            issue_number: commit.pushRequestNum,
                             ...repoInfo,
                         })
-                        .then(comment => {
+                        .then(({ data: { body } }) => {
                             // extract the changelog entries
-                            const lines = (comment.body as string).split("\r\n");
+                            const lines = body.split("\r\n");
                             for (const line of lines) {
                                 const fieldMatch = line.match(/^(\[[a-z\-]+\])/);
                                 if (fieldMatch) {
@@ -117,7 +102,7 @@ github.repos
         const entries: IField[] = [];
         const noFields: string[] = [];
         const contributors = new Set<string>();
-        for (const commit of commits) {
+        for (const commit of commitList) {
             if (commit.fields.length > 0) {
                 for (const field of commit.fields) {
                     if (field.tag !== "[no-log]") {

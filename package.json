@@ -47,6 +47,7 @@
         "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev"
     },
     "devDependencies": {
+        "@octokit/rest": "^16.24.3",
         "@types/babel__code-frame": "^7.0.1",
         "@types/chai": "^3.5.0",
         "@types/diff": "^3.2.0",
@@ -60,7 +61,6 @@
         "@types/rimraf": "^2.0.2",
         "@types/semver": "^5.3.30",
         "chai": "^3.5.0",
-        "github": "^8.2.1",
         "husky": "^0.14.3",
         "json-stringify-pretty-compact": "^1.2.0",
         "mocha": "^6.1.3",
