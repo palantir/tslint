@@ -86,11 +86,12 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         if (
             isAssertionExpression(node) &&
             node.type.kind !== ts.SyntaxKind.AnyKeyword &&
-            // If using TS >=3.4, allow const assertions
+            // Allow const assertions, introduced in TS 3.4
             !(
                 node.type.kind === ts.SyntaxKind.TypeReference &&
-                ts.isConstTypeReference !== undefined &&
-                ts.isConstTypeReference(node.type)
+                (ts.isConstTypeReference !== undefined
+                    ? ts.isConstTypeReference(node.type)
+                    : node.type.getText(ctx.sourceFile) === "const")
             ) &&
             // Compare with UnknownKeyword if using TS 3.0 or above
             (!!(ts.SyntaxKind as any).UnknownKeyword
