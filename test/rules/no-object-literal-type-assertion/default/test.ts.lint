@@ -16,6 +16,10 @@ x as T;
 {} as unknown;
 <unknown> {};
 
+// Allow const assertion
+({}) as const;
+<const> ({});
+
 foo({} as T);
     ~~~~~~~ [0]
 
