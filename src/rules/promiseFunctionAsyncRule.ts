@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier, isCallExpression } from "tsutils";
+import { hasAccessModifier, hasModifier, isCallExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -120,7 +120,18 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
                         !isCallExpression(declaration.body as ts.Expression)
                     ) {
                         const start = node.getStart(sourceFile);
-                        const fix = Lint.Replacement.appendText(start, "async ");
+                        let fixPos = start;
+
+                        if (hasAccessModifier(node as ts.ClassElement)) {
+                            // "public async ..." instead of "async public ..."
+                            const name = (node as ts.FunctionLikeDeclaration).name;
+
+                            if (name) {
+                                fixPos = name.pos + 1;
+                            }
+                        }
+
+                        const fix = Lint.Replacement.appendText(fixPos, "async ");
                         ctx.addFailure(
                             start,
                             (node as ts.FunctionLikeDeclaration).body!.pos,
