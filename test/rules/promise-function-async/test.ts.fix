@@ -1,0 +1,61 @@
+declare class Promise<T>{}
+
+const nonAsyncPromiseFunctionExpressionA = async function(p: Promise<void>) { return p; };
+
+const nonAsyncPromiseFunctionExpressionB = async function() { return new Promise<void>(); };
+
+// 'async' 'Promise'-returning function expressions are allowed
+const asyncPromiseFunctionExpressionA = async function(p: Promise<void>) { return p; };
+const asyncPromiseFunctionExpressionB = async function() { return new Promise<void>(); };
+
+// non-'async' non-'Promise'-returning function expressions are allowed
+const nonAsyncNonPromiseFunctionExpression = function(n: number) { return n; };
+
+async function nonAsyncPromiseFunctionDeclarationA(p: Promise<void>) { return p; }
+
+async function nonAsyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
+
+// 'async' 'Promise'-returning function declarations are allowed
+async function asyncPromiseFunctionDeclarationA(p: Promise<void>) { return p; }
+async function asyncPromiseFunctionDeclarationB() { return new Promise<void>(); }
+
+// non-'async' non-'Promise'-returning function declarations are allowed
+function nonAsyncNonPromiseFunctionDeclaration(n: number) { return n; }
+
+const nonAsyncPromiseArrowFunctionA = async (p: Promise<void>) => p;
+
+const nonAsyncPromiseArrowFunctionB = async () => new Promise<void>();
+
+// 'async' 'Promise'-returning arrow functions are allowed
+const asyncPromiseArrowFunctionA = async (p: Promise<void>) => p;
+const asyncPromiseArrowFunctionB = async () => new Promise<void>();
+
+// non-'async' non-'Promise'-returning arrow functions are allowed
+const nonAsyncNonPromiseArrowFunction = (n: number) => n;
+
+class Test {
+    public async nonAsyncPromiseMethodA(p: Promise<void>) {
+        return p;
+    }
+
+    public async nonAsyncPromiseMethodB() {
+        return new Promise<void>();
+    }
+
+    // 'async' 'Promise'-returning methods are allowed
+    public async asyncPromiseMethodA(p: Promise<void>) {
+        return p;
+    }
+    public async asyncPromiseMethodB() {
+        return new Promise<void>();
+    }
+
+    // non-'async' non-'Promise'-returning methods are allowed
+    public nonAsyncNonPromiseMethod(n: number) {
+        return n;
+    }
+
+    // single statement lamda functions that delegate to another promise-returning function are allowed
+    public delegatingMethod = () => this.asyncPromiseMethodB(1);
+}
+
