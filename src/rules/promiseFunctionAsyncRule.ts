@@ -126,7 +126,7 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
                             // "public async ..." instead of "async public ..."
                             const name = (node as ts.FunctionLikeDeclaration).name;
 
-                            if (name) {
+                            if (name !== undefined) {
                                 fixPos = name.pos + 1;
                             }
                         }
