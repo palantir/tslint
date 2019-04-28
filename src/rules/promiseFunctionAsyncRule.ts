@@ -51,6 +51,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "promise-function-async",
         description: "Requires any function or method that returns a promise to be marked async.",
+        hasFix: true,
         rationale: Lint.Utils.dedent`
             Ensures that each function is only capable of 1) returning a rejected promise, or 2)
             throwing an Error object. In contrast, non-\`async\` \`Promise\`-returning functions
@@ -118,10 +119,13 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
                         returnsPromise(declaration, tc) &&
                         !isCallExpression(declaration.body as ts.Expression)
                     ) {
+                        const start = node.getStart(sourceFile);
+                        const fix = Lint.Replacement.appendText(start, "async ");
                         ctx.addFailure(
-                            node.getStart(sourceFile),
+                            start,
                             (node as ts.FunctionLikeDeclaration).body!.pos,
                             Rule.FAILURE_STRING,
+                            fix,
                         );
                     }
             }
