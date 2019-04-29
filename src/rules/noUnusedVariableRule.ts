@@ -38,7 +38,7 @@ export class Rule extends Lint.Rules.TypedRule {
             and private class members, when using TSLint's \`--fix\` option.`,
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
-            Three optional arguments may be optionally provided:
+            Two optional arguments may be optionally provided:
 
             * \`"check-parameters"\` disallows unused function and constructor parameters.
                 * NOTE: this option is experimental and does not work with classes
@@ -63,7 +63,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 ],
             },
             minLength: 0,
-            maxLength: 3,
+            maxLength: 2,
         },
         optionExamples: [true, [true, { "ignore-pattern": "^_" }]],
         rationale: Lint.Utils.dedent`
