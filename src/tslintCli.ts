@@ -187,7 +187,7 @@ const options: Option[] = [
         short: "q",
         name: "quiet",
         type: "boolean",
-        describe: "hide errors on lint",
+        describe: "hide warnings on lint",
         description: "If true, hides warnings from linting output.",
     },
     {
