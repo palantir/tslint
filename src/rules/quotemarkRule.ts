@@ -259,7 +259,7 @@ function isNotValidToUseBackticksInNode(node: StringLiteralLike, sourceFile: ts.
         isEnumMember(node.parent) ||
         // Typescript converts old octal escape sequences to just the numbers therein
         containsOctalEscapeSequence(node, sourceFile) ||
-        // Typescript converts old octal escape sequences to just the numbers therein
+        // Use strict declarations have to be single or double quoted
         isUseStrictDeclaration(node) ||
         // Lookup type parameters must be single/double quoted
         isLookupTypeParameter(node)
