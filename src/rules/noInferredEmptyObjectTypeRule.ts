@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.TypedRule {
         options: null,
         optionExamples: [true],
         rationale: Lint.Utils.dedent`
-            Prior to TypeScript 3.4, generic type parameters for functions and constructors are inferred as
+            Prior to TypeScript 3.5, generic type parameters for functions and constructors are inferred as
             \`{}\` (the empty object type) by default when no type parameter is explicitly supplied or when
             the compiler cannot infer a more specific type.
             This is often undesirable as the call is meant to be of a more specific type.
