@@ -79,6 +79,7 @@ function walk(ctx: Lint.WalkContext): void {
                 break;
 
             case ts.SyntaxKind.JSDocClassTag:
+            case ts.SyntaxKind.JSDocThisTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
             case ts.SyntaxKind.JSDocPropertyTag:
