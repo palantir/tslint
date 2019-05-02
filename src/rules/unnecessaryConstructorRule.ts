@@ -19,6 +19,7 @@ import { isConstructorDeclaration, isParameterProperty } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { Replacement } from "../language/rule/rule";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -63,7 +64,16 @@ function walk(context: Lint.WalkContext) {
             !containsConstructorParameter(node) &&
             !isAccessRestrictingConstructor(node)
         ) {
-            context.addFailureAtNode(node, Rule.FAILURE_STRING);
+            const replacements = [];
+            // Since only one constructor implementation is allowed and the one found above is empty, all other overloads can be safely removed.
+            for (const maybeConstructor of node.parent.members) {
+                if (isConstructorDeclaration(maybeConstructor)) {
+                    replacements.push(
+                        Replacement.deleteFromTo(maybeConstructor.pos, maybeConstructor.end),
+                    );
+                }
+            }
+            context.addFailureAtNode(node, Rule.FAILURE_STRING, replacements);
         } else {
             ts.forEachChild(node, callback);
         }
