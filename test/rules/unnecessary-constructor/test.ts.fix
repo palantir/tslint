@@ -63,3 +63,7 @@ interface IConstructorSignature {
     new(): {};
 }
 
+class DecoratedParameters {
+    constructor(@Optional x: number) {}
+}
+

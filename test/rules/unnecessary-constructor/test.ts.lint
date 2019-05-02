@@ -79,4 +79,8 @@ interface IConstructorSignature {
     new(): {};
 }
 
+class DecoratedParameters {
+    constructor(@Optional x: number) {}
+}
+
 [0]: Remove unnecessary empty constructor.

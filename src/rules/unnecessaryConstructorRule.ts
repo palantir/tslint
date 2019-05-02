@@ -56,12 +56,16 @@ const isAccessRestrictingConstructor = (node: ts.ConstructorDeclaration): boolea
     // If this has any modifier that isn't public, it's doing something
     node.modifiers.some(modifier => modifier.kind !== ts.SyntaxKind.PublicKeyword);
 
+const containsDecorator = (node: ts.ConstructorDeclaration): boolean =>
+    node.parameters.some(p => p.decorators !== undefined);
+
 function walk(context: Lint.WalkContext) {
     const callback = (node: ts.Node): void => {
         if (
             isConstructorDeclaration(node) &&
             isEmptyConstructor(node) &&
             !containsConstructorParameter(node) &&
+            !containsDecorator(node) &&
             !isAccessRestrictingConstructor(node)
         ) {
             const replacements = [];
