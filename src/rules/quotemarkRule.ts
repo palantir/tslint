@@ -356,7 +356,22 @@ function isTypeCheckWithOldTsc(node: StringLiteralLike) {
 
 function containsOctalEscapeSequence(node: StringLiteralLike, sourceFile: ts.SourceFile) {
     // Octal sequences can go from 1-377 (255 in octal), but let's match the prefix, which will at least be \1-\77
-    return /\\[1-7][0-7]?/.test(node.getText(sourceFile));
+    // Using node.getText here strips the backslashes from the string. We also need to make sure there isn't an even
+    // number of backslashes (then it would not be an escape sequence, but a literal backslash followed by numbers).
+    const matches = node.getText(sourceFile).match(/(\\)+[1-7][0-7]?/g);
+
+    if (matches != undefined) {
+        for (const match of matches) {
+            const numBackslashes = match.match(/\\/g)!.length;
+
+            if (numBackslashes % 2 === 1) {
+                // There was an odd number of backslashes preceeding this node – it's an octal escape sequence
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 function isUseStrictDeclaration(node: StringLiteralLike) {

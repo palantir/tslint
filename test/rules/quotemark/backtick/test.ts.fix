@@ -15,11 +15,13 @@ const octalEscapeSequence4 = '\377'
 const octalEscapeSequence5 = '\123'
 // Prefix (\47) is an octal escape sequence
 const octalEscapeSequence6 = '\477'
+const octalEscapeSequence7 = '\\77 \77 \\37 \\77'
 
 const notOctalEscapeSequence = `\877`
 const notOctalEscapeSequence2 = `\017`
 const notOctalEscapeSequence3 = `\t`
 const notOctalEscapeSequence4 = `\0`
+const notOctalEscapeSequence4 = `\\77 \\37 \\\\47 \\\\\\77`
 
 function strictFunction() {
     "use strict"

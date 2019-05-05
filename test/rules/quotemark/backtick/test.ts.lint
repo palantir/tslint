@@ -15,6 +15,7 @@ const octalEscapeSequence4 = '\377'
 const octalEscapeSequence5 = '\123'
 // Prefix (\47) is an octal escape sequence
 const octalEscapeSequence6 = '\477'
+const octalEscapeSequence7 = '\\77 \77 \\37 \\77'
 
 const notOctalEscapeSequence = '\877'
                                ~~~~~~ [single]
@@ -24,6 +25,8 @@ const notOctalEscapeSequence3 = '\t'
                                 ~~~~ [single]
 const notOctalEscapeSequence4 = '\0'
                                 ~~~~ [single]
+const notOctalEscapeSequence4 = '\\77 \\37 \\\\47 \\\\\\77'
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [single]
 
 function strictFunction() {
     "use strict"
