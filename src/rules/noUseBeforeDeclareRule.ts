@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as semver from "semver";
 import { isBindingElement } from "tsutils";
 import * as ts from "typescript";
 
@@ -42,6 +43,9 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: false,
         requiresTypeInfo: true,
         codeExamples,
+        deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
+            ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
+            : undefined,
     };
     /* tslint:enable:object-literal-sort-keys */
 
