@@ -16,9 +16,11 @@ x as T;
 {} as unknown;
 <unknown> {};
 
+#if typescript >= 3.4.0
 // Allow const assertion
 ({}) as const;
 <const> ({});
+#endif
 
 foo({} as T);
     ~~~~~~~ [0]

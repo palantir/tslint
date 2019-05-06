@@ -48,7 +48,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             The type assertion in the latter case is either unnecessary or hides an error.
             The compiler will warn for excess properties with this syntax, but not missing required fields.
             For example: \`const x: { foo: number } = {}\` will fail to compile, but
-            \`const x = {} as { foo: number }\` will succeed.`,
+            \`const x = {} as { foo: number }\` will succeed.
+            Additionally, the const assertion \`const x = { foo: 1 } as const\`,
+            introduced in TypeScript 3.4, is considered beneficial and is ignored by this rule.`,
         optionsDescription: Lint.Utils.dedent`
             One option may be configured:
 
@@ -87,12 +89,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
             isAssertionExpression(node) &&
             node.type.kind !== ts.SyntaxKind.AnyKeyword &&
             // Allow const assertions, introduced in TS 3.4
-            !(
-                node.type.kind === ts.SyntaxKind.TypeReference &&
-                (ts.isConstTypeReference !== undefined
-                    ? ts.isConstTypeReference(node.type)
-                    : node.type.getText(ctx.sourceFile) === "const")
-            ) &&
+            !(ts.isConstTypeReference !== undefined && ts.isConstTypeReference(node.type)) &&
             // Compare with UnknownKeyword if using TS 3.0 or above
             (!!(ts.SyntaxKind as any).UnknownKeyword
                 ? node.type.kind !== (ts.SyntaxKind as any).UnknownKeyword
