@@ -17,8 +17,12 @@
 
 import { lt } from "semver";
 import {
+    isEnumMember,
     isExportDeclaration,
+    isExpressionStatement,
     isImportDeclaration,
+    isIndexedAccessTypeNode,
+    isLiteralTypeNode,
     isNoSubstitutionTemplateLiteral,
     isSameLine,
     isStringLiteral,
@@ -38,6 +42,7 @@ const OPTION_AVOID_ESCAPE = "avoid-escape";
 
 type QUOTEMARK = "'" | '"' | "`";
 type JSX_QUOTEMARK = "'" | '"';
+type StringLiteralLike = ts.StringLiteral | ts.NoSubstitutionTemplateLiteral;
 
 interface Options {
     quotemark: QUOTEMARK;
@@ -131,21 +136,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
             const actualQuotemark = sourceFile.text[node.end - 1];
 
             // Don't use backticks instead of single/double quotes when it breaks TypeScript syntax.
-            if (
-                expectedQuotemark === "`" &&
-                // This captures `export blah from "package"`
-                (isExportDeclaration(node.parent) ||
-                    // This captures `import blah from "package"`
-                    isImportDeclaration(node.parent) ||
-                    // This captures quoted names in object literal keys
-                    isNameInAssignment(node) ||
-                    // This captures quoted signatures (property or method)
-                    isSignature(node) ||
-                    // This captures literal types in generic type constraints
-                    isTypeConstraint(node) ||
-                    // Whether this is the type in a typeof check with older tsc
-                    isTypeCheckWithOldTsc(node))
-            ) {
+            if (expectedQuotemark === "`" && isNotValidToUseBackticksInNode(node, sourceFile)) {
                 return;
             }
 
@@ -250,12 +241,37 @@ function getJSXQuotemarkPreference(
     return regularQuotemarkPreference !== "`" ? regularQuotemarkPreference : '"';
 }
 
+function isNotValidToUseBackticksInNode(node: StringLiteralLike, sourceFile: ts.SourceFile) {
+    return (
+        // This captures `export blah from "package"`
+        isExportDeclaration(node.parent) ||
+        // This captures `import blah from "package"`
+        isImportDeclaration(node.parent) ||
+        // This captures quoted names in object literal keys
+        isNameInAssignment(node) ||
+        // This captures quoted signatures (property or method)
+        isSignature(node) ||
+        // This captures literal types in generic type constraints
+        isTypeConstraint(node) ||
+        // Older TS doesn't narrow a type when backticks are used to compare typeof
+        isTypeCheckWithOldTsc(node) ||
+        // Enum members can't use backticks
+        isEnumMember(node.parent) ||
+        // Typescript converts old octal escape sequences to just the numbers therein
+        containsOctalEscapeSequence(node, sourceFile) ||
+        // Use strict declarations have to be single or double quoted
+        isUseStrictDeclaration(node) ||
+        // Lookup type parameters must be single/double quoted
+        isLookupTypeParameter(node)
+    );
+}
+
 /**
  * Whether this node is a type constraint in a generic type.
  * @param  node The node to check
  * @return Whether this node is a type constraint
  */
-function isTypeConstraint(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+function isTypeConstraint(node: StringLiteralLike) {
     let parent = node.parent.parent;
 
     // If this node doesn't have a grandparent, it's not a type constraint
@@ -285,7 +301,7 @@ function isTypeConstraint(node: ts.StringLiteral | ts.NoSubstitutionTemplateLite
  * @param  node The node to check
  * @return Whether this node is a property/method signature.
  */
-function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+function isSignature(node: StringLiteralLike) {
     let parent = node.parent;
 
     if (hasOldTscBacktickBehavior() && node.parent.kind === ts.SyntaxKind.LastTypeNode) {
@@ -306,7 +322,7 @@ function isSignature(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) 
  * @param  node The node to check
  * @return Whether this node is the name in an assignment/decleration.
  */
-function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+function isNameInAssignment(node: StringLiteralLike) {
     if (
         node.parent.kind !== ts.SyntaxKind.PropertyAssignment &&
         node.parent.kind !== ts.SyntaxKind.MethodDeclaration
@@ -323,7 +339,7 @@ function isNameInAssignment(node: ts.StringLiteral | ts.NoSubstitutionTemplateLi
     );
 }
 
-function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplateLiteral) {
+function isTypeCheckWithOldTsc(node: StringLiteralLike) {
     if (!hasOldTscBacktickBehavior()) {
         // This one only affects older typescript versions
         return false;
@@ -338,6 +354,35 @@ function isTypeCheckWithOldTsc(node: ts.StringLiteral | ts.NoSubstitutionTemplat
     return node.parent.getChildren().some(n => n.kind === ts.SyntaxKind.TypeOfExpression);
 }
 
+function containsOctalEscapeSequence(node: StringLiteralLike, sourceFile: ts.SourceFile) {
+    // Octal sequences can go from 1-377 (255 in octal), but let's match the prefix, which will at least be \1-\77
+    // Using node.getText here strips the backslashes from the string. We also need to make sure there isn't an even
+    // number of backslashes (then it would not be an escape sequence, but a literal backslash followed by numbers).
+    const matches = node.getText(sourceFile).match(/(\\)+[1-7][0-7]?/g);
+
+    if (matches != undefined) {
+        for (const match of matches) {
+            const numBackslashes = match.match(/\\/g)!.length;
+
+            if (numBackslashes % 2 === 1) {
+                // There was an odd number of backslashes preceeding this node – it's an octal escape sequence
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+function isUseStrictDeclaration(node: StringLiteralLike) {
+    return node.text === "use strict" && isExpressionStatement(node.parent);
+}
+
+function isLookupTypeParameter(node: StringLiteralLike) {
+    return isLiteralTypeNode(node.parent) && isIndexedAccessTypeNode(node.parent.parent);
+}
+
+/** Versions of typescript below 2.7.1 treat backticks differently */
 function hasOldTscBacktickBehavior() {
     return lt(getNormalizedTypescriptVersion(), "2.7.1");
 }
