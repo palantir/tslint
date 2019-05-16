@@ -73,7 +73,7 @@ export interface IRuleMetadata {
      * Examples of what a standard config for the rule might look like.
      * Using a string[] here is deprecated. Write the options as a JSON object instead.
      */
-    optionExamples?: Array<true | any[]> | string[];
+    optionExamples?: Array<true | any[]> | string[] | Array<{ options: any }>;
 
     /**
      * An explanation of why the rule is useful.
