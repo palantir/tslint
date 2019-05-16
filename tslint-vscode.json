@@ -9,6 +9,7 @@
         "no-floating-promises": false,
         "no-for-in-array": false,
         "no-inferred-empty-object-type": false,
+        "no-restricted-globals": false,
         "no-unnecessary-type-assertion": false,
         "no-unsafe-any": false,
         "prefer-readonly": false,

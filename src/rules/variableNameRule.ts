@@ -37,27 +37,30 @@ const BANNED_KEYWORDS = [
 const bannedKeywordsSet = new Set(BANNED_KEYWORDS);
 const bannedKeywordsStr = BANNED_KEYWORDS.map(kw => `\`${kw}\``).join(", ");
 
-const OPTION_LEADING_UNDERSCORE = "allow-leading-underscore";
-const OPTION_TRAILING_UNDERSCORE = "allow-trailing-underscore";
-const OPTION_BAN_KEYWORDS = "ban-keywords";
 const OPTION_CHECK_FORMAT = "check-format";
-const OPTION_REQUIRE_CONT_FOR_ALL_CAPS = "require-const-for-all-caps";
+const OPTION_ALLOW_LEADING_UNDERSCORE = "allow-leading-underscore";
 const OPTION_ALLOW_PASCAL_CASE = "allow-pascal-case";
 const OPTION_ALLOW_SNAKE_CASE = "allow-snake-case";
+const OPTION_ALLOW_TRAILING_UNDERSCORE = "allow-trailing-underscore";
+const OPTION_REQUIRE_CONST_FOR_ALL_CAPS = "require-const-for-all-caps";
+
+const OPTION_BAN_KEYWORDS = "ban-keywords";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "variable-name",
         description: "Checks variable names for various errors.",
         optionsDescription: Lint.Utils.dedent`
-            Six arguments may be optionally provided:
+            Several arguments may be optionally provided:
 
-            * \`"${OPTION_CHECK_FORMAT}"\`: allows only lowerCamelCased or UPPER_CASED variable names
-              * \`"${OPTION_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
-              * \`"${OPTION_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
-              * \`"${OPTION_REQUIRE_CONT_FOR_ALL_CAPS}"\`: enforces that all variables with UPPER_CASED names should be \`const\`.
-              * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
-              * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
+            * \`"${OPTION_CHECK_FORMAT}"\` enbables enforcement of a certain naming format. By default, the rule only allows only lowerCamelCased or UPPER_CASED variable names.
+              * These additional options make the check stricter:
+                * \`"${OPTION_REQUIRE_CONST_FOR_ALL_CAPS}"\`: enforces that all variables with UPPER_CASED names should be \`const\`.
+              * These additional options make the check more permissive:
+                * \`"${OPTION_ALLOW_LEADING_UNDERSCORE}"\` allows underscores at the beginning (only has an effect if "check-format" specified)
+                * \`"${OPTION_ALLOW_PASCAL_CASE}"\` allows PascalCase in addition to lowerCamelCase.
+                * \`"${OPTION_ALLOW_SNAKE_CASE}"\` allows snake_case in addition to lowerCamelCase.
+                * \`"${OPTION_ALLOW_TRAILING_UNDERSCORE}"\` allows underscores at the end. (only has an effect if "check-format" specified)
             * \`"${OPTION_BAN_KEYWORDS}"\`: disallows the use of certain TypeScript keywords as variable or parameter names.
               * These are: ${bannedKeywordsStr}`,
         options: {
@@ -66,17 +69,27 @@ export class Rule extends Lint.Rules.AbstractRule {
                 type: "string",
                 enum: [
                     OPTION_CHECK_FORMAT,
-                    OPTION_LEADING_UNDERSCORE,
-                    OPTION_TRAILING_UNDERSCORE,
+                    OPTION_ALLOW_LEADING_UNDERSCORE,
                     OPTION_ALLOW_PASCAL_CASE,
                     OPTION_ALLOW_SNAKE_CASE,
+                    OPTION_ALLOW_TRAILING_UNDERSCORE,
+                    OPTION_REQUIRE_CONST_FOR_ALL_CAPS,
                     OPTION_BAN_KEYWORDS,
                 ],
             },
             minLength: 0,
             maxLength: 6,
         },
-        optionExamples: [[true, "ban-keywords", "check-format", "allow-leading-underscore"]],
+        optionExamples: [
+            {
+                options: [
+                    "ban-keywords",
+                    "check-format",
+                    "allow-leading-underscore",
+                    "allow-pascal-case",
+                ],
+            },
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -105,9 +118,9 @@ function parseOptions(ruleArguments: string[]): Options {
         banKeywords,
         // check variable name formatting by default if no options are specified
         checkFormat: !banKeywords || hasOption(OPTION_CHECK_FORMAT),
-        leadingUnderscore: hasOption(OPTION_LEADING_UNDERSCORE),
-        trailingUnderscore: hasOption(OPTION_TRAILING_UNDERSCORE),
-        allCapsForConst: hasOption(OPTION_REQUIRE_CONT_FOR_ALL_CAPS),
+        leadingUnderscore: hasOption(OPTION_ALLOW_LEADING_UNDERSCORE),
+        trailingUnderscore: hasOption(OPTION_ALLOW_TRAILING_UNDERSCORE),
+        allCapsForConst: hasOption(OPTION_REQUIRE_CONST_FOR_ALL_CAPS),
         allowPascalCase: hasOption(OPTION_ALLOW_PASCAL_CASE),
         allowSnakeCase: hasOption(OPTION_ALLOW_SNAKE_CASE),
     };
@@ -125,8 +138,9 @@ function walk(ctx: Lint.WalkContext<Options>): void {
                 const { initializer, name, propertyName } = node as ts.BindingElement;
                 if (name.kind === ts.SyntaxKind.Identifier) {
                     handleVariableNameKeyword(name);
-                    // A destructuring pattern that does not rebind an expression is always an alias, e.g. `var {Foo} = ...;`.
-                    // Only check if the name is rebound (`var {Foo: bar} = ...;`).
+                    // A destructuring pattern that does not rebind an expression is
+                    // always an alias, e.g. `var {Foo} = ...;`. Only check if the name is
+                    // rebound (`var {Foo: bar} = ...;`).
                     if (
                         node.parent.kind !== ts.SyntaxKind.ObjectBindingPattern ||
                         propertyName !== undefined
@@ -163,7 +177,8 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 
         if (name.kind === ts.SyntaxKind.Identifier) {
             handleVariableNameFormat(name, initializer);
-            // do not check property declarations for keywords, they are allowed to be keywords
+            // do not check property declarations for keywords, they are allowed to be
+            // keywords
             if (node.kind !== ts.SyntaxKind.PropertyDeclaration) {
                 handleVariableNameKeyword(name);
             }

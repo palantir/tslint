@@ -1,4 +1,4 @@
-[typescript]: >= 2.4.0
+[typescript]: >= 2.4.0 < 3.5.0
 
 // Catches explicit union types.
 
