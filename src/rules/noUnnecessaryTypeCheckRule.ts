@@ -16,7 +16,6 @@
  */
 
 import * as utils from "tsutils";
-import { isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -163,7 +162,7 @@ function containsType(haystack: ts.Type | undefined, needle: ts.TypeFlags): bool
         return false;
     }
 
-    if (isUnionType(haystack)) {
+    if (utils.isUnionType(haystack)) {
         return haystack.types.some(subType => containsType(subType, needle));
     }
 
