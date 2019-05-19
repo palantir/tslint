@@ -1,0 +1,29 @@
+declare const alwaysUndefined: boolean | undefined = undefined;
+declare const sometimesUndefined: boolean | undefined;
+declare const neverUndefined: boolean | undefined = true;
+
+alwaysUndefined === undefined;
+~~~~~~~~~~~~~~~                [This comparison is unnecessary because the left side is always undefined]
+
+sometimesUndefined === undefined;
+if (sometimesUndefined !== undefined) {
+    sometimesUndefined === undefined;
+    ~~~~~~~~~~~~~~~~~~                [This comparison is unnecessary because the left side is never undefined]
+}
+
+neverUndefined === undefined;
+~~~~~~~~~~~~~~                [This comparison is unnecessary because the left side is never undefined]
+
+undefined === alwaysUndefined;
+              ~~~~~~~~~~~~~~~  [This comparison is unnecessary because the right side is always undefined]
+
+undefined === sometimesUndefined;
+
+undefined === neverUndefined;
+              ~~~~~~~~~~~~~~  [This comparison is unnecessary because the right side is never undefined]
+
+
+declare const alwaysNull: boolean | null = null;
+
+alwaysNull === null;
+~~~~~~~~~~          [This comparison is unnecessary because the left side is always null]
