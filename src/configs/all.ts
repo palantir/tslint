@@ -221,6 +221,7 @@ export const rules = {
     "no-unnecessary-initializer": true,
     "no-unnecessary-qualifier": true,
     "no-unnecessary-type-assertion": true,
+    "no-unnecessary-type-check": true,
     "number-literal-format": true,
     "object-literal-key-quotes": { options: "consistent-as-needed" },
     "object-literal-shorthand": true,
