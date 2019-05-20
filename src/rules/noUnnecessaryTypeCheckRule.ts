@@ -116,8 +116,12 @@ function getUnnecessaryTypeCheckForIdentifier(
     right: ts.Expression,
     identifier: Identifier,
 ): UnnecessaryTypeCheck | undefined {
-    const failureDetails = (overlapType: Overlap, failingSide: Side) => ({
-        atNode: failingSide === "right" ? right : left,
+    const failureDetails = (
+        overlapType: Overlap,
+        atNode: ts.Expression,
+        failingSide: Side,
+    ): UnnecessaryTypeCheck => ({
+        atNode,
         failingSide,
         overlapType,
         comparingTo: identifier.label,
@@ -129,25 +133,19 @@ function getUnnecessaryTypeCheckForIdentifier(
     const neverOverlaps = (exp: ts.Expression) =>
         !containsType(tc.getTypeAtLocation(exp), identifier.typeFlag);
 
-    if (expressionIsIdentifier(left, identifier.kind)) {
-        if (alwaysOverlaps(right)) {
-            return failureDetails("always", "right");
+    const getFailure = (possibleIdentifer: ts.Expression, exp: ts.Expression, expSide: Side) => {
+        if (expressionIsIdentifier(possibleIdentifer, identifier.kind)) {
+            if (alwaysOverlaps(exp)) {
+                return failureDetails("always", exp, expSide);
+            }
+            if (neverOverlaps(exp)) {
+                return failureDetails("never", exp, expSide);
+            }
         }
-        if (neverOverlaps(right)) {
-            return failureDetails("never", "right");
-        }
-    }
+        return undefined;
+    };
 
-    if (expressionIsIdentifier(right, identifier.kind)) {
-        if (alwaysOverlaps(left)) {
-            return failureDetails("always", "left");
-        }
-        if (neverOverlaps(left)) {
-            return failureDetails("never", "left");
-        }
-    }
-
-    return undefined;
+    return getFailure(left, right, "right") || getFailure(right, left, "left");
 }
 
 function expressionIsIdentifier(exp: ts.Expression, identifier: ts.SyntaxKind) {
