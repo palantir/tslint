@@ -155,14 +155,9 @@ function expressionIsIdentifier(exp: ts.Expression, identifier: ts.SyntaxKind) {
     return exp.kind === identifier;
 }
 
-function containsType(haystack: ts.Type | undefined, needle: ts.TypeFlags): boolean {
-    if (haystack === undefined) {
-        return false;
-    }
-
+function containsType(haystack: ts.Type, needle: ts.TypeFlags): boolean {
     if (utils.isUnionType(haystack)) {
         return haystack.types.some(subType => containsType(subType, needle));
     }
-
     return haystack.getFlags() === needle;
 }
