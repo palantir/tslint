@@ -22,11 +22,27 @@ import * as Lint from "../index";
 
 type Side = "right" | "left";
 type Overlap = "always" | "never";
+type UnnecessaryTypeCheckKeyword = "undefined" | "null";
+
+/**
+ * An UnnecessaryTypeCheck is an instance in the source file of an unnecessary type check
+ * against an UnnecessaryTypeCheckKeyword (i.e. the check is always true or always false)
+ *
+ * @example const x = 4;
+ *          if (x === undefined) // bad comparison: x (left side) is never undefined
+ *
+ *          const failure: UnnecessaryTypeCheck = {
+ *              atNode: x,
+ *              failingSide: "left",
+ *              overlapType: "never",
+ *              comparingTo: "undefined",
+ *          }
+ */
 interface UnnecessaryTypeCheck {
     atNode: ts.Expression;
     failingSide: Side;
     overlapType: Overlap;
-    comparingTo: string;
+    comparingTo: UnnecessaryTypeCheckKeyword;
 }
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -74,7 +90,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
 interface Identifier {
     kind: ts.SyntaxKind;
     typeFlag: ts.TypeFlags;
-    label: string;
+    label: UnnecessaryTypeCheckKeyword;
 }
 
 const comparisonsToCheck: Identifier[] = [
@@ -90,6 +106,11 @@ const comparisonsToCheck: Identifier[] = [
     },
 ];
 
+interface SideOfBinaryExpression {
+    side: Side;
+    expression: ts.Expression;
+}
+
 function getUnnecessaryTypeCheck(
     node: ts.BinaryExpression,
     tc: ts.TypeChecker,
@@ -101,7 +122,12 @@ function getUnnecessaryTypeCheck(
     }
 
     for (const identifier of comparisonsToCheck) {
-        const failure = getUnnecessaryTypeCheckForIdentifier(tc, left, right, identifier);
+        const failure = getUnnecessaryTypeCheckForIdentifier(
+            tc,
+            { expression: left, side: "left" },
+            { expression: right, side: "right" },
+            identifier,
+        );
         if (failure) {
             return failure;
         }
@@ -112,8 +138,8 @@ function getUnnecessaryTypeCheck(
 
 function getUnnecessaryTypeCheckForIdentifier(
     tc: ts.TypeChecker,
-    left: ts.Expression,
-    right: ts.Expression,
+    left: SideOfBinaryExpression,
+    right: SideOfBinaryExpression,
     identifier: Identifier,
 ): UnnecessaryTypeCheck | undefined {
     const failureDetails = (
@@ -133,19 +159,19 @@ function getUnnecessaryTypeCheckForIdentifier(
     const neverOverlaps = (exp: ts.Expression) =>
         !containsType(tc.getTypeAtLocation(exp), identifier.typeFlag);
 
-    const getFailure = (possibleIdentifer: ts.Expression, exp: ts.Expression, expSide: Side) => {
+    const getFailure = (possibleIdentifer: ts.Expression, otherSide: SideOfBinaryExpression) => {
         if (expressionIsIdentifier(possibleIdentifer, identifier.kind)) {
-            if (alwaysOverlaps(exp)) {
-                return failureDetails("always", exp, expSide);
+            if (alwaysOverlaps(otherSide.expression)) {
+                return failureDetails("always", otherSide.expression, otherSide.side);
             }
-            if (neverOverlaps(exp)) {
-                return failureDetails("never", exp, expSide);
+            if (neverOverlaps(otherSide.expression)) {
+                return failureDetails("never", otherSide.expression, otherSide.side);
             }
         }
         return undefined;
     };
 
-    return getFailure(left, right, "right") || getFailure(right, left, "left");
+    return getFailure(left.expression, right) || getFailure(right.expression, left);
 }
 
 function expressionIsIdentifier(exp: ts.Expression, identifier: ts.SyntaxKind) {
