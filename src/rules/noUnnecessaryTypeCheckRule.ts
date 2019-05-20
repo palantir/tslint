@@ -96,13 +96,13 @@ interface Identifier {
 const comparisonsToCheck: Identifier[] = [
     {
         kind: ts.SyntaxKind.UndefinedKeyword,
-        typeFlag: ts.TypeFlags.Undefined,
         label: "undefined",
+        typeFlag: ts.TypeFlags.Undefined,
     },
     {
         kind: ts.SyntaxKind.NullKeyword,
-        typeFlag: ts.TypeFlags.Null,
         label: "null",
+        typeFlag: ts.TypeFlags.Null,
     },
 ];
 
@@ -128,7 +128,7 @@ function getUnnecessaryTypeCheck(
             { expression: right, side: "right" },
             identifier,
         );
-        if (failure) {
+        if (failure !== undefined) {
             return failure;
         }
     }
@@ -148,9 +148,9 @@ function getUnnecessaryTypeCheckForIdentifier(
         failingSide: Side,
     ): UnnecessaryTypeCheck => ({
         atNode,
+        comparingTo: identifier.label,
         failingSide,
         overlapType,
-        comparingTo: identifier.label,
     });
 
     const alwaysOverlaps = (exp: ts.Expression) =>
@@ -171,6 +171,7 @@ function getUnnecessaryTypeCheckForIdentifier(
         return undefined;
     };
 
+    // tslint:disable-next-line:strict-boolean-expressions
     return getFailure(left.expression, right) || getFailure(right.expression, left);
 }
 
