@@ -26,8 +26,8 @@ undefined === neverUndefined;
 
 declare const neverNull: boolean = false;
 
-alwaysNull === null;
-~~~~~~~~~~          [LEFT_NEVER_NULL]
+neverNull === null;
+~~~~~~~~~           [LEFT_NEVER_NULL]
 
 
 
