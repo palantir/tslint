@@ -1,3 +1,8 @@
+42 === undefined;
+~~                [This comparison is unnecessary because the left side is never undefined]
+
+
+
 declare const alwaysUndefined: boolean | undefined = undefined;
 declare const sometimesUndefined: boolean | undefined;
 declare const neverUndefined: boolean | undefined = true;
@@ -21,6 +26,7 @@ undefined === sometimesUndefined;
 
 undefined === neverUndefined;
               ~~~~~~~~~~~~~~  [This comparison is unnecessary because the right side is never undefined]
+
 
 
 declare const alwaysNull: boolean | null = null;
