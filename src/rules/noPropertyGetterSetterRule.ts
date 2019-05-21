@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (ts.isGetAccessor(node) || ts.isSetAccessor(node)) {
+        if (node.kind === ts.SyntaxKind.GetAccessor || node.kind === ts.SyntaxKind.SetAccessor) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
