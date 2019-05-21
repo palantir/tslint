@@ -1,0 +1,34 @@
+function func(): void {}
+
+type NormalType = () => void;
+
+interface Interface {
+    lambda: () => void;
+    voidProp: void;
+              ~~~~ [void as non-return type is forbidden]
+}
+
+class ClassName {
+    private readonly propName: void;
+                               ~~~~ [void as non-return type is forbidden]
+}
+
+let letVoid: void;
+             ~~~~ [void as non-return type is forbidden]
+
+type VoidType = void;
+                ~~~~ [void as non-return type is forbidden]
+
+class OtherClassName {
+    private propName: VoidType;
+}
+
+type UnionType = string | number;
+type UnionType2 = string | number | void;
+                                    ~~~~ [void as non-return type is forbidden]
+
+type UnionType3 = string | (number & any | (string | void));
+                                                     ~~~~ [void as non-return type is forbidden]
+
+type IntersectionType = string & number & void;
+                                          ~~~~ [void as non-return type is forbidden]

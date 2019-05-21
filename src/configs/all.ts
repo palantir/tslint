@@ -170,6 +170,7 @@ export const rules = {
     "no-default-export": true,
     "no-default-import": true,
     "no-duplicate-imports": true,
+    "no-invalid-void": true,
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
     "no-parameter-reassignment": true,
