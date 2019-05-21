@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-property-getter-setter": true
+  }
+}

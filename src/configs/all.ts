@@ -173,6 +173,7 @@ export const rules = {
     "no-irregular-whitespace": true,
     "no-mergeable-namespace": true,
     "no-parameter-reassignment": true,
+    "no-property-getter-setter": true,
     "no-require-imports": true,
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,

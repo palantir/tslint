@@ -1,0 +1,102 @@
+class NormalClass {
+    public a: number;
+    protected b: string;
+    private c: Object;
+
+    public publicMethod(): void {}
+    protected protectedMethod(): void {}
+    private privateMethod(): void {}
+}
+
+
+class ClassWithGetter {
+    public get a(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    protected get b(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    private get c(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+}
+
+
+class ClassWithSetter {
+    public set a(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    protected set b(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    private set c(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+}
+
+
+class ClassWithGetterAndSetter {
+    public get a(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    public set a(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    protected get b(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    protected set b(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    private get c(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    private set c(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    public get d(): number {
+    ~~~~~~~~~~~~~~~~~~~~~~~~
+        return 1;
+~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+
+    public set e(b: number): void {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [Property getter/setter are forbidden.]
+}
