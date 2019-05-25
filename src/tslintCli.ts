@@ -125,8 +125,11 @@ const options: Option[] = [
     {
         name: "print-config",
         type: "boolean",
-        describe: "idk",
-        description: "wat",
+        describe: "print resolved configuration for a file",
+        description: dedent`
+            When passed a single file name, prints the configuration that would
+            be used to lint that file.
+            No linting is performed and only config-related options are valid.`,
     },
     {
         short: "r",
