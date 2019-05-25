@@ -435,6 +435,35 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    describe("--print-config flag", () => {
+        it("exits with code 1 if no files are provided", async () => {
+            const status = await execRunner({
+                files: [],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
+        });
+
+        it("exits with code 0 if one file is provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.Ok);
+        });
+
+        it("exits with code 1 if multiple files are provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts", "test/files//b.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
+        });
+    });
+
     describe("--project flag", () => {
         it("exits with code 0 if `tsconfig.json` is passed and it specifies files without errors", async () => {
             const status = await execRunner({
