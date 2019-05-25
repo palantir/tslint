@@ -664,11 +664,10 @@ export function isFileExcluded(filepath: string, configFile?: IConfigurationFile
 export function stringifyConfiguration(configFile: IConfigurationFile) {
     return JSON.stringify(
         {
-            defaultSeverity: configFile.defaultSeverity,
             extends: configFile.extends,
             jsRules: convertRulesMapToObject(configFile.jsRules),
-            rules: convertRulesMapToObject(configFile.rules),
             linterOptions: configFile.linterOptions,
+            rules: convertRulesMapToObject(configFile.rules),
             rulesDirectory: configFile.rulesDirectory,
         },
         undefined,
@@ -677,8 +676,8 @@ export function stringifyConfiguration(configFile: IConfigurationFile) {
 }
 
 function convertRulesMapToObject(rules: Map<string, Partial<IOptions>>) {
-    return Array.from(rules).reduce(
-        (result, [key, value]) => Object.assign(result, { [key]: value }),
+    return Array.from(rules).reduce<{ [i: string]: Partial<IOptions> }>(
+        (result, [key, value]) => ({ ...result, [key]: value }),
         {},
     );
 }

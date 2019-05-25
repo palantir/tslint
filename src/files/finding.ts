@@ -20,8 +20,8 @@ import * as glob from "glob";
 import { filter as createMinimatchFilter, Minimatch } from "minimatch";
 import * as path from "path";
 
+import { Logger } from "../runner";
 import { flatMap, trimSingleQuotes } from "../utils";
-import { Logger } from '../runner';
 
 export function filterFiles(files: string[], patterns: string[], include: boolean): string[] {
     if (patterns.length === 0) {

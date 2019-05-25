@@ -21,11 +21,12 @@ import { filter as createMinimatchFilter } from "minimatch";
 import * as path from "path";
 import * as ts from "typescript";
 
-import { Linter } from "../linter";
 import { FatalError } from "../error";
-import { Options, Logger } from "../runner";
+import { Linter } from "../linter";
+import { Logger, Options } from "../runner";
 import { trimSingleQuotes } from "../utils";
-import { resolveGlobs, findTsconfig, filterFiles } from "./finding";
+
+import { filterFiles, findTsconfig, resolveGlobs } from "./finding";
 
 export function resolveFilesAndProgram(
     { files, project, exclude, outputAbsolutePaths }: Options,

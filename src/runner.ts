@@ -24,17 +24,17 @@ import * as ts from "typescript";
 import {
     DEFAULT_CONFIG,
     findConfiguration,
+    findConfigurationPath,
     isFileExcluded,
     JSON_CONFIG_FILENAME,
-    findConfigurationPath,
     stringifyConfiguration,
 } from "./configuration";
 import { FatalError } from "./error";
-import { resolveFilesAndProgram } from './files/program';
-import { tryReadFile } from './files/reading';
+import { resolveFilesAndProgram } from "./files/program";
+import { tryReadFile } from "./files/reading";
 import { LintResult } from "./index";
 import { Linter } from "./linter";
-import { trimSingleQuotes } from './utils';
+import { trimSingleQuotes } from "./utils";
 
 export interface Options {
     /**
@@ -181,17 +181,18 @@ async function runConfigPrinting(options: Options, logger: Logger): Promise<Stat
     if (files.length !== 1) {
         throw new FatalError(`--print-config must be run with exactly one file`);
     }
-    
-    const configurationPath = options.config === undefined
-        ? findConfigurationPath(null, files[0])
-        : options.config;
+
+    const configurationPath =
+        options.config === undefined ? findConfigurationPath(null, files[0]) : options.config;
     if (configurationPath === undefined) {
-        throw new FatalError(`Could not find configuration path. Try passing a --config to your tslint.json.`);
+        throw new FatalError(
+            `Could not find configuration path. Try passing a --config to your tslint.json.`,
+        );
     }
 
     const configuration = findConfiguration(configurationPath, files[0]).results;
     if (configuration === undefined) {
-        throw new FatalError(`Could not find configuration for '${files[1]}`)
+        throw new FatalError(`Could not find configuration for '${files[1]}`);
     }
 
     logger.log(`${stringifyConfiguration(configuration)}\n`);

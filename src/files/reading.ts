@@ -16,8 +16,9 @@
  */
 
 import * as fs from "fs";
-import { Logger } from "../runner";
+
 import { FatalError } from "../error";
+import { Logger } from "../runner";
 
 /** Read a file, but return undefined if it is an MPEG '.ts' file. */
 export async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
