@@ -672,7 +672,7 @@ export function stringifyConfiguration(configFile: IConfigurationFile) {
             rulesDirectory: configFile.rulesDirectory,
         },
         undefined,
-        4,
+        2,
     );
 }
 
