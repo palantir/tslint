@@ -26,6 +26,8 @@ import {
     findConfiguration,
     isFileExcluded,
     JSON_CONFIG_FILENAME,
+    findConfigurationPath,
+    stringifyConfiguration,
 } from "./configuration";
 import { FatalError } from "./error";
 import { resolveFilesAndProgram } from './files/program';
@@ -88,7 +90,7 @@ export interface Options {
     /**
      * Outputs the configuration to be used instead of linting.
      */
-    printConfig?: string;
+    printConfig?: boolean;
 
     /**
      * tsconfig.json file.
@@ -175,20 +177,24 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
 }
 
 async function runConfigPrinting(options: Options, logger: Logger): Promise<Status> {
-    const { config, files } = options;
+    const { files } = options;
     if (files.length !== 1) {
         throw new FatalError(`--print-config must be run with exactly one file`);
     }
-    if (config === undefined) {
-        throw new FatalError(`--print-config must be run with exactly one file`);
+    
+    const configurationPath = options.config === undefined
+        ? findConfigurationPath(null, files[0])
+        : options.config;
+    if (configurationPath === undefined) {
+        throw new FatalError(`Could not find configuration path. Try passing a --config to your tslint.json.`);
     }
 
-    const configuration = findConfiguration(config, files[1]).results;
+    const configuration = findConfiguration(configurationPath, files[0]).results;
     if (configuration === undefined) {
         throw new FatalError(`Could not find configuration for '${files[1]}`)
     }
 
-    logger.log(`${JSON.stringify(configuration, undefined, 4)}\n`);
+    logger.log(`${stringifyConfiguration(configuration)}\n`);
     return Status.Ok;
 }
 
