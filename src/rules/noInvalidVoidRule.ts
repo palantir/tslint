@@ -56,7 +56,6 @@ function walk(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node) {
         if (
             node.kind === ts.SyntaxKind.VoidKeyword &&
-            node.parent !== undefined &&
             failedKinds.indexOf(node.parent.kind) !== -1
         ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
