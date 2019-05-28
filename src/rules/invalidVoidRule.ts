@@ -24,8 +24,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "invalid-void",
         description: Lint.Utils.dedent`
-            Disallows usage of "void" type outside of return type.
-            If "void" is used as return type, it shouldn't be a part of intersection/union type.`,
+            Disallows usage of \`void\` type outside of return type.
+            If \`void\` is used as return type, it shouldn't be a part of intersection/union type.`,
+        rationale: Lint.Utils.dedent`
+            The \`void\` type means "nothing" or that a function does not return any value,
+            in contra with implicit \`undefined\` type which means that a function returns a value \`undefined\`.
+            So "nothing" cannot be mixed with any other types.
+            If you need this - use \`undefined\` type instead.`,
         hasFix: false,
         optionsDescription: "Not configurable.",
         options: null,
