@@ -22,7 +22,7 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "no-invalid-void",
+        ruleName: "invalid-void",
         description: Lint.Utils.dedent`
             Disallows usage of "void" type outside of return type.
             If "void" is used as return type, it shouldn't be a part of intersection/union type.`,

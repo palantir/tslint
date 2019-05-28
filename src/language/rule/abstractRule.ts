@@ -67,7 +67,7 @@ export abstract class AbstractRule implements IRule {
     ): RuleFailure[];
     protected applyWithFunction<T, U>(
         sourceFile: ts.SourceFile,
-        // tslint:disable-next-line:no-invalid-void
+        // tslint:disable-next-line:invalid-void
         walkFn: (ctx: WalkContext<T | void>, programOrChecker?: U) => void,
         options?: T,
         programOrChecker?: U,
