@@ -51,6 +51,7 @@ export const rules = {
     },
     "no-any": true,
     "no-empty-interface": true,
+    "no-for-in": true,
     "no-import-side-effect": true,
     // Technically this is not the strictest setting, but don't want to conflict with "typedef"
     "no-inferrable-types": { options: ["ignore-params"] },
