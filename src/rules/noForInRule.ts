@@ -16,12 +16,14 @@
  */
 import { isForInStatement } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: 'no-for-in',
-        description: "Recommended the avoidance of 'for-in' statements. They can be replaced by Object.keys in a 'for-of' loop.",
+        description:
+            "Recommended the avoidance of 'for-in' statements. They can be replaced by Object.keys in a 'for-of' loop.",
+        ruleName: "no-for-in",
         rationale:
             "A for(... of ...) loop is easier to implement and read when a for(... in ...) loop, as for(... in ...) require a hasOwnProperty check on objects to ensure proper behaviour.",
         optionsDescription: "Not configurable.",
@@ -32,7 +34,6 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static FAILURE_STRING_FACTORY(initializer: string, expression: string): string {
-        //tslint:disable-next-line:max-line-length
         return `Do not use the 'for in' statement: 'for (${initializer} in ${expression})'. If this is an object, use 'Object.keys' instead. If this is an array use a standard 'for' or 'for of' loop instead.`;
     }
 
@@ -41,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     function cb(node: ts.Node): void {
         if (isForInStatement(node)) {
             const initializer: string = node.initializer.getText();
