@@ -23,12 +23,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description:
             "Recommended the avoidance of 'for-in' statements. They can be replaced by Object.keys in a 'for-of' loop.",
-        ruleName: "no-for-in",
-        rationale:
-            "A for(... of ...) loop is easier to implement and read when a for(... in ...) loop, as for(... in ...) require a hasOwnProperty check on objects to ensure proper behaviour.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
+        rationale:
+            "A for(... of ...) loop is easier to implement and read when a for(... in ...) loop, as for(... in ...) require a hasOwnProperty check on objects to ensure proper behaviour.",
+        ruleName: "no-for-in",
         type: "typescript",
         typescriptOnly: false,
     };
