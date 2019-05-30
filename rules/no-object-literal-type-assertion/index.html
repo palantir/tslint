@@ -11,6 +11,8 @@ rationale: |-
   The compiler will warn for excess properties with this syntax, but not missing required fields.
   For example: `const x: { foo: number } = {}` will fail to compile, but
   `const x = {} as { foo: number }` will succeed.
+  Additionally, the const assertion `const x = { foo: 1 } as const`,
+  introduced in TypeScript 3.4, is considered beneficial and is ignored by this rule.
 optionsDescription: |-
 
   One option may be configured:

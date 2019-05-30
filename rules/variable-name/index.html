@@ -1,16 +1,20 @@
 ---
 ruleName: variable-name
 description: Checks variable names for various errors.
-optionsDescription: |-
+optionsDescription: >-
 
-  Six arguments may be optionally provided:
+  Several arguments may be optionally provided:
 
-  * `"check-format"`: allows only lowerCamelCased or UPPER_CASED variable names
-    * `"allow-leading-underscore"` allows underscores at the beginning (only has an effect if "check-format" specified)
-    * `"allow-trailing-underscore"` allows underscores at the end. (only has an effect if "check-format" specified)
-    * `"require-const-for-all-caps"`: enforces that all variables with UPPER_CASED names should be `const`.
-    * `"allow-pascal-case"` allows PascalCase in addition to lowerCamelCase.
-    * `"allow-snake-case"` allows snake_case in addition to lowerCamelCase.
+
+  * `"check-format"` enbables enforcement of a certain naming format. By default, the rule only allows only lowerCamelCased or UPPER_CASED
+  variable names.
+    * These additional options make the check stricter:
+      * `"require-const-for-all-caps"`: enforces that all variables with UPPER_CASED names should be `const`.
+    * These additional options make the check more permissive:
+      * `"allow-leading-underscore"` allows underscores at the beginning (only has an effect if "check-format" specified)
+      * `"allow-pascal-case"` allows PascalCase in addition to lowerCamelCase.
+      * `"allow-snake-case"` allows snake_case in addition to lowerCamelCase.
+      * `"allow-trailing-underscore"` allows underscores at the end. (only has an effect if "check-format" specified)
   * `"ban-keywords"`: disallows the use of certain TypeScript keywords as variable or parameter names.
     * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`
 options:
@@ -20,14 +24,23 @@ options:
     enum:
       - check-format
       - allow-leading-underscore
-      - allow-trailing-underscore
       - allow-pascal-case
       - allow-snake-case
+      - allow-trailing-underscore
+      - require-const-for-all-caps
       - ban-keywords
   minLength: 0
   maxLength: 6
 optionExamples:
-  - '[true, "ban-keywords", "check-format", "allow-leading-underscore"]'
+  - |-
+    {
+      "options": [
+        "ban-keywords",
+        "check-format",
+        "allow-leading-underscore",
+        "allow-pascal-case"
+      ]
+    }
 type: style
 typescriptOnly: false
 layout: rule
@@ -40,9 +53,10 @@ optionsJSON: |-
       "enum": [
         "check-format",
         "allow-leading-underscore",
-        "allow-trailing-underscore",
         "allow-pascal-case",
         "allow-snake-case",
+        "allow-trailing-underscore",
+        "require-const-for-all-caps",
         "ban-keywords"
       ]
     },

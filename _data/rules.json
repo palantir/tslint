@@ -2386,7 +2386,7 @@
   {
     "ruleName": "no-object-literal-type-assertion",
     "description": "\nForbids an object literal to appear in a type assertion expression.\nCasting to `any` or to `unknown` is still allowed.",
-    "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\nThe compiler will warn for excess properties with this syntax, but not missing required fields.\nFor example: `const x: { foo: number } = {}` will fail to compile, but\n`const x = {} as { foo: number }` will succeed.",
+    "rationale": "\nAlways prefer `const x: T = { ... };` to `const x = { ... } as T;`.\nThe type assertion in the latter case is either unnecessary or hides an error.\nThe compiler will warn for excess properties with this syntax, but not missing required fields.\nFor example: `const x: { foo: number } = {}` will fail to compile, but\n`const x = {} as { foo: number }` will succeed.\nAdditionally, the const assertion `const x = { foo: 1 } as const`,\nintroduced in TypeScript 3.4, is considered beneficial and is ignored by this rule.",
     "optionsDescription": "\nOne option may be configured:\n\n* `allow-arguments` allows type assertions to be used on object literals inside call expressions.",
     "options": {
       "type": "object",
@@ -2955,7 +2955,7 @@
     "description": "\nDisallows unused imports, variables, functions and\nprivate class members. Similar to tsc's --noUnusedParameters and --noUnusedLocals\noptions, but does not interrupt code compilation.",
     "descriptionDetails": "\nIn addition to avoiding compilation errors, this rule may still be useful if you\nwish to have `tslint` automatically remove unused imports, variables, functions,\nand private class members, when using TSLint's `--fix` option.",
     "hasFix": true,
-    "optionsDescription": "\nThree optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names and imports that match the pattern will be ignored.",
+    "optionsDescription": "\nTwo optional arguments may be optionally provided:\n\n* `\"check-parameters\"` disallows unused function and constructor parameters.\n    * NOTE: this option is experimental and does not work with classes\n    that use abstract method declarations, among other things.\n* `{\"ignore-pattern\": \"pattern\"}` where pattern is a case-sensitive regexp.\nVariable names and imports that match the pattern will be ignored.",
     "options": {
       "type": "array",
       "items": {
@@ -2978,7 +2978,7 @@
         ]
       },
       "minLength": 0,
-      "maxLength": 3
+      "maxLength": 2
     },
     "optionExamples": [
       true,
@@ -3014,7 +3014,8 @@
         "pass": "```ts\nvar hello = 'world';\nvar foo;\n\nconsole.log(hello, foo, capitalize(hello));\n// 'world', undefined, 'WORLD'\n\nfunction capitalize(val) {\n    return val.toUpperCase();\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n\nfunction declaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n```",
         "fail": "```ts\nconsole.log(hello, foo);\n\nvar hello = 'world';\nvar foo;\n\nfunction undeclaredImports() {\n    console.log(foo1);\n    console.log(foo2);\n    console.log(foo3);\n    map([], (x) => x);\n}\n\nimport { default as foo1 } from \"./lib\";\nimport foo2 from \"./lib\";\nimport _, { map, foldl } from \"./underscore\";\nimport * as foo3 from \"./lib\";\nimport \"./lib\";\n```"
       }
-    ]
+    ],
+    "deprecationMessage": "Since TypeScript 2.9. Please use the built-in compiler checks instead."
   },
   {
     "ruleName": "no-var-keyword",
@@ -4470,7 +4471,7 @@
   {
     "ruleName": "variable-name",
     "description": "Checks variable names for various errors.",
-    "optionsDescription": "\nSix arguments may be optionally provided:\n\n* `\"check-format\"`: allows only lowerCamelCased or UPPER_CASED variable names\n  * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n  * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n  * `\"require-const-for-all-caps\"`: enforces that all variables with UPPER_CASED names should be `const`.\n  * `\"allow-pascal-case\"` allows PascalCase in addition to lowerCamelCase.\n  * `\"allow-snake-case\"` allows snake_case in addition to lowerCamelCase.\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
+    "optionsDescription": "\nSeveral arguments may be optionally provided:\n\n* `\"check-format\"` enbables enforcement of a certain naming format. By default, the rule only allows only lowerCamelCased or UPPER_CASED variable names.\n  * These additional options make the check stricter:\n    * `\"require-const-for-all-caps\"`: enforces that all variables with UPPER_CASED names should be `const`.\n  * These additional options make the check more permissive:\n    * `\"allow-leading-underscore\"` allows underscores at the beginning (only has an effect if \"check-format\" specified)\n    * `\"allow-pascal-case\"` allows PascalCase in addition to lowerCamelCase.\n    * `\"allow-snake-case\"` allows snake_case in addition to lowerCamelCase.\n    * `\"allow-trailing-underscore\"` allows underscores at the end. (only has an effect if \"check-format\" specified)\n* `\"ban-keywords\"`: disallows the use of certain TypeScript keywords as variable or parameter names.\n  * These are: `any`, `Number`, `number`, `String`, `string`, `Boolean`, `boolean`, `Undefined`, `undefined`",
     "options": {
       "type": "array",
       "items": {
@@ -4478,9 +4479,10 @@
         "enum": [
           "check-format",
           "allow-leading-underscore",
-          "allow-trailing-underscore",
           "allow-pascal-case",
           "allow-snake-case",
+          "allow-trailing-underscore",
+          "require-const-for-all-caps",
           "ban-keywords"
         ]
       },
@@ -4488,12 +4490,14 @@
       "maxLength": 6
     },
     "optionExamples": [
-      [
-        true,
-        "ban-keywords",
-        "check-format",
-        "allow-leading-underscore"
-      ]
+      {
+        "options": [
+          "ban-keywords",
+          "check-format",
+          "allow-leading-underscore",
+          "allow-pascal-case"
+        ]
+      }
     ],
     "type": "style",
     "typescriptOnly": false
