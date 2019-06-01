@@ -7,8 +7,6 @@
 });
 
 [].forEach(x => {
-    return console.log(x);
-           ~~~~~~~~~~~~~~  [0]
+    console.log(x); return;
 });
 
-[0]: Expression has type `void`. Put it on its own line as a statement.

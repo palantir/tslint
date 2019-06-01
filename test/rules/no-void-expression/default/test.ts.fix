@@ -1,0 +1,38 @@
+function doIt() {}
+async function doAsync() {}
+function print(strs) {}
+
+[].forEach(x => { console.log(x); });
+
+[].forEach(x => {
+    console.log(x);
+});
+
+[].forEach(x => { x && console.log(x); });
+
+async function f(): Promise<void> {
+    const x = doIt();
+    console.log(await doAsync());
+    print``; return;
+}
+
+true && console.log(0);
+false || console.log(0);
+
+runner(() => { "x"; });
+runner(() => { ({x: "x"}); });
+listRunner(() => { "x"; });
+listRunner(() => { "x"; }, stringer, console.log, () => { "x"; });
+maybeRunner(() => { "x"; });
+runner(stringer);
+
+declare function doIt(): void;
+declare function doAsync(): Promise<void>;
+declare function print(strs: TemplateStringsArray): void;
+declare function runner(x: () => void): void;
+declare function listRunner(...x: Array<() => void>): void;
+declare function maybeRunner(x?: () => void): void;
+declare function stringer(): string;
+
+!!data ? console.info(message, data) : console.info(message);
+

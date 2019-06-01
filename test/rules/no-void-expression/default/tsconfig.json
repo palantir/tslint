@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "allowJs": true
+        "allowJs": true,
+        "strictFunctionTypes": true,
     }
 }

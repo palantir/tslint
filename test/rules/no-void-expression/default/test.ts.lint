@@ -5,7 +5,12 @@ function print(strs) {}
 [].forEach(x => console.log(x));
                 ~~~~~~~~~~~~~~ [0]
 
+[].forEach(x => {
+    console.log(x);
+});
+
 [].forEach(x => x && console.log(x));
+                ~~~~~~~~~~~~~~~~~~~ [0]
                      ~~~~~~~~~~~~~~ [0]
 
 async function f(): Promise<void> {
@@ -20,9 +25,26 @@ async function f(): Promise<void> {
 true && console.log(0);
 false || console.log(0);
 
+runner(() => "x");
+             ~~~  [0]
+runner(() => ({x: "x"}));
+             ~~~~~~~~~~  [0]
+listRunner(() => "x");
+                 ~~~  [0]
+listRunner(() => "x", stringer, console.log, () => "x");
+                 ~~~  [0]
+                                                   ~~~  [0]
+maybeRunner(() => "x");
+                  ~~~  [0]
+runner(stringer);
+
 declare function doIt(): void;
 declare function doAsync(): Promise<void>;
 declare function print(strs: TemplateStringsArray): void;
+declare function runner(x: () => void): void;
+declare function listRunner(...x: Array<() => void>): void;
+declare function maybeRunner(x?: () => void): void;
+declare function stringer(): string;
 
 !!data ? console.info(message, data) : console.info(message);
 
