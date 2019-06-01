@@ -683,7 +683,7 @@ describe("Configuration", () => {
         });
     });
 
-    describe.only("stringifyConfiguration", () => {
+    describe("stringifyConfiguration", () => {
         const blankConfiguration: IConfigurationFile = {
             extends: [],
             jsRules: new Map(),
@@ -733,8 +733,8 @@ describe("Configuration", () => {
                         jsRules: {
                             "js-rule": {
                                 ruleArguments: ["sample", "argument"],
-                                ruleName: "js-rule"
-                            }
+                                ruleName: "js-rule",
+                            },
                         },
                         rules: {},
                         rulesDirectory: [],
@@ -750,8 +750,8 @@ describe("Configuration", () => {
                 ...blankConfiguration,
                 linterOptions: {
                     exclude: ["./sample/**/*.ts"],
-                    format: "sample-format"
-                }
+                    format: "sample-format",
+                },
             };
 
             const actual = stringifyConfiguration(configuration);
@@ -779,11 +779,14 @@ describe("Configuration", () => {
             const configuration: IConfigurationFile = {
                 ...blankConfiguration,
                 rules: new Map([
-                    ["ts-rule", {
-                        ruleArguments: ["sample", "argument"],
-                        ruleName: "ts-rule",
-                    }]
-                ])
+                    [
+                        "ts-rule",
+                        {
+                            ruleArguments: ["sample", "argument"],
+                            ruleName: "ts-rule",
+                        },
+                    ],
+                ]),
             };
 
             const actual = stringifyConfiguration(configuration);
@@ -797,8 +800,8 @@ describe("Configuration", () => {
                         rules: {
                             "ts-rule": {
                                 ruleArguments: ["sample", "argument"],
-                                ruleName: "ts-rule"
-                            }
+                                ruleName: "ts-rule",
+                            },
                         },
                         rulesDirectory: [],
                     },
@@ -811,7 +814,7 @@ describe("Configuration", () => {
         it("stringifies a configuration with rulesDirectory", () => {
             const configuration: IConfigurationFile = {
                 ...blankConfiguration,
-                rulesDirectory: ["./directory/one", "./directory/two"]
+                rulesDirectory: ["./directory/one", "./directory/two"],
             };
 
             const actual = stringifyConfiguration(configuration);
@@ -823,10 +826,7 @@ describe("Configuration", () => {
                         extends: [],
                         jsRules: {},
                         rules: {},
-                        rulesDirectory: [
-                            "./directory/one",
-                            "./directory/two",
-                        ],
+                        rulesDirectory: ["./directory/one", "./directory/two"],
                     },
                     undefined,
                     2,

@@ -31,10 +31,10 @@ import {
 } from "./configuration";
 import { FatalError } from "./error";
 import { tryReadFile } from "./files/reading";
+import { resolveFilesAndProgram } from "./files/resolution";
 import { LintResult } from "./index";
 import { Linter } from "./linter";
 import { trimSingleQuotes } from "./utils";
-import { resolveFilesAndProgram } from './files/resolution';
 
 export interface Options {
     /**
