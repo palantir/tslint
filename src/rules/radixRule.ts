@@ -59,25 +59,25 @@ function isPropertyAccessParseInt(
 
 function isPropertyAccessOfIdentifier(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
     return (
         isPropertyAccessExpression(expression) &&
         isIdentifier(expression.expression) &&
-        identifers.some(identifer => (expression.expression as ts.Identifier).text === identifer)
+        identifiers.some(identifier => (expression.expression as ts.Identifier).text === identifier)
     );
 }
 
 function isPropertyAccessOfProperty(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
     return (
         isPropertyAccessExpression(expression) &&
         isPropertyAccessExpression(expression.expression) &&
-        identifers.some(
-            identifer =>
-                (expression.expression as ts.PropertyAccessExpression).name.text === identifer,
+        identifiers.some(
+            identifier =>
+                (expression.expression as ts.PropertyAccessExpression).name.text === identifier,
         )
     );
 }

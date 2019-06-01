@@ -63,6 +63,7 @@ Prerequisites:
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
+cd tslint
 yarn
 yarn compile
 yarn test

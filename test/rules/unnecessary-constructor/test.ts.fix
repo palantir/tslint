@@ -1,11 +1,7 @@
 export class ExportedClass {
-    constructor() { }
-    ~~~~~~~~~~~~~~~~~       [0]
 }
 
 class PublicConstructor {
-    public constructor() { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~       [0]
 }
 
 class ProtectedConstructor {
@@ -16,24 +12,17 @@ class PrivateConstructor {
     private constructor() { }
 }
 
-class SameLine { constructor() { } }
-                 ~~~~~~~~~~~~~~~~~       [0]
+class SameLine { }
 
 class WithPrecedingMember {
     public member: string;
-    constructor() {}
-    ~~~~~~~~~~~~~~~~       [0]
 }
 
 class WithFollowingMethod {
-    constructor() {}
-    ~~~~~~~~~~~~~~~~       [0]
     public method() {}
 }
 
 const classExpression = class {
-    constructor() { }
-    ~~~~~~~~~~~~~~~~~       [0]
 }
 
 class ContainsContents {
@@ -49,8 +38,6 @@ class CallsSuper extends PublicConstructor {
 }
 
 class ContainsParameter {
-    constructor(x: number) { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
 
 class PrivateContainsParameter {
@@ -70,9 +57,6 @@ class ContainsParameterAndParameterDeclaration {
 }
 
 class ConstructorOverload {
-  constructor(x: number);
-  constructor(x: number, y?: number) { }
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
 
 interface IConstructorSignature {
@@ -83,4 +67,3 @@ class DecoratedParameters {
     constructor(@Optional x: number) {}
 }
 
-[0]: Remove unnecessary empty constructor.

@@ -21,15 +21,24 @@ import * as Lint from "../index";
 
 import { codeExamples } from "./code-examples/unnecessaryElse.examples";
 
+const OPTION_ALLOW_ELSE_IF = "allow-else-if";
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         description: Lint.Utils.dedent`
         Disallows \`else\` blocks following \`if\` blocks ending with a \`break\`, \`continue\`, \`return\`, or \`throw\` statement.`,
         descriptionDetails: "",
-        optionExamples: [true],
-        options: null,
-        optionsDescription: "Not configurable.",
+        optionExamples: [true, [true, { [OPTION_ALLOW_ELSE_IF]: true }]],
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_ELSE_IF]: { type: "boolean" },
+            },
+        },
+        optionsDescription: Lint.Utils.dedent`
+            You can optionally specify the option \`"${OPTION_ALLOW_ELSE_IF}"\` to allow "else if" statements.
+        `,
         rationale: Lint.Utils.dedent`
         When an \`if\` block is guaranteed to exit control flow when entered,
         it is unnecessary to add an \`else\` statement.
@@ -46,7 +55,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            parseOptions(this.ruleArguments[0] as Partial<Options> | undefined),
+        );
     }
 }
 
@@ -55,7 +68,18 @@ interface IJumpAndIfStatement {
     node: ts.IfStatement;
 }
 
-function walk(ctx: Lint.WalkContext): void {
+interface Options {
+    [OPTION_ALLOW_ELSE_IF]: boolean;
+}
+
+function parseOptions(option: Partial<Options> | undefined): Options {
+    return {
+        [OPTION_ALLOW_ELSE_IF]: false,
+        ...option,
+    };
+}
+
+function walk(ctx: Lint.WalkContext<Options>): void {
     const ifStatementStack: IJumpAndIfStatement[] = [];
 
     function visitIfStatement(node: ts.IfStatement) {
@@ -68,7 +92,8 @@ function walk(ctx: Lint.WalkContext): void {
         if (
             jumpStatement !== undefined &&
             node.elseStatement !== undefined &&
-            !recentStackParentMissingJumpStatement()
+            !recentStackParentMissingJumpStatement() &&
+            (!utils.isIfStatement(node.elseStatement) || !ctx.options[OPTION_ALLOW_ELSE_IF])
         ) {
             const elseKeyword = getPositionOfElseKeyword(node, ts.SyntaxKind.ElseKeyword);
             ctx.addFailureAtNode(elseKeyword, Rule.FAILURE_STRING(jumpStatement));

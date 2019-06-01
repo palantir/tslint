@@ -40,7 +40,7 @@ const dummyLogger: Logger = {
     },
 };
 
-describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
+describe("Executable", function(this: Mocha.Suite) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(10000);
 
@@ -181,7 +181,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Custom formatters", () => {
-        const createFormatVerifier = (done: MochaDone): ExecFileCallback => (err, stdout) => {
+        const createFormatVerifier = (done: Mocha.Done): ExecFileCallback => (err, stdout) => {
             assert.isNotNull(err, "process should exit with error");
             assert.strictEqual(err.code, 2, "error code should be 2");
             assert.include(
