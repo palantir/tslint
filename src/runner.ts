@@ -30,11 +30,11 @@ import {
     stringifyConfiguration,
 } from "./configuration";
 import { FatalError } from "./error";
-import { resolveFilesAndProgram } from "./files/program";
 import { tryReadFile } from "./files/reading";
 import { LintResult } from "./index";
 import { Linter } from "./linter";
 import { trimSingleQuotes } from "./utils";
+import { resolveFilesAndProgram } from './files/resolution';
 
 export interface Options {
     /**
@@ -153,7 +153,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     }
 
     if (options.printConfig) {
-        return runConfigPrinting(options, logger);
+        return printConfiguration(options, logger);
     }
 
     if (options.test) {
@@ -176,7 +176,7 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
-async function runConfigPrinting(options: Options, logger: Logger): Promise<Status> {
+async function printConfiguration(options: Options, logger: Logger): Promise<Status> {
     const { files } = options;
     if (files.length !== 1) {
         throw new FatalError(`--print-config must be run with exactly one file`);
