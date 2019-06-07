@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { hasOwnProperty } from "../../utils";
 import { DESCRIPTOR_OVERLOADS, DocType } from "../completedDocsRule";
 
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
