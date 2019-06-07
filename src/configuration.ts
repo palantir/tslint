@@ -24,7 +24,7 @@ import * as path from "path";
 import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
-import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
+import { arrayify, stripComments, tryResolvePackage } from "./utils";
 
 export interface IConfigurationFile {
     /**
