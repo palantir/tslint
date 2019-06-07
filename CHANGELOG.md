@@ -1,5 +1,33 @@
 # Change Log
 
+## v5.17.0
+
+- [bugfix] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) backtic option now ignores enum members, use strict declarations, lookup types, and strings containing octal escape sequences. (#4693)
+- [bugfix] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) no longer errors on `JSDocThisTag` (#4690)
+- [chore] Update devDependency mocha from v3.2.0 to v6.1.4 (#4669) (#4674)
+- [chore] Update devDependency js-yaml from ^3.13.0 to ^3.13.1 (#4663)
+- [chore] Update deprecated devDependency github to @octokit/rest (#4673)
+- [chore] Update devDependency nyc from v13.3.0 to v14.1.1 (#4699)
+- [deprecation] [`no-use-before-declare`](https://palantir.github.io/tslint/rules/no-use-before-declare/) rule for typescript >= 2.9.0 (#4695)
+- [documentation] Minor fix for [`variable-name`](https://palantir.github.io/tslint/rules/variable-name/) rule metadata (#4731)
+- [documentation] Fixed [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) argument count (#4683)
+- [enhancement] Allow const assertions in [`no-object-literal-type-assertion`](https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/) (#4681)
+- [new-fixer] [`unnecessary-constructor`](https://palantir.github.io/tslint/rules/unnecessary-constructor/) (#4694)
+
+Thanks to our contributors!
+
+- Bjorn Stromberg
+- Vitaliy Agoshkov
+- knafteN
+- Bowen Ni
+- Waseem Ahmad
+- Åsmund Grammeltvedt
+- Eric Ferreira
+- Zhen Tian
+- Tom Lakesman
+- zachkirsch
+
+
 ## v5.16.0
 
 - [bugfix] Excuse more [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) backtick edge cases and fix behavior for TS < 2.7.1 (#4642)

@@ -660,3 +660,24 @@ export function isFileExcluded(filepath: string, configFile?: IConfigurationFile
     const fullPath = path.resolve(filepath);
     return configFile.linterOptions.exclude.some(pattern => new Minimatch(pattern).match(fullPath));
 }
+
+export function stringifyConfiguration(configFile: IConfigurationFile) {
+    return JSON.stringify(
+        {
+            extends: configFile.extends,
+            jsRules: convertRulesMapToObject(configFile.jsRules),
+            linterOptions: configFile.linterOptions,
+            rules: convertRulesMapToObject(configFile.rules),
+            rulesDirectory: configFile.rulesDirectory,
+        },
+        undefined,
+        2,
+    );
+}
+
+function convertRulesMapToObject(rules: Map<string, Partial<IOptions>>) {
+    return Array.from(rules).reduce<{ [i: string]: Partial<IOptions> }>(
+        (result, [key, value]) => ({ ...result, [key]: value }),
+        {},
+    );
+}

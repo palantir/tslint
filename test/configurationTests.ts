@@ -26,6 +26,7 @@ import {
     loadConfigurationFromPath,
     parseConfigFile,
     RawConfigFile,
+    stringifyConfiguration,
 } from "../src/configuration";
 import { IOptions, RuleSeverity } from "../src/language/rule/rule";
 
@@ -679,6 +680,158 @@ describe("Configuration", () => {
             assert.throws(() => {
                 loadConfigurationFromPath("tslint:doesnotexist");
             });
+        });
+    });
+
+    describe("stringifyConfiguration", () => {
+        const blankConfiguration: IConfigurationFile = {
+            extends: [],
+            jsRules: new Map(),
+            rules: new Map(),
+            rulesDirectory: [],
+        };
+
+        it("stringifies an empty configuration", () => {
+            const actual = stringifyConfiguration(blankConfiguration);
+
+            assert.equal(
+                actual,
+                JSON.stringify(
+                    {
+                        extends: [],
+                        jsRules: {},
+                        rules: {},
+                        rulesDirectory: [],
+                    },
+                    undefined,
+                    2,
+                ),
+            );
+        });
+
+        it("stringifies a configuration with jsRules", () => {
+            const configuration: IConfigurationFile = {
+                ...blankConfiguration,
+                jsRules: new Map([
+                    [
+                        "js-rule",
+                        {
+                            ruleArguments: ["sample", "argument"],
+                            ruleName: "js-rule",
+                        },
+                    ],
+                ]),
+            };
+
+            const actual = stringifyConfiguration(configuration);
+
+            assert.equal(
+                actual,
+                JSON.stringify(
+                    {
+                        extends: [],
+                        jsRules: {
+                            "js-rule": {
+                                ruleArguments: ["sample", "argument"],
+                                ruleName: "js-rule",
+                            },
+                        },
+                        rules: {},
+                        rulesDirectory: [],
+                    },
+                    undefined,
+                    2,
+                ),
+            );
+        });
+
+        it("stringifies a configuration with linterOptions", () => {
+            const configuration: IConfigurationFile = {
+                ...blankConfiguration,
+                linterOptions: {
+                    exclude: ["./sample/**/*.ts"],
+                    format: "sample-format",
+                },
+            };
+
+            const actual = stringifyConfiguration(configuration);
+
+            assert.equal(
+                actual,
+                JSON.stringify(
+                    {
+                        extends: [],
+                        jsRules: {},
+                        linterOptions: {
+                            exclude: ["./sample/**/*.ts"],
+                            format: "sample-format",
+                        },
+                        rules: {},
+                        rulesDirectory: [],
+                    },
+                    undefined,
+                    2,
+                ),
+            );
+        });
+
+        it("stringifies a configuration with rules", () => {
+            const configuration: IConfigurationFile = {
+                ...blankConfiguration,
+                rules: new Map([
+                    [
+                        "ts-rule",
+                        {
+                            ruleArguments: ["sample", "argument"],
+                            ruleName: "ts-rule",
+                        },
+                    ],
+                ]),
+            };
+
+            const actual = stringifyConfiguration(configuration);
+
+            assert.equal(
+                actual,
+                JSON.stringify(
+                    {
+                        extends: [],
+                        jsRules: {},
+                        rules: {
+                            "ts-rule": {
+                                ruleArguments: ["sample", "argument"],
+                                ruleName: "ts-rule",
+                            },
+                        },
+                        rulesDirectory: [],
+                    },
+                    undefined,
+                    2,
+                ),
+            );
+        });
+
+        it("stringifies a configuration with rulesDirectory", () => {
+            const configuration: IConfigurationFile = {
+                ...blankConfiguration,
+                rulesDirectory: ["./directory/one", "./directory/two"],
+            };
+
+            const actual = stringifyConfiguration(configuration);
+
+            assert.equal(
+                actual,
+                JSON.stringify(
+                    {
+                        extends: [],
+                        jsRules: {},
+                        rules: {},
+                        rulesDirectory: ["./directory/one", "./directory/two"],
+                    },
+                    undefined,
+                    2,
+                ),
+            );
         });
     });
 });
