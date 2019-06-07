@@ -165,6 +165,9 @@ function getDependencies(fileName: string, options: Options): Set<string> {
 }
 
 function addDependencies(result: Set<string>, dependencies: Dependencies) {
+    for (const name of Object.keys(dependencies)) {
+        result.add(name);
+    }
     for (const name in dependencies) {
         if (dependencies.hasOwnProperty(name)) {
             result.add(name);

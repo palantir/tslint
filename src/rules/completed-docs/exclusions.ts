@@ -49,13 +49,11 @@ const addRequirements = (exclusionsMap: ExclusionsMap, descriptors: IInputExclus
         return;
     }
 
-    for (const docType in descriptors) {
-        if (hasOwnProperty(descriptors, docType)) {
-            exclusionsMap.set(
-                docType as DocType,
-                createRequirementsForDocType(docType as DocType, descriptors[docType]),
-            );
-        }
+    for (const docType of Object.keys(descriptors)) {
+        exclusionsMap.set(
+            docType as DocType,
+            createRequirementsForDocType(docType as DocType, descriptors[docType]),
+        );
     }
 };
 

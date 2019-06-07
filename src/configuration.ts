@@ -311,8 +311,8 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     } catch (err) {
         throw new Error(
             `Invalid "extends" configuration value - could not require "${filePath}". ` +
-                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-                "for the approximate method TSLint uses to find the referenced configuration file.",
+            "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+            "for the approximate method TSLint uses to find the referenced configuration file.",
         );
     }
 }
@@ -328,12 +328,10 @@ export function extendConfigurationFile(
         add(nextProperty);
         return combinedProperty as T;
 
-        function add(property: T | undefined): void {
+        function add(property: any): void {
             if (property !== undefined) {
-                for (const name in property) {
-                    if (hasOwnProperty(property, name)) {
-                        combinedProperty[name] = property[name];
-                    }
+                for (const name of Object.keys(property) as string[]) {
+                    combinedProperty[name] = property[name];
                 }
             }
         }
@@ -517,9 +515,9 @@ export type RawRuleConfig =
     | boolean
     | any[]
     | {
-          severity?: RuleSeverity | "warn" | "none" | "default";
-          options?: any;
-      };
+        severity?: RuleSeverity | "warn" | "none" | "default";
+        options?: any;
+    };
 
 /**
  * Parses a config file and normalizes legacy config settings.
@@ -578,10 +576,8 @@ export function parseConfigFile(
     function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
         const map = new Map<string, Partial<IOptions>>();
         if (config !== undefined) {
-            for (const ruleName in config) {
-                if (hasOwnProperty(config, ruleName)) {
-                    map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
-                }
+            for (const ruleName of Object.keys(config)) {
+                map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
             }
         }
         return map;
@@ -618,15 +614,15 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(pattern =>
-                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
-                      ),
-                  }
+                    exclude: arrayify(raw.exclude).map(pattern =>
+                        dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
+                    ),
+                }
                 : {}),
             ...(raw.format !== undefined
                 ? {
-                      format: raw.format,
-                  }
+                    format: raw.format,
+                }
                 : {}),
         };
     }

@@ -23,9 +23,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description:
             "Recommended the avoidance of 'for-in' statements. They can be replaced by Object.keys in a 'for-of' loop.",
+        optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
-        optionExamples: [true],
         rationale:
             "A for(... of ...) loop is easier to implement and read when a for(... in ...) loop, as for(... in ...) require a hasOwnProperty check on objects to ensure proper behaviour.",
         ruleName: "no-for-in",
