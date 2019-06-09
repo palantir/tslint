@@ -311,26 +311,30 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     } catch (err) {
         throw new Error(
             `Invalid "extends" configuration value - could not require "${filePath}". ` +
-            "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
-            "for the approximate method TSLint uses to find the referenced configuration file.",
+                "Review the Node lookup algorithm (https://nodejs.org/api/modules.html#modules_all_together) " +
+                "for the approximate method TSLint uses to find the referenced configuration file.",
         );
     }
 }
+
+type keyValue = {
+    [s: string]: any;
+};
 
 export function extendConfigurationFile(
     targetConfig: IConfigurationFile,
     nextConfigSource: IConfigurationFile,
 ): IConfigurationFile {
-    function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
+    function combineProperties(targetProperty: keyValue | undefined, nextProperty: keyValue | undefined): keyValue {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
         add(nextProperty);
-        return combinedProperty as T;
+        return combinedProperty;
 
-        function add(property: any): void {
+        function add(property: keyValue | undefined): void {
             if (property !== undefined) {
-                for (const name of Object.keys(property) as string[]) {
+                for (const name of Object.keys(property)) {
                     combinedProperty[name] = property[name];
                 }
             }
@@ -515,9 +519,9 @@ export type RawRuleConfig =
     | boolean
     | any[]
     | {
-        severity?: RuleSeverity | "warn" | "none" | "default";
-        options?: any;
-    };
+          severity?: RuleSeverity | "warn" | "none" | "default";
+          options?: any;
+      };
 
 /**
  * Parses a config file and normalizes legacy config settings.
@@ -614,15 +618,15 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                    exclude: arrayify(raw.exclude).map(pattern =>
-                        dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
-                    ),
-                }
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
+                      ),
+                  }
                 : {}),
             ...(raw.format !== undefined
                 ? {
-                    format: raw.format,
-                }
+                      format: raw.format,
+                  }
                 : {}),
         };
     }

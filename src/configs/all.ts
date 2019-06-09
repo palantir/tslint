@@ -297,11 +297,7 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
-for (const key in rules) {
-    if (!hasOwnProperty(rules, key)) {
-        continue;
-    }
-
+for (const key of Object.keys(rules)) {
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
     if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
