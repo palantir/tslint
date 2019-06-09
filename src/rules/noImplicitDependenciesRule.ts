@@ -168,11 +168,6 @@ function addDependencies(result: Set<string>, dependencies: Dependencies) {
     for (const name of Object.keys(dependencies)) {
         result.add(name);
     }
-    for (const name in dependencies) {
-        if (dependencies.hasOwnProperty(name)) {
-            result.add(name);
-        }
-    }
 }
 
 function findPackageJson(current: string): string | undefined {

@@ -317,22 +317,25 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-type keyValue = {
+interface KeyValue {
     [s: string]: any;
-};
+}
 
 export function extendConfigurationFile(
     targetConfig: IConfigurationFile,
     nextConfigSource: IConfigurationFile,
 ): IConfigurationFile {
-    function combineProperties(targetProperty: keyValue | undefined, nextProperty: keyValue | undefined): keyValue {
+    function combineProperties(
+        targetProperty: KeyValue | undefined,
+        nextProperty: KeyValue | undefined,
+    ): KeyValue {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
         add(nextProperty);
         return combinedProperty;
 
-        function add(property: keyValue | undefined): void {
+        function add(property: KeyValue | undefined): void {
             if (property !== undefined) {
                 for (const name of Object.keys(property)) {
                     combinedProperty[name] = property[name];
