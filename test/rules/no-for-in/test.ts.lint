@@ -7,15 +7,15 @@ for (let i = 0; i < columns[0].data.length; i++) {
 // this should NOT pass
 const object = {test:1, test2:1 ,test3:1};
 for (const key in object) {
-~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Expected a 'for-of' loop instead of a 'for-in' loop.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	if (object.hasOwnProperty(key)) {.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		const element = object[key];
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	}
 ~~
 }
-~
+~ [Do not use the 'for in' statement: 'for (const key in object)'. If this is an object, use 'Object.keys' instead. If this is an array use a standard 'for' or 'for of' loop instead.]
 
 // this should pass
 for (const key of Object.keys(object)) {
