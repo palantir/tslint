@@ -100,7 +100,7 @@ export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker {
         return (
             comments !== undefined &&
             comments.some(comment =>
-                /^\s*falls through\b/i.test(
+                /^\s*falls?\s?through\b/i.test(
                     this.sourceFile.text.slice(comment.pos + 2, comment.end),
                 ),
             )
