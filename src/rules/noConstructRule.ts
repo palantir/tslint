@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isNewExpression(node) && node.expression.kind === ts.SyntaxKind.Identifier) {
             switch ((node.expression as ts.Identifier).text) {

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_ALLOW_NULL_UNION = "allow-null-union";
@@ -26,8 +27,9 @@ const OPTION_ALLOW_ENUM = "allow-enum";
 const OPTION_ALLOW_NUMBER = "allow-number";
 const OPTION_ALLOW_MIX = "allow-mix";
 const OPTION_ALLOW_BOOLEAN_OR_UNDEFINED = "allow-boolean-or-undefined";
+const OPTION_IGNORE_RHS = "ignore-rhs";
 
-// tslint:disable object-literal-sort-keys
+// tslint:disable object-literal-sort-keys no-bitwise
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -64,6 +66,7 @@ export class Rule extends Lint.Rules.TypedRule {
               - Also allows \`true | false | undefined\`.
               - Does not allow \`false | undefined\`.
               - This option is a subset of \`${OPTION_ALLOW_UNDEFINED_UNION}\`, so you don't need to enable both options at the same time.
+            * \`${OPTION_IGNORE_RHS}\` ignores the right-hand operand of \`&&\` and \`||\`.
         `,
         options: {
             type: "array",
@@ -76,10 +79,11 @@ export class Rule extends Lint.Rules.TypedRule {
                     OPTION_ALLOW_ENUM,
                     OPTION_ALLOW_NUMBER,
                     OPTION_ALLOW_BOOLEAN_OR_UNDEFINED,
+                    OPTION_IGNORE_RHS,
                 ],
             },
             minLength: 0,
-            maxLength: 5,
+            maxLength: 7,
         },
         optionExamples: [
             true,
@@ -116,6 +120,7 @@ interface Options {
     allowNumber: boolean;
     allowMix: boolean;
     allowBooleanOrUndefined: boolean;
+    ignoreRhs: boolean;
 }
 
 function parseOptions(ruleArguments: string[], strictNullChecks: boolean): Options {
@@ -128,6 +133,7 @@ function parseOptions(ruleArguments: string[], strictNullChecks: boolean): Optio
         allowNumber: has(OPTION_ALLOW_NUMBER),
         allowMix: has(OPTION_ALLOW_MIX),
         allowBooleanOrUndefined: has(OPTION_ALLOW_BOOLEAN_OR_UNDEFINED),
+        ignoreRhs: has(OPTION_IGNORE_RHS),
     };
 
     function has(name: string): boolean {
@@ -143,14 +149,19 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                 const b = node as ts.BinaryExpression;
                 if (binaryBooleanExpressionKind(b) !== undefined) {
                     const { left, right } = b;
-                    const checkHalf = (expr: ts.Expression) => {
-                        // If it's another boolean binary expression, we'll check it when recursing.
-                        if (!isBooleanBinaryExpression(expr)) {
-                            checkExpression(expr, b);
-                        }
-                    };
-                    checkHalf(left);
-                    checkHalf(right);
+                    // If ignore-rhs is off, we don't have to analyze a boolean binary expression
+                    // on the left side because it will be checked well enough on its own.  However,
+                    // if ignore-rhs is on, we have to analyze the overall result of the left
+                    // side no matter what, because its right side might not follow the rules.
+                    if (options.ignoreRhs || !isBooleanBinaryExpression(left)) {
+                        checkExpression(left, b);
+                    }
+                    // If ignore-rhs is on, we don't have to analyze the right hand side
+                    // We also don't have to analyze the right hand side if it is also a
+                    // boolean binary expression; its own inner check is sufficient.
+                    if (!(options.ignoreRhs || isBooleanBinaryExpression(right))) {
+                        checkExpression(right, b);
+                    }
                 }
                 break;
             }
@@ -224,7 +235,6 @@ function getTypeFailure(type: ts.Type, options: Options): TypeFailure | undefine
     switch (triState(kind)) {
         case true:
             // Allow 'any'. Allow 'true' itself, but not any other always-truthy type.
-            // tslint:disable-next-line no-bitwise
             return isTypeFlagSet(type, ts.TypeFlags.Any | ts.TypeFlags.BooleanLiteral)
                 ? undefined
                 : TypeFailure.AlwaysTruthy;
@@ -290,10 +300,10 @@ function handleUnion(type: ts.UnionType, options: Options): TypeFailure | undefi
     return seenFalsy === 0
         ? TypeFailure.AlwaysTruthy
         : !anyTruthy
-            ? TypeFailure.AlwaysFalsy
-            : !options.allowMix && seenFalsy > 1
-                ? TypeFailure.Mixes
-                : undefined;
+        ? TypeFailure.AlwaysFalsy
+        : !options.allowMix && seenFalsy > 1
+        ? TypeFailure.Mixes
+        : undefined;
 }
 
 /** Fails if a kind of falsiness is not allowed. */
@@ -378,29 +388,28 @@ function getKind(type: ts.Type): TypeKind {
     return is(ts.TypeFlags.String)
         ? TypeKind.String
         : is(ts.TypeFlags.Number)
-            ? TypeKind.Number
-            : is(ts.TypeFlags.Boolean)
-                ? TypeKind.Boolean
-                : is(ts.TypeFlags.Null)
-                    ? TypeKind.Null
-                    : // tslint:disable-next-line:no-bitwise
-                      is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
-                        ? TypeKind.Undefined
-                        : is(ts.TypeFlags.EnumLike)
-                            ? TypeKind.Enum
-                            : is(ts.TypeFlags.NumberLiteral)
-                                ? numberLiteralIsZero(type as ts.NumberLiteralType)
-                                    ? TypeKind.FalseNumberLiteral
-                                    : TypeKind.AlwaysTruthy
-                                : is(ts.TypeFlags.StringLiteral)
-                                    ? stringLiteralIsEmpty(type as ts.StringLiteralType)
-                                        ? TypeKind.FalseStringLiteral
-                                        : TypeKind.AlwaysTruthy
-                                    : is(ts.TypeFlags.BooleanLiteral)
-                                        ? (type as ts.IntrinsicType).intrinsicName === "true"
-                                            ? TypeKind.AlwaysTruthy
-                                            : TypeKind.FalseBooleanLiteral
-                                        : TypeKind.AlwaysTruthy;
+        ? TypeKind.Number
+        : is(ts.TypeFlags.Boolean)
+        ? TypeKind.Boolean
+        : is(ts.TypeFlags.Null)
+        ? TypeKind.Null // tslint:disable-next-line:no-bitwise
+        : is(ts.TypeFlags.Undefined | ts.TypeFlags.Void)
+        ? TypeKind.Undefined
+        : is(ts.TypeFlags.EnumLike)
+        ? TypeKind.Enum
+        : is(ts.TypeFlags.NumberLiteral)
+        ? numberLiteralIsZero(type as ts.NumberLiteralType)
+            ? TypeKind.FalseNumberLiteral
+            : TypeKind.AlwaysTruthy
+        : is(ts.TypeFlags.StringLiteral)
+        ? stringLiteralIsEmpty(type as ts.StringLiteralType)
+            ? TypeKind.FalseStringLiteral
+            : TypeKind.AlwaysTruthy
+        : is(ts.TypeFlags.BooleanLiteral)
+        ? (type as ts.IntrinsicType).intrinsicName === "true"
+            ? TypeKind.AlwaysTruthy
+            : TypeKind.FalseBooleanLiteral
+        : TypeKind.AlwaysTruthy;
 
     function is(flags: ts.TypeFlags) {
         return isTypeFlagSet(type, flags);

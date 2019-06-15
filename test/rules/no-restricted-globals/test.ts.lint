@@ -1,0 +1,75 @@
+function foo(evt: Event) {
+    let length: number = 1;
+    console.log(length);
+
+    Event.target;
+
+    event.target;
+    ~~~~~ [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+}
+
+console.log(length);
+            ~~~~~~  [Unexpected global variable 'length'. Use a local parameter or variable instead.]
+
+import { name } from "./foo";
+import "./custom-global"
+console.log(name);
+
+console.log(badGlobal);
+            ~~~~~~~~~  [Unexpected global variable 'badGlobal'. Use a local parameter or variable instead.]
+
+console.log(goodGlobal);
+
+let { foo = event } = bar
+            ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+
+let { foo = (() => event)() } = bar;
+                   ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+
+let foo: typeof event;
+                ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+
+function rest() {
+    const { bar, ...event } = foo;
+}
+
+function nested() {
+    const { bar, event: { x: y } } = foo;
+}
+
+function initializer() {
+    const { bar, length = () => event } = foo;
+                                ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+}
+
+function nestedInitializer() {
+    const { bar, length: { x: y = () => event } } = foo;
+                                        ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+}
+
+function computedProperty() {
+    const { [event.type]: x } = foo;
+             ~~~~~  [Unexpected global variable 'event'. Use a local parameter or variable instead.]
+}
+
+function typeTest() {
+    type name = any;
+}
+
+function functionTest () {
+    const foo = name;
+    
+    function name () {
+
+    }
+}
+
+function interfaceTest() {
+    var foo: name;
+    interface name {}
+}
+
+function classTest() {
+    const foo = new name();
+    class name {}
+}

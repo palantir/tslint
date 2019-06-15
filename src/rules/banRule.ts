@@ -94,6 +94,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 { name: ["it", "only"], message: "don't focus tests" },
                 { name: ["chai", "assert", "equal"], message: "Use 'strictEqual' instead." },
                 { name: ["*", "forEach"], message: "Use a regular for loop instead." },
+                { name: ["*", "_id", "toString"], message: "Use 'toHexString' instead." },
             ],
         ],
         type: "functionality",
@@ -167,14 +168,14 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkForObjectMethodBan(expression: ts.PropertyAccessExpression) {
-        for (const ban of this.options.methods) {
+        outer: for (const ban of this.options.methods) {
             if (expression.name.text !== ban.name) {
                 continue;
             }
             let current = expression.expression;
             for (let i = ban.object.length - 1; i > 0; --i) {
                 if (!isPropertyAccessExpression(current) || current.name.text !== ban.object[i]) {
-                    continue;
+                    continue outer;
                 }
                 current = current.expression;
             }

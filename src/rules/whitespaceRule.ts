@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces whitespace style conventions.",
         rationale: "Helps maintain a readable, consistent style in your codebase.",
         optionsDescription: Lint.Utils.dedent`
-            Ten arguments may be optionally provided:
+            Several arguments may be optionally provided:
 
             * \`"check-branch"\` checks branching statements (\`if\`/\`else\`/\`for\`/\`while\`) are followed by whitespace.
             * \`"check-decl"\`checks that variable declarations have whitespace around the equals token.
@@ -75,7 +75,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 11,
         },
         optionExamples: [[true, "check-branch", "check-operator", "check-typecast"]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
         hasFix: true,
     };
@@ -170,6 +170,22 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 }
                 break;
 
+            case ts.SyntaxKind.ExportDeclaration:
+                const { exportClause } = node as ts.ExportDeclaration;
+                if (options.module && exportClause !== undefined) {
+                    exportClause.elements.forEach((element, idx, arr) => {
+                        if (idx === arr.length - 1) {
+                            const token = exportClause.getLastToken()!;
+                            checkForTrailingWhitespace(token.getFullStart());
+                        }
+                        if (idx === 0) {
+                            const startPos = element.getStart() - 1;
+                            checkForTrailingWhitespace(startPos, startPos + 1);
+                        }
+                    });
+                }
+                break;
+
             case ts.SyntaxKind.FunctionType:
                 checkEqualsGreaterThanTokenInNode(node);
                 break;
@@ -187,7 +203,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                                 const internalName = element.name;
                                 if (internalName !== undefined) {
                                     if (idx === arr.length - 1) {
-                                        const token = namedBindings.getLastToken();
+                                        const token = namedBindings.getLastToken()!;
                                         checkForTrailingWhitespace(token.getFullStart());
                                     }
                                     if (idx === 0) {
@@ -335,10 +351,13 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 break;
             case ts.SyntaxKind.ImportKeyword:
                 if (
-                    parent.kind === ts.SyntaxKind.CallExpression &&
-                    (parent as ts.CallExpression).expression.kind === ts.SyntaxKind.ImportKeyword
+                    utils.isCallExpression(parent) &&
+                    parent.expression.kind === ts.SyntaxKind.ImportKeyword
                 ) {
                     return; // Don't check ImportCall
+                }
+                if (utils.isImportTypeNode(parent)) {
+                    return; // Don't check TypeQuery
                 }
             // falls through
             case ts.SyntaxKind.ExportKeyword:

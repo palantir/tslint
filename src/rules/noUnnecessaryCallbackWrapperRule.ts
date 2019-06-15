@@ -25,6 +25,7 @@ import {
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noUnnecessaryCallbackWrapper.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -56,7 +57,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
         if (

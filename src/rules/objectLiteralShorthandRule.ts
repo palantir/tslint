@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import {
     isShorthandPropertyAssignment,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 const OPTION_NEVER = "never";
@@ -61,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
+function disallowShorthandWalker(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isShorthandPropertyAssignment(node)) {
             ctx.addFailureAtNode(
@@ -71,7 +72,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
             );
         } else if (
             isMethodDeclaration(node) &&
-            node.parent!.kind === ts.SyntaxKind.ObjectLiteralExpression
+            node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
         ) {
             ctx.addFailureAtNode(
                 node.name,
@@ -83,7 +84,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
+function enforceShorthandWalker(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
             if (

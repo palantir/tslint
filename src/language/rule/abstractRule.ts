@@ -18,15 +18,16 @@
 import * as ts from "typescript";
 
 import { IWalker, WalkContext } from "../walker";
+
 import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
 
 export type NoInfer<T> = T & { [K in keyof T]: T[K] };
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
+    public ruleName: string;
     protected readonly ruleArguments: any[];
     protected readonly ruleSeverity: RuleSeverity;
-    public ruleName: string;
 
     constructor(private readonly options: IOptions) {
         this.ruleName = options.ruleName;
@@ -51,7 +52,7 @@ export abstract class AbstractRule implements IRule {
 
     protected applyWithFunction(
         sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<void>) => void,
+        walkFn: (ctx: WalkContext) => void,
     ): RuleFailure[];
     protected applyWithFunction<T>(
         sourceFile: ts.SourceFile,
