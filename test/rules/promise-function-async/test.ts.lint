@@ -38,6 +38,8 @@ const asyncPromiseArrowFunctionB = async () => new Promise<void>();
 
 // non-'async' non-'Promise'-returning arrow functions are allowed
 const nonAsyncNonPromiseArrowFunction = (n: number) => n;
+const nonAsyncNonPromiseArrowFunctionParenthesisOne = (n: number) => (n);
+const nonAsyncNonPromiseArrowFunctionParenthesisTwo = (n: number) => ((n));
 
 class Test {
     public nonAsyncPromiseMethodA(p: Promise<void>) {
@@ -65,6 +67,8 @@ class Test {
 
     // single statement lamda functions that delegate to another promise-returning function are allowed
     public delegatingMethod = () => this.asyncPromiseMethodB(1);
+    public delegatingMethodParenthesisOne = () => (this.asyncPromiseMethodB(1));
+    public delegatingMethodParenthesisTwo = () => ((this.asyncPromiseMethodB(1)));
 }
 
 [0]: functions that return promises must be async
