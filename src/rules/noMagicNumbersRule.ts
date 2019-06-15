@@ -143,14 +143,14 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<ParsedOptionsType | numbe
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (isCallExpression(node)) {
-                if (
-                    isIdentifier(node.expression) &&
-                    node.expression.text === "parseInt"
-                ) {
+                if (isIdentifier(node.expression) && node.expression.text === "parseInt") {
                     return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
                 }
-                
-                if (isPropertyAccessExpression(node.expression) && NUMBER_METHODS.has(node.expression.name.text)) {
+
+                if (
+                    isPropertyAccessExpression(node.expression) &&
+                    NUMBER_METHODS.has(node.expression.name.text)
+                ) {
                     return;
                 }
             }
