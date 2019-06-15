@@ -150,7 +150,12 @@ export class Rule extends Lint.Rules.AbstractRule {
 function parseOptions(options: Array<string | IExceptionsObject>): Options {
     return {
         allowTrailingLowercase: has(OPTION_ALLOW_TRAILING_LOWERCASE),
-        case: has(OPTION_LOWERCASE) ? Case.Lower : has(OPTION_UPPERCASE) ? Case.Upper : Case.None,
+        case:
+            options.indexOf(OPTION_LOWERCASE) !== -1
+                ? Case.Lower
+                : options.indexOf(OPTION_UPPERCASE) !== -1
+                ? Case.Upper
+                : Case.None,
         failureSuffix: "",
         space: has(OPTION_SPACE),
         ...composeExceptions(options[options.length - 1]),
@@ -231,8 +236,8 @@ class CommentFormatWalker extends Lint.AbstractWalker<Options> {
             return status;
         }
         status.text = fullText.slice(status.start, end);
-        // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ..."
-        if (/^(?:#(?:end)?region|noinspection\s)/.test(status.text)) {
+        // whitelist //#region and //#endregion and JetBrains IDEs' "//noinspection ...", "//region", "//endregion"
+        if (/^(?:#?(?:end)?region|noinspection\s)/.test(status.text)) {
             return status;
         }
 

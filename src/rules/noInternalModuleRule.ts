@@ -17,6 +17,7 @@
 
 import { isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -45,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NoInternalModuleWalker extends Lint.AbstractWalker<void> {
+class NoInternalModuleWalker extends Lint.AbstractWalker {
     public walk(sourceFile: ts.SourceFile) {
         return this.checkStatements(sourceFile.statements);
     }

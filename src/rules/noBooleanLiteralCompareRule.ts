@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isBinaryExpression(node)) {
             const cmp = getBooleanComparison(node, checker);

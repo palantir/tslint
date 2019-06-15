@@ -1,12 +1,17 @@
 [![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
 [![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
+[![Dependency Status](https://david-dm.org/palantir/tslint.svg)](https://david-dm.org/palantir/tslint)
+[![devDependency Status](https://david-dm.org/palantir/tslint/dev-status.svg)](https://david-dm.org/palantir/tslint/?type=dev)
+[![peerDependency Status](https://david-dm.org/palantir/tslint/peer-status.svg)](https://david-dm.org/palantir/tslint/?type=peer)
 [![Circle CI](https://circleci.com/gh/palantir/tslint.svg?style=svg)](https://circleci.com/gh/palantir/tslint)
 
 # TSLint
 
 TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
-TSLint supports:
+:warning: __TSLint will be deprecated some time in 2019__. See this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534).
+
+TSLint currently supports:
 
 -   an extensive set of core rules
 -   custom lint rules
@@ -14,7 +19,7 @@ TSLint supports:
 -   inline disabling and enabling of rules with comment flags in source code
 -   configuration presets (`tslint:latest`, `tslint-react`, etc.) and plugin composition
 -   automatic fixing of formatting & style violations
--   integration with [MSBuild](https://github.com/joshuakgoldberg/tslint.msbuild), [Grunt](https://github.com/palantir/grunt-tslint), [Gulp](https://github.com/panuhorsmalahti/gulp-tslint), [Atom](https://github.com/AtomLinter/linter-tslint), [Eclipse](https://github.com/palantir/eclipse-tslint), [Emacs](http://flycheck.org), [Sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [Vim](https://github.com/scrooloose/syntastic), [Visual Studio 2015](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebAnalyzer), [Visual Studio 2017](https://marketplace.visualstudio.com/items?itemName=RichNewman.TypeScriptAnalyzer), [Visual Studio code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint), [WebStorm](https://www.jetbrains.com/webstorm/help/tslint.html) and [more](https://palantir.github.io/tslint/usage/third-party-tools/)
+-   integration with [MSBuild](https://github.com/joshuakgoldberg/tslint.msbuild), [Grunt](https://github.com/palantir/grunt-tslint), [Gulp](https://github.com/panuhorsmalahti/gulp-tslint), [Atom](https://github.com/AtomLinter/linter-tslint), [Eclipse](https://github.com/palantir/eclipse-tslint), [Emacs](https://www.flycheck.org/), [Sublime](https://packagecontrol.io/packages/SublimeLinter-contrib-tslint), [Vim](https://github.com/scrooloose/syntastic), [Visual Studio 2015](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.WebAnalyzer), [Visual Studio 2017](https://marketplace.visualstudio.com/items?itemName=RichNewman.TypeScriptAnalyzer), [Visual Studio code](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin) (alternative: use [this extension](https://marketplace.visualstudio.com/items?itemName=eg2.tslint) for TS <3.2), [WebStorm](https://www.jetbrains.com/webstorm/help/tslint.html) and [more](https://palantir.github.io/tslint/usage/third-party-tools/)
 
 ## Installation & Usage
 
@@ -26,7 +31,7 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 -   [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
 -   [inline disabling and enabling of rules with comment flags](https://palantir.github.io/tslint/usage/rule-flags/)
 
-## Custom Rules & Plugins
+## Custom rules & plugins
 
 #### Custom rule sets from Palantir
 
@@ -54,23 +59,12 @@ Prerequisites:
 -   `node` v7+
 -   `yarn` v1.0+
 
-#### Quick Start
+#### Quick start
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
+cd tslint
 yarn
 yarn compile
 yarn test
 ```
-
-## Creating a new release
-
-1. Bump the version number in `package.json` and `src/linter.ts`
-2. Add release notes in `CHANGELOG.md`
-    - Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a [Github.com personal access token](https://github.com/settings/tokens) to exist at `~/github_token.txt` with "repo" permissions.
-3. Commit with message `Prepare release <version>`
-4. Push your branch to GitHub and make a PR
-5. Once your PR is merged, wait for the tests to pass on CircleCI for develop
-6. Create a "Release" on GitHub with the proper tag version and notes from the changelog.
-    - The tag should be identical to the version in `package.json`
-7. Run `yarn run publish:local`

@@ -1,0 +1,8 @@
+{
+    "include": ["index.ts"],
+    "compilerOptions": {
+      "resolveJsonModule": true,
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
+    }
+}

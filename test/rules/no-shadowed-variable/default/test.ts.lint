@@ -2,6 +2,7 @@ import { Foo } from './foo';
 import * as Bar from '.bar';
 import Baz from './baz';
 import Bas = require('./bas');
+import _ = require('lodash');
 {
     const Foo = 'bar';
           ~~~ [err % ('Foo')]
@@ -11,6 +12,8 @@ import Bas = require('./bas');
           ~~~ [err % ('Baz')]
     const Bas = Baz;
           ~~~ [err % ('Bas')]
+    const _ = _;
+          ~ [err % ('_')]
 }
 function letTesting() {
     var a = 1;

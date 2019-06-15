@@ -1,0 +1,23 @@
+function emit(event: string, data: number): void;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for functions.]
+
+function emit(event: string, data: string): void;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for functions.]
+
+/**
+ * Exists in one place
+ */
+function emit(event: string, data:any) { }
+
+{
+    function a(event: string, data: number): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for functions.]
+
+    function b(event: string, data: string): void;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for functions.]
+
+    /**
+    * Exists in one place
+    */
+    function b(event: string, data:any) { }
+}

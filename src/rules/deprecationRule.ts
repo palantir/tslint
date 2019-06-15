@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import {
     isVariableDeclarationList,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -61,7 +62,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isIdentifier(node)) {
             if (!isDeclaration(node)) {
@@ -84,7 +85,7 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
 }
 
 function isDeclaration(identifier: ts.Identifier): boolean {
-    const parent = identifier.parent!;
+    const parent = identifier.parent;
     switch (parent.kind) {
         case ts.SyntaxKind.ClassDeclaration:
         case ts.SyntaxKind.ClassExpression:
@@ -112,7 +113,7 @@ function isDeclaration(identifier: ts.Identifier): boolean {
         case ts.SyntaxKind.PropertyAssignment:
             return (
                 (parent as ts.PropertyAssignment).name === identifier &&
-                !isReassignmentTarget(identifier.parent!.parent as ts.ObjectLiteralExpression)
+                !isReassignmentTarget(identifier.parent.parent as ts.ObjectLiteralExpression)
             );
         case ts.SyntaxKind.BindingElement:
             // return true for `b` in `const {a: b} = obj"`
@@ -126,10 +127,10 @@ function isDeclaration(identifier: ts.Identifier): boolean {
 }
 
 function getCallExpresion(node: ts.Expression): ts.CallLikeExpression | undefined {
-    let parent = node.parent!;
+    let parent = node.parent;
     if (isPropertyAccessExpression(parent) && parent.name === node) {
         node = parent;
-        parent = node.parent!;
+        parent = node.parent;
     }
     return isTaggedTemplateExpression(parent) ||
         ((isCallExpression(parent) || isNewExpression(parent)) && parent.expression === node)
@@ -146,9 +147,9 @@ function getDeprecation(node: ts.Identifier, tc: ts.TypeChecker): string | undef
         }
     }
     let symbol: ts.Symbol | undefined;
-    const parent = node.parent!;
+    const parent = node.parent;
     if (parent.kind === ts.SyntaxKind.BindingElement) {
-        symbol = tc.getTypeAtLocation(parent.parent!).getProperty(node.text);
+        symbol = tc.getTypeAtLocation(parent.parent).getProperty(node.text);
     } else if (
         (isPropertyAssignment(parent) && parent.name === node) ||
         (isShorthandPropertyAssignment(parent) &&
@@ -215,10 +216,10 @@ function getDeprecationFromDeclarations(declarations?: ts.Declaration[]): string
             declaration = getDeclarationOfBindingElement(declaration);
         }
         if (isVariableDeclaration(declaration)) {
-            declaration = declaration.parent!;
+            declaration = declaration.parent;
         }
         if (isVariableDeclarationList(declaration)) {
-            declaration = declaration.parent!;
+            declaration = declaration.parent;
         }
         const result = getDeprecationFromDeclaration(declaration);
         if (result !== undefined) {

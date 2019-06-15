@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     // Intentionally exclude EndOfFileToken: it can have JSDoc, but it is only relevant in JavaScript files
     return sourceFile.statements.forEach(function cb(node: ts.Node): void {
@@ -79,6 +79,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 break;
 
             case ts.SyntaxKind.JSDocClassTag:
+            case ts.SyntaxKind.JSDocThisTag:
             case ts.SyntaxKind.JSDocTypeTag:
             case ts.SyntaxKind.JSDocTypedefTag:
             case ts.SyntaxKind.JSDocPropertyTag:

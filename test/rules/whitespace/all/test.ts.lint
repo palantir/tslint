@@ -144,7 +144,16 @@ export function each(obj, iterator, context) {
 }
 
 export {each as forEach};
+        ~ [missing whitespace]
+                       ~ [missing whitespace]
 import "libE";
+
+const E = 123;
+const F = 123;
+export {E,F};
+        ~ [missing whitespace]
+          ~ [missing whitespace]
+           ~ [missing whitespace]
 
 function foobar(){}
                  ~ [missing whitespace]

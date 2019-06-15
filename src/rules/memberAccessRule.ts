@@ -190,8 +190,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 node.kind === ts.SyntaxKind.Constructor
                     ? getChildOfKind(node, ts.SyntaxKind.ConstructorKeyword, ctx.sourceFile)!
                     : node.name !== undefined
-                        ? node.name
-                        : node;
+                    ? node.name
+                    : node;
             const memberName =
                 node.name !== undefined && node.name.kind === ts.SyntaxKind.Identifier
                     ? node.name.text
