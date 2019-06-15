@@ -6,7 +6,6 @@
 /scripts/*.js
 /scripts/*.js.map
 /lib/
-/test/executable/tslint.json
 node_modules/
 !test/rules/**/node_modules
 tscommand*.txt
@@ -26,3 +25,6 @@ docs/formatters/*/index.html
 
 /coverage/
 /.nyc_output
+
+# ide
+/.idea

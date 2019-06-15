@@ -67,6 +67,8 @@ import { importB } from "libB";
 import { importC } from "libC";
 import moduleD, { importD } from "libD";
 import { importD, importE } from "libD";
+import { importF as F } from "libF";
+import { importF as F, importG as G } from "libF";
 
 import {
   importA,
@@ -82,8 +84,12 @@ export function each(obj, iterator, context) {
     //
 }
 
-export {each as forEach};
+export { each as forEach };
 import "libE";
+
+const E = 123;
+const F = 123;
+export { E, F };
 
 function foobar() {}
 

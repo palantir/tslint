@@ -44,10 +44,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isCallExpression(node) &&
-            node.expression.kind === ts.SyntaxKind.Identifier && (node.expression as ts.Identifier).text === "eval") {
+        if (
+            isCallExpression(node) &&
+            node.expression.kind === ts.SyntaxKind.Identifier &&
+            (node.expression as ts.Identifier).text === "eval"
+        ) {
             ctx.addFailureAtNode(node.expression, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

@@ -1,3 +1,4 @@
+[typescript]: < 2.9.0
 // case 1
 const fs = require("fs");
 

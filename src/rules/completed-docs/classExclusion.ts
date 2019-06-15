@@ -19,8 +19,16 @@ import { hasModifier } from "tsutils";
 import * as ts from "typescript";
 
 import {
-    ALL, Location, LOCATION_INSTANCE, LOCATION_STATIC, Privacy, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC,
+    ALL,
+    Location,
+    LOCATION_INSTANCE,
+    LOCATION_STATIC,
+    Privacy,
+    PRIVACY_PRIVATE,
+    PRIVACY_PROTECTED,
+    PRIVACY_PUBLIC,
 } from "../completedDocsRule";
+
 import { Exclusion } from "./exclusion";
 
 export interface IClassExclusionDescriptor {
@@ -33,9 +41,7 @@ export class ClassExclusion extends Exclusion<IClassExclusionDescriptor> {
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
     public excludes(node: ts.Node) {
-        return !(
-            this.shouldLocationBeDocumented(node)
-            && this.shouldPrivacyBeDocumented(node));
+        return !(this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node));
     }
 
     private shouldLocationBeDocumented(node: ts.Node) {

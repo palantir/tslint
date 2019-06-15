@@ -8,17 +8,12 @@
         "noUnusedLocals": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
         "sourceMap": true,
         "target": "es5",
         "lib": ["es6"],
         "outDir": "../build"
     },
-    "include": [
-        "../src/**/*",
-        "**/*"
-    ],
-    "exclude": [
-        "./files",
-        "./rules"
-    ]
+    "include": ["../src/**/*", "**/*"],
+    "exclude": ["./files", "./rules"]
 }

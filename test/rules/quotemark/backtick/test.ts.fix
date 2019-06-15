@@ -1,0 +1,80 @@
+"use strict"
+
+import { Something } from "some-package"
+export { SomethingElse } from "another-package"
+
+enum Sides {
+    '<- Left',
+    'Right ->'
+}
+
+const octalEscapeSequence = '\1'
+const octalEscapeSequence2 = '\7'
+const octalEscapeSequence3 = '\77'
+const octalEscapeSequence4 = '\377'
+const octalEscapeSequence5 = '\123'
+// Prefix (\47) is an octal escape sequence
+const octalEscapeSequence6 = '\477'
+const octalEscapeSequence7 = '\\77 \77 \\37 \\77'
+
+const notOctalEscapeSequence = `\877`
+const notOctalEscapeSequence2 = `\017`
+const notOctalEscapeSequence3 = `\t`
+const notOctalEscapeSequence4 = `\0`
+const notOctalEscapeSequence4 = `\\77 \\37 \\\\47 \\\\\\77`
+
+function strictFunction() {
+    "use strict"
+
+    const str = `use strict`
+}
+
+var single = `single`;
+    var double = `married`;
+var singleWithinDouble = `'singleWithinDouble'`;
+var doubleWithinSingle = `"doubleWithinSingle"`;
+var tabNewlineWithinSingle = `tab\tNewline\nWithinSingle`;
+
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" | number> = [];
+var arrayThree: Array<"literal string" | "hello world"> = [];
+var arrayFour: Array<"literal string" | "hello world" | "foo bar"> = [];
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" & number> = [];
+var arrayFour: Array<"literal string" | "hello world" & "foo bar"> = [];
+
+function test<T extends "generic">() {
+
+}
+
+function test<T extends ("generic" & number)>() {
+
+}
+
+declare var obj: {
+    helloWorldString: string
+}
+
+interface obj2 {
+    helloWorldString: string
+}
+
+type objHello = typeof obj["helloWorldString"]
+type objHello2 = obj2["helloWorldString"]
+let helloValue = obj[`helloWorldString`]
+
+helloValue = obj[`helloWorldString`]
+
+const obj3: {
+    value: typeof obj["helloWorldString"]
+} = {
+    value: obj[`helloWorldString`]
+}
+
+const callback = <U extends "generic">() => `hi` as number | string
+
+var hello: `world`;
+`escaped'quotemark`;
+
+// "avoid-template" option is not set.
+`foo`;

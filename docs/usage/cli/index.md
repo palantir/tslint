@@ -41,9 +41,11 @@ Options:
 -i, --init                             generate a tslint.json config file in the current working directory
 -o, --out [out]                        output file
 --outputAbsolutePaths                  whether or not outputted file paths are absolute
+--print-config                         print resolved configuration for a file
 -r, --rules-dir [rules-dir]            rules directory
 -s, --formatters-dir [formatters-dir]  formatters directory
 -t, --format [format]                  output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)
+-q, --quiet                            hide non "error" severity linting errors from output
 --test                                 test that tslint produces the correct output for the specified directory
 -p, --project [project]                tsconfig.json file
 --type-check                           (deprecated) check for type errors before linting the project
@@ -116,6 +118,11 @@ tslint accepts the following command-line options:
     Other built-in options include pmd, msbuild, checkstyle, and vso.
     Additional formatters can be added and used if the --formatters-dir
     option is set.
+
+-q, --quiet
+    Hide non "error" severity linting errors from output. This can be
+    especially useful in CI environments, where you may want only "error"
+    severity linting errors to cause linting to fail.
 
 --test:
     Runs tslint on matched directories and checks if tslint outputs

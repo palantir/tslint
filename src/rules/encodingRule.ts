@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const encoding = detectEncoding(ctx.sourceFile.fileName);
     if (encoding !== "utf8") {
         ctx.addFailure(0, 1, Rule.FAILURE_STRING(encoding));
@@ -66,8 +66,14 @@ function showEncoding(encoding: Encoding): string {
 function detectEncoding(fileName: string): Encoding {
     const fd = fs.openSync(fileName, "r");
     const maxBytesRead = 3; // Only need 3 bytes to detect the encoding.
-    const buffer = new Buffer(maxBytesRead);
-    const bytesRead = fs.readSync(fd, buffer, /*offset*/ 0, /*length*/ maxBytesRead, /*position*/ 0);
+    const buffer = Buffer.allocUnsafe(maxBytesRead);
+    const bytesRead = fs.readSync(
+        fd,
+        buffer,
+        /*offset*/ 0,
+        /*length*/ maxBytesRead,
+        /*position*/ 0,
+    );
     fs.closeSync(fd);
     return detectBufferEncoding(buffer, bytesRead);
 }

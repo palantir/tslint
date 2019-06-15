@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 
 export const rules = {
     "adjacent-overload-signatures": true,
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-        ],
+    align: {
+        options: ["parameters", "statements"],
     },
     "array-type": {
         options: ["array-simple"],
@@ -31,7 +28,10 @@ export const rules = {
     "ban-types": {
         options: [
             ["Object", "Avoid using the `Object` type. Did you mean `object`?"],
-            ["Function", "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."],
+            [
+                "Function",
+                "Avoid using the `Function` type. Prefer a specific function type, like `() => void`.",
+            ],
             ["Boolean", "Avoid using the `Boolean` type. Did you mean `boolean`?"],
             ["Number", "Avoid using the `Number` type. Did you mean `number`?"],
             ["String", "Avoid using the `String` type. Did you mean `string`?"],
@@ -43,12 +43,12 @@ export const rules = {
     "comment-format": {
         options: ["check-space"],
     },
-    "curly": true,
+    curly: true,
     "cyclomatic-complexity": false,
-    "eofline": true,
-    "forin": true,
+    eofline: true,
+    forin: true,
     "import-spacing": true,
-    "indent":  {
+    indent: {
         options: ["spaces"],
     },
     "interface-name": {
@@ -57,12 +57,8 @@ export const rules = {
     "interface-over-type-literal": true,
     "jsdoc-format": true,
     "label-position": true,
-    "max-classes-per-file": {
-        options: [1],
-    },
-    "max-line-length": {
-        options: [120],
-    },
+    "max-classes-per-file": { options: 1 },
+    "max-line-length": { options: 120 },
     "member-access": true,
     "member-ordering": {
         options: {
@@ -98,13 +94,10 @@ export const rules = {
     "no-unnecessary-initializer": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    // disable this rule as it is very heavy performance-wise and not that useful
-    "no-use-before-declare": false,
+    "no-use-before-declare": false, // disabled because it is very heavy performance-wise and not that useful
     "no-var-keyword": true,
     "no-var-requires": true,
-    "object-literal-key-quotes": {
-        options: ["consistent-as-needed"],
-    },
+    "object-literal-key-quotes": { options: "consistent-as-needed" },
     "object-literal-shorthand": true,
     "object-literal-sort-keys": true,
     "one-line": {
@@ -116,14 +109,9 @@ export const rules = {
             "check-whitespace",
         ],
     },
-    "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
-    },
+    "one-variable-per-declaration": { options: ["ignore-for-loop"] },
     "only-arrow-functions": {
-        options: [
-            "allow-declarations",
-            "allow-named-functions",
-        ],
+        options: ["allow-declarations", "allow-named-functions"],
     },
     "ordered-imports": {
         options: {
@@ -134,16 +122,11 @@ export const rules = {
     },
     "prefer-const": true,
     "prefer-for-of": true,
-    "quotemark": {
-        options: [
-            "double",
-            "avoid-escape",
-        ],
+    quotemark: {
+        options: ["double", "avoid-escape"],
     },
-    "radix": true,
-    "semicolon": {
-        options: ["always"],
-    },
+    radix: true,
+    semicolon: { options: ["always"] },
     "space-before-function-paren": {
         options: {
             anonymous: "never",
@@ -155,27 +138,26 @@ export const rules = {
     },
     "trailing-comma": {
         options: {
+            esSpecCompliant: true,
             multiline: "always",
             singleline: "never",
         },
     },
-    "triple-equals": {
-        options: ["allow-null-check"],
-    },
-    "typedef": false,
+    "triple-equals": { options: ["allow-null-check"] },
+    typedef: false,
     "typedef-whitespace": {
         options: [
             {
                 "call-signature": "nospace",
                 "index-signature": "nospace",
-                "parameter": "nospace",
+                parameter: "nospace",
                 "property-declaration": "nospace",
                 "variable-declaration": "nospace",
             },
             {
                 "call-signature": "onespace",
                 "index-signature": "onespace",
-                "parameter": "onespace",
+                parameter: "onespace",
                 "property-declaration": "onespace",
                 "variable-declaration": "onespace",
             },
@@ -185,13 +167,9 @@ export const rules = {
     "unified-signatures": true,
     "use-isnan": true,
     "variable-name": {
-        options: [
-            "ban-keywords",
-            "check-format",
-            "allow-pascal-case",
-        ],
+        options: ["ban-keywords", "check-format", "allow-pascal-case"],
     },
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",
@@ -203,18 +181,15 @@ export const rules = {
     },
 };
 export const jsRules = {
-    "align": {
-        options: [
-            "parameters",
-            "statements",
-        ],
+    align: {
+        options: ["parameters", "statements"],
     },
     "class-name": true,
-    "curly": true,
-    "eofline": true,
-    "forin": true,
+    curly: true,
+    eofline: true,
+    forin: true,
     "import-spacing": true,
-    "indent":  {
+    indent: {
         options: ["spaces"],
     },
     "jsdoc-format": true,
@@ -253,19 +228,12 @@ export const jsRules = {
             "check-whitespace",
         ],
     },
-    "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
+    "one-variable-per-declaration": { options: ["ignore-for-loop"] },
+    quotemark: {
+        options: ["double", "avoid-escape"],
     },
-    "quotemark": {
-        options: [
-            "double",
-            "avoid-escape",
-        ],
-    },
-    "radix": true,
-    "semicolon": {
-        options: ["always"],
-    },
+    radix: true,
+    semicolon: { options: ["always"] },
     "space-before-function-paren": {
         options: {
             anonymous: "never",
@@ -281,18 +249,12 @@ export const jsRules = {
             singleline: "never",
         },
     },
-    "triple-equals": {
-        options: ["allow-null-check"],
-    },
+    "triple-equals": { options: ["allow-null-check"] },
     "use-isnan": true,
     "variable-name": {
-        options: [
-            "ban-keywords",
-            "check-format",
-            "allow-pascal-case",
-        ],
+        options: ["ban-keywords", "check-format", "allow-pascal-case"],
     },
-    "whitespace": {
+    whitespace: {
         options: [
             "check-branch",
             "check-decl",

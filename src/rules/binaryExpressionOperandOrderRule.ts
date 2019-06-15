@@ -42,16 +42,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Literal expression should be on the right-hand side of a binary expression.";
+    public static FAILURE_STRING =
+        "Literal expression should be on the right-hand side of a binary expression.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node) {
-        if (isBinaryExpression(node) && isLiteral(node.left) && !isLiteral(node.right) && !isAllowedOrderedOperator(node)) {
+        if (
+            isBinaryExpression(node) &&
+            isLiteral(node.left) &&
+            !isLiteral(node.right) &&
+            !isAllowedOrderedOperator(node)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         ts.forEachChild(node, cb);

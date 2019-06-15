@@ -29,7 +29,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Parameter properties can be confusing to those new to TS as they are less explicit
             than other ways of declaring and initializing class members.
 
-            It can be cleaner to keep member variable declarations in one list directly only the class
+            It can be cleaner to keep member variable declarations in one list directly above the class constructor
             (instead of mixed between direct class members and constructor parameter properties).
         `,
         optionsDescription: "Not configurable.",
@@ -49,14 +49,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (node.kind === ts.SyntaxKind.Constructor) {
             for (const parameter of (node as ts.ConstructorDeclaration).parameters) {
                 if (isParameterProperty(parameter)) {
-                    ctx.addFailure(parameter.getStart(ctx.sourceFile),
-                                   parameter.name.pos,
-                                   Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)));
+                    ctx.addFailure(
+                        parameter.getStart(ctx.sourceFile),
+                        parameter.name.pos,
+                        Rule.FAILURE_STRING_FACTORY(parameter.name.getText(ctx.sourceFile)),
+                    );
                 }
             }
         }

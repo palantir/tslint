@@ -58,10 +58,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [
             true,
             [true, OPTION_CHECK_MULTILINE_START],
-            [true, OPTION_PREFER_SINGLELINE, { OPTION_MAX_WIDTH: 80}],
-            [true, OPTION_CHECK_MULTILINE_START, OPTION_PREFER_SINGLELINE, { OPTION_MAX_WIDTH: 80 }],
+            [true, OPTION_PREFER_SINGLELINE, { OPTION_MAX_WIDTH: 80 }],
+            [
+                true,
+                OPTION_CHECK_MULTILINE_START,
+                OPTION_PREFER_SINGLELINE,
+                { OPTION_MAX_WIDTH: 80 },
+            ],
         ],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
         codeExamples: [
             {
@@ -92,10 +97,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static ALIGNMENT_FAILURE_STRING = "asterisks in jsdoc must be aligned";
     public static FORMAT_FAILURE_STRING = "jsdoc is not formatted correctly on this line";
     public static PREFER_SINGLE_LINE_FAILURE = "short jsdoc block should be on single line";
-    public static SINGLE_LINE_MAX_WIDTH_FAILURE = "singleline jsdoc block should fit within maxWidth characters";
+    public static SINGLE_LINE_MAX_WIDTH_FAILURE =
+        "singleline jsdoc block should fit within maxWidth characters";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const maxWidthOption = this.ruleArguments.find((arg) => typeof arg === "object" && typeof arg[OPTION_MAX_WIDTH] === "number");
+        const maxWidthOption = this.ruleArguments.find(
+            arg => typeof arg === "object" && typeof arg[OPTION_MAX_WIDTH] === "number",
+        );
         let maxWidth;
         if (maxWidthOption) {
             maxWidth = maxWidthOption[OPTION_MAX_WIDTH];
@@ -115,21 +123,37 @@ interface Options {
     maxWidth: number;
 }
 
-function shouldBeSingleline(ctx: Lint.WalkContext<Options>, lines: string[], {pos, end}: ts.CommentRange): boolean {
+function shouldBeSingleline(
+    ctx: Lint.WalkContext<Options>,
+    lines: string[],
+    { pos, end }: ts.CommentRange,
+): boolean {
     if (!ctx.options.preferSingleline) {
         return false;
     }
 
     if (lines.length === 3) {
         ctx.addFailure(pos, end, Rule.PREFER_SINGLE_LINE_FAILURE, [
-            Lint.Replacement.replaceFromTo(pos, end, `/** ${lines[1].trim().substr(1).trim()} */`),
+            Lint.Replacement.replaceFromTo(
+                pos,
+                end,
+                `/** ${lines[1]
+                    .trim()
+                    .substr(1)
+                    .trim()} */`,
+            ),
         ]);
     }
 
     return false;
 }
 
-function shouldBeMultiline(ctx: Lint.WalkContext<Options>, lines: string[], fullText: string, { pos, end }: ts.CommentRange): boolean {
+function shouldBeMultiline(
+    ctx: Lint.WalkContext<Options>,
+    lines: string[],
+    fullText: string,
+    { pos, end }: ts.CommentRange,
+): boolean {
     if (!ctx.options.preferSingleline && !ctx.options.maxWidth) {
         return false;
     }
@@ -176,9 +200,9 @@ function shouldBeMultiline(ctx: Lint.WalkContext<Options>, lines: string[], full
                 return acc;
             },
             [`${indent} *`],
-    )
-    // Flip the list so it's in top-to-bottom order
-    .reverse();
+        )
+        // Flip the list so it's in top-to-bottom order
+        .reverse();
 
     newLines.unshift(`${indent}/**`);
     newLines.push(`${indent} */`);
@@ -193,10 +217,14 @@ function shouldBeMultiline(ctx: Lint.WalkContext<Options>, lines: string[], full
 function walk(ctx: Lint.WalkContext<Options>) {
     return utils.forEachComment(ctx.sourceFile, (fullText, range) => {
         const { kind, pos, end } = range;
-        if (kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
-            fullText[pos + 2] !== "*" || fullText[pos + 3] === "*" || fullText[pos + 3] === "/") {
-                return;
-            }
+        if (
+            kind !== ts.SyntaxKind.MultiLineCommentTrivia ||
+            fullText[pos + 2] !== "*" ||
+            fullText[pos + 3] === "*" ||
+            fullText[pos + 3] === "/"
+        ) {
+            return;
+        }
         const lines = fullText.slice(pos + 3, end - 2).split("\n");
         const firstLine = lines[0];
 
@@ -242,7 +270,6 @@ function walk(ctx: Lint.WalkContext<Options>) {
         if (lastLine.length !== alignColumn) {
             ctx.addFailure(lineStart, end, Rule.ALIGNMENT_FAILURE_STRING);
         }
-
     });
 }
 

@@ -34,22 +34,45 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Use a method signature instead of a property signature of function type.";
+    public static FAILURE_STRING =
+        "Use a method signature instead of a property signature of function type.";
+
+    public static METH_SIGN_STRING(ps: ts.PropertySignature): string {
+        const { type, questionToken } = ps;
+
+        let result = ps.name.getText();
+        if (questionToken !== undefined) {
+            result += "?";
+        }
+        if (type !== undefined && isFunctionTypeNode(type) && type.type !== undefined) {
+            if (type.typeParameters !== undefined) {
+                const tps = type.typeParameters.map(tp => tp.getText()).join(", ");
+                result += `<${tps}>`;
+            }
+            const args = type.parameters.map(v => v.getText()).join(", ");
+            result += `(${args}): ${type.type.getText()};`;
+        }
+
+        return result;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isPropertySignature(node)) {
             const { type } = node;
             if (type !== undefined && isFunctionTypeNode(type)) {
-                ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, type.type === undefined ? undefined : [
-                    Lint.Replacement.deleteFromTo(type.pos - 1, type.getStart()), // delete colon in 'foo: () => void'
-                    Lint.Replacement.replaceFromTo(type.parameters.end + 1, type.type.pos, ":"), // replace => with colon
-                ]);
+                ctx.addFailureAtNode(
+                    node.name,
+                    Rule.FAILURE_STRING,
+                    type.type === undefined
+                        ? undefined
+                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))],
+                );
             }
         }
         return ts.forEachChild(node, cb);

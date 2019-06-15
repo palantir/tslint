@@ -1,12 +1,14 @@
 {
     "include": [
-        "build/**/*.js"
+        "build/**/*.js",
+        "src/**/*.ts"
     ],
     "extension": [
-        ".js"
+        ".js",
+        ".ts"
     ],
     "exclude": [
-        "build/test"
+        "**/test"
     ],
     "reporter": [
         "text-summary",
