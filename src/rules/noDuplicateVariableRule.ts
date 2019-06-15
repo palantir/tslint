@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 const OPTION_CHECK_PARAMETERS = "check-parameters";
 
@@ -42,10 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_CHECK_PARAMETERS],
         },
-        optionExamples: [
-            true,
-            [true, OPTION_CHECK_PARAMETERS],
-        ],
+        optionExamples: [true, [true, OPTION_CHECK_PARAMETERS]],
         type: "functionality",
         typescriptOnly: false,
     };
@@ -56,9 +54,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
-            parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== - 1,
-        }));
+        return this.applyWithWalker(
+            new NoDuplicateVariableWalker(sourceFile, this.ruleName, {
+                parameters: this.ruleArguments.indexOf(OPTION_CHECK_PARAMETERS) !== -1,
+            }),
+        );
     }
 }
 
@@ -67,7 +67,10 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
         const cb = (node: ts.Node): void => {
-            if (utils.isFunctionScopeBoundary(node)) {
+            // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+            // requires tsutils > 3.0.
+            if (isFunctionScopeBoundary(node)) {
+                // tslint:enable:deprecation
                 const oldScope = this.scope;
                 this.scope = new Set();
                 ts.forEachChild(node, cb);
@@ -76,7 +79,10 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
             }
             if (this.options.parameters && utils.isParameterDeclaration(node)) {
                 this.handleBindingName(node.name, false);
-            } else if (utils.isVariableDeclarationList(node) && !utils.isBlockScopedVariableDeclarationList(node)) {
+            } else if (
+                utils.isVariableDeclarationList(node) &&
+                !utils.isBlockScopedVariableDeclarationList(node)
+            ) {
                 for (const variable of node.declarations) {
                     this.handleBindingName(variable.name, true);
                 }

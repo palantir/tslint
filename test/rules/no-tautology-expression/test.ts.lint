@@ -1,0 +1,159 @@
+
+const expr = "someStr" === "someStr";
+             ~~~~~~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+const expr = 123 === 123;
+             ~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+const someVar = 100;
+const expr = someVar === someVar;
+             ~~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+
+const someFunc = () => {
+    if ("SomeStr" === "SomeStr") {
+        ~~~~~~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (100 === 100) {
+        ~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    let someVar = 100;
+    if (someVar === someVar) {
+        ~~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (1 !== 1) {
+        ~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (1 > 1) {
+        ~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = 123;
+    if (someVar < someVar) {
+        ~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" == "str") {
+        ~~~~~~~~~~~~~~ [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (123 != 123) {
+        ~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" <= "str") {
+        ~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if ("str" >= "str") {
+        ~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = true;
+    if (someVar || someVar) {
+        ~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someVar = true;
+    if (someVar && someVar) {
+        ~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someObj = { "name" : "moses the great" };
+    if (someObj.name === someObj.name) {
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const someObj = { "name" : "moses the great", "address" : "king's road 10" };
+    if (someObj.name === someObj.address) {
+        return true;
+    }
+}
+
+const someFunc = () => {
+    const objOne = { "name" : "moses the great" };
+    const objTwo = { "name" : "moses the great" };
+    if (objOne.name === objTwo.name) {
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (true === true) {
+        ~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (false === false) {
+        ~~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (true === false) {
+        ~~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (null === null) {
+        ~~~~~~~~~~~~~  [Both sides of this equality comparison are the same, so the expression is either a tautology or a contradiction.]
+        return true;
+    }
+}
+
+const someFunc = () => {
+    if (null === false) {
+        return true;
+    }
+}
+
+const someVar1 = 3 + 3;
+const someVar2 = 3 - 3;
+const someVar3 = 3 * 3;
+const someVar4 = 3 % 3;
+const someVar5 = 3 / 3;

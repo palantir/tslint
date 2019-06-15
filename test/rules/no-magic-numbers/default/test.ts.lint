@@ -1,24 +1,24 @@
 console.log(-1, 0, 1);
 console.log(42.42);
-            ~~~~~                     ['magic numbers' are not allowed]
+            ~~~~~                     ['magic numbers' are not allowed: 42.42]
 console.log(-0);
-            ~~                            ['magic numbers' are not allowed]
+            ~~                            ['magic numbers' are not allowed: -0]
 const a = 1337;
 const b = {
     a: 1338,
     b: 0,
 }
 b.b = 1339;
-      ~~~~                          ['magic numbers' are not allowed]
+      ~~~~                          ['magic numbers' are not allowed: 1339]
 
 console.log(1340);
-            ~~~~                    ['magic numbers' are not allowed]
+            ~~~~                    ['magic numbers' are not allowed: 1340]
 for(let i = 0;i>1341;++i) {
-                ~~~~                ['magic numbers' are not allowed]
+                ~~~~                ['magic numbers' are not allowed: 1341]
 }
 
 throw 1342;
-      ~~~~                          ['magic numbers' are not allowed]
+      ~~~~                          ['magic numbers' are not allowed: 1342]
 
 class A {
     static test = 1337;

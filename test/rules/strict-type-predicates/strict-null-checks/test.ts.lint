@@ -194,6 +194,9 @@ declare function get<T>(): T;
     typeof get<string | number>() === `stirng`;
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
 
+    typeof get<any>() === "unknown";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
     let a: string, b: string;
     typeof a === typeof b;
     typeof a === b;

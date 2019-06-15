@@ -1,6 +1,6 @@
 /*
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,32 @@
  */
 
 // Use classes here instead of interfaces because we want runtime type data
-export class Line { }
-export class CodeLine extends Line { constructor(public contents: string) { super(); } }
-export class MessageSubstitutionLine extends Line { constructor(public key: string, public message: string) { super(); } }
+export class Line {}
+export class CodeLine extends Line {
+    constructor(public contents: string) {
+        super();
+    }
+}
+export class MessageSubstitutionLine extends Line {
+    constructor(public key: string, public message: string) {
+        super();
+    }
+}
 
-export class ErrorLine extends Line { constructor(public startCol: number) { super(); } }
-export class MultilineErrorLine extends ErrorLine { constructor(startCol: number) { super(startCol); } }
+export class ErrorLine extends Line {
+    constructor(public startCol: number) {
+        super();
+    }
+}
+export class MultilineErrorLine extends ErrorLine {
+    constructor(startCol: number) {
+        super(startCol);
+    }
+}
 export class EndErrorLine extends ErrorLine {
-    constructor(startCol: number, public endCol: number, public message: string) { super(startCol); }
+    constructor(startCol: number, public endCol: number, public message: string) {
+        super(startCol);
+    }
 }
 
 // example matches (between the quotes):
@@ -50,7 +68,7 @@ export function parseLine(text: string): Line {
     if (endErrorMatch !== null) {
         const [, squiggles, message] = endErrorMatch;
         const startErrorCol = text.indexOf("~");
-        const zeroLengthError = (squiggles === ZERO_LENGTH_ERROR);
+        const zeroLengthError = squiggles === ZERO_LENGTH_ERROR;
         const endErrorCol = zeroLengthError ? startErrorCol : text.lastIndexOf("~") + 1;
         return new EndErrorLine(startErrorCol, endErrorCol, message);
     }
@@ -69,14 +87,17 @@ export function parseLine(text: string): Line {
  * Maps a Line object to a matching line of text that could be in a .lint file.
  * This is almost the inverse of parseLine.
  * If you ran `printLine(parseLine(someText), code)`, the whitespace in the result may be different than in someText
+ * @param fileName - File name containing the line and code.
  * @param line - A Line object to convert to text
  * @param code - If line represents error markup, this is the line of code preceding the markup.
  *               Otherwise, this parameter is not required.
  */
-export function printLine(line: Line, code?: string): string | undefined {
+export function printLine(fileName: string, line: Line, code?: string): string | undefined {
     if (line instanceof ErrorLine) {
         if (code === undefined) {
-           throw new Error("Must supply argument for code parameter when line is an ErrorLine");
+            throw new Error(
+                `${fileName}: Must supply argument for code parameter when line is an ErrorLine`,
+            );
         }
 
         const leadingSpaces = " ".repeat(line.startCol);
@@ -93,7 +114,7 @@ export function printLine(line: Line, code?: string): string | undefined {
             let tildes = "~".repeat(line.endCol - line.startCol);
             if (code.length < line.endCol) {
                 // Better than crashing in String.repeat
-                throw new Error(`Bad error marker at ${JSON.stringify(line)}`);
+                throw new Error(`Bad error marker in ${fileName} at ${JSON.stringify(line)}`);
             }
             let endSpaces = " ".repeat(code.length - line.endCol);
             if (tildes.length === 0) {

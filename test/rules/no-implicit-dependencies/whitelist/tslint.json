@@ -1,5 +1,5 @@
 {
-  "rules": {
-    "no-implicit-dependencies": [true, ["src", "app"]]
-  }
+    "rules": {
+        "no-implicit-dependencies": [true, ["src", "app", "@components", "@com/fixer"]]
+    }
 }

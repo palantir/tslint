@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-null-undefined-union": true
+  }
+}

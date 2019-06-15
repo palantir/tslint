@@ -18,20 +18,23 @@
 // tslint:disable strict-boolean-expressions (TODO: Fix up options)
 
 import * as fs from "fs";
-import * as glob from "glob";
-import { filter as createMinimatchFilter, Minimatch } from "minimatch";
 import * as path from "path";
 import * as ts from "typescript";
 
 import {
     DEFAULT_CONFIG,
     findConfiguration,
+    findConfigurationPath,
+    isFileExcluded,
     JSON_CONFIG_FILENAME,
+    stringifyConfiguration,
 } from "./configuration";
 import { FatalError } from "./error";
+import { tryReadFile } from "./files/reading";
+import { resolveFilesAndProgram } from "./files/resolution";
 import { LintResult } from "./index";
 import { Linter } from "./linter";
-import { flatMap } from "./utils";
+import { trimSingleQuotes } from "./utils";
 
 export interface Options {
     /**
@@ -83,6 +86,11 @@ export interface Options {
      * Whether to output absolute paths
      */
     outputAbsolutePaths?: boolean;
+
+    /**
+     * Outputs the configuration to be used instead of linting.
+     */
+    printConfig?: boolean;
 
     /**
      * tsconfig.json file.
@@ -144,9 +152,16 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
         return Status.Ok;
     }
 
+    if (options.printConfig) {
+        return printConfiguration(options, logger);
+    }
+
     if (options.test) {
         const test = await import("./test");
-        const results = test.runTests((options.files || []).map(trimSingleQuotes), options.rulesDirectory);
+        const results = test.runTests(
+            (options.files || []).map(trimSingleQuotes),
+            options.rulesDirectory,
+        );
         return test.consoleTestResultsHandler(results, logger) ? Status.Ok : Status.FatalError;
     }
 
@@ -161,13 +176,38 @@ async function runWorker(options: Options, logger: Logger): Promise<Status> {
     return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
 }
 
+async function printConfiguration(options: Options, logger: Logger): Promise<Status> {
+    const { files } = options;
+    if (files.length !== 1) {
+        throw new FatalError(`--print-config must be run with exactly one file`);
+    }
+
+    const configurationPath =
+        options.config === undefined ? findConfigurationPath(null, files[0]) : options.config;
+    if (configurationPath === undefined) {
+        throw new FatalError(
+            `Could not find configuration path. Try passing a --config to your tslint.json.`,
+        );
+    }
+
+    const configuration = findConfiguration(configurationPath, files[0]).results;
+    if (configuration === undefined) {
+        throw new FatalError(`Could not find configuration for '${files[1]}`);
+    }
+
+    logger.log(`${stringifyConfiguration(configuration)}\n`);
+    return Status.Ok;
+}
+
 async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
     const { files, program } = resolveFilesAndProgram(options, logger);
     // if type checking, run the type checker
     if (program && options.typeCheck) {
         const diagnostics = ts.getPreEmitDiagnostics(program);
         if (diagnostics.length !== 0) {
-            const message = diagnostics.map((d) => showDiagnostic(d, program, options.outputAbsolutePaths)).join("\n");
+            const message = diagnostics
+                .map(d => showDiagnostic(d, program, options.outputAbsolutePaths))
+                .join("\n");
             if (options.force) {
                 logger.error(`${message}\n`);
             } else {
@@ -178,73 +218,27 @@ async function runLinter(options: Options, logger: Logger): Promise<LintResult> 
     return doLinting(options, files, program, logger);
 }
 
-function resolveFilesAndProgram(
-    { files, project, exclude, outputAbsolutePaths }: Options,
+async function doLinting(
+    options: Options,
+    files: string[],
+    program: ts.Program | undefined,
     logger: Logger,
-): { files: string[]; program?: ts.Program } {
-    // remove single quotes which break matching on Windows when glob is passed in single quotes
-    exclude = exclude.map(trimSingleQuotes);
+): Promise<LintResult> {
+    let configFile =
+        options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
-    if (project === undefined) {
-        return { files: resolveGlobs(files, exclude, outputAbsolutePaths, logger) };
+    let formatter = options.format;
+    if (formatter === undefined) {
+        formatter =
+            configFile && configFile.linterOptions && configFile.linterOptions.format
+                ? configFile.linterOptions.format
+                : "prose";
     }
 
-    const projectPath = findTsconfig(project);
-    if (projectPath === undefined) {
-        throw new FatalError(`Invalid option for project: ${project}`);
-    }
-
-    exclude = exclude.map((pattern) => path.resolve(pattern));
-    const program = Linter.createProgram(projectPath);
-    let filesFound: string[];
-    if (files.length === 0) {
-        filesFound = filterFiles(Linter.getFileNames(program), exclude, false);
-    } else {
-        files = files.map((f) => path.resolve(f));
-        filesFound = filterFiles(program.getSourceFiles().map((f) => f.fileName), files, true);
-        filesFound = filterFiles(filesFound, exclude, false);
-
-        // find non-glob files that have no matching file in the project and are not excluded by any exclude pattern
-        for (const file of filterFiles(files, exclude, false)) {
-            if (!glob.hasMagic(file) && !filesFound.some(createMinimatchFilter(file))) {
-                if (fs.existsSync(file)) {
-                    throw new FatalError(`'${file}' is not included in project.`);
-                }
-                logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
-            }
-        }
-    }
-    return { files: filesFound, program };
-}
-
-function filterFiles(files: string[], patterns: string[], include: boolean): string[] {
-    if (patterns.length === 0) {
-        return include ? [] : files;
-    }
-    const matcher = patterns.map((pattern) => new Minimatch(pattern, {dot: !include})); // `glob` always enables `dot` for ignore patterns
-    return files.filter((file) => include === matcher.some((pattern) => pattern.match(file)));
-}
-
-function resolveGlobs(files: string[], ignore: string[], outputAbsolutePaths: boolean | undefined, logger: Logger): string[] {
-    const results = flatMap(
-        files,
-        (file) => glob.sync(trimSingleQuotes(file), { ignore, nodir: true }),
-    );
-    // warn if `files` contains non-existent files, that are not patters and not excluded by any of the exclude patterns
-    for (const file of filterFiles(files, ignore, false)) {
-        if (!glob.hasMagic(file) && !results.some(createMinimatchFilter(file))) {
-            logger.error(`'${file}' does not exist. This will be an error in TSLint 6.\n`); // TODO make this an error in v6.0.0
-        }
-    }
-    const cwd = process.cwd();
-    return results.map((file) => outputAbsolutePaths ? path.resolve(cwd, file) : path.relative(cwd, file));
-}
-
-async function doLinting(options: Options, files: string[], program: ts.Program | undefined, logger: Logger): Promise<LintResult> {
     const linter = new Linter(
         {
             fix: !!options.fix,
-            formatter: options.format,
+            formatter,
             formattersDirectory: options.formattersDirectory,
             quiet: !!options.quiet,
             rulesDirectory: options.rulesDirectory,
@@ -253,7 +247,6 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     );
 
     let lastFolder: string | undefined;
-    let configFile = options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
     for (const file of files) {
         if (options.config === undefined) {
@@ -263,7 +256,7 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
                 lastFolder = folder;
             }
         }
-        if (isFileExcluded(file)) {
+        if (isFileExcluded(file, configFile)) {
             continue;
         }
 
@@ -283,43 +276,16 @@ async function doLinting(options: Options, files: string[], program: ts.Program 
     }
 
     return linter.getResult();
-
-    function isFileExcluded(filepath: string) {
-        if (configFile === undefined || configFile.linterOptions == undefined || configFile.linterOptions.exclude == undefined) {
-            return false;
-        }
-        const fullPath = path.resolve(filepath);
-        return configFile.linterOptions.exclude.some((pattern) => new Minimatch(pattern).match(fullPath));
-    }
 }
 
-/** Read a file, but return undefined if it is an MPEG '.ts' file. */
-async function tryReadFile(filename: string, logger: Logger): Promise<string | undefined> {
-    if (!fs.existsSync(filename)) {
-        throw new FatalError(`Unable to open file: ${filename}`);
-    }
-    const buffer = Buffer.allocUnsafe(256);
-    const fd = fs.openSync(filename, "r");
-    try {
-        fs.readSync(fd, buffer, 0, 256, 0);
-        if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-            // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-            // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-            // TypeScript source, so tslint ignores files with the specific pattern.
-            logger.error(`${filename}: ignoring MPEG transport stream\n`);
-            return undefined;
-        }
-    } finally {
-        fs.closeSync(fd);
-    }
-
-    return fs.readFileSync(filename, "utf8");
-}
-
-function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, program: ts.Program, outputAbsolutePaths?: boolean): string {
+function showDiagnostic(
+    { file, start, category, messageText }: ts.Diagnostic,
+    program: ts.Program,
+    outputAbsolutePaths?: boolean,
+): string {
     let message = ts.DiagnosticCategory[category];
     if (file !== undefined && start !== undefined) {
-        const {line, character} = file.getLineAndCharacterOfPosition(start);
+        const { line, character } = file.getLineAndCharacterOfPosition(start);
         const currentDirectory = program.getCurrentDirectory();
         const filePath = outputAbsolutePaths
             ? path.resolve(currentDirectory, file.fileName)
@@ -327,22 +293,4 @@ function showDiagnostic({ file, start, category, messageText }: ts.Diagnostic, p
         message += ` at ${filePath}:${line + 1}:${character + 1}:`;
     }
     return `${message} ${ts.flattenDiagnosticMessageText(messageText, "\n")}`;
-}
-
-function trimSingleQuotes(str: string): string {
-    return str.replace(/^'|'$/g, "");
-}
-
-function findTsconfig(project: string): string | undefined {
-    try {
-        const stats = fs.statSync(project); // throws if file does not exist
-        if (!stats.isDirectory()) {
-            return project;
-        }
-        const projectFile = path.join(project, "tsconfig.json");
-        fs.accessSync(projectFile); // throws if file does not exist
-        return projectFile;
-    } catch (e) {
-        return undefined;
-    }
 }

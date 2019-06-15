@@ -24,7 +24,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-invalid-template-strings",
-        description: "Warns on use of `\${` in non-template strings.",
+        // tslint:disable-next-line no-invalid-template-strings
+        description: "Warns on use of `${` in non-template strings.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -41,7 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isStringLiteral(node)) {
             check(node);
