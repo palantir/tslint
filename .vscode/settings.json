@@ -25,6 +25,5 @@
 
     // Always use project's provided typescript compiler version
     "typescript.tsdk": "node_modules/typescript/lib",
-    "files.eol": "\n",
-    "git.ignoreLimitWarning": true
+    "files.eol": "\n"
 }
