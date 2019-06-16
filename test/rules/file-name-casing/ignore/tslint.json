@@ -2,7 +2,7 @@
     "rules": {
         "file-name-casing": [true, {
             ".ts": "ignore",
-            ".tsx": "camel-case"
+            ".tsx": "pascal-case"
         }]
     }
 }
