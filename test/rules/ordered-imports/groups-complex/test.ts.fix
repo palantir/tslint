@@ -17,6 +17,8 @@ import './baz'; // required
 
 import {bar} from '../bar';
 import {xbar} from '../xbar';
+x.fnCall();
+
 
 
 export class Test {}

@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class Walker extends Lint.AbstractWalker<void> {
+class Walker extends Lint.AbstractWalker {
     public walk(node: ts.SourceFile) {
         return this.checkStatements(node.statements);
     }

@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     if (ctx.sourceFile.typeReferenceDirectives.length === 0) {
         return;
     }

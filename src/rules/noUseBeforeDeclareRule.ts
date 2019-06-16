@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as semver from "semver";
 import { isBindingElement } from "tsutils";
 import * as ts from "typescript";
 
@@ -42,6 +43,9 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: false,
         requiresTypeInfo: true,
         codeExamples,
+        deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
+            ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
+            : undefined,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -54,7 +58,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function recur(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.TypeReference:

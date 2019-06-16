@@ -27,7 +27,7 @@ export interface IWalker {
     getFailures(): RuleFailure[];
 }
 
-export abstract class AbstractWalker<T> extends WalkContext<T> implements IWalker {
+export abstract class AbstractWalker<T = void> extends WalkContext<T> implements IWalker {
     public abstract walk(sourceFile: ts.SourceFile): void;
 
     public getSourceFile() {

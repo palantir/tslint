@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import codeFrame = require("babel-code-frame");
+import { codeFrameColumns } from "@babel/code-frame";
 import chalk from "chalk";
 
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
@@ -76,11 +76,10 @@ export class Formatter extends AbstractFormatter {
             ruleName = chalk.gray(`(${ruleName})`);
 
             // Frame
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const frame = codeFrame(
+            const { character: column, line } = failure.getStartPosition().getLineAndCharacter();
+            const frame = codeFrameColumns(
                 failure.getRawLines(),
-                lineAndCharacter.line + 1, // babel-code-frame is 1 index
-                lineAndCharacter.character,
+                { start: { line: line + 1, column } }, // babel-code-frame is 1 index
                 {
                     forceColor: chalk.enabled,
                     highlightCode: true,

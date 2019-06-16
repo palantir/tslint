@@ -35,6 +35,7 @@ interface Argv {
     init?: boolean;
     out?: string;
     outputAbsolutePaths: boolean;
+    printConfig?: boolean;
     project?: string;
     rulesDir?: string;
     formattersDir: string;
@@ -48,7 +49,7 @@ interface Argv {
 interface Option {
     short?: string;
     // Commander will camelCase option names.
-    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
+    name: keyof Argv | "rules-dir" | "formatters-dir" | "print-config" | "type-check";
     type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
@@ -122,6 +123,15 @@ const options: Option[] = [
         description: "If true, all paths in the output will be absolute.",
     },
     {
+        name: "print-config",
+        type: "boolean",
+        describe: "print resolved configuration for a file",
+        description: dedent`
+            When passed a single file name, prints the configuration that would
+            be used to lint that file.
+            No linting is performed and only config-related options are valid.`,
+    },
+    {
         short: "r",
         name: "rules-dir",
         type: "array",
@@ -187,7 +197,7 @@ const options: Option[] = [
         short: "q",
         name: "quiet",
         type: "boolean",
-        describe: "hide errors on lint",
+        describe: "hide warnings on lint",
         description: "If true, hides warnings from linting output.",
     },
     {
@@ -296,6 +306,7 @@ run(
         init: argv.init,
         out: argv.out,
         outputAbsolutePaths: argv.outputAbsolutePaths,
+        printConfig: argv.printConfig,
         project: argv.project,
         quiet: argv.quiet,
         rulesDirectory: argv.rulesDir,

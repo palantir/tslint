@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-class NoUnsafeAnyWalker extends Lint.AbstractWalker<void> {
+class NoUnsafeAnyWalker extends Lint.AbstractWalker {
     constructor(
         sourceFile: ts.SourceFile,
         ruleName: string,

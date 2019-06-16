@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     let variables: Map<ts.Identifier, utils.VariableInfo> | undefined;
 

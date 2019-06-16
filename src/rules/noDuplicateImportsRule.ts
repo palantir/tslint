@@ -15,10 +15,21 @@
  * limitations under the License.
  */
 
-import { isImportDeclaration, isLiteralExpression, isModuleDeclaration } from "tsutils";
+import {
+    isImportDeclaration,
+    isLiteralExpression,
+    isModuleDeclaration,
+    isNamespaceImport,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+const OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS = "allow-namespace-imports";
+
+interface RuleOptions {
+    [OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]?: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -29,9 +40,17 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Using a single import statement per module will make the code clearer because you can see everything being imported
             from that module on one line.`,
-        optionsDescription: "Not configurable",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            "${OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS}" allows you to import namespaces on separate lines.`,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]: {
+                    type: "boolean",
+                },
+            },
+        },
+        optionExamples: [[true, { [OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]: true }]],
         type: "maintainability",
         typescriptOnly: false,
     };
@@ -40,27 +59,67 @@ export class Rule extends Lint.Rules.AbstractRule {
         return `Multiple imports from '${module}' can be combined into one.`;
     }
 
+    public static NAMESPACE_FAILURE_STRING(module: string) {
+        return `Multiple wildcard imports from the same module, '${module}', are prohibited.`;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            [OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]: !!(
+                this.ruleArguments.length > 0 &&
+                this.ruleArguments[0] !== null &&
+                (this.ruleArguments[0] as RuleOptions)[OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]
+            ),
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    walkWorker(ctx, ctx.sourceFile.statements, new Set());
+function walk(ctx: Lint.WalkContext<RuleOptions>): void {
+    walkWorker(ctx, ctx.sourceFile.statements, {
+        imports: new Set(),
+        namespaceImports: new Set(),
+    });
+}
+
+function statementIsNamespaceImport(statement: ts.ImportDeclaration) {
+    return !!(
+        statement.importClause !== undefined &&
+        statement.importClause.namedBindings !== undefined &&
+        isNamespaceImport(statement.importClause.namedBindings)
+    );
 }
 
 function walkWorker(
-    ctx: Lint.WalkContext<void>,
+    ctx: Lint.WalkContext<RuleOptions>,
     statements: ReadonlyArray<ts.Statement>,
-    seen: Set<string>,
+    seen: {
+        imports: Set<string>;
+        namespaceImports: Set<string>;
+    },
 ): void {
     for (const statement of statements) {
-        if (isImportDeclaration(statement) && isLiteralExpression(statement.moduleSpecifier)) {
+        if (
+            isImportDeclaration(statement) &&
+            isLiteralExpression(statement.moduleSpecifier) &&
+            (!statementIsNamespaceImport(statement) ||
+                !ctx.options[OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS])
+        ) {
             const { text } = statement.moduleSpecifier;
-            if (seen.has(text)) {
+            if (seen.imports.has(text)) {
                 ctx.addFailureAtNode(statement, Rule.FAILURE_STRING(text));
             }
-            seen.add(text);
+            seen.imports.add(text);
+        } else if (
+            isImportDeclaration(statement) &&
+            isLiteralExpression(statement.moduleSpecifier) &&
+            statementIsNamespaceImport(statement) &&
+            ctx.options[OPTION_ALLOW_SEPARATE_NAMESPACE_IMPORTS]
+        ) {
+            const { text } = statement.moduleSpecifier;
+            if (seen.namespaceImports.has(text)) {
+                ctx.addFailureAtNode(statement, Rule.NAMESPACE_FAILURE_STRING(text));
+            }
+            seen.namespaceImports.add(text);
         }
 
         if (
@@ -74,7 +133,12 @@ function walkWorker(
             walkWorker(
                 ctx,
                 (statement.body as ts.ModuleBlock).statements,
-                ts.isExternalModule(ctx.sourceFile) ? seen : new Set(),
+                ts.isExternalModule(ctx.sourceFile)
+                    ? seen
+                    : {
+                          imports: new Set(),
+                          namespaceImports: new Set(),
+                      },
             );
         }
     }

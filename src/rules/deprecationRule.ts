@@ -62,7 +62,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isIdentifier(node)) {
             if (!isDeclaration(node)) {

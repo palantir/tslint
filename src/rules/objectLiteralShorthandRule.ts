@@ -62,7 +62,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
+function disallowShorthandWalker(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isShorthandPropertyAssignment(node)) {
             ctx.addFailureAtNode(
@@ -84,7 +84,7 @@ function disallowShorthandWalker(ctx: Lint.WalkContext<void>) {
     });
 }
 
-function enforceShorthandWalker(ctx: Lint.WalkContext<void>) {
+function enforceShorthandWalker(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (isPropertyAssignment(node)) {
             if (

@@ -40,7 +40,7 @@ const dummyLogger: Logger = {
     },
 };
 
-describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
+describe("Executable", function(this: Mocha.Suite) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
     this.timeout(10000);
 
@@ -181,7 +181,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Custom formatters", () => {
-        const createFormatVerifier = (done: MochaDone): ExecFileCallback => (err, stdout) => {
+        const createFormatVerifier = (done: Mocha.Done): ExecFileCallback => (err, stdout) => {
             assert.isNotNull(err, "process should exit with error");
             assert.strictEqual(err.code, 2, "error code should be 2");
             assert.include(
@@ -432,6 +432,35 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 test: true,
             });
             assert.equal(status, Status.FatalError, "error code should be 1");
+        });
+    });
+
+    describe("--print-config flag", () => {
+        it("exits with code 1 if no files are provided", async () => {
+            const status = await execRunner({
+                files: [],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
+        });
+
+        it("exits with code 0 if one file is provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.Ok);
+        });
+
+        it("exits with code 1 if multiple files are provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts", "test/files//b.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
         });
     });
 

@@ -55,7 +55,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.ForInStatement) {
             const type = checker.getTypeAtLocation((node as ts.ForInStatement).expression);

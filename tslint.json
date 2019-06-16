@@ -6,13 +6,7 @@
     ],
     "rules": {
         // Formatting rules
-        "prettier": {
-            "options": {
-                "printWidth": 100,
-                "tabWidth": 4,
-                "trailingComma": "all"
-            }
-        },
+        "prettier": true,
 
         // Don't want these
         "cyclomatic-complexity": false,
@@ -22,6 +16,7 @@
         "no-parameter-reassignment": false,
         "no-unused-variable": false,
         "typedef": false,
+        "unnecessary-else": false,
 
         // TODO: Enable stricter options for these
         "comment-format": {

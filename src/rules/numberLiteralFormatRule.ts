@@ -35,7 +35,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Helps keep a consistent style with numeric literals.
             Non-standard literals are more difficult to scan through and can be a symptom of typos.
         `,
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isNumericLiteral(node)) {

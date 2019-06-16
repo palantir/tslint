@@ -42,7 +42,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 export class Linter {
-    public static VERSION = "5.12.1";
+    public static VERSION = "5.17.0";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -105,19 +105,18 @@ export class Linter {
      * `resolveJsonModule`.
      */
     public static getFileNames(program: ts.Program): string[] {
-        return mapDefined(
-            program.getSourceFiles(),
-            file =>
-                file.fileName.endsWith(".d.ts") ||
-                file.fileName.endsWith(".json") ||
-                program.isSourceFileFromExternalLibrary(file)
-                    ? undefined
-                    : file.fileName,
+        return mapDefined(program.getSourceFiles(), file =>
+            file.fileName.endsWith(".d.ts") ||
+            file.fileName.endsWith(".json") ||
+            program.isSourceFileFromExternalLibrary(file)
+                ? undefined
+                : file.fileName,
         );
     }
 
     private failures: RuleFailure[] = [];
     private fixes: RuleFailure[] = [];
+    private readonly fileNames: string[] = [];
 
     constructor(private readonly options: ILinterOptions, private program?: ts.Program) {
         if (typeof options !== "object") {
@@ -139,6 +138,7 @@ export class Linter {
         if (isFileExcluded(fileName, configuration)) {
             return;
         }
+        this.fileNames.push(fileName);
         const sourceFile = this.getSourceFile(fileName, source);
         const isJs = /\.jsx?$/i.test(fileName);
         const enabledRules = this.getEnabledRules(configuration, isJs);
@@ -191,7 +191,7 @@ export class Linter {
         }
         const formatter = new Formatter();
 
-        const output = formatter.format(failures, this.fixes);
+        const output = formatter.format(failures, this.fixes, this.fileNames);
 
         const errorCount = errors.length;
         return {

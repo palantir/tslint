@@ -378,6 +378,7 @@ export function extendConfigurationFile(
  *
  * @deprecated use `path.resolve` instead
  */
+// tslint:disable-next-line no-null-undefined-union
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != undefined) {
         const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
@@ -508,7 +509,9 @@ export interface RawConfigFile {
 export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
+
 export type RawRuleConfig =
+    // tslint:disable-next-line no-null-undefined-union
     | null
     | undefined
     | boolean
@@ -592,14 +595,12 @@ export function parseConfigFile(
         const validJsRules = new Map<string, Partial<IOptions>>();
         if (copyRulestoJsRules) {
             rules.forEach((ruleOptions, ruleName) => {
-                if (ruleOptions.ruleSeverity !== "off") {
-                    const Rule = findRule(ruleName, rulesDirectory);
-                    if (
-                        Rule !== undefined &&
-                        (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
-                    ) {
-                        validJsRules.set(ruleName, ruleOptions);
-                    }
+                const Rule = findRule(ruleName, rulesDirectory);
+                if (
+                    Rule !== undefined &&
+                    (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
+                ) {
+                    validJsRules.set(ruleName, ruleOptions);
                 }
             });
         }
@@ -617,11 +618,8 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(
-                          pattern =>
-                              dir === undefined
-                                  ? path.resolve(pattern)
-                                  : path.resolve(dir, pattern),
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
                       ),
                   }
                 : {}),
@@ -661,4 +659,25 @@ export function isFileExcluded(filepath: string, configFile?: IConfigurationFile
     }
     const fullPath = path.resolve(filepath);
     return configFile.linterOptions.exclude.some(pattern => new Minimatch(pattern).match(fullPath));
+}
+
+export function stringifyConfiguration(configFile: IConfigurationFile) {
+    return JSON.stringify(
+        {
+            extends: configFile.extends,
+            jsRules: convertRulesMapToObject(configFile.jsRules),
+            linterOptions: configFile.linterOptions,
+            rules: convertRulesMapToObject(configFile.rules),
+            rulesDirectory: configFile.rulesDirectory,
+        },
+        undefined,
+        2,
+    );
+}
+
+function convertRulesMapToObject(rules: Map<string, Partial<IOptions>>) {
+    return Array.from(rules).reduce<{ [i: string]: Partial<IOptions> }>(
+        (result, [key, value]) => ({ ...result, [key]: value }),
+        {},
+    );
 }

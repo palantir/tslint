@@ -66,6 +66,7 @@ export const rules = {
     "no-namespace": true,
     "no-non-null-assertion": true,
     "no-reference": true,
+    "no-restricted-globals": true,
     "no-this-assignment": true,
     "no-var-requires": true,
     "only-arrow-functions": true,
@@ -119,6 +120,7 @@ export const rules = {
         }
     },
     "no-arg": true,
+    "no-async-without-await": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-console": true,
@@ -138,6 +140,7 @@ export const rules = {
     // "no-invalid-this": Won't this be deprecated?
     "no-misused-new": true,
     "no-null-keyword": true,
+    "no-null-undefined-union": true,
     "no-object-literal-type-assertion": true,
     "no-return-await": true,
     "no-shadowed-variable": true,
@@ -145,6 +148,7 @@ export const rules = {
     "no-string-throw": true,
     "no-sparse-arrays": true,
     "no-submodule-imports": true,
+    "no-tautology-expression": true,
     "no-unbound-method": true,
     "no-unnecessary-class": { options: ["allow-empty-class"] },
     "no-unsafe-any": true,
@@ -157,6 +161,7 @@ export const rules = {
     "prefer-conditional-expression": true,
     radix: true,
     "restrict-plus-operands": true,
+    "static-this": true,
     "strict-boolean-expressions": true,
     "strict-type-predicates": true,
     "switch-default": true,
@@ -283,7 +288,8 @@ export const rules = {
     "switch-final-break": true,
     "type-literal-delimiter": true,
     "unnecessary-bind": true,
-    "variable-name": { options: ["ban-keywords", "check-format"] },
+    "unnecessary-else": true,
+    "variable-name": { options: ["ban-keywords", "check-format", "require-const-for-all-caps"] },
     whitespace: {
         options: [
             "check-branch",

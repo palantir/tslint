@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             enum: [BAN_SINGLE_ARG_PARENS],
         },
         optionExamples: [true, [true, BAN_SINGLE_ARG_PARENS]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

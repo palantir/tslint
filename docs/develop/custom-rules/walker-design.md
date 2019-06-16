@@ -30,23 +30,23 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-// Here, the options object type is `void` because we don't pass any options in this example.
+// Here, the options object type is `void` (which is the default, so can be omitted) because we don't pass any options in this example.
 function walk(ctx: Lint.WalkContext<void>) {
     // Recursively walk the AST starting with root node, `ctx.sourceFile`.
     // Call the function `cb` (defined below) for each child.
     return ts.forEachChild(ctx.sourceFile, cb);
-    
+
     function cb(node: ts.Node): void {
         // Stop recursing further into the AST by returning early. Here, we ignore type nodes.
         if (node.kind >= ts.SyntaxKind.FirstTypeNode && node.kind <= ts.SyntaxKind.LastTypeNode) {
             return;
         }
-        
+
         // Add failures using the `WalkContext<T>` object. Here, we add a failure if we find the null keyword.
         if (node.kind === ts.SyntaxKind.NullKeyword) {
             return ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
-        
+
         // Continue recursion into the AST by calling function `cb` for every child of the current node.
         return ts.forEachChild(node, cb);
     }
@@ -90,7 +90,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
                 return ts.forEachChild(node, cb);
             }
         };
-        
+
         // Start recursion for all children of `sourceFile`.
         return ts.forEachChild(sourceFile, cb);
     }
@@ -108,7 +108,7 @@ class NoMagicNumbersWalker extends Lint.AbstractWalker<Set<string>> {
 ## Migrating from RuleWalker to AbstractWalker
 
 The main difference between `RuleWalker` and `AbstractWalker` is that you need to implement the AST recursion yourself. But why would you want to do that?
-__Performance!__ `RuleWalker` wants to be "one walker to rule them all" (pun intended). It's easy to use but that convenience 
+__Performance!__ `RuleWalker` wants to be "one walker to rule them all" (pun intended). It's easy to use but that convenience
 makes it slow by default. When implementing the walking yourself, you only need to do as much work as needed.
 
 Besides that you *should* convert the `ruleArguments` to a useful format before passing it to `AbstractWalker` as seen above.
@@ -125,8 +125,8 @@ This table describes the equivalent methods between the two classes:
 `this.appendText()` | `Lint.Replacement.appendText()`
 `this.hasOption()` and `this.getOptions()` | use `this.options` directly
 `this.getLineAndCharacterOfPosition()` | `ts.getLineAndCharacterOfPosition(this.sourceFile, ...)`
-`this.getLimit()` | `this.sourceFile.end` 
-`this.getSourceFile()` | is available to be compatible, but prefer `this.sourceFile` 
+`this.getLimit()` | `this.sourceFile.end`
+`this.getSourceFile()` | is available to be compatible, but prefer `this.sourceFile`
 `this.getFailures()` | is available to be compatible, but prefer `this.failures`
 `this.skip()` | just don't use it, it's a noop
 `this.getRuleName()` | `this.ruleName`

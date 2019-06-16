@@ -72,7 +72,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node)) {
             const equals = Lint.getEqualsKind(node.operatorToken);
@@ -311,12 +311,12 @@ function testNonStrictNullUndefined(type: ts.Type): boolean | "null" | "undefine
     return !anyOther
         ? true
         : anyNull && anyUndefined
-            ? undefined
-            : anyNull
-                ? "null"
-                : anyUndefined
-                    ? "undefined"
-                    : false;
+        ? undefined
+        : anyNull
+        ? "null"
+        : anyUndefined
+        ? "undefined"
+        : false;
 }
 
 function unionParts(type: ts.Type) {

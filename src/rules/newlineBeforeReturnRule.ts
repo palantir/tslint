@@ -31,7 +31,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: "Not configurable.",
         options: {},
         optionExamples: [true],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NewlineBeforeReturnWalker extends Lint.AbstractWalker<void> {
+class NewlineBeforeReturnWalker extends Lint.AbstractWalker {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
             if (node.kind === ts.SyntaxKind.ReturnStatement) {

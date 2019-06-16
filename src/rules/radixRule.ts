@@ -59,30 +59,30 @@ function isPropertyAccessParseInt(
 
 function isPropertyAccessOfIdentifier(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
     return (
         isPropertyAccessExpression(expression) &&
         isIdentifier(expression.expression) &&
-        identifers.some(identifer => (expression.expression as ts.Identifier).text === identifer)
+        identifiers.some(identifier => (expression.expression as ts.Identifier).text === identifier)
     );
 }
 
 function isPropertyAccessOfProperty(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
     return (
         isPropertyAccessExpression(expression) &&
         isPropertyAccessExpression(expression.expression) &&
-        identifers.some(
-            identifer =>
-                (expression.expression as ts.PropertyAccessExpression).name.text === identifer,
+        identifiers.some(
+            identifier =>
+                (expression.expression as ts.PropertyAccessExpression).name.text === identifier,
         )
     );
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (
             isCallExpression(node) &&

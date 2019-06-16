@@ -57,7 +57,7 @@ type JumpStatement =
     | ts.ThrowStatement
     | ts.ReturnStatement;
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     let inFinally = false;
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {

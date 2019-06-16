@@ -70,7 +70,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             maxLength: 5,
         },
         optionExamples: [[true, "parameters", "statements"]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

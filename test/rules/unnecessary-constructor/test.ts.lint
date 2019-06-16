@@ -10,12 +10,10 @@ class PublicConstructor {
 
 class ProtectedConstructor {
     protected constructor() { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
 }
 
 class PrivateConstructor {
     private constructor() { }
-    ~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
 }
 
 class SameLine { constructor() { } }
@@ -55,6 +53,14 @@ class ContainsParameter {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 }
 
+class PrivateContainsParameter {
+    private constructor(x: number) { }
+}
+
+class ProtectedContainsParameter {
+    protected constructor(x: number) { }
+}
+
 class ContainsParameterDeclaration {
     constructor(public x: number) { }
 }
@@ -71,6 +77,10 @@ class ConstructorOverload {
 
 interface IConstructorSignature {
     new(): {};
+}
+
+class DecoratedParameters {
+    constructor(@Optional x: number) {}
 }
 
 [0]: Remove unnecessary empty constructor.
