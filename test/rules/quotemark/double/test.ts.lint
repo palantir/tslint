@@ -8,7 +8,6 @@ var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be "]
 'escaped\'quotemark';
 ~~~~~~~~~~~~~~~~~~~~ [' should be "]
-var unbalancedSingle = ('a)
 
 // "avoid-template" option is not set.
 `foo`;

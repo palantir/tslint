@@ -4,7 +4,6 @@ var singleWithinDouble = "'singleWithinDouble'";
 var doubleWithinSingle = "\"doubleWithinSingle\"";
 var tabNewlineWithinSingle = "tab\tNewline\nWithinSingle";
 "escaped'quotemark";
-var unbalancedSingle = ('a)
 
 // "avoid-template" option is not set.
 `foo`;
