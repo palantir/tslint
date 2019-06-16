@@ -1,5 +1,5 @@
 {
-  "rules": {
-    "adjacent-overload-signatures": [true, "ignore-accessors"]
-  }
+    "rules": {
+        "adjacent-overload-signatures": [true, { "ignore-accessors": true }]
+    }
 }

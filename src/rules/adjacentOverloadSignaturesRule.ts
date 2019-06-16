@@ -20,7 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const IGNORE_ACCESSORS = "ignore-accessors";
+const OPTION_IGNORE_ACCESSORS = "ignore-accessors";
 
 interface Options {
     ignoreAccessors: boolean;
@@ -32,18 +32,18 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "adjacent-overload-signatures",
         description: "Enforces function overloads to be consecutive.",
         optionsDescription: Lint.Utils.dedent`
-            If \`${IGNORE_ACCESSORS}\` is specified, then getters and setters are not considered to be overloads
+            If \`${OPTION_IGNORE_ACCESSORS}\` is specified, then getters and setters are not considered to be overloads
             of function with the same signature.`,
         options: {
-            type: "array",
-            items: {
-                type: "string",
-                enum: [IGNORE_ACCESSORS],
+            type: "object",
+            properties: {
+                [OPTION_IGNORE_ACCESSORS]: {
+                    type: "boolean",
+                },
             },
-            minLength: 0,
-            maxLength: 1,
+            additionalProperties: false,
         },
-        optionExamples: [true, [true, IGNORE_ACCESSORS]],
+        optionExamples: [true, [true, { OPTION_IGNORE_ACCESSORS: true }]],
         rationale:
             "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
@@ -56,8 +56,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const rawOptions = { ...this.ruleArguments[0] } as { [OPTION_IGNORE_ACCESSORS]?: boolean };
         return this.applyWithFunction(sourceFile, walk, {
-            ignoreAccessors: this.ruleArguments.indexOf(IGNORE_ACCESSORS) !== -1,
+            ignoreAccessors: !!rawOptions[OPTION_IGNORE_ACCESSORS],
         });
     }
 }
