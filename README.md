@@ -28,7 +28,7 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 
 ## TSLint Playground
 
-There is a sandbox environment for TSLint at [palantir.github.io/tslint-playground](https://palantir.github.io/tslint-playground/), which can be used to test rules and see how tslint works. Issues can be files against `tslint-playground` [here](https://github.com/palantir/tslint-playground).
+There is a sandbox environment for TSLint at [palantir.github.io/tslint-playground](https://palantir.github.io/tslint-playground/), which can be used to test rules and see how TSLint works. Issues can be filed against `tslint-playground` [here](https://github.com/palantir/tslint-playground).
 
 ## Custom Rules & Plugins
 
