@@ -116,10 +116,12 @@ enum TestNumericEnum {
 
 const e1: TestNumericEnum = TestNumericEnum.One
 
+#if typescript > 2.1
 if (e1 === TestNumericEnum.Two) {}
 if (TestNumericEnum.Two === e1) {}
 if (e1 > TestNumericEnum.Two) {}
 if (TestNumericEnum.Two > e1) {}
+#endif
 
 const f1: TestNumericEnum | undefined
 const f2: TestNumericEnum | undefined

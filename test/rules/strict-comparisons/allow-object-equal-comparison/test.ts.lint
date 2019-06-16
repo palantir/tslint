@@ -110,10 +110,12 @@ enum TestNumericEnum {
 
 const e1: TestNumericEnum = TestNumericEnum.One
 
+#if typescript > 2.1
 if (e1 === TestNumericEnum.Two) {}
 if (TestNumericEnum.Two === e1) {}
 if (e1 > TestNumericEnum.Two) {}
 if (TestNumericEnum.Two > e1) {}
+#endif
 
 const f1: TestNumericEnum | undefined
 const f2: TestNumericEnum | undefined
@@ -128,12 +130,14 @@ enum TestStringEnum {
 
 const g1: TestStringEnum = TestStringEnum.One
 
+#if typescript > 2.1
 if (g1 === TestStringEnum.Two) {}
 if (TestStringEnum.Two === g1) {}
 if (g1 > TestStringEnum.Two) {}
     ~~~~~~~~~~~~~~~~~~~~~~~     [Cannot use '>' comparator for type 'string'.]
 if (TestStringEnum.Two > g1) {}
     ~~~~~~~~~~~~~~~~~~~~~~~     [Cannot use '>' comparator for type 'string'.]
+#endif
 
 const h1: string | number = Math.random() > 0.5 ? 'text' : 5;
 const h2: string | number = Math.random() > 0.5 ? 'test' : 2;
