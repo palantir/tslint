@@ -121,12 +121,10 @@ if (e1 === TestNumericEnum.Two) {}
 if (TestNumericEnum.Two === e1) {}
 if (e1 > TestNumericEnum.Two) {}
 if (TestNumericEnum.Two > e1) {}
-#endif
 
 const f1: TestNumericEnum | undefined
 const f2: TestNumericEnum | undefined
 
-#if typescript > 2.1
 if (f1 === f2) {}
 if (f2 === f1) {}
 

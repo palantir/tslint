@@ -132,6 +132,7 @@ if (TestNumericEnum.Two > e1) {}
 const f1: TestNumericEnum | undefined
 const f2: TestNumericEnum | undefined
 
+#if typescript > 2.1
 if (f1 === f2) {}
 if (f2 === f1) {}
 
@@ -142,7 +143,6 @@ enum TestStringEnum {
 
 const g1: TestStringEnum = TestStringEnum.One
 
-#if typescript > 2.1
 if (g1 === TestStringEnum.Two) {}
 if (TestStringEnum.Two === g1) {}
 if (g1 > TestStringEnum.Two) {}
