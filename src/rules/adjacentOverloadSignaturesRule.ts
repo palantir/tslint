@@ -56,6 +56,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        // tslint:disable-next-line: no-object-literal-type-assertion
         const rawOptions = { ...this.ruleArguments[0] } as { [OPTION_IGNORE_ACCESSORS]?: boolean };
         return this.applyWithFunction(sourceFile, walk, {
             ignoreAccessors: !!rawOptions[OPTION_IGNORE_ACCESSORS],
