@@ -25,16 +25,11 @@
 
         // TODO: Enable stricter options for these
         "comment-format": {
-            "options": [
-                "check-space"
-            ]
+            "options": ["check-space"]
         },
         "member-access": true,
         "only-arrow-functions": {
-            "options": [
-                "allow-declarations",
-                "allow-named-functions"
-            ]
+            "options": ["allow-declarations", "allow-named-functions"]
         },
 
         // TODO: Enable these
@@ -49,31 +44,19 @@
         "no-use-before-declare": false,
         "no-void-expression": false,
         "prefer-function-over-method": false,
+        "strict-comparisons": false,
         "strict-type-predicates": false,
         "triple-equals": {
-            "options": [
-                "allow-undefined-check"
-            ]
+            "options": ["allow-undefined-check"]
         },
 
         // Misc
         "ban": {
-            "options": [
-                [
-                    "describe",
-                    "only"
-                ],
-                [
-                    "it",
-                    "only"
-                ]
-            ]
+            "options": [["describe", "only"], ["it", "only"]]
         },
         "interface-name": false,
         "file-header": {
-            "options": [
-                "Copyright \\d{4} Palantir Technologies, Inc."
-            ]
+            "options": ["Copyright \\d{4} Palantir Technologies, Inc."]
         },
         "max-classes-per-file": false,
         "member-ordering": {
@@ -82,15 +65,11 @@
             }
         },
         "no-console": {
-            "options": [
-                "log"
-            ]
+            "options": ["log"]
         },
         "no-switch-case-fall-through": true,
         "strict-boolean-expressions": {
-            "options": [
-                "allow-boolean-or-undefined"
-            ]
+            "options": ["allow-boolean-or-undefined"]
         },
         "switch-default": false,
         "variable-name": {
