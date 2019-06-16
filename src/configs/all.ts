@@ -107,6 +107,7 @@ export const rules = {
     // "import-blacklist": no sensible default
     "label-position": true,
     "no-arg": true,
+    "no-async-without-await": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
     "no-console": true,
@@ -149,6 +150,7 @@ export const rules = {
     "restrict-plus-operands": true,
     "static-this": true,
     "strict-boolean-expressions": true,
+    "strict-comparisons": true,
     "strict-type-predicates": true,
     "switch-default": true,
     "triple-equals": true,

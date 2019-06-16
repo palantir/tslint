@@ -1,0 +1,149 @@
+if (2) {}
+if (2 > 1) {}
+if (2 < 1) {}
+if (2 >= 1) {}
+if (2 <= 1) {}
+if (2 == 1) {}
+if (2 === 1) {}
+if (2 != 1) {}
+if (2 !== 1) {}
+if (2 > undefined) {}
+    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
+if (undefined === 1) {}
+    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
+if (2 > undefined) {}
+    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
+if (undefined === 1) {}
+    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
+if (true) {}
+if (true > false) {}
+    ~~~~~~~~~~~~     [Cannot use '>' comparator for type 'boolean'.]
+if (true < false) {}
+    ~~~~~~~~~~~~     [Cannot use '<' comparator for type 'boolean'.]
+if (true >= false) {}
+    ~~~~~~~~~~~~~     [Cannot use '>=' comparator for type 'boolean'.]
+if (true <= false) {}
+    ~~~~~~~~~~~~~     [Cannot use '<=' comparator for type 'boolean'.]
+if (true == false) {}
+if (true === false) {}
+if (true != false) {}
+if (true !== false) {}
+if ('') {}
+if ('' > '') {}
+if ('' < '') {}
+if ('' >= '') {}
+if ('' <= '') {}
+if ('' == '') {}
+if ('' === '') {}
+if ('' != '') {}
+if ('' !== '') {}
+if ({}) {}
+if ({} > {}) {}
+    ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+if ({} < {}) {}
+    ~~~~~~~     [Cannot use '<' comparator for type 'object'.]
+if ({} >= {}) {}
+    ~~~~~~~~     [Cannot use '>=' comparator for type 'object'.]
+if ({} <= {}) {}
+    ~~~~~~~~     [Cannot use '<=' comparator for type 'object'.]
+if ({} == {}) {}
+    ~~~~~~~~     [Cannot use '==' comparator for type 'object'.]
+if ({} === {}) {}
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+if ({} != {}) {}
+    ~~~~~~~~     [Cannot use '!=' comparator for type 'object'.]
+if ({} !== {}) {}
+    ~~~~~~~~~     [Cannot use '!==' comparator for type 'object'.]
+if ([] === []) {}
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+
+if (3 > 2 || 2 > 1 && true === true) {}
+if ('' > '' || 2 > 1 || {} > {}) {}
+                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+if ('' > '' && 2 > 1 && {} > {}) {}
+                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+
+if ({} === null) {}
+    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+if (null === {}) {}
+    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+if ({} === undefined) {}
+    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+if (undefined === {}) {}
+    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+
+function sameObject<T>(a: T, b: T): boolean {
+    return a === b;
+           ~~~~~~~  [Cannot use '===' comparator for type 'object'.]
+}
+
+function sameObject<T>(a: any, b: any): boolean {
+    return a === b;
+}
+
+type myNumber = number;
+const a1: myNumber = 1
+const a2: myNumber = 2
+
+if (a1 < a2) {}
+if (a2 < a1) {}
+
+type myString = string;
+const b1: myString = ''
+const b2: myString = ''
+
+if (b1 === b2) {}
+if (b2 === b1) {}
+
+type myObject = Object;
+const c1: myObject = {}
+const c2: myObject = {}
+
+if (c1 === c2) {}
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+if (c2 === c1) {}
+    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+
+const d1: any = 'string'
+const d2: any = 2
+if (d1 === d2) {}
+if (d2 === d1) {}
+
+enum TestNumericEnum {
+    One = 1,
+    Two = 2,
+}
+
+const e1: TestNumericEnum = TestNumericEnum.One
+
+#if typescript > 2.1
+if (e1 === TestNumericEnum.Two) {}
+if (TestNumericEnum.Two === e1) {}
+if (e1 > TestNumericEnum.Two) {}
+if (TestNumericEnum.Two > e1) {}
+
+const f1: TestNumericEnum | undefined
+const f2: TestNumericEnum | undefined
+
+if (f1 === f2) {}
+if (f2 === f1) {}
+
+enum TestStringEnum {
+    One = 'one',
+    Two = 'two',
+}
+
+const g1: TestStringEnum = TestStringEnum.One
+
+if (g1 === TestStringEnum.Two) {}
+if (TestStringEnum.Two === g1) {}
+if (g1 > TestStringEnum.Two) {}
+if (TestStringEnum.Two > g1) {}
+#endif
+
+const h1: string | number = Math.random() > 0.5 ? 'text' : 5;
+const h2: string | number = Math.random() > 0.5 ? 'test' : 2;
+if (h1 > h2) {}
+if (h2 > h1) {}
+if (h1 === h2) {}
+if (h2 === h1) {}

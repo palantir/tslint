@@ -1,0 +1,6 @@
+declare const x: string | undefined;
+x!;
+
+declare const y: string;
+y as string;
+~~~~~~~~~~~  [This assertion is unnecessary since it does not change the type of the expression.]

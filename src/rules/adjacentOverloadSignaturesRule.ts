@@ -20,14 +20,30 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_IGNORE_ACCESSORS = "ignore-accessors";
+
+interface Options {
+    ignoreAccessors: boolean;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "adjacent-overload-signatures",
         description: "Enforces function overloads to be consecutive.",
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            If \`${OPTION_IGNORE_ACCESSORS}\` is specified, then getters and setters are not considered to be overloads
+            of function with the same signature.`,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_IGNORE_ACCESSORS]: {
+                    type: "boolean",
+                },
+            },
+            additionalProperties: false,
+        },
+        optionExamples: [true, [true, { OPTION_IGNORE_ACCESSORS: true }]],
         rationale:
             "Improves readability and organization by grouping naturally related items together.",
         type: "typescript",
@@ -40,11 +56,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        // tslint:disable-next-line: no-object-literal-type-assertion
+        const rawOptions = { ...this.ruleArguments[0] } as { [OPTION_IGNORE_ACCESSORS]?: boolean };
+        return this.applyWithFunction(sourceFile, walk, {
+            ignoreAccessors: !!rawOptions[OPTION_IGNORE_ACCESSORS],
+        });
     }
 }
 
-function walk(ctx: Lint.WalkContext): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
     const { sourceFile } = ctx;
     visitStatements(sourceFile.statements);
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
@@ -61,8 +81,13 @@ function walk(ctx: Lint.WalkContext): void {
                     | ts.ClassDeclaration
                     | ts.TypeLiteralNode;
                 addFailures(
-                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(members, member =>
-                        utils.isSignatureDeclaration(member) ? getOverloadKey(member) : undefined,
+                    getMisplacedOverloads<ts.TypeElement | ts.ClassElement>(
+                        members,
+                        member =>
+                            utils.isSignatureDeclaration(member)
+                                ? getOverloadKey(member)
+                                : undefined,
+                        ctx.options.ignoreAccessors,
                     ),
                 );
             }
@@ -73,10 +98,13 @@ function walk(ctx: Lint.WalkContext): void {
 
     function visitStatements(statements: ReadonlyArray<ts.Statement>): void {
         addFailures(
-            getMisplacedOverloads(statements, statement =>
-                utils.isFunctionDeclaration(statement) && statement.name !== undefined
-                    ? statement.name.text
-                    : undefined,
+            getMisplacedOverloads(
+                statements,
+                statement =>
+                    utils.isFunctionDeclaration(statement) && statement.name !== undefined
+                        ? statement.name.text
+                        : undefined,
+                ctx.options.ignoreAccessors,
             ),
         );
     }
@@ -92,12 +120,16 @@ function walk(ctx: Lint.WalkContext): void {
 function getMisplacedOverloads<T extends ts.Node>(
     overloads: ReadonlyArray<T>,
     getKey: (node: T) => string | undefined,
+    ignoreAccessors: boolean,
 ): ts.SignatureDeclaration[] {
     const result: ts.SignatureDeclaration[] = [];
     let lastKey: string | undefined;
     const seen = new Set<string>();
     for (const node of overloads) {
-        if (node.kind === ts.SyntaxKind.SemicolonClassElement) {
+        if (
+            node.kind === ts.SyntaxKind.SemicolonClassElement ||
+            (ignoreAccessors && isAccessor(node))
+        ) {
             continue;
         }
 
@@ -113,6 +145,10 @@ function getMisplacedOverloads<T extends ts.Node>(
         }
     }
     return result;
+}
+
+function isAccessor(member: ts.Node): boolean {
+    return member.kind === ts.SyntaxKind.GetAccessor || member.kind === ts.SyntaxKind.SetAccessor;
 }
 
 function printOverload(node: ts.SignatureDeclaration): string {

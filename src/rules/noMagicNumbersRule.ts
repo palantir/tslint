@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 
-import { isCallExpression, isIdentifier } from "tsutils";
+import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { isNegativeNumberLiteral } from "../language/utils";
+
+const NUMBER_METHODS = new Set(["toExponential", "toFixed", "toPrecision", "toString"]);
 
 interface AllowedNumbersType {
     "allowed-numbers": number[];
@@ -140,12 +142,17 @@ function parseOptions(options: Array<OptionsType | number>): ParsedOptionsType {
 class NoMagicNumbersWalker extends Lint.AbstractWalker<ParsedOptionsType | number[]> {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (
-                isCallExpression(node) &&
-                isIdentifier(node.expression) &&
-                node.expression.text === "parseInt"
-            ) {
-                return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
+            if (isCallExpression(node)) {
+                if (isIdentifier(node.expression) && node.expression.text === "parseInt") {
+                    return node.arguments.length === 0 ? undefined : cb(node.arguments[0]);
+                }
+
+                if (
+                    isPropertyAccessExpression(node.expression) &&
+                    NUMBER_METHODS.has(node.expression.name.text)
+                ) {
+                    return;
+                }
             }
 
             if (node.kind === ts.SyntaxKind.NumericLiteral) {
