@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-const failedKinds = [
+const failedKinds = new Set([
     ts.SyntaxKind.PropertySignature,
     ts.SyntaxKind.PropertyDeclaration,
 
@@ -56,14 +56,11 @@ const failedKinds = [
 
     ts.SyntaxKind.IntersectionType,
     ts.SyntaxKind.UnionType,
-];
+]);
 
 function walk(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node) {
-        if (
-            node.kind === ts.SyntaxKind.VoidKeyword &&
-            failedKinds.indexOf(node.parent.kind) !== -1
-        ) {
+        if (node.kind === ts.SyntaxKind.VoidKeyword && failedKinds.has(node.parent.kind)) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
 
