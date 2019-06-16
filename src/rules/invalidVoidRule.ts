@@ -56,6 +56,23 @@ const failedKinds = new Set([
 
     ts.SyntaxKind.IntersectionType,
     ts.SyntaxKind.UnionType,
+
+    ts.SyntaxKind.Parameter,
+    ts.SyntaxKind.TypeParameter,
+
+    ts.SyntaxKind.AsExpression,
+    ts.SyntaxKind.TypeAssertionExpression,
+
+    ts.SyntaxKind.TypeOperator,
+    ts.SyntaxKind.ArrayType,
+
+    ts.SyntaxKind.MappedType,
+    ts.SyntaxKind.ConditionalType,
+
+    ts.SyntaxKind.TypeReference,
+
+    ts.SyntaxKind.NewExpression,
+    ts.SyntaxKind.CallExpression,
 ]);
 
 function walk(ctx: Lint.WalkContext): void {

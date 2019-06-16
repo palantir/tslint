@@ -42,9 +42,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "When chaining calls, put method calls on new lines.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(
-            new NewlinePerChainedCallWalker(sourceFile, this.ruleName, undefined),
-        );
+        return this.applyWithWalker(new NewlinePerChainedCallWalker(sourceFile, this.ruleName, {}));
     }
 }
 

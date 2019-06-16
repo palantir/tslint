@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
         "This is the default value for this type parameter, so it can be omitted.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, {}, program.getTypeChecker());
     }
 }
 

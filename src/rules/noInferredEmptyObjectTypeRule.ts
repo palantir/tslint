@@ -59,7 +59,7 @@ class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker {
         ruleName: string,
         private readonly checker: ts.TypeChecker,
     ) {
-        super(sourceFile, ruleName, undefined);
+        super(sourceFile, ruleName, {});
     }
 
     public walk(sourceFile: ts.SourceFile) {

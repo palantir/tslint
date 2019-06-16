@@ -51,7 +51,7 @@ export class Rule extends Lint.Rules.TypedRule {
         "for-in loops over arrays are forbidden. Use for-of or array.forEach instead.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, {}, program.getTypeChecker());
     }
 }
 

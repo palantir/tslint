@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static FAILURE_STRING = "Union type cannot include both 'null' and 'undefined'.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, {}, program.getTypeChecker());
     }
 }
 

@@ -2,6 +2,61 @@ function func(): void {}
 
 type NormalType = () => void;
 
+let normalArrow = (): void => { }
+
+let ughThisThing = void 0;
+
+function takeThing(thing: undefined) { }
+takeThing(void 0);
+
+function takeVoid(thing: void) { }
+                         ~~~~ [0]
+
+
+const arrowGeneric = <T extends void>(arg: T) => { }
+                                ~~~~ [0]
+const arrowGeneric1 = <T = void>(arg: T) => { }
+                           ~~~~ [0]
+const arrowGeneric2 = <T extends void = void>(arg: T) => { }
+                                 ~~~~ [0]
+                                        ~~~~ [0]
+
+function functionGeneric<T extends void>(arg: T) {}
+                                   ~~~~ [0]
+function functionGeneric1<T = void>(arg: T) {}
+                              ~~~~ [0]
+function functionGeneric2<T extends void = void>(arg: T) {}
+                                    ~~~~ [0]
+                                           ~~~~ [0]
+
+declare function functionDeclaration<T extends void>(arg: T): void;
+                                               ~~~~ [0]
+declare function functionDeclaration1<T = void>(arg: T): void;
+                                          ~~~~ [0]
+declare function functionDeclaration2<T extends void = void>(arg: T): void;
+                                                ~~~~ [0]
+                                                       ~~~~ [0]
+
+
+functionGeneric<void>(undefined);
+                ~~~~ [0]
+
+declare function voidArray(args: void[]): void[];
+                                 ~~~~ [0]
+                                          ~~~~ [0]
+
+let value = undefined as void;
+                         ~~~~ [0]
+
+let value = <void>undefined;
+             ~~~~ [0]
+
+function takesThings(...things: void[]): void { }
+                                ~~~~ [0]
+
+type KeyofVoid = keyof void;
+                       ~~~~[0]
+
 interface Interface {
     lambda: () => void;
     voidProp: void;
@@ -12,6 +67,10 @@ class ClassName {
     private readonly propName: void;
                                ~~~~ [0]
 }
+
+let invalidMap: Map<string, void> = new Map<string, void>();
+                            ~~~~ [0]
+                                                    ~~~~ [0]
 
 let letVoid: void;
              ~~~~ [0]
@@ -32,5 +91,24 @@ type UnionType3 = string | (number & any | (string | void));
 
 type IntersectionType = string & number & void;
                                           ~~~~ [0]
+
+#if typescript >= 2.8.0
+type MappedType<T> = {
+    [K in keyof T]: void;
+                    ~~~~ [0]
+}
+type ConditionalType<T> = {
+    [K in keyof T]: T[K] extends string ? void : string;
+                                          ~~~~ [0]
+}
+#endif
+
+#if typescript >= 3.4.0
+type ManyVoid = readonly void[];
+                         ~~~~ [0]
+
+function foo(arr: readonly void[]) { }
+                           ~~~~ [0]
+#endif
 
 [0]: void is not a valid type other than return types

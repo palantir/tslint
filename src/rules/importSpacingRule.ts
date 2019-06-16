@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static NO_LINE_BREAKS = "Line breaks are not allowed in import declaration";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, {}));
     }
 }
 
