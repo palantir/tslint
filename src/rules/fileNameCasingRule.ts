@@ -179,11 +179,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             [true, Casing.CamelCase],
-            [true, Casing.CamelCase, ["index.ts", "myFile.ts"]],
             [true, Casing.PascalCase],
-            [true, Casing.PascalCase, ["index.ts", "MyFile.ts"]],
             [true, Casing.KebabCase],
-            [true, Casing.KebabCase, ["index.ts", "my-file.ts"]],
             [true, Casing.SnakeCase],
             [
                 true,
@@ -238,7 +235,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        if (this.ruleArguments.length < 1) {
+        if (this.ruleArguments.length !== 1) {
             return [];
         }
 
