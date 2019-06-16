@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
     for (const statement of ctx.sourceFile.statements) {
         if (
             !isImportDeclaration(statement) ||

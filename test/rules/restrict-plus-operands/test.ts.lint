@@ -17,35 +17,38 @@ var pair: NumberStringPair = {
 
 // bad
 var bad1  = 5 + "10";
-            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + "10". Consider using template literals.]
 var bad2  = [] + 5;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + 5]
 var bad3  = [] + {};
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + {}]
 var bad4  = [] + [];
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + []]
 var bad4  = 5 + [];
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + []]
 var bad5  = "5" + {};
-            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found "5" + {}. Consider using template literals.]
 var bad6  = 5.5 + "5";
-            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5.5 + "5". Consider using template literals.]
 var bad7  = "5.5" + 5;
-            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found "5.5" + 5. Consider using template literals.]
 var bad8  = x + y;
-            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + string. Consider using template literals.]
 var bad9  = y + x;
-            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found string + number. Consider using template literals.]
 var bad10 = x + {};
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + {}]
 var bad11 = [] + y;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + string. Consider using template literals.]
 var bad12 = pair.first + "10";
-            ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + "10". Consider using template literals.]
 var bad13 = 5 + pair.second;
-            ~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, consider using template literals]
+            ~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + string. Consider using template literals.]
 var bad14 = pair + pair;
-            ~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers]
+            ~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found NumberStringPair + NumberStringPair]
+var anyTyped: any = 5;
+var bad15 = anyTyped + 12;
+            ~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found any + 12]
 
 // good
 var good1 = 5 + 10;

@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 const OPTION_CHECK_PARAMETERS = "check-parameters";
 
@@ -66,7 +67,10 @@ class NoDuplicateVariableWalker extends Lint.AbstractWalker<Options> {
     public walk(sourceFile: ts.SourceFile) {
         this.scope = new Set();
         const cb = (node: ts.Node): void => {
-            if (utils.isFunctionScopeBoundary(node)) {
+            // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+            // requires tsutils > 3.0.
+            if (isFunctionScopeBoundary(node)) {
+                // tslint:enable:deprecation
                 const oldScope = this.scope;
                 this.scope = new Set();
                 ts.forEachChild(node, cb);

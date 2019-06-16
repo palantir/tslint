@@ -1,0 +1,18 @@
+commonRules: &common
+    rule-one:
+        severity: error
+    rule-two:
+        - true
+        - "common rule"
+jsRules:
+    <<: *common
+    rule-three:
+        - true
+        - "js rule"
+rules:
+    <<: *common
+    rule-one:
+        severity: warning
+    rule-three:
+        - true
+        - "ts rule"

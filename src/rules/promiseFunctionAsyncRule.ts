@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import { hasModifier } from "tsutils";
+import { hasModifier, isCallExpression } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_FUNCTION_DECLARATION = "check-function-declaration";
@@ -102,10 +103,11 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
     const { sourceFile, options } = ctx;
     return ts.forEachChild(sourceFile, function cb(node): void {
         if (options.has(node.kind)) {
+            const declaration = node as ts.FunctionLikeDeclaration;
             switch (node.kind) {
                 case ts.SyntaxKind.MethodDeclaration:
                 case ts.SyntaxKind.FunctionDeclaration:
-                    if ((node as ts.FunctionLikeDeclaration).body === undefined) {
+                    if (declaration.body === undefined) {
                         break;
                     }
                 // falls through
@@ -113,7 +115,8 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
                 case ts.SyntaxKind.ArrowFunction:
                     if (
                         !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
-                        returnsPromise(node as ts.FunctionLikeDeclaration, tc)
+                        returnsPromise(declaration, tc) &&
+                        !isCallExpression(declaration.body as ts.Expression)
                     ) {
                         ctx.addFailure(
                             node.getStart(sourceFile),

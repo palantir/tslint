@@ -28,6 +28,7 @@ import {
     PRIVACY_PROTECTED,
     PRIVACY_PUBLIC,
 } from "../completedDocsRule";
+
 import { Exclusion } from "./exclusion";
 
 export interface IClassExclusionDescriptor {

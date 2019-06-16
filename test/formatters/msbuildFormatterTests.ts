@@ -19,6 +19,7 @@ import * as path from "path";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("MSBuild Formatter", () => {

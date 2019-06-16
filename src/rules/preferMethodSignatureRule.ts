@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isPropertySignature(node)) {
             const { type } = node;
