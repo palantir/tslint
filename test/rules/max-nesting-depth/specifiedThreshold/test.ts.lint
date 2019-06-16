@@ -6,7 +6,7 @@ const validFunctionExpression = function() {
 
 const invalidFunctionExpression = function() {
     const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [This function has a nesting depth of at least 3, which is higher than the threshold of 2]
 }
 
 const validArrowFunction = () => {
@@ -15,7 +15,7 @@ const validArrowFunction = () => {
 
 const invalidArrowFunction = () => {
     const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~            [This function has a nesting depth of at least 3, which is higher than the threshold of 2]
 }
 
 class MyClass {
@@ -25,7 +25,7 @@ class MyClass {
 
     get invalidGet(): string {
         return false ? "true" : false ? "true" : false ? "true" : "false";
-                                                 ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidGet has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidGet has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 
     set validSet(newValue: string) {
@@ -34,7 +34,7 @@ class MyClass {
 
     set invalidSet(newValue: string) {
         const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidSet has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidSet has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 
     validMethod() {
@@ -43,7 +43,7 @@ class MyClass {
 
     invalidMethod() {
         const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidMethod has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function invalidMethod has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 }
 
@@ -56,7 +56,7 @@ class validConstructor {
 class invalidConstructor {
     constructor() {
         const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [The function has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~            [This function has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 }
 
@@ -94,7 +94,7 @@ function invalidSwitch() {
                             return 0;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                     }
-~~~~~~~~~~~~~~~~~~~~~ [The function invalidSwitch has a nesting depth of at least 3 which is higher than the threshold of 2]
+~~~~~~~~~~~~~~~~~~~~~ [The function invalidSwitch has a nesting depth of at least 3, which is higher than the threshold of 2]
                 default:
                     return 0;
             }
@@ -115,17 +115,17 @@ function invalidTryCatchFinally() {
     try {
         try {
             try { } catch (error) { } finally { }
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     } catch (error) {
         try {
             try { } catch (error) { } finally { }
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     } finally {
         try {
             try { } catch (error) { } finally { }
-            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidTryCatchFinally has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -144,7 +144,7 @@ function invalidDo() {
             do { }
             ~~~~~~
             while (false)
-~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidDo has a nesting depth of at least 3 which is higher than the threshold of 2]
+~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidDo has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
         while (false)
     }
@@ -161,7 +161,7 @@ function invalidWhile() {
     while(false) {
         while(false) {
             while(false) { }
-            ~~~~~~~~~~~~~~~~ [The function invalidWhile has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~ [The function invalidWhile has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -176,7 +176,7 @@ function invalidFor() {
     for(;;) {
         for(;;) {
             for(;;) { }
-            ~~~~~~~~~~~ [The function invalidFor has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~ [The function invalidFor has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -191,7 +191,7 @@ function invalidForIn() {
     for(let i in [0,1,2]) {
         for(let i in [0,1,2]) {
             for(let i in [0,1,2]) { }
-            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForIn has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForIn has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -206,7 +206,7 @@ function invalidForOf() {
     for(let i of [0,1,2]) {
         for(let i of [0,1,2]) {
             for(let i of [0,1,2]) { }
-            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForOf has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~ [The function invalidForOf has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -223,10 +223,10 @@ function invalidIf() {
     if(true) {
         if(true) {
             if(true) { } else { }
-            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3, which is higher than the threshold of 2]
         } else {
             if(true) { } else { }
-            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3 which is higher than the threshold of 2]
+            ~~~~~~~~~~~~~~~~~~~~~ [The function invalidIf has a nesting depth of at least 3, which is higher than the threshold of 2]
         }
     }
 }
@@ -238,14 +238,14 @@ function outer1() {
     const condition = false ? "true" : false ? "true" : "false";
     function inner1() {
         const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner1 has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner1 has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 }
 
 // Invalid outer function, valid inner function.
 function outer2() {
     const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer2 has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer2 has a nesting depth of at least 3, which is higher than the threshold of 2]
     function inner2() {
         const condition = false ? "true" : false ? "true" : "false";
     }
@@ -262,9 +262,9 @@ function outer3() {
 // Both invalid.
 function outer4() {
     const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                        ~~~~~~~~~~~~~~~~~~~~~~~~  [The function outer4 has a nesting depth of at least 3, which is higher than the threshold of 2]
    function inner4() {
         const condition = false ? "true" : false ? "true" : false ? "true" : "false";
-                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner4 has a nesting depth of at least 3 which is higher than the threshold of 2]
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~~  [The function inner4 has a nesting depth of at least 3, which is higher than the threshold of 2]
     }
 }

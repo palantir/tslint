@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2019 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,16 @@
 
 import { isFunctionWithBody, isIdentifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
-/**
- * Rule max-nesting-depth
- */
-export class Rule extends Lint.Rules.AbstractRule {
-    public static MINIMUM_THRESHOLD = 1;
-    public static DEFAULT_THRESHOLD = 4;
-    public static THRESHOLD_EXAMPLE = 7;
+const DEFAULT_THRESHOLD = 7;
+const MINIMUM_THRESHOLD = 1;
+const OPTION_THRESHOLD = "threshold";
+const THRESHOLD_EXAMPLE = 4;
 
-    /* tslint:disable:object-literal-sort-keys */
+export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "max-nesting-depth",
         description: "Enforces a maximum threshold of nesting depth.",
         descriptionDetails: Lint.Utils.dedent`
             The nesting depth metric is assessed for each function of any type. It is computed by
@@ -40,144 +37,125 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`if\` statements
             * \`?:\` ternary operators
             * \`switch\` statements
-            * \`for\`, \`for in\` and \`for of\` loops
+            * \`for\`,, \`for in\`, and \`for of\` loops
             * \`while\` and \`do while\` loops
-            * \`try\` \`catch\` and \`finally\` blocks
+            * \`try\`, \`catch\`, and \`finally\` blocks
 
             The [\`max-nesting-depth\`](../max-nesting-depth) metric and the
             [\`cyclomatic-complexity\`](../cyclomatic-complexity) metric are both computed using the
-            control statements. The cyclomatic complexity metric simply counts the control statements
-            of the function until its threshold is reached whereas the nesting depth metric increase
-            and decrease each time a control statement is entered and left in the function until its
+            control statements. The cyclomatic complexity metric counts the control statements of
+            the function until its threshold is reached, whereas the nesting depth metric increases
+            and decreases each time a control statement is entered and left in the function until its
             threshold is reached.`,
+        optionExamples: [true, [true, { [OPTION_THRESHOLD]: THRESHOLD_EXAMPLE }]],
+        options: {
+            additionalProperties: false,
+            properties: {
+                [OPTION_THRESHOLD]: {
+                    minimum: MINIMUM_THRESHOLD,
+                    type: "number",
+                },
+            },
+            type: "object",
+        },
+        optionsDescription: Lint.Utils.dedent`
+            An optional upper limit for maximum nesting depth can be specified. If no limit option
+            is provided a default value of ${DEFAULT_THRESHOLD} will be used.`,
         rationale: Lint.Utils.dedent`
             Maximum nesting depth is a code metric which indicates how deep control statements are
             nested in a function. This metric quickly reveals the functions whose code is made
             difficult to read by an excessive nesting of the control statements.
 
             It's better to have smaller, single-purpose functions with self-documenting names.`,
-        optionsDescription: Lint.Utils.dedent`
-            An optional upper limit for maximum nesting depth can be specified. If no limit option
-            is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,
-        options: {
-            type: "number",
-            minimum: Rule.MINIMUM_THRESHOLD,
-        },
-        optionExamples: [true, [true, Rule.THRESHOLD_EXAMPLE]],
+        ruleName: "max-nesting-depth",
         type: "maintainability",
         typescriptOnly: false,
     };
-    /* tslint:enable:object-literal-sort-keys */
 
-    /**
-     * Builds and returns the failure string
-     * @param expected Rule threshold
-     * @param actual Depth of current function
-     * @param name Function name
-     */
-    public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
+    public static FAILURE_STRING(expected: number, actual: number, name: string = ""): string {
         return (
-            `The function${name === "" ? "" : ` ${name}`} has a nesting depth of at least ` +
-            `${actual} which is higher than the threshold of ${expected}`
+            `${name === "" ? "This function" : `The function ${name}`} has a nesting depth of at least ` +
+            `${actual}, which is higher than the threshold of ${expected}`
         );
     }
 
-    /**
-     *  Returns the provided function's name
-     * @param node The function
-     */
-    public static getFunctionName(node: ts.FunctionLikeDeclaration): string {
-        return node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
-    }
-
-    /**
-     * Returns true if the nesting depth rule is applicable to the current node
-     */
-    public static isNestingDepthStatement(node: ts.Node): boolean {
-        switch (node.kind) {
-            case ts.SyntaxKind.ConditionalExpression:
-            case ts.SyntaxKind.IfStatement:
-            case ts.SyntaxKind.SwitchStatement:
-            case ts.SyntaxKind.DoStatement:
-            case ts.SyntaxKind.WhileStatement:
-            case ts.SyntaxKind.ForStatement:
-            case ts.SyntaxKind.ForInStatement:
-            case ts.SyntaxKind.ForOfStatement:
-            case ts.SyntaxKind.TryStatement:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * Walks the AST
-     * @param ctx Walk context
-     */
-    public static walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-        const {
-            options: { threshold },
-        } = ctx;
-        const nestingDepthStack: number[] = [];
-        const functionNameStack: string[] = [];
-        const cbNode: (node: ts.Node) => void = (node: ts.Node): void => {
-            if (isFunctionWithBody(node)) {
-                nestingDepthStack.push(0);
-                functionNameStack.push(Rule.getFunctionName(node));
-                ts.forEachChild(node, cbNode);
-                nestingDepthStack.pop();
-                functionNameStack.pop();
-            } else if (Rule.isNestingDepthStatement(node)) {
-                nestingDepthStack[nestingDepthStack.length - 1]++;
-                // Report at the outer depth and stop walking the AST
-                if (nestingDepthStack[nestingDepthStack.length - 1] === threshold + 1) {
-                    ctx.addFailureAtNode(
-                        node,
-                        Rule.FAILURE_STRING(
-                            threshold,
-                            nestingDepthStack[nestingDepthStack.length - 1],
-                            functionNameStack[functionNameStack.length - 1],
-                        ),
-                    );
-                } else {
-                    ts.forEachChild(node, cbNode);
-                }
-                nestingDepthStack[nestingDepthStack.length - 1]--;
-            } else {
-                return ts.forEachChild(node, cbNode);
-            }
-        };
-
-        return ts.forEachChild(ctx.sourceFile, cbNode);
-    }
-
-    /**
-     * Returns true if the rule is enabled
-     */
     public isEnabled(): boolean {
         // Disable the rule if the option is provided but non-numeric or less than the minimum.
         const isThresholdValid: boolean =
-            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+            typeof this.threshold === "number" && this.threshold >= MINIMUM_THRESHOLD;
 
         return super.isEnabled() && isThresholdValid;
     }
 
-    /**
-     * Returns the configured or default rule threshold
-     */
     private get threshold(): number {
-        if (this.ruleArguments[0] !== undefined) {
-            return this.ruleArguments[0] as number;
+        if (!this.ruleArguments[0]) {
+            return DEFAULT_THRESHOLD;
         }
 
-        return Rule.DEFAULT_THRESHOLD;
+        return (this.ruleArguments[0] as Partial<{ [OPTION_THRESHOLD]: number }>)[OPTION_THRESHOLD]!;
     }
 
-    /**
-     * Analyze the provided source file
-     * @param sourceFile The source file to be analyzed
-     */
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, Rule.walk, { threshold: this.threshold });
+        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
     }
 }
+
+const walk = (ctx: Lint.WalkContext<{ threshold: number }>): void => {
+    const {
+        options: { threshold },
+    } = ctx;
+    const nestingDepthStack: number[] = [];
+    const functionNameStack: string[] = [];
+    const cbNode = (node: ts.Node): void => {
+        if (isFunctionWithBody(node)) {
+            nestingDepthStack.push(0);
+            functionNameStack.push(getFunctionName(node));
+            ts.forEachChild(node, cbNode);
+            nestingDepthStack.pop();
+            functionNameStack.pop();
+        } else if (isNestingDepthStatement(node)) {
+            nestingDepthStack[nestingDepthStack.length - 1]++;
+            // Report at the outer depth and stop walking the AST
+            if (nestingDepthStack[nestingDepthStack.length - 1] === threshold + 1) {
+                ctx.addFailureAtNode(
+                    node,
+                    Rule.FAILURE_STRING(
+                        threshold,
+                        nestingDepthStack[nestingDepthStack.length - 1],
+                        functionNameStack[functionNameStack.length - 1],
+                    ),
+                );
+            } else {
+                ts.forEachChild(node, cbNode);
+            }
+            nestingDepthStack[nestingDepthStack.length - 1]--;
+        } else {
+            return ts.forEachChild(node, cbNode);
+        }
+    };
+
+    return ts.forEachChild(ctx.sourceFile, cbNode);
+};
+
+const getFunctionName = (node: ts.FunctionLikeDeclaration) =>
+    node.name !== undefined && isIdentifier(node.name) ? node.name.text : "";
+
+/**
+ * Returns true if the nesting depth rule is applicable to the current node
+ */
+const isNestingDepthStatement = (node: ts.Node): boolean => {
+    switch (node.kind) {
+        case ts.SyntaxKind.ConditionalExpression:
+        case ts.SyntaxKind.IfStatement:
+        case ts.SyntaxKind.SwitchStatement:
+        case ts.SyntaxKind.DoStatement:
+        case ts.SyntaxKind.WhileStatement:
+        case ts.SyntaxKind.ForStatement:
+        case ts.SyntaxKind.ForInStatement:
+        case ts.SyntaxKind.ForOfStatement:
+        case ts.SyntaxKind.TryStatement:
+            return true;
+        default:
+            return false;
+    }
+};

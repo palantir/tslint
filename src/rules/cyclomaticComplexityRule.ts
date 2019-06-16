@@ -41,9 +41,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             The [\`max-nesting-depth\`](../max-nesting-depth) metric and the
             [\`cyclomatic-complexity\`](../cyclomatic-complexity) metric are both computed using the
-            control statements. The cyclomatic complexity metric simply counts the control statements
-            of the function until its threshold is reached whereas the nesting depth metric increase
-            and decrease each time a control statement is entered and left in the function until its
+            control statements. The cyclomatic complexity metric counts the control statements of
+            the function until its threshold is reached, whereas the nesting depth metric increases
+            and decreases each time a control statement is entered and left in the function until its
             threshold is reached.`,
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a

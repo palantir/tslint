@@ -29,21 +29,24 @@ function validThresholdPass() {
 }
 
 function validThresholdFail() {
-    const condition1: boolean = false;
-    const condition2: boolean = false;
-    const condition3: boolean = false;
-    const condition4: boolean = false;
-    const condition5: boolean = false;
-    if (condition1) {
-        if (condition2) {
-            if (condition3) {
-                if (condition4) {
-                    if (condition5) {
-                    ~~~~~~~~~~~~~~~~~
-                        return;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (1) {
+        if (2) {
+            if (3) {
+                if (4) {
+                    if (5) {
+                        if (6) {
+                            if (7) {
+                                if (8) {
+                                ~~~~~~~~
+                                    return;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [The function validThresholdFail has a nesting depth of at least 8, which is higher than the threshold of 7]
+                            }
+                                }
+                            }
+                        }
                     }
-~~~~~~~~~~~~~~~~~~~~~ [The function validThresholdFail has a nesting depth of at least 5 which is higher than the threshold of 4]
                 }
             }
         }
