@@ -5,19 +5,19 @@ type NormalType = () => void;
 interface Interface {
     lambda: () => void;
     voidProp: void;
-              ~~~~ [void as non-return type is forbidden]
+              ~~~~ [0]
 }
 
 class ClassName {
     private readonly propName: void;
-                               ~~~~ [void as non-return type is forbidden]
+                               ~~~~ [0]
 }
 
 let letVoid: void;
-             ~~~~ [void as non-return type is forbidden]
+             ~~~~ [0]
 
 type VoidType = void;
-                ~~~~ [void as non-return type is forbidden]
+                ~~~~ [0]
 
 class OtherClassName {
     private propName: VoidType;
@@ -25,10 +25,12 @@ class OtherClassName {
 
 type UnionType = string | number;
 type UnionType2 = string | number | void;
-                                    ~~~~ [void as non-return type is forbidden]
+                                    ~~~~ [0]
 
 type UnionType3 = string | (number & any | (string | void));
-                                                     ~~~~ [void as non-return type is forbidden]
+                                                     ~~~~ [0]
 
 type IntersectionType = string & number & void;
-                                          ~~~~ [void as non-return type is forbidden]
+                                          ~~~~ [0]
+
+[0]: void is not a valid type other than return types
