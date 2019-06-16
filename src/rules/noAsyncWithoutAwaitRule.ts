@@ -51,101 +51,90 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walk(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-// tslint:disable-next-line: deprecation
-class Walk extends Lint.RuleWalker {
-    protected visitFunctionDeclaration(node: ts.FunctionDeclaration) {
-        this.addFailureIfAsyncFunctionHasNoAwait(node);
-        super.visitFunctionDeclaration(node);
-    }
-
-    protected visitArrowFunction(node: ts.ArrowFunction) {
-        this.addFailureIfAsyncFunctionHasNoAwait(node);
-        super.visitArrowFunction(node);
-    }
-
-    protected visitMethodDeclaration(node: ts.MethodDeclaration) {
-        this.addFailureIfAsyncFunctionHasNoAwait(node);
-        super.visitMethodDeclaration(node);
-    }
-
-    protected visitFunctionExpression(node: ts.FunctionExpression) {
-        this.addFailureIfAsyncFunctionHasNoAwait(node);
-        super.visitFunctionExpression(node);
-    }
-
-    private getAsyncModifier(node: ts.Node) {
-        if (node.modifiers !== undefined) {
-            return node.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
-        }
-
-        return undefined;
-    }
-
-    private isReturn(node: ts.Node): boolean {
-        return node.kind === ts.SyntaxKind.ReturnKeyword;
-    }
-
-    private functionBlockHasAwait(node: ts.Node): boolean {
-        if (tsutils.isAwaitExpression(node)) {
-            return true;
-        }
-
-        if (
-            node.kind === ts.SyntaxKind.ArrowFunction ||
-            node.kind === ts.SyntaxKind.FunctionDeclaration
-        ) {
-            return false;
-        }
-
-        // tslint:disable-next-line:no-unsafe-any
-        return node.getChildren().some(this.functionBlockHasAwait.bind(this));
-    }
-
-    private readonly functionBlockHasReturn = (node: ts.Node): boolean => {
-        if (this.isReturn(node)) {
-            return true;
-        }
-
-        if (
-            node.kind === ts.SyntaxKind.ArrowFunction ||
-            node.kind === ts.SyntaxKind.FunctionDeclaration
-        ) {
-            return false;
-        }
-
-        return node.getChildren().some(this.functionBlockHasReturn);
-    };
-
-    private isShortArrowReturn(node: FunctionNodeType) {
-        return node.kind === ts.SyntaxKind.ArrowFunction && node.body.kind !== ts.SyntaxKind.Block;
-    }
-
-    private reportFailureIfAsyncFunction(node: FunctionNodeType) {
-        const asyncModifier = this.getAsyncModifier(node);
+function walk(context: Lint.WalkContext) {
+    const reportFailureIfAsyncFunction = (node: FunctionNodeType) => {
+        const asyncModifier = getAsyncModifier(node);
         if (asyncModifier !== undefined) {
-            this.addFailureAt(
+            context.addFailureAt(
                 asyncModifier.getStart(),
                 asyncModifier.getEnd() - asyncModifier.getStart(),
                 Rule.FAILURE_STRING,
             );
         }
-    }
+    };
 
-    private addFailureIfAsyncFunctionHasNoAwait(node: FunctionNodeType) {
+    const addFailureIfAsyncFunctionHasNoAwait = (node: FunctionNodeType) => {
         if (node.body === undefined) {
-            this.reportFailureIfAsyncFunction(node);
+            reportFailureIfAsyncFunction(node);
             return;
         }
+
         if (
-            !this.isShortArrowReturn(node) &&
-            !this.functionBlockHasAwait(node.body) &&
-            !this.functionBlockHasReturn(node.body)
+            !isShortArrowReturn(node) &&
+            !functionBlockHasAwait(node.body) &&
+            !functionBlockHasReturn(node.body)
         ) {
-            this.reportFailureIfAsyncFunction(node);
+            reportFailureIfAsyncFunction(node);
         }
-    }
+    };
+
+    return ts.forEachChild(context.sourceFile, function visitNode(node): void {
+        if (
+            tsutils.isArrowFunction(node) ||
+            tsutils.isFunctionDeclaration(node) ||
+            tsutils.isFunctionExpression(node) ||
+            tsutils.isMethodDeclaration(node)
+        ) {
+            addFailureIfAsyncFunctionHasNoAwait(node);
+        }
+
+        return ts.forEachChild(node, visitNode);
+    });
 }
+
+const getAsyncModifier = (node: ts.Node) => {
+    if (node.modifiers !== undefined) {
+        return node.modifiers.find(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+    }
+
+    return undefined;
+};
+
+const isReturn = (node: ts.Node): boolean => node.kind === ts.SyntaxKind.ReturnKeyword;
+
+const functionBlockHasAwait = (node: ts.Node): boolean => {
+    if (tsutils.isAwaitExpression(node)) {
+        return true;
+    }
+
+    if (
+        node.kind === ts.SyntaxKind.ArrowFunction ||
+        node.kind === ts.SyntaxKind.FunctionDeclaration
+    ) {
+        return false;
+    }
+
+    return node.getChildren().some(functionBlockHasAwait);
+};
+
+const functionBlockHasReturn = (node: ts.Node): boolean => {
+    if (isReturn(node)) {
+        return true;
+    }
+
+    if (
+        node.kind === ts.SyntaxKind.ArrowFunction ||
+        node.kind === ts.SyntaxKind.FunctionDeclaration
+    ) {
+        return false;
+    }
+
+    return node.getChildren().some(functionBlockHasReturn);
+};
+
+const isShortArrowReturn = (node: FunctionNodeType) =>
+    node.kind === ts.SyntaxKind.ArrowFunction && node.body.kind !== ts.SyntaxKind.Block;
