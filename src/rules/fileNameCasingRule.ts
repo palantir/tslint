@@ -207,7 +207,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ],
         hasFix: false,
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
