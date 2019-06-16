@@ -44,7 +44,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             minimum: "1",
         },
         optionExamples: [true, [true, 2]],
-        type: "style",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

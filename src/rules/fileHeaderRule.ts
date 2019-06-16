@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,20 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
-const ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
+const OPTION_MATCH = "match";
+const OPTION_ALLOW_SINGLE_LINE_COMMENTS = "allow-single-line-comments";
+const OPTION_DEFAULT = "default";
+const OPTION_ENFORCE_TRAILING_NEWLINE = "enforce-trailing-newline";
+
+interface FileHeaderRuleOptions {
+    [OPTION_MATCH]: string;
+    [OPTION_ALLOW_SINGLE_LINE_COMMENTS]?: boolean;
+    [OPTION_DEFAULT]?: string;
+    [OPTION_ENFORCE_TRAILING_NEWLINE]?: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -27,29 +38,76 @@ export class Rule extends Lint.Rules.AbstractRule {
         description:
             "Enforces a certain header comment for all files, matched by a regular expression.",
         optionsDescription: Lint.Utils.dedent`
+            A single object may be passed in for configuration that must contain:
+
+            * \`${OPTION_MATCH}\`: a regular expression that all headers should match
+
+            Any of the following optional fields may also be provided:
+
+            * \`${OPTION_ALLOW_SINGLE_LINE_COMMENTS}\`: a boolean for whether \`//\` should be considered file headers in addition to \`/*\` comments
+            * \`${OPTION_DEFAULT}\`: text to add for file headers when running in \`--fix\` mode
+            * \`${OPTION_ENFORCE_TRAILING_NEWLINE}\`: a boolean for whether a newline must follow the header
+
+            The rule will also accept array of strings as a legacy form of options, though the object form is recommended.
             The first option, which is mandatory, is a regular expression that all headers should match.
             The second argument, which is optional, is a string that should be inserted as a header comment
             if fixing is enabled and no header that matches the first argument is found.
             The third argument, which is optional, is a string that denotes whether or not a newline should
             exist on the header.`,
         options: {
-            type: "array",
-            items: [
+            oneOf: [
                 {
-                    type: "string",
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: {
+                            [OPTION_MATCH]: {
+                                type: "string",
+                            },
+                            [OPTION_ALLOW_SINGLE_LINE_COMMENTS]: {
+                                type: "boolean",
+                            },
+                            [OPTION_DEFAULT]: {
+                                type: "string",
+                            },
+                            [OPTION_ENFORCE_TRAILING_NEWLINE]: {
+                                type: "boolean",
+                            },
+                        },
+                        additionalProperties: false,
+                    },
                 },
                 {
-                    type: "string",
-                },
-                {
-                    type: "string",
+                    type: "array",
+                    items: [
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "string",
+                        },
+                        {
+                            type: "string",
+                        },
+                    ],
+                    additionalItems: false,
+                    minLength: 1,
+                    maxLength: 3,
                 },
             ],
-            additionalItems: false,
-            minLength: 1,
-            maxLength: 3,
         },
-        optionExamples: [[true, "Copyright \\d{4}", "Copyright 2018", ENFORCE_TRAILING_NEWLINE]],
+        optionExamples: [
+            [
+                true,
+                {
+                    [OPTION_MATCH]: "Copyright \\d{4}",
+                    [OPTION_ALLOW_SINGLE_LINE_COMMENTS]: true,
+                    [OPTION_DEFAULT]: "Copyright 2018",
+                    [OPTION_ENFORCE_TRAILING_NEWLINE]: true,
+                },
+            ],
+            [true, "Copyright \\d{4}", "Copyright 2018", OPTION_ENFORCE_TRAILING_NEWLINE],
+        ],
         hasFix: true,
         type: "style",
         typescriptOnly: false,
@@ -60,17 +118,18 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static MISSING_NEW_LINE_FAILURE_STRING = "missing new line following the file header";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        const options = this.getRuleOptions();
+
         const { text } = sourceFile;
-        const headerFormat = new RegExp(this.ruleArguments[0] as string);
-        const textToInsert = this.ruleArguments[1] as string | undefined;
-        const enforceExtraTrailingLine =
-            this.ruleArguments.indexOf(ENFORCE_TRAILING_NEWLINE) !== -1;
+        const headerFormat = new RegExp(options[OPTION_MATCH]);
+        const textToInsert = options[OPTION_DEFAULT];
 
         // ignore shebang if it exists
         let offset = text.startsWith("#!") ? text.indexOf("\n") : 0;
-        // returns the text of the first comment or undefined
-        const commentText = ts.forEachLeadingCommentRange(text, offset, (pos, end, kind) =>
-            text.substring(pos + 2, kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2),
+        const commentText = this.getFileHeaderText(
+            text,
+            offset,
+            !!options[OPTION_ALLOW_SINGLE_LINE_COMMENTS],
         );
 
         if (commentText === undefined || !headerFormat.test(commentText)) {
@@ -106,7 +165,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const trailingNewLineViolation =
-            enforceExtraTrailingLine &&
+            options[OPTION_ENFORCE_TRAILING_NEWLINE] &&
             headerFormat.test(commentText) &&
             this.doesNewLineEndingViolationExist(text, offset);
 
@@ -132,6 +191,24 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         return [];
+    }
+
+    private getRuleOptions(): FileHeaderRuleOptions {
+        const options = this.ruleArguments;
+        if (options.length === 1 && typeof options[0] === "object") {
+            return options[0] as FileHeaderRuleOptions;
+        }
+
+        // Legacy options
+        const args = this.ruleArguments as string[];
+        return {
+            [OPTION_DEFAULT]: args[1],
+            [OPTION_ENFORCE_TRAILING_NEWLINE]:
+                args[2] !== undefined
+                    ? args[2].indexOf(OPTION_ENFORCE_TRAILING_NEWLINE) !== -1
+                    : undefined,
+            [OPTION_MATCH]: args[0],
+        };
     }
 
     private createComment(
@@ -170,5 +247,27 @@ export class Rule extends Lint.Rules.AbstractRule {
         return (
             entireComment !== undefined && NEW_LINE_FOLLOWING_HEADER.test(entireComment) !== null
         );
+    }
+
+    private getFileHeaderText(
+        text: string,
+        offset: number,
+        allowSingleLineComments: boolean,
+    ): string | undefined {
+        const ranges = ts.getLeadingCommentRanges(text, offset);
+        if (ranges === undefined || ranges.length === 0) {
+            return undefined;
+        }
+
+        const fileHeaderRanges = !allowSingleLineComments ? ranges.slice(0, 1) : ranges;
+        return fileHeaderRanges
+            .map(range => {
+                const { pos, kind, end } = range;
+                return text.substring(
+                    pos + 2,
+                    kind === ts.SyntaxKind.SingleLineCommentTrivia ? end : end - 2,
+                );
+            })
+            .join("\n");
     }
 }

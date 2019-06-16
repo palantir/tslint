@@ -84,8 +84,12 @@ export function each(obj, iterator, context) {
     //
 }
 
-export {each as forEach};
+export { each as forEach };
 import "libE";
+
+const E = 123;
+const F = 123;
+export { E, F };
 
 function foobar() {}
 

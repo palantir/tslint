@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { unwrapParentheses } from "../language/utils";
 
@@ -44,7 +45,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     const { sourceFile } = ctx;
     let variables: Map<ts.Identifier, utils.VariableInfo> | undefined;
 
@@ -86,7 +87,7 @@ function isNonSimpleIncrementorUse(
     sourceFile: ts.SourceFile,
 ): boolean {
     // check if iterator is used for something other than reading data from array
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         !utils.isElementAccessExpression(parent) ||
         // `a[i] = ...` or similar

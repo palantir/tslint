@@ -1,0 +1,26 @@
+`fo\`o`;
+~~~~~~~ [0]
+
+`a 'quote'`;
+~~~~~~~~~~~ [1]
+
+`a "quote"`;
+~~~~~~~~~~~ [0]
+
+`a "quote" 'quote'`;
+
+// Allow multi-line templates
+`
+foo
+bar
+`;
+
+// Allow tagged templates and templates with substitutions
+foo``;
+`${foo}`;
+
+this.toastCtrl.present(`Please tick "Yes" to confirm`);
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+[0]: ` should be '
+[1]: ` should be "

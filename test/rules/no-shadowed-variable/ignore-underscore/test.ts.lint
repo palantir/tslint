@@ -1,0 +1,10 @@
+import _ = require('lodash');
+
+function foo(_) {
+    console.log(_);
+}
+
+function foo(_1, _2) {
+    // Allow shadowing of multiple unused parameters
+    [].map((_1, _2) => undefined);
+}

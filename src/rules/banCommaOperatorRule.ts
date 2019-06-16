@@ -64,7 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (
             isBinaryExpression(node) &&
@@ -78,7 +78,7 @@ function walk(ctx: Lint.WalkContext<void>) {
 }
 
 function isForLoopIncrementor(node: ts.Node) {
-    const parent = node.parent!;
+    const parent = node.parent;
     return (
         parent.kind === ts.SyntaxKind.ForStatement &&
         (parent as ts.ForStatement).incrementor === node

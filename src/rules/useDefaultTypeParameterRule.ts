@@ -22,6 +22,7 @@ import {
     isTypeAliasDeclaration,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 import { find } from "../utils";
 
@@ -53,7 +54,7 @@ interface ArgsAndParams {
     typeParameters: ReadonlyArray<ts.TypeParameterDeclaration>;
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const argsAndParams = getArgsAndParameters(node, checker);
         if (argsAndParams !== undefined) {
@@ -101,8 +102,8 @@ function getArgsAndParameters(node: ts.Node, checker: ts.TypeChecker): ArgsAndPa
                 decl.kind === ts.SyntaxKind.TypeReference
                     ? typeParamsFromType(decl.typeName, checker)
                     : decl.kind === ts.SyntaxKind.ExpressionWithTypeArguments
-                        ? typeParamsFromType(decl.expression, checker)
-                        : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
+                    ? typeParamsFromType(decl.expression, checker)
+                    : typeParamsFromCall(node as ts.CallExpression | ts.NewExpression, checker);
             return typeParameters === undefined ? undefined : { typeArguments, typeParameters };
         default:
             return undefined;
@@ -133,14 +134,10 @@ function typeParamsFromType(
         return undefined;
     }
 
-    return find(
-        sym.declarations,
-        decl =>
-            isClassLikeDeclaration(decl) ||
-            isTypeAliasDeclaration(decl) ||
-            isInterfaceDeclaration(decl)
-                ? decl.typeParameters
-                : undefined,
+    return find(sym.declarations, decl =>
+        isClassLikeDeclaration(decl) || isTypeAliasDeclaration(decl) || isInterfaceDeclaration(decl)
+            ? decl.typeParameters
+            : undefined,
     );
 }
 

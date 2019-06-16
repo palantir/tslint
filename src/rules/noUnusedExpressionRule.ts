@@ -50,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Detects potential errors where an assignment or function call was intended.`,
         optionsDescription: Lint.Utils.dedent`
-            Two arguments may be optionally provided:
+            Three arguments may be optionally provided:
 
             * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
             method or function calls for side effects (e.g. \`e && e.preventDefault()\`).
@@ -210,16 +210,13 @@ function isIndirectEval(node: ts.BinaryExpression): boolean {
         isIdentifier(node.right) &&
         node.right.text === "eval" &&
         isLiteralZero(node.left) &&
-        node.parent!.kind === ts.SyntaxKind.ParenthesizedExpression &&
-        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression
+        node.parent.kind === ts.SyntaxKind.ParenthesizedExpression &&
+        node.parent.parent.kind === ts.SyntaxKind.CallExpression
     );
 }
 
 function isDirective(node: ts.ExpressionStatement) {
-    if (
-        node.expression.kind !== ts.SyntaxKind.StringLiteral ||
-        !canContainDirective(node.parent!)
-    ) {
+    if (node.expression.kind !== ts.SyntaxKind.StringLiteral || !canContainDirective(node.parent)) {
         return false;
     }
 
@@ -243,7 +240,7 @@ function canContainDirective(node: ts.Node): boolean {
         case ts.SyntaxKind.ModuleBlock:
             return true;
         case ts.SyntaxKind.Block:
-            switch (node.parent!.kind) {
+            switch (node.parent.kind) {
                 case ts.SyntaxKind.ArrowFunction:
                 case ts.SyntaxKind.FunctionExpression:
                 case ts.SyntaxKind.FunctionDeclaration:

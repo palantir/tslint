@@ -18,9 +18,11 @@
 import { assert } from "chai";
 import * as fs from "fs";
 import { createSourceFile, ScriptTarget } from "typescript";
+
 import { DEFAULT_CONFIG } from "../src/configuration";
 import { Replacement, RuleFailure } from "../src/language/rule/rule";
 import { Linter } from "../src/linter";
+
 import { createTempFile } from "./utils";
 
 class TestLinter extends Linter {

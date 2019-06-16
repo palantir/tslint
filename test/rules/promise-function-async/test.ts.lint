@@ -62,6 +62,9 @@ class Test {
     public nonAsyncNonPromiseMethod(n: number) {
         return n;
     }
+
+    // single statement lamda functions that delegate to another promise-returning function are allowed
+    public delegatingMethod = () => this.asyncPromiseMethodB(1);
 }
 
 [0]: functions that return promises must be async
