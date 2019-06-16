@@ -126,6 +126,7 @@ if (TestNumericEnum.Two > e1) {}
 const f1: TestNumericEnum | undefined
 const f2: TestNumericEnum | undefined
 
+#if typescript > 2.1
 if (f1 === f2) {}
 if (f2 === f1) {}
 
@@ -140,6 +141,7 @@ if (g1 === TestStringEnum.Two) {}
 if (TestStringEnum.Two === g1) {}
 if (g1 > TestStringEnum.Two) {}
 if (TestStringEnum.Two > g1) {}
+#endif
 
 const h1: string | number = Math.random() > 0.5 ? 'text' : 5;
 const h2: string | number = Math.random() > 0.5 ? 'test' : 2;
