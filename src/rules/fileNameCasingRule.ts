@@ -25,6 +25,7 @@ import { isCamelCased, isKebabCased, isPascalCased, isSnakeCased } from "../util
 enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
+    Ignored = "ignored",
     KebabCase = "kebab-case",
     SnakeCase = "snake-case",
 }
@@ -49,6 +50,8 @@ function isCorrectCasing(fileName: string, casing: Casing): boolean {
             return isCamelCased(fileName);
         case Casing.PascalCase:
             return isPascalCased(fileName);
+        case Casing.Ignored:
+            return true;
         case Casing.KebabCase:
             return isKebabCased(fileName);
         case Casing.SnakeCase:
@@ -142,6 +145,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`${Casing.PascalCase}\`: File names must be Pascal-cased: \`FileName.ts\`.
             * \`${Casing.KebabCase}\`: File names must be kebab-cased: \`file-name.ts\`.
             * \`${Casing.SnakeCase}\`: File names must be snake-cased: \`file_name.ts\`.
+            * \`${Casing.Ignored}\`: File names are ignored _(useful for the object configuration)_.
 
             Or an object, where the key represents a regular expression that
             matches the file name, and the value is the file name rule from
@@ -193,6 +197,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                     ".*": Casing.CamelCase,
                 },
             ],
+            [
+                true,
+                {
+                    ".ts": Casing.Ignored,
+                    ".tsx": Casing.PascalCase,
+                },
+            ],
         ],
         hasFix: false,
         type: "style",
@@ -214,6 +225,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 return "camelCase";
             case Casing.PascalCase:
                 return "PascalCase";
+            case Casing.Ignored:
+                return "ignored";
             case Casing.KebabCase:
                 return "kebab-case";
             case Casing.SnakeCase:
