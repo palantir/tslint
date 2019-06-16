@@ -192,8 +192,8 @@ function getTypes(types: ts.Type): TypeKind[] {
     return isUnionType(types)
         ? Array.from(new Set(types.types.map(getKind)))
         : isTypeFlagSet(types, ts.TypeFlags.EnumLiteral) && typeof baseType !== "undefined"
-            ? [getKind(baseType)]
-            : [getKind(types)];
+        ? [getKind(baseType)]
+        : [getKind(types)];
 }
 
 function getStrictestComparableType(
