@@ -20,10 +20,10 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const DEFAULT_THRESHOLD = 7;
+const DEFAULT_THRESHOLD = 10;
 const MINIMUM_THRESHOLD = 1;
 const OPTION_THRESHOLD = "threshold";
-const THRESHOLD_EXAMPLE = 4;
+const THRESHOLD_EXAMPLE = 5;
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
@@ -74,7 +74,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public static FAILURE_STRING(expected: number, actual: number, name: string = ""): string {
         return (
-            `${name === "" ? "This function" : `The function ${name}`} has a nesting depth of at least ` +
+            `${
+                name === "" ? "This function" : `The function ${name}`
+            } has a nesting depth of at least ` +
             `${actual}, which is higher than the threshold of ${expected}`
         );
     }
@@ -92,7 +94,9 @@ export class Rule extends Lint.Rules.AbstractRule {
             return DEFAULT_THRESHOLD;
         }
 
-        return (this.ruleArguments[0] as Partial<{ [OPTION_THRESHOLD]: number }>)[OPTION_THRESHOLD]!;
+        return (this.ruleArguments[0] as Partial<{ [OPTION_THRESHOLD]: number }>)[
+            OPTION_THRESHOLD
+        ]!;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {

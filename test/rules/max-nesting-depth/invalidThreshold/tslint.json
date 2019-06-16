@@ -1,5 +1,5 @@
 {
   "rules": {
-    "max-nesting-depth": [true, -5]
+    "max-nesting-depth": [true, { "threshold": -5 }]
   }
 }
