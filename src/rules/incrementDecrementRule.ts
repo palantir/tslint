@@ -29,10 +29,7 @@ const OPTION_ALLOW_POST = "allow-post";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Enforces using explicit += 1 or -= 1 operators.",
-        optionExamples: [
-            true,
-            [true, OPTION_ALLOW_POST],
-        ],
+        optionExamples: [true, [true, OPTION_ALLOW_POST]],
         options: {
             items: {
                 enum: [OPTION_ALLOW_POST],
@@ -56,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static FAILURE_STRING_FACTORY = (newOperatorText: string) =>
-        `Use an explicit ${newOperatorText} operator.`
+        `Use an explicit ${newOperatorText} operator.`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
@@ -68,7 +65,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(context: Lint.WalkContext<Options>) {
-    function createReplacement(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression, newOperatorText: string): Lint.Replacement {
+    function createReplacement(
+        node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression,
+        newOperatorText: string,
+    ): Lint.Replacement {
         let text = `${node.operand.getText(context.sourceFile)} ${newOperatorText}`;
 
         if (node.parent !== undefined && tsutils.isBinaryExpression(node.parent)) {
@@ -79,10 +79,15 @@ function walk(context: Lint.WalkContext<Options>) {
     }
 
     function complainOnNode(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
-        const newOperatorText = node.operator === ts.SyntaxKind.PlusPlusToken
-            ? "+= 1"
-            : "-= 1";
-        const replacement = createReplacement(node, newOperatorText);
+        const newOperatorText = node.operator === ts.SyntaxKind.PlusPlusToken ? "+= 1" : "-= 1";
+        let replacement: Lint.Replacement | undefined;
+
+        if (
+            tsutils.isPrefixUnaryExpression(node) ||
+            node.parent.kind === ts.SyntaxKind.ExpressionStatement
+        ) {
+            replacement = createReplacement(node, newOperatorText);
+        }
 
         const failure = Rule.FAILURE_STRING_FACTORY(newOperatorText);
 
@@ -112,6 +117,8 @@ function walk(context: Lint.WalkContext<Options>) {
     });
 }
 
-function isIncrementOrDecrementOperator(operator: ts.PostfixUnaryOperator | ts.PrefixUnaryOperator) {
+function isIncrementOrDecrementOperator(
+    operator: ts.PostfixUnaryOperator | ts.PrefixUnaryOperator,
+) {
     return operator === ts.SyntaxKind.PlusPlusToken || operator === ts.SyntaxKind.MinusMinusToken;
 }

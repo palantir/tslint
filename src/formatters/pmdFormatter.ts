@@ -18,14 +18,13 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: IFormatterMetadata = {
         formatterName: "pmd",
-        description: "Formats errors as through they were PMD output.",
+        description: "Formats errors as though they were PMD output.",
         descriptionDetails: "Imitates the XML output from PMD. All errors have a priority of 1.",
         sample: Utils.dedent`
         <pmd version="tslint">
@@ -38,10 +37,11 @@ export class Formatter extends AbstractFormatter {
     /* tslint:enable:object-literal-sort-keys */
 
     public format(failures: RuleFailure[]): string {
-        let output = "<pmd version=\"tslint\">";
+        let output = '<pmd version="tslint">';
 
         for (const failure of failures) {
-            const failureString = failure.getFailure()
+            const failureString = failure
+                .getFailure()
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")

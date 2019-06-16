@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isTryStatement } from "tsutils";
+import { isTryStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -45,10 +46,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
         if (node.kind === ts.SyntaxKind.AwaitExpression && isUnnecessaryAwait(node)) {
-            const {expression} = node as ts.AwaitExpression;
+            const { expression } = node as ts.AwaitExpression;
             const keywordStart = expression.pos - "await".length;
             ctx.addFailure(
                 keywordStart,
@@ -63,12 +64,12 @@ function walk(ctx: Lint.WalkContext<void>) {
 
 function isUnnecessaryAwait(node: ts.Node): boolean {
     while (true) {
-        const parent = node.parent!;
+        const parent = node.parent;
         outer: switch (parent.kind) {
             case ts.SyntaxKind.ArrowFunction:
                 return true;
             case ts.SyntaxKind.ReturnStatement:
-                return !isInsideTryBlock(parent.parent!);
+                return !isInsideTryBlock(parent.parent);
             case ts.SyntaxKind.ParenthesizedExpression:
                 break;
             case ts.SyntaxKind.ConditionalExpression:
@@ -95,7 +96,10 @@ function isUnnecessaryAwait(node: ts.Node): boolean {
 
 function isInsideTryBlock(node: ts.Node): boolean {
     while (node.parent !== undefined) {
+        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+        // requires tsutils > 3.0.
         if (isFunctionScopeBoundary(node)) {
+            // tslint:enable:deprecation
             return false;
         }
         if (isTryStatement(node.parent)) {
@@ -103,11 +107,11 @@ function isInsideTryBlock(node: ts.Node): boolean {
                 // statements inside the try block always have an error handler, either catch or finally
                 node.parent.tryBlock === node ||
                 // statement inside the catch block only have an error handler if there is a finally block
-                node.parent.finallyBlock !== undefined && node.parent.catchClause === node
+                (node.parent.finallyBlock !== undefined && node.parent.catchClause === node)
             ) {
                 return true;
             }
-            node = node.parent.parent!;
+            node = node.parent.parent;
         } else {
             node = node.parent;
         }

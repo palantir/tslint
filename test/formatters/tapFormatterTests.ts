@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import { dedent } from "../../src/utils";
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("TAP Formatter", () => {
@@ -38,7 +39,15 @@ describe("TAP Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
         ];
 
         const failureStrings = [
@@ -48,7 +57,10 @@ describe("TAP Formatter", () => {
         ];
 
         const actualResult = formatter.format(failures);
-        assert.equal(actualResult, `TAP version 13\n1..${failures.length}\n${failureStrings.join("\n")}\n`);
+        assert.equal(
+            actualResult,
+            `TAP version 13\n1..${failures.length}\n${failureStrings.join("\n")}\n`,
+        );
     });
 
     it("handles no failures", () => {
@@ -56,13 +68,15 @@ describe("TAP Formatter", () => {
         assert.equal(result, "TAP version 13\n1..0 # SKIP No failures\n");
     });
 
-    function getFailureString(num: number,
-                              ruleName: string,
-                              severity: string,
-                              file: string,
-                              line: number,
-                              character: number,
-                              reason: string) {
+    function getFailureString(
+        num: number,
+        ruleName: string,
+        severity: string,
+        file: string,
+        line: number,
+        character: number,
+        reason: string,
+    ) {
         return dedent`
             not ok ${num} - ${reason}
               ---

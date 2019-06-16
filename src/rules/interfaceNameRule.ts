@@ -19,7 +19,6 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isUpperCase } from "../utils";
 
 const OPTION_ALWAYS = "always-prefix";
 const OPTION_NEVER = "never-prefix";
@@ -49,19 +48,25 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_NO_PREFIX = 'interface name must not have an "I" prefix';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1 });
+        return this.applyWithFunction(sourceFile, walk, {
+            never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1,
+        });
     }
 }
 
 function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
-    const { options: { never } } = ctx;
+    const {
+        options: { never },
+    } = ctx;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (utils.isInterfaceDeclaration(node)) {
             const { name } = node;
-            if (never && hasPrefixI(name.text)) {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-            } else if (!never && name.text[0] !== "I") {
-                ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+            if (!cantDecide(name.text)) {
+                if (never && hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
+                } else if (!never && !hasPrefixI(name.text)) {
+                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
+                }
             }
         } else {
             return ts.forEachChild(node, cb);
@@ -70,6 +75,17 @@ function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
 }
 
 function hasPrefixI(name: string): boolean {
-    // Allow IndexedDB interfaces
-    return name.length >= 2 && name[0] === "I" && isUpperCase(name[1]) && !name.startsWith("IDB");
+    return name.length >= 3 && name[0] === "I" && /^[A-Z]*$/.test(name[1]);
+}
+
+function cantDecide(name: string): boolean {
+    return (
+        // Case ID
+        (name.length === 2 && name[0] === "I" && /^[A-Z]*$/.test(name[1])) ||
+        // Case IDB or ID42
+        (name.length >= 2 &&
+            name[0] === "I" &&
+            /^[A-Z]*$/.test(name[1]) &&
+            !/^[a-z]*$/.test(name[2]))
+    );
 }

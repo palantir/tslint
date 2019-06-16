@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, cb);
     function cb(node: ts.Node): void {
         if (isTypeNodeKind(node.kind)) {
@@ -74,7 +74,7 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (node.kind !== ts.SyntaxKind.NullKeyword) {
             return ts.forEachChild(node, cb);
         }
-        const parent = node.parent!;
+        const parent = node.parent;
         let eq: Lint.EqualsKind | undefined;
         if (isBinaryExpression(parent)) {
             eq = Lint.getEqualsKind(parent.operatorToken);
@@ -82,7 +82,11 @@ function walk(ctx: Lint.WalkContext<void>) {
         if (eq === undefined) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         } else if (!eq.isStrict) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.replaceNode(node, "undefined", ctx.sourceFile));
+            ctx.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                Lint.Replacement.replaceNode(node, "undefined", ctx.sourceFile),
+            );
         }
     }
 }

@@ -16,11 +16,16 @@
  */
 
 import { RuleFailure } from "../rule/rule";
+
 import { IFormatter, IFormatterMetadata } from "./formatter";
 
 export abstract class AbstractFormatter implements IFormatter {
     public static metadata: IFormatterMetadata;
-    public abstract format(failures: RuleFailure[]): string;
+    public abstract format(
+        failures: RuleFailure[],
+        fixes?: RuleFailure[],
+        fileNames?: string[],
+    ): string;
 
     protected sortFailures(failures: RuleFailure[]): RuleFailure[] {
         return failures.slice().sort(RuleFailure.compare);

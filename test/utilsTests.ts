@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import { assert } from "chai";
+
 import { arrayify, dedent, escapeRegExp } from "../src/utils";
 
 describe("Utils", () => {
@@ -24,7 +25,7 @@ describe("Utils", () => {
         assert.deepEqual(arrayify([]), []);
         assert.deepEqual(arrayify("foo"), ["foo"]);
         assert.deepEqual(arrayify(1), [1]);
-        assert.deepEqual(arrayify({foo: 2}), [{foo: 2}]);
+        assert.deepEqual(arrayify({ foo: 2 }), [{ foo: 2 }]);
         assert.deepEqual(arrayify([1, 2]), [1, 2]);
         assert.deepEqual(arrayify(["foo"]), ["foo"]);
     });
@@ -34,7 +35,8 @@ describe("Utils", () => {
             dedent`
             foo
             bar`,
-            "\nfoo\nbar");
+            "\nfoo\nbar",
+        );
 
         assert.equal(dedent`   one-line`, "one-line");
 

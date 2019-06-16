@@ -19,6 +19,7 @@ import * as ts from "typescript";
 
 import { dedent } from "../../src/utils";
 import { IFormatter, RuleFailure, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("Prose Formatter", () => {
@@ -38,7 +39,15 @@ describe("Prose Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "warning"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "warning",
+            ),
         ];
 
         const expectedResult = dedent`
@@ -55,7 +64,7 @@ describe("Prose Formatter", () => {
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
         ];
 
-        const mockFix = { getFileName: () => "file2" } as any as RuleFailure;  // tslint:disable-line no-object-literal-type-assertion
+        const mockFix = ({ getFileName: () => "file2" } as any) as RuleFailure; // tslint:disable-line no-object-literal-type-assertion
 
         const fixes = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
@@ -79,6 +88,6 @@ describe("Prose Formatter", () => {
     });
 
     function getPositionString(line: number, character: number) {
-        return `[${line}, ${character}]: `;
+        return `:${line}:${character} - `;
     }
 });

@@ -61,13 +61,13 @@ export class Rule extends Lint.Rules.AbstractRule {
             listType: {
                 anyOf: [
                     {
-                        type: "string"
+                        type: "string",
                     },
                     {
                         type: "array",
                         items: { type: "string" },
                         minLength: 1,
-                        maxLength: 3
+                        maxLength: 3,
                     },
                     {
                         type: "object",
@@ -75,15 +75,15 @@ export class Rule extends Lint.Rules.AbstractRule {
                             name: {
                                 anyOf: [
                                     { type: "string" },
-                                    { type: "array", items: { type: "string" }, minLength: 1 }
-                                ]
+                                    { type: "array", items: { type: "string" }, minLength: 1 },
+                                ],
                             },
-                            message: { type: "string" }
+                            message: { type: "string" },
                         },
-                        required: ["name"]
-                    }
-                ]
-            }
+                        required: ["name"],
+                    },
+                ],
+            },
         },
         optionExamples: [
             [
@@ -93,11 +93,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 ["describe", "only"],
                 { name: ["it", "only"], message: "don't focus tests" },
                 { name: ["chai", "assert", "equal"], message: "Use 'strictEqual' instead." },
-                { name: ["*", "forEach"], message: "Use a regular for loop instead." }
-            ]
+                { name: ["*", "forEach"], message: "Use a regular for loop instead." },
+                { name: ["*", "_id", "toString"], message: "Use 'toHexString' instead." },
+            ],
         ],
         type: "functionality",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -109,7 +110,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new BanFunctionWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments))
+            new BanFunctionWalker(sourceFile, this.ruleName, parseOptions(this.ruleArguments)),
         );
     }
 }
@@ -143,7 +144,7 @@ function parseOptions(args: Array<string | string[] | OptionsInput>): Options {
                     methods.push({
                         message: arg.message,
                         name: arg.name[arg.name.length - 1],
-                        object: arg.name.slice(0, -1)
+                        object: arg.name.slice(0, -1),
                     });
             }
         }
@@ -167,14 +168,14 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkForObjectMethodBan(expression: ts.PropertyAccessExpression) {
-        for (const ban of this.options.methods) {
+        outer: for (const ban of this.options.methods) {
             if (expression.name.text !== ban.name) {
                 continue;
             }
             let current = expression.expression;
             for (let i = ban.object.length - 1; i > 0; --i) {
                 if (!isPropertyAccessExpression(current) || current.name.text !== ban.object[i]) {
-                    continue;
+                    continue outer;
                 }
                 current = current.expression;
             }
@@ -184,7 +185,7 @@ class BanFunctionWalker extends Lint.AbstractWalker<Options> {
             ) {
                 this.addFailureAtNode(
                     expression,
-                    Rule.FAILURE_STRING_FACTORY(`${ban.object.join(".")}.${ban.name}`, ban.message)
+                    Rule.FAILURE_STRING_FACTORY(`${ban.object.join(".")}.${ban.name}`, ban.message),
                 );
                 break;
             }

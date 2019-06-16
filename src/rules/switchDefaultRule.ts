@@ -19,6 +19,7 @@ import { isDefaultClause } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/switchDefault.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -42,10 +43,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (node.kind === ts.SyntaxKind.SwitchStatement &&
-            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)) {
+        if (
+            node.kind === ts.SyntaxKind.SwitchStatement &&
+            !(node as ts.SwitchStatement).caseBlock.clauses.some(isDefaultClause)
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

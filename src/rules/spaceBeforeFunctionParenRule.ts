@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { getChildOfKind, hasModifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const ALWAYS_OR_NEVER = {
@@ -32,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             true,
             [true, "always"],
             [true, "never"],
-            [true, {anonymous: "always", named: "never", asyncArrow: "always"}],
+            [true, { anonymous: "always", named: "never", asyncArrow: "always" }],
         ],
         options: {
             properties: {
@@ -62,7 +63,11 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static MISSING_WHITESPACE_ERROR = "Missing whitespace before function parens";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, parseOptions(this.ruleArguments[0] as Option | Options | undefined));
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            parseOptions(this.ruleArguments[0] as Option | Options | undefined),
+        );
     }
 }
 
@@ -75,7 +80,8 @@ function parseOptions(json: Option | Options | undefined): Options {
     // Need to specify constructor or it will be Object
     const options: Options = { constructor: undefined };
     for (const optionName of optionNames) {
-        options[optionName] = typeof json === "object" ? json[optionName] : json === undefined ? "always" : json;
+        options[optionName] =
+            typeof json === "object" ? json[optionName] : json === undefined ? "always" : json;
     }
     return options;
 }
@@ -94,16 +100,28 @@ function walk(ctx: Lint.WalkContext<Options>): void {
     function check(node: ts.Node, option: "always" | "never"): void {
         const openParen = getChildOfKind(node, ts.SyntaxKind.OpenParenToken, sourceFile);
         // openParen may be missing for an async arrow function `async x => ...`.
-        if (openParen === undefined) { return; }
+        if (openParen === undefined) {
+            return;
+        }
 
         const hasSpace = Lint.isWhiteSpace(sourceFile.text.charCodeAt(openParen.end - 2));
 
         if (hasSpace && option === "never") {
             const pos = openParen.getStart() - 1;
-            ctx.addFailureAt(pos, 1, Rule.INVALID_WHITESPACE_ERROR, Lint.Replacement.deleteText(pos, 1));
+            ctx.addFailureAt(
+                pos,
+                1,
+                Rule.INVALID_WHITESPACE_ERROR,
+                Lint.Replacement.deleteText(pos, 1),
+            );
         } else if (!hasSpace && option === "always") {
             const pos = openParen.getStart();
-            ctx.addFailureAt(pos, 1, Rule.MISSING_WHITESPACE_ERROR, Lint.Replacement.appendText(pos, " "));
+            ctx.addFailureAt(
+                pos,
+                1,
+                Rule.MISSING_WHITESPACE_ERROR,
+                Lint.Replacement.appendText(pos, " "),
+            );
         }
     }
 }
@@ -111,20 +129,26 @@ function walk(ctx: Lint.WalkContext<Options>): void {
 function getOption(node: ts.Node, options: Options): Option | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.ArrowFunction:
-            return !hasTypeParameters(node) && hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
-                ? options.asyncArrow : undefined;
+            return !hasTypeParameters(node) &&
+                hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+                ? options.asyncArrow
+                : undefined;
 
         case ts.SyntaxKind.Constructor:
             return options.constructor;
 
         case ts.SyntaxKind.FunctionDeclaration:
-            // name is optional for function declaration which is default export (TS will emit error in other cases).
-            // Can be handled in the same way as function expression.
+        // name is optional for function declaration which is default export (TS will emit error in other cases).
+        // Can be handled in the same way as function expression.
         case ts.SyntaxKind.FunctionExpression: {
             const functionName = (node as ts.FunctionExpression).name;
             const hasName = functionName !== undefined && functionName.text !== "";
 
-            return hasName ? options.named : !hasTypeParameters(node) ? options.anonymous : undefined;
+            return hasName
+                ? options.named
+                : !hasTypeParameters(node)
+                ? options.anonymous
+                : undefined;
         }
 
         case ts.SyntaxKind.MethodDeclaration:

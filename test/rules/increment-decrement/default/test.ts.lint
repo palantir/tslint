@@ -38,3 +38,8 @@ x-- - x;
 ~~~       [minus]
 [plus]:       Use an explicit += 1 operator.
 [minus]:       Use an explicit -= 1 operator.
+
+expect(x++)
+       ~~~       [plus]
+expect(++x)
+       ~~~       [plus]

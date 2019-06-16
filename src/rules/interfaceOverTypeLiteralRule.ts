@@ -17,6 +17,7 @@
 
 import { getChildOfKind, isTypeAliasDeclaration, isTypeLiteralNode } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -24,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-over-type-literal",
         description: "Prefer an interface declaration over a type literal (`type T = { ... }`)",
-        rationale: "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
+        rationale:
+            "Interfaces are generally preferred over type literals because interfaces can be implemented, extended and merged.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -41,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isTypeAliasDeclaration(node) && isTypeLiteralNode(node.type)) {
             const typeKeyword = getChildOfKind(node, ts.SyntaxKind.TypeKeyword, ctx.sourceFile)!;

@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "no-magic-numbers": [true, {
+      "ignore-jsx": true
+    }]
+  }
+}

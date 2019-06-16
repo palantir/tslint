@@ -45,10 +45,13 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, tc: ts.TypeChecker) {
     for (const statement of ctx.sourceFile.statements) {
-        if (!isImportDeclaration(statement) ||
-            statement.importClause === undefined || statement.importClause.name === undefined) {
+        if (
+            !isImportDeclaration(statement) ||
+            statement.importClause === undefined ||
+            statement.importClause.name === undefined
+        ) {
             continue;
         }
         const defaultImport = statement.importClause.name;
@@ -57,11 +60,18 @@ function walk(ctx: Lint.WalkContext<void>, tc: ts.TypeChecker) {
             continue;
         }
 
-        const {declarations} = tc.getAliasedSymbol(symbol);
+        const { declarations } = tc.getAliasedSymbol(symbol);
         if (declarations !== undefined && declarations.length !== 0) {
             const { name } = declarations[0] as ts.NamedDeclaration;
-            if (name !== undefined && name.kind === ts.SyntaxKind.Identifier && name.text !== defaultImport.text) {
-                ctx.addFailureAtNode(defaultImport, Rule.FAILURE_STRING(defaultImport.text, name.text));
+            if (
+                name !== undefined &&
+                name.kind === ts.SyntaxKind.Identifier &&
+                name.text !== defaultImport.text
+            ) {
+                ctx.addFailureAtNode(
+                    defaultImport,
+                    Rule.FAILURE_STRING(defaultImport.text, name.text),
+                );
             }
         }
     }
