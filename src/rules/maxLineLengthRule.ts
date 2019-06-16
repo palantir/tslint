@@ -17,6 +17,7 @@
 
 import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 interface MaxLineLengthRuleOptions {
@@ -76,7 +77,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 },
             ],
         ],
-        type: "maintainability",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */

@@ -49,7 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.BindingElement:
@@ -59,7 +59,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
             case ts.SyntaxKind.VariableDeclaration:
                 if (
                     !isBindingPattern((node as ts.VariableDeclaration).name) &&
-                    !isNodeFlagSet(node.parent!, ts.NodeFlags.Const)
+                    !isNodeFlagSet(node.parent, ts.NodeFlags.Const)
                 ) {
                     checkInitializer(node as ts.VariableDeclaration);
                 }

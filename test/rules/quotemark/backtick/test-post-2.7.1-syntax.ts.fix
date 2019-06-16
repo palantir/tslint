@@ -1,0 +1,13 @@
+if (typeof v === `string`) {}
+
+if (typeof `string` === `number`) {}
+
+const object: {
+    "optional-prop"?: `hello-optional`
+    "optional-function"?(): void
+    "another-kebab": `hello-value`
+} = {
+    "optional-prop": undefined,
+    "optional-function"() {},
+    "another-kebab": `hello-value`
+};

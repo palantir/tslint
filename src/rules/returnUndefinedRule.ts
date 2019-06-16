@@ -52,7 +52,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isReturnStatement(node)) {
             check(node);
@@ -115,6 +115,11 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Void;
         case ts.SyntaxKind.GetAccessor:
             return ReturnKind.Value;
+    }
+
+    // Handle generator functions/methods:
+    if (node.asteriskToken !== undefined) {
+        return ReturnKind.Void;
     }
 
     const contextual =

@@ -1,6 +1,7 @@
 let x: Array<number> = [1] as Array<number>;
 let y: Array<string> = <Array<string>>["2"];
 let z: Array = [3, "4"];
+let u: Array<unknown> = [];
 
 let xx: Array<Array<number>> = [[1, 2], [3]];
 let yy: Array<Array<number>> = [[4, 5], [6]];
@@ -42,4 +43,8 @@ type barIntersection = Array<string & number>;
 interface FooInterface {
     '.bar': {baz: Array<string>;};
 }
+
+// Test an unknown Array
+let t: Array<unknown> = [];
+let u: Array<unknown> = [];
 

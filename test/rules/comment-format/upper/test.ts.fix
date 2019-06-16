@@ -1,0 +1,27 @@
+class Clazz { // This comment is correct
+    /* block comment
+     * adada
+     */
+    public funcxion() { // This comment has a lowercase letter starting it
+        // This comment is on its own line, and starts with a lowercase _and_ no space
+        console.log("test"); // This comment has no space
+    }
+    /// <not a reference>
+    //// Foo
+}
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`
+
+// Tslint should show error here
+
+// Tslint: not a rule flag
+
+// tslint:disable-next-line:no-unused-expression
+class Invalid {}
+
+// tslint:disable-next-line:no-unused-expression
+class Valid {}
+

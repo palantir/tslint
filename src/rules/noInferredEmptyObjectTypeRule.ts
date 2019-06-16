@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { isObjectFlagSet, isObjectType, isTypeReference } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -29,8 +30,9 @@ export class Rule extends Lint.Rules.TypedRule {
         options: null,
         optionExamples: [true],
         rationale: Lint.Utils.dedent`
-            When function or constructor may be called with a type parameter but one isn't supplied or inferrable,
-            TypeScript defaults to \`{}\`.
+            Prior to TypeScript 3.4, generic type parameters for functions and constructors are inferred as
+            \`{}\` (the empty object type) by default when no type parameter is explicitly supplied or when
+            the compiler cannot infer a more specific type.
             This is often undesirable as the call is meant to be of a more specific type.
         `,
         type: "functionality",
@@ -51,7 +53,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker<void> {
+class NoInferredEmptyObjectTypeRule extends Lint.AbstractWalker {
     constructor(
         sourceFile: ts.SourceFile,
         ruleName: string,

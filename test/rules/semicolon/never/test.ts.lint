@@ -83,7 +83,7 @@ class MyClass {
      ~ [0]
 
     public initializedMethodPropertyWithoutSemicolon = () => {
-        return "hi again"; 
+        return "hi again";
                          ~ [0]
     }
 
@@ -267,6 +267,15 @@ var foo = () => {};
                   ~ [0]
 []
 var bar; var foo = function() {};
+[]
+
+var
+[]
+
+const
+[]
+
+let
 []
 
 [0]: Unnecessary semicolon

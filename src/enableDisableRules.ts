@@ -19,6 +19,7 @@
 
 import * as utils from "tsutils";
 import * as ts from "typescript";
+
 import { RuleFailure } from "./language/rule/rule";
 
 /**

@@ -18,9 +18,11 @@
 import { assert } from "chai";
 import * as fs from "fs";
 import * as path from "path";
+
 import { rules as allRules, RULES_EXCLUDED_FROM_ALL_CONFIG } from "../src/configs/all";
+import { IOptions } from "../src/language/rule/rule";
 import { camelize } from "../src/utils";
-import { IOptions } from "./../src/language/rule/rule";
+
 import { findRule, loadRules, RuleConstructor } from "./lint";
 
 const builtRulesDir = "build/src/rules";

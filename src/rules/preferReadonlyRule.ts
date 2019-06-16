@@ -20,6 +20,7 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { typeIsOrHasBaseType } from "../language/typeUtils";
+import { isFunctionScopeBoundary } from "../utils";
 
 const OPTION_ONLY_INLINE_LAMBDAS = "only-inline-lambdas";
 
@@ -93,13 +94,16 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
                 if (scope !== undefined) {
                     handlePropertyAccessExpression(
                         node as ts.PropertyAccessExpression,
-                        node.parent!,
+                        node.parent,
                     );
                 }
                 break;
 
             default:
-                if (utils.isFunctionScopeBoundary(node)) {
+                // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+                // requires tsutils > 3.0.
+                if (isFunctionScopeBoundary(node)) {
+                    // tslint:enable:deprecation
                     handleFunctionScopeBoundary(node);
                 } else {
                     ts.forEachChild(node, visitNode);

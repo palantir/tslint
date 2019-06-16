@@ -1,0 +1,38 @@
+var snake_case_var;
+    ~~~~~~~~~~~~~~  [regular-case]
+
+var camelCaseVar;
+
+var PascalCaseVar;
+    ~~~~~~~~~~~~~  [regular-case]
+
+var UPPER_CASE_VAR;
+    ~~~~~~~~~~~~~~  [const]
+
+let snake_case_let;
+    ~~~~~~~~~~~~~~  [regular-case]
+
+let camelCaseLet;
+
+let PascalCaseLet;
+    ~~~~~~~~~~~~~  [regular-case]
+
+let UPPER_CASE_LET;
+    ~~~~~~~~~~~~~~  [const]
+
+const snake_case_const;
+      ~~~~~~~~~~~~~~~~  [regular-case]
+
+const camelCaseConst;
+
+const PascalCaseConst;
+      ~~~~~~~~~~~~~~~  [regular-case]
+
+const UPPER_CASE_CONST;
+
+class Test {
+    public static readonly MY_FIELD = 10;
+}
+
+[const]: Only `const` variables may be UPPER_CASE.
+[regular-case]: variable name must be in lowerCamelCase or UPPER_CASE

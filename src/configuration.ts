@@ -20,8 +20,8 @@ import * as yaml from "js-yaml";
 import { Minimatch } from "minimatch";
 import * as os from "os";
 import * as path from "path";
-import { FatalError, showWarningOnce } from "./error";
 
+import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
 import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
@@ -267,13 +267,7 @@ export function readConfigurationFile(filepath: string): RawConfigFile {
             if (resolvedConfigFileExt === ".json") {
                 return JSON.parse(stripComments(fileContent)) as RawConfigFile;
             } else {
-                return yaml.safeLoad(fileContent, {
-                    // Note: yaml.LoadOptions expects a schema value of type "any",
-                    // but this trips up the no-unsafe-any rule.
-                    // tslint:disable-next-line:no-unsafe-any
-                    schema: yaml.JSON_SCHEMA,
-                    strict: true,
-                }) as RawConfigFile;
+                return yaml.safeLoad(fileContent) as RawConfigFile;
             }
         } catch (e) {
             const error = e as Error;
@@ -384,6 +378,7 @@ export function extendConfigurationFile(
  *
  * @deprecated use `path.resolve` instead
  */
+// tslint:disable-next-line no-null-undefined-union
 export function getRelativePath(directory?: string | null, relativeTo?: string) {
     if (directory != undefined) {
         const basePath = relativeTo !== undefined ? relativeTo : process.cwd();
@@ -514,7 +509,9 @@ export interface RawConfigFile {
 export interface RawRulesConfig {
     [key: string]: RawRuleConfig;
 }
+
 export type RawRuleConfig =
+    // tslint:disable-next-line no-null-undefined-union
     | null
     | undefined
     | boolean
@@ -598,14 +595,12 @@ export function parseConfigFile(
         const validJsRules = new Map<string, Partial<IOptions>>();
         if (copyRulestoJsRules) {
             rules.forEach((ruleOptions, ruleName) => {
-                if (ruleOptions.ruleSeverity !== "off") {
-                    const Rule = findRule(ruleName, rulesDirectory);
-                    if (
-                        Rule !== undefined &&
-                        (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
-                    ) {
-                        validJsRules.set(ruleName, ruleOptions);
-                    }
+                const Rule = findRule(ruleName, rulesDirectory);
+                if (
+                    Rule !== undefined &&
+                    (Rule.metadata === undefined || !Rule.metadata.typescriptOnly)
+                ) {
+                    validJsRules.set(ruleName, ruleOptions);
                 }
             });
         }
@@ -623,11 +618,8 @@ export function parseConfigFile(
         return {
             ...(raw.exclude !== undefined
                 ? {
-                      exclude: arrayify(raw.exclude).map(
-                          pattern =>
-                              dir === undefined
-                                  ? path.resolve(pattern)
-                                  : path.resolve(dir, pattern),
+                      exclude: arrayify(raw.exclude).map(pattern =>
+                          dir === undefined ? path.resolve(pattern) : path.resolve(dir, pattern),
                       ),
                   }
                 : {}),
@@ -667,4 +659,25 @@ export function isFileExcluded(filepath: string, configFile?: IConfigurationFile
     }
     const fullPath = path.resolve(filepath);
     return configFile.linterOptions.exclude.some(pattern => new Minimatch(pattern).match(fullPath));
+}
+
+export function stringifyConfiguration(configFile: IConfigurationFile) {
+    return JSON.stringify(
+        {
+            extends: configFile.extends,
+            jsRules: convertRulesMapToObject(configFile.jsRules),
+            linterOptions: configFile.linterOptions,
+            rules: convertRulesMapToObject(configFile.rules),
+            rulesDirectory: configFile.rulesDirectory,
+        },
+        undefined,
+        2,
+    );
+}
+
+function convertRulesMapToObject(rules: Map<string, Partial<IOptions>>) {
+    return Array.from(rules).reduce<{ [i: string]: Partial<IOptions> }>(
+        (result, [key, value]) => ({ ...result, [key]: value }),
+        {},
+    );
 }
