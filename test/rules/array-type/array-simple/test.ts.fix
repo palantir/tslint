@@ -2,6 +2,7 @@ let x: undefined[] = [undefined] as undefined[];
 let xx: object[] = [];
 let y: string[] = <string[]>["2"];
 let z: any[] = [3, "4"];
+let u: unknown[] = [];
 
 let xx: number[][] = [[1, 2], [3]];
 let yy: number[][] = [[4, 5], [6]];
@@ -53,4 +54,8 @@ let w: Array<fooName.BazType<string>> = [["baz"]];
 interface FooInterface {
     '.bar': {baz: string[];};
 }
+
+// Test an unknown Array
+let t: unknown[] = [];
+let u: unknown[] = [];
 

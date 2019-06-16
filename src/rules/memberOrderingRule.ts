@@ -118,6 +118,32 @@ const optionsDescription = Lint.Utils.dedent`
 
     ${namesMarkdown(PRESET_NAMES)}
 
+    \`fields-first\` puts, in order of precedence:
+
+        * fields before constructors before methods
+        * static members before instance members
+        * public members before protected members before private members
+
+    \`instance-sandwich\` puts, in order of precedence:
+
+        * fields before constructors before methods
+        * static fields before instance fields, but static methods *after* instance methods
+        * public members before protected members before private members
+
+    \`statics-first\` puts, in order of precedence:
+
+        * static members before instance members
+            * public members before protected members before private members
+            * fields before methods
+        * instance fields before constructors before instance methods
+            * fields before constructors before methods
+            * public members before protected members before private members
+
+    Note that these presets, despite looking similar, can have subtly different behavior due to the order in which these
+    rules are specified. A fully expanded ordering can be found in the PRESETS constant in
+    https://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.
+    (You may need to check the version of the file corresponding to your version of tslint.)
+
     Alternatively, the value for \`order\` may be an array consisting of the following strings:
 
     ${namesMarkdown(allMemberKindNames)}
@@ -171,6 +197,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                         },
                     ],
                 },
+                alphabetize: {
+                    type: "boolean",
+                },
             },
             additionalProperties: false,
         },
@@ -190,6 +219,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                         "protected-instance-method",
                         "private-instance-method",
                     ],
+                    alphabetize: true,
                 },
             ],
             [
@@ -264,7 +294,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /**
-     * Check wether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
+     * Check whether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
      * Lint.Replacement is generated, which replaces the entire NodeArray with a correctly sorted one. The Replacement
      * is not immediately added to a RuleFailure, as incorrectly sorted nodes can be nested (e.g. a class declaration
      * in a method implementation), but instead temporarily stored in `this.fixes`. Nested Replacements are manually
@@ -324,27 +354,29 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             }
         }
         if (failureExists) {
-            const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
-                const a = members[ai];
-                const b = members[bi];
+            const sortedMemberIndexes = members
+                .map((_, i) => i)
+                .sort((ai, bi) => {
+                    const a = members[ai];
+                    const b = members[bi];
 
-                // first, sort by member rank
-                const rankDiff = this.memberRank(a) - this.memberRank(b);
-                if (rankDiff !== 0) {
-                    return rankDiff;
-                }
-                // then lexicographically if alphabetize == true
-                if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
-                    const aName = nameString(a.name);
-                    const bName = nameString(b.name);
-                    const nameDiff = aName.localeCompare(bName);
-                    if (nameDiff !== 0) {
-                        return nameDiff;
+                    // first, sort by member rank
+                    const rankDiff = this.memberRank(a) - this.memberRank(b);
+                    if (rankDiff !== 0) {
+                        return rankDiff;
                     }
-                }
-                // finally, sort by position in original NodeArray so the sort remains stable.
-                return ai - bi;
-            });
+                    // then lexicographically if alphabetize == true
+                    if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
+                        const aName = nameString(a.name);
+                        const bName = nameString(b.name);
+                        const nameDiff = aName.localeCompare(bName);
+                        if (nameDiff !== 0) {
+                            return nameDiff;
+                        }
+                    }
+                    // finally, sort by position in original NodeArray so the sort remains stable.
+                    return ai - bi;
+                });
             const splits = getSplitIndexes(members, this.sourceFile.text);
             const sortedMembersText = sortedMemberIndexes.map(i => {
                 const start = splits[i];
@@ -458,8 +490,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     const accessLevel = hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword)
         ? "private"
         : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword)
-            ? "protected"
-            : "public";
+        ? "protected"
+        : "public";
 
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
@@ -506,11 +538,10 @@ interface Options {
 
 function parseOptions(options: any[]): Options {
     const { order: orderJson, alphabetize } = getOptionsJson(options);
-    const order = orderJson.map(
-        cat =>
-            typeof cat === "string"
-                ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
+    const order = orderJson.map(cat =>
+        typeof cat === "string"
+            ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
+            : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
     );
     return { order, alphabetize };
 }

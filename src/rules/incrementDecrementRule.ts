@@ -80,7 +80,14 @@ function walk(context: Lint.WalkContext<Options>) {
 
     function complainOnNode(node: ts.PostfixUnaryExpression | ts.PrefixUnaryExpression) {
         const newOperatorText = node.operator === ts.SyntaxKind.PlusPlusToken ? "+= 1" : "-= 1";
-        const replacement = createReplacement(node, newOperatorText);
+        let replacement: Lint.Replacement | undefined;
+
+        if (
+            tsutils.isPrefixUnaryExpression(node) ||
+            node.parent.kind === ts.SyntaxKind.ExpressionStatement
+        ) {
+            replacement = createReplacement(node, newOperatorText);
+        }
 
         const failure = Rule.FAILURE_STRING_FACTORY(newOperatorText);
 

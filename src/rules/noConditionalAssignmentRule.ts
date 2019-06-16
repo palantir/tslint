@@ -46,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     let checking = 0;
     return ts.forEachChild(ctx.sourceFile, cb);
 

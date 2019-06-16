@@ -5,15 +5,13 @@ class Clazz { // This comment is correct
     public funcxion() { // this comment has a lowercase letter starting it
                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
         //this comment is on its own line, and starts with a lowercase _and_ no space
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [upper]
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space_upper]
         console.log("test"); //This comment has no space
                                ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
     }
     /// <not a reference>
     ////foo
-        ~~~ [space]
-        ~~~ [upper]
+        ~~~ [space_upper]
 }
 
 //#region test
@@ -36,3 +34,4 @@ class Valid {}
 
 [upper]: comment must start with uppercase letter
 [space]: comment must start with a space
+[space_upper]: comment must start with a space and uppercase letter

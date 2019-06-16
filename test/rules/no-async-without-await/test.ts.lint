@@ -1,0 +1,122 @@
+async function a(){
+~~~~~ [0]
+    let b = 1;
+    console.log(b);
+}
+
+async function a(){
+   let b = 1;
+   await console.log(b);
+}
+
+async function a(){
+   let b = 1;
+   console.log(await b());
+}
+
+async function a(){
+~~~~~ [0]
+   let b = 1;
+   let c = async () => {
+        await fetch();
+   };
+}
+
+async function a(){
+~~~~~ [Functions marked async must contain an await or return statement.]
+   let b = 1;
+   async function f() {
+        await fetch();
+   };
+}
+
+function a(){
+   let b = 1;
+   async function f() {
+   ~~~~~ [Functions marked async must contain an await or return statement.]
+        fetch();
+   };
+}
+
+const a = async () => {
+          ~~~~~ [Functions marked async must contain an await or return statement.]
+   let b = 1;
+   console.log(b);
+}
+
+class A {
+    async b() {
+    ~~~~~ [Functions marked async must contain an await or return statement.]
+        console.log(1);
+    }
+}
+
+class A {
+    async b() {
+        await b();
+    }
+}
+
+class A {
+     public a = async function b() {
+         await b();
+     }
+ }
+
+class A {
+     public a = async function b() {
+                ~~~~~ [Functions marked async must contain an await or return statement.]
+         b();
+     }
+ }
+
+class A {
+     public a = async () => {
+         await b();
+     }
+ }
+
+class A {
+     public a = async () => {
+                ~~~~~ [Functions marked async must contain an await or return statement.]
+         b();
+     }
+ }
+
+class A {
+     public a = async () => 1;
+ }
+
+async () => {
+    await a();
+    class A {
+        async b() {
+        ~~~~~ [Functions marked async must contain an await or return statement.]
+            console.log(1);
+        }
+    }
+};
+
+async function a() {
+   let b = 1;
+   return b;
+}
+
+let a = async () => 1;
+
+async function a() {
+~~~~~ [Functions marked async must contain an await or return statement.]
+   let b = 1;
+   let a = () => {
+      return 1;
+   }
+}
+
+async function foo;
+~~~~~ [Functions marked async must contain an await or return statement.]
+
+function * foo() {
+    return 1;
+}
+
+[0]: Functions marked async must contain an await or return statement.

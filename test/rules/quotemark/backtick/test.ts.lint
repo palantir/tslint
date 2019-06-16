@@ -1,15 +1,99 @@
+"use strict"
+
+import { Something } from "some-package"
+export { SomethingElse } from "another-package"
+
+enum Sides {
+    '<- Left',
+    'Right ->'
+}
+
+const octalEscapeSequence = '\1'
+const octalEscapeSequence2 = '\7'
+const octalEscapeSequence3 = '\77'
+const octalEscapeSequence4 = '\377'
+const octalEscapeSequence5 = '\123'
+// Prefix (\47) is an octal escape sequence
+const octalEscapeSequence6 = '\477'
+const octalEscapeSequence7 = '\\77 \77 \\37 \\77'
+
+const notOctalEscapeSequence = '\877'
+                               ~~~~~~ [single]
+const notOctalEscapeSequence2 = '\017'
+                                ~~~~~~ [single]
+const notOctalEscapeSequence3 = '\t'
+                                ~~~~ [single]
+const notOctalEscapeSequence4 = '\0'
+                                ~~~~ [single]
+const notOctalEscapeSequence4 = '\\77 \\37 \\\\47 \\\\\\77'
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [single]
+
+function strictFunction() {
+    "use strict"
+
+    const str = "use strict"
+                ~~~~~~~~~~~~ [double]
+}
+
 var single = 'single';
-             ~~~~~~~~  [' should be `]
+             ~~~~~~~~  [single]
     var double = "married";
-                 ~~~~~~~~~ [" should be `]
+                 ~~~~~~~~~ [double]
 var singleWithinDouble = "'singleWithinDouble'";
-                         ~~~~~~~~~~~~~~~~~~~~~~ [" should be `]
+                         ~~~~~~~~~~~~~~~~~~~~~~ [double]
 var doubleWithinSingle = '"doubleWithinSingle"';
-                         ~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
+                         ~~~~~~~~~~~~~~~~~~~~~~  [single]
 var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
-                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be `]
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [single]
+
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" | number> = [];
+var arrayThree: Array<"literal string" | "hello world"> = [];
+var arrayFour: Array<"literal string" | "hello world" | "foo bar"> = [];
+var array: Array<"literal string"> = [];
+var arrayTwo: Array<"literal string" & number> = [];
+var arrayFour: Array<"literal string" | "hello world" & "foo bar"> = [];
+
+function test<T extends "generic">() {
+
+}
+
+function test<T extends ("generic" & number)>() {
+
+}
+
+declare var obj: {
+    helloWorldString: string
+}
+
+interface obj2 {
+    helloWorldString: string
+}
+
+type objHello = typeof obj["helloWorldString"]
+type objHello2 = obj2["helloWorldString"]
+let helloValue = obj["helloWorldString"]
+                     ~~~~~~~~~~~~~~~~~~ [double]
+
+helloValue = obj["helloWorldString"]
+                 ~~~~~~~~~~~~~~~~~~ [double]
+
+const obj3: {
+    value: typeof obj["helloWorldString"]
+} = {
+    value: obj["helloWorldString"]
+               ~~~~~~~~~~~~~~~~~~ [double]
+}
+
+const callback = <U extends "generic">() => "hi" as number | string
+                                            ~~~~ [double]
+
+var hello: "world";
+           ~~~~~~~ [double]
 'escaped\'quotemark';
-~~~~~~~~~~~~~~~~~~~~ [' should be `]
+~~~~~~~~~~~~~~~~~~~~ [single]
 
 // "avoid-template" option is not set.
 `foo`;
+[single]: ' should be `
+[double]: " should be `

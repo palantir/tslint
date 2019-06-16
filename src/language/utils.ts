@@ -74,7 +74,7 @@ export function isBlockScopedVariable(
     node: ts.VariableDeclaration | ts.VariableStatement,
 ): boolean {
     if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-        const parent = node.parent!;
+        const parent = node.parent;
         return (
             parent.kind === ts.SyntaxKind.CatchClause ||
             isBlockScopedVariableDeclarationList(parent)
@@ -95,7 +95,7 @@ export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
 export function getBindingElementVariableDeclaration(
     node: ts.BindingElement,
 ): ts.VariableDeclaration | null {
-    let currentParent = node.parent! as ts.Node;
+    let currentParent = node.parent as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
@@ -177,7 +177,10 @@ export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags):
  *
  * @deprecated no longer used
  */
-export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+export function isCombinedModifierFlagSet(
+    node: ts.Declaration,
+    flagToCheck: ts.ModifierFlags,
+): boolean {
     // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
 }
@@ -378,7 +381,7 @@ export function forEachToken(
             fullText,
             token.kind,
             { tokenStart, fullStart: token.pos, end: token.end },
-            token.parent!,
+            token.parent,
         );
     }
 }
@@ -396,7 +399,7 @@ function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback
      * This includes trailing trivia of the last token and the leading trivia of the current token
      */
     function handleTrivia(start: number, end: number, token: ts.Node) {
-        const parent = token.parent!;
+        const parent = token.parent;
         // prevent false positives by not scanning inside JsxText
         if (!canHaveLeadingTrivia(token.kind, parent)) {
             return;
@@ -471,7 +474,7 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
             // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
             return (
                 parent.kind !== ts.SyntaxKind.JsxExpression ||
-                parent.parent!.kind !== ts.SyntaxKind.JsxElement
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
             );
 
         case ts.SyntaxKind.LessThanToken:
@@ -481,7 +484,7 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
                 case ts.SyntaxKind.JsxOpeningElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be leading trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
                 default:
                     return true;
             }
@@ -502,7 +505,7 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
             // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
             return (
                 parent.kind !== ts.SyntaxKind.JsxExpression ||
-                parent.parent!.kind !== ts.SyntaxKind.JsxElement
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
             );
 
         case ts.SyntaxKind.GreaterThanToken:
@@ -512,7 +515,7 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
                 case ts.SyntaxKind.JsxClosingElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be trailing trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
 
                 default:
                     return true;

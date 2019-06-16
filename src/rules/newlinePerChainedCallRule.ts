@@ -22,6 +22,7 @@ import {
     isSameLine,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "..";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -47,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class NewlinePerChainedCallWalker extends Lint.AbstractWalker<void> {
+class NewlinePerChainedCallWalker extends Lint.AbstractWalker {
     public walk(sourceFile: ts.SourceFile) {
         const checkForSameLine = (node: ts.Node): void => {
             if (

@@ -43,7 +43,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isConstructorDeclaration(node) && node.body !== undefined) {
             getSuperForNode(node.body);
@@ -77,9 +77,9 @@ function walk(ctx: Lint.WalkContext<void>): void {
                 return Kind.NoSuper;
 
             case ts.SyntaxKind.SuperKeyword:
-                return node.parent!.kind === ts.SyntaxKind.CallExpression &&
+                return node.parent.kind === ts.SyntaxKind.CallExpression &&
                     (node.parent as ts.CallExpression).expression === node
-                    ? { node: node.parent! as ts.CallExpression, break: false }
+                    ? { node: node.parent as ts.CallExpression, break: false }
                     : Kind.NoSuper;
 
             case ts.SyntaxKind.ConditionalExpression: {
@@ -204,8 +204,8 @@ function worse(a: Super, b: Super): Super {
                 : a
             : b
         : typeof b === "number"
-            ? a
-            : a.break
-                ? b
-                : a;
+        ? a
+        : a.break
+        ? b
+        : a;
 }

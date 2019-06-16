@@ -35,7 +35,6 @@ export const codeExamples = [
                     break;
                 default:
                     console.log('default');
-                    break;
             }
         `,
         fail: Lint.Utils.dedent`
@@ -46,7 +45,6 @@ export const codeExamples = [
                     break;
                 case 2:
                     doSomething2();
-                    break;
             }
         `,
     },

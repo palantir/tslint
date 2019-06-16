@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
+import { isArrayTypeNode, isParameterDeclaration } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noAny.examples";
+
+const OPTION_IGNORE_REST_ARGS = "ignore-rest-args";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -37,9 +41,16 @@ export class Rule extends Lint.Rules.AbstractRule {
 
             Also see the \`no-unsafe-any\` rule.
         `,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            If \`"${OPTION_IGNORE_REST_ARGS}": true\` is provided rest arguments will be ignored.
+        `,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_IGNORE_REST_ARGS]: { type: "boolean" },
+            },
+        },
+        optionExamples: [true, [true, { [OPTION_IGNORE_REST_ARGS]: true }]],
         type: "typescript",
         typescriptOnly: true,
         codeExamples,
@@ -50,16 +61,41 @@ export class Rule extends Lint.Rules.AbstractRule {
         "Type declaration of 'any' loses type-safety. Consider replacing it with a more precise type.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        const options: Options = getOptions(this.ruleArguments[0] as Partial<Options> | undefined);
+        return this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+interface Options {
+    [OPTION_IGNORE_REST_ARGS]: boolean;
+}
+
+function getOptions(options: Partial<Options> | undefined): Options {
+    return {
+        [OPTION_IGNORE_REST_ARGS]: false,
+        ...options,
+    };
+}
+
+function walk(ctx: Lint.WalkContext<Options>) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.AnyKeyword) {
+            if (ctx.options[OPTION_IGNORE_REST_ARGS] && isRestParameterArrayType(node)) {
+                return;
+            }
+
             const start = node.end - 3;
             return ctx.addFailure(start, node.end, Rule.FAILURE_STRING);
         }
+
         return ts.forEachChild(node, cb);
     });
+}
+
+function isRestParameterArrayType(anyTypeNode: ts.Node) {
+    return (
+        isArrayTypeNode(anyTypeNode.parent) &&
+        isParameterDeclaration(anyTypeNode.parent.parent) &&
+        anyTypeNode.parent.parent.getChildAt(0).kind === ts.SyntaxKind.DotDotDotToken
+    );
 }

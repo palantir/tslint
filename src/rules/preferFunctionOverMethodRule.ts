@@ -98,8 +98,8 @@ class PreferFunctionOverMethodWalker extends Lint.AbstractWalker<Options> {
         return (
             node.body === undefined || // exclude abstract methods and overload signatures
             // exclude object methods
-            (node.parent!.kind !== ts.SyntaxKind.ClassDeclaration &&
-                node.parent!.kind !== ts.SyntaxKind.ClassExpression) ||
+            (node.parent.kind !== ts.SyntaxKind.ClassDeclaration &&
+                node.parent.kind !== ts.SyntaxKind.ClassExpression) ||
             hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword) ||
             (this.options.allowProtected &&
                 hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) ||
@@ -122,7 +122,7 @@ interface ThisUsed {
 function isRecursiveCall(node: ts.Node, name?: string) {
     return (
         name !== undefined &&
-        node.parent!.kind === ts.SyntaxKind.PropertyAccessExpression &&
+        node.parent.kind === ts.SyntaxKind.PropertyAccessExpression &&
         (node.parent as ts.PropertyAccessExpression).name.text === name
     );
 }

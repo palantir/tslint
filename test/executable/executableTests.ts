@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ import * as cp from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import * as semver from "semver";
+
 import { Logger, Options, run, Status } from "../../src/runner";
 import { denormalizeWinPath } from "../../src/utils";
+import { getNormalizedTypescriptVersion } from "../../src/verify/parse";
 import { createTempFile } from "../utils";
 
 // when tests are run with mocha from npm scripts CWD points to project root
@@ -37,9 +40,11 @@ const dummyLogger: Logger = {
     },
 };
 
-describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
+describe("Executable", function(this: Mocha.Suite) {
     this.slow(3000); // the executable is JIT-ed each time it runs; avoid showing slowness warnings
-    this.timeout(4000);
+    this.timeout(10000);
+
+    const tsVersion = getNormalizedTypescriptVersion();
 
     describe("Files", () => {
         it("exits with code 1 if no arguments passed", done => {
@@ -176,7 +181,7 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
     });
 
     describe("Custom formatters", () => {
-        const createFormatVerifier = (done: MochaDone): ExecFileCallback => (err, stdout) => {
+        const createFormatVerifier = (done: Mocha.Done): ExecFileCallback => (err, stdout) => {
             assert.isNotNull(err, "process should exit with error");
             assert.strictEqual(err.code, 2, "error code should be 2");
             assert.include(
@@ -430,6 +435,35 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
         });
     });
 
+    describe("--print-config flag", () => {
+        it("exits with code 1 if no files are provided", async () => {
+            const status = await execRunner({
+                files: [],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
+        });
+
+        it("exits with code 0 if one file is provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.Ok);
+        });
+
+        it("exits with code 1 if multiple files are provided", async () => {
+            const status = await execRunner({
+                files: ["test/files/a.ts", "test/files//b.ts"],
+                printConfig: true,
+            });
+
+            assert.equal(status, Status.FatalError);
+        });
+    });
+
     describe("--project flag", () => {
         it("exits with code 0 if `tsconfig.json` is passed and it specifies files without errors", async () => {
             const status = await execRunner({
@@ -596,6 +630,15 @@ describe("Executable", function(this: Mocha.ISuiteCallbackContext) {
                 fs.readFileSync("test/files/project-multiple-fixes/after.test.ts", "utf-8"),
             );
         }).timeout(8000);
+
+        if (semver.satisfies(tsVersion, ">=2.9")) {
+            it("does not try to parse JSON files with --resolveJsonModule with TS >= 2.9", async () => {
+                const status = await execRunner({
+                    project: "test/files/tsconfig-resolve-json-module/tsconfig.json",
+                });
+                assert.equal(status, Status.Ok, "process should exit without an error");
+            });
+        }
     });
 
     describe("--type-check", () => {
