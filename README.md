@@ -66,15 +66,3 @@ yarn
 yarn compile
 yarn test
 ```
-
-## Creating a new release
-
-1.  Bump the version number in `package.json` and `src/linter.ts`
-2.  Add release notes in `CHANGELOG.md`
-    -   Use `./scripts/generate-changelog.js` (after building it with `tsc -p scripts`) to generate the changelog diff. This script expects a [Github.com personal access token](https://github.com/settings/tokens) to exist at `~/github_token.txt` with "repo" permissions.
-3.  Commit with message `Prepare release <version>`
-4.  Push your branch to GitHub and make a PR
-5.  Once your PR is merged, wait for the tests to pass on CircleCI for develop
-6.  Create a "Release" on GitHub with the proper tag version and notes from the changelog.
-    -   The tag should be identical to the version in `package.json`
-7.  Run `yarn run publish:local`
