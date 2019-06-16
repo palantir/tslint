@@ -17,6 +17,7 @@
 
 import { getLineRanges } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 interface MaxLineLengthRuleOptions {
@@ -37,7 +38,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         It can take one argument, which can be any of the following:
         * integer indicating maximum length of lines.
         * object with keys:
-          * \`limit\` - number < 0 defining max line length
+          * \`limit\` - number greater than 0 defining the max line length
           * \`ignore-pattern\` - string defining ignore pattern for this rule, being parsed by \`new RegExp()\`.
             For example:
              * \`\/\/ \` pattern will ignore all in-line comments.
@@ -56,8 +57,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                     {
                         type: "object",
                         properties: {
-                            "limit": {type: "number"},
-                            "ignore-pattern": {type: "string"},
+                            limit: { type: "number" },
+                            "ignore-pattern": { type: "string" },
                         },
                         additionalProperties: false,
                     },
@@ -66,10 +67,17 @@ export class Rule extends Lint.Rules.AbstractRule {
             minLength: 1,
             maxLength: 2,
         },
-        optionExamples: [[true, 120], [true, {
-            "limit": 120,
-            "ignore-pattern": "^import |^export \{(.*?)\}"}]],
-        type: "maintainability",
+        optionExamples: [
+            [true, 120],
+            [
+                true,
+                {
+                    limit: 120,
+                    "ignore-pattern": "^import |^export {(.*?)}",
+                },
+            ],
+        ],
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -80,7 +88,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public isEnabled(): boolean {
         const limit = this.getRuleOptions().limit;
-        return super.isEnabled() && (limit > 0);
+        return super.isEnabled() && limit > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -89,14 +97,14 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private getRuleOptions(): MaxLineLengthRuleOptions {
         const argument = this.ruleArguments[0];
-        let options: MaxLineLengthRuleOptions = {limit: 0};
+        let options: MaxLineLengthRuleOptions = { limit: 0 };
         if (typeof argument === "number") {
             options.limit = argument;
         } else {
             options = argument as MaxLineLengthRuleOptions;
-            const ignorePattern = (argument as {[key: string]: string})["ignore-pattern"];
-            options.ignorePattern = (typeof ignorePattern === "string") ?
-                new RegExp((ignorePattern)) : undefined;
+            const ignorePattern = (argument as { [key: string]: string })["ignore-pattern"];
+            options.ignorePattern =
+                typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined;
         }
         options.limit = Number(options.limit); // user can pass a string instead of number
         return options;
@@ -107,9 +115,13 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
     const limit = ctx.options.limit;
     const ignorePattern = ctx.options.ignorePattern;
     for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength <= limit) { continue; }
+        if (line.contentLength <= limit) {
+            continue;
+        }
         const lineContent = ctx.sourceFile.text.substr(line.pos, line.contentLength);
-        if (ignorePattern !== undefined && ignorePattern.test(lineContent)) { continue; }
+        if (ignorePattern !== undefined && ignorePattern.test(lineContent)) {
+            continue;
+        }
         ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
     }
 }

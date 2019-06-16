@@ -1,6 +1,6 @@
 #### PR checklist
 
-- [ ] Addresses an existing issue: #0000
+- [ ] Addresses an existing issue: fixes #0000
 - [ ] New feature, bugfix, or enhancement
   - [ ] Includes tests
 - [ ] Documentation update

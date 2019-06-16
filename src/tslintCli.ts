@@ -19,6 +19,8 @@
 
 import commander = require("commander");
 import * as fs from "fs";
+import * as mkdirp from "mkdirp";
+import * as path from "path";
 
 import { Linter } from "./linter";
 import { run } from "./runner";
@@ -33,6 +35,7 @@ interface Argv {
     init?: boolean;
     out?: string;
     outputAbsolutePaths: boolean;
+    printConfig?: boolean;
     project?: string;
     rulesDir?: string;
     formattersDir: string;
@@ -46,7 +49,7 @@ interface Argv {
 interface Option {
     short?: string;
     // Commander will camelCase option names.
-    name: keyof Argv | "rules-dir" | "formatters-dir" | "type-check";
+    name: keyof Argv | "rules-dir" | "formatters-dir" | "print-config" | "type-check";
     type: "string" | "boolean" | "array";
     describe: string; // Short, used for usage message
     description: string; // Long, used for `--help`
@@ -120,9 +123,18 @@ const options: Option[] = [
         description: "If true, all paths in the output will be absolute.",
     },
     {
+        name: "print-config",
+        type: "boolean",
+        describe: "print resolved configuration for a file",
+        description: dedent`
+            When passed a single file name, prints the configuration that would
+            be used to lint that file.
+            No linting is performed and only config-related options are valid.`,
+    },
+    {
         short: "r",
         name: "rules-dir",
-        type: "string",
+        type: "array",
         describe: "rules directory",
         description: dedent`
             An additional rules directory, for user-created rules.
@@ -148,7 +160,8 @@ const options: Option[] = [
         short: "t",
         name: "format",
         type: "string",
-        describe: "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
+        describe:
+            "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
         description: dedent`
             The formatter to use to format the results of the linter before
             outputting it to stdout or the file passed in --out. The core
@@ -184,7 +197,7 @@ const options: Option[] = [
         short: "q",
         name: "quiet",
         type: "boolean",
-        describe: "hide errors on lint",
+        describe: "hide warnings on lint",
         description: "If true, hides warnings from linting output.",
     },
     {
@@ -227,9 +240,21 @@ for (const option of options) {
 
 commander.on("--help", () => {
     const indent = "\n        ";
-    const optionDetails = options.concat(builtinOptions).map((o) =>
-        `${optionUsageTag(o)}:${o.description.startsWith("\n") ? o.description.replace(/\n/g, indent) : indent + o.description}`);
-    console.log(`tslint accepts the following commandline options:\n\n    ${optionDetails.join("\n\n    ")}\n\n`);
+    const optionDetails = options
+        .concat(builtinOptions)
+        .map(
+            o =>
+                `${optionUsageTag(o)}:${
+                    o.description.startsWith("\n")
+                        ? o.description.replace(/\n/g, indent)
+                        : indent + o.description
+                }`,
+        );
+    console.log(
+        `tslint accepts the following commandline options:\n\n    ${optionDetails.join(
+            "\n\n    ",
+        )}\n\n`,
+    );
 });
 
 // Hack to get unknown option errors to work. https://github.com/visionmedia/commander.js/pull/121
@@ -238,24 +263,36 @@ commander.args = parsed.args;
 if (parsed.unknown.length !== 0) {
     (commander.parseArgs as (args: string[], unknown: string[]) => void)([], parsed.unknown);
 }
-const argv = commander.opts() as any as Argv;
+const argv = (commander.opts() as any) as Argv;
 
-if (!(argv.init || argv.test !== undefined || argv.project !== undefined || commander.args.length > 0)) {
+if (
+    !(
+        argv.init ||
+        argv.test !== undefined ||
+        argv.project !== undefined ||
+        commander.args.length > 0
+    )
+) {
     console.error("No files specified. Use --project to lint a project folder.");
     process.exit(1);
 }
 
 if (argv.typeCheck) {
-    console.warn("--type-check is deprecated. You only need --project to enable rules which need type information.");
+    console.warn(
+        "--type-check is deprecated. You only need --project to enable rules which need type information.",
+    );
     if (argv.project === undefined) {
         console.error("--project must be specified in order to enable type checking.");
         process.exit(1);
     }
 }
 
-const outputStream: NodeJS.WritableStream = argv.out === undefined
-    ? process.stdout
-    : fs.createWriteStream(argv.out, {flags: "w+", mode: 420});
+let outputStream: NodeJS.WritableStream = process.stdout;
+
+if (argv.out !== undefined) {
+    mkdirp.sync(path.dirname(argv.out));
+    outputStream = fs.createWriteStream(argv.out, { flags: "w+", mode: 420 });
+}
 
 run(
     {
@@ -264,11 +301,12 @@ run(
         files: arrayify(commander.args),
         fix: argv.fix,
         force: argv.force,
-        format: argv.format === undefined ? "prose" : argv.format,
+        format: argv.format,
         formattersDirectory: argv.formattersDir,
         init: argv.init,
         out: argv.out,
         outputAbsolutePaths: argv.outputAbsolutePaths,
+        printConfig: argv.printConfig,
         project: argv.project,
         quiet: argv.quiet,
         rulesDirectory: argv.rulesDir,
@@ -282,15 +320,17 @@ run(
         error(m) {
             process.stderr.write(m);
         },
-    })
-    .then((rc) => {
+    },
+)
+    .then(rc => {
         process.exitCode = rc;
-    }).catch((e) => {
+    })
+    .catch(e => {
         console.error(e);
         process.exitCode = 1;
     });
 
-function optionUsageTag({short, name}: Option) {
+function optionUsageTag({ short, name }: Option) {
     return short !== undefined ? `-${short}, --${name}` : `--${name}`;
 }
 

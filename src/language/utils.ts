@@ -16,19 +16,32 @@
  */
 
 import * as path from "path";
-import { isBlockScopedVariableDeclarationList, isIdentifier, isPrefixUnaryExpression } from "tsutils";
+import {
+    isBlockScopedVariableDeclarationList,
+    isIdentifier,
+    isPrefixUnaryExpression,
+} from "tsutils";
 import * as ts from "typescript";
 
 import { IDisabledInterval, RuleFailure } from "./rule/rule";
 
 export function getSourceFile(fileName: string, source: string): ts.SourceFile {
     const normalizedName = path.normalize(fileName).replace(/\\/g, "/");
-    return ts.createSourceFile(normalizedName, source, ts.ScriptTarget.ES5, /*setParentNodes*/ true);
+    return ts.createSourceFile(
+        normalizedName,
+        source,
+        ts.ScriptTarget.ES5,
+        /*setParentNodes*/ true,
+    );
 }
 
 /** @deprecated See IDisabledInterval. */
-export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabledInterval[]): boolean { // tslint:disable-line deprecation
-    return disabledIntervals.some((interval) => {
+export function doesIntersect(
+    failure: RuleFailure,
+    // tslint:disable-next-line:deprecation
+    disabledIntervals: IDisabledInterval[],
+): boolean {
+    return disabledIntervals.some(interval => {
         const maxStart = Math.max(interval.startPosition, failure.getStartPosition().getPosition());
         const minEnd = Math.min(interval.endPosition, failure.getEndPosition().getPosition());
         return maxStart <= minEnd;
@@ -40,13 +53,15 @@ export function doesIntersect(failure: RuleFailure, disabledIntervals: IDisabled
  *
  * @deprecated use `hasModifier` from `tsutils`
  */
-export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifierKinds: ts.SyntaxKind[]): boolean {
+export function hasModifier(
+    modifiers: ts.ModifiersArray | undefined,
+    ...modifierKinds: ts.SyntaxKind[]
+): boolean {
     if (modifiers === undefined || modifierKinds.length === 0) {
         return false;
     }
 
-    return modifiers.some(
-        (m) => modifierKinds.some((k) => m.kind === k));
+    return modifiers.some(m => modifierKinds.some(k => m.kind === k));
 }
 
 /**
@@ -55,10 +70,15 @@ export function hasModifier(modifiers: ts.ModifiersArray | undefined, ...modifie
  *
  * @deprecated use `isBlockScopedVariableDeclarationList` from `tsutils`
  */
-export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.VariableStatement): boolean {
+export function isBlockScopedVariable(
+    node: ts.VariableDeclaration | ts.VariableStatement,
+): boolean {
     if (node.kind === ts.SyntaxKind.VariableDeclaration) {
-        const parent = node.parent!;
-        return parent.kind === ts.SyntaxKind.CatchClause || isBlockScopedVariableDeclarationList(parent);
+        const parent = node.parent;
+        return (
+            parent.kind === ts.SyntaxKind.CatchClause ||
+            isBlockScopedVariableDeclarationList(parent)
+        );
     } else {
         return isBlockScopedVariableDeclarationList(node.declarationList);
     }
@@ -68,12 +88,14 @@ export function isBlockScopedVariable(node: ts.VariableDeclaration | ts.Variable
 export function isBlockScopedBindingElement(node: ts.BindingElement): boolean {
     const variableDeclaration = getBindingElementVariableDeclaration(node); // tslint:disable-line:deprecation
     // if no variable declaration, it must be a function param, which is block scoped
-    return (variableDeclaration === null) || isBlockScopedVariable(variableDeclaration); // tslint:disable-line:deprecation
+    return variableDeclaration === null || isBlockScopedVariable(variableDeclaration); // tslint:disable-line:deprecation
 }
 
 /** @deprecated use `getDeclarationOfBindingElement` from `tsutils` */
-export function getBindingElementVariableDeclaration(node: ts.BindingElement): ts.VariableDeclaration | null {
-    let currentParent = node.parent! as ts.Node;
+export function getBindingElementVariableDeclaration(
+    node: ts.BindingElement,
+): ts.VariableDeclaration | null {
+    let currentParent = node.parent as ts.Node;
     while (currentParent.kind !== ts.SyntaxKind.VariableDeclaration) {
         if (currentParent.parent === undefined) {
             return null; // function parameter, no variable declaration
@@ -91,7 +113,7 @@ export function getBindingElementVariableDeclaration(node: ts.BindingElement): t
  * @deprecated use `getChildOfKind` from `tsutils`
  */
 export function childOfKind(node: ts.Node, kind: ts.SyntaxKind): ts.Node | undefined {
-    return node.getChildren().find((child) => child.kind === kind);
+    return node.getChildren().find(child => child.kind === kind);
 }
 
 /**
@@ -121,8 +143,10 @@ export function ancestorWhere<T extends ts.Node = ts.Node>(
 export function isAssignment(node: ts.Node) {
     if (node.kind === ts.SyntaxKind.BinaryExpression) {
         const binaryExpression = node as ts.BinaryExpression;
-        return binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment
-            && binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment;
+        return (
+            binaryExpression.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+            binaryExpression.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+        );
     } else {
         return false;
     }
@@ -153,7 +177,10 @@ export function isCombinedNodeFlagSet(node: ts.Node, flagToCheck: ts.NodeFlags):
  *
  * @deprecated no longer used
  */
-export function isCombinedModifierFlagSet(node: ts.Node, flagToCheck: ts.ModifierFlags): boolean {
+export function isCombinedModifierFlagSet(
+    node: ts.Declaration,
+    flagToCheck: ts.ModifierFlags,
+): boolean {
     // tslint:disable-next-line:no-bitwise
     return (ts.getCombinedModifierFlags(node) & flagToCheck) !== 0;
 }
@@ -210,55 +237,65 @@ export function unwrapParentheses(node: ts.Expression) {
 
 /** @deprecated use `isFunctionScopeBoundary` from `tsutils` */
 export function isScopeBoundary(node: ts.Node): boolean {
-    return node.kind === ts.SyntaxKind.FunctionDeclaration
-        || node.kind === ts.SyntaxKind.FunctionExpression
-        || node.kind === ts.SyntaxKind.PropertyAssignment
-        || node.kind === ts.SyntaxKind.ShorthandPropertyAssignment
-        || node.kind === ts.SyntaxKind.MethodDeclaration
-        || node.kind === ts.SyntaxKind.Constructor
-        || node.kind === ts.SyntaxKind.ModuleDeclaration
-        || node.kind === ts.SyntaxKind.ArrowFunction
-        || node.kind === ts.SyntaxKind.ParenthesizedExpression
-        || node.kind === ts.SyntaxKind.ClassDeclaration
-        || node.kind === ts.SyntaxKind.ClassExpression
-        || node.kind === ts.SyntaxKind.InterfaceDeclaration
-        || node.kind === ts.SyntaxKind.GetAccessor
-        || node.kind === ts.SyntaxKind.SetAccessor
-        || node.kind === ts.SyntaxKind.SourceFile && ts.isExternalModule(node as ts.SourceFile);
+    return (
+        node.kind === ts.SyntaxKind.FunctionDeclaration ||
+        node.kind === ts.SyntaxKind.FunctionExpression ||
+        node.kind === ts.SyntaxKind.PropertyAssignment ||
+        node.kind === ts.SyntaxKind.ShorthandPropertyAssignment ||
+        node.kind === ts.SyntaxKind.MethodDeclaration ||
+        node.kind === ts.SyntaxKind.Constructor ||
+        node.kind === ts.SyntaxKind.ModuleDeclaration ||
+        node.kind === ts.SyntaxKind.ArrowFunction ||
+        node.kind === ts.SyntaxKind.ParenthesizedExpression ||
+        node.kind === ts.SyntaxKind.ClassDeclaration ||
+        node.kind === ts.SyntaxKind.ClassExpression ||
+        node.kind === ts.SyntaxKind.InterfaceDeclaration ||
+        node.kind === ts.SyntaxKind.GetAccessor ||
+        node.kind === ts.SyntaxKind.SetAccessor ||
+        (node.kind === ts.SyntaxKind.SourceFile && ts.isExternalModule(node as ts.SourceFile))
+    );
 }
 
 /** @deprecated use `isBlockScopeBoundary` from `tsutils` */
 export function isBlockScopeBoundary(node: ts.Node): boolean {
-    return isScopeBoundary(node) // tslint:disable-line:deprecation
-        || node.kind === ts.SyntaxKind.Block
-        || isLoop(node) // tslint:disable-line:deprecation
-        || node.kind === ts.SyntaxKind.WithStatement
-        || node.kind === ts.SyntaxKind.SwitchStatement
-        || node.parent !== undefined
-            && (node.parent.kind === ts.SyntaxKind.TryStatement
-            || node.parent.kind === ts.SyntaxKind.IfStatement);
+    return (
+        isScopeBoundary(node) || // tslint:disable-line:deprecation
+        node.kind === ts.SyntaxKind.Block ||
+        isLoop(node) || // tslint:disable-line:deprecation
+        node.kind === ts.SyntaxKind.WithStatement ||
+        node.kind === ts.SyntaxKind.SwitchStatement ||
+        (node.parent !== undefined &&
+            (node.parent.kind === ts.SyntaxKind.TryStatement ||
+                node.parent.kind === ts.SyntaxKind.IfStatement))
+    );
 }
 
 /** @deprecated use `isIterationStatement` from `tsutils` or `typescript` */
 export function isLoop(node: ts.Node): node is ts.IterationStatement {
-   return node.kind === ts.SyntaxKind.DoStatement
-        || node.kind === ts.SyntaxKind.WhileStatement
-        || node.kind === ts.SyntaxKind.ForStatement
-        || node.kind === ts.SyntaxKind.ForInStatement
-        || node.kind === ts.SyntaxKind.ForOfStatement;
+    return (
+        node.kind === ts.SyntaxKind.DoStatement ||
+        node.kind === ts.SyntaxKind.WhileStatement ||
+        node.kind === ts.SyntaxKind.ForStatement ||
+        node.kind === ts.SyntaxKind.ForInStatement ||
+        node.kind === ts.SyntaxKind.ForOfStatement
+    );
 }
 
 /**
  * @returns Whether node is a numeric expression.
  */
 export function isNumeric(node: ts.Expression) {
-    while (isPrefixUnaryExpression(node) &&
-           (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)) {
+    while (
+        isPrefixUnaryExpression(node) &&
+        (node.operator === ts.SyntaxKind.PlusToken || node.operator === ts.SyntaxKind.MinusToken)
+    ) {
         node = node.operand;
     }
 
-    return node.kind === ts.SyntaxKind.NumericLiteral ||
-        isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity");
+    return (
+        node.kind === ts.SyntaxKind.NumericLiteral ||
+        (isIdentifier(node) && (node.text === "NaN" || node.text === "Infinity"))
+    );
 }
 
 export interface TokenPosition {
@@ -269,8 +306,17 @@ export interface TokenPosition {
     /** The end of the token */
     end: number;
 }
-export type ForEachTokenCallback = (fullText: string, kind: ts.SyntaxKind, pos: TokenPosition, parent: ts.Node) => void;
-export type ForEachCommentCallback = (fullText: string, kind: ts.SyntaxKind, pos: TokenPosition) => void;
+export type ForEachTokenCallback = (
+    fullText: string,
+    kind: ts.SyntaxKind,
+    pos: TokenPosition,
+    parent: ts.Node,
+) => void;
+export type ForEachCommentCallback = (
+    fullText: string,
+    kind: ts.SyntaxKind,
+    pos: TokenPosition,
+) => void;
 export type FilterCallback = (node: ts.Node) => boolean;
 
 /**
@@ -285,7 +331,12 @@ export type FilterCallback = (node: ts.Node) => boolean;
  *
  * @deprecated use `forEachToken` or `forEachTokenWithTrivia` from `tsutils`
  */
-export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachTokenCallback, filter?: FilterCallback) {
+export function forEachToken(
+    node: ts.Node,
+    skipTrivia: boolean,
+    cb: ForEachTokenCallback,
+    filter?: FilterCallback,
+) {
     // this function will most likely be called with SourceFile anyways, so there is no need for an additional parameter
     const sourceFile = node.getSourceFile();
     const fullText = sourceFile.text;
@@ -302,10 +353,12 @@ export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachToke
     }
 
     function iterateChildren(child: ts.Node): void {
-        if (child.kind < ts.SyntaxKind.FirstNode ||
+        if (
+            child.kind < ts.SyntaxKind.FirstNode ||
             // for backwards compatibility to typescript 2.0.10
             // JsxText was no Token, but a Node in that version
-            child.kind === ts.SyntaxKind.JsxText) {
+            child.kind === ts.SyntaxKind.JsxText
+        ) {
             // we found a token, tokens have no children, stop recursing here
             return callback(child);
         }
@@ -324,19 +377,29 @@ export function forEachToken(node: ts.Node, skipTrivia: boolean, cb: ForEachToke
             // we only have to handle trivia before each token, because there is nothing after EndOfFileToken
             handleTrivia!(token.pos, tokenStart, token);
         }
-        return cb(fullText, token.kind, {tokenStart, fullStart: token.pos, end: token.end}, token.parent!);
+        return cb(
+            fullText,
+            token.kind,
+            { tokenStart, fullStart: token.pos, end: token.end },
+            token.parent,
+        );
     }
 }
 
 function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback) {
     const fullText = sourceFile.text;
-    const scanner = ts.createScanner(sourceFile.languageVersion, false, sourceFile.languageVariant, fullText);
+    const scanner = ts.createScanner(
+        sourceFile.languageVersion,
+        false,
+        sourceFile.languageVariant,
+        fullText,
+    );
     /**
      * Scan the specified range to get all trivia tokens.
      * This includes trailing trivia of the last token and the leading trivia of the current token
      */
     function handleTrivia(start: number, end: number, token: ts.Node) {
-        const parent = token.parent!;
+        const parent = token.parent;
         // prevent false positives by not scanning inside JsxText
         if (!canHaveLeadingTrivia(token.kind, parent)) {
             return;
@@ -347,7 +410,12 @@ function createTriviaHandler(sourceFile: ts.SourceFile, cb: ForEachTokenCallback
         do {
             const kind = scanner.scan();
             position = scanner.getTextPos();
-            cb(fullText, kind, {tokenStart: scanner.getTokenPos(), end: position, fullStart: start}, parent);
+            cb(
+                fullText,
+                kind,
+                { tokenStart: scanner.getTokenPos(), end: position, fullStart: start },
+                parent,
+            );
         } while (position < end);
     }
 
@@ -365,14 +433,19 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
        forEachToken also does intentionally not pay attention to the correct comment ownership of nodes as it always
        scans all trivia before each token, which could include trailing comments of the previous token.
        Comment onwership is done right in this function*/
-    return forEachToken(node, true, (fullText, tokenKind, pos, parent) => { // tslint:disable-line:deprecation
+    // tslint:disable-next-line:deprecation
+    return forEachToken(node, true, (fullText, tokenKind, pos, parent) => {
         // don't search for comments inside JsxText
         if (canHaveLeadingTrivia(tokenKind, parent)) {
             // Comments before the first token (pos.fullStart === 0) are all considered leading comments, so no need for special treatment
             const comments = ts.getLeadingCommentRanges(fullText, pos.fullStart);
             if (comments !== undefined) {
                 for (const comment of comments) {
-                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
+                    cb(fullText, comment.kind, {
+                        end: comment.end,
+                        fullStart: pos.fullStart,
+                        tokenStart: comment.pos,
+                    });
                 }
             }
         }
@@ -380,7 +453,11 @@ export function forEachComment(node: ts.Node, cb: ForEachCommentCallback) {
             const comments = ts.getTrailingCommentRanges(fullText, pos.end);
             if (comments !== undefined) {
                 for (const comment of comments) {
-                    cb(fullText, comment.kind, {fullStart: pos.fullStart, tokenStart: comment.pos, end: comment.end});
+                    cb(fullText, comment.kind, {
+                        end: comment.end,
+                        fullStart: pos.fullStart,
+                        tokenStart: comment.pos,
+                    });
                 }
             }
         }
@@ -395,7 +472,10 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
 
         case ts.SyntaxKind.OpenBraceToken:
             // before a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+            return (
+                parent.kind !== ts.SyntaxKind.JsxExpression ||
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
+            );
 
         case ts.SyntaxKind.LessThanToken:
             switch (parent.kind) {
@@ -404,7 +484,7 @@ function canHaveLeadingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boolea
                 case ts.SyntaxKind.JsxOpeningElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be leading trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
                 default:
                     return true;
             }
@@ -423,7 +503,10 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
 
         case ts.SyntaxKind.CloseBraceToken:
             // after a JsxExpression inside a JsxElement's body can only be other JsxChild, but no trivia
-            return parent.kind !== ts.SyntaxKind.JsxExpression || parent.parent!.kind !== ts.SyntaxKind.JsxElement;
+            return (
+                parent.kind !== ts.SyntaxKind.JsxExpression ||
+                parent.parent.kind !== ts.SyntaxKind.JsxElement
+            );
 
         case ts.SyntaxKind.GreaterThanToken:
             switch (parent.kind) {
@@ -432,7 +515,7 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
                 case ts.SyntaxKind.JsxClosingElement:
                 case ts.SyntaxKind.JsxSelfClosingElement:
                     // there can only be trailing trivia if we are at the end of the top level element
-                    return parent.parent!.parent!.kind !== ts.SyntaxKind.JsxElement;
+                    return parent.parent.parent.kind !== ts.SyntaxKind.JsxElement;
 
                 default:
                     return true;
@@ -451,8 +534,10 @@ function canHaveTrailingTrivia(tokenKind: ts.SyntaxKind, parent: ts.Node): boole
  *                 This value is typically obtained from `node.getFullStart()` or `node.getEnd()`
  */
 export function hasCommentAfterPosition(text: string, position: number): boolean {
-    return ts.getTrailingCommentRanges(text, position) !== undefined ||
-           ts.getLeadingCommentRanges(text, position) !== undefined;
+    return (
+        ts.getTrailingCommentRanges(text, position) !== undefined ||
+        ts.getLeadingCommentRanges(text, position) !== undefined
+    );
 }
 
 export interface EqualsKind {
@@ -476,14 +561,20 @@ export function getEqualsKind(node: ts.BinaryOperatorToken): EqualsKind | undefi
 }
 
 export function isStrictNullChecksEnabled(options: ts.CompilerOptions): boolean {
-    return options.strictNullChecks === true ||
-        (options.strict === true && options.strictNullChecks !== false);
+    return (
+        options.strictNullChecks === true ||
+        (options.strict === true && options.strictNullChecks !== false)
+    );
 }
 
-export function isNegativeNumberLiteral(node: ts.Node): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
-    return isPrefixUnaryExpression(node) &&
+export function isNegativeNumberLiteral(
+    node: ts.Node,
+): node is ts.PrefixUnaryExpression & { operand: ts.NumericLiteral } {
+    return (
+        isPrefixUnaryExpression(node) &&
         node.operator === ts.SyntaxKind.MinusToken &&
-        node.operand.kind === ts.SyntaxKind.NumericLiteral;
+        node.operand.kind === ts.SyntaxKind.NumericLiteral
+    );
 }
 
 /** Wrapper for compatibility with typescript@<2.3.1 */

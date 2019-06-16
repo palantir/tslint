@@ -1,167 +1,184 @@
 version: 2
-jobs:
-  build:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run:
-          name: Install dependencies
-          command: yarn
-      - save_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-          paths:
+
+aliases:
+    - &docker-node-latest
+        - image: circleci/node:latest
+
+    - &docker-node-lts
+        - image: circleci/node:lts
+
+    - &docker-node-8
+        - image: circleci/node:8
+
+    - &docker-node-6
+        - image: circleci/node:6
+
+    - &restore-node-modules-cache
+        name: Restore node_modules cache
+        key: v1-yarn-deps-{{ checksum "yarn.lock" }}
+
+    - &restore-yarn-cache
+        name: Restore yarnpkg cache
+        key: v1-yarn-cache
+
+    - &save-node-modules-cache
+        name: Save node_modules cache
+        paths:
             - node_modules
-      - run: yarn compile
-      - persist_to_workspace:
-          root: '.'
-          paths:
-            - lib
-            - build
-            - yarn.lock
-  lint:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn lint
-  test:
-    docker:
-      - image: circleci/node:8
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn test
-  test2.1:
-    docker:
-      - image: circleci/node:4
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.1
-      - run: yarn test
-  test2.4:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.4
-      - run: yarn test
-  test2.7:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.7
-      - run: yarn test
-  test2.8:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.8
-      - run: yarn test
-  test2.9:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@2.9
-      - run: yarn test
-  test3.0:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@3.0.1
-      - run: yarn test
-  testRc:
-    docker:
-      - image: circleci/node:6
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@rc
-      - run: yarn test
-  testNext:
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - attach_workspace:
-          at: '.'
-      - restore_cache:
-          key: dependency-cache-{{ checksum "yarn.lock" }}
-      - run: yarn add typescript@next
-      - run: yarn test
+        key: v1-yarn-deps-{{ checksum "yarn.lock" }}
+
+    - &save-yarn-cache
+        name: Save yarnpkg cache
+        paths:
+            - ~/.cache/yarn
+        key: v1-yarn-cache
+
+jobs:
+    checkout-code:
+        docker: *docker-node-lts
+        steps:
+            - checkout
+            - restore_cache: *restore-yarn-cache
+            - restore_cache: *restore-node-modules-cache
+            - run: yarn install --non-interactive --cache-folder ~/.cache/yarn
+            - run:
+                name: Check if yarn.lock changed during install
+                command: git diff --exit-code
+            - save_cache: *save-node-modules-cache
+            - save_cache: *save-yarn-cache
+
+    clean-lockfile:
+        docker: *docker-node-lts
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - run: ./scripts/verifyCleanLockfile.sh
+
+    build:
+        docker: *docker-node-lts
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn compile
+            - persist_to_workspace:
+                root: "."
+                paths: [lib, build]
+
+    lint:
+        docker: *docker-node-lts
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn lint
+
+    test:
+        docker: *docker-node-8
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn test
+
+    test2.1:
+        docker: *docker-node-6
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.1
+            - run: yarn test
+
+    test2.4:
+        docker: *docker-node-6
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.4
+            - run: yarn test
+
+    test2.7:
+        docker: *docker-node-6
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.7
+            - run: yarn test
+
+    test2.8:
+        docker: *docker-node-6
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.8
+            - run: yarn test
+
+    test2.9:
+        docker: *docker-node-6
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.9
+            - run: yarn test
+
+    test3.0:
+        docker: *docker-node-8
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@3.0.1
+            - run: yarn test
+
+    testRc:
+        docker: *docker-node-lts
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@rc
+            - run: yarn test
+
+    testNext:
+        docker: *docker-node-latest
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@next
+            - run: yarn test
 
 workflows:
-  version: 2
-  build_lint_test:
-    jobs:
-      - build
-      - lint:
-          requires:
-            - build
-      - test:
-          requires:
-            - build
-      - test2.1:
-          requires:
-            - build
-      - test2.4:
-          requires:
-            - build
-      - test2.7:
-          requires:
-            - build
-      - test2.8:
-          requires:
-            - build
-      - test2.9:
-          requires:
-            - build
-      - test3.0:
-          requires:
-            - build
-      - testRc:
-          requires:
-            - build
-      - testNext:
-          requires:
-            - build
+    version: 2
+    build_lint_test:
+        jobs:
+            - checkout-code
+            - clean-lockfile:
+                requires: [checkout-code]
+            - build:
+                requires: [checkout-code]
+            - lint:
+                  requires: [build]
+            - test:
+                  requires: [build]
+            - test2.1:
+                  requires: [build]
+            - test2.4:
+                  requires: [build]
+            - test2.7:
+                  requires: [build]
+            - test2.8:
+                  requires: [build]
+            - test2.9:
+                  requires: [build]
+            - test3.0:
+                  requires: [build]
+            - testRc:
+                  requires: [build]
+            - testNext:
+                  requires: [build]

@@ -4,6 +4,16 @@ export const exportedVariable = 1;
 const internalVariable = 2;
       ~~~~~~~~~~~~~~~~~~~~              [Documentation must exist for variables.]
 
+/**
+ * (documentation here will be read)
+ */
+const firstVariableInList = true,
+    /**
+     * (documentation here will not be read)
+     */
+    secondVariableInList = false;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for variables.]
+
 // Variables in `catch` clauses should not be checked.
 try {
 } catch (ex) {

@@ -1,0 +1,4 @@
+﻿
+// This file starts with a zero width no-break-space.
+// See http://www.fileformat.info/info/unicode/char/feff/index.htm
+const a = 3;

@@ -17,7 +17,9 @@
 
 import { forEachComment } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/banTsIgnore.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -34,14 +36,15 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:disable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = 'Do not use "// @ts-ignore" comments because they suppress compilation errors.';
+    public static FAILURE_STRING =
+        'Do not use "// @ts-ignore" comments because they suppress compilation errors.';
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     const ignoreDiagnosticCommentRegEx = /^\s*\/\/\/?\s*@ts-ignore/;
     forEachComment(ctx.sourceFile, (fullText, comment) => {
         const commentText = fullText.slice(comment.pos, comment.end);

@@ -1,0 +1,19 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: circleci/ruby:2.3-jessie-node-browsers-legacy
+        steps:
+            - checkout
+            - restore_cache:
+                  key: dependency-cache-{{ checksum "Gemfile.lock" }}
+            - run:
+                  name: Install dependencies
+                  command: bundle check || bundle install
+            - save_cache:
+                  key: dependency-cache-{{ checksum "Gemfile.lock" }}
+                  paths:
+                      - vendor/bundle
+            - run:
+                  name: Build documentation
+                  command: bundle exec jekyll build

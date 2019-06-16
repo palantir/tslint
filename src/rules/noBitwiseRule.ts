@@ -48,7 +48,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.BinaryExpression) {
             switch ((node as ts.BinaryExpression).operatorToken.kind) {
@@ -66,8 +66,10 @@ function walk(ctx: Lint.WalkContext<void>) {
                 case ts.SyntaxKind.GreaterThanGreaterThanGreaterThanEqualsToken:
                     ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
-        } else if (node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
-                   (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken) {
+        } else if (
+            node.kind === ts.SyntaxKind.PrefixUnaryExpression &&
+            (node as ts.PrefixUnaryExpression).operator === ts.SyntaxKind.TildeToken
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

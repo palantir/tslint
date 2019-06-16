@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-class Walker extends Lint.AbstractWalker<void> {
+class Walker extends Lint.AbstractWalker {
     public walk(node: ts.SourceFile) {
         return this.checkStatements(node.statements);
     }
@@ -59,7 +59,10 @@ class Walker extends Lint.AbstractWalker<void> {
                 const { text } = name;
                 const prev = seen.get(text);
                 if (prev !== undefined) {
-                    this.addFailureAtNode(name, Rule.failureStringFactory(text, this.getLineOfNode(prev.name)));
+                    this.addFailureAtNode(
+                        name,
+                        Rule.failureStringFactory(text, this.getLineOfNode(prev.name)),
+                    );
                 }
                 seen.set(text, statement as ts.NamespaceDeclaration);
             }

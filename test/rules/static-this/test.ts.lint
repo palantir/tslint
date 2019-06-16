@@ -1,0 +1,87 @@
+class StaticThis {
+    static value = 0;
+    static staticValue = this.value;
+                         ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+
+    static _color = undefined;
+
+    static get color() {
+        return this._color;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+
+    static set color(color) {
+        this._color = color;
+        ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+
+    private _value = 5;
+
+    getValue() {
+        return this._value;
+    }
+
+    get length() {
+        return this._value;
+    }
+
+    set length(value) {
+        this._value = value;
+    }
+}
+
+class Child extends StaticThis {
+    static word = 'Hello';
+    static staticValue = this.word;
+                         ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+const AnonymClass = class {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+class AnonymClassChild extends AnonymClass {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+const NamedClass = class Name {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+class NamedClassChild extends NamedClass {
+    static getTypeOf() {
+        return this;
+               ~~~~ [Use the parent class name instead of `this` when in a `static` context.]
+    }
+}
+
+interface Bar {}
+
+class Foo {
+    public static higherOrderComponent(): any {
+        return class implements Bar {
+            public constructor() {
+                console.log(this);
+            }
+        };
+    }
+}

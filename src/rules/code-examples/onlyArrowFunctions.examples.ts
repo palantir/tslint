@@ -28,6 +28,10 @@ export const codeExamples = [
             const myFunc = () => {
                 // do something ...
             };
+
+            const myFunc = function() {
+                this.doSomething();
+            };
         `,
         fail: Lint.Utils.dedent`
             function myFunc() {

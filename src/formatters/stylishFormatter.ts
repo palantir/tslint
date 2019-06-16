@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
+import chalk from "chalk";
+
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
-import chalk from "chalk";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
@@ -55,8 +54,8 @@ export class Formatter extends AbstractFormatter {
             return [];
         }
         const outputLines: string[] = [];
-        const positionMaxSize       = this.getPositionMaxSize(failures);
-        const ruleMaxSize           = this.getRuleMaxSize(failures);
+        const positionMaxSize = this.getPositionMaxSize(failures);
+        const ruleMaxSize = this.getRuleMaxSize(failures);
 
         let currentFile: string | undefined;
 
@@ -73,19 +72,20 @@ export class Formatter extends AbstractFormatter {
             }
 
             let failureString = failure.getFailure();
-            failureString     = chalk.yellow(failureString);
+            failureString = chalk.yellow(failureString);
 
             // Rule
             let ruleName = failure.getRuleName();
-            ruleName     = this.pad(ruleName, ruleMaxSize);
-            ruleName     = chalk.grey(ruleName);
+            ruleName = this.pad(ruleName, ruleMaxSize);
+            ruleName = chalk.grey(ruleName);
 
             // Lines
             positionTuple = this.pad(positionTuple, positionMaxSize);
 
-            positionTuple = failure.getRuleSeverity() === "warning"
-                ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
-                : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
+            positionTuple =
+                failure.getRuleSeverity() === "warning"
+                    ? chalk.blue(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`)
+                    : chalk.red(`${failure.getRuleSeverity().toUpperCase()}: ${positionTuple}`);
 
             // Output
             const output = `${positionTuple}  ${ruleName}  ${failureString}`;
@@ -107,7 +107,8 @@ export class Formatter extends AbstractFormatter {
         for (const failure of failures) {
             const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
 
-            const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`.length;
+            const positionSize = `${lineAndCharacter.line + 1}:${lineAndCharacter.character + 1}`
+                .length;
 
             if (positionSize > positionMaxSize) {
                 positionMaxSize = positionSize;
