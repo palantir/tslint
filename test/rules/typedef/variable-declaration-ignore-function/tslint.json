@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "typedef": [true, "variable-declaration", "variable-declaration-ignore-function"]
+    }
+}
