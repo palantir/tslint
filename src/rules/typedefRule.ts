@@ -21,7 +21,6 @@ import * as ts from "typescript";
 import * as Lint from "../index";
 
 import { codeExamples } from "./code-examples/typedef.examples";
-import { getChildOfKind } from "tsutils";
 
 interface Options {
     "call-signature"?: boolean;
@@ -187,7 +186,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkVariableDeclaration(node: ts.Node): void {
-        const { parent, name, type } = <ts.VariableDeclaration>node;
+        const { parent, name, type } = node as ts.VariableDeclaration;
 
         // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
@@ -226,10 +225,10 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         const ignoreFunctions: boolean =
             this.options[OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION] === true;
 
-        return !!(
+        return (
             ignoreFunctions &&
-            (getChildOfKind(node, ts.SyntaxKind.ArrowFunction) ||
-                getChildOfKind(node, ts.SyntaxKind.FunctionExpression))
+            (utils.getChildOfKind(node, ts.SyntaxKind.ArrowFunction) !== undefined ||
+                utils.getChildOfKind(node, ts.SyntaxKind.FunctionExpression) !== undefined)
         );
     }
 
