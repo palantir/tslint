@@ -184,7 +184,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         if (initializer === undefined || initializer.kind !== ts.SyntaxKind.ArrowFunction) {
             if (
                 this.options[OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION] === true &&
-                initializer &&
+                initializer !== undefined &&
                 initializer.kind === ts.SyntaxKind.FunctionExpression
             ) {
                 return;
