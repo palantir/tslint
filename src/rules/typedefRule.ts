@@ -157,7 +157,8 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         }
     }
 
-    private checkParameter({ parent, name, type }: ts.ParameterDeclaration): void {
+    private checkParameter(node: ts.Node): void {
+        const { parent, name, type } = node as ts.ParameterDeclaration;
         const isArrowFunction = parent.kind === ts.SyntaxKind.ArrowFunction;
 
         const option = (() => {
@@ -181,6 +182,13 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // If this is an arrow function, it doesn't need to have a typedef on the property declaration
         // as the typedefs can be on the function's parameters instead
         if (initializer === undefined || initializer.kind !== ts.SyntaxKind.ArrowFunction) {
+            if (
+                this.options[OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION] === true &&
+                initializer &&
+                initializer.kind === ts.SyntaxKind.FunctionExpression
+            ) {
+                return;
+            }
             this.checkTypeAnnotation("member-variable-declaration", name, type, name);
         }
     }
