@@ -2,10 +2,24 @@
   {
     "ruleName": "adjacent-overload-signatures",
     "description": "Enforces function overloads to be consecutive.",
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf `ignore-accessors` is specified, then getters and setters are not considered to be overloads\nof function with the same signature.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "ignore-accessors": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "OPTION_IGNORE_ACCESSORS": true
+        }
+      ]
     ],
     "rationale": "Improves readability and organization by grouping naturally related items together.",
     "type": "typescript",
@@ -357,7 +371,7 @@
     "ruleName": "comment-format",
     "description": "Enforces formatting rules for single-line comments.",
     "rationale": "Helps maintain a consistent, readable style in your codebase.",
-    "optionsDescription": "\nThree arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that for comments starting with multiple slashes, e.g. `///`, leading slashes are ignored\n    * TypeScript reference comments are ignored completely\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last argument.\n\nOne of two options can be provided in this object:\n\n    * `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n    * `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
+    "optionsDescription": "\nFour arguments may be optionally provided:\n\n* `\"check-space\"` requires that all single-line comments must begin with a space, as in `// comment`\n    * note that for comments starting with multiple slashes, e.g. `///`, leading slashes are ignored\n    * TypeScript reference comments are ignored completely\n* `\"check-lowercase\"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.\n* `\"check-uppercase\"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.\n* `\"allow-trailing-lowercase\"` allows that only the first comment of a series of comments needs to be uppercase.\n    * requires `\"check-uppercase\"`\n    * comments must start at the same position\n\nExceptions to `\"check-lowercase\"` or `\"check-uppercase\"` can be managed with object that may be passed as last\nargument.\n\nOne of two options can be provided in this object:\n\n* `\"ignore-words\"`  - array of strings - words that will be ignored at the beginning of the comment.\n* `\"ignore-pattern\"` - string - RegExp pattern that will be ignored at the beginning of the comment.\n",
     "options": {
       "type": "array",
       "items": {
@@ -367,7 +381,8 @@
             "enum": [
               "check-space",
               "check-lowercase",
-              "check-uppercase"
+              "check-uppercase",
+              "allow-trailing-lowercase"
             ]
           },
           {
@@ -389,13 +404,14 @@
         ]
       },
       "minLength": 1,
-      "maxLength": 4
+      "maxLength": 5
     },
     "optionExamples": [
       [
         true,
         "check-space",
-        "check-uppercase"
+        "check-uppercase",
+        "allow-trailing-lowercase"
       ],
       [
         true,
@@ -1022,7 +1038,7 @@
     "ruleName": "file-name-casing",
     "description": "Enforces a consistent file naming convention",
     "rationale": "Helps maintain a consistent style across a file hierarchy",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.\n\nOr an object, where the key represents a regular expression that\nmatches the file name, and the value is the file name rule from\nthe previous list.\n\n* { \".tsx\": \"pascal-case\", \".ts\": \"camel-case\" }\n        ",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.\n* `ignored`: File names are ignored _(useful for the object configuration)_.\n\nOr an object, where the key represents a regular expression that\nmatches the file name, and the value is the file name rule from\nthe previous list.\n\n* { \".tsx\": \"pascal-case\", \".ts\": \"camel-case\" }\n        ",
     "options": {
       "type": "array",
       "items": {
@@ -1087,6 +1103,13 @@
           ".style.ts": "kebab-case",
           ".tsx": "pascal-case",
           ".*": "camel-case"
+        }
+      ],
+      [
+        true,
+        {
+          ".ts": "ignored",
+          ".tsx": "pascal-case"
         }
       ]
     ],
@@ -1724,6 +1747,27 @@
     "optionExamples": [
       true
     ],
+    "type": "functionality",
+    "typescriptOnly": false
+  },
+  {
+    "codeExamples": [
+      {
+        "config": "```json\n\"rules\": { \"no-async-without-await\": true }\n```",
+        "description": "Do not use the async keyword if it is not needed",
+        "fail": "```ts\nasync function f() {\n    fetch();\n}\n\nasync function f() {\n    async function g() {\n        await h();\n    }\n}\n```",
+        "pass": "```ts\nasync function f() {\n    await fetch();\n}\n\nconst f = async () => {\n    await fetch();\n};\n\nconst f = async () => {\n    return 'value';\n};\n```"
+      }
+    ],
+    "description": "Functions marked async must contain an await or return statement.",
+    "hasFix": false,
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "\nMarking a function as `async` without using `await` or returning a value inside it can lead to an unintended promise return and a larger transpiled output.\nOften the function can be synchronous and the `async` keyword is there by mistake.\nReturn statements are allowed as sometimes it is desirable to wrap the returned value in a Promise.",
+    "ruleName": "no-async-without-await",
     "type": "functionality",
     "typescriptOnly": false
   },
@@ -3866,6 +3910,56 @@
     "type": "functionality",
     "typescriptOnly": true,
     "requiresTypeInfo": true
+  },
+  {
+    "ruleName": "strict-comparisons",
+    "description": "Only allow comparisons between primitives.",
+    "optionsDescription": "\nOne of the following arguments may be optionally provided:\n* `allow-object-equal-comparison` allows `!=` `==` `!==` `===` comparison between any types.\n* `allow-string-order-comparison` allows `>` `<` `>=` `<=` comparison between strings.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "allow-object-equal-comparison": {
+          "type": "boolean"
+        },
+        "allow-string-order-comparison": {
+          "type": "boolean"
+        }
+      }
+    },
+    "optionExamples": [
+      true,
+      [
+        true,
+        {
+          "allow-object-equal-comparison": false,
+          "allow-string-order-comparison": false
+        }
+      ]
+    ],
+    "rationale": "\nWhen using comparison operators to compare objects, they compare references and not values.\nThis is often done accidentally.\nWith this rule, `>`, `>=`, `<`, `<=` operators are only allowed when comparing `numbers`.\n`===`, `!==` are allowed for `number` `string` and `boolean` types and if one of the\noperands is `null` or `undefined`.\n            ",
+    "type": "functionality",
+    "typescriptOnly": false,
+    "requiresTypeInfo": true,
+    "codeExamples": [
+      {
+        "description": "Disallows usage of comparison operators with non-primitive types.",
+        "config": "```json\n\"rules\": { \"strict-comparisons\": true }\n```",
+        "pass": "```ts\nconst object1 = {};\nconst object2 = {};\nif (isEqual(object1, object2)) {}\n```",
+        "fail": "```ts\nconst object1 = {};\nconst object2 = {};\nif (object1 === object2) {}\n```"
+      },
+      {
+        "description": "Allows equality operators to be used with non-primitive types, while still disallowing the use of greater than and less than.",
+        "config": "```json\n\"rules\": { \"strict-comparisons\": [true, {  \"allow-object-equal-comparison\": true }] }\n```",
+        "pass": "```ts\nconst object1 = {};\nconst object2 = {};\nif (object1 === object2) {}\n```",
+        "fail": "```ts\nconst object1 = {};\nconst object2 = {};\nif (object1 < object2) {}\n```"
+      },
+      {
+        "description": "Allows ordering operators to be used with string types.",
+        "config": "```json\n\"rules\": { \"strict-comparisons\": [true, {  \"allow-string-order-comparison\": true }] }\n```",
+        "pass": "```ts\nconst string1 = \"\";\nconst string2 = \"\";\nif (string1 < string2) {}\n```",
+        "fail": "```ts\nconst object1 = {};\nconst object2 = {};\nif (object1 < object2) {}\n```"
+      }
+    ]
   },
   {
     "ruleName": "strict-type-predicates",

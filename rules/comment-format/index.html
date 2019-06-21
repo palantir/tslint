@@ -4,20 +4,24 @@ description: Enforces formatting rules for single-line comments.
 rationale: 'Helps maintain a consistent, readable style in your codebase.'
 optionsDescription: |
 
-  Three arguments may be optionally provided:
+  Four arguments may be optionally provided:
 
   * `"check-space"` requires that all single-line comments must begin with a space, as in `// comment`
       * note that for comments starting with multiple slashes, e.g. `///`, leading slashes are ignored
       * TypeScript reference comments are ignored completely
   * `"check-lowercase"` requires that the first non-whitespace character of a comment must be lowercase, if applicable.
   * `"check-uppercase"` requires that the first non-whitespace character of a comment must be uppercase, if applicable.
+  * `"allow-trailing-lowercase"` allows that only the first comment of a series of comments needs to be uppercase.
+      * requires `"check-uppercase"`
+      * comments must start at the same position
 
-  Exceptions to `"check-lowercase"` or `"check-uppercase"` can be managed with object that may be passed as last argument.
+  Exceptions to `"check-lowercase"` or `"check-uppercase"` can be managed with object that may be passed as last
+  argument.
 
   One of two options can be provided in this object:
 
-      * `"ignore-words"`  - array of strings - words that will be ignored at the beginning of the comment.
-      * `"ignore-pattern"` - string - RegExp pattern that will be ignored at the beginning of the comment.
+  * `"ignore-words"`  - array of strings - words that will be ignored at the beginning of the comment.
+  * `"ignore-pattern"` - string - RegExp pattern that will be ignored at the beginning of the comment.
 options:
   type: array
   items:
@@ -27,6 +31,7 @@ options:
           - check-space
           - check-lowercase
           - check-uppercase
+          - allow-trailing-lowercase
       - type: object
         properties:
           ignore-words:
@@ -38,9 +43,9 @@ options:
         minProperties: 1
         maxProperties: 1
   minLength: 1
-  maxLength: 4
+  maxLength: 5
 optionExamples:
-  - '[true, "check-space", "check-uppercase"]'
+  - '[true, "check-space", "check-uppercase", "allow-trailing-lowercase"]'
   - '[true, "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]'
   - '[true, "check-lowercase", {"ignore-pattern": "STD\\w{2,3}\\b"}]'
 type: style
@@ -58,7 +63,8 @@ optionsJSON: |-
           "enum": [
             "check-space",
             "check-lowercase",
-            "check-uppercase"
+            "check-uppercase",
+            "allow-trailing-lowercase"
           ]
         },
         {
@@ -80,6 +86,6 @@ optionsJSON: |-
       ]
     },
     "minLength": 1,
-    "maxLength": 4
+    "maxLength": 5
   }
 ---

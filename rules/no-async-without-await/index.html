@@ -1,0 +1,54 @@
+---
+codeExamples:
+  - config: |-
+      ```json
+      "rules": { "no-async-without-await": true }
+      ```
+    description: Do not use the async keyword if it is not needed
+    fail: |-
+      ```ts
+      async function f() {
+          fetch();
+      }
+
+      async function f() {
+          async function g() {
+              await h();
+          }
+      }
+      ```
+    pass: |-
+      ```ts
+      async function f() {
+          await fetch();
+      }
+
+      const f = async () => {
+          await fetch();
+      };
+
+      const f = async () => {
+          return 'value';
+      };
+      ```
+description: Functions marked async must contain an await or return statement.
+hasFix: false
+optionExamples:
+  - 'true'
+options: null
+optionsDescription: Not configurable.
+rationale: >-
+
+  Marking a function as `async` without using `await` or returning a value inside it can lead to an unintended promise return and a larger
+  transpiled output.
+
+  Often the function can be synchronous and the `async` keyword is there by mistake.
+
+  Return statements are allowed as sometimes it is desirable to wrap the returned value in a Promise.
+ruleName: no-async-without-await
+type: functionality
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-async-without-await'
+optionsJSON: 'null'
+---
