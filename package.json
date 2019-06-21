@@ -1,6 +1,6 @@
 {
     "name": "tslint",
-    "version": "5.17.0",
+    "version": "5.18.0",
     "description": "An extensible static analysis linter for the TypeScript language",
     "bin": {
         "tslint": "./bin/tslint"
@@ -44,7 +44,7 @@
         "tsutils": "^2.29.0"
     },
     "peerDependencies": {
-        "typescript": ">=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev"
+        "typescript": ">=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev"
     },
     "devDependencies": {
         "@octokit/rest": "^16.24.3",
