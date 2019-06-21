@@ -1,14 +1,32 @@
 ---
 ruleName: adjacent-overload-signatures
 description: Enforces function overloads to be consecutive.
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If `ignore-accessors` is specified, then getters and setters are not considered to be overloads
+  of function with the same signature.
+options:
+  type: object
+  properties:
+    ignore-accessors:
+      type: boolean
+  additionalProperties: false
 optionExamples:
   - 'true'
+  - '[true, {"OPTION_IGNORE_ACCESSORS": true}]'
 rationale: Improves readability and organization by grouping naturally related items together.
 type: typescript
 typescriptOnly: true
 layout: rule
 title: 'Rule: adjacent-overload-signatures'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "ignore-accessors": {
+        "type": "boolean"
+      }
+    },
+    "additionalProperties": false
+  }
 ---

@@ -1,0 +1,103 @@
+---
+ruleName: strict-comparisons
+description: Only allow comparisons between primitives.
+optionsDescription: |-
+
+  One of the following arguments may be optionally provided:
+  * `allow-object-equal-comparison` allows `!=` `==` `!==` `===` comparison between any types.
+  * `allow-string-order-comparison` allows `>` `<` `>=` `<=` comparison between strings.
+options:
+  type: object
+  properties:
+    allow-object-equal-comparison:
+      type: boolean
+    allow-string-order-comparison:
+      type: boolean
+optionExamples:
+  - 'true'
+  - |-
+    [
+      true,
+      {
+        "allow-object-equal-comparison": false,
+        "allow-string-order-comparison": false
+      }
+    ]
+rationale: |-
+
+  When using comparison operators to compare objects, they compare references and not values.
+  This is often done accidentally.
+  With this rule, `>`, `>=`, `<`, `<=` operators are only allowed when comparing `numbers`.
+  `===`, `!==` are allowed for `number` `string` and `boolean` types and if one of the
+  operands is `null` or `undefined`.
+              
+type: functionality
+typescriptOnly: false
+requiresTypeInfo: true
+codeExamples:
+  - description: Disallows usage of comparison operators with non-primitive types.
+    config: |-
+      ```json
+      "rules": { "strict-comparisons": true }
+      ```
+    pass: |-
+      ```ts
+      const object1 = {};
+      const object2 = {};
+      if (isEqual(object1, object2)) {}
+      ```
+    fail: |-
+      ```ts
+      const object1 = {};
+      const object2 = {};
+      if (object1 === object2) {}
+      ```
+  - description: 'Allows equality operators to be used with non-primitive types, while still disallowing the use of greater than and less than.'
+    config: |-
+      ```json
+      "rules": { "strict-comparisons": [true, {  "allow-object-equal-comparison": true }] }
+      ```
+    pass: |-
+      ```ts
+      const object1 = {};
+      const object2 = {};
+      if (object1 === object2) {}
+      ```
+    fail: |-
+      ```ts
+      const object1 = {};
+      const object2 = {};
+      if (object1 < object2) {}
+      ```
+  - description: Allows ordering operators to be used with string types.
+    config: |-
+      ```json
+      "rules": { "strict-comparisons": [true, {  "allow-string-order-comparison": true }] }
+      ```
+    pass: |-
+      ```ts
+      const string1 = "";
+      const string2 = "";
+      if (string1 < string2) {}
+      ```
+    fail: |-
+      ```ts
+      const object1 = {};
+      const object2 = {};
+      if (object1 < object2) {}
+      ```
+layout: rule
+title: 'Rule: strict-comparisons'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "allow-object-equal-comparison": {
+        "type": "boolean"
+      },
+      "allow-string-order-comparison": {
+        "type": "boolean"
+      }
+    }
+  }
+---
