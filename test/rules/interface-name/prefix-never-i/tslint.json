@@ -1,7 +1,6 @@
 {
-    "rules":{
-        "interface-name": [
-            true,
+    "rules": {
+        "interface-name": [true,
             {
                 "prefix-never": ["I"]
             }

@@ -52,7 +52,9 @@ export const rules = {
         options: ["spaces"],
     },
     "interface-name": {
-        options: ["always-prefix"],
+        options: {
+            "prefix-never": ["I"],
+        },
     },
     "interface-over-type-literal": true,
     "jsdoc-format": true,

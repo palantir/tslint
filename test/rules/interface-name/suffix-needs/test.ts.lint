@@ -1,0 +1,28 @@
+// valid code
+interface OptionsContract {
+}
+
+interface SomethingContract {
+}
+
+interface FooContract {
+}
+
+interface BarContract {
+}
+
+interface BazContract {
+}
+
+// invalid code
+interface Options {
+          ~~~~~~~   [interface name must finish with specified suffix: Contract]
+}
+
+interface Incomplete {
+          ~~~~~~~~~~   [interface name must finish with specified suffix: Contract]
+}
+
+interface I18nService {
+          ~~~~~~~~~~~   [interface name must finish with specified suffix: Contract]
+}

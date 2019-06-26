@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "interface-name": [true,
+        {
+            "suffix-needs": ["Contract"]
+        }
+    ]
+  }
+}

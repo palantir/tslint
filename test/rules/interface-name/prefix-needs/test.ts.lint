@@ -1,0 +1,28 @@
+// valid code
+interface TypeOptions {
+}
+
+interface TypeSomething {
+}
+
+interface TypeFoo {
+}
+
+interface TypeBar {
+}
+
+interface TypeBaz {
+}
+
+// invalid code
+interface Options {
+          ~~~~~~~   [interface name must start with specified prefix: Type]
+}
+
+interface Incomplete {
+          ~~~~~~~~~~   [interface name must start with specified prefix: Type]
+}
+
+interface I18nService {
+          ~~~~~~~~~~~   [interface name must start with specified prefix: Type]
+}

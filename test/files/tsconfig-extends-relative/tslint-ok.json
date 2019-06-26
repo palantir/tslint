@@ -2,7 +2,9 @@
     "rules":{
         "interface-name": [
             true,
-            "always-prefix"
+            {
+                "prefix-needs": "I"
+            }
         ]
     }
 }

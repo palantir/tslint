@@ -22,13 +22,13 @@ interface IS3Foobar {
 
 // invalid code
 interface Options {
-          ~~~~~~~   [interface name must start with a capitalized I]
+          ~~~~~~~   [interface name must start with specified prefix: I]
 }
 
 interface Incomplete {
-          ~~~~~~~~~~   [interface name must start with a capitalized I]
+          ~~~~~~~~~~   [interface name must start with specified prefix: I]
 }
 
 interface I18nService {
-          ~~~~~~~~~~~   [interface name must start with a capitalized I]
+          ~~~~~~~~~~~   [interface name must start with specified prefix: I]
 }

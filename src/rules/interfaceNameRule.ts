@@ -20,62 +20,153 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const OPTION_ALWAYS = "always-prefix";
-const OPTION_NEVER = "never-prefix";
+const OPTION_SUFFIX_NEEDS = "suffix-needs";
+const OPTION_SUFFIX_NEVER = "suffix-never";
+const OPTION_PREFIX_NEEDS = "prefix-needs";
+const OPTION_PREFIX_NEVER = "prefix-never";
+
+interface WalkOptions {
+    prefixNeeds: string[];
+    prefixNever: string[];
+    suffixNeeds: string[];
+    suffixNever: string[];
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "interface-name",
-        description: "Requires interface names to begin with a capital 'I'",
-        rationale: "Makes it easy to differentiate interfaces from regular classes at a glance.",
+        description: "Interface names needs or not to contain a specific prefix or suffix",
+        rationale: "Define a rule for how interfaces should be designed in the application.",
         optionsDescription: Lint.Utils.dedent`
-            One of the following two options must be provided:
+            Possible options can be provided, together or separately:
 
-            * \`"${OPTION_ALWAYS}"\` requires interface names to start with an "I"
-            * \`"${OPTION_NEVER}"\` requires interface names to not have an "I" prefix`,
+            * \`"${OPTION_SUFFIX_NEEDS}"\` requires interface names finish with one or more specified content
+            * \`"${OPTION_SUFFIX_NEVER}"\` requires interface names NOT finish with one or more specified content
+            * \`"${OPTION_PREFIX_NEEDS}"\` requires interface names starts with one or more specified content
+            * \`"${OPTION_PREFIX_NEVER}"\` requires interface names NOT starts with one or more specified content`,
         options: {
-            type: "string",
-            enum: [OPTION_ALWAYS, OPTION_NEVER],
+            type: "object",
+            properties: {
+                [OPTION_SUFFIX_NEEDS]: {
+                    oneOf: [{ type: "string" }, { type: "array", items: { type: "string" } }],
+                },
+                [OPTION_SUFFIX_NEVER]: {
+                    oneOf: [{ type: "string" }, { type: "array", items: { type: "string" } }],
+                },
+                [OPTION_PREFIX_NEEDS]: {
+                    oneOf: [{ type: "string" }, { type: "array", items: { type: "string" } }],
+                },
+                [OPTION_PREFIX_NEVER]: {
+                    oneOf: [{ type: "string" }, { type: "array", items: { type: "string" } }],
+                },
+            },
+            additionalProperties: false,
         },
-        optionExamples: [[true, OPTION_ALWAYS], [true, OPTION_NEVER]],
+        optionExamples: [
+            [true, { [OPTION_SUFFIX_NEEDS]: "Contract" }],
+            [true, { [OPTION_SUFFIX_NEEDS]: ["Interface", "Contract"] }],
+            [true, { [OPTION_SUFFIX_NEVER]: "Contract" }],
+            [true, { [OPTION_SUFFIX_NEVER]: ["Interface", "Contract"] }],
+            [true, { [OPTION_SUFFIX_NEEDS]: "Contract", [OPTION_SUFFIX_NEVER]: "Interface" }],
+            [true, { [OPTION_PREFIX_NEEDS]: "I" }],
+            [true, { [OPTION_PREFIX_NEEDS]: ["I", "Interface"] }],
+            [true, { [OPTION_PREFIX_NEVER]: "I" }],
+            [true, { [OPTION_PREFIX_NEVER]: ["I", "Interface"] }],
+            [true, { [OPTION_PREFIX_NEEDS]: "I", [OPTION_PREFIX_NEVER]: "Interface" }],
+        ],
         type: "style",
         typescriptOnly: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "interface name must start with a capitalized I";
-    public static FAILURE_STRING_NO_PREFIX = 'interface name must not have an "I" prefix';
+    public static FAILURE_SUFFIX_NEEDS = "interface name must finish with specified suffix";
+    public static FAILURE_SUFFIX_NEVER = "interface name must not finish with specified suffix";
+    public static FAILURE_PREFIX_NEEDS = "interface name must start with specified prefix";
+    public static FAILURE_PREFIX_NEVER = "interface name must not start with specified prefix";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {
-            never: this.ruleArguments.indexOf(OPTION_NEVER) !== -1,
-        });
+        const options = parseWalkOptions(this.ruleArguments);
+
+        return this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
-function walk(ctx: Lint.WalkContext<{ never: boolean }>): void {
+function walk(ctx: Lint.WalkContext<WalkOptions>): void {
     const {
-        options: { never },
+        options: { prefixNeeds, prefixNever, suffixNeeds, suffixNever },
     } = ctx;
+
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (utils.isInterfaceDeclaration(node)) {
-            const { name } = node;
-            if (!cantDecide(name.text)) {
-                if (never && hasPrefixI(name.text)) {
-                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING_NO_PREFIX);
-                } else if (!never && !hasPrefixI(name.text)) {
-                    ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
-                }
-            }
-        } else {
+        if (!utils.isInterfaceDeclaration(node)) {
             return ts.forEachChild(node, cb);
         }
+
+        const { name } = node;
+        const prefixNeverI = prefixNever.indexOf("I") > -1;
+        const prefixNeedsI = prefixNeeds.indexOf("I") > -1;
+
+        if ((prefixNeverI || prefixNeedsI) && !cantDecide(name.text)) {
+            if (prefixNeverI && hasPrefixI(name.text)) {
+                ctx.addFailureAtNode(name, `${Rule.FAILURE_PREFIX_NEVER}: I`);
+            } else if (prefixNeedsI && !hasPrefixI(name.text)) {
+                ctx.addFailureAtNode(name, `${Rule.FAILURE_PREFIX_NEEDS}: I`);
+            }
+        }
+
+        const prefixNeedsWithoutI = prefixNeeds.filter((prefix: string) => prefix !== "I");
+        const prefixNeverWithoutI = prefixNever.filter((prefix: string) => prefix !== "I");
+
+        if (prefixNeedsWithoutI.length > 0) {
+            prefixNeedsWithoutI
+                .filter((p: string) => !hasSpecificPrefix(name.text, p))
+                .forEach((p: string) =>
+                    ctx.addFailureAtNode(name, `${Rule.FAILURE_PREFIX_NEEDS}: ${p}`),
+                );
+        }
+
+        if (prefixNeverWithoutI.length > 0) {
+            prefixNeverWithoutI
+                .filter((p: string) => hasSpecificPrefix(name.text, p))
+                .forEach((p: string) =>
+                    ctx.addFailureAtNode(name, `${Rule.FAILURE_PREFIX_NEVER}: ${p}`),
+                );
+        }
+
+        suffixNeeds
+            .filter((s: string) => !hasSpecificSuffix(name.text, s))
+            .forEach((s: string) =>
+                ctx.addFailureAtNode(name, `${Rule.FAILURE_SUFFIX_NEEDS}: ${s}`),
+            );
+
+        suffixNever
+            .filter((s: string) => hasSpecificSuffix(name.text, s))
+            .forEach((s: string) =>
+                ctx.addFailureAtNode(name, `${Rule.FAILURE_SUFFIX_NEVER}: ${s}`),
+            );
     });
 }
 
 function hasPrefixI(name: string): boolean {
     return name.length >= 3 && name[0] === "I" && /^[A-Z]*$/.test(name[1]);
+}
+
+function hasSpecificPrefix(name: string, prefix: string): boolean {
+    return prefix.length > 0 && name.slice(0, prefix.length) === prefix;
+}
+
+function hasSpecificSuffix(name: string, suffix: string): boolean {
+    return (
+        suffix.length > 0 &&
+        name
+            .split("")
+            .reverse()
+            .join("")
+            .slice(0, suffix.length)
+            .split("")
+            .reverse()
+            .join("") === suffix
+    );
 }
 
 function cantDecide(name: string): boolean {
@@ -88,4 +179,40 @@ function cantDecide(name: string): boolean {
             /^[A-Z]*$/.test(name[1]) &&
             !/^[a-z]*$/.test(name[2]))
     );
+}
+
+function parseWalkOptions(options: any[]): WalkOptions {
+    if (!options[0]) {
+        return {
+            prefixNeeds: [],
+            prefixNever: [],
+            suffixNeeds: [],
+            suffixNever: [],
+        };
+    }
+
+    // tslint:no-unsafe-any
+    const allOptions = options.reduce(
+        (acc: any, option: any) => ({
+            ...acc,
+            ...(typeof option === "object" ? option : {}),
+        }),
+        {},
+    );
+
+    // tslint:disable-next-line:strict-boolean-expressions no-unsafe-any
+    const suffixNeeds: string | string[] = allOptions[OPTION_SUFFIX_NEEDS] || [];
+    // tslint:disable-next-line:strict-boolean-expressions no-unsafe-any
+    const suffixNever: string | string[] = allOptions[OPTION_SUFFIX_NEVER] || [];
+    // tslint:disable-next-line:strict-boolean-expressions no-unsafe-any
+    const prefixNeeds: string | string[] = allOptions[OPTION_PREFIX_NEEDS] || [];
+    // tslint:disable-next-line:strict-boolean-expressions no-unsafe-any
+    const prefixNever: string | string[] = allOptions[OPTION_PREFIX_NEVER] || [];
+
+    return {
+        prefixNeeds: Array.isArray(prefixNeeds) ? prefixNeeds : [prefixNeeds],
+        prefixNever: Array.isArray(prefixNever) ? prefixNever : [prefixNever],
+        suffixNeeds: Array.isArray(suffixNeeds) ? suffixNeeds : [suffixNeeds],
+        suffixNever: Array.isArray(suffixNever) ? suffixNever : [suffixNever],
+    };
 }
