@@ -33,7 +33,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         typescriptOnly: false,
     };
 
-    public static FAILURE_STRING_FACTORY(initializer: string, expression: string): string {
+    public static FAILURE_STRING_FACTORY(_: string, __: string): string {
         return `Use a for...of statement instead of for...in. If iterating over an object, use Object.keys() to access its enumerable keys.`;
     }
 
