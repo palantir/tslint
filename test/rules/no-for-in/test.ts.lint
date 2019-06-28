@@ -16,7 +16,6 @@ for (const key in object) {
 }
 ~ [Do not use the 'for in' statement: 'for (const key in object)'. If this is an object, use 'Object.keys' instead. If this is an array use a standard 'for' or 'for of' loop instead.]
 
-// this should pass
 for (const key of Object.keys(object)) {
 	const value = object[key];
 }
