@@ -34,7 +34,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
 
     public static FAILURE_STRING_FACTORY(initializer: string, expression: string): string {
-        return `Do not use the 'for in' statement: 'for (${initializer} in ${expression})'. If this is an object, use 'Object.keys' instead. If this is an array use a standard 'for' or 'for of' loop instead.`;
+        return `Use a for...of statement instead of for...in. If iterating over an object, use Object.keys() to access its enumerable keys.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
