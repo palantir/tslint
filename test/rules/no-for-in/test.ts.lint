@@ -3,7 +3,6 @@ for (let i = 0; i < columns[0].data.length; i++) {
 	columns.map((x) => x.data[i]);
 }
 
-// this should NOT pass
 const object = { test: 1, test2: 1, test3: 1 };
 for (const key in object) {
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
