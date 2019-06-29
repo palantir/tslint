@@ -48,7 +48,7 @@ function walk(ctx: Lint.WalkContext) {
             const initializer: string = node.initializer.getText();
             const expression: string = node.expression.getText();
 
-            const msg: string = Rule.FAILURE_STRING_FACTORY(initializer, expression);
+            const msg: string = Rule.FAILURE_STRING_FACTORY();
             ctx.addFailureAt(node.getStart(), node.getWidth(), msg);
         }
         return ts.forEachChild(node, cb);
