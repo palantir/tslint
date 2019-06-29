@@ -45,9 +45,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 function walk(ctx: Lint.WalkContext) {
     function cb(node: ts.Node): void {
         if (isForInStatement(node)) {
-            const initializer: string = node.initializer.getText();
-            const expression: string = node.expression.getText();
-
             const msg: string = Rule.FAILURE_STRING_FACTORY();
             ctx.addFailureAt(node.getStart(), node.getWidth(), msg);
         }
