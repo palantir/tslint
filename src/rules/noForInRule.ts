@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2013 Palantir Technologies, Inc.
+ * Copyright 2019 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { isForInStatement } from "tsutils";
 import * as ts from "typescript";
 
@@ -22,12 +23,12 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description:
-            "Recommended the avoidance of 'for-in' statements. They can be replaced by Object.keys in a 'for-of' loop.",
+            "Ban the usage of for...in statements.",
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
         rationale:
-            "A for(... of ...) loop is easier to implement and read when a for(... in ...) loop, as for(... in ...) require a hasOwnProperty check on objects to ensure proper behaviour.",
+            "for...in statements are legacy JavaScript syntax which usually require a verbose `hasOwnProperty` check inside their loop body. These statements can be fully replaced with for...of statements in modern JS & TS.",
         ruleName: "no-for-in",
         type: "typescript",
         typescriptOnly: false,

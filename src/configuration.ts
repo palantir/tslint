@@ -325,17 +325,17 @@ export function extendConfigurationFile(
     targetConfig: IConfigurationFile,
     nextConfigSource: IConfigurationFile,
 ): IConfigurationFile {
-    function combineProperties(
-        targetProperty: KeyValue | undefined,
-        nextProperty: KeyValue | undefined,
-    ): KeyValue {
+    function combineProperties<T extends { [key: string]: any }>(
+        targetProperty: T | undefined,
+        nextProperty: T | undefined,
+    ): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
         add(nextProperty);
-        return combinedProperty;
+        return combinedProperty as T;
 
-        function add(property: KeyValue | undefined): void {
+        function add(property: T | undefined): void {
             if (property !== undefined) {
                 for (const name of Object.keys(property)) {
                     combinedProperty[name] = property[name];
