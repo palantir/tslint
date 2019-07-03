@@ -317,10 +317,6 @@ function resolveConfigurationPath(filePath: string, relativeTo?: string) {
     }
 }
 
-interface KeyValue {
-    [s: string]: any;
-}
-
 export function extendConfigurationFile(
     targetConfig: IConfigurationFile,
     nextConfigSource: IConfigurationFile,
