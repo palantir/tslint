@@ -23,7 +23,6 @@ import * as Lint from "../index";
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Ban the usage of for...in statements.",
-            "Ban the usage of for...in statements.",
         optionExamples: [true],
         options: null,
         optionsDescription: "Not configurable.",
