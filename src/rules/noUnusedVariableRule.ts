@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import * as semver from "semver";
 import * as utils from "tsutils";
 import * as ts from "typescript";
 
