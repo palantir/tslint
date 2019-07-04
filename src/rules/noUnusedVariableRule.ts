@@ -72,11 +72,7 @@ export class Rule extends Lint.Rules.TypedRule {
         `,
         type: "functionality",
         typescriptOnly: true,
-        requiresTypeInfo: true,deprecationMessage: semver.gte(ts.version, "2.9.0-dev.0")
-77
-            ? "Since TypeScript 2.9. Please use the built-in compiler checks instead."
-78
-            : undefined,
+        requiresTypeInfo: true,
     };
     /* tslint:enable:object-literal-sort-keys */
 
