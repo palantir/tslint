@@ -69,7 +69,9 @@ function walk(context: Lint.WalkContext) {
 
     const addFailureIfAsyncFunctionHasNoAwait = (node: FunctionNodeType) => {
         if (node.body === undefined) {
-            reportFailureIfAsyncFunction(node);
+            if (node.type === undefined) {
+                reportFailureIfAsyncFunction(node);
+            }
             return;
         }
 
