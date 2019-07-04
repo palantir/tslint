@@ -18,7 +18,6 @@
 import { join as joinPaths } from "path";
 
 import { findRule } from "../ruleLoader";
-import { hasOwnProperty } from "../utils";
 
 // tslint:disable object-literal-sort-keys
 // tslint:disable object-literal-key-quotes
@@ -51,6 +50,7 @@ export const rules = {
     },
     "no-any": true,
     "no-empty-interface": true,
+    "no-for-in": true,
     "no-import-side-effect": true,
     // Technically this is not the strictest setting, but don't want to conflict with "typedef"
     "no-inferrable-types": { options: ["ignore-params"] },
@@ -298,11 +298,7 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
 export const jsRules: { [key: string]: any } = {};
-for (const key in rules) {
-    if (!hasOwnProperty(rules, key)) {
-        continue;
-    }
-
+for (const key of Object.keys(rules)) {
     const Rule = findRule(key, joinPaths(__dirname, "..", "rules"));
     if (Rule === undefined) {
         throw new Error(`Couldn't find rule '${key}'.`);
