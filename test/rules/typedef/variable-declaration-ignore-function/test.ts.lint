@@ -1,4 +1,3 @@
-// Should all pass
 var foo = function(): void {};
 let foo = function(): void {};
 const foo = function(): void {};
@@ -12,6 +11,13 @@ class Foo {
     foo = function(): void {};
 }
 
-// Should not throw any exception if we do decide to add types.
 const foo: () => void = (): void => {};
 const foo: () => void = function(): void {};
+
+var noTypeDef = 'Should still fail';
+    ~~~~~~~~~ [expected variable-declaration: 'noTypeDef' to have a typedef]
+
+class NoTypeDef {
+    public noTypeDef = 'Should still fail';
+           ~~~~~~~~~ [expected member-variable-declaration: 'noTypeDef' to have a typedef]
+}
