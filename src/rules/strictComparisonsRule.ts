@@ -127,12 +127,19 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
 
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         if (isBinaryExpression(node) && isComparisonOperator(node)) {
+            const isEquality = isEqualityOperator(node);
             const leftType = checker.getTypeAtLocation(node.left);
             const rightType = checker.getTypeAtLocation(node.right);
 
+            if (
+                (containsNullOrUndefined(leftType) || containsNullOrUndefined(rightType)) &&
+                isEquality
+            ) {
+                return;
+            }
+
             const leftKinds: TypeKind[] = getTypes(leftType);
             const rightKinds: TypeKind[] = getTypes(rightType);
-
             const operandKind = getStrictestComparableType(leftKinds, rightKinds);
 
             if (operandKind === undefined) {
@@ -143,7 +150,6 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                     operandKind,
                     node.operatorToken.getText(),
                 );
-                const isEquality = isEqualityOperator(node);
                 if (isEquality) {
                     // Check !=, ==, !==, ===
                     switch (operandKind) {
@@ -184,6 +190,13 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function containsNullOrUndefined(type: ts.Type) {
+    return (
+        (type as ts.IntrinsicType).intrinsicName === "null" ||
+        (type as ts.IntrinsicType).intrinsicName === "undefined"
+    );
 }
 
 function getTypes(types: ts.Type): TypeKind[] {
