@@ -1,5 +1,5 @@
 async function a(){
-~~~~~ [0]
+~~~~~ [FAILURE_STRING]
     let b = 1;
     console.log(b);
 }
@@ -15,7 +15,7 @@ async function a(){
 }
 
 async function a(){
-~~~~~ [0]
+~~~~~ [FAILURE_STRING]
    let b = 1;
    let c = async () => {
         await fetch();
@@ -23,7 +23,7 @@ async function a(){
 }
 
 async function a(){
-~~~~~ [Functions marked async must contain an await or return statement.]
+~~~~~ [FAILURE_STRING]
    let b = 1;
    async function f() {
         await fetch();
@@ -33,20 +33,20 @@ async function a(){
 function a(){
    let b = 1;
    async function f() {
-   ~~~~~ [Functions marked async must contain an await or return statement.]
+   ~~~~~ [FAILURE_STRING]
         fetch();
    };
 }
 
 const a = async () => {
-          ~~~~~ [Functions marked async must contain an await or return statement.]
+          ~~~~~ [FAILURE_STRING]
    let b = 1;
    console.log(b);
 }
 
 class A {
     async b() {
-    ~~~~~ [Functions marked async must contain an await or return statement.]
+    ~~~~~ [FAILURE_STRING]
         console.log(1);
     }
 }
@@ -65,7 +65,7 @@ class A {
 
 class A {
      public a = async function b() {
-                ~~~~~ [Functions marked async must contain an await or return statement.]
+                ~~~~~ [FAILURE_STRING]
          b();
      }
  }
@@ -78,7 +78,7 @@ class A {
 
 class A {
      public a = async () => {
-                ~~~~~ [Functions marked async must contain an await or return statement.]
+                ~~~~~ [FAILURE_STRING]
          b();
      }
  }
@@ -91,7 +91,7 @@ async () => {
     await a();
     class A {
         async b() {
-        ~~~~~ [Functions marked async must contain an await or return statement.]
+        ~~~~~ [FAILURE_STRING]
             console.log(1);
         }
     }
@@ -105,7 +105,7 @@ async function a() {
 let a = async () => 1;
 
 async function a() {
-~~~~~ [Functions marked async must contain an await or return statement.]
+~~~~~ [FAILURE_STRING]
    let b = 1;
    let a = () => {
       return 1;
@@ -113,10 +113,53 @@ async function a() {
 }
 
 async function foo;
-~~~~~ [Functions marked async must contain an await or return statement.]
+~~~~~ [FAILURE_STRING]
 
 function * foo() {
     return 1;
 }
 
-[0]: Functions marked async must contain an await or return statement.
+abstract class A {
+    public async func() {
+           ~~~~~ [FAILURE_STRING]
+        b();
+    }
+}
+
+abstract class A {
+    public abstract func(): void;
+}
+
+abstract class A {
+    public async func() { /* */ }
+           ~~~~~ [FAILURE_STRING]
+}
+
+abstract class A {
+    public async func(): Promise<number> { /* */ }
+           ~~~~~ [FAILURE_STRING]
+}
+
+abstract class A {
+    public const test: Promise<number>
+}
+
+abstract class A {
+    public abstract async func<T>(param: T): Promise<T>;
+}
+
+export async function f(i: number): Promise<void>;
+export async function f(s1: string, s2: string): Promise<void>;
+export async function f(...args: unknown[]): Promise<void> {
+    return Promise.resolve();
+}
+
+export class A {
+    public async f(i: number): Promise<void>;
+    public async f(s1: string, s2: string): Promise<void>;
+    public async f(..._args: unknown[]): Promise<void> {
+        return Promise.resolve();
+    }
+}
+
+[FAILURE_STRING]: Functions marked async must contain an await or return statement.

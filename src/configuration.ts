@@ -24,7 +24,7 @@ import * as path from "path";
 import { FatalError, showWarningOnce } from "./error";
 import { IOptions, RuleSeverity } from "./language/rule/rule";
 import { findRule } from "./ruleLoader";
-import { arrayify, hasOwnProperty, stripComments, tryResolvePackage } from "./utils";
+import { arrayify, stripComments, tryResolvePackage } from "./utils";
 
 export interface IConfigurationFile {
     /**
@@ -321,7 +321,10 @@ export function extendConfigurationFile(
     targetConfig: IConfigurationFile,
     nextConfigSource: IConfigurationFile,
 ): IConfigurationFile {
-    function combineProperties<T>(targetProperty: T | undefined, nextProperty: T | undefined): T {
+    function combineProperties<T extends { [key: string]: any }>(
+        targetProperty: T | undefined,
+        nextProperty: T | undefined,
+    ): T {
         const combinedProperty: { [key: string]: any } = {};
         add(targetProperty);
         // next config source overwrites the target config object
@@ -330,10 +333,8 @@ export function extendConfigurationFile(
 
         function add(property: T | undefined): void {
             if (property !== undefined) {
-                for (const name in property) {
-                    if (hasOwnProperty(property, name)) {
-                        combinedProperty[name] = property[name];
-                    }
+                for (const name of Object.keys(property)) {
+                    combinedProperty[name] = property[name];
                 }
             }
         }
@@ -578,10 +579,8 @@ export function parseConfigFile(
     function parseRules(config: RawRulesConfig | undefined): Map<string, Partial<IOptions>> {
         const map = new Map<string, Partial<IOptions>>();
         if (config !== undefined) {
-            for (const ruleName in config) {
-                if (hasOwnProperty(config, ruleName)) {
-                    map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
-                }
+            for (const ruleName of Object.keys(config)) {
+                map.set(ruleName, parseRuleOptions(config[ruleName], defaultSeverity));
             }
         }
         return map;
