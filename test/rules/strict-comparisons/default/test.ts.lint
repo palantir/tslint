@@ -173,7 +173,7 @@ const func = (param?: boolean): boolean => {
   return param === undefined ? false : param;
 }
 const func = (param?: boolean): boolean => {
-  return param === null ? false : param;
+  return param === null ? false : true;
 }
 const func = (param: number): number => {
   return param + 1;
