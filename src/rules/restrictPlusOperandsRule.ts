@@ -40,7 +40,7 @@ export class Rule extends Lint.Rules.TypedRule {
     public static SUGGEST_TEMPLATE_LITERALS = ". Consider using template literals.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, {}, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 

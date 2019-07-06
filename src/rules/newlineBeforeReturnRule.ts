@@ -39,7 +39,9 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Missing blank line before return";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NewlineBeforeReturnWalker(sourceFile, this.ruleName, {}));
+        return this.applyWithWalker(
+            new NewlineBeforeReturnWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 

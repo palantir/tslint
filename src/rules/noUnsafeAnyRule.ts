@@ -71,7 +71,7 @@ class NoUnsafeAnyWalker extends Lint.AbstractWalker {
         ruleName: string,
         private readonly checker: ts.TypeChecker,
     ) {
-        super(sourceFile, ruleName, {});
+        super(sourceFile, ruleName, undefined);
     }
 
     public walk(sourceFile: ts.SourceFile) {

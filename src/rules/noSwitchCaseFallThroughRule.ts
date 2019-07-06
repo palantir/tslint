@@ -65,7 +65,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithWalker(
-            new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, {}),
+            new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined),
         );
     }
 }

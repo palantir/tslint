@@ -40,7 +40,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         "The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoInternalModuleWalker(sourceFile, this.ruleName, {}));
+        return this.applyWithWalker(
+            new NoInternalModuleWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 

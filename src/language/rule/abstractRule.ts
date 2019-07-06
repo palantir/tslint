@@ -67,13 +67,11 @@ export abstract class AbstractRule implements IRule {
     ): RuleFailure[];
     protected applyWithFunction<T, U>(
         sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<T> | WalkContext, programOrChecker?: U) => void,
+        walkFn: (ctx: WalkContext<T | undefined>, programOrChecker?: U) => void,
         options?: T,
         programOrChecker?: U,
     ): RuleFailure[] {
-        const ctx = new WalkContext(sourceFile, this.ruleName, options) as (
-            | WalkContext<T>
-            | WalkContext);
+        const ctx = new WalkContext(sourceFile, this.ruleName, options);
         walkFn(ctx, programOrChecker);
         return ctx.failures;
     }
