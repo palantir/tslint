@@ -163,6 +163,7 @@ export const rules = {
     "cyclomatic-complexity": true,
     eofline: true,
     indent: { options: ["spaces"] },
+    "invalid-void": true,
     "linebreak-style": { options: "LF" },
     "max-classes-per-file": { options: 1 },
     "max-file-line-count": { options: 1000 },
