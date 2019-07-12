@@ -11,4 +11,16 @@ type Record<T, U> = {
  	[K in T]: U; 
 }
 
+export declare type RequestArgs = {
+                    ~~~~~~~~~~~     [0]
+  someKey: string,
+  data: {
+    num_columns: number,
+    column_names: string[],
+    column_values: {[key: string]: string},
+    key_columns: string[],
+  },
+  options?: string,
+};
+
 [0]: Use an interface instead of a type literal.
