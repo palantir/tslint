@@ -57,17 +57,17 @@ function walk(ctx: Lint.WalkContext): void {
             if (ctx.sourceFile.text[node.end - 1] === ";") {
                 fix.push(Lint.Replacement.deleteText(node.end - 1, 1));
             }
-            // replace trailing comma with semicolon
+	    // replace trailing comma with semicolon
             const members = node.type.members;
             if (members.length !== 0) {
-                members.forEach(mem => {
-                    const memText: string = mem.getFullText();
-                    if (memText[memText.length - 1] === ",") {
-                        fix.push(new Lint.Replacement(mem.end - 1, 1, ";"));
-                    }
-                });
+              members.forEach(mem => {
+                const memText: string = mem.getFullText();
+                if (memText[memText.length - 1] === ",") {
+                  fix.push(new Lint.Replacement(mem.end - 1, 1, ";"));
+                }
+              });
             }
-
+	    
             ctx.addFailureAtNode(node.name, Rule.FAILURE_STRING, fix);
         }
         return ts.forEachChild(node, cb);
