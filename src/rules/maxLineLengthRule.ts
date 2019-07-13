@@ -157,7 +157,9 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
                     if (nodeAtLimit !== undefined) {
                         shouldIgnoreLine =
                             shouldIgnoreLine ||
-                            isPartOfStringOrTemplate(nodeAtLimit, ctx.sourceFile);
+                            ts.isStringLiteral(nodeAtLimit) ||
+                            ts.isNoSubstitutionTemplateLiteral(nodeAtLimit) ||
+                            isPartOfTemplate(nodeAtLimit, ctx.sourceFile);
                     }
                 }
 
@@ -171,11 +173,11 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
     return;
 }
 
-function isPartOfStringOrTemplate(node: ts.Node, root: ts.Node): boolean {
+function isPartOfTemplate(node: ts.Node, root: ts.Node): boolean {
     let nodeReference: ts.Node = node;
 
     while (nodeReference !== root) {
-        if (ts.isStringLiteralLike(nodeReference) || ts.isTemplateExpression(nodeReference)) {
+        if (ts.isTemplateExpression(nodeReference)) {
             return true;
         }
 
