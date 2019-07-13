@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getLineRanges, LineRange, getTokenAtPosition } from "tsutils";
+import { getLineRanges, getTokenAtPosition, LineRange } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -61,9 +61,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                         properties: {
                             limit: { type: "number" },
                             "ignore-pattern": { type: "string" },
-                            "check-strings": { type: "boolean" }
-                        }
-                    }
+                            "check-strings": { type: "boolean" },
+                        },
+                    },
                 ],
             },
             minLength: 1,
@@ -82,9 +82,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                 true,
                 {
                     limit: 120,
-                    "check-strings": true
-                }
-            ]
+                    "check-strings": true,
+                },
+            ],
         ],
         type: "formatting",
         typescriptOnly: false,
@@ -106,20 +106,20 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     private getRuleOptions(): MaxLineLengthRuleOptions {
         const argument = this.ruleArguments[0];
-        let options: MaxLineLengthRuleOptions = { limit: 0 };
+        const options: MaxLineLengthRuleOptions = { limit: 0 };
 
         if (typeof argument === "number") {
             options.limit = argument;
         } else {
             const {
-                "limit": limit,
+                limit: limit,
                 "ignore-pattern": ignorePattern,
-                "check-strings": checkStrings
-            } = argument as { 
-                "limit": number,
-                "ignore-pattern"?: string,
-                "check-strings"?: boolean
-             };
+                "check-strings": checkStrings,
+            } = argument as {
+                limit: number;
+                "ignore-pattern"?: string;
+                "check-strings"?: boolean;
+            };
 
             options.limit = Number(limit);
 
@@ -140,7 +140,7 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
         .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
         .filter(
             ({ pos, contentLength }: LineRange): boolean => {
-                let shouldIgnoreLine: boolean = false;
+                let shouldIgnoreLine = false;
 
                 if (ignorePattern !== undefined) {
                     shouldIgnoreLine =
@@ -154,8 +154,10 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
                         pos + limit,
                     );
 
-                    if (nodeAtLimit) {
-                        shouldIgnoreLine = shouldIgnoreLine || isPartOfStringOrTemplate(nodeAtLimit, ctx.sourceFile);
+                    if (nodeAtLimit !== undefined) {
+                        shouldIgnoreLine =
+                            shouldIgnoreLine ||
+                            isPartOfStringOrTemplate(nodeAtLimit, ctx.sourceFile);
                     }
                 }
 
@@ -173,10 +175,7 @@ function isPartOfStringOrTemplate(node: ts.Node, root: ts.Node): boolean {
     let nodeReference: ts.Node = node;
 
     while (nodeReference !== root) {
-        if (
-            ts.isStringLiteralLike(nodeReference) ||
-            ts.isTemplateExpression(nodeReference)
-        ) {
+        if (ts.isStringLiteralLike(nodeReference) || ts.isTemplateExpression(nodeReference)) {
             return true;
         }
 
