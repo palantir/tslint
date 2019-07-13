@@ -177,7 +177,7 @@ function isPartOfTemplate(node: ts.Node, root: ts.Node): boolean {
     let nodeReference: ts.Node = node;
 
     while (nodeReference !== root) {
-        if (ts.isTemplateExpression(nodeReference)) {
+        if (nodeReference.kind === ts.SyntaxKind.TemplateExpression) {
             return true;
         }
 
