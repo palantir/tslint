@@ -157,8 +157,8 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
                     if (nodeAtLimit !== undefined) {
                         shouldIgnoreLine =
                             shouldIgnoreLine ||
-                            ts.isStringLiteral(nodeAtLimit) ||
-                            ts.isNoSubstitutionTemplateLiteral(nodeAtLimit) ||
+                            nodeAtLimit.kind === ts.SyntaxKind.StringLiteral ||
+                            nodeAtLimit.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral ||
                             isPartOfTemplate(nodeAtLimit, ctx.sourceFile);
                     }
                 }
