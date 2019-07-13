@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { getLineRanges } from "tsutils";
+import { getLineRanges, LineRange, getTokenAtPosition } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -23,6 +23,7 @@ import * as Lint from "../index";
 interface MaxLineLengthRuleOptions {
     limit: number;
     ignorePattern?: RegExp;
+    checkStrings?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -46,6 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
              * \`^export \{(.*?)\}\` pattern will ignore all multiple export statements.
              * \`class [a-zA-Z]+ implements \` pattern will ignore all class declarations implementing interfaces.
              * \`^import |^export \{(.*?)\}|class [a-zA-Z]+ implements |// \` pattern will ignore all the cases listed above.
+          * \`check-strings\` - determines if strings should be checked, \`false\` by default.
          `,
         options: {
             type: "array",
@@ -59,9 +61,9 @@ export class Rule extends Lint.Rules.AbstractRule {
                         properties: {
                             limit: { type: "number" },
                             "ignore-pattern": { type: "string" },
-                        },
-                        additionalProperties: false,
-                    },
+                            "check-strings": { type: "boolean" }
+                        }
+                    }
                 ],
             },
             minLength: 1,
@@ -76,6 +78,13 @@ export class Rule extends Lint.Rules.AbstractRule {
                     "ignore-pattern": "^import |^export {(.*?)}",
                 },
             ],
+            [
+                true,
+                {
+                    limit: 120,
+                    "check-strings": true
+                }
+            ]
         ],
         type: "formatting",
         typescriptOnly: false,
@@ -98,30 +107,81 @@ export class Rule extends Lint.Rules.AbstractRule {
     private getRuleOptions(): MaxLineLengthRuleOptions {
         const argument = this.ruleArguments[0];
         let options: MaxLineLengthRuleOptions = { limit: 0 };
+
         if (typeof argument === "number") {
             options.limit = argument;
         } else {
-            options = argument as MaxLineLengthRuleOptions;
-            const ignorePattern = (argument as { [key: string]: string })["ignore-pattern"];
+            const {
+                "limit": limit,
+                "ignore-pattern": ignorePattern,
+                "check-strings": checkStrings
+            } = argument as { 
+                "limit": number,
+                "ignore-pattern"?: string,
+                "check-strings"?: boolean
+             };
+
+            options.limit = Number(limit);
+
             options.ignorePattern =
                 typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined;
+
+            options.checkStrings = Boolean(checkStrings);
         }
-        options.limit = Number(options.limit); // user can pass a string instead of number
+
         return options;
     }
 }
 
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
-    const limit = ctx.options.limit;
-    const ignorePattern = ctx.options.ignorePattern;
-    for (const line of getLineRanges(ctx.sourceFile)) {
-        if (line.contentLength <= limit) {
-            continue;
+    const { limit, ignorePattern, checkStrings } = ctx.options;
+
+    getLineRanges(ctx.sourceFile)
+        .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
+        .filter(
+            ({ pos, contentLength }: LineRange): boolean => {
+                let shouldIgnoreLine: boolean = false;
+
+                if (ignorePattern !== undefined) {
+                    shouldIgnoreLine =
+                        shouldIgnoreLine ||
+                        ignorePattern.test(ctx.sourceFile.text.substr(pos, contentLength));
+                }
+
+                if (!checkStrings) {
+                    const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(
+                        ctx.sourceFile,
+                        pos + limit,
+                    );
+
+                    if (nodeAtLimit) {
+                        shouldIgnoreLine = shouldIgnoreLine || isPartOfStringOrTemplate(nodeAtLimit, ctx.sourceFile);
+                    }
+                }
+
+                return !shouldIgnoreLine;
+            },
+        )
+        .forEach(({ pos, contentLength }: LineRange) =>
+            ctx.addFailureAt(pos, contentLength, Rule.FAILURE_STRING_FACTORY(limit)),
+        );
+
+    return;
+}
+
+function isPartOfStringOrTemplate(node: ts.Node, root: ts.Node): boolean {
+    let nodeReference: ts.Node = node;
+
+    while (nodeReference !== root) {
+        if (
+            ts.isStringLiteralLike(nodeReference) ||
+            ts.isTemplateExpression(nodeReference)
+        ) {
+            return true;
         }
-        const lineContent = ctx.sourceFile.text.substr(line.pos, line.contentLength);
-        if (ignorePattern !== undefined && ignorePattern.test(lineContent)) {
-            continue;
-        }
-        ctx.addFailureAt(line.pos, line.contentLength, Rule.FAILURE_STRING_FACTORY(limit));
+
+        nodeReference = nodeReference.parent;
     }
+
+    return false;
 }
