@@ -24,6 +24,7 @@ interface MaxLineLengthRuleOptions {
     limit: number;
     ignorePattern?: RegExp;
     checkStrings?: boolean;
+    checkRegex?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -48,6 +49,7 @@ export class Rule extends Lint.Rules.AbstractRule {
              * \`class [a-zA-Z]+ implements \` pattern will ignore all class declarations implementing interfaces.
              * \`^import |^export \{(.*?)\}|class [a-zA-Z]+ implements |// \` pattern will ignore all the cases listed above.
           * \`check-strings\` - determines if strings should be checked, \`false\` by default.
+          * \`check-regex\` - determines if regular expressions should be checked, \`false\` by default.
          `,
         options: {
             type: "array",
@@ -62,6 +64,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                             limit: { type: "number" },
                             "ignore-pattern": { type: "string" },
                             "check-strings": { type: "boolean" },
+                            "check-regex": { type: "boolean" },
                         },
                     },
                 ],
@@ -76,13 +79,8 @@ export class Rule extends Lint.Rules.AbstractRule {
                 {
                     limit: 120,
                     "ignore-pattern": "^import |^export {(.*?)}",
-                },
-            ],
-            [
-                true,
-                {
-                    limit: 120,
                     "check-strings": true,
+                    "check-regex": true,
                 },
             ],
         ],
@@ -115,10 +113,12 @@ export class Rule extends Lint.Rules.AbstractRule {
                 limit: limit,
                 "ignore-pattern": ignorePattern,
                 "check-strings": checkStrings,
+                "check-regex": checkRegex,
             } = argument as {
                 limit: number;
                 "ignore-pattern"?: string;
                 "check-strings"?: boolean;
+                "check-regex"?: boolean;
             };
 
             options.limit = Number(limit);
@@ -127,6 +127,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined;
 
             options.checkStrings = Boolean(checkStrings);
+            options.checkRegex = Boolean(checkRegex);
         }
 
         return options;
@@ -134,7 +135,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
-    const { limit, ignorePattern, checkStrings } = ctx.options;
+    const { limit, ignorePattern, checkStrings, checkRegex } = ctx.options;
 
     getLineRanges(ctx.sourceFile)
         .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
@@ -159,7 +160,22 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
                             shouldIgnoreLine ||
                             nodeAtLimit.kind === ts.SyntaxKind.StringLiteral ||
                             nodeAtLimit.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral ||
-                            isPartOfTemplate(nodeAtLimit, ctx.sourceFile);
+                            hasParentMatchingTypes(nodeAtLimit, ctx.sourceFile, [
+                                ts.SyntaxKind.TemplateExpression,
+                            ]);
+                    }
+                }
+
+                if (!checkRegex) {
+                    const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(
+                        ctx.sourceFile,
+                        pos + limit,
+                    );
+
+                    if (nodeAtLimit !== undefined) {
+                        shouldIgnoreLine =
+                            shouldIgnoreLine ||
+                            nodeAtLimit.kind === ts.SyntaxKind.RegularExpressionLiteral;
                     }
                 }
 
@@ -173,11 +189,15 @@ function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
     return;
 }
 
-function isPartOfTemplate(node: ts.Node, root: ts.Node): boolean {
+function hasParentMatchingTypes(
+    node: ts.Node,
+    root: ts.Node,
+    parentTypes: ts.SyntaxKind[],
+): boolean {
     let nodeReference: ts.Node = node;
 
     while (nodeReference !== root) {
-        if (nodeReference.kind === ts.SyntaxKind.TemplateExpression) {
+        if (parentTypes.indexOf(nodeReference.kind) >= 0) {
             return true;
         }
 

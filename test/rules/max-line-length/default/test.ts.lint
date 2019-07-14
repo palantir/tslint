@@ -12,6 +12,14 @@ const extremelyLongDoubleQuoteString = "Lorem ipsum dolor sit amet, consetetur s
 
 const extremelyLongTemplateString = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam volu`;
 
-const extremelyLongTemplateStringWithVariableAtLimit = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod ${some-variable} ut labore et dolore magna aliquyam `;
+const extremelyLongTemplateStringWithVariableAtLimit = `Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod ${someVariable} ut labore et dolore magna aliquyam `;
+
+const multiLineTemplateString = `
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam volu
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam volu
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam volu
+`;
+
+const veryLongRegularExpression = /\s*********************************************************************************************************************/;
 
 [0]: Exceeds maximum line length of 140

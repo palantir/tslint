@@ -3,7 +3,8 @@
     "max-line-length": [true, {
       "limit": "140",
       "ignore-pattern": "^import ",
-      "check-strings": true
+      "check-strings": true,
+      "check-regex": true
     }]
   }
 }
