@@ -135,58 +135,53 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
-    const { limit, ignorePattern, checkStrings, checkRegex } = ctx.options;
+    const { limit } = ctx.options;
 
     getLineRanges(ctx.sourceFile)
         .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
-        .filter(
-            ({ pos, contentLength }: LineRange): boolean => {
-                let shouldIgnoreLine = false;
-
-                if (ignorePattern !== undefined) {
-                    shouldIgnoreLine =
-                        shouldIgnoreLine ||
-                        ignorePattern.test(ctx.sourceFile.text.substr(pos, contentLength));
-                }
-
-                if (!checkStrings) {
-                    const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(
-                        ctx.sourceFile,
-                        pos + limit,
-                    );
-
-                    if (nodeAtLimit !== undefined) {
-                        shouldIgnoreLine =
-                            shouldIgnoreLine ||
-                            nodeAtLimit.kind === ts.SyntaxKind.StringLiteral ||
-                            nodeAtLimit.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral ||
-                            hasParentMatchingTypes(nodeAtLimit, ctx.sourceFile, [
-                                ts.SyntaxKind.TemplateExpression,
-                            ]);
-                    }
-                }
-
-                if (!checkRegex) {
-                    const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(
-                        ctx.sourceFile,
-                        pos + limit,
-                    );
-
-                    if (nodeAtLimit !== undefined) {
-                        shouldIgnoreLine =
-                            shouldIgnoreLine ||
-                            nodeAtLimit.kind === ts.SyntaxKind.RegularExpressionLiteral;
-                    }
-                }
-
-                return !shouldIgnoreLine;
-            },
-        )
+        .filter((line: LineRange): boolean => !shouldIgnoreLine(line, ctx))
         .forEach(({ pos, contentLength }: LineRange) =>
             ctx.addFailureAt(pos, contentLength, Rule.FAILURE_STRING_FACTORY(limit)),
         );
 
     return;
+}
+
+function shouldIgnoreLine(
+    { pos, contentLength }: LineRange,
+    { options, sourceFile }: Lint.WalkContext<MaxLineLengthRuleOptions>,
+): boolean {
+    const { checkRegex, checkStrings, ignorePattern, limit } = options;
+
+    let shouldOmitLine = false;
+
+    if (ignorePattern !== undefined) {
+        shouldOmitLine =
+            shouldOmitLine || ignorePattern.test(sourceFile.text.substr(pos, contentLength));
+    }
+
+    if (!checkStrings) {
+        const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(sourceFile, pos + limit);
+
+        if (nodeAtLimit !== undefined) {
+            shouldOmitLine =
+                shouldOmitLine ||
+                nodeAtLimit.kind === ts.SyntaxKind.StringLiteral ||
+                nodeAtLimit.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral ||
+                hasParentMatchingTypes(nodeAtLimit, sourceFile, [ts.SyntaxKind.TemplateExpression]);
+        }
+    }
+
+    if (!checkRegex) {
+        const nodeAtLimit: ts.Node | undefined = getTokenAtPosition(sourceFile, pos + limit);
+
+        if (nodeAtLimit !== undefined) {
+            shouldOmitLine =
+                shouldOmitLine || nodeAtLimit.kind === ts.SyntaxKind.RegularExpressionLiteral;
+        }
+    }
+
+    return shouldOmitLine;
 }
 
 function hasParentMatchingTypes(
