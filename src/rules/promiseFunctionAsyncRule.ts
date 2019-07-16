@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier, isCallExpression } from "tsutils";
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -104,7 +104,7 @@ function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
     return ts.forEachChild(sourceFile, function cb(node): void {
         if (options.has(node.kind) && isFunctionLikeWithBody(node)) {
             if (
-                !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
+                !tsutils.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
                 !isCallExpressionBody(node.body) &&
                 returnsPromise(node, tc)
             ) {
@@ -130,11 +130,11 @@ function isFunctionLikeWithBody(
 }
 
 function isCallExpressionBody(body: ts.Node) {
-    while (ts.isParenthesizedExpression(body)) {
+    while (tsutils.isParenthesizedExpression(body)) {
         body = body.expression;
     }
 
-    return isCallExpression(body);
+    return tsutils.isCallExpression(body);
 }
 
 function returnsPromise(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
