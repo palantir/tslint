@@ -20,11 +20,16 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_LIMIT = "limit";
+const OPTION_IGNORE_PATTERN = "ignore-pattern";
+const OPTION_CHECK_STRINGS = "check-strings";
+const OPTION_CHECK_REGEX = "check-regex";
+
 interface MaxLineLengthRuleOptions {
-    limit: number;
-    ignorePattern?: RegExp;
-    checkStrings?: boolean;
-    checkRegex?: boolean;
+    [OPTION_LIMIT]: number;
+    [OPTION_IGNORE_PATTERN]?: RegExp;
+    [OPTION_CHECK_STRINGS]?: boolean;
+    [OPTION_CHECK_REGEX]?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -40,16 +45,16 @@ export class Rule extends Lint.Rules.AbstractRule {
         It can take one argument, which can be any of the following:
         * integer indicating maximum length of lines.
         * object with keys:
-          * \`limit\` - number greater than 0 defining the max line length
-          * \`ignore-pattern\` - string defining ignore pattern for this rule, being parsed by \`new RegExp()\`.
+          * \`${OPTION_LIMIT}\` - number greater than 0 defining the max line length
+          * \`${OPTION_IGNORE_PATTERN}\` - string defining ignore pattern for this rule, being parsed by \`new RegExp()\`.
             For example:
              * \`\/\/ \` pattern will ignore all in-line comments.
              * \`^import \` pattern will ignore all import statements.
              * \`^export \{(.*?)\}\` pattern will ignore all multiple export statements.
              * \`class [a-zA-Z]+ implements \` pattern will ignore all class declarations implementing interfaces.
              * \`^import |^export \{(.*?)\}|class [a-zA-Z]+ implements |// \` pattern will ignore all the cases listed above.
-          * \`check-strings\` - determines if strings should be checked, \`false\` by default.
-          * \`check-regex\` - determines if regular expressions should be checked, \`false\` by default.
+          * \`${OPTION_CHECK_STRINGS}\` - determines if strings should be checked, \`false\` by default.
+          * \`${OPTION_CHECK_REGEX}\` - determines if regular expressions should be checked, \`false\` by default.
          `,
         options: {
             type: "array",
@@ -61,10 +66,10 @@ export class Rule extends Lint.Rules.AbstractRule {
                     {
                         type: "object",
                         properties: {
-                            limit: { type: "number" },
-                            "ignore-pattern": { type: "string" },
-                            "check-strings": { type: "boolean" },
-                            "check-regex": { type: "boolean" },
+                            [OPTION_LIMIT]: { type: "number" },
+                            [OPTION_IGNORE_PATTERN]: { type: "string" },
+                            [OPTION_CHECK_STRINGS]: { type: "boolean" },
+                            [OPTION_CHECK_REGEX]: { type: "boolean" },
                         },
                     },
                 ],
@@ -77,10 +82,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
-                    limit: 120,
-                    "ignore-pattern": "^import |^export {(.*?)}",
-                    "check-strings": true,
-                    "check-regex": true,
+                    [OPTION_LIMIT]: 120,
+                    [OPTION_IGNORE_PATTERN]: "^import |^export {(.*?)}",
+                    [OPTION_CHECK_STRINGS]: true,
+                    [OPTION_CHECK_REGEX]: true,
                 },
             ],
         ],
@@ -94,7 +99,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     public isEnabled(): boolean {
-        const limit = this.getRuleOptions().limit;
+        const limit = this.getRuleOptions()[OPTION_LIMIT];
         return super.isEnabled() && limit > 0;
     }
 
@@ -103,39 +108,31 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private getRuleOptions(): MaxLineLengthRuleOptions {
-        const argument = this.ruleArguments[0];
-        const options: MaxLineLengthRuleOptions = { limit: 0 };
+        const argument = this.ruleArguments[0] as MaxLineLengthRuleOptions | number;
 
         if (typeof argument === "number") {
-            options.limit = argument;
+            return { [OPTION_LIMIT]: argument };
         } else {
             const {
-                limit: limit,
-                "ignore-pattern": ignorePattern,
-                "check-strings": checkStrings,
-                "check-regex": checkRegex,
-            } = argument as {
-                limit: number;
-                "ignore-pattern"?: string;
-                "check-strings"?: boolean;
-                "check-regex"?: boolean;
+                [OPTION_CHECK_REGEX]: checkRegex,
+                [OPTION_CHECK_STRINGS]: checkStrings,
+                [OPTION_IGNORE_PATTERN]: ignorePattern,
+                [OPTION_LIMIT]: limit,
+            } = argument;
+
+            return {
+                [OPTION_CHECK_REGEX]: Boolean(checkRegex),
+                [OPTION_CHECK_STRINGS]: Boolean(checkStrings),
+                [OPTION_IGNORE_PATTERN]:
+                    typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined,
+                [OPTION_LIMIT]: Number(limit),
             };
-
-            options.limit = Number(limit);
-
-            options.ignorePattern =
-                typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined;
-
-            options.checkStrings = Boolean(checkStrings);
-            options.checkRegex = Boolean(checkRegex);
         }
-
-        return options;
     }
 }
 
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
-    const { limit } = ctx.options;
+    const { [OPTION_LIMIT]: limit } = ctx.options;
 
     getLineRanges(ctx.sourceFile)
         .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
@@ -151,7 +148,12 @@ function shouldIgnoreLine(
     { pos, contentLength }: LineRange,
     { options, sourceFile }: Lint.WalkContext<MaxLineLengthRuleOptions>,
 ): boolean {
-    const { checkRegex, checkStrings, ignorePattern, limit } = options;
+    const {
+        [OPTION_CHECK_REGEX]: checkRegex,
+        [OPTION_CHECK_STRINGS]: checkStrings,
+        [OPTION_IGNORE_PATTERN]: ignorePattern,
+        [OPTION_LIMIT]: limit,
+    } = options;
 
     let shouldOmitLine = false;
 
