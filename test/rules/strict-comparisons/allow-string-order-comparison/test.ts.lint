@@ -8,22 +8,19 @@ if (2 === 1) {}
 if (2 != 1) {}
 if (2 !== 1) {}
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
+    ~~~~~~~~~~~~~     [CANNOT_COMPARE % ("number", "undefined")]
 if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
 if (2 > undefined) {}
-    ~~~~~~~~~~~~~     [Cannot compare type 'number' to type 'undefined'.]
-if (undefined === 1) {}
-    ~~~~~~~~~~~~~~~     [Cannot compare type 'undefined' to type 'number'.]
+    ~~~~~~~~~~~~~     [CANNOT_COMPARE % ("number", "undefined")]
 if (true) {}
 if (true > false) {}
-    ~~~~~~~~~~~~     [Cannot use '>' comparator for type 'boolean'.]
+    ~~~~~~~~~~~~     [CANNOT_USE % (">", "boolean")]
 if (true < false) {}
-    ~~~~~~~~~~~~     [Cannot use '<' comparator for type 'boolean'.]
+    ~~~~~~~~~~~~     [CANNOT_USE % ("<", "boolean")]
 if (true >= false) {}
-    ~~~~~~~~~~~~~     [Cannot use '>=' comparator for type 'boolean'.]
+    ~~~~~~~~~~~~~     [CANNOT_USE % (">=", "boolean")]
 if (true <= false) {}
-    ~~~~~~~~~~~~~     [Cannot use '<=' comparator for type 'boolean'.]
+    ~~~~~~~~~~~~~     [CANNOT_USE % ("<=", "boolean")]
 if (true == false) {}
 if (true === false) {}
 if (true != false) {}
@@ -39,42 +36,38 @@ if ('' != '') {}
 if ('' !== '') {}
 if ({}) {}
 if ({} > {}) {}
-    ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+    ~~~~~~~     [CANNOT_USE % (">", "object")]
 if ({} < {}) {}
-    ~~~~~~~     [Cannot use '<' comparator for type 'object'.]
+    ~~~~~~~     [CANNOT_USE % ("<", "object")]
 if ({} >= {}) {}
-    ~~~~~~~~     [Cannot use '>=' comparator for type 'object'.]
+    ~~~~~~~~     [CANNOT_USE % (">=", "object")]
 if ({} <= {}) {}
-    ~~~~~~~~     [Cannot use '<=' comparator for type 'object'.]
+    ~~~~~~~~     [CANNOT_USE % ("<=", "object")]
 if ({} == {}) {}
-    ~~~~~~~~     [Cannot use '==' comparator for type 'object'.]
+    ~~~~~~~~     [CANNOT_USE % ("==", "object")]
 if ({} === {}) {}
-    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+    ~~~~~~~~~     [CANNOT_USE % ("===", "object")]
 if ({} != {}) {}
-    ~~~~~~~~     [Cannot use '!=' comparator for type 'object'.]
+    ~~~~~~~~     [CANNOT_USE % ("!=", "object")]
 if ({} !== {}) {}
-    ~~~~~~~~~     [Cannot use '!==' comparator for type 'object'.]
+    ~~~~~~~~~     [CANNOT_USE % ("!==", "object")]
 if ([] === []) {}
-    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+    ~~~~~~~~~     [CANNOT_USE % ("===", "object")]
 
 if (3 > 2 || 2 > 1 && true === true) {}
 if ('' > '' || 2 > 1 || {} > {}) {}
-                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+                        ~~~~~~~     [CANNOT_USE % (">", "object")]
 if ('' > '' && 2 > 1 && {} > {}) {}
-                        ~~~~~~~     [Cannot use '>' comparator for type 'object'.]
+                        ~~~~~~~     [CANNOT_USE % (">", "object")]
 
 if ({} === null) {}
-    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if (null === {}) {}
-    ~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if ({} === undefined) {}
-    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 if (undefined === {}) {}
-    ~~~~~~~~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
 
 function sameObject<T>(a: T, b: T): boolean {
     return a === b;
-           ~~~~~~~  [Cannot use '===' comparator for type 'object'.]
+           ~~~~~~~  [CANNOT_USE % ("===", "object")]
 }
 
 function sameObject<T>(a: any, b: any): boolean {
@@ -100,9 +93,9 @@ const c1: myObject = {}
 const c2: myObject = {}
 
 if (c1 === c2) {}
-    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+    ~~~~~~~~~     [CANNOT_USE % ("===", "object")]
 if (c2 === c1) {}
-    ~~~~~~~~~     [Cannot use '===' comparator for type 'object'.]
+    ~~~~~~~~~     [CANNOT_USE % ("===", "object")]
 
 const d1: any = 'string'
 const d2: any = 2
@@ -147,3 +140,39 @@ if (h1 > h2) {}
 if (h2 > h1) {}
 if (h1 === h2) {}
 if (h2 === h1) {}
+
+if (undefined === null) {}
+if (null !== undefined) {}
+
+if (1 > null) {}
+    ~~~~~~~~ [CANNOT_COMPARE % ("number", "null")]
+if (null > 1) {}
+    ~~~~~~~~ [CANNOT_COMPARE % ("null", "number")]
+if (1 >= undefined) {}
+    ~~~~~~~~~~~~~~ [CANNOT_COMPARE % ("number", "undefined")]
+if (undefined >= 1) {}
+    ~~~~~~~~~~~~~~ [CANNOT_COMPARE % ("undefined", "number")]
+if (undefined <= null) {}
+    ~~~~~~~~~~~~~~~~~ [CANNOT_COMPARE % ("undefined", "null")]
+if (null >= undefined) {}
+    ~~~~~~~~~~~~~~~~~ [CANNOT_COMPARE % ("null", "undefined")]
+
+const func = (param?: boolean): boolean => {
+  return param === undefined ? false : param;
+}
+const func = (param?: boolean): boolean => {
+  return param === null ? false : true;
+}
+const func = (param: number): number => {
+  return param + 1;
+}
+const func = (arg1: number, arg2: number): boolean => {
+  return arg1 === arg2;
+}
+const func = (param: string | null = null) => {
+    if (param !== null) {}
+    if (param !== undefined) {}
+}
+
+[CANNOT_USE]: Cannot use '%s' comparator for type '%s'.
+[CANNOT_COMPARE]: Cannot compare type '%s' to type '%s'.
