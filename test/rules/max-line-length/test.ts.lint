@@ -1,7 +1,0 @@
-import { KindOfOneVerySpecificComponentOrSomethingLikeThis } from '../../../../very/very/very/very/very/long/and/complicated/and/nested/directory/structure/target';
-
-var simpleName = 1;
-var complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedName;
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Exceeds maximum line length of 140]
-
-var complicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicatedNameIsAcomplicat;
