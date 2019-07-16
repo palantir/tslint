@@ -26,10 +26,10 @@ const OPTION_CHECK_STRINGS = "check-strings";
 const OPTION_CHECK_REGEX = "check-regex";
 
 interface MaxLineLengthRuleOptions {
-    [OPTION_LIMIT]: number;
-    [OPTION_IGNORE_PATTERN]?: RegExp;
-    [OPTION_CHECK_STRINGS]?: boolean;
-    [OPTION_CHECK_REGEX]?: boolean;
+    limit: number;
+    ignorePattern?: RegExp;
+    checkStrings?: boolean;
+    checkRegex?: boolean;
 }
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -71,6 +71,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                             [OPTION_CHECK_STRINGS]: { type: "boolean" },
                             [OPTION_CHECK_REGEX]: { type: "boolean" },
                         },
+                        additionalProperties: false,
                     },
                 ],
             },
@@ -108,10 +109,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private getRuleOptions(): MaxLineLengthRuleOptions {
-        const argument = this.ruleArguments[0] as MaxLineLengthRuleOptions | number;
+        const argument = this.ruleArguments[0] as { [key: string]: any } | number;
 
         if (typeof argument === "number") {
-            return { [OPTION_LIMIT]: argument };
+            return { limit: argument };
         } else {
             const {
                 [OPTION_CHECK_REGEX]: checkRegex,
@@ -121,22 +122,24 @@ export class Rule extends Lint.Rules.AbstractRule {
             } = argument;
 
             return {
-                [OPTION_CHECK_REGEX]: Boolean(checkRegex),
-                [OPTION_CHECK_STRINGS]: Boolean(checkStrings),
-                [OPTION_IGNORE_PATTERN]:
+                checkRegex: Boolean(checkRegex),
+                checkStrings: Boolean(checkStrings),
+                ignorePattern:
                     typeof ignorePattern === "string" ? new RegExp(ignorePattern) : undefined,
-                [OPTION_LIMIT]: Number(limit),
+                limit: Number(limit),
             };
         }
     }
 }
 
 function walk(ctx: Lint.WalkContext<MaxLineLengthRuleOptions>) {
-    const { [OPTION_LIMIT]: limit } = ctx.options;
+    const { limit } = ctx.options;
 
     getLineRanges(ctx.sourceFile)
-        .filter(({ contentLength }: LineRange): boolean => contentLength > limit)
-        .filter((line: LineRange): boolean => !shouldIgnoreLine(line, ctx))
+        .filter(
+            (line: LineRange): boolean =>
+                line.contentLength > limit && !shouldIgnoreLine(line, ctx),
+        )
         .forEach(({ pos, contentLength }: LineRange) =>
             ctx.addFailureAt(pos, contentLength, Rule.FAILURE_STRING_FACTORY(limit)),
         );
@@ -148,12 +151,7 @@ function shouldIgnoreLine(
     { pos, contentLength }: LineRange,
     { options, sourceFile }: Lint.WalkContext<MaxLineLengthRuleOptions>,
 ): boolean {
-    const {
-        [OPTION_CHECK_REGEX]: checkRegex,
-        [OPTION_CHECK_STRINGS]: checkStrings,
-        [OPTION_IGNORE_PATTERN]: ignorePattern,
-        [OPTION_LIMIT]: limit,
-    } = options;
+    const { checkRegex, checkStrings, ignorePattern, limit } = options;
 
     let shouldOmitLine = false;
 
