@@ -79,16 +79,21 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: true,
         requiresTypeInfo: true,
         codeExamples,
-
     };
     /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        // tslint:disable-next-line: no-object-literal-type-assertion
         const rawOptions = { ...this.ruleArguments[0] } as { [OPTION_PROMISE_CLASSES]?: string[] };
+        const promiseClasses =
+            rawOptions[OPTION_PROMISE_CLASSES] !== undefined
+                ? rawOptions[OPTION_PROMISE_CLASSES]!
+                : [];
+
         return this.applyWithFunction(
             sourceFile,
             walk,
-            { promiseClasses: ["Promise", ...(rawOptions[OPTION_PROMISE_CLASSES] || [])] },
+            { promiseClasses: ["Promise", ...promiseClasses] },
             program.getTypeChecker(),
         );
     }
@@ -134,9 +139,12 @@ function walk(context: Lint.WalkContext<Options>, checker: ts.TypeChecker): void
 
     function checkExpression(expression: ts.Expression): void {
         const mainType = checker.getTypeAtLocation(expression);
-		if (isPromiseType(mainType) || (isUnionType(mainType) && mainType.types.every(isPromiseType))) {
-			context.addFailureAtNode(expression, RULE_MESSAGE);
-		}
+        if (
+            isPromiseType(mainType) ||
+            (isUnionType(mainType) && mainType.types.every(isPromiseType))
+        ) {
+            context.addFailureAtNode(expression, RULE_MESSAGE);
+        }
     }
 
     function isPromiseType(type: ts.Type) {
