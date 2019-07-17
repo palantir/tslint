@@ -16,6 +16,12 @@ const globalBinaryExpression = "text" && promiseFunc();
 promiseFunc() && console.log("topLevelBinaryExpression");
 ~~~~~~~~~~~~~                        [0]
 
+function union(promiseOrUndefined: Promise<any> | undefined, promiseOrFalse: Promise<any> | false, promiseOrNull: Promise<any> | null) {
+    if (promiseOrUndefined || promiseOrFalse || promiseOrNull) {
+        return;
+    }
+};
+
 function funky(maybePromise?: Promise<number>) {
     while (promiseFunc() && maybePromise) {
            ~~~~~~~~~~~~~                    [0]
