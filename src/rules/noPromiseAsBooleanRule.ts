@@ -120,10 +120,15 @@ function walk(context: Lint.WalkContext<Options>, checker: ts.TypeChecker): void
     }
 
     function checkExpression(expression: ts.Expression): void {
-        const { symbol } = checker.getTypeAtLocation(expression);
-        if (symbol !== undefined && context.options.promiseClasses.indexOf(symbol.name) !== -1) {
-            context.addFailureAtNode(expression, RULE_MESSAGE);
-        }
+        const mainType = checker.getTypeAtLocation(expression);
+		if (isPromiseType(mainType) || (mainType.isUnion() && mainType.types.every(isPromiseType))) {
+			context.addFailureAtNode(expression, RULE_MESSAGE);
+		}
+    }
+
+    function isPromiseType(type: ts.Type) {
+        const promiseClasses = context.options.promiseClasses;
+        return type.symbol !== undefined && promiseClasses.indexOf(type.symbol.name) !== -1;
     }
 }
 

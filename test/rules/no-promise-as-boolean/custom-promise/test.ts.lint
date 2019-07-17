@@ -29,4 +29,9 @@ function union(promiseOrUndefined: CustomPromise | undefined, promiseOrFalse: Cu
     }
 }
 
+function normalUrCustomPromise(onlyPromise: CustomPromise | Promise<any>, promiseOrNull: CustomPromise | Promise<any> | null) {
+    if (onlyPromise && promiseOrNull) { }
+        ~~~~~~~~~~~                       [0]
+}
+
 [0]: Promises are not allowed as boolean.
