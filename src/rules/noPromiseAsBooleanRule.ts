@@ -49,12 +49,12 @@ export class Rule extends Lint.Rules.TypedRule {
         },
         optionExamples: [true, [true, "Thenable"]],
         rationale: Lint.Utils.dedent`
-            There are no situations where one would like to check if a variable's value is truthy if it's type
+            There are no situations where one would like to check whether a variable's value is truthy if its type
             only is Promise.
             This may only occur when the typings are incorrect or the variable has a union type
             (like Promise | undefined), of which the latter is allowed.
 
-            This rule prevents common bugs, where the user most of the times wants to 'await' a Promise first.
+            This rule prevents common bugs from forgetting to 'await' a Promise.
         `,
         type: "functionality",
         typescriptOnly: true,
