@@ -57,4 +57,10 @@ function funky(maybePromise?: Promise<number>) {
     }
 }
 
+async function waiter(custumerDecisionPromise: Promise<any>) {
+    if (await custumerDecisionPromise) {
+        console.log("Customer ready to take an order.")
+    }
+}
+
 [0]: Promises are not allowed as boolean.
