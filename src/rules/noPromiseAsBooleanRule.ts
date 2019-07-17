@@ -28,6 +28,8 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { codeExamples } from "./code-examples/noPromiseAsBoolean.examples";
+
 const OPTION_PROMISE_CLASSES = "promise-classes";
 
 interface Options {
@@ -39,6 +41,14 @@ export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-promise-as-boolean",
         description: "Warns for Promises that are used for boolean conditions.",
+        descriptionDetails: Lint.Utils.dedent`
+            For the most accurate findings, set \`"strict": true\` in your \`tsconfig.json\`.
+
+            It's recommended to enable to following tslint rules as well:
+            * [\`strict-boolean-expressions\`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/)
+            * [\`strict-type-predicates\`](https://palantir.github.io/tslint/rules/strict-type-predicates/)
+            * [\`no-floating-promises\`](https://palantir.github.io/tslint/rules/no-floating-promises/)
+        `,
         optionsDescription: Lint.Utils.dedent`
             A list of 'string' names of any additional classes that should also be treated as Promises.
             For example, if you are using a class called 'Future' that implements the Thenable interface,
@@ -67,6 +77,8 @@ export class Rule extends Lint.Rules.TypedRule {
         type: "functionality",
         typescriptOnly: true,
         requiresTypeInfo: true,
+        codeExamples,
+
     };
     /* tslint:enable:object-literal-sort-keys */
 
