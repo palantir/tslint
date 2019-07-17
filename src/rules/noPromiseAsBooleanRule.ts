@@ -28,6 +28,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_PROMISE_CLASSES = "promise-classes";
+
+interface Options {
+    promiseClasses: string[];
+}
+
 export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -41,13 +47,15 @@ export class Rule extends Lint.Rules.TypedRule {
             type reference names.
         `,
         options: {
-            type: "list",
-            listType: {
-                type: "array",
-                items: { type: "string" },
+            type: "object",
+            properties: {
+                [OPTION_PROMISE_CLASSES]: {
+                    type: "array",
+                    items: { type: "string" },
+                },
             },
         },
-        optionExamples: [true, [true, "Thenable"]],
+        optionExamples: [true, [true, { OPTION_PROMISE_CLASSES: ["Thenable"] }]],
         rationale: Lint.Utils.dedent`
             There are no situations where one would like to check whether a variable's value is truthy if its type
             only is Promise.
@@ -63,10 +71,11 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const rawOptions = { ...this.ruleArguments[0] } as { [OPTION_PROMISE_CLASSES]?: string[] };
         return this.applyWithFunction(
             sourceFile,
             walk,
-            ["Promise", ...(this.ruleArguments as string[])],
+            { promiseClasses: ["Promise", ...(rawOptions[OPTION_PROMISE_CLASSES] || [])] },
             program.getTypeChecker(),
         );
     }
@@ -74,7 +83,7 @@ export class Rule extends Lint.Rules.TypedRule {
 
 const RULE_MESSAGE = "Promises are not allowed as boolean.";
 
-function walk(context: Lint.WalkContext<string[]>, checker: ts.TypeChecker): void {
+function walk(context: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
     const { sourceFile } = context;
     return ts.forEachChild(sourceFile, cb);
 
@@ -112,7 +121,7 @@ function walk(context: Lint.WalkContext<string[]>, checker: ts.TypeChecker): voi
 
     function checkExpression(expression: ts.Expression): void {
         const { symbol } = checker.getTypeAtLocation(expression);
-        if (symbol !== undefined && context.options.indexOf(symbol.name) !== -1) {
+        if (symbol !== undefined && context.options.promiseClasses.indexOf(symbol.name) !== -1) {
             context.addFailureAtNode(expression, RULE_MESSAGE);
         }
     }
