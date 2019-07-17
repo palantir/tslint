@@ -1,0 +1,32 @@
+[typescript]: >= 2.4.0
+
+async function promiseFunc() {
+    return false;
+}
+
+class CustomPromise<T = any> {}
+const customPromise = new CustomPromise<any>();
+
+// Custom promise
+if (customPromise) {}
+    ~~~~~~~~~~~~~     [0]
+
+normalExpression = customPromise;
+const stringLiteral = "text" + customPromise;
+
+const globalUnaryExpression = !!customPromise;
+                                ~~~~~~~~~~~~~  [0]
+
+const globalBinaryExpression = "text" && customPromise;
+                                         ~~~~~~~~~~~~~  [0]
+
+customPromise && console.log("topLevelBinaryExpression");
+~~~~~~~~~~~~~                        [0]
+
+function union(promiseOrUndefined: CustomPromise | undefined, promiseOrFalse: CustomPromise | false, promiseOrNull: CustomPromise | null) {
+    if (promiseOrUndefined || promiseOrFalse || promiseOrNull) {
+        return;
+    }
+}
+
+[0]: Promises are not allowed as boolean.
