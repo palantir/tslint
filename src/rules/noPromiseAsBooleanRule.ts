@@ -22,6 +22,7 @@ import {
     isForStatement,
     isIfStatement,
     isPrefixUnaryExpression,
+    isUnionType,
     isWhileStatement,
 } from "tsutils";
 import * as ts from "typescript";
@@ -133,7 +134,7 @@ function walk(context: Lint.WalkContext<Options>, checker: ts.TypeChecker): void
 
     function checkExpression(expression: ts.Expression): void {
         const mainType = checker.getTypeAtLocation(expression);
-		if (isPromiseType(mainType) || (mainType.isUnion() && mainType.types.every(isPromiseType))) {
+		if (isPromiseType(mainType) || (isUnionType(mainType) && mainType.types.every(isPromiseType))) {
 			context.addFailureAtNode(expression, RULE_MESSAGE);
 		}
     }
