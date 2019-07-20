@@ -25,4 +25,13 @@ if (x === f()) {} else if (x === g()) {}
 if (x.y.z === a.b) else if (x.y.z === c.d) {}
     ~~~~~~~~~~~~~ [0]
 
+if (null === 1 || null === 2 || null === 3) {}
+if (1 === null || 2 === null || 3 === null) {}
+if (null === 1 || 2 === null || null === 3) {}
+
+if (undefined === 1 || undefined === 2 || undefined === 3) {}
+if (1 === undefined || 2 === undefined || 3 === undefined) {}
+if (undefined === 1 || 2 === undefined || undefined === 3) {}
+
+
 [0]: Use a switch statement instead of using multiple '===' checks.

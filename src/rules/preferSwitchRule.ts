@@ -113,7 +113,11 @@ function everyCondition(node: ts.Expression, test: (e: ts.Expression) => boolean
         case ts.SyntaxKind.BarBarToken:
             return everyCondition(left, test) && everyCondition(right, test);
         case ts.SyntaxKind.EqualsEqualsEqualsToken:
-            return isSimple(left) && isSimple(right) && test(left);
+            return (
+                isSimple(left) &&
+                isSimple(right) &&
+                ((isSwitchVariable(left) && test(left)) || (isSwitchVariable(right) && test(right)))
+            );
         default:
             return false;
     }
@@ -143,6 +147,25 @@ function isSimple(node: ts.Node): boolean {
         case ts.SyntaxKind.TrueKeyword:
         case ts.SyntaxKind.FalseKeyword:
         case ts.SyntaxKind.NullKeyword:
+            return true;
+        default:
+            return false;
+    }
+}
+
+function isUndefined(node: ts.Node): boolean {
+    return utils.isIdentifier(node) && node.text === "undefined";
+}
+
+function isSwitchVariable(node: ts.Node): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.PropertyAccessExpression:
+        case ts.SyntaxKind.ThisKeyword:
+            return true;
+        case ts.SyntaxKind.Identifier:
+            if (isUndefined(node)) {
+                return false;
+            }
             return true;
         default:
             return false;
