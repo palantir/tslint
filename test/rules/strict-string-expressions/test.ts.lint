@@ -12,6 +12,8 @@
   const emptyArr = [];
 
   `foo`
+  `${'str literal'}`
+  `${123}`
   `${fooAny}`
   `${fooStr}`
   `${fooNumber}`
@@ -28,6 +30,8 @@
   `${emptyArr}`
      ~~~~~~~~~~ [Explicit conversion to string type required]
 
+  `${String('str literal')}`
+  `${String(123)}`
   `${String(fooAny)}`
   `${String(fooStr)}`
   `${String(fooNumber)}`
@@ -38,6 +42,8 @@
   `${String(fooArr)}`
   `${String(emptyArr)}`
 
+  `${'str literal'.toString()}`
+  `${123..toString()}`
   `${fooAny.toString()}`
   `${fooStr.toString()}`
   `${fooNumber.toString()}`
@@ -48,6 +54,8 @@
   `${fooArr.toString()}`
   `${emptyArr.toString()}`
 
+  'str' + 'str literal' + 'str'
+  'str' + 123 + 'str'
   'str' + fooAny + 'str'
   'str' + fooStr + 'str'
   'str' + fooNumber + 'str'
@@ -64,6 +72,8 @@
   'str' + emptyArr + 'str'
   ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
 
+  'str' + String('str literal') + 'str'
+  'str' + String(123) + 'str'
   'str' + String(fooAny) + 'str'
   'str' + String(fooStr) + 'str'
   'str' + String(fooNumber) + 'str'
@@ -74,6 +84,8 @@
   'str' + String(fooArr) + 'str'
   'str' + String(emptyArr) + 'str'
 
+  'str' + 'str literal'.toString() + 'str'
+  'str' + 123..toString() + 'str'
   'str' + fooAny.toString() + 'str'
   'str' + fooStr.toString() + 'str'
   'str' + fooNumber.toString() + 'str'
