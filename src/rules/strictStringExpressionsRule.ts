@@ -54,10 +54,10 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.BinaryExpression: {
                 const binaryExpr = node as ts.BinaryExpression;
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-                    const leftIsString = isTypeRequiresExplicitToString(
+                    const leftIsString = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.left),
                     );
-                    const rightIsString = isTypeRequiresExplicitToString(
+                    const rightIsString = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.right),
                     );
                     const leftIsFailed = !leftIsString && rightIsString;
@@ -72,7 +72,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.TemplateSpan: {
                 const templateSpanNode = node as ts.TemplateSpan;
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
-                const isString = isTypeRequiresExplicitToString(type);
+                const isString = isTypeConvertsToStringEasily(type);
                 if (!isString) {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
@@ -92,6 +92,6 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     }
 }
 
-function isTypeRequiresExplicitToString(type: ts.Type) {
+function isTypeConvertsToStringEasily(type: ts.Type) {
     return isTypeFlagSet(type, ts.TypeFlags.StringLike) || isTypeFlagSet(type, ts.TypeFlags.Any);
 }
