@@ -54,14 +54,14 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.BinaryExpression: {
                 const binaryExpr = node as ts.BinaryExpression;
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-                    const leftIsString = isTypeConvertsToStringEasily(
+                    const leftIsPassedAsIs = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.left),
                     );
-                    const rightIsString = isTypeConvertsToStringEasily(
+                    const rightIsPassedAsIs = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.right),
                     );
-                    const leftIsFailed = !leftIsString && rightIsString;
-                    const rightIsFailed = leftIsString && !rightIsString;
+                    const leftIsFailed = !leftIsPassedAsIs && rightIsPassedAsIs;
+                    const rightIsFailed = leftIsPassedAsIs && !rightIsPassedAsIs;
                     if (leftIsFailed || rightIsFailed) {
                         const expression = leftIsFailed ? binaryExpr.left : binaryExpr.right;
                         addFailure(binaryExpr, expression);
@@ -72,8 +72,8 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.TemplateSpan: {
                 const templateSpanNode = node as ts.TemplateSpan;
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
-                const isString = isTypeConvertsToStringEasily(type);
-                if (!isString) {
+                const shouldPassAsIs = isTypeConvertsToStringEasily(type);
+                if (!shouldPassAsIs) {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
                 }
