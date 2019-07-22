@@ -14,7 +14,7 @@
   `foo`
   `${fooAny}`
   `${fooStr}`
-  `${String(fooNumber)}`
+  `${fooNumber}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
   `${String(classWithToString)}`
@@ -24,7 +24,7 @@
 
   `${String(fooAny)}`
   `${String(fooStr)}`
-  `${String(fooNumber)}`
+  `${fooNumber}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
   `${String(classWithToString)}`
@@ -44,7 +44,7 @@
 
   'str' + fooAny + 'str'
   'str' + fooStr + 'str'
-  'str' + String(fooNumber) + 'str'
+  'str' + fooNumber + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
   'str' + String(classWithToString) + 'str'
@@ -54,7 +54,7 @@
 
   'str' + String(fooAny) + 'str'
   'str' + String(fooStr) + 'str'
-  'str' + String(fooNumber) + 'str'
+  'str' + fooNumber + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
   'str' + String(classWithToString) + 'str'

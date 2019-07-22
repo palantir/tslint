@@ -15,7 +15,6 @@
   `${fooAny}`
   `${fooStr}`
   `${fooNumber}`
-     ~~~~~~~~~~~ [Explicit conversion to string type required]
   `${FooClass}`
      ~~~~~~~~~~ [Explicit conversion to string type required]
   `${ClassWithToString}`
@@ -52,7 +51,6 @@
   'str' + fooAny + 'str'
   'str' + fooStr + 'str'
   'str' + fooNumber + 'str'
-  ~~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
   'str' + FooClass + 'str'
   ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
   'str' + ClassWithToString + 'str'
