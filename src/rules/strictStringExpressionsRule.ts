@@ -93,5 +93,10 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
 }
 
 function isTypeConvertsToStringEasily(type: ts.Type) {
-    return isTypeFlagSet(type, ts.TypeFlags.StringLike) || isTypeFlagSet(type, ts.TypeFlags.Any);
+    return (
+        isTypeFlagSet(type, ts.TypeFlags.StringOrNumberLiteral) ||
+        isTypeFlagSet(type, ts.TypeFlags.NumberLike) ||
+        isTypeFlagSet(type, ts.TypeFlags.StringLike) ||
+        isTypeFlagSet(type, ts.TypeFlags.Any)
+    );
 }
