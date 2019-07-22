@@ -1,0 +1,87 @@
+  const fooStr: string = 'foo';
+  const fooNumber = 2;
+  class FooClass {}
+  class ClassWithToString {
+      public static toString () { return ''; }
+      public toString () { return ''; }
+  }
+  const classWithToString = new ClassWithToString();
+  const FooStr = new String('foo');
+  const fooArr = ['foo'];
+  const emptyArr = [];
+
+  `foo`
+  `${fooStr}`
+  `${String(fooNumber)}`
+  `${String(FooClass)}`
+  `${String(ClassWithToString)}`
+  `${String(classWithToString)}`
+  `${String(FooStr)}`
+  `${String(fooArr)}`
+  `${String(emptyArr)}`
+
+  `${String(fooStr)}`
+  `${String(fooNumber)}`
+  `${String(FooClass)}`
+  `${String(ClassWithToString)}`
+  `${String(classWithToString)}`
+  `${String(FooStr)}`
+  `${String(fooArr)}`
+  `${String(emptyArr)}`
+
+  `${fooStr.toString()}`
+  `${fooNumber.toString()}`
+  `${FooClass.toString()}`
+  `${ClassWithToString.toString()}`
+  `${classWithToString.toString()}`
+  `${FooStr.toString()}`
+  `${fooArr.toString()}`
+  `${emptyArr.toString()}`
+
+  'str' + fooStr + 'str'
+  'str' + String(fooNumber) + 'str'
+  'str' + String(FooClass) + 'str'
+  'str' + String(ClassWithToString) + 'str'
+  'str' + String(classWithToString) + 'str'
+  'str' + String(FooStr) + 'str'
+  'str' + String(fooArr) + 'str'
+  'str' + String(emptyArr) + 'str'
+
+  'str' + String(fooStr) + 'str'
+  'str' + String(fooNumber) + 'str'
+  'str' + String(FooClass) + 'str'
+  'str' + String(ClassWithToString) + 'str'
+  'str' + String(classWithToString) + 'str'
+  'str' + String(FooStr) + 'str'
+  'str' + String(fooArr) + 'str'
+  'str' + String(emptyArr) + 'str'
+
+  'str' + fooStr.toString() + 'str'
+  'str' + fooNumber.toString() + 'str'
+  'str' + FooClass.toString() + 'str'
+  'str' + ClassWithToString.toString() + 'str'
+  'str' + classWithToString.toString() + 'str'
+  'str' + FooStr.toString() + 'str'
+  'str' + fooArr.toString() + 'str'
+  'str' + emptyArr.toString() + 'str'
+
+  const barFooStrOrUndef: string | undefined;
+  const barFooStrOrNull: string | null;
+
+  `${String(barFooStrOrUndef)}`
+  `${String(barFooStrOrNull)}`
+
+  `${String(barFooStrOrUndef)}`
+  `${String(barFooStrOrNull)}`
+
+  `${barFooStrOrUndef.toString()}`
+  `${barFooStrOrNull.toString()}`
+
+  'str' + String(barFooStrOrUndef) + 'str'
+  'str' + String(barFooStrOrNull) + 'str'
+
+  'str' + String(barFooStrOrUndef) + 'str'
+  'str' + String(barFooStrOrNull) + 'str'
+
+  'str' + barFooStrOrUndef.toString() + 'str'
+  'str' + barFooStrOrNull.toString() + 'str'

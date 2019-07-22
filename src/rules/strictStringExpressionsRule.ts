@@ -23,7 +23,8 @@ import { isTypeFlagSet } from 'tsutils';
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "strict-string-expressions",
-        description: Lint.Utils.dedent`
+        description: 'Disable implicit toString() calls',
+        descriptionDetails: Lint.Utils.dedent`
             Require explicit toString() call for variables used in strings. By default only strings are allowed.
 
             The following nodes are checked:
@@ -35,8 +36,11 @@ export class Rule extends Lint.Rules.TypedRule {
         requiresTypeInfo: true,
         options: [],
         optionExamples: [true],
-        optionsDescription: "Not configurable."
+        optionsDescription: "Not configurable.",
+        hasFix: true
     };
+
+    public static CONVERSION_REQUIRED = 'Explicit conversion to string type required';
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
@@ -52,11 +56,16 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
                     const leftIsString = isTypeFlagSet(checker.getTypeAtLocation(binaryExpr.left), ts.TypeFlags.StringLike);
                     const rightIsString = isTypeFlagSet(checker.getTypeAtLocation(binaryExpr.right), ts.TypeFlags.StringLike);
-                    if (
-                        (leftIsString && !rightIsString)
-                        || (!leftIsString && rightIsString)
-                    ) {
-                        addFailure(ctx, node);
+                    const leftIsFailed = !leftIsString && rightIsString;
+                    const rightIsFailed = leftIsString && !rightIsString;
+                    if (leftIsFailed || rightIsFailed) {
+                        const expression = leftIsFailed ? binaryExpr.left : binaryExpr.right;
+                        const fix = Lint.Replacement.replaceFromTo(
+                            expression.getStart(sourceFile),
+                            expression.end,
+                            `String(${expression.getText()})`
+                        );
+                        ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
                     }
                 }
                 break;
@@ -66,7 +75,13 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
                 const isString = isTypeFlagSet(type, ts.TypeFlags.StringLike);
                 if (!isString) {
-                    addFailure(ctx, node);
+                    const { expression } = templateSpanNode;
+                    const fix = Lint.Replacement.replaceFromTo(
+                        expression.getStart(sourceFile),
+                        expression.end,
+                        `String(${expression.getText()})`
+                    );
+                    ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
                 }
                 break;
             }
@@ -75,9 +90,6 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
     });
 }
 
-function addFailure (ctx: Lint.WalkContext, node: ts.Node) {
-    ctx.addFailureAtNode(node, 'Explicit conversion to string type required');
-}
 
 declare module "typescript" {
     // No other way to distinguish boolean literal true from boolean literal false
