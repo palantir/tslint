@@ -89,11 +89,3 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
         return ts.forEachChild(node, cb);
     });
 }
-
-
-declare module "typescript" {
-    // No other way to distinguish boolean literal true from boolean literal false
-    export interface IntrinsicType extends ts.Type {
-        intrinsicName: string;
-    }
-}
