@@ -15,15 +15,14 @@
  * limitations under the License.
  */
 
+import { isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isTypeFlagSet } from 'tsutils';
 
 export class Rule extends Lint.Rules.TypedRule {
     public static metadata: Lint.IRuleMetadata = {
-        ruleName: "strict-string-expressions",
-        description: 'Disable implicit toString() calls',
+        description: "Disable implicit toString() calls",
         descriptionDetails: Lint.Utils.dedent`
             Require explicit toString() call for variables used in strings. By default only strings are allowed.
 
@@ -31,31 +30,38 @@ export class Rule extends Lint.Rules.TypedRule {
 
             * String literals ("foo" + bar)
             * ES6 templates (\`foo \${bar}\`)`,
+        hasFix: true,
+        optionExamples: [true],
+        options: [],
+        optionsDescription: "Not configurable.",
+        requiresTypeInfo: true,
+        ruleName: "strict-string-expressions",
         type: "functionality",
         typescriptOnly: true,
-        requiresTypeInfo: true,
-        options: [],
-        optionExamples: [true],
-        optionsDescription: "Not configurable.",
-        hasFix: true
     };
 
-    public static CONVERSION_REQUIRED = 'Explicit conversion to string type required';
+    public static CONVERSION_REQUIRED = "Explicit conversion to string type required";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     const { sourceFile } = ctx;
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
                 const binaryExpr = node as ts.BinaryExpression;
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-                    const leftIsString = isTypeFlagSet(checker.getTypeAtLocation(binaryExpr.left), ts.TypeFlags.StringLike);
-                    const rightIsString = isTypeFlagSet(checker.getTypeAtLocation(binaryExpr.right), ts.TypeFlags.StringLike);
+                    const leftIsString = isTypeFlagSet(
+                        checker.getTypeAtLocation(binaryExpr.left),
+                        ts.TypeFlags.StringLike,
+                    );
+                    const rightIsString = isTypeFlagSet(
+                        checker.getTypeAtLocation(binaryExpr.right),
+                        ts.TypeFlags.StringLike,
+                    );
                     const leftIsFailed = !leftIsString && rightIsString;
                     const rightIsFailed = leftIsString && !rightIsString;
                     if (leftIsFailed || rightIsFailed) {
@@ -73,20 +79,16 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
                 }
-                break;
             }
         }
         return ts.forEachChild(node, cb);
     });
 
-    function addFailure (
-        node: ts.Node,
-        expression: ts.Expression,
-    ) {
+    function addFailure(node: ts.Node, expression: ts.Expression) {
         const fix = Lint.Replacement.replaceFromTo(
             expression.getStart(),
             expression.end,
-            `String(${expression.getText()})`
+            `String(${expression.getText()})`,
         );
         ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
     }
