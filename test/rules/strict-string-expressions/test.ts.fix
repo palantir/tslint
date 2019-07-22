@@ -28,7 +28,7 @@
   `${String(123)}`
   `${String(fooAny)}`
   `${String(fooStr)}`
-  `${fooNumber}`
+  `${String(fooNumber)}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
   `${String(classWithToString)}`
@@ -64,7 +64,7 @@
   'str' + String(123) + 'str'
   'str' + String(fooAny) + 'str'
   'str' + String(fooStr) + 'str'
-  'str' + fooNumber + 'str'
+  'str' + String(fooNumber) + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
   'str' + String(classWithToString) + 'str'
