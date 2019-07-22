@@ -60,12 +60,7 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
                     const rightIsFailed = leftIsString && !rightIsString;
                     if (leftIsFailed || rightIsFailed) {
                         const expression = leftIsFailed ? binaryExpr.left : binaryExpr.right;
-                        const fix = Lint.Replacement.replaceFromTo(
-                            expression.getStart(sourceFile),
-                            expression.end,
-                            `String(${expression.getText()})`
-                        );
-                        ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
+                        addFailure(binaryExpr, expression);
                     }
                 }
                 break;
@@ -76,16 +71,23 @@ function walk(ctx: Lint.WalkContext<undefined>, checker: ts.TypeChecker): void {
                 const isString = isTypeFlagSet(type, ts.TypeFlags.StringLike);
                 if (!isString) {
                     const { expression } = templateSpanNode;
-                    const fix = Lint.Replacement.replaceFromTo(
-                        expression.getStart(sourceFile),
-                        expression.end,
-                        `String(${expression.getText()})`
-                    );
-                    ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
+                    addFailure(templateSpanNode, expression);
                 }
                 break;
             }
         }
         return ts.forEachChild(node, cb);
     });
+
+    function addFailure (
+        node: ts.Node,
+        expression: ts.Expression,
+    ) {
+        const fix = Lint.Replacement.replaceFromTo(
+            expression.getStart(),
+            expression.end,
+            `String(${expression.getText()})`
+        );
+        ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
+    }
 }
