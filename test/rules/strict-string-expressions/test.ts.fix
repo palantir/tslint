@@ -1,3 +1,4 @@
+  const fooAny: any;
   const fooStr: string = 'foo';
   const fooNumber = 2;
   class FooClass {}
@@ -11,6 +12,7 @@
   const emptyArr = [];
 
   `foo`
+  `${fooAny}`
   `${fooStr}`
   `${String(fooNumber)}`
   `${String(FooClass)}`
@@ -20,6 +22,7 @@
   `${String(fooArr)}`
   `${String(emptyArr)}`
 
+  `${String(fooAny)}`
   `${String(fooStr)}`
   `${String(fooNumber)}`
   `${String(FooClass)}`
@@ -29,6 +32,7 @@
   `${String(fooArr)}`
   `${String(emptyArr)}`
 
+  `${fooAny.toString()}`
   `${fooStr.toString()}`
   `${fooNumber.toString()}`
   `${FooClass.toString()}`
@@ -38,6 +42,7 @@
   `${fooArr.toString()}`
   `${emptyArr.toString()}`
 
+  'str' + fooAny + 'str'
   'str' + fooStr + 'str'
   'str' + String(fooNumber) + 'str'
   'str' + String(FooClass) + 'str'
@@ -47,6 +52,7 @@
   'str' + String(fooArr) + 'str'
   'str' + String(emptyArr) + 'str'
 
+  'str' + String(fooAny) + 'str'
   'str' + String(fooStr) + 'str'
   'str' + String(fooNumber) + 'str'
   'str' + String(FooClass) + 'str'
@@ -56,6 +62,7 @@
   'str' + String(fooArr) + 'str'
   'str' + String(emptyArr) + 'str'
 
+  'str' + fooAny.toString() + 'str'
   'str' + fooStr.toString() + 'str'
   'str' + fooNumber.toString() + 'str'
   'str' + FooClass.toString() + 'str'

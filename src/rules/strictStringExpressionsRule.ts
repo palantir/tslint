@@ -54,14 +54,8 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.BinaryExpression: {
                 const binaryExpr = node as ts.BinaryExpression;
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-                    const leftIsString = isTypeFlagSet(
-                        checker.getTypeAtLocation(binaryExpr.left),
-                        ts.TypeFlags.StringLike,
-                    );
-                    const rightIsString = isTypeFlagSet(
-                        checker.getTypeAtLocation(binaryExpr.right),
-                        ts.TypeFlags.StringLike,
-                    );
+                    const leftIsString = isTypeRequiresExplicitToString(checker.getTypeAtLocation(binaryExpr.left));
+                    const rightIsString = isTypeRequiresExplicitToString(checker.getTypeAtLocation(binaryExpr.right));
                     const leftIsFailed = !leftIsString && rightIsString;
                     const rightIsFailed = leftIsString && !rightIsString;
                     if (leftIsFailed || rightIsFailed) {
@@ -74,7 +68,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.TemplateSpan: {
                 const templateSpanNode = node as ts.TemplateSpan;
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
-                const isString = isTypeFlagSet(type, ts.TypeFlags.StringLike);
+                const isString = isTypeRequiresExplicitToString(type);
                 if (!isString) {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
@@ -92,4 +86,8 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
         );
         ctx.addFailureAtNode(node, Rule.CONVERSION_REQUIRED, fix);
     }
+}
+
+function isTypeRequiresExplicitToString (type: ts.Type) {
+    return isTypeFlagSet(type, ts.TypeFlags.StringLike) || isTypeFlagSet(type, ts.TypeFlags.Any);
 }
