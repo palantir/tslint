@@ -10,12 +10,14 @@
   const FooStr = new String('foo');
   const fooArr = ['foo'];
   const emptyArr = [];
+  const stringUni = "foo" | "bar";
 
   `foo`
   `${'str literal'}`
   `${123}`
   `${fooAny}`
   `${fooStr}`
+  `${stringUni}`
   `${fooNumber}`
   `${FooClass}`
      ~~~~~~~~~~ [Explicit conversion to string type required]
@@ -34,6 +36,7 @@
   `${String(123)}`
   `${String(fooAny)}`
   `${String(fooStr)}`
+  `${String(stringUni)}`
   `${String(fooNumber)}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
@@ -46,6 +49,7 @@
   `${123..toString()}`
   `${fooAny.toString()}`
   `${fooStr.toString()}`
+  `${stringUni.toString()}`
   `${fooNumber.toString()}`
   `${FooClass.toString()}`
   `${ClassWithToString.toString()}`
@@ -58,6 +62,7 @@
   'str' + 123 + 'str'
   'str' + fooAny + 'str'
   'str' + fooStr + 'str'
+  'str' + stringUni + 'str'
   'str' + fooNumber + 'str'
   'str' + FooClass + 'str'
   ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
@@ -76,6 +81,7 @@
   'str' + String(123) + 'str'
   'str' + String(fooAny) + 'str'
   'str' + String(fooStr) + 'str'
+  'str' + String(stringUni) + 'str'
   'str' + String(fooNumber) + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
@@ -88,6 +94,7 @@
   'str' + 123..toString() + 'str'
   'str' + fooAny.toString() + 'str'
   'str' + fooStr.toString() + 'str'
+  'str' + stringUni.toString() + 'str'
   'str' + fooNumber.toString() + 'str'
   'str' + FooClass.toString() + 'str'
   'str' + ClassWithToString.toString() + 'str'
