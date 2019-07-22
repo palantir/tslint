@@ -34,7 +34,8 @@ export class Rule extends Lint.Rules.TypedRule {
         typescriptOnly: true,
         requiresTypeInfo: true,
         options: [],
-        optionsDescription: '',
+        optionExamples: [true],
+        optionsDescription: "Not configurable."
     };
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
