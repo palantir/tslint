@@ -29,15 +29,15 @@ import * as Lint from "../index";
 
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
+const OPTION_IGNORE_BLANK_LINES = "ignore-blank-lines";
 const OPTION_IGNORE_CASE = "ignore-case";
 const OPTION_LOCALE_COMPARE = "locale-compare";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
 const OPTION_MATCH_DECLARATION_ORDER_ONLY = "match-declaration-order-only";
 const OPTION_SHORTHAND_FIRST = "shorthand-first";
-const OPTION_ALLOW_BLANK_LINES = "allow-blank-lines";
 
 interface Options {
-    allowBlankLines: boolean;
+    ignoreBlankLines: boolean;
     ignoreCase: boolean;
     localeCompare: boolean;
     matchDeclarationOrder: boolean;
@@ -54,14 +54,14 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
             When using the default alphabetical ordering, additional blank lines may be used to group
             object properties together while keeping the elements within each group in alphabetical order.
-            To opt out of this use ${OPTION_ALLOW_BLANK_LINES} option.
+            To opt out of this use ${OPTION_IGNORE_BLANK_LINES} option.
         `,
         rationale: "Useful in preventing merge conflicts",
         optionsDescription: Lint.Utils.dedent`
             By default, this rule checks that keys are in alphabetical order.
             The following may optionally be passed:
 
-            * \`${OPTION_ALLOW_BLANK_LINES}\` will enforce alphabetical ordering regardless of blank lines between each key-value pair.
+            * \`${OPTION_IGNORE_BLANK_LINES}\` will enforce alphabetical ordering regardless of blank lines between each key-value pair.
             * \`${OPTION_IGNORE_CASE}\` will compare keys in a case insensitive way.
             * \`${OPTION_LOCALE_COMPARE}\` will compare keys using the expected sort order of special characters, such as accents.
             * \`${OPTION_MATCH_DECLARATION_ORDER}\` will prefer to use the key ordering of the contextual type of the object literal, as in:
@@ -87,7 +87,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
         options: {
             type: "string",
             enum: [
-                OPTION_ALLOW_BLANK_LINES,
+                OPTION_IGNORE_BLANK_LINES,
                 OPTION_IGNORE_CASE,
                 OPTION_LOCALE_COMPARE,
                 OPTION_MATCH_DECLARATION_ORDER,
@@ -99,7 +99,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             true,
             [
                 true,
-                OPTION_ALLOW_BLANK_LINES,
+                OPTION_IGNORE_BLANK_LINES,
                 OPTION_IGNORE_CASE,
                 OPTION_LOCALE_COMPARE,
                 OPTION_MATCH_DECLARATION_ORDER,
@@ -168,7 +168,7 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
 function parseOptions(ruleArguments: any[]): Options {
     return {
-        allowBlankLines: has(OPTION_ALLOW_BLANK_LINES),
+        ignoreBlankLines: has(OPTION_IGNORE_BLANK_LINES),
         ignoreCase: has(OPTION_IGNORE_CASE),
         localeCompare: has(OPTION_LOCALE_COMPARE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
@@ -185,7 +185,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
         options: {
-            allowBlankLines,
+            ignoreBlankLines,
             ignoreCase,
             localeCompare,
             matchDeclarationOrder,
@@ -275,7 +275,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                                 ? lastKey.localeCompare(key) === 1
                                 : lastKey > key;
 
-                        if (keyOrderDescending && allowBlankLines) {
+                        if (keyOrderDescending && ignoreBlankLines) {
                             ctx.addFailureAtNode(
                                 property.name,
                                 Rule.FAILURE_STRING_ALPHABETICAL(property.name.text),
