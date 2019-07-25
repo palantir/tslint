@@ -17,10 +17,12 @@
 
 import {
     isExternalModuleReference,
+    isIdentifier,
     isImportDeclaration,
     isImportEqualsDeclaration,
     isModuleDeclaration,
     isNamedImports,
+    isQualifiedName,
     isStringLiteral,
 } from "tsutils";
 import * as ts from "typescript";
@@ -365,21 +367,31 @@ class Walker extends Lint.AbstractWalker<Options> {
     }
 
     private checkImportEqualsDeclaration(node: ts.ImportEqualsDeclaration) {
-        // only allowed `import x = require('y');`
-
         const { moduleReference } = node;
 
-        if (!isExternalModuleReference(moduleReference)) {
+        let importPath: string;
+        if (isExternalModuleReference(moduleReference)) {
+            // `import x = require('y');`
+            const { expression } = moduleReference;
+
+            if (expression === undefined || !isStringLiteral(expression)) {
+                return;
+            }
+
+            importPath = removeQuotes(expression.text);
+        } else if (
+            isQualifiedName(moduleReference) &&
+            isIdentifier(moduleReference.left) &&
+            isIdentifier(moduleReference.right)
+        ) {
+            // `import x = a.b;`
+            importPath = `${node.name.escapedText} = ${moduleReference.left.escapedText}.${
+                moduleReference.right.escapedText
+            }`;
+        } else {
             return;
         }
 
-        const { expression } = moduleReference;
-
-        if (expression === undefined || !isStringLiteral(expression)) {
-            return;
-        }
-
-        const importPath = removeQuotes(expression.text);
         this.checkImport(importPath, node);
     }
 

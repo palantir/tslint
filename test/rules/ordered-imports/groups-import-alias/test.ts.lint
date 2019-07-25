@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+/* Test a more complex set of split up groups. */
+
+// comment outside of imports
+import MyAlias = SomeModule.SomeType;
+import {app_f} from 'app/foo';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Imports from this module are not allowed in this group.  The expected groups (in order) are: /^app/, /.*=.*/.]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+
+export class Test {}

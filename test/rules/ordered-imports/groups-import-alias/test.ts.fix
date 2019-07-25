@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+/* Test a more complex set of split up groups. */
+
+// comment outside of imports
+import {app_f} from 'app/foo';
+
+import MyAlias = SomeModule.SomeType;
+
+export class Test {}
