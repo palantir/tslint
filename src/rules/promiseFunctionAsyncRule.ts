@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier, isCallExpression } from "tsutils";
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -102,32 +102,39 @@ export class Rule extends Lint.Rules.TypedRule {
 function walk(ctx: Lint.WalkContext<EnabledSyntaxKinds>, tc: ts.TypeChecker) {
     const { sourceFile, options } = ctx;
     return ts.forEachChild(sourceFile, function cb(node): void {
-        if (options.has(node.kind)) {
-            const declaration = node as ts.FunctionLikeDeclaration;
-            switch (node.kind) {
-                case ts.SyntaxKind.MethodDeclaration:
-                case ts.SyntaxKind.FunctionDeclaration:
-                    if (declaration.body === undefined) {
-                        break;
-                    }
-                // falls through
-                case ts.SyntaxKind.FunctionExpression:
-                case ts.SyntaxKind.ArrowFunction:
-                    if (
-                        !hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
-                        returnsPromise(declaration, tc) &&
-                        !isCallExpression(declaration.body as ts.Expression)
-                    ) {
-                        ctx.addFailure(
-                            node.getStart(sourceFile),
-                            (node as ts.FunctionLikeDeclaration).body!.pos,
-                            Rule.FAILURE_STRING,
-                        );
-                    }
+        if (options.has(node.kind) && isFunctionLikeWithBody(node)) {
+            if (
+                !tsutils.hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) &&
+                !isCallExpressionBody(node.body) &&
+                returnsPromise(node, tc)
+            ) {
+                ctx.addFailure(node.getStart(sourceFile), node.body.pos, Rule.FAILURE_STRING);
             }
         }
         return ts.forEachChild(node, cb);
     });
+}
+
+function isFunctionLikeWithBody(
+    node: ts.Node,
+): node is ts.FunctionLikeDeclaration & { body: ts.Node } {
+    switch (node.kind) {
+        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.FunctionDeclaration:
+        case ts.SyntaxKind.FunctionExpression:
+        case ts.SyntaxKind.ArrowFunction:
+            return (node as ts.FunctionLikeDeclaration).body !== undefined;
+    }
+
+    return false;
+}
+
+function isCallExpressionBody(body: ts.Node) {
+    while (tsutils.isParenthesizedExpression(body)) {
+        body = body.expression;
+    }
+
+    return tsutils.isCallExpression(body);
 }
 
 function returnsPromise(node: ts.FunctionLikeDeclaration, tc: ts.TypeChecker): boolean {
