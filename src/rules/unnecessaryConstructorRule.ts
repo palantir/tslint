@@ -15,18 +15,36 @@
  * limitations under the License.
  */
 
-import { isConstructorDeclaration, isParameterProperty } from "tsutils";
+import {
+    isCallExpression,
+    isConstructorDeclaration,
+    isExpressionStatement,
+    isParameterProperty,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 import { Replacement } from "../language/rule/rule";
 
+interface Options {
+    unnecessarySuperCall: boolean;
+}
+
+const OPTION_UNNECESSARY_SUPER_CALL = "unnecessary-super-call";
+
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Prevents blank constructors, as they are redundant.",
-        optionExamples: [true],
-        options: null,
-        optionsDescription: "Not configurable.",
+        optionExamples: [true, [true, { [OPTION_UNNECESSARY_SUPER_CALL]: true }]],
+        options: {
+            properties: {
+                [OPTION_UNNECESSARY_SUPER_CALL]: { type: "boolean" },
+            },
+            type: "object",
+        },
+        optionsDescription: Lint.Utils.dedent`
+            An optional object with the property '${OPTION_UNNECESSARY_SUPER_CALL}'.
+            This is to check for unnecessary constructor parameters for super call`,
         rationale: Lint.Utils.dedent`
             JavaScript implicitly adds a blank constructor when there isn't one.
             It's not necessary to manually add one in.
@@ -39,12 +57,49 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Remove unnecessary empty constructor.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        const options: Options = {
+            unnecessarySuperCall:
+                this.ruleArguments.length !== 0 &&
+                (this.ruleArguments[0] as { "unnecessary-super-call"?: boolean })[
+                    "unnecessary-super-call"
+                ] === true,
+        };
+
+        return this.applyWithFunction(sourceFile, walk, options);
     }
 }
 
-const isEmptyConstructor = (node: ts.ConstructorDeclaration): boolean =>
-    node.body !== undefined && node.body.statements.length === 0;
+const containsStatements = (statements: ts.NodeArray<ts.Statement>) => statements.length > 0;
+
+const containsSuper = (statements: ts.NodeArray<ts.Statement>): boolean => {
+    for (const statement of statements) {
+        if (
+            isExpressionStatement(statement) &&
+            isCallExpression(statement.expression) &&
+            ts.SyntaxKind.SuperKeyword === statement.expression.expression.kind
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+const isEmptyOrContainsOnlySuper = (node: ts.ConstructorDeclaration, options: Options): boolean => {
+    if (node.body) {
+        const { unnecessarySuperCall } = options;
+
+        if (!containsStatements(node.body.statements)) {
+            return true;
+        }
+
+        if (unnecessarySuperCall) {
+            return node.body.statements.length === 1 && containsSuper(node.body.statements);
+        }
+    }
+
+    return false;
+};
 
 const containsConstructorParameter = (node: ts.ConstructorDeclaration): boolean =>
     // If this has any parameter properties
@@ -59,11 +114,11 @@ const isAccessRestrictingConstructor = (node: ts.ConstructorDeclaration): boolea
 const containsDecorator = (node: ts.ConstructorDeclaration): boolean =>
     node.parameters.some(p => p.decorators !== undefined);
 
-function walk(context: Lint.WalkContext) {
+function walk(context: Lint.WalkContext<Options>) {
     const callback = (node: ts.Node): void => {
         if (
             isConstructorDeclaration(node) &&
-            isEmptyConstructor(node) &&
+            isEmptyOrContainsOnlySuper(node, context.options) &&
             !containsConstructorParameter(node) &&
             !containsDecorator(node) &&
             !isAccessRestrictingConstructor(node)

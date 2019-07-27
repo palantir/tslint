@@ -67,3 +67,45 @@ class DecoratedParameters {
     constructor(@Optional x: number) {}
 }
 
+class X {
+    constructor(private param1: number, param2: number) {}
+}
+
+export class Y extends X {
+    constructor(param1: number) {
+        super(param1, 2);
+    }
+}
+
+class Base {
+    constructor(public param: number) {}
+}
+
+class Super extends Base {
+    public param: number;
+    constructor(param1: number) {
+        super(param1);
+        this.param = param1;
+    }
+}
+
+class Super extends Base {
+  constructor(param: number) {
+    super(param);
+  }
+}
+
+class Super extends Base {
+    constructor(param1: number, public param2: number) {
+        super(param1);
+    }
+}
+
+class Super extends Base {
+    public param1: number;
+    constructor(public param2: number) {
+        super(param2);
+        this.param1 = param2;
+    }
+}
+
