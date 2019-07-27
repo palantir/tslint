@@ -1,54 +1,58 @@
 // aliases for number
 type MyNumber = number;
 type MyString = string;
-interface NumberStringPair {
+type MyBigInt = bigint;
+interface NumberStringBigint {
     first: MyNumber,
-    second: MyString
+    second: MyString,
+    third: MyBigInt
 }
 
 var x = 5;
 var y = "10";
 var z = 8.2;
 var w = "6.5";
-var pair: NumberStringPair = {
+var bigintVar = BigInt(200);
+var pair: NumberStringBigint = {
     first: 5,
-    second: "10"
+    second: "10",
+    third: BigInt(100),
 };
 
 // bad
 var bad1  = 5 + "10";
-            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + "10". Consider using template literals.]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found 5 + "10". Consider using template literals.]
 var bad2  = [] + 5;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + 5]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found [] + 5]
 var bad3  = [] + {};
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + {}]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found [] + {}]
 var bad4  = [] + [];
-            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + []]
+            ~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found [] + []]
 var bad4  = 5 + [];
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + []]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found 5 + []]
 var bad5  = "5" + {};
-            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found "5" + {}. Consider using template literals.]
+            ~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found "5" + {}. Consider using template literals.]
 var bad6  = 5.5 + "5";
-            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5.5 + "5". Consider using template literals.]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found 5.5 + "5". Consider using template literals.]
 var bad7  = "5.5" + 5;
-            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found "5.5" + 5. Consider using template literals.]
+            ~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found "5.5" + 5. Consider using template literals.]
 var bad8  = x + y;
-            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + string. Consider using template literals.]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found number + string. Consider using template literals.]
 var bad9  = y + x;
-            ~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found string + number. Consider using template literals.]
+            ~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found string + number. Consider using template literals.]
 var bad10 = x + {};
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + {}]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found number + {}]
 var bad11 = [] + y;
-            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found [] + string. Consider using template literals.]
+            ~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found [] + string. Consider using template literals.]
 var bad12 = pair.first + "10";
-            ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found number + "10". Consider using template literals.]
+            ~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found number + "10". Consider using template literals.]
 var bad13 = 5 + pair.second;
-            ~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found 5 + string. Consider using template literals.]
+            ~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found 5 + string. Consider using template literals.]
 var bad14 = pair + pair;
-            ~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found NumberStringPair + NumberStringPair]
+            ~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found NumberStringBigint + NumberStringBigint]
 var anyTyped: any = 5;
 var bad15 = anyTyped + 12;
-            ~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers, but found any + 12]
+            ~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found any + 12]
 
 // good
 var good1 = 5 + 10;
@@ -63,6 +67,30 @@ var good8 = "5.5" + pair.second;
 var good9 = ("5.5" as MyString) + pair.second;
 const good10 = 'hello' + (someBoolean ? 'a' : 'b') + (() => someBoolean ? 'c' : 'd')() + 'e';
 
+var anyVar: any = 200;
+
+const bigIntPassA = BigInt(1) + BigInt(2);
+const bigIntPassB = BigInt(1) + 100n;
+const bigIntFailA = BigInt(1) + 2;
+                    ~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + 2]
+const bigIntFailB = BigInt(1) + "failureString";
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + "failureString". Consider using template literals.]
+
+const bigIntFailC = bigintVar + x;
+                    ~~~~~~~~~~~~~ [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + number]
+const bigIntFailD = y + bigintVar;
+                    ~~~~~~~~~~~~~ [Operands of '+' operation must either be both strings or both numbers or both bigints, but found string + bigint. Consider using template literals.]
+const bigIntFailE = bigintVar + anyVar;
+                    ~~~~~~~~~~~~~~~~~~ [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + any]
+
+const bigIntFailF = pair.first + pair.third;
+                    ~~~~~~~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found number + bigint]
+const bigIntFailG = pair.third + pair.second;
+                    ~~~~~~~~~~~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + string. Consider using template literals.]
+const bigIntFailH = bigintVar + [];
+                    ~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + []]
+const bigIntFailI = bigintVar + {};
+                    ~~~~~~~~~~~~~~  [Operands of '+' operation must either be both strings or both numbers or both bigints, but found bigint + {}]
 // don't check other binary expressions
 const balls = true;
 balls === true;
