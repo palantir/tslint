@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import { hasOwnProperty } from "../../utils";
 import { DESCRIPTOR_OVERLOADS, DocType } from "../completedDocsRule";
 
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
@@ -49,13 +48,11 @@ const addRequirements = (exclusionsMap: ExclusionsMap, descriptors: IInputExclus
         return;
     }
 
-    for (const docType in descriptors) {
-        if (hasOwnProperty(descriptors, docType)) {
-            exclusionsMap.set(
-                docType as DocType,
-                createRequirementsForDocType(docType as DocType, descriptors[docType]),
-            );
-        }
+    for (const docType of Object.keys(descriptors)) {
+        exclusionsMap.set(
+            docType as DocType,
+            createRequirementsForDocType(docType as DocType, descriptors[docType]),
+        );
     }
 };
 

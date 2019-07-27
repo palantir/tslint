@@ -1,0 +1,10 @@
+{
+    "rules": {
+        "typedef": [
+            true,
+            "variable-declaration",
+            "member-variable-declaration",
+            "variable-declaration-ignore-function"
+        ]
+    }
+}

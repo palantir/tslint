@@ -1,5 +1,32 @@
 # Change Log
 
+## v5.18.0
+
+- [feature] New `--print-config` CLI flag (#4744)
+- [bugfix] [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) no longer flags `x!` non-null assertions if `--strictNullChecks` is not enabled (#3724)
+- [bugfix] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) handles unbalanced quotes more gracefully without crashing (#4344)
+- [docs] Add tslint-playground link to README and bug report template (#4150)
+- [enhancement] [`no-magic-numbers`](https://palantir.github.io/tslint/rules/no-magic-numbers/) rule ignores arguments passed into default Number methods (#3668)
+- [new-fixer] [`comment-format`](https://palantir.github.io/tslint/rules/comment-format/) (#3583)
+- [new-rule-option] `"allow-trailing-lowercase"` option for [`comment-format`](https://palantir.github.io/tslint/rules/comment-format/) rule (#3583)
+- [new-rule-option] `"ignore-accessors"` for [`adjacent-overload-signatures`](https://palantir.github.io/tslint/rules/adjacent-overload-signatures/) to ignore getters / setters overloads (#3718)
+- [new-rule] [`no-async-without-await`](https://palantir.github.io/tslint/rules/no-async-without-await/) (#3945)
+- [new-rule] [`strict-comparisons`](https://palantir.github.io/tslint/rules/strict-comparisons/) (#4519)
+
+Thanks to our contributors!
+
+- Josh Goldberg
+- smoehrle
+- Mateusz Witkowski
+- Andy Hanson
+- John Wiseheart
+- Eran Shabi
+- Tibor Blenessy
+- AndreasGassmann
+- Ryan Waskiewicz
+- Isabelle
+
+
 ## v5.17.0
 
 - [bugfix] [`quotemark`](https://palantir.github.io/tslint/rules/quotemark/) backtic option now ignores enum members, use strict declarations, lookup types, and strings containing octal escape sequences. (#4693)

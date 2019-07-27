@@ -51,6 +51,10 @@ interface Options {
     avoidTemplate: boolean;
 }
 
+function isQuoteMark(value: string): value is QUOTEMARK {
+    return ["'", '"', "`"].indexOf(value) > -1;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -140,8 +144,8 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 return;
             }
 
-            // We already have the expected quotemark. Done.
-            if (actualQuotemark === expectedQuotemark) {
+            // We already have the expected quotemark, or the quotemark is invalid. Done.
+            if (actualQuotemark === expectedQuotemark || !isQuoteMark(actualQuotemark)) {
                 return;
             }
 

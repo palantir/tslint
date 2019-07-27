@@ -31,7 +31,11 @@ Please refer to the full installation & usage documentation on the [TSLint websi
 -   [customization of TSLint](https://palantir.github.io/tslint/develop/custom-rules/).
 -   [inline disabling and enabling of rules with comment flags](https://palantir.github.io/tslint/usage/rule-flags/)
 
-## Custom rules & plugins
+## TSLint Playground
+
+There is a sandbox environment for TSLint at [palantir.github.io/tslint-playground](https://palantir.github.io/tslint-playground/), which can be used to test rules and see how TSLint works. Issues can be filed against `tslint-playground` [here](https://github.com/palantir/tslint-playground).
+
+## Custom Rules & Plugins
 
 #### Custom rule sets from Palantir
 
@@ -59,11 +63,10 @@ Prerequisites:
 -   `node` v7+
 -   `yarn` v1.0+
 
-#### Quick start
+#### Quick Start
 
 ```bash
 git clone git@github.com:palantir/tslint.git --config core.autocrlf=input --config core.eol=lf
-cd tslint
 yarn
 yarn compile
 yarn test
