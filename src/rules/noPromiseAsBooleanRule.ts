@@ -45,7 +45,7 @@ export class Rule extends Lint.Rules.TypedRule {
         descriptionDetails: Lint.Utils.dedent`
             For the most accurate findings, set \`"strict": true\` in your \`tsconfig.json\`.
 
-            It's recommended to enable to following tslint rules as well:
+            It's recommended to enable the following rules as well:
             * [\`strict-boolean-expressions\`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/)
             * [\`strict-type-predicates\`](https://palantir.github.io/tslint/rules/strict-type-predicates/)
             * [\`no-floating-promises\`](https://palantir.github.io/tslint/rules/no-floating-promises/)
