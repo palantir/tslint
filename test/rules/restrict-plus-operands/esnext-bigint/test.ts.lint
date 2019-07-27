@@ -1,4 +1,4 @@
-// aliases for number
+[typescript]: >= 3.2.0
 type MyNumber = number;
 type MyString = string;
 type MyBigInt = bigint;
