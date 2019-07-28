@@ -76,7 +76,9 @@ export class Rule extends Lint.Rules.TypedRule {
 
     private getRuleOptions(): Options {
         if (this.ruleArguments[0] === undefined) {
-            return {};
+            return {
+                [OPTION_ALLOW_EMPTY_TYPES]: true,
+            };
         } else {
             return this.ruleArguments[0] as Options;
         }
