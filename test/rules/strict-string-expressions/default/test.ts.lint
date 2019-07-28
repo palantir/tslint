@@ -11,6 +11,7 @@
   const fooArr = ['foo'];
   const emptyArr = [];
   const stringUni = "foo" | "bar";
+  const booleanVar: boolean;
 
   `foo`
   `${'str literal'}`
@@ -32,6 +33,7 @@
      ~~~~~~~~ [Explicit conversion to string type required]
   `${emptyArr}`
      ~~~~~~~~~~ [Explicit conversion to string type required]
+  `${booleanVar}`
 
   `${String('str literal')}`
   `${String(123)}`
@@ -46,6 +48,7 @@
   `${String(FooStr)}`
   `${String(fooArr)}`
   `${String(emptyArr)}`
+  `${String(booleanVar)}`
 
   `${'str literal'.toString()}`
   `${123..toString()}`
@@ -60,6 +63,7 @@
   `${FooStr.toString()}`
   `${fooArr.toString()}`
   `${emptyArr.toString()}`
+  `${booleanVar.toString()}`
 
   'str' + 'str literal' + 'str'
   'str' + 123 + 'str'
@@ -80,6 +84,7 @@
   ~~~~~~~~~~~~~~         [Explicit conversion to string type required]
   'str' + emptyArr + 'str'
   ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
+  'str' + booleanVar + 'str'
 
   'str' + String('str literal') + 'str'
   'str' + String(123) + 'str'
@@ -94,6 +99,7 @@
   'str' + String(FooStr) + 'str'
   'str' + String(fooArr) + 'str'
   'str' + String(emptyArr) + 'str'
+  'str' + String(booleanVar) + 'str'
 
   'str' + 'str literal'.toString() + 'str'
   'str' + 123..toString() + 'str'
@@ -108,6 +114,7 @@
   'str' + FooStr.toString() + 'str'
   'str' + fooArr.toString() + 'str'
   'str' + emptyArr.toString() + 'str'
+  'str' + booleanVar.toString() + 'str'
 
   const barFooStrOrUndef: string | undefined;
   const barFooStrOrNull: string | null;

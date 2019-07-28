@@ -148,6 +148,7 @@ function isTypeConvertsToStringEasily(type: ts.Type, options: Options): boolean 
     }
 
     return (
+        isTypeFlagSet(type, ts.TypeFlags.BooleanLike) ||
         isTypeFlagSet(type, ts.TypeFlags.StringOrNumberLiteral) ||
         isTypeFlagSet(type, ts.TypeFlags.NumberLike) ||
         isTypeFlagSet(type, ts.TypeFlags.StringLike) ||
