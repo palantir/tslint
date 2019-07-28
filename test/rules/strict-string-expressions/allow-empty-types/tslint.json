@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "strict-string-expressions": [true, { "allow-empty-types": true }]
+  }
+}

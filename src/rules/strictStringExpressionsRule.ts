@@ -20,7 +20,15 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_ALLOW_EMPTY_TYPES = 'allow-empty-types';
+
+interface Options {
+    [OPTION_ALLOW_EMPTY_TYPES]?: boolean;
+}
+
 export class Rule extends Lint.Rules.TypedRule {
+    public static CONVERSION_REQUIRED = "Explicit conversion to string type required";
+
     public static metadata: Lint.IRuleMetadata = {
         description: "Disable implicit toString() calls",
         descriptionDetails: Lint.Utils.dedent`
@@ -31,24 +39,47 @@ export class Rule extends Lint.Rules.TypedRule {
             * String literals ("foo" + bar)
             * ES6 templates (\`foo \${bar}\`)`,
         hasFix: true,
-        optionExamples: [true],
-        options: [],
-        optionsDescription: "Not configurable.",
+        optionsDescription: Lint.Utils.dedent`
+                Following arguments may be optionally provided:
+                * \`${OPTION_ALLOW_EMPTY_TYPES}\` allows \`null\`, \`undefined\` and \`never\` to be passed into strings without explicit conversion`,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_EMPTY_TYPES]: {
+                    type: "boolean",
+                },
+            },
+        },
+        optionExamples: [
+            true,
+            [
+                true,
+                {
+                    [OPTION_ALLOW_EMPTY_TYPES]: true,
+                },
+            ],
+        ],
         requiresTypeInfo: true,
         ruleName: "strict-string-expressions",
         type: "functionality",
         typescriptOnly: true,
     };
 
-    public static CONVERSION_REQUIRED = "Explicit conversion to string type required";
-
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
+        return this.applyWithFunction(sourceFile, walk, this.getRuleOptions(), program.getTypeChecker());
+    }
+
+    private getRuleOptions(): Options {
+        if (this.ruleArguments[0] === undefined) {
+            return {};
+        } else {
+            return this.ruleArguments[0] as Options;
+        }
     }
 }
 
-function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
-    const { sourceFile } = ctx;
+function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
+    const { sourceFile, options } = ctx;
     ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
         switch (node.kind) {
             case ts.SyntaxKind.BinaryExpression: {
@@ -56,9 +87,11 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
                     const leftIsPassedAsIs = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.left),
+                        options
                     );
                     const rightIsPassedAsIs = isTypeConvertsToStringEasily(
                         checker.getTypeAtLocation(binaryExpr.right),
+                        options
                     );
                     const leftIsFailed = !leftIsPassedAsIs && rightIsPassedAsIs;
                     const rightIsFailed = leftIsPassedAsIs && !rightIsPassedAsIs;
@@ -72,7 +105,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.TemplateSpan: {
                 const templateSpanNode = node as ts.TemplateSpan;
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
-                const shouldPassAsIs = isTypeConvertsToStringEasily(type);
+                const shouldPassAsIs = isTypeConvertsToStringEasily(type, options);
                 if (!shouldPassAsIs) {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
@@ -92,9 +125,18 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
     }
 }
 
-function isTypeConvertsToStringEasily(type: ts.Type) {
+const isEmptyType = (type: ts.Type): boolean => isTypeFlagSet(type, ts.TypeFlags.Null) ||
+    isTypeFlagSet(type, ts.TypeFlags.VoidLike) ||
+    isTypeFlagSet(type, ts.TypeFlags.Undefined) ||
+    isTypeFlagSet(type, ts.TypeFlags.Never);
+
+function isTypeConvertsToStringEasily(type: ts.Type, options: Options): boolean {
     if (isUnionType(type)) {
-        return type.types.every(isTypeConvertsToStringEasily);
+        return type.types.every((unionAtomicType) => isTypeConvertsToStringEasily(unionAtomicType, options));
+    }
+
+    if (options[OPTION_ALLOW_EMPTY_TYPES] && isEmptyType(type)) {
+        return true;
     }
 
     return (

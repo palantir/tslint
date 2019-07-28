@@ -20,18 +20,12 @@
   `${stringUni}`
   `${fooNumber}`
   `${(typeof window)}`
-  `${FooClass}`
-     ~~~~~~~~~~ [Explicit conversion to string type required]
-  `${ClassWithToString}`
-     ~~~~~~~~~~~~~~~~~~~ [Explicit conversion to string type required]
-  `${classWithToString}`
-     ~~~~~~~~~~~~~~~~~~~ [Explicit conversion to string type required]
-  `${FooStr}`
-     ~~~~~~~~ [Explicit conversion to string type required]
-  `${fooArr}`
-     ~~~~~~~~ [Explicit conversion to string type required]
-  `${emptyArr}`
-     ~~~~~~~~~~ [Explicit conversion to string type required]
+  `${String(FooClass)}`
+  `${String(ClassWithToString)}`
+  `${String(classWithToString)}`
+  `${String(FooStr)}`
+  `${String(fooArr)}`
+  `${String(emptyArr)}`
 
   `${String('str literal')}`
   `${String(123)}`
@@ -68,18 +62,12 @@
   'str' + stringUni + 'str'
   'str' + fooNumber + 'str'
   'str' + (typeof window) + 'str'
-  'str' + FooClass + 'str'
-  ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
-  'str' + ClassWithToString + 'str'
-  ~~~~~~~~~~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
-  'str' + classWithToString + 'str'
-  ~~~~~~~~~~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
-  'str' + FooStr + 'str'
-  ~~~~~~~~~~~~~~         [Explicit conversion to string type required]
-  'str' + fooArr + 'str'
-  ~~~~~~~~~~~~~~         [Explicit conversion to string type required]
-  'str' + emptyArr + 'str'
-  ~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
+  'str' + String(FooClass) + 'str'
+  'str' + String(ClassWithToString) + 'str'
+  'str' + String(classWithToString) + 'str'
+  'str' + String(FooStr) + 'str'
+  'str' + String(fooArr) + 'str'
+  'str' + String(emptyArr) + 'str'
 
   'str' + String('str literal') + 'str'
   'str' + String(123) + 'str'
@@ -111,25 +99,28 @@
 
   const barFooStrOrUndef: string | undefined;
   const barFooStrOrNull: string | null;
+  const neverType: never;
 
   `${barFooStrOrUndef}`
-     ~~~~~~~~~~~~~~~~~~ [Explicit conversion to string type required]
   `${barFooStrOrNull}`
-     ~~~~~~~~~~~~~~~~~ [Explicit conversion to string type required]
+  `${neverType}`
 
   `${String(barFooStrOrUndef)}`
   `${String(barFooStrOrNull)}`
+  `${String(neverType)}`
 
   `${barFooStrOrUndef.toString()}`
   `${barFooStrOrNull.toString()}`
+  `${neverType.toString()}`
 
   'str' + barFooStrOrUndef + 'str'
-  ~~~~~~~~~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
   'str' + barFooStrOrNull + 'str'
-  ~~~~~~~~~~~~~~~~~~~~~~~         [Explicit conversion to string type required]
+  'str' + neverType + 'str'
 
   'str' + String(barFooStrOrUndef) + 'str'
   'str' + String(barFooStrOrNull) + 'str'
+  'str' + String(neverType) + 'str'
 
   'str' + barFooStrOrUndef.toString() + 'str'
   'str' + barFooStrOrNull.toString() + 'str'
+  'str' + neverType.toString() + 'str'
