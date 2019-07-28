@@ -2,7 +2,7 @@
   "rules": {
     "unnecessary-constructor": [
         true,
-        { "unnecessary-super-call": true }
+        { "check-super-calls": true }
     ]
   }
 }

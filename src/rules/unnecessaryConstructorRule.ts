@@ -27,23 +27,23 @@ import * as Lint from "../index";
 import { Replacement } from "../language/rule/rule";
 
 interface Options {
-    unnecessarySuperCall: boolean;
+    checkSuperCall: boolean;
 }
 
-const OPTION_UNNECESSARY_SUPER_CALL = "unnecessary-super-call";
+const OPTION_CHECK_SUPER_CALL = "check-super-calls";
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         description: "Prevents blank constructors, as they are redundant.",
-        optionExamples: [true, [true, { [OPTION_UNNECESSARY_SUPER_CALL]: true }]],
+        optionExamples: [true, [true, { [OPTION_CHECK_SUPER_CALL]: true }]],
         options: {
             properties: {
-                [OPTION_UNNECESSARY_SUPER_CALL]: { type: "boolean" },
+                [OPTION_CHECK_SUPER_CALL]: { type: "boolean" },
             },
             type: "object",
         },
         optionsDescription: Lint.Utils.dedent`
-            An optional object with the property '${OPTION_UNNECESSARY_SUPER_CALL}'.
+            An optional object with the property '${OPTION_CHECK_SUPER_CALL}'.
             This is to check for unnecessary constructor parameters for super call`,
         rationale: Lint.Utils.dedent`
             JavaScript implicitly adds a blank constructor when there isn't one.
@@ -58,10 +58,10 @@ export class Rule extends Lint.Rules.AbstractRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options: Options = {
-            unnecessarySuperCall:
+            checkSuperCall:
                 this.ruleArguments.length !== 0 &&
-                (this.ruleArguments[0] as { "unnecessary-super-call"?: boolean })[
-                    "unnecessary-super-call"
+                (this.ruleArguments[0] as { "check-super-calls"?: boolean })[
+                    "check-super-calls"
                 ] === true,
         };
 
@@ -69,15 +69,34 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-const containsStatements = (statements: ts.NodeArray<ts.Statement>) => statements.length > 0;
+const containsSuper = (
+    statement: ts.Statement,
+    constructorParameters: ts.NodeArray<ts.ParameterDeclaration>,
+): boolean => {
+    if (
+        isExpressionStatement(statement) &&
+        isCallExpression(statement.expression) &&
+        ts.SyntaxKind.SuperKeyword === statement.expression.expression.kind
+    ) {
+        const superArguments = statement.expression.arguments;
 
-const containsSuper = (statements: ts.NodeArray<ts.Statement>): boolean => {
-    for (const statement of statements) {
-        if (
-            isExpressionStatement(statement) &&
-            isCallExpression(statement.expression) &&
-            ts.SyntaxKind.SuperKeyword === statement.expression.expression.kind
-        ) {
+        if (superArguments.length < constructorParameters.length) {
+            return true;
+        }
+
+        if (superArguments.length === constructorParameters.length) {
+            if (constructorParameters.length === 0) {
+                return true;
+            }
+
+            for (const constructorParameter of constructorParameters) {
+                for (const superArgument of superArguments) {
+                    if (constructorParameter.name.kind !== superArgument.kind) {
+                        return false;
+                    }
+                }
+            }
+
             return true;
         }
     }
@@ -86,15 +105,18 @@ const containsSuper = (statements: ts.NodeArray<ts.Statement>): boolean => {
 };
 
 const isEmptyOrContainsOnlySuper = (node: ts.ConstructorDeclaration, options: Options): boolean => {
-    if (node.body) {
-        const { unnecessarySuperCall } = options;
+    if (node.body !== undefined) {
+        const { checkSuperCall } = options;
 
-        if (!containsStatements(node.body.statements)) {
+        if (node.body.statements.length === 0) {
             return true;
         }
 
-        if (unnecessarySuperCall) {
-            return node.body.statements.length === 1 && containsSuper(node.body.statements);
+        if (checkSuperCall) {
+            return (
+                node.body.statements.length === 1 &&
+                containsSuper(node.body.statements[0], node.parameters)
+            );
         }
     }
 

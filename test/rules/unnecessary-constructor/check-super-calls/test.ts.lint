@@ -92,11 +92,8 @@ class X {
 
 export class Y extends X {
     constructor(param1: number) {
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         super(param1, 2);
-~~~~~~~~~~~~~~~~~~~~~~~~~
     }
-~~~~~ [0]
 }
 
 class Base {
@@ -124,6 +121,60 @@ class Super extends Base {
     constructor(param1: number, public param2: number) {
         super(param1);
     }
+}
+
+class Super extends Base {
+    constructor(param1: number, param2: number) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        super(param1);
+~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [0]
+}
+
+class Super extends Base {
+    constructor(param1: number) {
+        super(param1 + 1);
+    }
+}
+
+class Super extends Base {
+    constructor() {
+        super(1);
+    }
+}
+
+class Super extends Base {
+    constructor(param1: number) {
+        super(1);
+    }
+}
+
+const test = (param: number) => number;
+
+class Super extends Base {
+    constructor(param1: number) {
+        super(test(param1));
+    }
+}
+
+class Base2 {
+    constructor(public param1: number, param2: number) {}
+}
+
+class Super extends Base2 {
+    constructor(param1: number, param2: number) {
+        super(test(param2), param1);
+    }
+}
+
+class Super extends Base2 {
+    constructor(param1: number, param2: number) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        super(param2, param1);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [0]
 }
 
 class Super extends Base {
