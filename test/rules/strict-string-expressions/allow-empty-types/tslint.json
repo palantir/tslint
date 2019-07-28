@@ -1,5 +1,10 @@
 {
-  "rules": {
-    "strict-string-expressions": [true, { "allow-empty-types": true }]
-  }
+    "rules": {
+        "strict-string-expressions": [
+            true,
+            {
+                "allow-empty-types": true
+            }
+        ]
+    }
 }

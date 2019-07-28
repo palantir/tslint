@@ -150,7 +150,7 @@ export const rules = {
     "restrict-plus-operands": true,
     "static-this": true,
     "strict-boolean-expressions": true,
-    "strict-string-expressions": true,
+    "strict-string-expressions": [true, { "allow-empty-types": true }],
     "strict-comparisons": true,
     "strict-type-predicates": true,
     "switch-default": true,
