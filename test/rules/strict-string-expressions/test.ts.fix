@@ -19,6 +19,7 @@
   `${fooStr}`
   `${stringUni}`
   `${fooNumber}`
+  `${(typeof window)}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
   `${String(classWithToString)}`
@@ -32,6 +33,7 @@
   `${String(fooStr)}`
   `${String(stringUni)}`
   `${String(fooNumber)}`
+  `${String((typeof window))}`
   `${String(FooClass)}`
   `${String(ClassWithToString)}`
   `${String(classWithToString)}`
@@ -45,6 +47,7 @@
   `${fooStr.toString()}`
   `${stringUni.toString()}`
   `${fooNumber.toString()}`
+  `${(typeof window).toString()}`
   `${FooClass.toString()}`
   `${ClassWithToString.toString()}`
   `${classWithToString.toString()}`
@@ -58,6 +61,7 @@
   'str' + fooStr + 'str'
   'str' + stringUni + 'str'
   'str' + fooNumber + 'str'
+  'str' + (typeof window) + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
   'str' + String(classWithToString) + 'str'
@@ -71,6 +75,7 @@
   'str' + String(fooStr) + 'str'
   'str' + String(stringUni) + 'str'
   'str' + String(fooNumber) + 'str'
+  'str' + String((typeof window)) + 'str'
   'str' + String(FooClass) + 'str'
   'str' + String(ClassWithToString) + 'str'
   'str' + String(classWithToString) + 'str'
@@ -84,6 +89,7 @@
   'str' + fooStr.toString() + 'str'
   'str' + stringUni.toString() + 'str'
   'str' + fooNumber.toString() + 'str'
+  'str' + (typeof window).toString() + 'str'
   'str' + FooClass.toString() + 'str'
   'str' + ClassWithToString.toString() + 'str'
   'str' + classWithToString.toString() + 'str'
