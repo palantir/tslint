@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isTypeFlagSet } from "tsutils";
+import { isTypeFlagSet, isUnionType } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -93,6 +93,10 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
 }
 
 function isTypeConvertsToStringEasily(type: ts.Type) {
+    if (isUnionType(type)) {
+        return type.types.every(isTypeConvertsToStringEasily);
+    }
+
     return (
         isTypeFlagSet(type, ts.TypeFlags.StringOrNumberLiteral) ||
         isTypeFlagSet(type, ts.TypeFlags.NumberLike) ||
