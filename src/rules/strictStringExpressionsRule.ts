@@ -90,11 +90,11 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.BinaryExpression: {
                 const binaryExpr = node as ts.BinaryExpression;
                 if (binaryExpr.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-                    const leftIsPassedAsIs = isTypeConvertsToStringEasily(
+                    const leftIsPassedAsIs = typeCanBeStringifiedEasily(
                         checker.getTypeAtLocation(binaryExpr.left),
                         options,
                     );
-                    const rightIsPassedAsIs = isTypeConvertsToStringEasily(
+                    const rightIsPassedAsIs = typeCanBeStringifiedEasily(
                         checker.getTypeAtLocation(binaryExpr.right),
                         options,
                     );
@@ -110,7 +110,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
             case ts.SyntaxKind.TemplateSpan: {
                 const templateSpanNode = node as ts.TemplateSpan;
                 const type = checker.getTypeAtLocation(templateSpanNode.expression);
-                const shouldPassAsIs = isTypeConvertsToStringEasily(type, options);
+                const shouldPassAsIs = typeCanBeStringifiedEasily(type, options);
                 if (!shouldPassAsIs) {
                     const { expression } = templateSpanNode;
                     addFailure(templateSpanNode, expression);
@@ -130,20 +130,20 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
     }
 }
 
-const isEmptyType = (type: ts.Type): boolean =>
+const typeIsEmpty = (type: ts.Type): boolean =>
     isTypeFlagSet(type, ts.TypeFlags.Null) ||
     isTypeFlagSet(type, ts.TypeFlags.VoidLike) ||
     isTypeFlagSet(type, ts.TypeFlags.Undefined) ||
     isTypeFlagSet(type, ts.TypeFlags.Never);
 
-function isTypeConvertsToStringEasily(type: ts.Type, options: Options): boolean {
+function typeCanBeStringifiedEasily(type: ts.Type, options: Options): boolean {
     if (isUnionType(type)) {
         return type.types.every(unionAtomicType =>
-            isTypeConvertsToStringEasily(unionAtomicType, options),
+            typeCanBeStringifiedEasily(unionAtomicType, options),
         );
     }
 
-    if (options[OPTION_ALLOW_EMPTY_TYPES] && isEmptyType(type)) {
+    if (options[OPTION_ALLOW_EMPTY_TYPES] && typeIsEmpty(type)) {
         return true;
     }
 
