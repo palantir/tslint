@@ -129,6 +129,7 @@ export const rules = {
     "no-null-keyword": true,
     "no-null-undefined-union": true,
     "no-object-literal-type-assertion": true,
+    "no-promise-as-boolean": true,
     "no-return-await": true,
     "no-shadowed-variable": true,
     "no-string-literal": true,
