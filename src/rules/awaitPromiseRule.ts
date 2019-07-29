@@ -111,5 +111,7 @@ function containsType(type: ts.Type, predicate: (name: string) => boolean): bool
 }
 
 function isAsyncIterable(name: string) {
-    return name === "AsyncIterable" || name === "AsyncIterableIterator";
+    return (
+        name === "AsyncIterable" || name === "AsyncIterableIterator" || name === "AsyncGenerator"
+    );
 }
