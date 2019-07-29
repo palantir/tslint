@@ -8,6 +8,8 @@ type L<T> = () => T
 
 type T = () => void;
 
+type T = T2 & (() => void)
+
 type U = <T>(t: T) => T
 
 var fn: () => void;
@@ -31,4 +33,6 @@ export type I0 = () => void;
 export type I1 = new () => void;
 
 export type T = () => void
+
+export type T = T2 & (() => void)
 

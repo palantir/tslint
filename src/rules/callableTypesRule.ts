@@ -119,7 +119,7 @@ function renderSuggestion(
             return `type ${parent.name.text} = ${suggestion}`;
         }
     }
-    return suggestion.endsWith(";") ? suggestion.slice(0, -1) : suggestion;
+    return suggestion.replace(";", "");
 }
 
 function shouldWrapSuggestion(parent: ts.Node) {

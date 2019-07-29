@@ -23,6 +23,11 @@ type T = {
     ~~~~~~~~~ [type % ('() => void')]
 };
 
+type T = T2 & {
+    (): void;
+    ~~~~~~~~~ [type % ('(() => void)')]
+}
+
 type U = {
     <T>(t: T): T;
     ~~~~~~~~~~~~~ [type % ('<T>(t: T) => T')]
@@ -67,6 +72,11 @@ export interface I1 {
 export type T = {
     (): void;
     ~~~~~~~~~ [type % ('() => void')]
+}
+
+export type T = T2 & {
+    (): void;
+    ~~~~~~~~~ [type % ('(() => void)')]
 }
 
 [_base]: %s has only a call signature — use `%s` instead.
