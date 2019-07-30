@@ -36,7 +36,7 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static INVALID_TYPES_ERROR =
-        "Operands of '+' operation must either be both strings or both numbers";
+        "Operands of '+' operation must either be both strings or both numbers or both bigints";
     public static SUGGEST_TEMPLATE_LITERALS = ". Consider using template literals.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
@@ -85,7 +85,7 @@ function getTypeString(tc: ts.TypeChecker, node: ts.Node, type: ts.Type) {
     return typeString;
 }
 
-function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid" {
+function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "bigint" | "invalid" {
     if (
         isTypeFlagSet(type, ts.TypeFlags.StringLiteral) ||
         isTypeFlagSet(type, ts.TypeFlags.String)
@@ -96,6 +96,11 @@ function getBaseTypeOfLiteralType(type: ts.Type): "string" | "number" | "invalid
         isTypeFlagSet(type, ts.TypeFlags.Number)
     ) {
         return "number";
+    } else if (
+        isTypeFlagSet(type, ts.TypeFlags.BigIntLiteral) ||
+        isTypeFlagSet(type, ts.TypeFlags.BigInt)
+    ) {
+        return "bigint";
     } else if (isUnionType(type) && !isTypeFlagSet(type, ts.TypeFlags.Enum)) {
         const types = type.types.map(getBaseTypeOfLiteralType);
         return allSame(types) ? types[0] : "invalid";
