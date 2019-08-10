@@ -23,4 +23,51 @@ let g = <A><any>a;
 let h = <AsyncIterableIterator><any>a;
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 
+interface Action {
+    payload: number | false;
+}
+
+const action: Action = {
+    payload: 5,
+}
+
+const booleanAction: Action = {
+    payload: false,
+}
+
+const a = 5 + <number>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 - <number>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 * <number>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 / <number>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 % <number>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 && <number>action.payload;
+               ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 || <number>action.payload;
+               ~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 % <number><any>action.payload;
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 && <number><any>action.payload;
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = 5 || <number><any>action.payload;
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = true || <boolean>booleanAction.payload;
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+const a = false && <boolean>booleanAction.payload;
+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
 [0]: Type assertion using the '<>' syntax is forbidden. Use the 'as' syntax instead.

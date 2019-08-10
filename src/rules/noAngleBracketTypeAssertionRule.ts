@@ -51,7 +51,7 @@ function walk(ctx: Lint.WalkContext) {
         if (isTypeAssertion(node)) {
             let { expression } = node;
             const start = node.getStart(ctx.sourceFile);
-            const addParens = needsParens(node);
+            const addParens = isBinaryExpression(node.parent);
             let replaceText = ` as ${node.type.getText(ctx.sourceFile)}${addParens ? ")" : ""}`;
             while (isTypeAssertion(expression)) {
                 replaceText = ` as ${expression.type.getText(ctx.sourceFile)}${replaceText}`;
@@ -69,13 +69,4 @@ function walk(ctx: Lint.WalkContext) {
         }
         return ts.forEachChild(node, cb);
     });
-}
-
-function needsParens(node: ts.TypeAssertion): boolean {
-    const parent = node.parent;
-    return (
-        isBinaryExpression(parent) &&
-        (parent.operatorToken.kind === ts.SyntaxKind.AmpersandToken ||
-            parent.operatorToken.kind === ts.SyntaxKind.BarToken)
-    );
 }
