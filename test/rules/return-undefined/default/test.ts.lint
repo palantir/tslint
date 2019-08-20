@@ -66,10 +66,6 @@ async function promiseValue(): Promise<number | undefined> {
          ~~~~~~~ [UNDEFINED]
 }
 
-declare function f<T>(action: () => T | undefined): void;
-f(() => { return undefined; });
-          ~~~~~~~~~~~~~~~~~ [VOID]
-
 declare function test(cb: () => Promise<void> | void): void;
 
 test(async () => {
