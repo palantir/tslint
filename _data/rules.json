@@ -1346,6 +1346,19 @@
     "hasFix": true
   },
   {
+    "ruleName": "invalid-void",
+    "description": "\nDisallows usage of `void` type outside of return type.\nIf `void` is used as return type, it shouldn't be a part of intersection/union type.",
+    "rationale": "\nThe `void` type means \"nothing\" or that a function does not return any value,\nin contra with implicit `undefined` type which means that a function returns a value `undefined`.\nSo \"nothing\" cannot be mixed with any other types.\nIf you need this - use `undefined` type instead.",
+    "hasFix": false,
+    "optionsDescription": "Not configurable.",
+    "options": null,
+    "optionExamples": [
+      true
+    ],
+    "type": "maintainability",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "jsdoc-format",
     "description": "Enforces basic format rules for JSDoc comments.",
     "descriptionDetails": "\nThe following rules are enforced for JSDoc comments (comments starting with `/**`):\n\n* each line contains an asterisk and asterisks must be aligned\n* each asterisk must be followed by either a space or a newline (except for the first and the last)\n* the only characters before the asterisk on each line must be whitespace characters\n* one line comments must start with `/** ` and end with `*/`\n* multiline comments don't allow text after `/** ` in the first line (with option `\"check-multiline-start\"`)\n        ",
@@ -1481,7 +1494,7 @@
     "ruleName": "max-line-length",
     "description": "Requires lines to be under a certain max length.",
     "rationale": "\nLimiting the length of a line of code improves code readability.\nIt also makes comparing code side-by-side easier and improves compatibility with\nvarious editors, IDEs, and diff viewers.",
-    "optionsDescription": "\nIt can take one argument, which can be any of the following:\n* integer indicating maximum length of lines.\n* object with keys:\n  * `limit` - number greater than 0 defining the max line length\n  * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.\n    For example:\n     * `// ` pattern will ignore all in-line comments.\n     * `^import ` pattern will ignore all import statements.\n     * `^export {(.*?)}` pattern will ignore all multiple export statements.\n     * `class [a-zA-Z]+ implements ` pattern will ignore all class declarations implementing interfaces.\n     * `^import |^export {(.*?)}|class [a-zA-Z]+ implements |// ` pattern will ignore all the cases listed above.\n ",
+    "optionsDescription": "\nIt can take one argument, which can be any of the following:\n* integer indicating maximum length of lines.\n* object with keys:\n  * `limit` - number greater than 0 defining the max line length\n  * `ignore-pattern` - string defining ignore pattern for this rule, being parsed by `new RegExp()`.\n    For example:\n     * `// ` pattern will ignore all in-line comments.\n     * `^import ` pattern will ignore all import statements.\n     * `^export {(.*?)}` pattern will ignore all multiple export statements.\n     * `class [a-zA-Z]+ implements ` pattern will ignore all class declarations implementing interfaces.\n     * `^import |^export {(.*?)}|class [a-zA-Z]+ implements |// ` pattern will ignore all the cases listed above.\n  * `check-strings` - determines if strings should be checked, `false` by default.\n  * `check-regex` - determines if regular expressions should be checked, `false` by default.\n ",
     "options": {
       "type": "array",
       "items": {
@@ -1497,6 +1510,12 @@
               },
               "ignore-pattern": {
                 "type": "string"
+              },
+              "check-strings": {
+                "type": "boolean"
+              },
+              "check-regex": {
+                "type": "boolean"
               }
             },
             "additionalProperties": false
@@ -1515,7 +1534,9 @@
         true,
         {
           "limit": 120,
-          "ignore-pattern": "^import |^export {(.*?)}"
+          "ignore-pattern": "^import |^export {(.*?)}",
+          "check-strings": true,
+          "check-regex": true
         }
       ]
     ],
@@ -2115,6 +2136,18 @@
     "typescriptOnly": false
   },
   {
+    "description": "Ban the usage of for...in statements.",
+    "optionExamples": [
+      true
+    ],
+    "options": null,
+    "optionsDescription": "Not configurable.",
+    "rationale": "for...in statements are legacy JavaScript syntax which usually require a verbose `hasOwnProperty` check inside their loop body. These statements can be fully replaced with for...of statements in modern JS & TS.",
+    "ruleName": "no-for-in",
+    "type": "typescript",
+    "typescriptOnly": false
+  },
+  {
     "ruleName": "no-implicit-dependencies",
     "description": "Disallows importing modules that are not listed as dependency in the project's package.json",
     "descriptionDetails": "\nDisallows importing transient dependencies and modules installed above your package's root directory.\n        ",
@@ -2488,6 +2521,52 @@
     ],
     "type": "typescript",
     "typescriptOnly": false
+  },
+  {
+    "ruleName": "no-promise-as-boolean",
+    "description": "Warns for Promises that are used for boolean conditions.",
+    "descriptionDetails": "\nFor the most accurate findings, set `\"strict\": true` in your `tsconfig.json`.\n\nIt's recommended to enable the following rules as well:\n* [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/)\n* [`strict-type-predicates`](https://palantir.github.io/tslint/rules/strict-type-predicates/)\n* [`no-floating-promises`](https://palantir.github.io/tslint/rules/no-floating-promises/)\n        ",
+    "optionsDescription": "\nA list of 'string' names of any additional classes that should also be treated as Promises.\nFor example, if you are using a class called 'Future' that implements the Thenable interface,\nyou might tell the rule to consider type references with the name 'Future' as valid Promise-like\ntypes. Note that this rule doesn't check for type assignability or compatibility; it just checks\ntype reference names.\n        ",
+    "options": {
+      "type": "object",
+      "properties": {
+        "promise-classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "optionExamples": [
+      true,
+      [
+        true,
+        {
+          "OPTION_PROMISE_CLASSES": [
+            "Thenable"
+          ]
+        }
+      ]
+    ],
+    "rationale": "\nThere are no situations where one would like to check whether a variable's value is truthy if its type\nonly is Promise.\nThis may only occur when the typings are incorrect or the variable has a union type\n(like Promise | undefined), of which the latter is allowed.\n\nThis rule prevents common bugs from forgetting to 'await' a Promise.\n        ",
+    "type": "functionality",
+    "typescriptOnly": true,
+    "requiresTypeInfo": true,
+    "codeExamples": [
+      {
+        "description": "Disallows usages of a non-awaited Promise as boolean.",
+        "config": "```json\n\"rules\": { \"no-promise-as-boolean\": true }\n```",
+        "pass": "```ts\nasync function waiter(custumerDecisionPromise: Promise<any>) {\n    if (await custumerDecisionPromise) {\n        console.log(\"Customer ready to take an order.\")\n    }\n}\n```",
+        "fail": "```ts\nasync function waiter(custumerDecisionPromise: Promise<any>) {\n    if (custumerDecisionPromise) {\n        console.log(\"Customer ready to take an order.\")\n    }\n}\n```"
+      },
+      {
+        "description": "Disallows usages of a non-awaited third-party promise as boolean.",
+        "config": "```json\n\"rules\": { \"no-promise-as-boolean\": [true, { \"promise-classes\": [\"CustomPromise\"] }] }\n```",
+        "pass": "```ts\nfunction printOrdersPerLine(orderId: number, orderedFoodPromise: CustomPromise<string[]>) {\n    orderedFoodPromise.then(orderedFood => {\n        console.log(`${orderId} contains the following items:`);\n\n        for (let index = 0; orderedFood; index++) {\n            console.log(\"orderedFood[index]\");\n        }\n\n        console.log(\"Done.\");\n    })\n}\n```",
+        "fail": "```ts\nfunction printOrdersPerLine(orderId: number, orderedFoodPromise: CustomPromise<string[]>) {\n    console.log(`${orderId} contains the following items:`);\n\n    for (let index = 0; orderedFoodPromise; index++) {\n        console.log(\"orderedFoodPromise[index]\");\n    }\n\n    console.log(\"Done.\");\n}\n```"
+      }
+    ]
   },
   {
     "ruleName": "no-redundant-jsdoc",
@@ -3172,12 +3251,13 @@
   },
   {
     "ruleName": "object-literal-sort-keys",
-    "description": "\nChecks ordering of keys in object literals.\n\nWhen using the default alphabetical ordering, additional blank lines may be used to group\nobject properties together while keeping the elements within each group in alphabetical order.\n        ",
+    "description": "\nChecks ordering of keys in object literals.\n\nWhen using the default alphabetical ordering, additional blank lines may be used to group\nobject properties together while keeping the elements within each group in alphabetical order.\nTo opt out of this use ignore-blank-lines option.\n        ",
     "rationale": "Useful in preventing merge conflicts",
-    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* `ignore-case` will compare keys in a case insensitive way.\n* `locale-compare` will compare keys using the expected sort order of special characters, such as accents.\n* `match-declaration-order` will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    ```\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n    ```\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n* \"match-declaration-order-only\" exactly like \"match-declaration-order\",\n    but don't fall back to alphabetical if a contextual type is not found.\n\n    Note: If both match-declaration-order-only and match-declaration-order options are present,\n          match-declaration-order-only will take precedence and alphabetical fallback will not occur.\n\n* `shorthand-first` will enforce shorthand properties to appear first, as in:\n\n    ```\n    const obj = { a, c, b: true };\n    ```\n",
+    "optionsDescription": "\nBy default, this rule checks that keys are in alphabetical order.\nThe following may optionally be passed:\n\n* `ignore-blank-lines` will enforce alphabetical ordering regardless of blank lines between each key-value pair.\n* `ignore-case` will compare keys in a case insensitive way.\n* `locale-compare` will compare keys using the expected sort order of special characters, such as accents.\n* `match-declaration-order` will prefer to use the key ordering of the contextual type of the object literal, as in:\n\n    ```\n    interface I { foo: number; bar: number; }\n    const obj: I = { foo: 1, bar: 2 };\n    ```\n\nIf a contextual type is not found, alphabetical ordering will be used instead.\n* \"match-declaration-order-only\" exactly like \"match-declaration-order\",\n    but don't fall back to alphabetical if a contextual type is not found.\n\n    Note: If both match-declaration-order-only and match-declaration-order options are present,\n          match-declaration-order-only will take precedence and alphabetical fallback will not occur.\n\n* `shorthand-first` will enforce shorthand properties to appear first, as in:\n\n    ```\n    const obj = { a, c, b: true };\n    ```\n",
     "options": {
       "type": "string",
       "enum": [
+        "ignore-blank-lines",
         "ignore-case",
         "locale-compare",
         "match-declaration-order",
@@ -3189,6 +3269,7 @@
       true,
       [
         true,
+        "ignore-blank-lines",
         "ignore-case",
         "locale-compare",
         "match-declaration-order",
@@ -3962,6 +4043,33 @@
     ]
   },
   {
+    "description": "Disable implicit toString() calls",
+    "descriptionDetails": "\nRequire explicit toString() call for variables used in strings. By default only strings are allowed.\n\nThe following nodes are checked:\n\n* String literals (\"foo\" + bar)\n* ES6 templates (`foo ${bar}`)",
+    "hasFix": true,
+    "optionExamples": [
+      true,
+      [
+        true,
+        {
+          "allow-empty-types": true
+        }
+      ]
+    ],
+    "options": {
+      "properties": {
+        "allow-empty-types": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "optionsDescription": "\nFollowing arguments may be optionally provided:\n* `allow-empty-types` allows `null`, `undefined` and `never` to be passed into strings without explicit conversion",
+    "requiresTypeInfo": true,
+    "ruleName": "strict-string-expressions",
+    "type": "functionality",
+    "typescriptOnly": true
+  },
+  {
     "ruleName": "strict-type-predicates",
     "description": "\nWarns for type predicates that are always true or always false.\nWorks for 'typeof' comparisons to constants (e.g. 'typeof foo === \"string\"'), and equality comparison to 'null'/'undefined'.\n(TypeScript won't let you compare '1 === 2', but it has an exception for '1 === undefined'.)\nDoes not yet work for 'instanceof'.\nDoes *not* warn for 'if (x.y)' where 'x.y' is always truthy. For that, see strict-boolean-expressions.\n\nThis rule requires `strictNullChecks` to work properly.",
     "optionsDescription": "Not configurable.",
@@ -4212,7 +4320,7 @@
   {
     "ruleName": "typedef",
     "description": "Requires type definitions to exist.",
-    "optionsDescription": "\nSeveral arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks non-binding variable declarations.\n* `\"member-variable-declaration\"` checks member variable declarations.\n* `\"object-destructuring\"` checks object destructuring declarations.\n* `\"array-destructuring\"` checks array destructuring declarations.",
+    "optionsDescription": "\nSeveral arguments may be optionally provided:\n\n* `\"call-signature\"` checks return type of functions.\n* `\"arrow-call-signature\"` checks return type of arrow functions.\n* `\"parameter\"` checks type specifier of function parameters for non-arrow functions.\n* `\"arrow-parameter\"` checks type specifier of function parameters for arrow functions.\n* `\"property-declaration\"` checks return types of interface properties.\n* `\"variable-declaration\"` checks non-binding variable declarations.\n* `\"variable-declaration-ignore-function\"` ignore variable declarations for non-arrow and arrow functions.\n* `\"member-variable-declaration\"` checks member variable declarations.\n* `\"object-destructuring\"` checks object destructuring declarations.\n* `\"array-destructuring\"` checks array destructuring declarations.",
     "options": {
       "type": "array",
       "items": {
@@ -4224,13 +4332,14 @@
           "arrow-parameter",
           "property-declaration",
           "variable-declaration",
+          "variable-declaration-ignore-function",
           "member-variable-declaration",
           "object-destructuring",
           "array-destructuring"
         ]
       },
       "minLength": 0,
-      "maxLength": 7
+      "maxLength": 10
     },
     "optionExamples": [
       [

@@ -1,0 +1,16 @@
+---
+description: Ban the usage of for...in statements.
+optionExamples:
+  - 'true'
+options: null
+optionsDescription: Not configurable.
+rationale: >-
+  for...in statements are legacy JavaScript syntax which usually require a verbose `hasOwnProperty` check inside their loop body. These
+  statements can be fully replaced with for...of statements in modern JS & TS.
+ruleName: no-for-in
+type: typescript
+typescriptOnly: false
+layout: rule
+title: 'Rule: no-for-in'
+optionsJSON: 'null'
+---

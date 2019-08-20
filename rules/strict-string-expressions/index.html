@@ -1,0 +1,39 @@
+---
+description: Disable implicit toString() calls
+descriptionDetails: |-
+
+  Require explicit toString() call for variables used in strings. By default only strings are allowed.
+
+  The following nodes are checked:
+
+  * String literals ("foo" + bar)
+  * ES6 templates (`foo ${bar}`)
+hasFix: true
+optionExamples:
+  - 'true'
+  - '[true, {"allow-empty-types": true}]'
+options:
+  properties:
+    allow-empty-types:
+      type: boolean
+  type: object
+optionsDescription: |-
+
+  Following arguments may be optionally provided:
+  * `allow-empty-types` allows `null`, `undefined` and `never` to be passed into strings without explicit conversion
+requiresTypeInfo: true
+ruleName: strict-string-expressions
+type: functionality
+typescriptOnly: true
+layout: rule
+title: 'Rule: strict-string-expressions'
+optionsJSON: |-
+  {
+    "properties": {
+      "allow-empty-types": {
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  }
+---
