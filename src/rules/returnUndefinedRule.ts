@@ -61,7 +61,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     });
 
     function check(node: ts.ReturnStatement): void {
-        const actualReturnKind = returnKindFromReturn(node);
+        const actualReturnKind = getReturnKindFromReturnStatement(node);
         if (actualReturnKind === undefined) {
             return;
         }
@@ -72,7 +72,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
             return;
         }
 
-        const returnKindFromType = getReturnKind(functionReturningFrom, checker);
+        const returnKindFromType = getReturnKindFromFunction(functionReturningFrom, checker);
         if (returnKindFromType !== undefined && returnKindFromType !== actualReturnKind) {
             ctx.addFailureAtNode(
                 node,
@@ -84,7 +84,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     }
 }
 
-function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
+function getReturnKindFromReturnStatement(node: ts.ReturnStatement): ReturnKind | undefined {
     if (node.expression === undefined) {
         return ReturnKind.Void;
     } else if (isIdentifier(node.expression) && node.expression.text === "undefined") {
@@ -94,9 +94,9 @@ function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined 
     }
 }
 
-enum ReturnKind {
-    Void,
-    Value,
+const enum ReturnKind {
+    Void = "void",
+    Value = "value",
 }
 
 type FunctionLike =
@@ -108,7 +108,10 @@ type FunctionLike =
     | ts.GetAccessorDeclaration
     | ts.SetAccessorDeclaration;
 
-function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind | undefined {
+function getReturnKindFromFunction(
+    node: FunctionLike,
+    checker: ts.TypeChecker,
+): ReturnKind | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.Constructor:
         case ts.SyntaxKind.SetAccessor:
@@ -134,13 +137,15 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
     if (returnType === undefined || isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
         return undefined;
     }
-    if (
-        (hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
-            ? isEffectivelyVoidPromise
-            : isEffectivelyVoid)(returnType)
-    ) {
+
+    const effectivelyVoidChecker = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+        ? isEffectivelyVoidPromise
+        : isEffectivelyVoid;
+
+    if (effectivelyVoidChecker(returnType)) {
         return ReturnKind.Void;
     }
+
     return ReturnKind.Value;
 }
 
