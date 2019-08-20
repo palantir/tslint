@@ -1,5 +1,36 @@
 # Change Log
 
+## v5.19.0
+
+- [bugfix] relax [`promise-function-async`](https://palantir.github.io/tslint/rules/promise-function-async/) for short parenthesized arrow functions (#4765)
+- [bugfix] fix [`no-async-without-await`](https://palantir.github.io/tslint/rules/no-async-without-await/) false positive for abstract methods (#4782)
+- [bugfix] fix [`strict-comparison`](https://palantir.github.io/tslint/rules/strict-comparison/) false positive for `null` and `undefined` literals (#4786)
+- [bugfix] improve [`no-angle-bracket-type-assertion`](https://palantir.github.io/tslint/rules/no-angle-bracket-type-assertion/) autofix semantics with more parentheses (#4823)
+- [enhancement] add BigInt support to [`restrict-plus-operands`](https://palantir.github.io/tslint/rules/restrict-plus-operands/) rule (#4814)
+- [enhancement] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) now supports new TypeScript 3.6 AST API symbols for async iterators (#4800)
+- [new-rule-option] `check-strings` and `check-regex` options for [`max-line-length`](https://palantir.github.io/tslint/rules/max-line-length/) rule (#4798)
+- [new-rule-option] `variable-declaration-ignore-function` option for [`typedef`](https://palantir.github.io/tslint/rules/typedef/) rule (#4769)
+- [new-rule-option] `ignore-blank-lines` option for [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) rule (#4808)
+- [new-rule] [`no-for-in`](https://palantir.github.io/tslint/rules/no-for-in/) (#4747)
+- [new-rule] [`no-invalid-void`](https://palantir.github.io/tslint/rules/no-invalid-void/) (#4736)
+- [new-rule] [`strict-string-expressions`](https://palantir.github.io/tslint/rules/strict-string-expressions/) reports errors on type coercions found in string expressions (#4807)
+- [new-rule] ['no-promise-as-boolean'](https://palantir.github.io/tslint/rules/no-promise-as-boolean/) (#4790)
+- [docs] link to OSS fellowship medium post in README (#4821)
+
+Thanks to our contributors!
+
+- Josh Pike
+- Tanmoy Bhowmik
+- Michael Withagen
+- Evgeniy Timokhov
+- Vitalij Krotov
+- Josh Goldberg
+- Veda
+- Guido
+- Robert Fink
+- Max Sysoev
+
+
 ## v5.18.0
 
 - [feature] New `--print-config` CLI flag (#4744)
