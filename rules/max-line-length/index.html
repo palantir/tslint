@@ -19,6 +19,8 @@ optionsDescription: |-
        * `^export {(.*?)}` pattern will ignore all multiple export statements.
        * `class [a-zA-Z]+ implements ` pattern will ignore all class declarations implementing interfaces.
        * `^import |^export {(.*?)}|class [a-zA-Z]+ implements |// ` pattern will ignore all the cases listed above.
+    * `check-strings` - determines if strings should be checked, `false` by default.
+    * `check-regex` - determines if regular expressions should be checked, `false` by default.
    
 options:
   type: array
@@ -31,12 +33,25 @@ options:
             type: number
           ignore-pattern:
             type: string
+          check-strings:
+            type: boolean
+          check-regex:
+            type: boolean
         additionalProperties: false
   minLength: 1
   maxLength: 2
 optionExamples:
   - '[true, 120]'
-  - '[true, {"limit": 120, "ignore-pattern": "^import |^export {(.*?)}"}]'
+  - |-
+    [
+      true,
+      {
+        "limit": 120,
+        "ignore-pattern": "^import |^export {(.*?)}",
+        "check-strings": true,
+        "check-regex": true
+      }
+    ]
 type: formatting
 typescriptOnly: false
 layout: rule
@@ -57,6 +72,12 @@ optionsJSON: |-
             },
             "ignore-pattern": {
               "type": "string"
+            },
+            "check-strings": {
+              "type": "boolean"
+            },
+            "check-regex": {
+              "type": "boolean"
             }
           },
           "additionalProperties": false

@@ -11,6 +11,7 @@ optionsDescription: |-
   * `"arrow-parameter"` checks type specifier of function parameters for arrow functions.
   * `"property-declaration"` checks return types of interface properties.
   * `"variable-declaration"` checks non-binding variable declarations.
+  * `"variable-declaration-ignore-function"` ignore variable declarations for non-arrow and arrow functions.
   * `"member-variable-declaration"` checks member variable declarations.
   * `"object-destructuring"` checks object destructuring declarations.
   * `"array-destructuring"` checks array destructuring declarations.
@@ -25,11 +26,12 @@ options:
       - arrow-parameter
       - property-declaration
       - variable-declaration
+      - variable-declaration-ignore-function
       - member-variable-declaration
       - object-destructuring
       - array-destructuring
   minLength: 0
-  maxLength: 7
+  maxLength: 10
 optionExamples:
   - '[true, "call-signature", "parameter", "member-variable-declaration"]'
 type: typescript
@@ -196,12 +198,13 @@ optionsJSON: |-
         "arrow-parameter",
         "property-declaration",
         "variable-declaration",
+        "variable-declaration-ignore-function",
         "member-variable-declaration",
         "object-destructuring",
         "array-destructuring"
       ]
     },
     "minLength": 0,
-    "maxLength": 7
+    "maxLength": 10
   }
 ---
