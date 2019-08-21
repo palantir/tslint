@@ -14,7 +14,7 @@
 - [new-rule] [`no-for-in`](https://palantir.github.io/tslint/rules/no-for-in/) (#4747)
 - [new-rule] [`invalid-void`](https://palantir.github.io/tslint/rules/invalid-void/) (#4736)
 - [new-rule] [`strict-string-expressions`](https://palantir.github.io/tslint/rules/strict-string-expressions/) reports errors on type coercions found in string expressions (#4807)
-- [new-rule] ['no-promise-as-boolean'](https://palantir.github.io/tslint/rules/no-promise-as-boolean/) (#4790)
+- [new-rule] [`no-promise-as-boolean`](https://palantir.github.io/tslint/rules/no-promise-as-boolean/) (#4790)
 - [docs] link to OSS fellowship medium post in README (#4821)
 
 Thanks to our contributors!
