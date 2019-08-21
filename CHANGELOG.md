@@ -12,7 +12,7 @@
 - [new-rule-option] `variable-declaration-ignore-function` option for [`typedef`](https://palantir.github.io/tslint/rules/typedef/) rule (#4769)
 - [new-rule-option] `ignore-blank-lines` option for [`object-literal-sort-keys`](https://palantir.github.io/tslint/rules/object-literal-sort-keys/) rule (#4808)
 - [new-rule] [`no-for-in`](https://palantir.github.io/tslint/rules/no-for-in/) (#4747)
-- [new-rule] [`no-invalid-void`](https://palantir.github.io/tslint/rules/no-invalid-void/) (#4736)
+- [new-rule] [`invalid-void`](https://palantir.github.io/tslint/rules/invalid-void/) (#4736)
 - [new-rule] [`strict-string-expressions`](https://palantir.github.io/tslint/rules/strict-string-expressions/) reports errors on type coercions found in string expressions (#4807)
 - [new-rule] ['no-promise-as-boolean'](https://palantir.github.io/tslint/rules/no-promise-as-boolean/) (#4790)
 - [docs] link to OSS fellowship medium post in README (#4821)
