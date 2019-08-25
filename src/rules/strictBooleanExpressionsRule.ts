@@ -153,7 +153,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker: ts.TypeChecker): void {
                     // on the left side because it will be checked well enough on its own.  However,
                     // if ignore-rhs is on, we have to analyze the overall result of the left
                     // side no matter what, because its right side might not follow the rules.
-                    if (options.ignoreRhs || !isBooleanBinaryExpression(left)) {
+                    if (!isBooleanBinaryExpression(left)) {
                         checkExpression(left, b);
                     }
                     // If ignore-rhs is on, we don't have to analyze the right hand side

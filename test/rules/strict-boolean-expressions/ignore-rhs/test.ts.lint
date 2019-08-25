@@ -25,28 +25,54 @@ anyType && boolType;
 numType && boolType;
 ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
 boolType && strType;
+
 boolType && objType && enumType;
-#if typescript < 2.2.0
-~~~~~~~~~~~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
-#endif
+
+boolType && objType || enumType;
+
+boolType || objType && enumType;
+            ~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+
+boolType || objType || enumType;
+
 bwrapType && boolType;
 ~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
 
 boolType || classType;
 boolType || anyType;
 boolType || numType;
+
 strType || boolType;
 ~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+
 bwrapType || boolType;
 ~~~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+
 objType || boolType || enumType;
 ~~~~~~~                          [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
-~~~~~~~~~~~~~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+
 boolExpr && strType;
+
 numType || boolExpr;
 ~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
+
 numType && boolExpr || strType;
 ~~~~~~~                         [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
-~~~~~~~~~~~~~~~~~~~             [This type is not allowed in the operand for the '||' operator because it could be a number. Only booleans are allowed.]
+
 bwrapType || boolExpr && bwrapType;
 ~~~~~~~~~                           [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+
+let bool1:boolean = true
+let bool2:boolean = true
+let obj:{}|undefined = {}
+
+bool1 && obj && bool2
+bool1 && bool2 && obj
+boolExpr && numType || strType;
+boolExpr || numType || strType;
+boolExpr || numType && strType;
+            ~~~~~~~             [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+boolExpr && numType && strType;
+boolExpr || boolType && strType;
+boolExpr || boolType || strType;
+boolExpr && boolType || strType;
