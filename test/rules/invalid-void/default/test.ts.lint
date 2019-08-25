@@ -99,6 +99,12 @@ type UnionType3 = string | (number & any | (string | void));
 type IntersectionType = string & number & void;
                                           ~~~~ [0]
 
+function returnsVoidPromiseDirectly(): Promise<void> {
+    return Promise.resolve();
+}
+
+async function returnsVoidPromiseAsync(): Promise<void> {}
+
 #if typescript >= 2.8.0
 type MappedType<T> = {
     [K in keyof T]: void;

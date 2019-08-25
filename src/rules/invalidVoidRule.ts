@@ -19,6 +19,12 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+const OPTION_ALLOW_GENERICS = "allow-generics";
+
+interface Options {
+    allowGenerics: boolean | Set<string>;
+}
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
@@ -32,9 +38,26 @@ export class Rule extends Lint.Rules.AbstractRule {
             So "nothing" cannot be mixed with any other types.
             If you need this - use \`undefined\` type instead.`,
         hasFix: false,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+        optionsDescription: Lint.Utils.dedent`
+            If \`${OPTION_ALLOW_GENERICS}\` is specified as \`true\`, then generic types will always be allowed to to be \`void\`.
+            Alternately, provide an array of strings for \`${OPTION_ALLOW_GENERICS}\` to exclusively allow those.`,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_GENERICS]: {
+                    oneOf: [
+                        { type: "boolean" },
+                        { type: "array", items: { type: "string" }, minLength: 1 },
+                    ],
+                },
+            },
+            additionalProperties: false,
+        },
+        optionExamples: [
+            true,
+            [true, { [OPTION_ALLOW_GENERICS]: true }],
+            [true, { [OPTION_ALLOW_GENERICS]: ["Promise", "PromiseLike"] }],
+        ],
         type: "maintainability",
         typescriptOnly: true,
     };
@@ -43,7 +66,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "void is not a valid type other than return types";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(sourceFile, walk, {
+            // tslint:disable-next-line:no-object-literal-type-assertion
+            allowGenerics: this.getAllowGenerics(this.ruleArguments[0] as boolean | string[] | undefined)
+        });
+    }
+
+    private getAllowGenerics(rawArgument: boolean | string[] | undefined) {
+        return rawArgument instanceof Array
+            ? new Set(rawArgument)
+            : !!rawArgument;
     }
 }
 
@@ -75,10 +107,28 @@ const failedKinds = new Set([
     ts.SyntaxKind.CallExpression,
 ]);
 
-function walk(ctx: Lint.WalkContext): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const isWhitelistedTypeReferenceNode = (node: ts.Node) => {
+        if (!ts.isTypeReferenceNode(node)) {
+            return false;
+        }
+
+        if (!(ctx.options.allowGenerics instanceof Set)) {
+            return ctx.options.allowGenerics;
+        }
+
+        if (!ts.isIdentifier(node.typeName)) {
+            return false;
+        }
+
+        return ctx.options.allowGenerics.has(node.typeName.text)
+    }
+
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node) {
         if (node.kind === ts.SyntaxKind.VoidKeyword && failedKinds.has(node.parent.kind)) {
-            ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (!isWhitelistedTypeReferenceNode(node.parent)) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
 
         ts.forEachChild(node, cb);

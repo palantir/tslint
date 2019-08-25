@@ -1,0 +1,7 @@
+type Generic<T> = [T];
+type GenericVoid = Generic<void>;
+
+function takeVoid(thing: void) { }
+                         ~~~~ [0]
+
+[0]: void is not a valid type other than return types
