@@ -28,7 +28,19 @@ import * as ts from "typescript";
 
 import * as Lint from "..";
 
-const OPTION_NEVER = "never";
+const OPTION_VALUE_NEVER = "never";
+const OPTION_KEY_PROPERTY = "property";
+const OPTION_KEY_METHOD = "method";
+
+interface RawOptions {
+    [OPTION_KEY_PROPERTY]?: "never" | "always";
+    [OPTION_KEY_METHOD]?: "never" | "always";
+}
+
+interface Options {
+    enforceShorthandMethods: boolean;
+    enforceShorthandProperties: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -37,12 +49,37 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces/disallows use of ES6 object literal shorthand.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
-        If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.`,
+        If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.
+        With \`{"property": "never"}\` provided, the rule fails on property shothands only,
+        and respectively with \`{"method": "never"}\`, the rule fails only on method shorthands`,
         options: {
-            type: "string",
-            enum: [OPTION_NEVER],
+            oneOf: [
+                {
+                    type: "string",
+                    enum: [OPTION_VALUE_NEVER],
+                },
+                {
+                    type: "object",
+                    properties: {
+                        [OPTION_KEY_PROPERTY]: {
+                            type: "string",
+                            enum: [OPTION_VALUE_NEVER],
+                        },
+                        [OPTION_KEY_METHOD]: {
+                            type: "string",
+                            enum: [OPTION_VALUE_NEVER],
+                        },
+                    },
+                    minProperties: 1,
+                    maxProperties: 2,
+                },
+            ],
         },
-        optionExamples: [true, [true, OPTION_NEVER]],
+        optionExamples: [
+            true,
+            [true, OPTION_VALUE_NEVER],
+            [true, { [OPTION_KEY_PROPERTY]: OPTION_VALUE_NEVER }],
+        ],
         type: "style",
         typescriptOnly: false,
     };
@@ -52,69 +89,96 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static LONGHAND_METHOD = "Expected method shorthand in object literal ";
     public static SHORTHAND_ASSIGNMENT = "Shorthand property assignments have been disallowed.";
 
+    public static getLonghandPropertyErrorMessage(nodeText: string) {
+        return `Expected property shorthand in object literal ('${nodeText}').`;
+    }
+    public static getLonghandMethodErrorMessage(nodeText: string) {
+        return `Expected method shorthand in object literal ('${nodeText}').`;
+    }
+    public static getDisallowedShorthandErrorMessage(options: Options) {
+        if (options.enforceShorthandMethods && !options.enforceShorthandProperties) {
+            return "Shorthand property assignments have been disallowed.";
+        } else if (!options.enforceShorthandMethods && options.enforceShorthandProperties) {
+            return "Shorthand method assignments have been disallowed.";
+        }
+        return "Shorthand property and method assignments have been disallowed.";
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(
-            sourceFile,
-            this.ruleArguments.indexOf(OPTION_NEVER) === -1
-                ? enforceShorthandWalker
-                : disallowShorthandWalker,
+        return this.applyWithFunction(sourceFile, walk, this.parseOptions(this.ruleArguments));
+    }
+
+    private parseOptions(options: Array<string | RawOptions>): Options {
+        if (options.indexOf(OPTION_VALUE_NEVER) !== -1) {
+            return {
+                enforceShorthandMethods: false,
+                enforceShorthandProperties: false,
+            };
+        }
+        const optionsObject: RawOptions | undefined = options.find(
+            (el: string | RawOptions): el is RawOptions =>
+                typeof el === "object" &&
+                (el[OPTION_KEY_PROPERTY] === "never" || el[OPTION_KEY_METHOD] === "never"),
         );
+        if (optionsObject !== undefined) {
+            return {
+                enforceShorthandMethods: !(optionsObject[OPTION_KEY_METHOD] === "never"),
+                enforceShorthandProperties: !(optionsObject[OPTION_KEY_PROPERTY] === "never"),
+            };
+        } else {
+            return {
+                enforceShorthandMethods: true,
+                enforceShorthandProperties: true,
+            };
+        }
     }
 }
 
-function disallowShorthandWalker(ctx: Lint.WalkContext) {
+function walk(ctx: Lint.WalkContext<Options>) {
+    const { enforceShorthandMethods, enforceShorthandProperties } = ctx.options;
     return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isShorthandPropertyAssignment(node)) {
+        if (
+            enforceShorthandProperties &&
+            isPropertyAssignment(node) &&
+            node.name.kind === ts.SyntaxKind.Identifier &&
+            isIdentifier(node.initializer) &&
+            node.name.text === node.initializer.text
+        ) {
+            ctx.addFailureAtNode(
+                node,
+                Rule.getLonghandPropertyErrorMessage(`{${node.name.text}}`),
+                Lint.Replacement.deleteFromTo(node.name.end, node.end),
+            );
+        } else if (
+            enforceShorthandMethods &&
+            isPropertyAssignment(node) &&
+            isFunctionExpression(node.initializer) &&
+            // allow named function expressions
+            node.initializer.name === undefined
+        ) {
+            const [name, fix] = handleLonghandMethod(node.name, node.initializer, ctx.sourceFile);
+            ctx.addFailure(
+                node.getStart(ctx.sourceFile),
+                getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!.pos,
+                Rule.getLonghandMethodErrorMessage(`{${name}() {...}}`),
+                fix,
+            );
+        } else if (!enforceShorthandProperties && isShorthandPropertyAssignment(node)) {
             ctx.addFailureAtNode(
                 node.name,
-                Rule.SHORTHAND_ASSIGNMENT,
+                Rule.getDisallowedShorthandErrorMessage(ctx.options),
                 Lint.Replacement.appendText(node.getStart(ctx.sourceFile), `${node.name.text}: `),
             );
         } else if (
+            !enforceShorthandMethods &&
             isMethodDeclaration(node) &&
             node.parent.kind === ts.SyntaxKind.ObjectLiteralExpression
         ) {
             ctx.addFailureAtNode(
                 node.name,
-                Rule.SHORTHAND_ASSIGNMENT,
+                Rule.getDisallowedShorthandErrorMessage(ctx.options),
                 fixShorthandMethodDeclaration(node, ctx.sourceFile),
             );
-        }
-        return ts.forEachChild(node, cb);
-    });
-}
-
-function enforceShorthandWalker(ctx: Lint.WalkContext) {
-    return ts.forEachChild(ctx.sourceFile, function cb(node): void {
-        if (isPropertyAssignment(node)) {
-            if (
-                node.name.kind === ts.SyntaxKind.Identifier &&
-                isIdentifier(node.initializer) &&
-                node.name.text === node.initializer.text
-            ) {
-                ctx.addFailureAtNode(
-                    node,
-                    `${Rule.LONGHAND_PROPERTY}('{${node.name.text}}').`,
-                    Lint.Replacement.deleteFromTo(node.name.end, node.end),
-                );
-            } else if (
-                isFunctionExpression(node.initializer) &&
-                // allow named function expressions
-                node.initializer.name === undefined
-            ) {
-                const [name, fix] = handleLonghandMethod(
-                    node.name,
-                    node.initializer,
-                    ctx.sourceFile,
-                );
-                ctx.addFailure(
-                    node.getStart(ctx.sourceFile),
-                    getChildOfKind(node.initializer, ts.SyntaxKind.OpenParenToken, ctx.sourceFile)!
-                        .pos,
-                    `${Rule.LONGHAND_METHOD}('{${name}() {...}}').`,
-                    fix,
-                );
-            }
         }
         return ts.forEachChild(node, cb);
     });
