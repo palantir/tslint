@@ -10,6 +10,8 @@ let yy: number[][] = [[4, 5], [6]];
 let ya = [[1, "2"]] as Array<[number, string]>;
 
 type Arr<T> = T[];
+type ParenthesisArr<T> = (T)[];
+type DoubleParenthesisArr<T> = ((T))[];
 
 // Ignore user defined aliases
 let yyyy: Arr<Array<Array<Arr<string>>>> = [[[["2"]]]];
@@ -38,9 +40,11 @@ let barVar: Array<(c: number) => number>;
 
 type fooUnion = Array<string|number|boolean>;
 type barUnion = Array<string|number|boolean>;
+type bazUnion = Array<(string|number|boolean)>;
 
 type fooIntersection = Array<string & number>;
 type barIntersection = Array<string & number>;
+type bazIntersection = Array<(string & number)>;
 
 namespace fooName {
     type BarType = { bar: string };
