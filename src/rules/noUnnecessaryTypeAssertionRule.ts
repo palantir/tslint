@@ -44,9 +44,10 @@ export class Rule extends Lint.Rules.TypedRule {
         "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        const strictChecksEnabled = !!program.getCompilerOptions().strict;
-        const strictNullChecksEnabled = program.getCompilerOptions().strictNullChecks === true;
-        const strictNullChecksNotDisabled = program.getCompilerOptions().strictNullChecks !== false;
+        const compilerOptions = program.getCompilerOptions();
+        const strictChecksEnabled = !!compilerOptions.strict;
+        const strictNullChecksEnabled = compilerOptions.strictNullChecks === true;
+        const strictNullChecksNotDisabled = compilerOptions.strictNullChecks !== false;
 
         return this.applyWithWalker(
             new Walker(
