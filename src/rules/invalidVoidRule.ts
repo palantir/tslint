@@ -26,9 +26,11 @@ interface Options {
     allowGenerics: boolean | Set<string>;
 }
 
-type RawOptions = undefined | {
-    [OPTION_ALLOW_GENERICS]?: boolean | Set<string>;
-}
+type RawOptions =
+    | undefined
+    | {
+          [OPTION_ALLOW_GENERICS]?: boolean | Set<string>;
+      };
 
 type GenericReference = ts.NewExpression | ts.TypeReferenceNode;
 
@@ -84,7 +86,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 
     private getAllowGenerics(rawArgument: RawOptions) {
-        if (!rawArgument) {
+        if (rawArgument == undefined) {
             return true;
         }
 
@@ -128,9 +130,9 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         : Rule.FAILURE_STRING_NO_GENERICS;
 
     const getGenericReferenceName = (node: GenericReference) => {
-        const rawName = ts.isNewExpression(node) ? node.expression : node.typeName;
+        const rawName = tsutils.isNewExpression(node) ? node.expression : node.typeName;
 
-        return ts.isIdentifier(rawName) ? rawName.text : rawName.getText(ctx.sourceFile);
+        return tsutils.isIdentifier(rawName) ? rawName.text : rawName.getText(ctx.sourceFile);
     };
 
     const getTypeReferenceFailure = (node: GenericReference) => {
@@ -162,7 +164,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         }
 
         return (
-            ts.isNewExpression(parent) &&
+            tsutils.isNewExpression(parent) &&
             parent.typeArguments !== undefined &&
             ts.isTypeNode(node) &&
             parent.typeArguments.indexOf(node) !== -1
