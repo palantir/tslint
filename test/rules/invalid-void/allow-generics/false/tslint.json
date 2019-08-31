@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "invalid-void": [true, {
+      "allow-generics": false
+    }]
+  }
+}

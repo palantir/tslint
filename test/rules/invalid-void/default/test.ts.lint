@@ -75,9 +75,9 @@ class ClassName {
                                ~~~~ [0]
 }
 
-let invalidMap: Map<string, void> = new Map<string, void>();
-                            ~~~~ [0]
-                                                    ~~~~ [0]
+let voidPromise: Promise<void> = new Promise<void>(() => {});
+
+let voidMap: Map<string, void> = new Map<string, void>();
 
 let letVoid: void;
              ~~~~ [0]
@@ -124,4 +124,4 @@ function foo(arr: readonly void[]) { }
                            ~~~~ [0]
 #endif
 
-[0]: void is not a valid type other than return types
+[0]: void is not a valid type other than generic or return types

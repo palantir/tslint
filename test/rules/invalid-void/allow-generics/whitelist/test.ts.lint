@@ -3,9 +3,10 @@ type AllowedVoid = Allowed<void>;
 
 type Banned<T> = [T];
 type BannedVoid = Banned<void>;
-                         ~~~~ [0]
+                         ~~~~ [Generic % ('Banned')]
 
 function takeVoid(thing: void) { }
                          ~~~~ [0]
 
-[0]: void is not a valid type other than return types
+[0]: void is not a valid type other than generic or return types
+[Generic]: %s may not have void as a generic type

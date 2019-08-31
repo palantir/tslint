@@ -25,12 +25,18 @@ interface Options {
     allowGenerics: boolean | Set<string>;
 }
 
+interface RawOptions {
+    [OPTION_ALLOW_GENERICS]?: boolean | Set<string>;
+}
+
+type GenericReference = ts.NewExpression | ts.TypeReferenceNode;
+
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "invalid-void",
         description: Lint.Utils.dedent`
-            Disallows usage of \`void\` type outside of return type.
+            Disallows usage of \`void\` type outside of generic or return types.
             If \`void\` is used as return type, it shouldn't be a part of intersection/union type.`,
         rationale: Lint.Utils.dedent`
             The \`void\` type means "nothing" or that a function does not return any value,
@@ -39,8 +45,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             If you need this - use \`undefined\` type instead.`,
         hasFix: false,
         optionsDescription: Lint.Utils.dedent`
-            If \`${OPTION_ALLOW_GENERICS}\` is specified as \`true\`, then generic types will always be allowed to to be \`void\`.
-            Alternately, provide an array of strings for \`${OPTION_ALLOW_GENERICS}\` to exclusively allow those.`,
+            If \`${OPTION_ALLOW_GENERICS}\` is specified as \`false\`, then generic types will no longer be allowed to to be \`void\`.
+            Alternately, provide an array of strings for \`${OPTION_ALLOW_GENERICS}\` to exclusively allow generic types by those names.`,
         options: {
             type: "object",
             properties: {
@@ -55,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             true,
-            [true, { [OPTION_ALLOW_GENERICS]: true }],
+            [true, { [OPTION_ALLOW_GENERICS]: false }],
             [true, { [OPTION_ALLOW_GENERICS]: ["Promise", "PromiseLike"] }],
         ],
         type: "maintainability",
@@ -63,19 +69,27 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "void is not a valid type other than return types";
+    public static FAILURE_STRING_ALLOW_GENERICS =
+        "void is not a valid type other than generic or return types";
+    public static FAILURE_STRING_NO_GENERICS = "void is not a valid type other than return types";
+    public static FAILURE_WRONG_GENERIC = (genericName: string) =>
+        `${genericName} may not have void as a generic type`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
             // tslint:disable-next-line:no-object-literal-type-assertion
-            allowGenerics: this.getAllowGenerics(this.ruleArguments[0] as boolean | string[] | undefined)
+            allowGenerics: this.getAllowGenerics(this.ruleArguments[0] as RawOptions),
         });
     }
 
-    private getAllowGenerics(rawArgument: boolean | string[] | undefined) {
-        return rawArgument instanceof Array
-            ? new Set(rawArgument)
-            : !!rawArgument;
+    private getAllowGenerics(rawArgument: RawOptions) {
+        if (!rawArgument) {
+            return true;
+        }
+
+        const allowGenerics = rawArgument[OPTION_ALLOW_GENERICS];
+
+        return allowGenerics instanceof Array ? new Set(allowGenerics) : !!allowGenerics;
     }
 }
 
@@ -108,26 +122,62 @@ const failedKinds = new Set([
 ]);
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const isWhitelistedTypeReferenceNode = (node: ts.Node) => {
-        if (!ts.isTypeReferenceNode(node)) {
-            return false;
-        }
+    const defaultFailureString = ctx.options.allowGenerics
+        ? Rule.FAILURE_STRING_ALLOW_GENERICS
+        : Rule.FAILURE_STRING_NO_GENERICS;
 
-        if (!(ctx.options.allowGenerics instanceof Set)) {
-            return ctx.options.allowGenerics;
-        }
+    const getGenericReferenceName = (node: GenericReference) => {
+        const rawName = ts.isNewExpression(node)
+            ? node.expression
+            : node.typeName;
 
-        if (!ts.isIdentifier(node.typeName)) {
-            return false;
-        }
-
-        return ctx.options.allowGenerics.has(node.typeName.text)
+        return ts.isIdentifier(rawName)
+            ? rawName.text
+            : rawName.getText(ctx.sourceFile);
     }
+
+    const getTypeReferenceFailure = (node: GenericReference) => {
+        if (!(ctx.options.allowGenerics instanceof Set)) {
+            return ctx.options.allowGenerics ? undefined : defaultFailureString;
+        }
+
+        const genericName = getGenericReferenceName(node);
+
+        return ctx.options.allowGenerics.has(genericName)
+            ? undefined
+            : Rule.FAILURE_WRONG_GENERIC(genericName);
+    };
+
+    const checkTypeReference = (parent: GenericReference, node: ts.Node) => {
+        const failure = getTypeReferenceFailure(parent);
+
+        if (failure !== undefined) {
+            ctx.addFailureAtNode(node, failure);
+        }
+    };
+
+    const isParentGenericReference = (
+        parent: ts.Node,
+        node: ts.Node,
+    ): parent is GenericReference => {
+        if (ts.isTypeReferenceNode(parent)) {
+            return true;
+        }
+
+        return (
+            ts.isNewExpression(parent) &&
+            parent.typeArguments !== undefined &&
+            ts.isTypeNode(node) &&
+            parent.typeArguments.indexOf(node) !== -1
+        );
+    };
 
     ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node) {
         if (node.kind === ts.SyntaxKind.VoidKeyword && failedKinds.has(node.parent.kind)) {
-            if (!isWhitelistedTypeReferenceNode(node.parent)) {
-                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            if (isParentGenericReference(node.parent, node)) {
+                checkTypeReference(node.parent, node);
+            } else {
+                ctx.addFailureAtNode(node, defaultFailureString);
             }
         }
 
