@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -25,7 +26,7 @@ interface Options {
     allowGenerics: boolean | Set<string>;
 }
 
-interface RawOptions {
+type RawOptions = undefined | {
     [OPTION_ALLOW_GENERICS]?: boolean | Set<string>;
 }
 
@@ -89,7 +90,7 @@ export class Rule extends Lint.Rules.AbstractRule {
 
         const allowGenerics = rawArgument[OPTION_ALLOW_GENERICS];
 
-        return allowGenerics instanceof Array ? new Set(allowGenerics) : !!allowGenerics;
+        return allowGenerics instanceof Array ? new Set(allowGenerics) : Boolean(allowGenerics);
     }
 }
 
@@ -127,14 +128,10 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         : Rule.FAILURE_STRING_NO_GENERICS;
 
     const getGenericReferenceName = (node: GenericReference) => {
-        const rawName = ts.isNewExpression(node)
-            ? node.expression
-            : node.typeName;
+        const rawName = ts.isNewExpression(node) ? node.expression : node.typeName;
 
-        return ts.isIdentifier(rawName)
-            ? rawName.text
-            : rawName.getText(ctx.sourceFile);
-    }
+        return ts.isIdentifier(rawName) ? rawName.text : rawName.getText(ctx.sourceFile);
+    };
 
     const getTypeReferenceFailure = (node: GenericReference) => {
         if (!(ctx.options.allowGenerics instanceof Set)) {
@@ -160,7 +157,7 @@ function walk(ctx: Lint.WalkContext<Options>): void {
         parent: ts.Node,
         node: ts.Node,
     ): parent is GenericReference => {
-        if (ts.isTypeReferenceNode(parent)) {
+        if (tsutils.isTypeReferenceNode(parent)) {
             return true;
         }
 
