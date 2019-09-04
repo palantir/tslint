@@ -25,7 +25,7 @@ import { isCamelCased, isKebabCased, isPascalCased, isSnakeCased } from "../util
 enum Casing {
     CamelCase = "camel-case",
     PascalCase = "pascal-case",
-    Ignored = "ignored",
+    Ignored = "ignore",
     KebabCase = "kebab-case",
     SnakeCase = "snake-case",
 }
@@ -40,7 +40,13 @@ type ValidationResult = Casing | undefined;
 
 type Validator<T extends Config> = (sourceFile: ts.SourceFile, casing: T) => ValidationResult;
 
-const rules = [Casing.CamelCase, Casing.PascalCase, Casing.KebabCase, Casing.SnakeCase];
+const rules = [
+    Casing.CamelCase,
+    Casing.Ignored,
+    Casing.PascalCase,
+    Casing.KebabCase,
+    Casing.SnakeCase,
+];
 
 const validCasingOptions = new Set(rules);
 
