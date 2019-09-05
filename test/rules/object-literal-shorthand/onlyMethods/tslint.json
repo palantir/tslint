@@ -3,7 +3,8 @@
         "object-literal-shorthand": [
             true,
             {
-                "property": "never"
+                "property": "never",
+                "method": "always"
             }
         ]
     }

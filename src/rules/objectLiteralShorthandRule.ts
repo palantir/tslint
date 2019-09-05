@@ -49,9 +49,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         description: "Enforces/disallows use of ES6 object literal shorthand.",
         hasFix: true,
         optionsDescription: Lint.Utils.dedent`
-        If the \'never\' option is provided, any shorthand object literal syntax will cause a failure.
-        With \`{"property": "never"}\` provided, the rule fails on property shothands only,
-        and respectively with \`{"method": "never"}\`, the rule fails only on method shorthands`,
+        \`"always"\` assumed to be default option, thus with no options provided
+        the rule enforces object literal methods and properties shorthands.
+        With \`"never"\` option provided, any shorthand object literal syntax causes an error.
+
+        The rule can be configured in a more granular way.
+        With \`{"property": "never"}\` provided (which is equivalent to \`{"property": "never", "method": "always"}\`),
+        the rule only flags property shorthand assignments,
+        and respectively with \`{"method": "never"}\` (equivalent to \`{"property": "always", "method": "never"}\`),
+        the rule fails only on method shorthands.`,
         options: {
             oneOf: [
                 {
@@ -118,12 +124,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         const optionsObject: RawOptions | undefined = options.find(
             (el: string | RawOptions): el is RawOptions =>
                 typeof el === "object" &&
-                (el[OPTION_KEY_PROPERTY] === "never" || el[OPTION_KEY_METHOD] === "never"),
+                (el[OPTION_KEY_PROPERTY] === OPTION_VALUE_NEVER ||
+                    el[OPTION_KEY_METHOD] === OPTION_VALUE_NEVER),
         );
         if (optionsObject !== undefined) {
             return {
-                enforceShorthandMethods: !(optionsObject[OPTION_KEY_METHOD] === "never"),
-                enforceShorthandProperties: !(optionsObject[OPTION_KEY_PROPERTY] === "never"),
+                enforceShorthandMethods: !(optionsObject[OPTION_KEY_METHOD] === OPTION_VALUE_NEVER),
+                enforceShorthandProperties: !(
+                    optionsObject[OPTION_KEY_PROPERTY] === OPTION_VALUE_NEVER
+                ),
             };
         } else {
             return {
