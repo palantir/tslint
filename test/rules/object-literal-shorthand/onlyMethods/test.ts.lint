@@ -1,4 +1,4 @@
-const bad = {
+const badMethodsGoodProps = {
   w: function() {},
   ~~~~~~~~~~~ [LONGHAND_METHOD % ("('{w() {...}}')")]
   x: function *() {},
@@ -6,14 +6,14 @@ const bad = {
   [y]: function() {},
   ~~~~~~~~~~~~~  [LONGHAND_METHOD % ("('{[y]() {...}}')")]
   z: z
-  ~~~~  [Expected property shorthand in object literal ('{z}').]
 };
 
-const good = {
+const goodMethodsBadProps = {
   w() {},
   *x() {},
   [y]() {},
   z
+  ~  [OBJECT_LITERAL_DISALLOWED]
 };
 
 const arrows = {
@@ -32,12 +32,12 @@ const quotes = {
 
 const extraCases = {
   x,
+  ~  [OBJECT_LITERAL_DISALLOWED]
   a: 123,
   b: "hello",
   c: 'c',
   ["a" + "nested"]: {
     x: x
-    ~~~~  [Expected property shorthand in object literal ('{x}').]
   }
 };
 
@@ -49,7 +49,10 @@ const asyncFn = {
 }
 
 ({foo: foo} = {foo: foo});
-  ~~~~~~~~ [LONGHAND_PROPERTY % ("('{foo}')")]
-               ~~~~~~~~ [LONGHAND_PROPERTY % ("('{foo}')")]
+({foo} = {foo});
+  ~~~ [OBJECT_LITERAL_DISALLOWED]
+          ~~~ [OBJECT_LITERAL_DISALLOWED]
+
+[OBJECT_LITERAL_DISALLOWED]: Shorthand property assignments have been disallowed.
 [LONGHAND_METHOD]: Expected method shorthand in object literal %s.
 [LONGHAND_PROPERTY]: Expected property shorthand in object literal %s.
