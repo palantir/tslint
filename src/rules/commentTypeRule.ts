@@ -47,7 +47,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`singleline\`: Comments starting with \`//\`
             * \`multiline\`:  Comments between \`/*\` and \`*/\` but are not doc comments
             * \`doc\`:        Multiline comments that start with \`/**\`
-            * \'directive\':  Triple-slash directives that are singleline comments starting with \`///\``,
+            * \`directive\`:  Triple-slash directives that are singleline comments starting with \`///\``,
         options: {
             type: "array",
             items: {
