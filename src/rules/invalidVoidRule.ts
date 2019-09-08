@@ -73,10 +73,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING_ALLOW_GENERICS =
-        "void is not a valid type other than generic or return types";
-    public static FAILURE_STRING_NO_GENERICS = "void is not a valid type other than return types";
+        "void is only valid as a return type or generic type variable";
+    public static FAILURE_STRING_NO_GENERICS = "void is only valid as a return type";
     public static FAILURE_WRONG_GENERIC = (genericName: string) =>
-        `${genericName} may not have void as a generic type`;
+        `${genericName} may not have void as a type variable`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, {
