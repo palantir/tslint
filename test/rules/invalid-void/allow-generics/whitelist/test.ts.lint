@@ -8,5 +8,5 @@ type BannedVoid = Banned<void>;
 function takeVoid(thing: void) { }
                          ~~~~ [0]
 
-[0]: void is not a valid type other than generic or return types
-[Generic]: %s may not have void as a generic type
+[0]: void is only valid as a return type or generic type variable
+[Generic]: %s may not have void as a type variable
