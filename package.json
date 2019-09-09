@@ -33,7 +33,7 @@
         "builtin-modules": "^1.1.1",
         "chalk": "^2.3.0",
         "commander": "^2.12.1",
-        "diff": "^3.5.0",
+        "diff": "^4.0.1",
         "glob": "^7.1.1",
         "js-yaml": "^3.13.1",
         "minimatch": "^3.0.4",
