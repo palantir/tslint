@@ -75,9 +75,9 @@ class ClassName {
                                ~~~~ [0]
 }
 
-let invalidMap: Map<string, void> = new Map<string, void>();
-                            ~~~~ [0]
-                                                    ~~~~ [0]
+let voidPromise: Promise<void> = new Promise<void>(() => {});
+
+let voidMap: Map<string, void> = new Map<string, void>();
 
 let letVoid: void;
              ~~~~ [0]
@@ -99,6 +99,12 @@ type UnionType3 = string | (number & any | (string | void));
 type IntersectionType = string & number & void;
                                           ~~~~ [0]
 
+function returnsVoidPromiseDirectly(): Promise<void> {
+    return Promise.resolve();
+}
+
+async function returnsVoidPromiseAsync(): Promise<void> {}
+
 #if typescript >= 2.8.0
 type MappedType<T> = {
     [K in keyof T]: void;
@@ -118,4 +124,4 @@ function foo(arr: readonly void[]) { }
                            ~~~~ [0]
 #endif
 
-[0]: void is not a valid type other than return types
+[0]: void is only valid as a return type or generic type variable
