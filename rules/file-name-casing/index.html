@@ -10,7 +10,7 @@ optionsDescription: |-
   * `pascal-case`: File names must be Pascal-cased: `FileName.ts`.
   * `kebab-case`: File names must be kebab-cased: `file-name.ts`.
   * `snake-case`: File names must be snake-cased: `file_name.ts`.
-  * `ignored`: File names are ignored _(useful for the object configuration)_.
+  * `ignore`: File names are ignored _(useful for the object configuration)_.
 
   Or an object, where the key represents a regular expression that
   matches the file name, and the value is the file name rule from
@@ -27,6 +27,7 @@ options:
           - type: string
             enum: &ref_0
               - camel-case
+              - ignore
               - pascal-case
               - kebab-case
               - snake-case
@@ -42,7 +43,7 @@ optionExamples:
   - '[true, "snake-case"]'
   - '[true, {".tsx": "pascal-case", ".ts": "camel-case"}]'
   - '[true, {".style.ts": "kebab-case", ".tsx": "pascal-case", ".*": "camel-case"}]'
-  - '[true, {".ts": "ignored", ".tsx": "pascal-case"}]'
+  - '[true, {".ts": "ignore", ".tsx": "pascal-case"}]'
 hasFix: false
 type: style
 typescriptOnly: false
@@ -60,6 +61,7 @@ optionsJSON: |-
               "type": "string",
               "enum": [
                 "camel-case",
+                "ignore",
                 "pascal-case",
                 "kebab-case",
                 "snake-case"
@@ -73,6 +75,7 @@ optionsJSON: |-
             "type": "string",
             "enum": [
               "camel-case",
+              "ignore",
               "pascal-case",
               "kebab-case",
               "snake-case"

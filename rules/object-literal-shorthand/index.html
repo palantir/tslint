@@ -4,23 +4,68 @@ description: Enforces/disallows use of ES6 object literal shorthand.
 hasFix: true
 optionsDescription: |-
 
-  If the 'never' option is provided, any shorthand object literal syntax will cause a failure.
+  `"always"` assumed to be default option, thus with no options provided
+  the rule enforces object literal methods and properties shorthands.
+  With `"never"` option provided, any shorthand object literal syntax causes an error.
+
+  The rule can be configured in a more granular way.
+  With `{"property": "never"}` provided (which is equivalent to `{"property": "never", "method": "always"}`),
+  the rule only flags property shorthand assignments,
+  and respectively with `{"method": "never"}` (equivalent to `{"property": "always", "method": "never"}`),
+  the rule fails only on method shorthands.
 options:
-  type: string
-  enum:
-    - never
+  oneOf:
+    - type: string
+      enum:
+        - never
+    - type: object
+      properties:
+        property:
+          type: string
+          enum:
+            - never
+        method:
+          type: string
+          enum:
+            - never
+      minProperties: 1
+      maxProperties: 2
 optionExamples:
   - 'true'
   - '[true, "never"]'
+  - '[true, {"property": "never"}]'
 type: style
 typescriptOnly: false
 layout: rule
 title: 'Rule: object-literal-shorthand'
 optionsJSON: |-
   {
-    "type": "string",
-    "enum": [
-      "never"
+    "oneOf": [
+      {
+        "type": "string",
+        "enum": [
+          "never"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "string",
+            "enum": [
+              "never"
+            ]
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "never"
+            ]
+          }
+        },
+        "minProperties": 1,
+        "maxProperties": 2
+      }
     ]
   }
 ---

@@ -2,8 +2,16 @@
 description: 'Prevents blank constructors, as they are redundant.'
 optionExamples:
   - 'true'
-options: null
-optionsDescription: Not configurable.
+  - '[true, {"check-super-calls": true}]'
+options:
+  properties:
+    check-super-calls:
+      type: boolean
+  type: object
+optionsDescription: |-
+
+  An optional object with the property 'check-super-calls'.
+  This is to check for unnecessary constructor parameters for super call
 rationale: |-
 
   JavaScript implicitly adds a blank constructor when there isn't one.
@@ -14,5 +22,13 @@ type: functionality
 typescriptOnly: false
 layout: rule
 title: 'Rule: unnecessary-constructor'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "properties": {
+      "check-super-calls": {
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  }
 ---

@@ -2,7 +2,7 @@
 ruleName: invalid-void
 description: |-
 
-  Disallows usage of `void` type outside of return type.
+  Disallows usage of `void` type outside of generic or return types.
   If `void` is used as return type, it shouldn't be a part of intersection/union type.
 rationale: |-
 
@@ -11,13 +11,48 @@ rationale: |-
   So "nothing" cannot be mixed with any other types.
   If you need this - use `undefined` type instead.
 hasFix: false
-optionsDescription: Not configurable.
-options: null
+optionsDescription: |-
+
+  If `allow-generics` is specified as `false`, then generic types will no longer be allowed to to be `void`.
+  Alternately, provide an array of strings for `allow-generics` to exclusively allow generic types by those names.
+options:
+  type: object
+  properties:
+    allow-generics:
+      oneOf:
+        - type: boolean
+        - type: array
+          items:
+            type: string
+          minLength: 1
+  additionalProperties: false
 optionExamples:
   - 'true'
+  - '[true, {"allow-generics": false}]'
+  - '[true, {"allow-generics": ["Promise", "PromiseLike"]}]'
 type: maintainability
 typescriptOnly: true
 layout: rule
 title: 'Rule: invalid-void'
-optionsJSON: 'null'
+optionsJSON: |-
+  {
+    "type": "object",
+    "properties": {
+      "allow-generics": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minLength": 1
+          }
+        ]
+      }
+    },
+    "additionalProperties": false
+  }
 ---

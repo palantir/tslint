@@ -1038,7 +1038,7 @@
     "ruleName": "file-name-casing",
     "description": "Enforces a consistent file naming convention",
     "rationale": "Helps maintain a consistent style across a file hierarchy",
-    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.\n* `ignored`: File names are ignored _(useful for the object configuration)_.\n\nOr an object, where the key represents a regular expression that\nmatches the file name, and the value is the file name rule from\nthe previous list.\n\n* { \".tsx\": \"pascal-case\", \".ts\": \"camel-case\" }\n        ",
+    "optionsDescription": "\nOne of the following arguments must be provided:\n\n* `camel-case`: File names must be camel-cased: `fileName.ts`.\n* `pascal-case`: File names must be Pascal-cased: `FileName.ts`.\n* `kebab-case`: File names must be kebab-cased: `file-name.ts`.\n* `snake-case`: File names must be snake-cased: `file_name.ts`.\n* `ignore`: File names are ignored _(useful for the object configuration)_.\n\nOr an object, where the key represents a regular expression that\nmatches the file name, and the value is the file name rule from\nthe previous list.\n\n* { \".tsx\": \"pascal-case\", \".ts\": \"camel-case\" }\n        ",
     "options": {
       "type": "array",
       "items": {
@@ -1050,6 +1050,7 @@
                 "type": "string",
                 "enum": [
                   "camel-case",
+                  "ignore",
                   "pascal-case",
                   "kebab-case",
                   "snake-case"
@@ -1063,6 +1064,7 @@
               "type": "string",
               "enum": [
                 "camel-case",
+                "ignore",
                 "pascal-case",
                 "kebab-case",
                 "snake-case"
@@ -1108,7 +1110,7 @@
       [
         true,
         {
-          ".ts": "ignored",
+          ".ts": "ignore",
           ".tsx": "pascal-case"
         }
       ]
@@ -1347,13 +1349,47 @@
   },
   {
     "ruleName": "invalid-void",
-    "description": "\nDisallows usage of `void` type outside of return type.\nIf `void` is used as return type, it shouldn't be a part of intersection/union type.",
+    "description": "\nDisallows usage of `void` type outside of generic or return types.\nIf `void` is used as return type, it shouldn't be a part of intersection/union type.",
     "rationale": "\nThe `void` type means \"nothing\" or that a function does not return any value,\nin contra with implicit `undefined` type which means that a function returns a value `undefined`.\nSo \"nothing\" cannot be mixed with any other types.\nIf you need this - use `undefined` type instead.",
     "hasFix": false,
-    "optionsDescription": "Not configurable.",
-    "options": null,
+    "optionsDescription": "\nIf `allow-generics` is specified as `false`, then generic types will no longer be allowed to to be `void`.\nAlternately, provide an array of strings for `allow-generics` to exclusively allow generic types by those names.",
+    "options": {
+      "type": "object",
+      "properties": {
+        "allow-generics": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "allow-generics": false
+        }
+      ],
+      [
+        true,
+        {
+          "allow-generics": [
+            "Promise",
+            "PromiseLike"
+          ]
+        }
+      ]
     ],
     "type": "maintainability",
     "typescriptOnly": true
@@ -3232,11 +3268,34 @@
     "ruleName": "object-literal-shorthand",
     "description": "Enforces/disallows use of ES6 object literal shorthand.",
     "hasFix": true,
-    "optionsDescription": "\nIf the 'never' option is provided, any shorthand object literal syntax will cause a failure.",
+    "optionsDescription": "\n`\"always\"` assumed to be default option, thus with no options provided\nthe rule enforces object literal methods and properties shorthands.\nWith `\"never\"` option provided, any shorthand object literal syntax causes an error.\n\nThe rule can be configured in a more granular way.\nWith `{\"property\": \"never\"}` provided (which is equivalent to `{\"property\": \"never\", \"method\": \"always\"}`),\nthe rule only flags property shorthand assignments,\nand respectively with `{\"method\": \"never\"}` (equivalent to `{\"property\": \"always\", \"method\": \"never\"}`),\nthe rule fails only on method shorthands.",
     "options": {
-      "type": "string",
-      "enum": [
-        "never"
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "never"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "property": {
+              "type": "string",
+              "enum": [
+                "never"
+              ]
+            },
+            "method": {
+              "type": "string",
+              "enum": [
+                "never"
+              ]
+            }
+          },
+          "minProperties": 1,
+          "maxProperties": 2
+        }
       ]
     },
     "optionExamples": [
@@ -3244,6 +3303,12 @@
       [
         true,
         "never"
+      ],
+      [
+        true,
+        {
+          "property": "never"
+        }
       ]
     ],
     "type": "style",
@@ -4596,10 +4661,23 @@
   {
     "description": "Prevents blank constructors, as they are redundant.",
     "optionExamples": [
-      true
+      true,
+      [
+        true,
+        {
+          "check-super-calls": true
+        }
+      ]
     ],
-    "options": null,
-    "optionsDescription": "Not configurable.",
+    "options": {
+      "properties": {
+        "check-super-calls": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "optionsDescription": "\nAn optional object with the property 'check-super-calls'.\nThis is to check for unnecessary constructor parameters for super call",
     "rationale": "\nJavaScript implicitly adds a blank constructor when there isn't one.\nIt's not necessary to manually add one in.\n        ",
     "ruleName": "unnecessary-constructor",
     "type": "functionality",
