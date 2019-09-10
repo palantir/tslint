@@ -1,6 +1,6 @@
 # Change Log
 
-## v5.10.0
+## v5.20.0
 
 - [bugfix] fix [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) false positive with `"ignore-rhs"` option (#4833)
 - [bugfix] fix [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) no error when `"strict": true` in compiler flags (#4841)
