@@ -1,5 +1,28 @@
 # Change Log
 
+## v5.20.0
+
+- [bugfix] fix [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) false positive with `"ignore-rhs"` option (#4833)
+- [bugfix] fix [`no-unnecessary-type-assertion`](https://palantir.github.io/tslint/rules/no-unnecessary-type-assertion/) no error when `"strict": true` in compiler flags (#4841)
+- [bugfix] "ignore" option for [`file-name-casing`](https://palantir.github.io/tslint/rules/file-name-casing/) rule works correctly (#4848)
+- [bugfix] fix [`array-type`](https://palantir.github.io/tslint/rules/array-type/) false positive for simple parenthesized types with "array-simple" option (#4844)
+- [new-rule-option] [`object-literal-shorthand`](https://palantir.github.io/tslint/rules/object-literal-shorthand/) supports `{"property"?: "never", "method"?: "never"}` as config options (#4842)
+- [new-rule-option]: `allow-generics` option for [`invalid-void`](https://palantir.github.io/tslint/rules/invalid-void) rule (#4839)
+- [new-rule-option] `check-super-calls` option for [`unnecessary-constructor`](https://palantir.github.io/tslint/rules/unnecessary-constructor/) rule (#4813)
+- [chore] Upgrade `diff` dependency to v4.0.1 (#4845, #4852)
+
+Thanks to our contributors!
+
+- Bas Bosman
+- Tanmoy Bhowmik
+- David Zulaica
+- Maxime Kjaer
+- @guidsdo
+- Pavel Birukov
+- Josh Goldberg
+- Akshaya Srivatsa
+
+
 ## v5.19.0
 
 - [bugfix] relax [`promise-function-async`](https://palantir.github.io/tslint/rules/promise-function-async/) for short parenthesized arrow functions (#4765)
