@@ -37,6 +37,7 @@ declare function g(x: number, y: number, z: number): number;
 declare function h();
 
 /**
+ * @author John Doe <john.doe@example.com>
  * @param x Useful comment
  * @returns Useful comment
  */
