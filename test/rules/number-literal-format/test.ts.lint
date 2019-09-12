@@ -67,7 +67,7 @@
 0xDEAdBEEF;
 ~~~~~~~~~~ [uppercase]
 
-0.022000
+0.010200;
 ~~~~~~~~ [trailing-0]
 
 [leading-0]: Number literal should not have a leading '0'.
