@@ -101,7 +101,7 @@ function walk(ctx: Lint.WalkContext): void {
 
         const [num, exp = ""] = text.split(/e/i);
         const [integer, float = ""] = num.split(".");
-        const matchedNumeric = /(\.)([1-9]*)(0+)/.exec(num);
+        const matchedNumeric = /(\.)(\d*?)(0+)$/.exec(num);
         const [dot = "", numbers = "", zeroes = ""] = Array.isArray(matchedNumeric)
             ? matchedNumeric.slice(1)
             : [];
