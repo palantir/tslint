@@ -41,7 +41,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             In other cases, you may simply want to ban an import because using
             it is undesirable or unsafe.`,
         optionsDescription:
-            "A list of blacklisted modules, named imports, or regular expression patterns.",
+            "A list of blacklisted modules, named imports, or an array of expression patterns.",
         options: {
             type: "array",
             items: {
@@ -74,6 +74,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [
             true,
             [true, "rxjs", "lodash"],
+            [true, [".*\\.temp$", ".*\\.tmp$"]],
+            [true, { lodash: ["pull", "pullAll"] }],
             [true, "lodash", { lodash: ["pull", "pullAll"] }],
             [true, "rxjs", { lodash: ["pull", "pullAll"] }, [".*\\.temp$", ".*\\.tmp$"]],
         ],
