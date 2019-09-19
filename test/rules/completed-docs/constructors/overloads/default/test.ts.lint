@@ -1,0 +1,31 @@
+class Foo {
+    constructor(i: number);
+
+    /**
+     * Exists in one place
+     */
+    constructor(o: any) {}
+}
+
+class Foo {
+    public constructor(i: number);
+
+    /**
+     * Exists in one place
+     */
+    public constructor(o: any) {}
+}
+
+class Foo {
+    private constructor(i: number);
+
+    /**
+     * Exists in one place
+     */
+    private constructor(o: any) {}
+}
+
+class Foo {
+    protected constructor(i: number);
+    protected constructor(o: any) {}
+}

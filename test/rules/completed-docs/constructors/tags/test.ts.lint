@@ -1,0 +1,30 @@
+class Foo {
+    /**
+     * ...
+     */
+    constructor() {}
+}
+
+class Foo {
+    /**
+     * @see
+     */
+    public constructor() {}
+    ~~~~~~~~~~~~~~~~~~~~~~~ [public]
+}
+
+class Foo {
+    /**
+     * ...
+     */
+    private constructor() {}
+}
+
+class Foo {
+    /**
+     * @see #123
+     */
+    protected constructor() {}
+}
+
+[public]: Documentation must exist for public constructors.

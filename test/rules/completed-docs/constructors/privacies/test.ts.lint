@@ -1,0 +1,99 @@
+class Foo {
+    constructor() {}
+    ~~~~~~~~~~~~~~~~ [default]
+}
+
+class Foo {
+    public constructor() {}
+    ~~~~~~~~~~~~~~~~~~~~~~~ [public]
+}
+
+class Foo {
+    private constructor() {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [private]
+}
+
+class Foo {
+    protected constructor() {}
+}
+
+class Foo {
+    /** ... */
+    constructor() {}
+}
+
+class Foo {
+    /** content */
+    constructor() {}
+}
+
+class Foo {
+    /** */
+    constructor() {}
+    ~~~~~~~~~~~~~~~~ [default]
+}
+
+class Foo {
+    /** ... */
+    public constructor() {}
+}
+
+class Foo {
+    /** content */
+    public constructor() {}
+}
+
+class Foo {
+    /** */
+    public constructor() {}
+    ~~~~~~~~~~~~~~~~~~~~~~~ [public]
+}
+
+class Foo {
+    /** ... */
+    private constructor() {}
+}
+
+class Foo {
+    /** content */
+    private constructor() {}
+}
+
+class Foo {
+    /** */
+    private constructor() {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [private]
+}
+
+
+class Foo {
+    /**
+     * ...
+     */
+    constructor() {}
+}
+
+class Foo {
+    /**
+     * ...
+     */
+    public constructor() {}
+}
+
+class Foo {
+    /**
+     * ...
+     */
+    private constructor() {}
+}
+
+class Foo {
+    /**
+     * ...
+     */
+    protected constructor() {}
+}
+
+[default]: Documentation must exist for constructors.
+[public]: Documentation must exist for public constructors.
+[private]: Documentation must exist for private constructors.

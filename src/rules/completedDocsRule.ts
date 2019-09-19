@@ -26,6 +26,7 @@ import { constructExclusionsMap, ExclusionsMap } from "./completed-docs/exclusio
 export const ALL = "all";
 
 export const ARGUMENT_CLASSES = "classes";
+export const ARGUMENT_CONSTRUCTORS = "constructors";
 export const ARGUMENT_ENUMS = "enums";
 export const ARGUMENT_ENUM_MEMBERS = "enum-members";
 export const ARGUMENT_FUNCTIONS = "functions";
@@ -60,6 +61,7 @@ export type All = typeof ALL;
 export type DocType =
     | All
     | typeof ARGUMENT_CLASSES
+    | typeof ARGUMENT_CONSTRUCTORS
     | typeof ARGUMENT_ENUMS
     | typeof ARGUMENT_ENUM_MEMBERS
     | typeof ARGUMENT_FUNCTIONS
@@ -160,6 +162,35 @@ export class Rule extends Lint.Rules.AbstractRule {
         type: "object",
     };
 
+    public static ARGUMENT_DESCRIPTOR_CONSTRUCTOR = {
+        properties: {
+            [DESCRIPTOR_TAGS]: {
+                properties: {
+                    [TAGS_FOR_CONTENT]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "object",
+                    },
+                    [TAGS_FOR_EXISTENCE]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "array",
+                    },
+                },
+            },
+            [DESCRIPTOR_PRIVACIES]: {
+                enum: [ALL, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC],
+                type: "string",
+            },
+            [DESCRIPTOR_OVERLOADS]: {
+                type: "boolean",
+            },
+        },
+        type: "object",
+    };
+
     public static ARGUMENT_DESCRIPTOR_FUNCTION = {
         properties: {
             ...Rule.ARGUMENT_DESCRIPTOR_BLOCK.properties,
@@ -214,6 +245,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Types that may be enabled are:
 
             * \`"${ARGUMENT_CLASSES}"\`
+            * \`"${ARGUMENT_CONSTRUCTORS}"\`
             * \`"${ARGUMENT_ENUMS}"\`
             * \`"${ARGUMENT_ENUM_MEMBERS}"\`
             * \`"${ARGUMENT_FUNCTIONS}"\`
@@ -245,6 +277,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                         type: "object",
                         properties: {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_CONSTRUCTORS]: Rule.ARGUMENT_DESCRIPTOR_CONSTRUCTOR,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_FUNCTION,
@@ -324,6 +357,10 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         switch (node.kind) {
             case ts.SyntaxKind.ClassDeclaration:
                 checkNode(node as ts.ClassDeclaration, ARGUMENT_CLASSES);
+                break;
+
+            case ts.SyntaxKind.Constructor:
+                checkNode(node as ts.ClassDeclaration, ARGUMENT_CONSTRUCTORS);
                 break;
 
             case ts.SyntaxKind.EnumDeclaration:
@@ -419,9 +456,12 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
         docType: DocType,
         requirementNode: ts.Node,
     ): boolean {
-        const { name } = node;
-        if (name === undefined) {
-            return true;
+        if (docType !== ARGUMENT_CONSTRUCTORS) {
+            const { name } = node;
+
+            if (name === undefined) {
+                return true;
+            }
         }
 
         const exclusions = context.options.get(docType);
@@ -497,6 +537,14 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
                     child.name !== undefined &&
                     child.name.text === functionName,
             );
+        }
+
+        if (tsutils.isConstructorDeclaration(node) && tsutils.isClassDeclaration(node.parent)) {
+            const {
+                parent: { members },
+            } = node;
+
+            return members.filter(child => tsutils.isConstructorDeclaration(child));
         }
 
         if (

@@ -1,0 +1,13 @@
+{
+    "rules": {
+        "completed-docs": [true, {
+            "constructors": {
+                "tags": {
+                    "content": {
+                        "see": "^(\\s*)#(\\d+)(\\s*)$"
+                    }
+                }
+            }
+        }]
+    }
+}
