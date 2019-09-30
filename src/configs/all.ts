@@ -143,7 +143,7 @@ export const rules = {
     "no-unsafe-finally": true,
     "no-unused-expression": true,
     // "no-unused-variable" - deprecated in #3919
-    "no-use-before-declare": true,
+    // "no-use-before-declare" - deprecated in #4802,
     "no-var-keyword": true,
     "no-void-expression": true,
     "prefer-conditional-expression": true,
@@ -297,6 +297,7 @@ export const RULES_EXCLUDED_FROM_ALL_CONFIG = [
     "noSwitchCaseFallThrough",
     "typeofCompare",
     "noUnusedVariable",
+    "noUseBeforeDeclare",
 ];
 
 // Exclude typescript-only rules from jsRules, otherwise it's identical.
