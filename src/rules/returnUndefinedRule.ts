@@ -139,7 +139,6 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
         return typeArguments !== undefined && typeArguments.length === 1 && isEffectivelyVoidPromise(typeArguments[0]);
     }
 
-    //
     function getTypeArgumentsOfType(type: ts.Type) {
         if (!isTypeReference(type)) {
             return undefined;
