@@ -135,8 +135,12 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
         }
 
         const typeArguments = getTypeArgumentsOfType(type);
-        
-        return typeArguments !== undefined && typeArguments.length === 1 && isEffectivelyVoidPromise(typeArguments[0]);
+
+        return (
+            typeArguments !== undefined &&
+            typeArguments.length === 1 &&
+            isEffectivelyVoidPromise(typeArguments[0])
+        );
     }
 
     function getTypeArgumentsOfType(type: ts.Type) {
