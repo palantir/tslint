@@ -140,7 +140,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     }
 
     //
-    function getTypeArgumentsOfType(type: ts.Type): readonly ts.Type[] | undefined {
+    function getTypeArgumentsOfType(type: ts.Type) {
         if (!isTypeReference(type)) {
             return undefined;
         }
