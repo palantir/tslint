@@ -126,8 +126,8 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
         // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
         // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
 
-        // tslint:disable-next-line:no-bitwise
         if (
+            // tslint:disable-next-line:no-bitwise
             isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
             (isUnionType(type) && type.types.every(isEffectivelyVoidPromise))
         ) {
@@ -139,19 +139,22 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
         return typeArguments !== undefined && typeArguments.length === 1 && isEffectivelyVoidPromise(typeArguments[0]);
     }
 
-    function getTypeArgumentsOfType(type: ts.Type) {
+    //
+    function getTypeArgumentsOfType(type: ts.Type): readonly ts.Type[] | undefined {
         if (!isTypeReference(type)) {
             return undefined;
         }
 
+        // tslint:disable:no-unsafe-any
         // Fixes for https://github.com/palantir/tslint/issues/4863
         // type.typeArguments was replaced with checker.getTypeArguments:
         // https://github.com/microsoft/TypeScript/commit/250d5a8229e17342f36fe52545bb68140db96a2e
         if ((checker as any).getTypeArguments) {
-            return (checker as any).getTypeArguments(type) as readonly ts.Type[] | undefined;
+            return (checker as any).getTypeArguments(type) as ts.Type[] | undefined;
         }
 
-        return (type as any).typeArguments as readonly ts.Type[] | undefined;
+        return (type as any).typeArguments as ts.Type[] | undefined;
+        // tslint:enable:no-unsafe-any
     }
 }
 
