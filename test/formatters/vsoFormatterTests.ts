@@ -125,7 +125,6 @@ describe("VSO Formatter", () => {
         severity: string,
     ) {
         const properties = `sourcepath=${file};linenumber=${line};columnnumber=${character};code=${code};`;
-
         return `##vso[task.logissue type=${severity};${properties}]${reason}\n`;
     }
 });
