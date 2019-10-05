@@ -416,37 +416,40 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             prevMember = member;
         }
         if (failureExists) {
-            const sortedMemberIndexes = members.map((_, i) => i).sort((ai, bi) => {
-                const a = members[ai];
-                const b = members[bi];
+            const sortedMemberIndexes = members
+                .map((_, i) => i)
+                .sort((ai, bi) => {
+                    const a = members[ai];
+                    const b = members[bi];
 
-                // first, sort by member rank
-                const rankDiff = this.memberRank(a) - this.memberRank(b);
-                if (rankDiff !== 0) {
-                    return rankDiff;
-                }
-                // then lexicographically if alphabetize == true
-                if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
-                    const aName = nameString(a.name);
-                    const bName = nameString(b.name);
-                    const nameDiff = Rule.stringCompare(aName, bName);
-                    if (nameDiff !== 0) {
-                        return nameDiff;
+                    // first, sort by member rank
+                    const rankDiff = this.memberRank(a) - this.memberRank(b);
+                    if (rankDiff !== 0) {
+                        return rankDiff;
                     }
-                    const getSetDiff =
-                        a.kind === ts.SyntaxKind.GetAccessor && b.kind === ts.SyntaxKind.SetAccessor
-                            ? -1
-                            : a.kind === ts.SyntaxKind.SetAccessor &&
-                              b.kind === ts.SyntaxKind.GetAccessor
+                    // then lexicographically if alphabetize == true
+                    if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
+                        const aName = nameString(a.name);
+                        const bName = nameString(b.name);
+                        const nameDiff = Rule.stringCompare(aName, bName);
+                        if (nameDiff !== 0) {
+                            return nameDiff;
+                        }
+                        const getSetDiff =
+                            a.kind === ts.SyntaxKind.GetAccessor &&
+                            b.kind === ts.SyntaxKind.SetAccessor
+                                ? -1
+                                : a.kind === ts.SyntaxKind.SetAccessor &&
+                                  b.kind === ts.SyntaxKind.GetAccessor
                                 ? 1
                                 : 0;
-                    if (aName !== "" && getSetDiff !== 0) {
-                        return getSetDiff;
+                        if (aName !== "" && getSetDiff !== 0) {
+                            return getSetDiff;
+                        }
                     }
-                }
-                // finally, sort by position in original NodeArray so the sort remains stable.
-                return ai - bi;
-            });
+                    // finally, sort by position in original NodeArray so the sort remains stable.
+                    return ai - bi;
+                });
             const splits = getSplitIndexes(members, this.sourceFile.text);
             const sortedMembersText = sortedMemberIndexes.map(i => {
                 const start = splits[i];
@@ -548,8 +551,8 @@ function getMemberKind(member: Member): MemberKind | undefined {
     const accessLevel = hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword)
         ? "private"
         : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword)
-            ? "protected"
-            : "public";
+        ? "protected"
+        : "public";
     const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword)
         ? "Static"
         : "Instance";
@@ -603,11 +606,10 @@ interface Options {
 
 function parseOptions(options: any[]): Options {
     const { order: orderJson, alphabetize } = getOptionsJson(options);
-    const order = orderJson.map(
-        cat =>
-            typeof cat === "string"
-                ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
+    const order = orderJson.map(cat =>
+        typeof cat === "string"
+            ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
+            : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
     );
     return { order, alphabetize };
 }
