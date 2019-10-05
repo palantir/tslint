@@ -43,7 +43,6 @@ export const rules = {
     "jsdoc-format": true,
     "label-position": true,
     "max-classes-per-file": { options: 1 },
-    "member-access": true,
     "new-parens": true,
     "no-angle-bracket-type-assertion": true,
     "no-any": false,
@@ -77,13 +76,6 @@ export const rules = {
     "one-variable-per-declaration": { options: ["ignore-for-loop"] },
     "only-arrow-functions": {
         options: ["allow-declarations", "allow-named-functions"],
-    },
-    "ordered-imports": {
-        options: {
-            "import-sources-order": "case-insensitive",
-            "module-source-path": "full",
-            "named-imports-order": "case-insensitive",
-        },
     },
     "prefer-const": true,
     "prefer-for-of": true,
