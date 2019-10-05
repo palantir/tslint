@@ -18,7 +18,13 @@ var obj = {
 }
 
 setTimeout(() => {}, 1000);
+           ~~       [expected arrow-call-signature to have a typedef]
 setTimeout(function() {}, 1000);
 
+const foo = n => n+1
+          ~~~~       [expected arrow-call-signature to have a typedef]
+
 someFunc(n => n+1);
+        ~~~       [expected arrow-call-signature to have a typedef]
 someFunc(n => {});
+        ~~~       [expected arrow-call-signature to have a typedef]

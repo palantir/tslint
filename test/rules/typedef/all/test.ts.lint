@@ -76,12 +76,15 @@ class TsLint {
 }
 
 setTimeout(() => {}, 1000);
+           ~~            [expected arrow-call-signature to have a typedef]
 setTimeout(function() {}, 1000);
                    ~~            [expected call-signature to have a typedef]
 
 someFunc(n => n+1);
+        ~~~            [expected arrow-call-signature to have a typedef]
          ~        [expected arrow-parameter: 'n' to have a typedef]
 someFunc(n => {});
+        ~~~            [expected arrow-call-signature to have a typedef]
          ~        [expected arrow-parameter: 'n' to have a typedef]
 
 class A {
