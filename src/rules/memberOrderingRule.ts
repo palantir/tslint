@@ -56,97 +56,108 @@ enum MemberKind {
 }
 
 const PRESETS = new Map<string, MemberCategoryJson[]>([
-    ["fields-first", [
-        "public-static-field",
-        "protected-static-field",
-        "private-static-field",
+    [
+        "fields-first",
+        [
+            "public-static-field",
+            "protected-static-field",
+            "private-static-field",
 
-        "public-instance-field",
-        "protected-instance-field",
-        "private-instance-field",
+            "public-instance-field",
+            "protected-instance-field",
+            "private-instance-field",
 
-        "constructor",
+            "constructor",
 
-        "public-static-accessor",
-        "protected-static-accessor",
-        "private-static-accessor",
+            "public-static-accessor",
+            "protected-static-accessor",
+            "private-static-accessor",
 
-        "public-static-method",
-        "protected-static-method",
-        "private-static-method",
+            "public-static-method",
+            "protected-static-method",
+            "private-static-method",
 
-        "public-instance-accessor",
-        "protected-instance-accessor",
-        "private-instance-accessor",
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
 
-        "public-instance-method",
-        "protected-instance-method",
-        "private-instance-method",
-    ]],
-    ["instance-sandwich", [
-        "public-static-field",
-        "protected-static-field",
-        "private-static-field",
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method",
+        ],
+    ],
+    [
+        "instance-sandwich",
+        [
+            "public-static-field",
+            "protected-static-field",
+            "private-static-field",
 
-        "public-instance-field",
-        "protected-instance-field",
-        "private-instance-field",
+            "public-instance-field",
+            "protected-instance-field",
+            "private-instance-field",
 
-        "constructor",
+            "constructor",
 
-        "public-instance-accessor",
-        "protected-instance-accessor",
-        "private-instance-accessor",
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
 
-        "public-instance-method",
-        "protected-instance-method",
-        "private-instance-method",
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method",
 
-        "public-static-accessor",
-        "protected-static-accessor",
-        "private-static-accessor",
+            "public-static-accessor",
+            "protected-static-accessor",
+            "private-static-accessor",
 
-        "public-static-method",
-        "protected-static-method",
-        "private-static-method",
-    ]],
-    ["statics-first", [
-        "public-static-field",
-        "public-static-accessor",
-        "public-static-method",
+            "public-static-method",
+            "protected-static-method",
+            "private-static-method",
+        ],
+    ],
+    [
+        "statics-first",
+        [
+            "public-static-field",
+            "public-static-accessor",
+            "public-static-method",
 
-        "protected-static-field",
-        "protected-static-accessor",
-        "protected-static-method",
+            "protected-static-field",
+            "protected-static-accessor",
+            "protected-static-method",
 
-        "private-static-field",
-        "private-static-accessor",
-        "private-static-method",
+            "private-static-field",
+            "private-static-accessor",
+            "private-static-method",
 
-        "public-instance-field",
-        "protected-instance-field",
-        "private-instance-field",
+            "public-instance-field",
+            "protected-instance-field",
+            "private-instance-field",
 
-        "constructor",
+            "constructor",
 
-        "public-instance-accessor",
-        "protected-instance-accessor",
-        "private-instance-accessor",
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
 
-        "public-instance-method",
-        "protected-instance-method",
-        "private-instance-method",
-    ]],
+            "public-instance-method",
+            "protected-instance-method",
+            "private-instance-method",
+        ],
+    ],
 ]);
 const PRESET_NAMES = Array.from(PRESETS.keys());
 
-const allMemberKindNames = mapDefined(Object.keys(MemberKind), (key) => {
+const allMemberKindNames = mapDefined(Object.keys(MemberKind), key => {
     const mk = (MemberKind as any)[key];
-    return typeof mk === "number" ? MemberKind[mk].replace(/[A-Z]/g, (cap) => `-${cap.toLowerCase()}`) : undefined;
+    return typeof mk === "number"
+        ? MemberKind[mk].replace(/[A-Z]/g, cap => `-${cap.toLowerCase()}`)
+        : undefined;
 });
 
 function namesMarkdown(names: string[]): string {
-    return names.map((name) => `* \`${name}\``).join("\n    ");
+    return names.map(name => `* \`${name}\``).join("\n    ");
 }
 
 const optionsDescription = Lint.Utils.dedent`
@@ -238,34 +249,40 @@ export class Rule extends Lint.Rules.AbstractRule {
         },
         optionExamples: [
             [true, { order: "fields-first" }],
-            [true, {
-                alphabetize: true,
-                order: [
-                    "public-static-field",
-                    "public-instance-field",
-                    "public-constructor",
-                    "private-static-field",
-                    "private-instance-field",
-                    "private-constructor",
-                    "public-instance-method",
-                    "protected-instance-method",
-                    "private-instance-method",
-                ],
-            }],
-            [true, {
-                order: [
-                    {
-                        name: "static non-private",
-                        kinds: [
-                            "public-static-field",
-                            "protected-static-field",
-                            "public-static-method",
-                            "protected-static-method",
-                        ],
-                    },
-                    "constructor",
-                ],
-            }],
+            [
+                true,
+                {
+                    alphabetize: true,
+                    order: [
+                        "public-static-field",
+                        "public-instance-field",
+                        "public-constructor",
+                        "private-static-field",
+                        "private-instance-field",
+                        "private-constructor",
+                        "public-instance-method",
+                        "protected-instance-method",
+                        "private-instance-method",
+                    ],
+                },
+            ],
+            [
+                true,
+                {
+                    order: [
+                        {
+                            name: "static non-private",
+                            kinds: [
+                                "public-static-field",
+                                "protected-static-field",
+                                "public-static-method",
+                                "protected-static-method",
+                            ],
+                        },
+                        "constructor",
+                    ],
+                },
+            ],
         ],
         type: "typescript",
         typescriptOnly: false,
@@ -281,7 +298,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static stringCompare(a: string, b: string) {
         const aLower = a.toLowerCase();
         const bLower = b.toLowerCase();
-        return (aLower < bLower ? -1 : (aLower > bLower ? 1 : 0));
+        return aLower < bLower ? -1 : aLower > bLower ? 1 : 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
@@ -309,7 +326,12 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ClassExpression:
                 case ts.SyntaxKind.InterfaceDeclaration:
                 case ts.SyntaxKind.TypeLiteral:
-                    this.checkMembers((node as ts.ClassLikeDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode).members);
+                    this.checkMembers(
+                        (node as
+                            | ts.ClassLikeDeclaration
+                            | ts.InterfaceDeclaration
+                            | ts.TypeLiteralNode).members,
+                    );
             }
         };
         ts.forEachChild(sourceFile, cb);
@@ -345,10 +367,12 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 const nodeType = this.rankName(rank);
                 const prevNodeType = this.rankName(prevRank);
                 const lowerRank = this.findLowerRank(members, rank);
-                const locationHint = lowerRank !== -1
-                    ? `after ${this.rankName(lowerRank)}s`
-                    : "at the beginning of the class/interface";
-                const errorLine1 = `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
+                const locationHint =
+                    lowerRank !== -1
+                        ? `after ${this.rankName(lowerRank)}s`
+                        : "at the beginning of the class/interface";
+                const errorLine1 =
+                    `Declaration of ${nodeType} not allowed after declaration of ${prevNodeType}. ` +
                     `Instead, this should come ${locationHint}.`;
                 // add empty array as fix so we can add a replacement later. (fix itself is readonly)
                 this.addFailureAtNode(member, errorLine1, []);
@@ -366,15 +390,25 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 if (alphaDiff > 0) {
                     this.addFailureAtNode(
                         member.name,
-                        Rule.FAILURE_STRING_ALPHABETIZE(this.findLowerName(members, rank, curName), curName), []);
+                        Rule.FAILURE_STRING_ALPHABETIZE(
+                            this.findLowerName(members, rank, curName),
+                            curName,
+                        ),
+                        [],
+                    );
                     failureExists = true;
                     continue;
-                } else if (alphaDiff === 0 &&
+                } else if (
+                    alphaDiff === 0 &&
                     curName !== "" && // do not enforce get < set for computed properties
                     member.kind === ts.SyntaxKind.GetAccessor &&
                     prevMember.kind === ts.SyntaxKind.SetAccessor
                 ) {
-                    this.addFailureAtNode(member.name, `Getter for '${curName}' should appear before setter.`, []);
+                    this.addFailureAtNode(
+                        member.name,
+                        `Getter for '${curName}' should appear before setter.`,
+                        [],
+                    );
                     failureExists = true;
                     continue;
                 }
@@ -388,23 +422,33 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
 
                 // first, sort by member rank
                 const rankDiff = this.memberRank(a) - this.memberRank(b);
-                if (rankDiff !== 0) { return rankDiff; }
+                if (rankDiff !== 0) {
+                    return rankDiff;
+                }
                 // then lexicographically if alphabetize == true
                 if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
                     const aName = nameString(a.name);
                     const bName = nameString(b.name);
                     const nameDiff = Rule.stringCompare(aName, bName);
-                    if (nameDiff !== 0) { return nameDiff; }
-                    const getSetDiff = a.kind === ts.SyntaxKind.GetAccessor && b.kind === ts.SyntaxKind.SetAccessor ? -1
-                        : a.kind === ts.SyntaxKind.SetAccessor && b.kind === ts.SyntaxKind.GetAccessor ? 1
-                        : 0;
-                    if (aName !== "" && getSetDiff !== 0) { return getSetDiff; }
+                    if (nameDiff !== 0) {
+                        return nameDiff;
+                    }
+                    const getSetDiff =
+                        a.kind === ts.SyntaxKind.GetAccessor && b.kind === ts.SyntaxKind.SetAccessor
+                            ? -1
+                            : a.kind === ts.SyntaxKind.SetAccessor &&
+                              b.kind === ts.SyntaxKind.GetAccessor
+                                ? 1
+                                : 0;
+                    if (aName !== "" && getSetDiff !== 0) {
+                        return getSetDiff;
+                    }
                 }
                 // finally, sort by position in original NodeArray so the sort remains stable.
                 return ai - bi;
             });
             const splits = getSplitIndexes(members, this.sourceFile.text);
-            const sortedMembersText = sortedMemberIndexes.map((i) => {
+            const sortedMembersText = sortedMemberIndexes.map(i => {
                 const start = splits[i];
                 const end = splits[i + 1];
                 let nodeText = this.sourceFile.text.substring(start, end);
@@ -429,13 +473,21 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
             // it fixes all failures in this NodeArray, as TSLint doesn't handle duplicate Replacements.
             this.fixes.push([
                 arrayLast(this.failures),
-                Lint.Replacement.replaceFromTo(splits[0], arrayLast(splits), sortedMembersText.join("")),
+                Lint.Replacement.replaceFromTo(
+                    splits[0],
+                    arrayLast(splits),
+                    sortedMembersText.join(""),
+                ),
             ]);
         }
     }
 
     /** Finds the lowest name higher than 'targetName'. */
-    private findLowerName(members: ReadonlyArray<Member>, targetRank: Rank, targetName: string): string {
+    private findLowerName(
+        members: ReadonlyArray<Member>,
+        targetRank: Rank,
+        targetName: string,
+    ): string {
         for (const member of members) {
             if (member.name === undefined || this.memberRank(member) !== targetRank) {
                 continue;
@@ -465,7 +517,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
         if (optionName === undefined) {
             return -1;
         }
-        return this.options.order.findIndex((category) => category.has(optionName));
+        return this.options.order.findIndex(category => category.has(optionName));
     }
 
     private rankName(rank: Rank): string {
@@ -493,10 +545,14 @@ function memberKindFromName(name: string): MemberKind[] {
 }
 
 function getMemberKind(member: Member): MemberKind | undefined {
-    const accessLevel =  hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword) ? "private"
-        : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword) ? "protected"
-        : "public";
-    const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
+    const accessLevel = hasModifier(member.modifiers, ts.SyntaxKind.PrivateKeyword)
+        ? "private"
+        : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword)
+            ? "protected"
+            : "public";
+    const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword)
+        ? "Static"
+        : "Instance";
 
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
@@ -511,7 +567,9 @@ function getMemberKind(member: Member): MemberKind | undefined {
 
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertySignature:
-            const type = isFunctionLiteral((member as ts.PropertyDeclaration).initializer) ? "Method" : "Field";
+            const type = isFunctionLiteral((member as ts.PropertyDeclaration).initializer)
+                ? "Method"
+                : "Field";
             // tslint:disable-next-line:prefer-template
             return (MemberKind as any)[accessLevel + membership + type] as MemberKind;
 
@@ -528,7 +586,9 @@ function getMemberKind(member: Member): MemberKind | undefined {
 type MemberCategoryJson = { name: string; kinds: string[] } | string;
 class MemberCategory {
     constructor(readonly name: string, private readonly kinds: Set<MemberKind>) {}
-    public has(kind: MemberKind) { return this.kinds.has(kind); }
+    public has(kind: MemberKind) {
+        return this.kinds.has(kind);
+    }
 }
 
 type Member = ts.TypeElement | ts.ClassElement;
@@ -543,9 +603,12 @@ interface Options {
 
 function parseOptions(options: any[]): Options {
     const { order: orderJson, alphabetize } = getOptionsJson(options);
-    const order = orderJson.map((cat) => typeof cat === "string"
-        ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
-        : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))));
+    const order = orderJson.map(
+        cat =>
+            typeof cat === "string"
+                ? new MemberCategory(cat.replace(/-/g, " "), new Set(memberKindFromName(cat)))
+                : new MemberCategory(cat.name, new Set(flatMap(cat.kinds, memberKindFromName))),
+    );
     return { order, alphabetize };
 }
 function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alphabetize: boolean } {
@@ -553,20 +616,27 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
         throw new Error("Got empty options");
     }
 
-    const firstOption = allOptions[0] as { order: MemberCategoryJson[] | string; alphabetize?: boolean } | string;
+    const firstOption = allOptions[0] as
+        | { order: MemberCategoryJson[] | string; alphabetize?: boolean }
+        | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
         const order = convertFromOldStyleOptions(allOptions);
-        showWarningOnce(dedent`
+        showWarningOnce(
+            dedent`
             Warning: member-ordering - Direct string option is deprecated and does not support accessors.
             See also https://palantir.github.io/tslint/rules/member-ordering/
-            You should replace ${allOptions.map((o) => JSON.stringify(o)).join()}
+            You should replace ${allOptions.map(o => JSON.stringify(o)).join()}
             with the following equivalent options and add -accessor categories as appropriate:\n` +
-            JSON.stringify(order, undefined, "  "));
+                JSON.stringify(order, undefined, "  "),
+        );
         return { order, alphabetize: false }; // presume allOptions to be string[]
     }
 
-    return { order: categoryFromOption(firstOption[OPTION_ORDER]), alphabetize: firstOption[OPTION_ALPHABETIZE] === true };
+    return {
+        order: categoryFromOption(firstOption[OPTION_ORDER]),
+        alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
+    };
 }
 function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {
     if (Array.isArray(orderOption)) {
@@ -587,14 +657,29 @@ function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberC
 function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
     let categories: NameAndKinds[] = [{ name: "member", kinds: allMemberKindNames }];
     if (hasOption("variables-before-functions")) {
-        categories = splitOldStyleOptions(categories, (kind) => kind.includes("field"), "field", "method");
+        categories = splitOldStyleOptions(
+            categories,
+            kind => kind.includes("field"),
+            "field",
+            "method",
+        );
     }
     if (hasOption("static-before-instance")) {
-        categories = splitOldStyleOptions(categories, (kind) => kind.includes("static"), "static", "instance");
+        categories = splitOldStyleOptions(
+            categories,
+            kind => kind.includes("static"),
+            "static",
+            "instance",
+        );
     }
     if (hasOption("public-before-private")) {
         // 'protected' is considered public
-        categories = splitOldStyleOptions(categories, (kind) => !kind.includes("private"), "public", "private");
+        categories = splitOldStyleOptions(
+            categories,
+            kind => !kind.includes("private"),
+            "public",
+            "private",
+        );
     }
     return categories;
 
@@ -602,11 +687,20 @@ function convertFromOldStyleOptions(options: string[]): MemberCategoryJson[] {
         return options.indexOf(x) !== -1;
     }
 }
-interface NameAndKinds { name: string; kinds: string[]; }
-function splitOldStyleOptions(categories: NameAndKinds[], filter: (name: string) => boolean, a: string, b: string): NameAndKinds[] {
-    const newCategories: NameAndKinds[]  = [];
+interface NameAndKinds {
+    name: string;
+    kinds: string[];
+}
+function splitOldStyleOptions(
+    categories: NameAndKinds[],
+    filter: (name: string) => boolean,
+    a: string,
+    b: string,
+): NameAndKinds[] {
+    const newCategories: NameAndKinds[] = [];
     for (const cat of categories) {
-        const yes = []; const no = [];
+        const yes = [];
+        const no = [];
         for (const kind of cat.kinds) {
             if (filter(kind)) {
                 yes.push(kind);
@@ -665,7 +759,7 @@ function arrayFindLastIndex<T>(
     array: ArrayLike<T>,
     predicate: (el: T, elIndex: number, array: ArrayLike<T>) => boolean,
 ): number {
-    for (let i = array.length; i-- > 0;) {
+    for (let i = array.length; i-- > 0; ) {
         if (predicate(array[i], i, array)) {
             return i;
         }
@@ -678,9 +772,11 @@ function arrayFindLastIndex<T>(
  * See also Replacement.apply
  */
 function applyReplacementOffset(content: string, replacement: Lint.Replacement, offset: number) {
-    return content.substring(0, replacement.start - offset)
-        + replacement.text
-        + content.substring(replacement.start - offset + replacement.length);
+    return (
+        content.substring(0, replacement.start - offset) +
+        replacement.text +
+        content.substring(replacement.start - offset + replacement.length)
+    );
 }
 
 /**
@@ -696,7 +792,7 @@ function applyReplacementOffset(content: string, replacement: Lint.Replacement, 
  * if that comes first.
  */
 function getSplitIndexes(members: ts.NodeArray<Member>, text: string) {
-    const result = members.map((member) => getNextSplitIndex(text, member.getFullStart()));
+    const result = members.map(member => getNextSplitIndex(text, member.getFullStart()));
     result.push(getNextSplitIndex(text, arrayLast(members).getEnd()));
     return result;
 }
@@ -708,15 +804,15 @@ function getSplitIndexes(members: ts.NodeArray<Member>, text: string) {
  */
 function getNextSplitIndex(text: string, pos: number) {
     const enum CharacterCodes {
-        lineFeed = 0x0A,              // \n
-        carriageReturn = 0x0D,        // \r
-        formFeed = 0x0C,              // \f
-        tab = 0x09,                   // \t
-        verticalTab = 0x0B,           // \v
-        slash = 0x2F,                 // /
-        asterisk = 0x2A,              // *
-        space = 0x0020,   // " "
-        maxAsciiCharacter = 0x7F,
+        lineFeed = 0x0a, // \n
+        carriageReturn = 0x0d, // \r
+        formFeed = 0x0c, // \f
+        tab = 0x09, // \t
+        verticalTab = 0x0b, // \v
+        slash = 0x2f, // /
+        asterisk = 0x2a, // *
+        space = 0x0020, // " "
+        maxAsciiCharacter = 0x7f,
     }
     scan: while (pos >= 0 && pos < text.length) {
         const ch = text.charCodeAt(pos);
@@ -752,7 +848,10 @@ function getNextSplitIndex(text: string, pos: number) {
                         }
                     } else {
                         while (pos < text.length) {
-                            if (text.charCodeAt(pos) === CharacterCodes.asterisk && text.charCodeAt(pos + 1) === CharacterCodes.slash) {
+                            if (
+                                text.charCodeAt(pos) === CharacterCodes.asterisk &&
+                                text.charCodeAt(pos + 1) === CharacterCodes.slash
+                            ) {
                                 pos += 2;
                                 continue scan;
                             }
@@ -766,7 +865,7 @@ function getNextSplitIndex(text: string, pos: number) {
                 break scan;
             default:
                 // skip whitespace:
-                if (ch > CharacterCodes.maxAsciiCharacter && (ts.isWhiteSpaceLike(ch))) {
+                if (ch > CharacterCodes.maxAsciiCharacter && ts.isWhiteSpaceLike(ch)) {
                     pos++;
                     continue;
                 }
