@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+/* Test the case where import should be grouped using default grouping. */
+
+import {afoo, foo} from 'foo';
+import x = require('y');
+
+import {bar} from '../bar';
+
+import './baa';
+import './baz'; // required
+import './caa';
+
+export class Test {}

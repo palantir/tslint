@@ -17,17 +17,19 @@
 
 import * as ts from "typescript";
 
-import {doesIntersect} from "../utils";
-import {IWalker, WalkContext} from "../walker";
+import { IWalker, WalkContext } from "../walker";
+
 import { IOptions, IRule, IRuleMetadata, RuleFailure, RuleSeverity } from "./rule";
+
+export type NoInfer<T> = T & { [K in keyof T]: T[K] };
 
 export abstract class AbstractRule implements IRule {
     public static metadata: IRuleMetadata;
+    public ruleName: string;
     protected readonly ruleArguments: any[];
     protected readonly ruleSeverity: RuleSeverity;
-    public ruleName: string;
 
-    constructor(private options: IOptions) {
+    constructor(private readonly options: IOptions) {
         this.ruleName = options.ruleName;
         this.ruleArguments = options.ruleArguments;
         this.ruleSeverity = options.ruleSeverity;
@@ -41,37 +43,45 @@ export abstract class AbstractRule implements IRule {
 
     public applyWithWalker(walker: IWalker): RuleFailure[] {
         walker.walk(walker.getSourceFile());
-        return this.filterFailures(walker.getFailures());
+        return walker.getFailures();
     }
 
     public isEnabled(): boolean {
         return this.ruleSeverity !== "off";
     }
 
-    protected applyWithFunction(sourceFile: ts.SourceFile, walkFn: (ctx: WalkContext<void>) => void): RuleFailure[];
-    protected applyWithFunction<T, U extends T>(
+    protected applyWithFunction(
+        sourceFile: ts.SourceFile,
+        walkFn: (ctx: WalkContext) => void,
+    ): RuleFailure[];
+    protected applyWithFunction<T>(
         sourceFile: ts.SourceFile,
         walkFn: (ctx: WalkContext<T>) => void,
-        options: U,
+        options: NoInfer<T>,
     ): RuleFailure[];
-    protected applyWithFunction<T, U extends T>(
+    protected applyWithFunction<T, U>(
         sourceFile: ts.SourceFile,
-        walkFn: (ctx: WalkContext<T | void>) => void,
-        options?: U,
+        walkFn: (ctx: WalkContext<T>, programOrChecker: U) => void,
+        options: NoInfer<T>,
+        checker: NoInfer<U>,
+    ): RuleFailure[];
+    protected applyWithFunction<T, U>(
+        sourceFile: ts.SourceFile,
+        walkFn: (ctx: WalkContext<T | undefined>, programOrChecker?: U) => void,
+        options?: T,
+        programOrChecker?: U,
     ): RuleFailure[] {
         const ctx = new WalkContext(sourceFile, this.ruleName, options);
-        walkFn(ctx);
-        return this.filterFailures(ctx.failures);
+        walkFn(ctx, programOrChecker);
+        return ctx.failures;
     }
 
-    protected filterFailures(failures: RuleFailure[]): RuleFailure[] {
-        const result: RuleFailure[] = [];
-        for (const failure of failures) {
-            // don't add failures for a rule if the failure intersects an interval where that rule is disabled
-            if (!doesIntersect(failure, this.options.disabledIntervals) && !result.some((f) => f.equals(failure))) {
-                result.push(failure);
-            }
-        }
-        return result;
+    /**
+     * @deprecated
+     * Failures will be filtered based on `tslint:disable` comments by tslint.
+     * This method now does nothing.
+     */
+    protected filterFailures(failures: RuleFailure[]) {
+        return failures;
     }
 }

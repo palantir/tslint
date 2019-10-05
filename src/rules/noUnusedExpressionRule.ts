@@ -16,13 +16,18 @@
  */
 
 import {
-    isAssignmentKind, isBinaryExpression, isConditionalExpression, isExpressionStatement,
-    isIdentifier, isNumericLiteral, isPrefixUnaryExpression, isVoidExpression,
+    isAssignmentKind,
+    isBinaryExpression,
+    isConditionalExpression,
+    isExpressionStatement,
+    isIdentifier,
+    isNumericLiteral,
+    isParenthesizedExpression,
+    isVoidExpression,
 } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { unwrapParentheses } from "../language/utils";
 
 const ALLOW_FAST_NULL_CHECKS = "allow-fast-null-checks";
 const ALLOW_NEW = "allow-new";
@@ -45,7 +50,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         rationale: Lint.Utils.dedent`
             Detects potential errors where an assignment or function call was intended.`,
         optionsDescription: Lint.Utils.dedent`
-            Two arguments may be optionally provided:
+            Three arguments may be optionally provided:
 
             * \`${ALLOW_FAST_NULL_CHECKS}\` allows to use logical operators to perform fast null checks and perform
             method or function calls for side effects (e.g. \`e && e.preventDefault()\`).
@@ -55,10 +60,10 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "array",
             items: {
                 type: "string",
-                enum: [ALLOW_FAST_NULL_CHECKS],
+                enum: [ALLOW_FAST_NULL_CHECKS, ALLOW_NEW, ALLOW_TAGGED_TEMPLATE],
             },
             minLength: 0,
-            maxLength: 1,
+            maxLength: 3,
         },
         optionExamples: [true, [true, ALLOW_FAST_NULL_CHECKS]],
         type: "functionality",
@@ -69,87 +74,130 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "unused expression, expected an assignment or function call";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoUnusedExpressionWalker(sourceFile, this.ruleName, {
+        return this.applyWithFunction(sourceFile, walk, {
             allowFastNullChecks: this.ruleArguments.indexOf(ALLOW_FAST_NULL_CHECKS) !== -1,
             allowNew: this.ruleArguments.indexOf(ALLOW_NEW) !== -1,
             allowTaggedTemplate: this.ruleArguments.indexOf(ALLOW_TAGGED_TEMPLATE) !== -1,
-        }));
+        });
     }
 }
 
-class NoUnusedExpressionWalker extends Lint.AbstractWalker<Options> {
-    public walk(sourceFile: ts.SourceFile) {
-        const cb = (node: ts.Node): void => {
-            if (isExpressionStatement(node)) {
-                if (!isDirective(node) && this.isUnusedExpression(node.expression)) {
-                    this.reportFailure(node);
-                }
-            } else if (isVoidExpression(node)) {
-                // allow `void 0`
-                if (!isLiteralZero(node.expression) && this.isUnusedExpression(node.expression)) {
-                    this.reportFailure(node.expression);
-                }
+function walk(ctx: Lint.WalkContext<Options>) {
+    let checking = false;
+    let allowFastNullChecks = true;
+    return ts.forEachChild(ctx.sourceFile, cb);
+
+    function cb(node: ts.Node): boolean | undefined {
+        if (checking) {
+            if (isParenthesizedExpression(node) || isVoidExpression(node)) {
+                return cb(node.expression);
+            } else if (isConditionalExpression(node)) {
+                noCheck(node.condition, cb);
+                return both(node.whenTrue, node.whenFalse);
             } else if (isBinaryExpression(node)) {
-                if (node.operatorToken.kind === ts.SyntaxKind.CommaToken) {
-                    // allow indirect eval: `(0, eval)("code");`
-                    if (!isIndirectEval(node) && this.isUnusedExpression(node.left)) {
-                        this.reportFailure(node.left);
-                    }
+                switch (node.operatorToken.kind) {
+                    case ts.SyntaxKind.CommaToken:
+                        if (isIndirectEval(node)) {
+                            return false;
+                        }
+                        return both(node.left, node.right);
+                    case ts.SyntaxKind.AmpersandAmpersandToken:
+                    case ts.SyntaxKind.BarBarToken:
+                        if (allowFastNullChecks) {
+                            noCheck(node.left, cb);
+                            return cb(node.right);
+                        }
                 }
             }
-            return ts.forEachChild(node, cb);
-        };
-        return ts.forEachChild(sourceFile, cb);
-    }
-
-    private reportFailure(node: ts.Node) {
-        const start = node.getStart(this.sourceFile);
-        const end = node.end;
-        // don't add a new failure if it is contained in another failure's span
-        for (const failure of this.failures) {
-            if (failure.getStartPosition().getPosition() <= start &&
-                failure.getEndPosition().getPosition() >= end) {
-                return;
+            noCheck(node, forEachChild);
+            return isUnusedExpression(node, ctx.options);
+        }
+        if (isExpressionStatement(node)) {
+            allowFastNullChecks = ctx.options.allowFastNullChecks;
+            if (!isDirective(node)) {
+                check(node.expression, node);
             }
-        }
-        this.addFailure(start, end, Rule.FAILURE_STRING);
-    }
-
-    private isUnusedExpression(expression: ts.Expression): boolean {
-        expression = unwrapParentheses(expression);
-        switch (expression.kind) {
-            case ts.SyntaxKind.CallExpression:
-            case ts.SyntaxKind.YieldExpression:
-            case ts.SyntaxKind.DeleteExpression:
-            case ts.SyntaxKind.AwaitExpression:
-            case ts.SyntaxKind.PostfixUnaryExpression:
-                return false;
-            case ts.SyntaxKind.NewExpression:
-                return !this.options.allowNew;
-            case ts.SyntaxKind.TaggedTemplateExpression:
-                return !this.options.allowTaggedTemplate;
-            default:
-        }
-        if (isPrefixUnaryExpression(expression) &&
-            (expression.operator === ts.SyntaxKind.PlusPlusToken || expression.operator === ts.SyntaxKind.MinusMinusToken)) {
+            allowFastNullChecks = true;
             return false;
-        }
-        if (isConditionalExpression(expression)) {
-            return this.isUnusedExpression(expression.whenTrue) || this.isUnusedExpression(expression.whenFalse);
-        }
-        if (isBinaryExpression(expression)) {
-            const operatorKind = expression.operatorToken.kind;
-            if (isAssignmentKind(operatorKind)) {
-                return false;
+        } else if (isVoidExpression(node)) {
+            // allow `void 0` and `void(0)`
+            if (
+                !isLiteralZero(
+                    isParenthesizedExpression(node.expression)
+                        ? node.expression.expression
+                        : node.expression,
+                )
+            ) {
+                check(node.expression);
             }
-            if (this.options.allowFastNullChecks &&
-                (operatorKind === ts.SyntaxKind.AmpersandAmpersandToken || operatorKind === ts.SyntaxKind.BarBarToken)) {
-                return this.isUnusedExpression(expression.right);
-            } else if (operatorKind === ts.SyntaxKind.CommaToken) {
-                return this.isUnusedExpression(expression.left) || this.isUnusedExpression(expression.right);
-            }
+            return false;
+        } else if (
+            isBinaryExpression(node) &&
+            node.operatorToken.kind === ts.SyntaxKind.CommaToken &&
+            !isIndirectEval(node)
+        ) {
+            check(node.left);
+            return cb(node.right);
         }
-        return true;
+        return ts.forEachChild(node, cb);
+    }
+
+    function forEachChild(node: ts.Node) {
+        return ts.forEachChild(node, cb);
+    }
+
+    function check(node: ts.Node, failNode?: ts.Node): void {
+        checking = true;
+        if (cb(node)) {
+            ctx.addFailureAtNode(failNode === undefined ? node : failNode, Rule.FAILURE_STRING);
+        }
+        checking = false;
+    }
+
+    function noCheck(node: ts.Node, callback: (node: ts.Node) => void): void {
+        const old = allowFastNullChecks;
+        checking = false;
+        allowFastNullChecks = true;
+        callback(node);
+        allowFastNullChecks = old;
+        checking = true;
+    }
+
+    function both(one: ts.Node, two: ts.Node): boolean {
+        if (cb(one)) {
+            if (cb(two)) {
+                return true;
+            } else {
+                ctx.addFailureAtNode(one, Rule.FAILURE_STRING);
+            }
+        } else if (cb(two)) {
+            ctx.addFailureAtNode(two, Rule.FAILURE_STRING);
+        }
+        return false;
+    }
+}
+
+function isUnusedExpression(node: ts.Node, options: Options): boolean {
+    switch (node.kind) {
+        case ts.SyntaxKind.CallExpression:
+        case ts.SyntaxKind.YieldExpression:
+        case ts.SyntaxKind.DeleteExpression:
+        case ts.SyntaxKind.AwaitExpression:
+        case ts.SyntaxKind.PostfixUnaryExpression:
+            return false;
+        case ts.SyntaxKind.NewExpression:
+            return !options.allowNew;
+        case ts.SyntaxKind.TaggedTemplateExpression:
+            return !options.allowTaggedTemplate;
+        case ts.SyntaxKind.BinaryExpression:
+            return !isAssignmentKind((node as ts.BinaryExpression).operatorToken.kind);
+        case ts.SyntaxKind.PrefixUnaryExpression:
+            return (
+                (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.PlusPlusToken &&
+                (node as ts.PrefixUnaryExpression).operator !== ts.SyntaxKind.MinusMinusToken
+            );
+        default:
+            return true;
     }
 }
 
@@ -158,14 +206,17 @@ function isLiteralZero(node: ts.Expression) {
 }
 
 function isIndirectEval(node: ts.BinaryExpression): boolean {
-    return isIdentifier(node.right) && node.right.text === "eval" &&
+    return (
+        isIdentifier(node.right) &&
+        node.right.text === "eval" &&
         isLiteralZero(node.left) &&
-        node.parent!.kind === ts.SyntaxKind.ParenthesizedExpression &&
-        node.parent!.parent!.kind === ts.SyntaxKind.CallExpression;
+        node.parent.kind === ts.SyntaxKind.ParenthesizedExpression &&
+        node.parent.parent.kind === ts.SyntaxKind.CallExpression
+    );
 }
 
 function isDirective(node: ts.ExpressionStatement) {
-    if (node.expression.kind !== ts.SyntaxKind.StringLiteral || !canContainDirective(node.parent!)) {
+    if (node.expression.kind !== ts.SyntaxKind.StringLiteral || !canContainDirective(node.parent)) {
         return false;
     }
 
@@ -173,7 +224,10 @@ function isDirective(node: ts.ExpressionStatement) {
     // check if all previous statements in block are also directives
     for (let i = parent.statements.indexOf(node) - 1; i >= 0; --i) {
         const statement = parent.statements[i];
-        if (!isExpressionStatement(statement) || statement.expression.kind !== ts.SyntaxKind.StringLiteral) {
+        if (
+            !isExpressionStatement(statement) ||
+            statement.expression.kind !== ts.SyntaxKind.StringLiteral
+        ) {
             return false;
         }
     }
@@ -186,7 +240,7 @@ function canContainDirective(node: ts.Node): boolean {
         case ts.SyntaxKind.ModuleBlock:
             return true;
         case ts.SyntaxKind.Block:
-            switch (node.parent!.kind) {
+            switch (node.parent.kind) {
                 case ts.SyntaxKind.ArrowFunction:
                 case ts.SyntaxKind.FunctionExpression:
                 case ts.SyntaxKind.FunctionDeclaration:

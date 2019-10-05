@@ -6,8 +6,5 @@
         "ignore-module": "(allow-side-effect|\\.css)$"
       }
     ]
-  },
-  "linterOptions": {
-    "typeCheck": false
   }
 }

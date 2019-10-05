@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 
 import * as ts from "typescript";
 
-import {AbstractRule} from "./abstractRule";
-import {ITypedRule, RuleFailure} from "./rule";
+import { showWarningOnce } from "../../error";
+
+import { AbstractRule } from "./abstractRule";
+import { ITypedRule, RuleFailure } from "./rule";
 
 export abstract class TypedRule extends AbstractRule implements ITypedRule {
-
     public apply(): RuleFailure[] {
-        // if no program is given to the linter, throw an error
-        throw new Error(`The '${this.ruleName}' rule requires type checking`);
+        // if no program is given to the linter, show an error
+        showWarningOnce(`Warning: The '${this.ruleName}' rule requires type information.`);
+        return [];
     }
 
     public abstract applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): RuleFailure[];

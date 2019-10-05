@@ -1,0 +1,3 @@
+[typescript]: >=2.4.0
+/// <reference path="something.ts"/>
+                     ~~~~~~~~~~~~ [<reference> is not allowed, use imports]

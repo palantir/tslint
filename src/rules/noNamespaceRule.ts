@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { hasModifier } from "tsutils";
+import { hasModifier, isNodeFlagSet } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-namespace",
-        description: "Disallows use of internal \`module\`s and \`namespace\`s.",
+        description: "Disallows use of internal `module`s and `namespace`s.",
         descriptionDetails: "This rule still allows the use of `declare module ... {}`",
         rationale: Lint.Utils.dedent`
             ES6-style external modules are the standard way to modularize code.
@@ -69,10 +69,14 @@ function walk(ctx: Lint.WalkContext<Options>) {
     if (ctx.sourceFile.isDeclarationFile && ctx.options.allowDeclarations) {
         return;
     }
-    for (const node of ctx.sourceFile.statements){
+    for (const node of ctx.sourceFile.statements) {
         if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
-            if ((node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
-                (!ctx.options.allowDeclarations || !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))) {
+            if (
+                (node as ts.ModuleDeclaration).name.kind !== ts.SyntaxKind.StringLiteral &&
+                !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation) &&
+                (!ctx.options.allowDeclarations ||
+                    !hasModifier(node.modifiers, ts.SyntaxKind.DeclareKeyword))
+            ) {
                 ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
             }
         }

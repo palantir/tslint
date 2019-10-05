@@ -5,19 +5,18 @@
             "name": "Debug CLI",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/build/src/tslint-cli.js",
+            "program": "${workspaceRoot}/build/src/tslintCli.js",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
+            "outputCapture": "std",
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
@@ -27,18 +26,17 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": ["--reporter", "spec", "--colors", "--no-timeouts", "build/test/**/*Tests.js", "build/test/assert.js"],
+            "args": ["--reporter", "spec", "--colors", "--no-timeouts", "build/test/**/*Tests.js"],
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
@@ -49,16 +47,15 @@
             "stopOnEntry": false,
             "args": ["run", "test"],
             "cwd": "${workspaceRoot}",
-            "preLaunchTask": "tsc",
+            "preLaunchTask": "compile_tests",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*.js"]
         },
         {
@@ -71,14 +68,13 @@
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "tsc",
             "runtimeExecutable": null,
-            "runtimeArgs": [
-                "--nolazy"
-            ],
+            "runtimeArgs": ["--nolazy"],
             "env": {
                 "NODE_ENV": "development"
             },
             "console": "internalConsole",
-            "sourceMaps": true, 
+            "outputCapture": "std",
+            "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/build/**/*/js"]
         }
     ]

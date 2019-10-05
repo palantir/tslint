@@ -15,22 +15,28 @@
  * limitations under the License.
  */
 
+// tslint:disable strict-boolean-expressions (TODO: Fix up options)
+
 import * as fs from "fs";
-import * as glob from "glob";
 import * as path from "path";
 import * as ts from "typescript";
 
 import {
-    CONFIG_FILENAME,
     DEFAULT_CONFIG,
     findConfiguration,
-    IConfigurationFile,
+    findConfigurationPath,
+    isFileExcluded,
+    JSON_CONFIG_FILENAME,
+    stringifyConfiguration,
 } from "./configuration";
 import { FatalError } from "./error";
-import * as Linter from "./linter";
-import { consoleTestResultsHandler, runTests } from "./test";
+import { tryReadFile } from "./files/reading";
+import { resolveFilesAndProgram } from "./files/resolution";
+import { LintResult } from "./index";
+import { Linter } from "./linter";
+import { trimSingleQuotes } from "./utils";
 
-export interface IRunnerOptions {
+export interface Options {
     /**
      * Path to a configuration file.
      */
@@ -39,12 +45,12 @@ export interface IRunnerOptions {
     /**
      * Exclude globs from path expansion.
      */
-    exclude?: string | string[];
+    exclude: string[];
 
     /**
      * File paths to lint.
      */
-    files?: string[];
+    files: string[];
 
     /**
      * Whether to return status code 0 even if there are lint errors.
@@ -77,9 +83,24 @@ export interface IRunnerOptions {
     out?: string;
 
     /**
+     * Whether to output absolute paths
+     */
+    outputAbsolutePaths?: boolean;
+
+    /**
+     * Outputs the configuration to be used instead of linting.
+     */
+    printConfig?: boolean;
+
+    /**
      * tsconfig.json file.
      */
     project?: string;
+
+    /**
+     * Whether to hide warnings
+     */
+    quiet?: boolean;
 
     /**
      * Rules directory paths.
@@ -87,170 +108,189 @@ export interface IRunnerOptions {
     rulesDirectory?: string | string[];
 
     /**
-     * That TSLint produces the correct output for the specified directory.
+     * Run the tests in the given directories to ensure a (custom) TSLint rule's output matches the expected output.
+     * When this property is `true` the `files` property is used to specify the directories from which the tests should be executed.
      */
-    test?: string;
+    test?: boolean;
 
     /**
      * Whether to enable type checking when linting a project.
      */
     typeCheck?: boolean;
-
-    /**
-     * Whether to show the current TSLint version.
-     */
-    version?: boolean;
 }
 
-export class Runner {
-    private static trimSingleQuotes(str: string) {
-        return str.replace(/^'|'$/g, "");
+export const enum Status {
+    Ok = 0,
+    FatalError = 1,
+    LintError = 2,
+}
+
+export interface Logger {
+    log(message: string): void;
+    error(message: string): void;
+}
+
+export async function run(options: Options, logger: Logger): Promise<Status> {
+    try {
+        return await runWorker(options, logger);
+    } catch (error) {
+        if (error instanceof FatalError) {
+            logger.error(`${error.message}\n`);
+            return Status.FatalError;
+        }
+        throw error;
+    }
+}
+
+async function runWorker(options: Options, logger: Logger): Promise<Status> {
+    if (options.init) {
+        if (fs.existsSync(JSON_CONFIG_FILENAME)) {
+            throw new FatalError(`Cannot generate ${JSON_CONFIG_FILENAME}: file already exists`);
+        }
+
+        fs.writeFileSync(JSON_CONFIG_FILENAME, JSON.stringify(DEFAULT_CONFIG, undefined, "    "));
+        return Status.Ok;
     }
 
-    constructor(private options: IRunnerOptions, private outputStream: NodeJS.WritableStream) { }
+    if (options.printConfig) {
+        return printConfiguration(options, logger);
+    }
 
-    public run(onComplete: (status: number) => void) {
-        if (this.options.version) {
-            this.outputStream.write(Linter.VERSION + "\n");
-            return onComplete(0);
-        }
+    if (options.test) {
+        const test = await import("./test");
+        const results = test.runTests(
+            (options.files || []).map(trimSingleQuotes),
+            options.rulesDirectory,
+        );
+        return test.consoleTestResultsHandler(results, logger) ? Status.Ok : Status.FatalError;
+    }
 
-        if (this.options.init) {
-            if (fs.existsSync(CONFIG_FILENAME)) {
-                console.error(`Cannot generate ${CONFIG_FILENAME}: file already exists`);
-                return onComplete(1);
-            }
+    if (options.config && !fs.existsSync(options.config)) {
+        throw new FatalError(`Invalid option for configuration: ${options.config}`);
+    }
 
-            const tslintJSON = JSON.stringify(DEFAULT_CONFIG, undefined, "    ");
-            fs.writeFileSync(CONFIG_FILENAME, tslintJSON);
-            return onComplete(0);
-        }
+    const { output, errorCount } = await runLinter(options, logger);
+    if (output && output.trim()) {
+        logger.log(`${output}\n`);
+    }
+    return options.force || errorCount === 0 ? Status.Ok : Status.LintError;
+}
 
-        if (this.options.test) {
-            const results = runTests((this.options.files || []).map(Runner.trimSingleQuotes), this.options.rulesDirectory);
-            const didAllTestsPass = consoleTestResultsHandler(results);
-            return onComplete(didAllTestsPass ? 0 : 1);
-        }
+async function printConfiguration(options: Options, logger: Logger): Promise<Status> {
+    const { files } = options;
+    if (files.length !== 1) {
+        throw new FatalError(`--print-config must be run with exactly one file`);
+    }
 
-        // when provided, it should point to an existing location
-        if (this.options.config && !fs.existsSync(this.options.config)) {
-            console.error("Invalid option for configuration: " + this.options.config);
-            return onComplete(1);
-        }
+    const configurationPath =
+        options.config === undefined ? findConfigurationPath(null, files[0]) : options.config;
+    if (configurationPath === undefined) {
+        throw new FatalError(
+            `Could not find configuration path. Try passing a --config to your tslint.json.`,
+        );
+    }
 
-        // if both files and tsconfig are present, use files
-        let files = this.options.files === undefined ? [] : this.options.files;
-        let program: ts.Program | undefined;
+    const configuration = findConfiguration(configurationPath, files[0]).results;
+    if (configuration === undefined) {
+        throw new FatalError(`Could not find configuration for '${files[1]}`);
+    }
 
-        if (this.options.project != null) {
-            if (!fs.existsSync(this.options.project)) {
-                console.error("Invalid option for project: " + this.options.project);
-                return onComplete(1);
-            }
-            program = Linter.createProgram(this.options.project);
-            if (files.length === 0) {
-                files = Linter.getFileNames(program);
-            }
-            if (this.options.typeCheck) {
-                // if type checking, run the type checker
-                const diagnostics = ts.getPreEmitDiagnostics(program);
-                if (diagnostics.length > 0) {
-                    const messages = diagnostics.map((diag) => {
-                        // emit any error messages
-                        let message = ts.DiagnosticCategory[diag.category];
-                        if (diag.file) {
-                            const {line, character} = diag.file.getLineAndCharacterOfPosition(diag.start);
-                            message += ` at ${diag.file.fileName}:${line + 1}:${character + 1}:`;
-                        }
-                        message += " " + ts.flattenDiagnosticMessageText(diag.messageText, "\n");
-                        return message;
-                    });
-                    console.error(messages.join("\n"));
-                    return onComplete(this.options.force ? 0 : 1);
-                }
+    logger.log(`${stringifyConfiguration(configuration)}\n`);
+    return Status.Ok;
+}
+
+async function runLinter(options: Options, logger: Logger): Promise<LintResult> {
+    const { files, program } = resolveFilesAndProgram(options, logger);
+    // if type checking, run the type checker
+    if (program && options.typeCheck) {
+        const diagnostics = ts.getPreEmitDiagnostics(program);
+        if (diagnostics.length !== 0) {
+            const message = diagnostics
+                .map(d => showDiagnostic(d, program, options.outputAbsolutePaths))
+                .join("\n");
+            if (options.force) {
+                logger.error(`${message}\n`);
             } else {
-                // if not type checking, we don't need to pass in a program object
-                program = undefined;
+                throw new FatalError(message);
             }
-        } else if (this.options.typeCheck) {
-            console.error("--project must be specified in order to enable type checking.");
-            return onComplete(1);
-        }
-
-        let ignorePatterns: string[] = [];
-        if (this.options.exclude) {
-            const excludeArguments: string[] = Array.isArray(this.options.exclude) ? this.options.exclude : [this.options.exclude];
-
-            ignorePatterns = excludeArguments.map(Runner.trimSingleQuotes);
-        }
-
-        files = files
-            // remove single quotes which break matching on Windows when glob is passed in single quotes
-            .map(Runner.trimSingleQuotes)
-            .map((file: string) => glob.sync(file, { ignore: ignorePatterns, nodir: true }))
-            .reduce((a: string[], b: string[]) => a.concat(b), []);
-
-        try {
-            this.processFiles(onComplete, files, program);
-        } catch (error) {
-            if ((error as FatalError).name === FatalError.NAME) {
-                console.error((error as FatalError).message);
-                return onComplete(1);
-            }
-            // rethrow unhandled error
-            throw error;
         }
     }
+    return doLinting(options, files, program, logger);
+}
 
-    private processFiles(onComplete: (status: number) => void, files: string[], program?: ts.Program) {
-        const possibleConfigAbsolutePath = this.options.config != null ? path.resolve(this.options.config) : null;
-        const linter = new Linter({
-            fix: !!this.options.fix,
-            formatter: this.options.format,
-            formattersDirectory: this.options.formattersDirectory || "",
-            rulesDirectory: this.options.rulesDirectory || "",
-        }, program);
+async function doLinting(
+    options: Options,
+    files: string[],
+    program: ts.Program | undefined,
+    logger: Logger,
+): Promise<LintResult> {
+    let configFile =
+        options.config !== undefined ? findConfiguration(options.config).results : undefined;
 
-        let lastFolder: string | undefined;
-        let configFile: IConfigurationFile | undefined;
-        for (const file of files) {
-            if (!fs.existsSync(file)) {
-                console.error(`Unable to open file: ${file}`);
-                return onComplete(1);
-            }
+    let formatter = options.format;
+    if (formatter === undefined) {
+        formatter =
+            configFile && configFile.linterOptions && configFile.linterOptions.format
+                ? configFile.linterOptions.format
+                : "prose";
+    }
 
-            const buffer = new Buffer(256);
-            const fd = fs.openSync(file, "r");
-            try {
-                fs.readSync(fd, buffer, 0, 256, 0);
-                if (buffer.readInt8(0, true) === 0x47 && buffer.readInt8(188, true) === 0x47) {
-                    // MPEG transport streams use the '.ts' file extension. They use 0x47 as the frame
-                    // separator, repeating every 188 bytes. It is unlikely to find that pattern in
-                    // TypeScript source, so tslint ignores files with the specific pattern.
-                    console.warn(`${file}: ignoring MPEG transport stream`);
-                    continue;
-                }
-            } finally {
-                fs.closeSync(fd);
-            }
+    const linter = new Linter(
+        {
+            fix: !!options.fix,
+            formatter,
+            formattersDirectory: options.formattersDirectory,
+            quiet: !!options.quiet,
+            rulesDirectory: options.rulesDirectory,
+        },
+        program,
+    );
 
-            const contents = fs.readFileSync(file, "utf8");
+    let lastFolder: string | undefined;
+
+    for (const file of files) {
+        if (options.config === undefined) {
             const folder = path.dirname(file);
             if (lastFolder !== folder) {
-                configFile = findConfiguration(possibleConfigAbsolutePath, folder).results;
+                configFile = findConfiguration(null, folder).results;
                 lastFolder = folder;
             }
-            linter.lint(file, contents, configFile);
+        }
+        if (isFileExcluded(file, configFile)) {
+            continue;
         }
 
-        const lintResult = linter.getResult();
-
-        this.outputStream.write(lintResult.output, () => {
-            if (this.options.force || lintResult.errorCount === 0) {
-                onComplete(0);
-            } else {
-                onComplete(2);
+        let contents: string | undefined;
+        if (program !== undefined) {
+            const sourceFile = program.getSourceFile(file);
+            if (sourceFile !== undefined) {
+                contents = sourceFile.text;
             }
-        });
+        } else {
+            contents = await tryReadFile(file, logger);
+        }
+
+        if (contents !== undefined) {
+            linter.lint(file, contents, configFile);
+        }
     }
+
+    return linter.getResult();
+}
+
+function showDiagnostic(
+    { file, start, category, messageText }: ts.Diagnostic,
+    program: ts.Program,
+    outputAbsolutePaths?: boolean,
+): string {
+    let message = ts.DiagnosticCategory[category];
+    if (file !== undefined && start !== undefined) {
+        const { line, character } = file.getLineAndCharacterOfPosition(start);
+        const currentDirectory = program.getCurrentDirectory();
+        const filePath = outputAbsolutePaths
+            ? path.resolve(currentDirectory, file.fileName)
+            : path.relative(currentDirectory, file.fileName);
+        message += ` at ${filePath}:${line + 1}:${character + 1}:`;
+    }
+    return `${message} ${ts.flattenDiagnosticMessageText(messageText, "\n")}`;
 }

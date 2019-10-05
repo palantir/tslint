@@ -20,7 +20,13 @@ import * as ts from "typescript";
 
 import * as Lint from "../index";
 
+import { codeExamples } from "./code-examples/preferTemplate.examples";
+
 const OPTION_SINGLE_CONCAT = "allow-single-concat";
+
+interface Options {
+    allowSingleConcat: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -36,11 +42,14 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true, [true, OPTION_SINGLE_CONCAT]],
         type: "style",
         typescriptOnly: false,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Use a template literal instead of concatenating with a string literal.";
-    public static FAILURE_STRING_MULTILINE = "Use a multiline template literal instead of concatenating string literals with newlines.";
+    public static FAILURE_STRING =
+        "Use a template literal instead of concatenating with a string literal.";
+    public static FAILURE_STRING_MULTILINE =
+        "Use a multiline template literal instead of concatenating string literals with newlines.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         if (sourceFile.isDeclarationFile) {
@@ -48,14 +57,15 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
 
         const allowSingleConcat = this.ruleArguments.indexOf(OPTION_SINGLE_CONCAT) !== -1;
-        return this.applyWithFunction(sourceFile, (ctx) => walk(ctx, allowSingleConcat));
+        return this.applyWithFunction(sourceFile, walk, { allowSingleConcat });
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, allowSingleConcat: boolean): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
+    const allowSingleConcat = ctx.options.allowSingleConcat;
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         const failure = getError(node, allowSingleConcat);
-        if (failure) {
+        if (failure !== undefined) {
             ctx.addFailureAtNode(node, failure);
         } else {
             return ts.forEachChild(node, cb);
@@ -76,16 +86,21 @@ function getError(node: ts.Node, allowSingleConcat: boolean): string | undefined
         // They're both strings.
         // If they're joined by a newline, recommend a template expression instead.
         // Otherwise ignore. ("a" + "b", probably writing a long newline-less string on many lines.)
-        return containsNewline(left as StringLike) || containsNewline(right as StringLike) ? Rule.FAILURE_STRING_MULTILINE : undefined;
+        return containsNewline(left as StringLike) || containsNewline(right as StringLike)
+            ? Rule.FAILURE_STRING_MULTILINE
+            : undefined;
     } else if (!l && !r) {
-        // Watch out for `"a" + b + c`.
+        // Watch out for `"a" + b + c`. Parsed as `("a" + b) + c`.
         return containsAnyStringLiterals(left) ? Rule.FAILURE_STRING : undefined;
     } else if (l) {
         // `"x" + y`
         return !allowSingleConcat ? Rule.FAILURE_STRING : undefined;
     } else {
         // `? + "b"`
-        return !allowSingleConcat || isPlusExpression(left) ? Rule.FAILURE_STRING : undefined;
+        // If LHS consists of only string literals (as in `"a" + "b" + "c"`, allow it.)
+        return !containsOnlyStringLiterals(left) && (!allowSingleConcat || isPlusExpression(left))
+            ? Rule.FAILURE_STRING
+            : undefined;
     }
 }
 
@@ -99,13 +114,21 @@ function containsNewline(node: StringLike): boolean {
     }
 }
 
-function containsAnyStringLiterals(node: ts.Expression): boolean {
-    if (!isPlusExpression(node)) {
-        return false;
-    }
+function containsOnlyStringLiterals(node: ts.Expression): boolean {
+    return (
+        isPlusExpression(node) &&
+        isStringLike(node.right) &&
+        (isStringLike(node.left) || containsAnyStringLiterals(node.left))
+    );
+}
 
-    const { left, right } = node;
-    return isStringLike(right) || isStringLike(left) || containsAnyStringLiterals(left);
+function containsAnyStringLiterals(node: ts.Expression): boolean {
+    return (
+        isPlusExpression(node) &&
+        (isStringLike(node.right) ||
+            isStringLike(node.left) ||
+            containsAnyStringLiterals(node.left))
+    );
 }
 
 function isPlusExpression(node: ts.Node): node is ts.BinaryExpression {

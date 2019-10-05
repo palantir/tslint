@@ -1,14 +1,17 @@
 {
-  "linterOptions": {
-    "typeCheck": true
-  },
   "rules": {
     "completed-docs": [true, {
       "enums": {
         "visibilities": ["exported"]
       },
+      "enum-members": {
+        "visibilities": ["exported"]
+      },
       "interfaces": {
         "visibilities": ["internal"]
+      },
+      "variables": {
+        "visibilities": ["exported"]
       }
     }]
   }

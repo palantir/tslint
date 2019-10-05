@@ -6,6 +6,8 @@ let y: string[] = <Array<string>>["2"];
                    ~~~~~~~~~~~~~        [0]
 let z: Array = [3, "4"];
        ~~~~~             [0]
+let u: Array<unknown> = [];
+       ~~~~~~~~~~~~~~       [0]
 
 let xx: Array<Array<number>> = [[1, 2], [3]];
         ~~~~~~~~~~~~~~~~~~~~                  [0]
@@ -17,6 +19,8 @@ let ya = [[1, "2"]] as[number, string][];
 
 type Arr<T> = Array<T>;
               ~~~~~~~~  [0]
+type ParenthesisArr<T> = (T)[];
+type DoubleParenthesisArr<T> = ((T))[];
 
 // Ignore user defined aliases
 let yyyy: Arr<Array<Arr<string>>[]> = [[[["2"]]]];
@@ -27,6 +31,7 @@ interface ArrayClass<T> {
          ~~~~~~~~  [0]
     bar: T[];
     baz: Arr<T>;
+    xyz: this[];
 }
 
 function fooFunction(foo: Array<ArrayClass<string>>) {
@@ -49,10 +54,14 @@ let barVar: ((c: number) => number)[];
 type fooUnion = Array<string|number|boolean>;
 type barUnion = (string|number|boolean)[];
                 ~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
+type bazUnion = ((string|number|boolean))[];
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 type fooIntersection = Array<string & number>;
 type barIntersection = (string & number)[];
                        ~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
+type bazIntersection = ((string & number))[];
+                       ~~~~~~~~~~~~~~~~~~~~~  [Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.]
 
 namespace fooName {
     type BarType = { bar: string };
@@ -68,5 +77,10 @@ let w: fooName.BazType<string>[] = [["baz"]];
 interface FooInterface {
     '.bar': {baz: string[];};
 }
+
+// Test an unknown Array
+let t: unknown[] = [];
+let u: Array<unknown> = [];
+       ~~~~~~~~~~~~~~       [0]
 
 [0]: Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.

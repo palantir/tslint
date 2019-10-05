@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  */
 
 import { assert } from "chai";
-import {arrayify, dedent, escapeRegExp, objectify} from "../src/utils";
+
+import { arrayify, dedent, escapeRegExp } from "../src/utils";
 
 describe("Utils", () => {
     it("arrayify", () => {
@@ -24,23 +25,18 @@ describe("Utils", () => {
         assert.deepEqual(arrayify([]), []);
         assert.deepEqual(arrayify("foo"), ["foo"]);
         assert.deepEqual(arrayify(1), [1]);
-        assert.deepEqual(arrayify({foo: 2}), [{foo: 2}]);
+        assert.deepEqual(arrayify({ foo: 2 }), [{ foo: 2 }]);
         assert.deepEqual(arrayify([1, 2]), [1, 2]);
         assert.deepEqual(arrayify(["foo"]), ["foo"]);
     });
 
-    it("objectify", () => {
-        assert.deepEqual(objectify(undefined), {});
-        assert.deepEqual(objectify(null), {});
-        assert.deepEqual(objectify("foo"), {});
-        assert.deepEqual(objectify(1), {});
-        assert.deepEqual(objectify({foo: 1, mar: {baz: 2}}), {foo: 1, mar: {baz: 2}});
-    });
-
     it("dedent", () => {
-        assert.equal(dedent`
-        foo
-        bar`, "\nfoo\nbar");
+        assert.equal(
+            dedent`
+            foo
+            bar`,
+            "\nfoo\nbar",
+        );
 
         assert.equal(dedent`   one-line`, "one-line");
 

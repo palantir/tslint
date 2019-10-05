@@ -9,6 +9,11 @@ import {bz, A, C} from 'foo'; // failure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~            [Import sources within a group must be alphabetized.]
         ~~~~~                            [Named imports must be alphabetized.]
 
+// Underscores come last.
+import {A, _b, C, d} from 'zfoo'; // failure
+           ~~~~~              [Named imports must be alphabetized.]
+import {A, C, d, _b} from 'zfoo';
+
 import {
     b as c,
     ~~~~~~~

@@ -15,30 +15,19 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { hasOwnProperty } from "../utils";
 
-export interface IBlockRequirementDescriptor {
-    visibilities?: Visibility[];
-}
-
-export interface IClassRequirementDescriptor {
-    locations?: Location[];
-    privacies?: Privacy[];
-}
-
-export type RequirementDescriptor = IBlockRequirementDescriptor | IClassRequirementDescriptor;
-
-export interface IRequirementDescriptors {
-    [type: string /* DocType */]: RequirementDescriptor;
-}
+import { IInputExclusionDescriptors } from "./completed-docs/exclusionDescriptors";
+import { constructExclusionsMap, ExclusionsMap } from "./completed-docs/exclusions";
 
 export const ALL = "all";
 
 export const ARGUMENT_CLASSES = "classes";
 export const ARGUMENT_ENUMS = "enums";
+export const ARGUMENT_ENUM_MEMBERS = "enum-members";
 export const ARGUMENT_FUNCTIONS = "functions";
 export const ARGUMENT_INTERFACES = "interfaces";
 export const ARGUMENT_METHODS = "methods";
@@ -47,7 +36,9 @@ export const ARGUMENT_PROPERTIES = "properties";
 export const ARGUMENT_TYPES = "types";
 export const ARGUMENT_VARIABLES = "variables";
 
+export const DESCRIPTOR_TAGS = "tags";
 export const DESCRIPTOR_LOCATIONS = "locations";
+export const DESCRIPTOR_OVERLOADS = "overloads";
 export const DESCRIPTOR_PRIVACIES = "privacies";
 export const DESCRIPTOR_VISIBILITIES = "visibilities";
 
@@ -58,14 +49,19 @@ export const PRIVACY_PRIVATE = "private";
 export const PRIVACY_PROTECTED = "protected";
 export const PRIVACY_PUBLIC = "public";
 
+export const TAGS_FOR_CONTENT = "content";
+export const TAGS_FOR_EXISTENCE = "existence";
+
 export const VISIBILITY_EXPORTED = "exported";
 export const VISIBILITY_INTERNAL = "internal";
 
 export type All = typeof ALL;
 
-export type DocType = All
+export type DocType =
+    | All
     | typeof ARGUMENT_CLASSES
     | typeof ARGUMENT_ENUMS
+    | typeof ARGUMENT_ENUM_MEMBERS
     | typeof ARGUMENT_FUNCTIONS
     | typeof ARGUMENT_INTERFACES
     | typeof ARGUMENT_METHODS
@@ -74,39 +70,60 @@ export type DocType = All
     | typeof ARGUMENT_TYPES
     | typeof ARGUMENT_VARIABLES;
 
-export type Location = All
-    | typeof LOCATION_INSTANCE
-    | typeof LOCATION_STATIC;
+export type Location = All | typeof LOCATION_INSTANCE | typeof LOCATION_STATIC;
 
-export type Privacy = All
+export type Privacy =
+    | All
     | typeof PRIVACY_PRIVATE
     | typeof PRIVACY_PROTECTED
     | typeof PRIVACY_PUBLIC;
 
-export type Visibility = All
-    | typeof VISIBILITY_EXPORTED
-    | typeof VISIBILITY_INTERNAL;
+export type Visibility = All | typeof VISIBILITY_EXPORTED | typeof VISIBILITY_INTERNAL;
 
-type BlockOrClassRequirement = BlockRequirement | ClassRequirement;
-
-export class Rule extends Lint.Rules.TypedRule {
+export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING_EXIST = "Documentation must exist for ";
 
-    public static defaultArguments = [
-        ARGUMENT_CLASSES,
-        ARGUMENT_FUNCTIONS,
-        ARGUMENT_METHODS,
-        ARGUMENT_PROPERTIES,
-    ] as DocType[];
+    public static defaultArguments: IInputExclusionDescriptors = {
+        [ARGUMENT_CLASSES]: true,
+        [ARGUMENT_FUNCTIONS]: true,
+        [ARGUMENT_METHODS]: {
+            [DESCRIPTOR_TAGS]: {
+                [TAGS_FOR_CONTENT]: {
+                    see: ".*",
+                },
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
+            },
+        },
+        [ARGUMENT_PROPERTIES]: {
+            [DESCRIPTOR_TAGS]: {
+                [TAGS_FOR_CONTENT]: {
+                    see: ".*",
+                },
+                [TAGS_FOR_EXISTENCE]: ["deprecated", "inheritdoc"],
+            },
+        },
+    };
 
     public static ARGUMENT_DESCRIPTOR_BLOCK = {
         properties: {
+            [DESCRIPTOR_TAGS]: {
+                properties: {
+                    [TAGS_FOR_CONTENT]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "object",
+                    },
+                    [TAGS_FOR_EXISTENCE]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "array",
+                    },
+                },
+            },
             [DESCRIPTOR_VISIBILITIES]: {
-                enum: [
-                    ALL,
-                    VISIBILITY_EXPORTED,
-                    VISIBILITY_INTERNAL,
-                ],
+                enum: [ALL, VISIBILITY_EXPORTED, VISIBILITY_INTERNAL],
                 type: "string",
             },
         },
@@ -115,22 +132,49 @@ export class Rule extends Lint.Rules.TypedRule {
 
     public static ARGUMENT_DESCRIPTOR_CLASS = {
         properties: {
+            [DESCRIPTOR_TAGS]: {
+                properties: {
+                    [TAGS_FOR_CONTENT]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "object",
+                    },
+                    [TAGS_FOR_EXISTENCE]: {
+                        items: {
+                            type: "string",
+                        },
+                        type: "array",
+                    },
+                },
+            },
             [DESCRIPTOR_LOCATIONS]: {
-                enum: [
-                    ALL,
-                    LOCATION_INSTANCE,
-                    LOCATION_STATIC,
-                ],
+                enum: [ALL, LOCATION_INSTANCE, LOCATION_STATIC],
                 type: "string",
             },
             [DESCRIPTOR_PRIVACIES]: {
-                enum: [
-                    ALL,
-                    PRIVACY_PRIVATE,
-                    PRIVACY_PROTECTED,
-                    PRIVACY_PUBLIC,
-                ],
+                enum: [ALL, PRIVACY_PRIVATE, PRIVACY_PROTECTED, PRIVACY_PUBLIC],
                 type: "string",
+            },
+        },
+        type: "object",
+    };
+
+    public static ARGUMENT_DESCRIPTOR_FUNCTION = {
+        properties: {
+            ...Rule.ARGUMENT_DESCRIPTOR_BLOCK.properties,
+            [DESCRIPTOR_OVERLOADS]: {
+                type: "boolean",
+            },
+        },
+        type: "object",
+    };
+
+    public static ARGUMENT_DESCRIPTOR_METHOD = {
+        properties: {
+            ...Rule.ARGUMENT_DESCRIPTOR_CLASS.properties,
+            [DESCRIPTOR_OVERLOADS]: {
+                type: "boolean",
             },
         },
         type: "object",
@@ -139,9 +183,9 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "completed-docs",
-        description: "Enforces documentation for important items be filled out.",
+        description: "Enforces JSDoc comments for important items be filled out.",
         optionsDescription: Lint.Utils.dedent`
-            \`true\` to enable for ["${ARGUMENT_CLASSES}", "${ARGUMENT_FUNCTIONS}", "${ARGUMENT_METHODS}", "${ARGUMENT_PROPERTIES}"],
+            \`true\` to enable for \`[${Object.keys(Rule.defaultArguments).join(", ")}]\`,
             or an array with each item in one of two formats:
 
             * \`string\` to enable for that type
@@ -156,28 +200,45 @@ export class Rule extends Lint.Rules.TypedRule {
                         * \`"${ALL}"\`
                         * \`"${LOCATION_INSTANCE}"\`
                         * \`"${LOCATION_STATIC}"\`
-                * All other types may specify \`"${DESCRIPTOR_VISIBILITIES}"\`:
+                * Other types may specify \`"${DESCRIPTOR_VISIBILITIES}"\`:
                     * \`"${ALL}"\`
                     * \`"${VISIBILITY_EXPORTED}"\`
                     * \`"${VISIBILITY_INTERNAL}"\`
+                * \`"${ARGUMENT_FUNCTIONS}"\` \`"${ARGUMENT_METHODS}"\` may also specify \`"${DESCRIPTOR_OVERLOADS}"\`
+                  to indicate that each overload should have its own documentation, which is \`false\` by default.
+                * All types may also provide \`"${DESCRIPTOR_TAGS}"\`
+                  with members specifying tags that allow the docs to not have a body.
+                    * \`"${TAGS_FOR_CONTENT}"\`: Object mapping tags to \`RegExp\` bodies content allowed to count as complete docs.
+                    * \`"${TAGS_FOR_EXISTENCE}"\`: Array of tags that must only exist to count as complete docs.
 
             Types that may be enabled are:
 
-                * \`"${ARGUMENT_CLASSES}"\`
-                * \`"${ARGUMENT_ENUMS}"\`
-                * \`"${ARGUMENT_FUNCTIONS}"\`
-                * \`"${ARGUMENT_INTERFACES}"\`
-                * \`"${ARGUMENT_METHODS}"\`
-                * \`"${ARGUMENT_NAMESPACES}"\`
-                * \`"${ARGUMENT_PROPERTIES}"\`
-                * \`"${ARGUMENT_TYPES}"\`
-                * \`"${ARGUMENT_VARIABLES}"\``,
+            * \`"${ARGUMENT_CLASSES}"\`
+            * \`"${ARGUMENT_ENUMS}"\`
+            * \`"${ARGUMENT_ENUM_MEMBERS}"\`
+            * \`"${ARGUMENT_FUNCTIONS}"\`
+            * \`"${ARGUMENT_INTERFACES}"\`
+            * \`"${ARGUMENT_METHODS}"\`
+            * \`"${ARGUMENT_NAMESPACES}"\`
+            * \`"${ARGUMENT_PROPERTIES}"\`
+            * \`"${ARGUMENT_TYPES}"\`
+            * \`"${ARGUMENT_VARIABLES}"\``,
         options: {
             type: "array",
             items: {
                 anyOf: [
                     {
-                        enum: Rule.defaultArguments,
+                        options: [
+                            ARGUMENT_CLASSES,
+                            ARGUMENT_ENUMS,
+                            ARGUMENT_FUNCTIONS,
+                            ARGUMENT_INTERFACES,
+                            ARGUMENT_METHODS,
+                            ARGUMENT_NAMESPACES,
+                            ARGUMENT_PROPERTIES,
+                            ARGUMENT_TYPES,
+                            ARGUMENT_VARIABLES,
+                        ],
                         type: "string",
                     },
                     {
@@ -185,9 +246,10 @@ export class Rule extends Lint.Rules.TypedRule {
                         properties: {
                             [ARGUMENT_CLASSES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_ENUMS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
-                            [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_ENUM_MEMBERS]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
+                            [ARGUMENT_FUNCTIONS]: Rule.ARGUMENT_DESCRIPTOR_FUNCTION,
                             [ARGUMENT_INTERFACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
-                            [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
+                            [ARGUMENT_METHODS]: Rule.ARGUMENT_DESCRIPTOR_METHOD,
                             [ARGUMENT_NAMESPACES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
                             [ARGUMENT_PROPERTIES]: Rule.ARGUMENT_DESCRIPTOR_CLASS,
                             [ARGUMENT_TYPES]: Rule.ARGUMENT_DESCRIPTOR_BLOCK,
@@ -211,228 +273,332 @@ export class Rule extends Lint.Rules.TypedRule {
                         [DESCRIPTOR_LOCATIONS]: LOCATION_INSTANCE,
                         [DESCRIPTOR_PRIVACIES]: [PRIVACY_PUBLIC, PRIVACY_PROTECTED],
                     },
+                    [ARGUMENT_PROPERTIES]: {
+                        [DESCRIPTOR_TAGS]: {
+                            [TAGS_FOR_CONTENT]: {
+                                see: ["#.*"],
+                            },
+                            [TAGS_FOR_EXISTENCE]: ["inheritdoc"],
+                        },
+                    },
                 },
             ],
         ],
+        rationale: Lint.Utils.dedent`
+            Helps ensure important components are documented.
+
+            Note: use this rule sparingly. It's better to have self-documenting names on components with single, concise responsibilities.
+            Comments that only restate the names of variables add nothing to code, and can easily become outdated.
+        `,
         type: "style",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = this.getOptions();
-        const completedDocsWalker = new CompletedDocsWalker(sourceFile, options, program);
+        const exclusionsMap = this.getExclusionsMap(options.ruleArguments);
 
-        completedDocsWalker.setRequirements(this.getRequirements(options.ruleArguments));
-
-        return this.applyWithWalker(completedDocsWalker);
+        return this.applyWithFunction(sourceFile, walk, exclusionsMap);
     }
 
-    private getRequirements(ruleArguments: Array<DocType | IRequirementDescriptors>): Map<DocType, BlockOrClassRequirement> {
+    private getExclusionsMap(
+        ruleArguments: Array<DocType | IInputExclusionDescriptors>,
+    ): ExclusionsMap {
         if (ruleArguments.length === 0) {
-            ruleArguments = Rule.defaultArguments;
+            ruleArguments = [Rule.defaultArguments];
         }
 
-        return Requirement.constructRequirements(ruleArguments);
+        return constructExclusionsMap(ruleArguments);
     }
 }
 
-abstract class Requirement<TDescriptor extends RequirementDescriptor> {
-    public static constructRequirements(ruleArguments: Array<DocType | IRequirementDescriptors>): Map<DocType, BlockOrClassRequirement> {
-        const requirements: Map<DocType, BlockOrClassRequirement> = new Map();
+const modifierAliases: { [i: string]: string } = {
+    export: "exported",
+};
 
-        for (const ruleArgument of ruleArguments) {
-            Requirement.addRequirements(requirements, ruleArgument);
+function walk(context: Lint.WalkContext<ExclusionsMap>) {
+    return ts.forEachChild(context.sourceFile, cb);
+
+    function cb(node: ts.Node): void {
+        switch (node.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+                checkNode(node as ts.ClassDeclaration, ARGUMENT_CLASSES);
+                break;
+
+            case ts.SyntaxKind.EnumDeclaration:
+                checkNode(node as ts.EnumDeclaration, ARGUMENT_ENUMS);
+                for (const member of (node as ts.EnumDeclaration).members) {
+                    // Enum members don't have modifiers, so use the parent
+                    // enum declaration when checking the requirements.
+                    checkNode(member, ARGUMENT_ENUM_MEMBERS, node);
+                }
+                break;
+
+            case ts.SyntaxKind.FunctionDeclaration:
+                checkNode(node as ts.FunctionDeclaration, ARGUMENT_FUNCTIONS);
+                break;
+
+            case ts.SyntaxKind.InterfaceDeclaration:
+                checkNode(node as ts.InterfaceDeclaration, ARGUMENT_INTERFACES);
+                break;
+
+            case ts.SyntaxKind.MethodSignature:
+                checkNode(node as ts.MethodSignature, ARGUMENT_METHODS);
+                break;
+
+            case ts.SyntaxKind.MethodDeclaration:
+                if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkNode(node as ts.MethodDeclaration, ARGUMENT_METHODS);
+                }
+                break;
+
+            case ts.SyntaxKind.ModuleDeclaration:
+                checkNode(node as ts.ModuleDeclaration, ARGUMENT_NAMESPACES);
+                break;
+
+            case ts.SyntaxKind.PropertySignature:
+                checkNode(node as ts.PropertySignature, ARGUMENT_PROPERTIES);
+                break;
+
+            case ts.SyntaxKind.PropertyDeclaration:
+                checkNode(node as ts.PropertyDeclaration, ARGUMENT_PROPERTIES);
+                break;
+
+            case ts.SyntaxKind.TypeAliasDeclaration:
+                checkNode(node as ts.TypeAliasDeclaration, ARGUMENT_TYPES);
+                break;
+
+            case ts.SyntaxKind.VariableStatement:
+                // Only check variables at the namespace/module-level or file-level
+                // and not variables declared inside functions and other things.
+                switch (node.parent.kind) {
+                    case ts.SyntaxKind.SourceFile:
+                    case ts.SyntaxKind.ModuleBlock:
+                        for (const declaration of (node as ts.VariableStatement).declarationList
+                            .declarations) {
+                            checkNode(declaration, ARGUMENT_VARIABLES, node);
+                        }
+                }
+                break;
+
+            case ts.SyntaxKind.GetAccessor:
+            case ts.SyntaxKind.SetAccessor:
+                if (node.parent.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+                    checkAccessorNode(node as ts.AccessorDeclaration, ARGUMENT_PROPERTIES);
+                }
         }
 
-        return requirements;
+        return ts.forEachChild(node, cb);
     }
 
-    private static addRequirements(requirements: Map<DocType, BlockOrClassRequirement>, descriptor: DocType | IRequirementDescriptors) {
-        if (typeof descriptor === "string") {
-            requirements.set(descriptor, new BlockRequirement());
+    function checkNode(
+        node: ts.NamedDeclaration,
+        docType: DocType,
+        requirementNode: ts.Node = node,
+    ): void {
+        if (!nodeIsExcluded(node, docType, requirementNode) && !nodeHasDocs(node, docType)) {
+            addDocumentationFailure(node, describeDocType(docType), requirementNode);
+        }
+    }
+
+    function checkAccessorNode(node: ts.AccessorDeclaration, docType: DocType): void {
+        if (nodeIsExcluded(node, ARGUMENT_PROPERTIES, node) || nodeHasDocs(node, docType)) {
             return;
         }
 
-        for (const type in descriptor) {
-            if (hasOwnProperty(descriptor, type)) {
-                requirements.set(
-                    type as DocType,
-                    (type === "methods" || type === "properties")
-                        ? new ClassRequirement(descriptor[type])
-                        : new BlockRequirement(descriptor[type]));
+        const correspondingAccessor = getCorrespondingAccessor(node);
+
+        if (correspondingAccessor === undefined || !nodeHasDocs(correspondingAccessor, docType)) {
+            addDocumentationFailure(node, ARGUMENT_PROPERTIES, node);
+        }
+    }
+
+    function nodeIsExcluded(
+        node: ts.NamedDeclaration,
+        docType: DocType,
+        requirementNode: ts.Node,
+    ): boolean {
+        const { name } = node;
+        if (name === undefined) {
+            return true;
+        }
+
+        const exclusions = context.options.get(docType);
+        if (exclusions === undefined) {
+            return true;
+        }
+
+        for (const requirement of exclusions.requirements) {
+            if (requirement.excludes(requirementNode)) {
+                return true;
             }
         }
+
+        return false;
     }
 
-    protected constructor(public readonly descriptor: TDescriptor = {} as TDescriptor) { }
-
-    public abstract shouldNodeBeDocumented(node: ts.Declaration): boolean;
-
-    protected createSet<T extends All | string>(values?: T[]): Set<T> {
-        if (!values || values.length === 0) {
-            values = [ALL as T];
+    function nodeHasDocs(node: ts.Node, docType: DocType): boolean {
+        const docs = getApparentJsDoc(node, docType, context.sourceFile);
+        if (docs === undefined) {
+            return false;
         }
 
-        return new Set(values);
+        const comments = docs
+            .map(doc => doc.comment)
+            .filter(comment => comment !== undefined && comment.trim() !== "");
+
+        return comments.length !== 0;
     }
-}
 
-class BlockRequirement extends Requirement<IBlockRequirementDescriptor> {
-    public readonly visibilities: Set<Visibility> = this.createSet(this.descriptor.visibilities);
+    /**
+     * @see https://github.com/ajafff/tsutils/issues/16
+     */
+    function getApparentJsDoc(
+        node: ts.Node,
+        docType: DocType,
+        sourceFile: ts.SourceFile,
+    ): ts.JSDoc[] | undefined {
+        if (ts.isVariableDeclaration(node)) {
+            if (variableIsAfterFirstInDeclarationList(node)) {
+                return undefined;
+            }
 
-    public shouldNodeBeDocumented(node: ts.Declaration): boolean {
-        if (this.visibilities.has(ALL)) {
-            return true;
+            node = node.parent;
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ExportKeyword)) {
-            return this.visibilities.has(VISIBILITY_EXPORTED);
+        if (ts.isVariableDeclarationList(node)) {
+            node = node.parent;
         }
 
-        return this.visibilities.has(VISIBILITY_INTERNAL);
-    }
-}
+        const equivalentNodesForDocs: ts.Node[] = getEquivalentNodesForDocs(node, docType);
 
-class ClassRequirement extends Requirement<IClassRequirementDescriptor> {
-    public readonly locations: Set<Location> = this.createSet(this.descriptor.locations);
-    public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
-
-    public shouldNodeBeDocumented(node: ts.Declaration) {
-        return this.shouldLocationBeDocumented(node) && this.shouldPrivacyBeDocumented(node);
+        return equivalentNodesForDocs
+            .map(docsNode => tsutils.getJsDoc(docsNode, sourceFile))
+            .filter(nodeDocs => nodeDocs !== undefined)
+            .reduce((docs, moreDocs) => [...docs, ...moreDocs], []);
     }
 
-    private shouldLocationBeDocumented(node: ts.Declaration) {
-        if (this.locations.has(ALL)) {
-            return true;
+    /**
+     * @see https://github.com/palantir/tslint/issues/4416
+     */
+    function getEquivalentNodesForDocs(node: ts.Node, docType: DocType): ts.Node[] {
+        const exclusions = context.options.get(docType);
+        if (exclusions === undefined || exclusions.overloadsSeparateDocs) {
+            return [node];
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword)) {
-            return this.locations.has(LOCATION_STATIC);
+        if (tsutils.isFunctionDeclaration(node) && node.name !== undefined) {
+            const functionName = node.name.text;
+
+            return getSiblings(node).filter(
+                child =>
+                    tsutils.isFunctionDeclaration(child) &&
+                    child.name !== undefined &&
+                    child.name.text === functionName,
+            );
         }
 
-        return this.locations.has(LOCATION_INSTANCE);
-    }
+        if (
+            tsutils.isMethodDeclaration(node) &&
+            tsutils.isIdentifier(node.name) &&
+            tsutils.isClassDeclaration(node.parent)
+        ) {
+            const methodName = node.name.text;
 
-    private shouldPrivacyBeDocumented(node: ts.Declaration) {
-        if (this.privacies.has(ALL)) {
-            return true;
+            return node.parent.members.filter(
+                member =>
+                    tsutils.isMethodDeclaration(member) &&
+                    tsutils.isIdentifier(member.name) &&
+                    member.name.text === methodName,
+            );
         }
 
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
-            return this.privacies.has(PRIVACY_PRIVATE);
-        }
-
-        if (Lint.hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
-            return this.privacies.has(PRIVACY_PROTECTED);
-        }
-
-        return Lint.hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword);
-    }
-}
-
-class CompletedDocsWalker extends Lint.ProgramAwareRuleWalker {
-    private static modifierAliases: { [i: string]: string } = {
-        export: "exported",
-    };
-
-    private requirements: Map<DocType, BlockOrClassRequirement>;
-
-    public setRequirements(requirements: Map<DocType, BlockOrClassRequirement>): void {
-        this.requirements = requirements;
+        return [node];
     }
 
-    public visitClassDeclaration(node: ts.ClassDeclaration): void {
-        this.checkNode(node, ARGUMENT_CLASSES);
-        super.visitClassDeclaration(node);
-    }
-
-    public visitEnumDeclaration(node: ts.EnumDeclaration): void {
-        this.checkNode(node, ARGUMENT_ENUMS);
-        super.visitEnumDeclaration(node);
-    }
-
-    public visitFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        this.checkNode(node, ARGUMENT_FUNCTIONS);
-        super.visitFunctionDeclaration(node);
-    }
-
-    public visitInterfaceDeclaration(node: ts.InterfaceDeclaration): void {
-        this.checkNode(node, ARGUMENT_INTERFACES);
-        super.visitInterfaceDeclaration(node);
-    }
-
-    public visitMethodDeclaration(node: ts.MethodDeclaration): void {
-        this.checkNode(node, ARGUMENT_METHODS);
-        super.visitMethodDeclaration(node);
-    }
-
-    public visitModuleDeclaration(node: ts.ModuleDeclaration): void {
-        this.checkNode(node, ARGUMENT_NAMESPACES);
-        super.visitModuleDeclaration(node);
-    }
-
-    public visitPropertyDeclaration(node: ts.PropertyDeclaration): void {
-        this.checkNode(node, ARGUMENT_PROPERTIES);
-        super.visitPropertyDeclaration(node);
-    }
-
-    public visitTypeAliasDeclaration(node: ts.TypeAliasDeclaration): void {
-        this.checkNode(node, ARGUMENT_TYPES);
-        super.visitTypeAliasDeclaration(node);
-    }
-
-    public visitVariableDeclaration(node: ts.VariableDeclaration): void {
-        this.checkNode(node, ARGUMENT_VARIABLES);
-        super.visitVariableDeclaration(node);
-    }
-
-    private checkNode(node: ts.Declaration, nodeType: DocType): void {
-        if (node.name === undefined) {
-            return;
-        }
-
-        const requirement = this.requirements.get(nodeType);
-        if (!requirement || !requirement.shouldNodeBeDocumented(node)) {
-            return;
-        }
-
-        const symbol = this.getTypeChecker().getSymbolAtLocation(node.name);
-        if (!symbol) {
-            return;
-        }
-
-        const comments = symbol.getDocumentationComment();
-        this.checkComments(node, nodeType, comments);
-    }
-
-    private checkComments(node: ts.Declaration, nodeDescriptor: string, comments: ts.SymbolDisplayPart[]) {
-        if (comments.map((comment: ts.SymbolDisplayPart) => comment.text).join("").trim() === "") {
-            this.addDocumentationFailure(node, nodeDescriptor);
-        }
-    }
-
-    private addDocumentationFailure(node: ts.Declaration, nodeType: string): void {
+    function addDocumentationFailure(
+        node: ts.Node,
+        docType: string,
+        requirementNode: ts.Node,
+    ): void {
         const start = node.getStart();
         const width = node.getText().split(/\r|\n/g)[0].length;
-        const description = this.describeDocumentationFailure(node, nodeType);
+        const description = describeDocumentationFailure(requirementNode, docType);
 
-        this.addFailureAt(start, width, description);
+        context.addFailureAt(start, width, description);
+    }
+}
+
+function getCorrespondingAccessor(node: ts.AccessorDeclaration) {
+    const propertyName = tsutils.getPropertyName(node.name);
+    if (propertyName === undefined) {
+        return undefined;
     }
 
-    private describeDocumentationFailure(node: ts.Declaration, nodeType: string): string {
-        let description = Rule.FAILURE_STRING_EXIST;
+    const parent = node.parent as ts.ClassDeclaration | ts.ClassExpression;
+    const correspondingKindCheck =
+        node.kind === ts.SyntaxKind.GetAccessor ? isSetAccessor : isGetAccessor;
 
-        if (node.modifiers) {
-            description += node.modifiers.map((modifier) => this.describeModifier(modifier.kind)) + " ";
+    for (const member of parent.members) {
+        if (!correspondingKindCheck(member)) {
+            continue;
         }
 
-        return description + nodeType + ".";
+        if (tsutils.getPropertyName(member.name) === propertyName) {
+            return member;
+        }
     }
 
-    private describeModifier(kind: ts.SyntaxKind) {
-        const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
+    return undefined;
+}
 
-        return CompletedDocsWalker.modifierAliases[description] || description;
+function variableIsAfterFirstInDeclarationList(node: ts.VariableDeclaration): boolean {
+    const parent = node.parent;
+    if (parent === undefined) {
+        return false;
     }
+
+    return ts.isVariableDeclarationList(parent) && node !== parent.declarations[0];
+}
+
+function describeDocumentationFailure(node: ts.Node, docType: string): string {
+    let description = Rule.FAILURE_STRING_EXIST;
+
+    if (node.modifiers !== undefined) {
+        description += `${node.modifiers
+            .map(modifier => describeModifier(modifier.kind))
+            .join(" ")} `;
+    }
+
+    return `${description}${docType}.`;
+}
+
+function describeModifier(kind: ts.SyntaxKind) {
+    const description = ts.SyntaxKind[kind].toLowerCase().split("keyword")[0];
+    const alias = modifierAliases[description];
+    return alias !== undefined ? alias : description;
+}
+
+function describeDocType(docType: DocType): string {
+    return docType.replace("-", " ");
+}
+
+function getSiblings(node: ts.Node) {
+    const { parent } = node;
+
+    // Source files nest their statements within a node for getChildren()
+    if (ts.isSourceFile(parent)) {
+        return [...parent.statements];
+    }
+
+    return parent.getChildren();
+}
+
+function isGetAccessor(node: ts.Node): node is ts.GetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.GetAccessor;
+}
+
+function isSetAccessor(node: ts.Node): node is ts.SetAccessorDeclaration {
+    return node.kind === ts.SyntaxKind.SetAccessor;
 }

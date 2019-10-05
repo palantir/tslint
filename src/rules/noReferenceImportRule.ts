@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import * as utils from "tsutils";
+import { findImports, ImportKind } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +24,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-reference-import",
-        description: 'Don\'t <reference types="foo" /> if you import "foo" anyway.',
+        description: 'Don\'t `<reference types="foo" />` if you import `foo` anyway.',
         optionsDescription: "Not configurable.",
         options: null,
         type: "style",
@@ -41,63 +41,16 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
-    const { sourceFile } = ctx;
-    if (sourceFile.typeReferenceDirectives.length === 0) {
+function walk(ctx: Lint.WalkContext) {
+    if (ctx.sourceFile.typeReferenceDirectives.length === 0) {
         return;
     }
-
-    const imports = allImports(sourceFile);
-    for (const ref of sourceFile.typeReferenceDirectives) {
+    const imports = new Set(
+        findImports(ctx.sourceFile, ImportKind.AllStaticImports).map(name => name.text),
+    );
+    for (const ref of ctx.sourceFile.typeReferenceDirectives) {
         if (imports.has(ref.fileName)) {
             ctx.addFailure(ref.pos, ref.end, Rule.FAILURE_STRING(ref.fileName));
         }
     }
-}
-
-function allImports(sourceFile: ts.SourceFile): Set<string> {
-    const imports = new Set<string>();
-    for (const statement of sourceFile.statements) {
-        recur(statement);
-    }
-    return imports;
-
-    function recur(node: ts.Statement): void {
-        if (utils.isImportEqualsDeclaration(node)) {
-            const ref = node.moduleReference;
-            if (ref.kind === ts.SyntaxKind.ExternalModuleReference) {
-                if (ref.expression) {
-                    addImport(ref.expression);
-                }
-            }
-        } else if (utils.isImportDeclaration(node)) {
-            addImport(node.moduleSpecifier);
-        } else if (utils.isModuleDeclaration(node)) {
-            if (!sourceFile.isDeclarationFile) {
-                // Can't be any imports in a module augmentation.
-                return;
-            }
-
-            const body = moduleDeclarationBody(node);
-            if (body) {
-                for (const statement of body.statements) {
-                    recur(statement);
-                }
-            }
-        }
-    }
-
-    function addImport(moduleReference: ts.Expression): void {
-        if (utils.isStringLiteral(moduleReference)) {
-            imports.add(moduleReference.text);
-        }
-    }
-}
-
-function moduleDeclarationBody(node: ts.ModuleDeclaration): ts.ModuleBlock | undefined {
-    let body = node.body;
-    while (body && body.kind === ts.SyntaxKind.ModuleDeclaration) {
-        body = body.body;
-    }
-    return body && body.kind === ts.SyntaxKind.ModuleBlock ? body : undefined;
 }

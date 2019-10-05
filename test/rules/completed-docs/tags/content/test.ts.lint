@@ -1,0 +1,61 @@
+const CompletelyEmptyVariable = 0;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * 
+ */
+const ContentEmptyVariable = 1;
+      ~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/** */
+const ContentSingleLineEmptyVariable = 1;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see
+ */
+const ContentMissingVariable = 2;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/** @see */
+const ContentSingleLineMissingVariable = 2;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see wat
+ */
+const ContentInvalidVariable = 3;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/** @see wat */
+const ContentSingleLineInvalidVariable = 3;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for variables.]
+
+/**
+ * @see #123
+ */
+const ContentValidVariable = 4;
+
+/** @see #123 */
+const ContentSingleLineValidVariable = 4;
+
+/**
+ * ...
+ */
+const CommentBodyVariableDots = 5;
+
+/**
+ * ...content
+ */
+const CommentBodyVariableDotsAndContent = 6;
+
+/** content */
+const CommentBodyVariableSingleLineContent = 7;
+
+/** ...content */
+const CommentBodyVariableSingleLineDotsAndContent = 8;
+const CommentBodyVariableRofl = 5;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~  [Documentation must exist for variables.]
+
+/** ... */
+const CommentBodyVariableRofl = 5;

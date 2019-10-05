@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,25 @@
 
 import * as ts from "typescript";
 
-import {IOptions} from "../rule/rule";
-import {RuleWalker} from "./ruleWalker";
+import { IOptions } from "../rule/rule";
 
+import { RuleWalker } from "./ruleWalker";
+
+/**
+ * @deprecated
+ * RuleWalker-based rules are slow,
+ * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
+ * @see https://github.com/palantir/tslint/issues/2522
+ */
+// tslint:disable-next-line deprecation
 export class ProgramAwareRuleWalker extends RuleWalker {
-    private typeChecker: ts.TypeChecker;
+    private readonly typeChecker: ts.TypeChecker;
 
-    constructor(sourceFile: ts.SourceFile, options: IOptions, private program: ts.Program) {
+    constructor(
+        sourceFile: ts.SourceFile,
+        options: IOptions,
+        private readonly program: ts.Program,
+    ) {
         super(sourceFile, options);
 
         this.typeChecker = program.getTypeChecker();

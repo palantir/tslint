@@ -11,7 +11,7 @@
     "editor.wrappingIndent": "none",
 
     // The folders to exclude when doing a full text search in the workspace.
-    "files.exclude": {
+    "search.exclude": {
         ".git": true,
         ".tscache": true,
         "bower_components": true,
@@ -21,6 +21,9 @@
         "node_modules": true
     },
 
+    "tslint.configFile": "tslint-vscode.json",
+
     // Always use project's provided typescript compiler version
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "files.eol": "\n"
 }

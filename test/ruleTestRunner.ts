@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-import * as colors from "colors";
+import chalk from "chalk";
 import * as glob from "glob";
 import * as path from "path";
 
-import {consoleTestResultHandler, runTest} from "../src/test";
+import { consoleTestResultHandler, runTest } from "../src/test";
 
-/* tslint:disable:no-console */
-console.log();
-console.log(colors.underline("Testing Lint Rules:"));
-/* tslint:enable:no-console */
+process.stdout.write(chalk.underline("\nTesting Lint Rules:\n"));
 
 const testDirectories = glob.sync("test/rules/**/tslint.json").map(path.dirname);
 
 for (const testDirectory of testDirectories) {
     const results = runTest(testDirectory);
-    const didAllTestsPass = consoleTestResultHandler(results);
+    const didAllTestsPass = consoleTestResultHandler(results, {
+        log(m) {
+            process.stdout.write(m);
+        },
+        error(m) {
+            process.stderr.write(m);
+        },
+    });
     if (!didAllTestsPass) {
-        process.exit(1);
+        process.exitCode = 1;
+        break;
     }
 }
-
-process.exit(0);

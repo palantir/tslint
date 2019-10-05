@@ -15,11 +15,20 @@
  * limitations under the License.
  */
 
+import * as tsutils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
 
-const LEGAL_TYPEOF_RESULTS = new Set(["undefined", "string", "boolean", "number", "function", "object", "symbol"]);
+const LEGAL_TYPEOF_RESULTS = new Set([
+    "undefined",
+    "string",
+    "boolean",
+    "number",
+    "function",
+    "object",
+    "symbol",
+]);
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -31,25 +40,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [true],
         type: "functionality",
         typescriptOnly: false,
+        deprecationMessage: !/^2\.1\./.test(ts.version)
+            ? "Starting from TypeScript 2.2 the compiler includes this check which makes this rule redundant."
+            : "",
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING =
-        `'typeof' expression must be compared to one of: ${Array.from(LEGAL_TYPEOF_RESULTS).map((x) => `"${x}"`).join(", ")}`;
+    public static FAILURE_STRING = `'typeof' expression must be compared to one of: ${Array.from(
+        LEGAL_TYPEOF_RESULTS,
+    )
+        .map(x => `"${x}"`)
+        .join(", ")}`;
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class Walker extends Lint.RuleWalker {
-    public visitBinaryExpression(node: ts.BinaryExpression) {
-        const { operatorToken, left, right } = node;
-        if (Lint.getEqualsKind(operatorToken) && (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING);
+function walk(ctx: Lint.WalkContext): void {
+    ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        if (tsutils.isBinaryExpression(node)) {
+            const { operatorToken, left, right } = node;
+            if (
+                Lint.getEqualsKind(operatorToken) !== undefined &&
+                (isFaultyTypeof(left, right) || isFaultyTypeof(right, left))
+            ) {
+                ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
+            }
         }
-        super.visitBinaryExpression(node);
-    }
+        ts.forEachChild(node, cb);
+    });
 }
 
 function isFaultyTypeof(left: ts.Expression, right: ts.Expression) {

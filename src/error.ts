@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,14 @@ export class FatalError extends Error {
     constructor(public message: string, public innerError?: Error) {
         super(message);
         this.name = FatalError.NAME;
-        this.stack = new Error().stack;
+
+        // Fix prototype chain for target ES5
+        Object.setPrototypeOf(this, FatalError.prototype);
     }
 }
 
 export function isError(possibleError: any): possibleError is Error {
-    return possibleError != null && (possibleError as Error).message !== undefined;
+    return possibleError != undefined && (possibleError as Error).message !== undefined;
 }
 
 export function showWarningOnce(message: string) {
@@ -50,4 +52,8 @@ export function showWarningOnce(message: string) {
         console.warn(message);
         shownWarnings.add(message);
     }
+}
+
+export function showRuleCrashWarning(message: string, ruleName: string, fileName: string) {
+    console.warn(`The '${ruleName}' rule threw an error in '${fileName}':\n${message}`);
 }

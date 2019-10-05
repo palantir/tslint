@@ -15,60 +15,105 @@
  * limitations under the License.
  */
 
+import {
+    isAssertionExpression,
+    isObjectLiteralExpression,
+    isParenthesizedExpression,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
+import { codeExamples } from "./code-examples/noObjectLiteralTypeAssertion.examples";
+
+const OPTION_ALLOW_ARGUMENTS = "allow-arguments";
+
+const DEFAULT_OPTIONS: Options = {
+    [OPTION_ALLOW_ARGUMENTS]: false,
+};
+
+interface Options {
+    [OPTION_ALLOW_ARGUMENTS]: boolean;
+}
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "no-object-literal-type-assertion",
-        description: "Forbids an object literal to appear in a type assertion expression.",
+        description: Lint.Utils.dedent`
+            Forbids an object literal to appear in a type assertion expression.
+            Casting to \`any\` or to \`unknown\` is still allowed.`,
         rationale: Lint.Utils.dedent`
             Always prefer \`const x: T = { ... };\` to \`const x = { ... } as T;\`.
             The type assertion in the latter case is either unnecessary or hides an error.
-            \`const x: { foo: number } = {}\` will fail, but \`const x = {} as { foo: number }\` succeeds.`,
-        optionsDescription: "Not configurable.",
-        options: null,
-        optionExamples: [true],
+            The compiler will warn for excess properties with this syntax, but not missing required fields.
+            For example: \`const x: { foo: number } = {}\` will fail to compile, but
+            \`const x = {} as { foo: number }\` will succeed.
+            Additionally, the const assertion \`const x = { foo: 1 } as const\`,
+            introduced in TypeScript 3.4, is considered beneficial and is ignored by this rule.`,
+        optionsDescription: Lint.Utils.dedent`
+            One option may be configured:
+
+            * \`${OPTION_ALLOW_ARGUMENTS}\` allows type assertions to be used on object literals inside call expressions.`,
+        options: {
+            type: "object",
+            properties: {
+                [OPTION_ALLOW_ARGUMENTS]: {
+                    type: "boolean",
+                },
+            },
+            additionalProperties: false,
+        },
+        optionExamples: [true, [true, { [OPTION_ALLOW_ARGUMENTS]: true }]],
         type: "functionality",
         typescriptOnly: true,
+        codeExamples,
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "Type assertion applied to object literal.";
+    public static FAILURE_STRING =
+        "Type assertion on object literals is forbidden, use a type annotation instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk);
+        return this.applyWithFunction(
+            sourceFile,
+            walk,
+            parseOptions(this.ruleArguments[0] as Partial<Options> | undefined),
+        );
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext<Options>): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isTypeAssertionLike(node) && isObjectLiteral(node.expression)) {
+        if (
+            isAssertionExpression(node) &&
+            node.type.kind !== ts.SyntaxKind.AnyKeyword &&
+            // Allow const assertions, introduced in TS 3.4
+            !(ts.isConstTypeReference !== undefined && ts.isConstTypeReference(node.type)) &&
+            // Compare with UnknownKeyword if using TS 3.0 or above
+            (!!(ts.SyntaxKind as any).UnknownKeyword
+                ? node.type.kind !== (ts.SyntaxKind as any).UnknownKeyword
+                : node.type.getText(ctx.sourceFile) !== "unknown") &&
+            isObjectLiteralExpression(
+                isParenthesizedExpression(node.expression)
+                    ? node.expression.expression
+                    : node.expression,
+            ) &&
+            !(ctx.options[OPTION_ALLOW_ARGUMENTS] && isArgument(node))
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);
     });
 }
 
-function isTypeAssertionLike(node: ts.Node): node is ts.TypeAssertion | ts.AsExpression {
-    switch (node.kind) {
-        case ts.SyntaxKind.TypeAssertionExpression:
-        case ts.SyntaxKind.AsExpression:
-            return true;
-        default:
-            return false;
-    }
+function isArgument(node: ts.Node): boolean {
+    return ts.isCallLikeExpression(node.parent);
 }
 
-function isObjectLiteral(node: ts.Expression): boolean {
-    switch (node.kind) {
-        case ts.SyntaxKind.ParenthesizedExpression:
-            return isObjectLiteral((node as ts.ParenthesizedExpression).expression);
-        case ts.SyntaxKind.ObjectLiteralExpression:
-            return true;
-        default:
-            return false;
-    }
+function parseOptions(options: Partial<Options> | undefined): Options {
+    return {
+        ...DEFAULT_OPTIONS,
+        ...options,
+    };
 }

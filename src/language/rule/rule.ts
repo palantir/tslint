@@ -17,12 +17,12 @@
 
 import * as ts from "typescript";
 
-import {arrayify, flatMap} from "../../utils";
-import {IWalker} from "../walker";
+import { arrayify, flatMap } from "../../utils";
+import { IWalker } from "../walker";
 
 export interface RuleConstructor {
     metadata: IRuleMetadata;
-    new(options: IOptions): IRule;
+    new (options: IOptions): IRule;
 }
 
 export interface IRuleMetadata {
@@ -73,7 +73,7 @@ export interface IRuleMetadata {
      * Examples of what a standard config for the rule might look like.
      * Using a string[] here is deprecated. Write the options as a JSON object instead.
      */
-    optionExamples?: Array<true | any[]> | string[];
+    optionExamples?: Array<true | any[]> | string[] | Array<{ options: any }>;
 
     /**
      * An explanation of why the rule is useful.
@@ -89,19 +89,40 @@ export interface IRuleMetadata {
      * Whether or not the rule use for TypeScript only. If `false`, this rule may be used with .js files.
      */
     typescriptOnly: boolean;
+
+    /**
+     * Examples demonstrating what the lint rule will pass and fail
+     */
+    codeExamples?: ICodeExample[];
 }
 
-export type RuleType = "functionality" | "maintainability" | "style" | "typescript";
+export type RuleType = "functionality" | "maintainability" | "style" | "typescript" | "formatting";
 
 export type RuleSeverity = "warning" | "error" | "off";
+
+export interface ICodeExample {
+    config: string;
+    description: string;
+    pass: string;
+    fail?: string;
+}
 
 export interface IOptions {
     ruleArguments: any[];
     ruleSeverity: RuleSeverity;
     ruleName: string;
-    disabledIntervals: IDisabledInterval[];
+    /**
+     * @deprecated
+     * Tslint now handles disables itself.
+     * This will be empty.
+     */
+    disabledIntervals: IDisabledInterval[]; // tslint:disable-line deprecation
 }
 
+/**
+ * @deprecated
+ * These are now handled internally.
+ */
 export interface IDisabledInterval {
     startPosition: number;
     endPosition: number;
@@ -145,17 +166,21 @@ export interface ReplacementJson {
 }
 export class Replacement {
     public static applyFixes(content: string, fixes: Fix[]): string {
-        return this.applyAll(content, flatMap(fixes, arrayify));
+        return Replacement.applyAll(content, flatMap(fixes, arrayify));
     }
 
     public static applyAll(content: string, replacements: Replacement[]) {
         // sort in reverse so that diffs are properly applied
-        replacements.sort((a, b) => b.end - a.end);
+        replacements.sort((a, b) => (b.end !== a.end ? b.end - a.end : b.start - a.start));
         return replacements.reduce((text, r) => r.apply(text), content);
     }
 
-    public static replaceNode(node: ts.Node, text: string, sourceFile?: ts.SourceFile): Replacement {
-        return this.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
+    public static replaceNode(
+        node: ts.Node,
+        text: string,
+        sourceFile?: ts.SourceFile,
+    ): Replacement {
+        return Replacement.replaceFromTo(node.getStart(sourceFile), node.getEnd(), text);
     }
 
     public static replaceFromTo(start: number, end: number, text: string) {
@@ -181,7 +206,11 @@ export class Replacement {
     }
 
     public apply(content: string) {
-        return content.substring(0, this.start) + this.text + content.substring(this.start + this.length);
+        return (
+            content.substring(0, this.start) +
+            this.text +
+            content.substring(this.start + this.length)
+        );
     }
 
     public toJson(): ReplacementJson {
@@ -196,8 +225,10 @@ export class Replacement {
 }
 
 export class RuleFailurePosition {
-    constructor(private position: number, private lineAndCharacter: ts.LineAndCharacter) {
-    }
+    constructor(
+        private readonly position: number,
+        private readonly lineAndCharacter: ts.LineAndCharacter,
+    ) {}
 
     public getPosition() {
         return this.position;
@@ -219,9 +250,11 @@ export class RuleFailurePosition {
         const ll = this.lineAndCharacter;
         const rr = ruleFailurePosition.lineAndCharacter;
 
-        return this.position === ruleFailurePosition.position
-            && ll.line === rr.line
-            && ll.character === rr.character;
+        return (
+            this.position === ruleFailurePosition.position &&
+            ll.line === rr.line &&
+            ll.character === rr.character
+        );
     }
 }
 
@@ -229,19 +262,27 @@ export type Fix = Replacement | Replacement[];
 export type FixJson = ReplacementJson | ReplacementJson[];
 
 export class RuleFailure {
-    private fileName: string;
-    private startPosition: RuleFailurePosition;
-    private endPosition: RuleFailurePosition;
-    private rawLines: string;
+    public static compare(a: RuleFailure, b: RuleFailure): number {
+        if (a.fileName !== b.fileName) {
+            return a.fileName < b.fileName ? -1 : 1;
+        }
+        return a.startPosition.getPosition() - b.startPosition.getPosition();
+    }
+
+    private readonly fileName: string;
+    private readonly startPosition: RuleFailurePosition;
+    private readonly endPosition: RuleFailurePosition;
+    private readonly rawLines: string;
     private ruleSeverity: RuleSeverity;
 
-    constructor(private sourceFile: ts.SourceFile,
-                start: number,
-                end: number,
-                private failure: string,
-                private ruleName: string,
-                private fix?: Fix) {
-
+    constructor(
+        private readonly sourceFile: ts.SourceFile,
+        start: number,
+        end: number,
+        private readonly failure: string,
+        private readonly ruleName: string,
+        private readonly fix?: Fix,
+    ) {
         this.fileName = sourceFile.fileName;
         this.startPosition = this.createFailurePosition(start);
         this.endPosition = this.createFailurePosition(end);
@@ -293,7 +334,12 @@ export class RuleFailure {
         return {
             endPosition: this.endPosition.toJson(),
             failure: this.failure,
-            fix: this.fix === undefined ? undefined : Array.isArray(this.fix) ? this.fix.map((r) => r.toJson()) : this.fix.toJson(),
+            fix:
+                this.fix === undefined
+                    ? undefined
+                    : Array.isArray(this.fix)
+                    ? this.fix.map(r => r.toJson())
+                    : this.fix.toJson(),
             name: this.fileName,
             ruleName: this.ruleName,
             ruleSeverity: this.ruleSeverity,
@@ -302,10 +348,12 @@ export class RuleFailure {
     }
 
     public equals(ruleFailure: RuleFailure) {
-        return this.failure  === ruleFailure.getFailure()
-            && this.fileName === ruleFailure.getFileName()
-            && this.startPosition.equals(ruleFailure.getStartPosition())
-            && this.endPosition.equals(ruleFailure.getEndPosition());
+        return (
+            this.failure === ruleFailure.getFailure() &&
+            this.fileName === ruleFailure.getFileName() &&
+            this.startPosition.equals(ruleFailure.getStartPosition()) &&
+            this.endPosition.equals(ruleFailure.getEndPosition())
+        );
     }
 
     private createFailurePosition(position: number) {

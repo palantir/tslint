@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "object-literal-shorthand": [
+            true,
+            {
+                "property": "never",
+                "method": "always"
+            }
+        ]
+    }
+}

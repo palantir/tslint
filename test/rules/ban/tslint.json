@@ -2,13 +2,16 @@
   "rules": {
     "ban": [
       true,
-      ["xit"],
-      ["fit"],
-      ["xdescribe"],
+      "xit",
+      {"name": "fit"},
+      {"name": ["xdescribe"]},
       ["fdescribe"],
       ["window", "toString"],
-      ["_", "forEach"],
-      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."]
+      {"name": ["_", "map"]},
+      ["_", "filter", "Use the native JavaScript 'myArray.filter' instead."],
+      {"name": ["*", "forEach"], "message": "Use a regular for loop instead."},
+      {"name": ["chai", "assert", "equal"], "message": "Use 'strictEqual' instead."},
+      {"name": ["*", "_id", "toString"], "message": "Use 'toHexString' instead."}
     ]
   }
 }

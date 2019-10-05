@@ -18,6 +18,7 @@ import { assert } from "chai";
 import * as ts from "typescript";
 
 import { IFormatter, IRuleFailureJson, Replacement, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("JSON Formatter", () => {
@@ -36,66 +37,83 @@ describe("JSON Formatter", () => {
 
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
-            createFailure(sourceFile, 0, maxPosition, "full failure", "full-name",
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
+            createFailure(
+                sourceFile,
+                0,
+                maxPosition,
+                "full failure",
+                "full-name",
                 new Replacement(0, 0, ""),
-                "error"),
+                "error",
+            ),
         ];
 
         /* tslint:disable:object-literal-sort-keys */
-        const expectedResult: IRuleFailureJson[] = [{
-            name: TEST_FILE,
-            failure: "first failure",
-            startPosition: {
-                position: 0,
-                line: 0,
-                character: 0,
+        const expectedResult: IRuleFailureJson[] = [
+            {
+                name: TEST_FILE,
+                failure: "first failure",
+                startPosition: {
+                    position: 0,
+                    line: 0,
+                    character: 0,
+                },
+                endPosition: {
+                    position: 1,
+                    line: 0,
+                    character: 1,
+                },
+                ruleName: "first-name",
+                ruleSeverity: "error",
             },
-            endPosition: {
-                position: 1,
-                line: 0,
-                character: 1,
+            {
+                name: TEST_FILE,
+                failure: "last failure",
+                startPosition: {
+                    position: maxPosition - 1,
+                    line: 5,
+                    character: 2,
+                },
+                endPosition: {
+                    position: maxPosition,
+                    line: 6,
+                    character: 0,
+                },
+                ruleName: "last-name",
+                ruleSeverity: "ERROR",
             },
-            ruleName: "first-name",
-            ruleSeverity: "error",
-        },
-        {
-            name: TEST_FILE,
-            failure: "last failure",
-            startPosition: {
-                position: maxPosition - 1,
-                line: 5,
-                character: 2,
+            {
+                name: TEST_FILE,
+                failure: "full failure",
+                fix: {
+                    innerLength: 0,
+                    innerStart: 0,
+                    innerText: "",
+                },
+                startPosition: {
+                    position: 0,
+                    line: 0,
+                    character: 0,
+                },
+                endPosition: {
+                    position: maxPosition,
+                    line: 6,
+                    character: 0,
+                },
+                ruleName: "full-name",
+                ruleSeverity: "error",
             },
-            endPosition: {
-                position: maxPosition,
-                line: 6,
-                character: 0,
-            },
-            ruleName: "last-name",
-            ruleSeverity: "error",
-        },
-        {
-            name: TEST_FILE,
-            failure: "full failure",
-            fix: {
-                innerLength: 0,
-                innerStart: 0,
-                innerText: "",
-            },
-            startPosition: {
-                position: 0,
-                line: 0,
-                character: 0,
-            },
-            endPosition: {
-                position: maxPosition,
-                line: 6,
-                character: 0,
-            },
-            ruleName: "full-name",
-            ruleSeverity: "error",
-        }];
+        ];
+
         /* tslint:enable:object-literal-sort-keys */
 
         const actualResult = JSON.parse(formatter.format(failures));

@@ -47,6 +47,9 @@ import v = require("i");
 module M {
     export var x;
                 ~ [0]
+    []
+    export var y = x;
+    []
     export function f(s: string): string;
                                         ~ [0]
     export function f(n: number): number
@@ -80,7 +83,7 @@ class MyClass {
      ~ [0]
 
     public initializedMethodPropertyWithoutSemicolon = () => {
-        return "hi again"; 
+        return "hi again";
                          ~ [0]
     }
 
@@ -186,5 +189,93 @@ switch(foo.bar) {
 
 const x = f(() =>
     0); const y = 2
+
+a = b;
+     ~ [0]
+++c
+
+foo();
+(bar).foo()
+
+foo();
+(bar as Bar).foo()
+
+foo();
+<Bar>bar.foo()
+
+foo();
+() => {}
+
+foo();
+`bar`
+
+foo();
+`bar${baz}`
+
+a;
+/b/g
+
+a;
+/=b/i
+
+function bar(foo) { if (foo) return true; return false }
+function bar(foo) { if (foo) {return true;} return false;}
+                                         ~ [0]
+                                                        ~ [0]
+
+class Foo {
+    public [foo];
+                ~ [0]
+    ['moo']
+    public bar = foo;
+    ['foo']
+    public baz = () => true;
+    ['foobar']
+    public baz2 = () => () => {return true};
+                                           ~ [0]
+    ['foobarbaz']
+    public bas = () => {return true};
+                                    ~ [0]
+    ['barfoo']
+    public moar = () =>
+        true;
+    ['barbaz']
+}
+
+declare module "foo";
+{ /* don't remove semicolon, otherwise the shorthand module get's a body */ }
+
+function *gen() {
+    yield;
+         ~ [0]
+    []
+    yield 1;
+    []
+    if (foo)
+        return yield;
+                    ~ [0]
+    []
+    if (!foo)
+        return yield 1 || yield;
+                               ~ [0]
+    []
+    return yield 1;
+    []
+}
+
+var foo = () => {};
+                  ~ [0]
+[]
+var bar; var foo = function() {};
+[]
+
+var
+[]
+
+const
+[]
+
+let
+[]
 
 [0]: Unnecessary semicolon

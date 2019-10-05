@@ -40,10 +40,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             type: "string",
             enum: [OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
         },
-        optionExamples: [
-            true,
-            [true, OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED],
-        ],
+        optionExamples: [true, [true, OPTION_ALLOW_PUBLIC, OPTION_ALLOW_PROTECTED]],
         type: "style",
         typescriptOnly: false,
     };
@@ -52,10 +49,12 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Class method does not use 'this'. Use a function instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new PreferFunctionOverMethodWalker(sourceFile, this.ruleName, {
-            allowProtected: this.ruleArguments.indexOf(OPTION_ALLOW_PROTECTED) !== -1,
-            allowPublic: this.ruleArguments.indexOf(OPTION_ALLOW_PUBLIC) !== -1,
-        }));
+        return this.applyWithWalker(
+            new PreferFunctionOverMethodWalker(sourceFile, this.ruleName, {
+                allowProtected: this.ruleArguments.indexOf(OPTION_ALLOW_PROTECTED) !== -1,
+                allowPublic: this.ruleArguments.indexOf(OPTION_ALLOW_PUBLIC) !== -1,
+            }),
+        );
     }
 }
 
@@ -66,12 +65,12 @@ class PreferFunctionOverMethodWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (isMethodDeclaration(node) && !this.isExempt(node)) {
                 // currentScope is always undefined here, so we don't need to save it and just set it to undefined afterwards
-                const scope = this.currentScope = {
+                this.currentScope = {
                     isThisUsed: false,
                     name: getPropertyName(node.name),
                 };
                 ts.forEachChild(node, cb);
-                if (!scope.isThisUsed) {
+                if (!this.currentScope.isThisUsed) {
                     this.addFailureAtNode(node.name, Rule.FAILURE_STRING);
                 }
                 this.currentScope = undefined;
@@ -80,27 +79,38 @@ class PreferFunctionOverMethodWalker extends Lint.AbstractWalker<Options> {
                 this.currentScope = undefined;
                 ts.forEachChild(node, cb);
                 this.currentScope = scope;
-            } else if (this.currentScope !== undefined &&
-                       (node.kind === ts.SyntaxKind.ThisKeyword && !isRecursiveCall(node, this.currentScope.name) ||
-                        node.kind === ts.SyntaxKind.SuperKeyword)) {
+            } else if (
+                this.currentScope !== undefined &&
+                ((node.kind === ts.SyntaxKind.ThisKeyword &&
+                    !isRecursiveCall(node, this.currentScope.name)) ||
+                    node.kind === ts.SyntaxKind.SuperKeyword)
+            ) {
                 this.currentScope.isThisUsed = true;
             } else {
                 return ts.forEachChild(node, cb);
             }
-
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
     private isExempt(node: ts.MethodDeclaration): boolean {
         // TODO: handle the override keyword once it lands in the language
-        return node.body === undefined || // exclude abstract methods and overload signatures
+        return (
+            node.body === undefined || // exclude abstract methods and overload signatures
             // exclude object methods
-            node.parent!.kind !== ts.SyntaxKind.ClassDeclaration && node.parent!.kind !== ts.SyntaxKind.ClassExpression ||
+            (node.parent.kind !== ts.SyntaxKind.ClassDeclaration &&
+                node.parent.kind !== ts.SyntaxKind.ClassExpression) ||
             hasModifier(node.modifiers, ts.SyntaxKind.StaticKeyword) ||
-            this.options.allowProtected && hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword) ||
-            this.options.allowPublic && (hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword) ||
-                                         !hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword, ts.SyntaxKind.PrivateKeyword));
+            (this.options.allowProtected &&
+                hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) ||
+            (this.options.allowPublic &&
+                (hasModifier(node.modifiers, ts.SyntaxKind.PublicKeyword) ||
+                    !hasModifier(
+                        node.modifiers,
+                        ts.SyntaxKind.ProtectedKeyword,
+                        ts.SyntaxKind.PrivateKeyword,
+                    )))
+        );
     }
 }
 
@@ -110,7 +120,9 @@ interface ThisUsed {
 }
 
 function isRecursiveCall(node: ts.Node, name?: string) {
-    return name !== undefined &&
-        node.parent!.kind === ts.SyntaxKind.PropertyAccessExpression &&
-        (node.parent as ts.PropertyAccessExpression).name.text === name;
+    return (
+        name !== undefined &&
+        node.parent.kind === ts.SyntaxKind.PropertyAccessExpression &&
+        (node.parent as ts.PropertyAccessExpression).name.text === name
+    );
 }

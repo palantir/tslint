@@ -16,6 +16,7 @@
  */
 
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -37,28 +38,33 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_FACTORY = (lineCount: number, lineLimit: number) => {
-        let msg = `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. `;
-        msg += `Consider breaking this file up into smaller parts`;
-        return msg;
+    public static FAILURE_STRING(lineCount: number, lineLimit: number) {
+        return (
+            `This file has ${lineCount} lines, which exceeds the maximum of ${lineLimit} lines allowed. ` +
+            "Consider breaking this file up into smaller parts"
+        );
     }
 
     public isEnabled(): boolean {
-        return super.isEnabled() && this.ruleArguments[0] as number > 0;
+        return super.isEnabled() && (this.ruleArguments[0] as number) > 0;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const ruleFailures: Lint.RuleFailure[] = [];
-        const ruleArguments = this.getOptions().ruleArguments;
-        const lineLimit = ruleArguments[0] as number;
+        const lineLimit = this.ruleArguments[0] as number;
         const lineCount = sourceFile.getLineStarts().length;
-        const disabledIntervals = this.getOptions().disabledIntervals;
-
-        if (lineCount > lineLimit && disabledIntervals.length === 0) {
-            const errorString = Rule.FAILURE_STRING_FACTORY(lineCount, lineLimit);
-            ruleFailures.push(new Lint.RuleFailure(sourceFile, 0, 1, errorString,
-              this.getOptions().ruleName));
+        if (lineCount <= lineLimit) {
+            return [];
         }
-        return ruleFailures;
+
+        const len = sourceFile.text.length;
+        return [
+            new Lint.RuleFailure(
+                sourceFile,
+                len - 1,
+                len,
+                Rule.FAILURE_STRING(lineCount, lineLimit),
+                this.ruleName,
+            ),
+        ];
     }
 }

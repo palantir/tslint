@@ -1,0 +1,59 @@
+const asyncFn = {
+  f: async function() {
+    await some_promise;
+  },
+  fa: async function*() {
+    await some_promise;
+  }
+};
+
+const bad = {
+  w: function() {
+    const alsoBad = {
+        bad: bad,
+    };
+  },
+  x: function*() {},
+  [y]: function() {},
+  z: z,
+  nest: {
+    nestBad: function() {},
+    nextGood: function(prop: string): void {}
+  }
+};
+
+const good = {
+  w: function() {},
+  x: function *() {},
+  [y]: function() {}
+};
+
+const arrows = {
+  x: (y) => y  // this is OK.
+};
+
+const namedFunctions = {
+  x: function y() {}  // named function expressions are also OK.
+};
+
+const quotes = {
+  "foo-bar": function() {},
+  "foo-bar": function() {}
+};
+
+const extraCases = {
+  x: x,
+  a: 123,
+  b: "hello",
+  c: 'c',
+  ["a" + "nested"]: {
+    x: x
+  }
+};
+
+export class ClassA extends ClassZ {
+  testMethod() {}
+}
+
+({foo: foo} = {foo: foo});
+

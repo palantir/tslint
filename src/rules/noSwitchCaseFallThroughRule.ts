@@ -59,60 +59,51 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_PART = "expected a 'break' before ";
+    public static FAILURE_STRING(keyword: ts.SyntaxKind): string {
+        return `expected a 'break' before '${ts.tokenToString(keyword)}'`;
+    }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined));
+        return this.applyWithWalker(
+            new NoSwitchCaseFallThroughWalker(sourceFile, this.ruleName, undefined),
+        );
     }
 }
 
-export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker<void> {
+export class NoSwitchCaseFallThroughWalker extends Lint.AbstractWalker {
     public walk(sourceFile: ts.SourceFile) {
         const cb = (node: ts.Node): void => {
-            if (node.kind === ts.SyntaxKind.SwitchStatement) {
-                this.visitSwitchStatement(node as ts.SwitchStatement);
+            if (utils.isSwitchStatement(node)) {
+                this.visitSwitchStatement(node);
             }
             return ts.forEachChild(node, cb);
         };
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private visitSwitchStatement(node: ts.SwitchStatement) {
-        const clauses = node.caseBlock.clauses;
-        const len = clauses.length - 1; // last clause doesn't need to be checked
-        for (let i = 0; i < len; ++i) {
-            if (clauses[i].statements.length !== 0 &&
-                // TODO type assertion can be removed with typescript 2.2
-                !utils.endsControlFlow(clauses[i] as ts.CaseClause) &&
-                !this.isFallThroughAllowed(clauses[i])) {
-
-                this.reportError(clauses[i + 1]);
+    private visitSwitchStatement({ caseBlock: { clauses } }: ts.SwitchStatement): void {
+        clauses.forEach((clause, i) => {
+            if (
+                i !== clauses.length - 1 &&
+                clause.statements.length !== 0 &&
+                !utils.endsControlFlow(clause) &&
+                !this.isFallThroughAllowed(clause)
+            ) {
+                const keyword = clauses[i + 1].getChildAt(0);
+                this.addFailureAtNode(keyword, Rule.FAILURE_STRING(keyword.kind));
             }
-        }
+        });
     }
 
-    private isFallThroughAllowed(clause: ts.CaseOrDefaultClause) {
-        const sourceFileText = this.sourceFile.text;
-        const comments = ts.getLeadingCommentRanges(sourceFileText, clause.end);
-        if (comments === undefined) {
-            return false;
-        }
-        for (const comment of comments) {
-            let commentText: string;
-            if (comment.kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-                commentText = sourceFileText.substring(comment.pos + 2, comment.end - 2);
-            } else {
-                commentText = sourceFileText.substring(comment.pos + 2, comment.end);
-            }
-            if (commentText.trim() === "falls through") {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private reportError(clause: ts.CaseOrDefaultClause) {
-        const keyword = clause.kind === ts.SyntaxKind.CaseClause ? "case" : "default";
-        this.addFailureAt(clause.getStart(this.sourceFile), keyword.length, `${Rule.FAILURE_STRING_PART}'${keyword}'`);
+    private isFallThroughAllowed(clause: ts.CaseOrDefaultClause): boolean {
+        const comments = ts.getLeadingCommentRanges(this.sourceFile.text, clause.end);
+        return (
+            comments !== undefined &&
+            comments.some(comment =>
+                /^\s*falls through\b/i.test(
+                    this.sourceFile.text.slice(comment.pos + 2, comment.end),
+                ),
+            )
+        );
     }
 }

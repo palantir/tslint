@@ -18,6 +18,7 @@ import { assert } from "chai";
 import * as ts from "typescript";
 
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("VSO Formatter", () => {
@@ -37,13 +38,75 @@ describe("VSO Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
         ];
 
         const expectedResult =
-            getFailureString(TEST_FILE, 1,  1, "first failure", "first-name") +
-            getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name") +
-            getFailureString(TEST_FILE, 9,  2,  "last failure", "last-name");
+            getFailureString(TEST_FILE, 1, 1, "first failure", "first-name", "error") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name", "error") +
+            getFailureString(TEST_FILE, 9, 2, "last failure", "last-name", "error");
+
+        const actualResult = formatter.format(failures);
+        assert.equal(actualResult, expectedResult);
+    });
+
+    it("does not duplicate output for fixed failures", () => {
+        const maxPosition = sourceFile.getFullWidth();
+
+        const failures = [
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
+        ];
+
+        const expectedResult =
+            getFailureString(TEST_FILE, 1, 1, "first failure", "first-name", "error") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name", "error") +
+            getFailureString(TEST_FILE, 9, 2, "last failure", "last-name", "error");
+
+        const fixed = failures.slice();
+
+        const actualResult = formatter.format(failures, fixed);
+        assert.equal(actualResult, expectedResult);
+    });
+
+    it("outputs correct severity", () => {
+        const maxPosition = sourceFile.getFullWidth();
+
+        const failures = [
+            createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
+            createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "warning"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
+        ];
+
+        const expectedResult =
+            getFailureString(TEST_FILE, 1, 1, "first failure", "first-name", "error") +
+            getFailureString(TEST_FILE, 2, 12, "mid failure", "mid-name", "warning") +
+            getFailureString(TEST_FILE, 9, 2, "last failure", "last-name", "error");
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);
@@ -54,7 +117,15 @@ describe("VSO Formatter", () => {
         assert.equal(result, "\n");
     });
 
-    function getFailureString(file: string, line: number, character: number, reason: string, code: string) {
-        return `##vso[task.logissue type=warning;sourcepath=${file};linenumber=${line};columnnumber=${character};code=${code};]${reason}\n`;
+    function getFailureString(
+        file: string,
+        line: number,
+        character: number,
+        reason: string,
+        code: string,
+        severity: string,
+    ) {
+        const properties = `sourcepath=${file};linenumber=${line};columnnumber=${character};code=${code};`;
+        return `##vso[task.logissue type=${severity};${properties}]${reason}\n`;
     }
 });

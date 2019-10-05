@@ -5,12 +5,13 @@ class Clazz { // this comment is correct
     public funcxion() { // This comment has a capital letter starting it
                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
         //This comment is on its own line, and starts with a capital _and_ no space
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
-          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space_lower]
         console.log("test"); //this comment has no space
                                ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
     }
-    /// <reference or something>
+    /// <not a reference>
+    ////foo
+        ~~~ [space]
 }
 
 //#region test
@@ -35,3 +36,4 @@ const unusedVar = 'unneeded value';
 
 [lower]: comment must start with lowercase letter or the word(s): TODO, HACK
 [space]: comment must start with a space
+[space_lower]: comment must start with a space and lowercase letter or the word(s): TODO, HACK

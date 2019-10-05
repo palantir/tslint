@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "object-literal-sort-keys": [true, "locale-compare"]
+    }
+}

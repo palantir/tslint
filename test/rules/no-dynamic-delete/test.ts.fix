@@ -1,0 +1,19 @@
+const container: { [i: string]: 0 } = {};
+
+const getName = () => "";
+
+delete container.aaa;
+delete container["bb" + "b"];
+delete container.ccc;
+delete container.delete;
+delete container.delete;
+delete container[7];
+delete container[-7];
+delete container[7];
+delete container[-Infinity];
+delete container["-Infinity"];
+delete container[+Infinity];
+delete container["+Infinity"];
+delete container[NaN];
+delete container.NaN;
+delete container[getName()];

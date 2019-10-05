@@ -17,17 +17,24 @@
 
 import * as ts from "typescript";
 
-import {Fix, IOptions, Replacement, RuleFailure} from "../rule/rule";
-import {SyntaxWalker} from "./syntaxWalker";
-import {IWalker} from "./walker";
+import { Fix, IOptions, Replacement, RuleFailure } from "../rule/rule";
 
+import { SyntaxWalker } from "./syntaxWalker";
+import { IWalker } from "./walker";
+
+/**
+ * @deprecated
+ * RuleWalker-based rules are slow,
+ * so it's generally preferable to use applyWithFunction instead of applyWithWalker.
+ * @see https://github.com/palantir/tslint/issues/2522
+ */
 export class RuleWalker extends SyntaxWalker implements IWalker {
-    private limit: number;
-    private options?: any[];
-    private failures: RuleFailure[];
-    private ruleName: string;
+    private readonly limit: number;
+    private readonly options?: any[];
+    private readonly failures: RuleFailure[];
+    private readonly ruleName: string;
 
-    constructor(private sourceFile: ts.SourceFile, options: IOptions) {
+    constructor(private readonly sourceFile: ts.SourceFile, options: IOptions) {
         super();
 
         this.failures = [];
@@ -57,7 +64,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
     }
 
     public hasOption(option: string): boolean {
-        if (this.options) {
+        if (this.options !== undefined) {
             return this.options.indexOf(option) !== -1;
         } else {
             return false;
@@ -66,8 +73,8 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** @deprecated Prefer `addFailureAt` and its variants. */
     public createFailure(start: number, width: number, failure: string, fix?: Fix): RuleFailure {
-        const from = (start > this.limit) ? this.limit : start;
-        const to = ((start + width) > this.limit) ? this.limit : (start + width);
+        const from = start > this.limit ? this.limit : start;
+        const to = start + width > this.limit ? this.limit : start + width;
         return new RuleFailure(this.sourceFile, from, to, failure, this.ruleName, fix);
     }
 
@@ -78,6 +85,7 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** Add a failure with any arbitrary span. Prefer `addFailureAtNode` if possible. */
     public addFailureAt(start: number, width: number, failure: string, fix?: Fix) {
+        // tslint:disable-next-line deprecation
         this.addFailure(this.createFailure(start, width, failure, fix));
     }
 
@@ -88,7 +96,12 @@ export class RuleWalker extends SyntaxWalker implements IWalker {
 
     /** Add a failure using a node's span. */
     public addFailureAtNode(node: ts.Node, failure: string, fix?: Fix) {
-        this.addFailureAt(node.getStart(this.sourceFile), node.getWidth(this.sourceFile), failure, fix);
+        this.addFailureAt(
+            node.getStart(this.sourceFile),
+            node.getWidth(this.sourceFile),
+            failure,
+            fix,
+        );
     }
 
     public createReplacement(start: number, length: number, text: string): Replacement {

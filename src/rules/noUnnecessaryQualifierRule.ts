@@ -40,92 +40,115 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.getOptions(), program));
+        return this.applyWithFunction(sourceFile, walk, undefined, program.getTypeChecker());
     }
 }
 
-class Walker extends Lint.ProgramAwareRuleWalker {
-    private namespacesInScope: Array<ts.ModuleDeclaration | ts.EnumDeclaration> = [];
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
+    const namespacesInScope: Array<ts.ModuleDeclaration | ts.EnumDeclaration> = [];
+    ts.forEachChild(ctx.sourceFile, cb);
 
-    public visitModuleDeclaration(node: ts.ModuleDeclaration) {
-        this.namespacesInScope.push(node);
-        super.visitModuleDeclaration(node);
-        this.namespacesInScope.pop();
-    }
-
-    public visitEnumDeclaration(node: ts.EnumDeclaration) {
-        this.namespacesInScope.push(node);
-        super.visitEnumDeclaration(node);
-        this.namespacesInScope.pop();
-    }
-
-    public visitNode(node: ts.Node) {
+    function cb(node: ts.Node): void {
         switch (node.kind) {
+            case ts.SyntaxKind.ModuleDeclaration:
+            case ts.SyntaxKind.EnumDeclaration:
+                namespacesInScope.push(node as ts.ModuleDeclaration | ts.EnumDeclaration);
+                ts.forEachChild(node, cb);
+                namespacesInScope.pop();
+                break;
+
             case ts.SyntaxKind.QualifiedName:
                 const { left, right } = node as ts.QualifiedName;
-                this.visitNamespaceAccess(node, left, right);
+                visitNamespaceAccess(node, left, right);
                 break;
+
             case ts.SyntaxKind.PropertyAccessExpression:
                 const { expression, name } = node as ts.PropertyAccessExpression;
                 if (utils.isEntityNameExpression(expression)) {
-                    this.visitNamespaceAccess(node, expression, name);
+                    visitNamespaceAccess(node, expression, name);
                     break;
                 }
-                // falls through
+            // falls through
+
             default:
-                super.visitNode(node);
+                ts.forEachChild(node, cb);
         }
     }
 
-    private visitNamespaceAccess(node: ts.Node, qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier) {
-        if (this.qualifierIsUnnecessary(qualifier, name)) {
-            const fix = this.deleteFromTo(qualifier.getStart(), name.getStart());
-            this.addFailureAtNode(qualifier, Rule.FAILURE_STRING(qualifier.getText()), fix);
+    function visitNamespaceAccess(
+        node: ts.Node,
+        qualifier: ts.EntityNameOrEntityNameExpression,
+        name: ts.Identifier,
+    ): void {
+        if (qualifierIsUnnecessary(qualifier, name)) {
+            const fix = Lint.Replacement.deleteFromTo(qualifier.getStart(), name.getStart());
+            ctx.addFailureAtNode(qualifier, Rule.FAILURE_STRING(qualifier.getText()), fix);
         } else {
             // Only look for nested qualifier errors if we didn't already fail on the outer qualifier.
-            super.visitNode(node);
+            ts.forEachChild(node, cb);
         }
     }
 
-    private qualifierIsUnnecessary(qualifier: ts.EntityNameOrEntityNameExpression, name: ts.Identifier): boolean {
-        const namespaceSymbol = this.symbolAtLocation(qualifier);
-        if (namespaceSymbol === undefined || !this.symbolIsNamespaceInScope(namespaceSymbol)) {
+    function qualifierIsUnnecessary(
+        qualifier: ts.EntityNameOrEntityNameExpression,
+        name: ts.Identifier,
+    ): boolean {
+        const namespaceSymbol = checker.getSymbolAtLocation(qualifier);
+        if (namespaceSymbol === undefined || !symbolIsNamespaceInScope(namespaceSymbol)) {
             return false;
         }
 
-        const accessedSymbol = this.symbolAtLocation(name);
+        const accessedSymbol = checker.getSymbolAtLocation(name);
         if (accessedSymbol === undefined) {
             return false;
         }
 
         // If the symbol in scope is different, the qualifier is necessary.
-        const fromScope = this.getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
-        return fromScope === undefined || fromScope === accessedSymbol;
+        const fromScope = getSymbolInScope(qualifier, accessedSymbol.flags, name.text);
+        return fromScope === undefined || symbolsAreEqual(accessedSymbol, fromScope);
     }
 
-    private getSymbolInScope(node: ts.Node, flags: ts.SymbolFlags, name: string): ts.Symbol | undefined {
+    function getSymbolInScope(
+        node: ts.Node,
+        flags: ts.SymbolFlags,
+        name: string,
+    ): ts.Symbol | undefined {
         // TODO:PERF `getSymbolsInScope` gets a long list. Is there a better way?
-        const scope = this.getTypeChecker().getSymbolsInScope(node, flags);
-        return scope.find((scopeSymbol) => scopeSymbol.name === name);
+        const scope = checker.getSymbolsInScope(node, flags);
+        return scope.find(scopeSymbol => scopeSymbol.name === name);
     }
 
-    private symbolAtLocation(node: ts.Node): ts.Symbol | undefined {
-        return this.getTypeChecker().getSymbolAtLocation(node);
-    }
-
-    private symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
+    function symbolIsNamespaceInScope(symbol: ts.Symbol): boolean {
         const symbolDeclarations = symbol.getDeclarations();
-        if (symbolDeclarations == null) {
+        if (symbolDeclarations === undefined) {
             return false;
-        } else if (symbolDeclarations.some((decl) => this.namespacesInScope.some((ns) => ns === decl))) {
+        } else if (symbolDeclarations.some(decl => namespacesInScope.some(ns => ns === decl))) {
             return true;
         }
 
-        const alias = this.tryGetAliasedSymbol(symbol);
-        return alias !== undefined && this.symbolIsNamespaceInScope(alias);
+        const alias = tryGetAliasedSymbol(symbol, checker);
+        return alias !== undefined && symbolIsNamespaceInScope(alias);
     }
 
-    private tryGetAliasedSymbol(symbol: ts.Symbol): ts.Symbol | undefined {
-        return Lint.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias) ? this.getTypeChecker().getAliasedSymbol(symbol) : undefined;
+    function symbolsAreEqual(accessed: ts.Symbol, inScope: ts.Symbol): boolean {
+        if (checker.getExportSymbolOfSymbol !== undefined) {
+            inScope = checker.getExportSymbolOfSymbol(inScope);
+            return accessed === inScope;
+        }
+        return (
+            accessed === inScope ||
+            // For compatibility with typescript@2.5: compare declarations because the symbols don't have the same reference
+            Lint.Utils.arraysAreEqual(
+                accessed.declarations,
+                inScope.declarations,
+                (a, b) => a === b,
+            )
+        );
     }
+}
+
+function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol | undefined {
+    return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)
+        ? checker.getAliasedSymbol(symbol)
+        : undefined;
 }

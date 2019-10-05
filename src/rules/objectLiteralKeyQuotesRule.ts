@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
 
 import { isObjectLiteralExpression, isValidPropertyName } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 const OPTION_ALWAYS = "always";
 const OPTION_AS_NEEDED = "as-needed";
 const OPTION_CONSISTENT = "consistent";
 const OPTION_CONSISTENT_AS_NEEDED = "consistent-as-needed";
-type Option = typeof OPTION_ALWAYS | typeof OPTION_AS_NEEDED | typeof OPTION_CONSISTENT | typeof OPTION_CONSISTENT_AS_NEEDED;
+type Option =
+    | typeof OPTION_ALWAYS
+    | typeof OPTION_AS_NEEDED
+    | typeof OPTION_CONSISTENT
+    | typeof OPTION_CONSISTENT_AS_NEEDED;
 
 interface Options {
     option: Option;
@@ -74,18 +79,22 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static INCONSISTENT_PROPERTY = `All property names in this object literal must be consistently quoted or unquoted.`;
-    public static UNNEEDED_QUOTES = (name: string) => {
+    public static INCONSISTENT_PROPERTY =
+        "All property names in this object literal must be consistently quoted or unquoted.";
+    public static UNNEEDED_QUOTES(name: string) {
         return `Unnecessarily quoted property '${name}' found.`;
     }
-    public static UNQUOTED_PROPERTY = (name: string) => {
+    public static UNQUOTED_PROPERTY(name: string) {
         return `Unquoted property '${name}' found.`;
     }
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new ObjectLiteralKeyQuotesWalker(sourceFile, this.ruleName, {
-            option: this.ruleArguments.length === 0 ? "always" : this.ruleArguments[0] as Option,
-        }));
+        return this.applyWithWalker(
+            new ObjectLiteralKeyQuotesWalker(sourceFile, this.ruleName, {
+                option:
+                    this.ruleArguments.length === 0 ? "always" : (this.ruleArguments[0] as Option),
+            }),
+        );
     }
 }
 
@@ -94,7 +103,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
         const cb = (node: ts.Node): void => {
             if (isObjectLiteralExpression(node)) {
                 const propertyNames = Lint.Utils.mapDefined(node.properties, mapPropertyName);
-                outer: switch (this.options.option) { // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                outer: switch (this.options.option) {
                     case "always":
                         for (const name of propertyNames) {
                             if (name.kind !== ts.SyntaxKind.StringLiteral) {
@@ -104,7 +113,10 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                         break;
                     case "as-needed":
                         for (const name of propertyNames) {
-                            if (name.kind === ts.SyntaxKind.StringLiteral && isValidPropertyName(name.text)) {
+                            if (
+                                name.kind === ts.SyntaxKind.StringLiteral &&
+                                isValidPropertyName(name.text)
+                            ) {
                                 this.reportUnnecessary(name);
                             }
                         }
@@ -112,18 +124,25 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
                     case "consistent":
                         if (hasInconsistentQuotes(propertyNames)) {
                             // No fix -- don't know if they would want to add quotes or remove them.
-                            this.addFailureAt(node.getStart(this.sourceFile), 1, Rule.INCONSISTENT_PROPERTY);
+                            this.addFailureAt(
+                                node.getStart(this.sourceFile),
+                                1,
+                                Rule.INCONSISTENT_PROPERTY,
+                            );
                         }
                         break;
                     case "consistent-as-needed":
                         for (const name of propertyNames) {
-                            if (name.kind === ts.SyntaxKind.StringLiteral && !isValidPropertyName(name.text)) {
+                            if (
+                                name.kind === ts.SyntaxKind.StringLiteral &&
+                                !isValidPropertyName(name.text)
+                            ) {
                                 for (const propertyName of propertyNames) {
                                     if (propertyName.kind !== ts.SyntaxKind.StringLiteral) {
                                         this.reportMissing(propertyName);
                                     }
                                 }
-                                break outer; // tslint:disable-line no-unsafe-any (fixed in 5.2)
+                                break outer;
                             }
                         }
                         for (const name of propertyNames) {
@@ -149,20 +168,28 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
     }
 
     private reportUnnecessary(node: ts.StringLiteral) {
-        this.addFailureAtNode(node, Rule.UNNEEDED_QUOTES(node.text), Lint.Replacement.replaceNode(node, node.text, this.sourceFile));
+        this.addFailureAtNode(
+            node,
+            Rule.UNNEEDED_QUOTES(node.text),
+            Lint.Replacement.replaceNode(node, node.text, this.sourceFile),
+        );
     }
 }
 
-function mapPropertyName(property: ts.ObjectLiteralElementLike): ts.StringLiteral | ts.NumericLiteral | ts.Identifier | undefined {
-    if (property.kind === ts.SyntaxKind.ShorthandPropertyAssignment ||
+function mapPropertyName(
+    property: ts.ObjectLiteralElementLike,
+): ts.StringLiteral | ts.NumericLiteral | ts.Identifier | undefined {
+    if (
+        property.kind === ts.SyntaxKind.ShorthandPropertyAssignment ||
         property.kind === ts.SyntaxKind.SpreadAssignment ||
-        property.name.kind === ts.SyntaxKind.ComputedPropertyName) {
+        property.name.kind === ts.SyntaxKind.ComputedPropertyName
+    ) {
         return undefined;
     }
     return property.name;
 }
 
-function hasInconsistentQuotes(properties: ts.LiteralLikeNode[]) {
+function hasInconsistentQuotes(properties: ReadonlyArray<ts.LiteralLikeNode>) {
     if (properties.length < 2) {
         return false;
     }

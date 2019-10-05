@@ -1,6 +1,6 @@
 var NoTypesFn = function (a, b) {
-                           ~ [expected parameter: 'a' to have a typedef]
-                              ~ [expected parameter: 'b' to have a typedef]
+                          ~ [expected parameter: 'a' to have a typedef]
+                             ~ [expected parameter: 'b' to have a typedef]
 }
 
 var NoTypesArrowFn = (a, b) => {}

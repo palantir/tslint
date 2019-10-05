@@ -43,7 +43,8 @@ export class Rule extends Lint.Rules.AbstractRule {
             One argument may be optionally provided:
 
             * \`${OPTION_IGNORE_MODULE}\` allows to specify a regex and ignore modules which it matches.`,
-        rationale: "Imports with side effects may have behavior which is hard for static verification.",
+        rationale:
+            "Imports with side effects may have behavior which is hard for static verification.",
         ruleName: "no-import-side-effect",
         type: "typescript",
         typescriptOnly: false,
@@ -51,8 +52,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import with explicit side-effect";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as { "ignore-module": string };
-        const ignorePattern = patternConfig && new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
+        const patternConfig = this.ruleArguments[this.ruleArguments.length - 1] as
+            | { "ignore-module": string }
+            | undefined;
+        const ignorePattern =
+            patternConfig === undefined
+                ? undefined
+                : new RegExp(patternConfig[OPTION_IGNORE_MODULE]);
         return this.applyWithFunction(sourceFile, walk, ignorePattern);
     }
 }
@@ -65,11 +71,11 @@ function walk(ctx: Lint.WalkContext<RegExp | undefined>): void {
         }
 
         const { importClause, moduleSpecifier } = statement;
-        if (importClause || !utils.isStringLiteral(moduleSpecifier)) {
+        if (importClause !== undefined || !utils.isStringLiteral(moduleSpecifier)) {
             continue;
         }
 
-        if (!ignorePattern || !ignorePattern.test(moduleSpecifier.text)) {
+        if (ignorePattern === undefined || !ignorePattern.test(moduleSpecifier.text)) {
             ctx.addFailureAtNode(statement, Rule.FAILURE_STRING);
         }
     }

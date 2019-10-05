@@ -17,7 +17,9 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
+import { dedent } from "../../src/utils";
 import { IFormatter, TestUtils } from "../lint";
+
 import { createFailure } from "./utils";
 
 describe("Verbose Formatter", () => {
@@ -37,13 +39,21 @@ describe("Verbose Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
         ];
 
-        const expectedResult =
-            "ERROR: (first-name) " + TEST_FILE + getPositionString(1, 1) + "first failure\n" +
-            "ERROR: (mid-name) " + TEST_FILE + getPositionString(2, 12) + "mid failure\n" +
-            "ERROR: (last-name) " + TEST_FILE + getPositionString(9, 2) + "last failure\n";
+        const expectedResult = dedent`
+            ERROR: (first-name) ${TEST_FILE}${getPositionString(1, 1)}first failure
+            ERROR: (mid-name) ${TEST_FILE}${getPositionString(2, 12)}mid failure
+            ERROR: (last-name) ${TEST_FILE}${getPositionString(9, 2)}last failure\n`.slice(1); // remove leading newline
 
         const actualResult = formatter.format(failures);
         assert.equal(actualResult, expectedResult);

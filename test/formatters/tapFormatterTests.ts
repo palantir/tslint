@@ -17,10 +17,10 @@
 import { assert } from "chai";
 import * as ts from "typescript";
 
+import { dedent } from "../../src/utils";
 import { IFormatter, TestUtils } from "../lint";
-import { createFailure } from "./utils";
 
-import * as Utils from "../../src/utils";
+import { createFailure } from "./utils";
 
 describe("TAP Formatter", () => {
     const TEST_FILE = "formatters/tapFormatter.test.ts";
@@ -39,16 +39,28 @@ describe("TAP Formatter", () => {
         const failures = [
             createFailure(sourceFile, 0, 1, "first failure", "first-name", undefined, "error"),
             createFailure(sourceFile, 32, 36, "mid failure", "mid-name", undefined, "error"),
-            createFailure(sourceFile, maxPosition - 1, maxPosition, "last failure", "last-name", undefined, "error"),
+            createFailure(
+                sourceFile,
+                maxPosition - 1,
+                maxPosition,
+                "last failure",
+                "last-name",
+                undefined,
+                "error",
+            ),
         ];
 
-        const expectedResult =
-            getFailureString(1, "first-name", "error", TEST_FILE, 0, 0, "first failure") + "\n" +
-            getFailureString(2, "mid-name", "error", TEST_FILE, 1, 19, "mid failure") + "\n" +
-            getFailureString(3, "last-name", "error", TEST_FILE, 0, 12, "last failure") + "\n";
+        const failureStrings = [
+            getFailureString(1, "first-name", "error", TEST_FILE, 0, 0, "first failure"),
+            getFailureString(2, "mid-name", "error", TEST_FILE, 1, 19, "mid failure"),
+            getFailureString(3, "last-name", "error", TEST_FILE, 0, 12, "last failure"),
+        ];
 
         const actualResult = formatter.format(failures);
-        assert.equal(actualResult, `TAP version 13\n1..${failures.length}\n` + expectedResult);
+        assert.equal(
+            actualResult,
+            `TAP version 13\n1..${failures.length}\n${failureStrings.join("\n")}\n`,
+        );
     });
 
     it("handles no failures", () => {
@@ -56,23 +68,25 @@ describe("TAP Formatter", () => {
         assert.equal(result, "TAP version 13\n1..0 # SKIP No failures\n");
     });
 
-    function getFailureString(num: number,
-                              ruleName: string,
-                              severity: string,
-                              file: string,
-                              line: number,
-                              character: number,
-                              reason: string) {
-        return Utils.dedent`
-            not ok ${String(num)} - ${reason}
+    function getFailureString(
+        num: number,
+        ruleName: string,
+        severity: string,
+        file: string,
+        line: number,
+        character: number,
+        reason: string,
+    ) {
+        return dedent`
+            not ok ${num} - ${reason}
               ---
               message : ${reason}
               severity: ${severity}
               data:
                 ruleName: ${ruleName}
                 fileName: ${file}
-                line: ${String(line)}
-                character: ${String(character)}
+                line: ${line}
+                character: ${character}
                 failureString: ${reason}
                 rawLines: var x = 123;\n
               ...`;

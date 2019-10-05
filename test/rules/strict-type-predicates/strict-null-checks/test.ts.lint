@@ -1,0 +1,215 @@
+declare function get<T>(): T;
+
+// typeof undefined
+{
+    typeof get<boolean>() === "undefined";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<void>() === "undefined";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<boolean | undefined>() === "undefined";
+
+    declare const c: any;
+    typeof get<any>() === "undefined";
+
+    // 'undefined' is not assignable to '{}'
+    typeof get<{}>() === "undefined";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+}
+
+// typeof boolean
+{
+    declare const a: boolean;
+    typeof get<boolean>() === "boolean";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<Boolean>() === "boolean";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<boolean | undefined>() === "boolean";
+
+    typeof get<{}>() === "boolean";
+}
+
+// typeof number
+{
+    enum E {}
+
+    typeof get<E>() === "number";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<Number>() === "number";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+}
+
+// typeof string
+{
+    typeof get<"abc" | "def">() === "string";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<String>() === "string";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<"abc" | undefined>() === "string";
+}
+
+// typeof symbol
+{
+    typeof get<symbol>() === "symbol";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<string>() === "symbol";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<symbol | string>() === "symbol";
+}
+
+// typeof function
+{
+    typeof get<() => void>() === "function";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    typeof get<Function>() === "function";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+
+    typeof get<number>() === "function";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<number | (() => void)>() === "function";
+
+    class X {}
+    typeof X === "function";
+    ~~~~~~~~~~~~~~~~~~~~~~~ [T]
+    typeof X === "object";
+    ~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    // Works with union
+    class Foo { }
+    typeof get<typeof Foo | object> === "function";
+}
+
+// typeof object
+{
+    typeof get<boolean | number | string | symbol | (() => void) | Function>() === "object";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    typeof get<{}> === "object";
+}
+
+// === null / undefined
+{
+    get<number | undefined>() === null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    get<number | null>() === null;
+
+    get<number | null>() === undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    get<number | undefined>() === undefined;
+
+    // 'null' and 'undefined' are not assignable to '{}'
+
+    get<{}>() === null;
+    ~~~~~~~~~~~~~~~~~~ [F]
+
+    get<{}>() === undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    get<string | undefined>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== undefined' instead.]
+
+    get<string | null>() == undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== null' instead.]
+
+    get<string | null>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== null' instead.]
+
+    get<string | undefined>() == undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '=== undefined' instead.]
+
+    get<string | undefined>() != null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Use '!== undefined' instead.]
+
+    get<{}>() == null;
+    ~~~~~~~~~~~~~~~~~ [F]
+
+    get<string | null | undefined>() == null;
+    get<string | null | undefined>() != undefined;
+
+    get<null|undefined>() == null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+    get<null|undefined>() != undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+}
+
+// negation
+{
+    get<number | undefined>() !== null;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    get<number | null>() !== null;
+
+    get<number | null>() !== undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+
+    get<number | undefined>() !== undefined;
+
+    typeof get<string>() !== "string";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+}
+
+// reverse left/right
+{
+    "string" === typeof get<number>();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    undefined === get<void>();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~ [T]
+}
+
+// type parameters
+{
+    function f<T>(t: T) {
+        typeof t === "boolean";
+    }
+
+    // TODO: Would be nice to catch this.
+    function g<T extends string>(t: T) {
+        typeof t === "boolean";
+    }
+}
+
+// Detects bad typeof
+{
+    typeof get<boolean>() === true;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
+    typeof get<any>() === "orbject";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
+    typeof get<string | number>() === `string`;
+    typeof get<string | number>() === `stirng`;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
+    typeof get<any>() === "unknown";
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+
+    let a: string, b: string;
+    typeof a === typeof b;
+    typeof a === b;
+    a === typeof b;
+    typeof a === undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~ [F]
+
+    undefined === typeof a;
+    ~~~~~~~~~~~~~~~~~~~~~~ [typeof]
+    null === typeof b;
+    ~~~~~~~~~~~~~~~~~ [typeof]
+}
+
+[T]: Expression is always true.
+[F]: Expression is always false.
+[typeof]: Bad comparison for 'typeof'.

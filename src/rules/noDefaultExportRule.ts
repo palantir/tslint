@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,30 +40,26 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "Use of default exports is forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoDefaultExportWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-class NoDefaultExportWalker extends Lint.RuleWalker {
-    public visitExportAssignment(node: ts.ExportAssignment) {
-        const exportMember = node.getChildAt(1);
-        if (exportMember != null && exportMember.kind === ts.SyntaxKind.DefaultKeyword) {
-            this.addFailureAtNode(exportMember, Rule.FAILURE_STRING);
-        }
-        super.visitExportAssignment(node);
+function walk(ctx: Lint.WalkContext) {
+    if (ctx.sourceFile.isDeclarationFile || !ts.isExternalModule(ctx.sourceFile)) {
+        return;
     }
-
-    // inline class declaration and function declaration exports use modifiers
-    public visitNode(node: ts.Node) {
-        if (node.kind === ts.SyntaxKind.DefaultKeyword && node.parent != null) {
-            const nodes = node.parent.modifiers;
-            if (nodes != null &&
-                nodes.length === 2 &&
-                nodes[0].kind === ts.SyntaxKind.ExportKeyword &&
-                nodes[1].kind === ts.SyntaxKind.DefaultKeyword) {
-                    this.addFailureAtNode(nodes[1], Rule.FAILURE_STRING);
+    for (const statement of ctx.sourceFile.statements) {
+        if (statement.kind === ts.SyntaxKind.ExportAssignment) {
+            if (!(statement as ts.ExportAssignment).isExportEquals) {
+                ctx.addFailureAtNode(statement.getChildAt(1, ctx.sourceFile), Rule.FAILURE_STRING);
             }
+        } else if (
+            statement.modifiers !== undefined &&
+            statement.modifiers.length >= 2 &&
+            statement.modifiers[0].kind === ts.SyntaxKind.ExportKeyword &&
+            statement.modifiers[1].kind === ts.SyntaxKind.DefaultKeyword
+        ) {
+            ctx.addFailureAtNode(statement.modifiers[1], Rule.FAILURE_STRING);
         }
-        super.visitNode(node);
     }
 }

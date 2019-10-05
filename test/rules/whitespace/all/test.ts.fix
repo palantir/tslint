@@ -21,6 +21,9 @@ module M {
         goto: console.log("hi");
     }
 
+    for (x = 2; x--;) {}
+    for (;;) {}
+
     while (i < 1) {
         ++i;
     }
@@ -61,8 +64,16 @@ var objectInsideTemplateExpression = `${({foo: "bar"}).foo}`;
 
 import { importA } from "libA";
 import { importB } from "libB";
-import {importC} from "libC";
-import moduleD, {importD} from "libD";
+import { importC } from "libC";
+import moduleD, { importD } from "libD";
+import { importD, importE } from "libD";
+import { importF as F } from "libF";
+import { importF as F, importG as G } from "libF";
+
+import {
+  importA,
+  importB
+} from "libC";
 
 export default 123;
 
@@ -73,8 +84,12 @@ export function each(obj, iterator, context) {
     //
 }
 
-export {each as forEach};
+export { each as forEach };
 import "libE";
+
+const E = 123;
+const F = 123;
+export { E, F };
 
 function foobar() {}
 
@@ -97,4 +112,24 @@ else
 {
     const foo = 123;
     // code that just wants to be encapsulated in a block scope
+}
+
+const foo = { ...bar };
+
+const foo = [ ...bar ];
+
+function foo (bar, ...baz) {}
+
+const { foo, ...bar } = baz;
+
+type A = number | string;
+
+type B = number | string | {result: string};
+
+type C = {result: string} & {type: "A" | "B"};
+
+class a {
+    private x = 1;
+    y = 1;
+    public z = 0;
 }

@@ -1,0 +1,10 @@
+{
+    "rules": {
+        "strict-comparisons": [
+            true,
+            {
+                "allow-object-equal-comparison": true
+            }
+        ]
+    }
+}

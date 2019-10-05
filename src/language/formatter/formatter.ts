@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {RuleFailure} from "../rule/rule";
+import { RuleFailure } from "../rule/rule";
 
 export interface IFormatterMetadata {
     /**
@@ -46,15 +46,21 @@ export interface IFormatterMetadata {
 
 export type ConsumerType = "human" | "machine";
 
+// See https://github.com/palantir/tslint/issues/4364
+// TODO: Enable the `callable-types` rule below. Currently, it
+// produces a lint error in several locations complaining about the
+// `no-inferred-empty-object-type` rule.
 export interface FormatterConstructor {
-    new(): IFormatter;
+    // tslint:disable-next-line:callable-types
+    new (): IFormatter;
 }
 
 export interface IFormatter {
     /**
      * Formats linter results
-     * @param {RuleFailure[]} failures Linter failures that were not fixed
-     * @param {RuleFailure[]} fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
+     * @param failures Linter failures that were not fixed
+     * @param fixes Fixed linter failures. Available when the `--fix` argument is used on the command line
+     * @param fileNames All of the file paths that were linted
      */
-    format(failures: RuleFailure[], fixes?: RuleFailure[]): string;
+    format(failures: RuleFailure[], fixes?: RuleFailure[], fileNames?: string[]): string;
 }

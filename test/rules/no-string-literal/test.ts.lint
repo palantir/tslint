@@ -29,4 +29,8 @@ obj["?a#$!$^&%&"];
 // invalid accessor - no crash
 obj[]
 
+// that underscrore escaping thing typescript does
+obj['__foo__'];
+    ~~~~~~~~~ [0]
+
 [0]: object access via string literals is disallowed

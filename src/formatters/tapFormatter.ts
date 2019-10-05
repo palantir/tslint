@@ -18,7 +18,6 @@
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
@@ -26,7 +25,8 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "tap",
         description: "Formats output as TAP stream.",
-        descriptionDetails: "Provides error messages output in TAP13 format which can be consumed by any TAP formatter.",
+        descriptionDetails:
+            "Provides error messages output in TAP13 format which can be consumed by any TAP formatter.",
         sample: Utils.dedent`
             TAP version 13
             1..1
@@ -49,15 +49,12 @@ export class Formatter extends AbstractFormatter {
     public format(failures: RuleFailure[]): string {
         let output: string[] = ["TAP version 13"];
 
-        if (failures.length === 0) {
-            output = output.concat([
-                "1..0 # SKIP No failures",
-            ]);
-        } else {
-            output = output.concat([`1..${failures.length}`]).concat(this.mapToMessages(failures));
-        }
+        output =
+            failures.length === 0
+                ? output.concat(["1..0 # SKIP No failures"])
+                : output.concat([`1..${failures.length}`]).concat(this.mapToMessages(failures));
 
-        return output.join("\n") + "\n";
+        return `${output.join("\n")}\n`;
     }
 
     private mapToMessages(failures: RuleFailure[]): string[] {
@@ -84,6 +81,5 @@ export class Formatter extends AbstractFormatter {
                     rawLines: ${failureRaw}
                   ...`;
         });
-
     }
 }

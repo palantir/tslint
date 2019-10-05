@@ -1,0 +1,8 @@
+{
+    "rules": {
+        "file-name-casing": [true, {
+            ".ts$": "ignore",
+            ".tsx$": "pascal-case"
+        }]
+    }
+}

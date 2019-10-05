@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import { isFunctionScopeBoundary, isIdentifier } from "tsutils";
+import { isIdentifier } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
+import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
-
     public static DEFAULT_THRESHOLD = 20;
     public static MINIMUM_THRESHOLD = 2;
 
@@ -29,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "cyclomatic-complexity",
         description: "Enforces a threshold of cyclomatic complexity.",
         descriptionDetails: Lint.Utils.dedent`
-            Cyclomatic complexity is assessed for each function of any type. A starting value of 20
+            Cyclomatic complexity is assessed for each function of any type. A starting value of 0
             is assigned and this value is then incremented for every statement which can branch the
             control flow within the function. The following statements and expressions contribute
             to cyclomatic complexity:
@@ -37,17 +38,20 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`if\` and \`? :\`
             * \`||\` and \`&&\` due to short-circuit evaluation
             * \`for\`, \`for in\` and \`for of\` loops
-            * \`while\` and \`do while\` loops`,
+            * \`while\` and \`do while\` loops
+            * \`case\` clauses that contain statements`,
         rationale: Lint.Utils.dedent`
             Cyclomatic complexity is a code metric which indicates the level of complexity in a
             function. High cyclomatic complexity indicates confusing code which may be prone to
-            errors or difficult to modify.`,
+            errors or difficult to modify.
+
+            It's better to have smaller, single-purpose functions with self-documenting names.`,
         optionsDescription: Lint.Utils.dedent`
             An optional upper limit for cyclomatic complexity can be specified. If no limit option
-            is provided a default value of $(Rule.DEFAULT_THRESHOLD) will be used.`,
+            is provided a default value of ${Rule.DEFAULT_THRESHOLD} will be used.`,
         options: {
             type: "number",
-            minimum: "$(Rule.MINIMUM_THRESHOLD)",
+            minimum: Rule.MINIMUM_THRESHOLD,
         },
         optionExamples: [true, [true, 20]],
         type: "maintainability",
@@ -56,18 +60,10 @@ export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:enable:object-literal-sort-keys */
 
     public static FAILURE_STRING(expected: number, actual: number, name?: string): string {
-        return `The function${name === undefined ? "" : " " + name} has a cyclomatic complexity of ` +
-            `${actual} which is higher than the threshold of ${expected}`;
-    }
-
-    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
-    }
-
-    public isEnabled(): boolean {
-        // Disable the rule if the option is provided but non-numeric or less than the minimum.
-        const isThresholdValid = typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
-        return super.isEnabled() && isThresholdValid;
+        return (
+            `The function${name === undefined ? "" : ` ${name}`} has a cyclomatic complexity of ` +
+            `${actual} which is higher than the threshold of ${expected}`
+        );
     }
 
     private get threshold(): number {
@@ -76,14 +72,30 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
         return Rule.DEFAULT_THRESHOLD;
     }
+
+    public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
+        return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
+    }
+
+    public isEnabled(): boolean {
+        // Disable the rule if the option is provided but non-numeric or less than the minimum.
+        const isThresholdValid =
+            typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
+        return super.isEnabled() && isThresholdValid;
+    }
 }
 
 function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
-    const { options: { threshold } } = ctx;
+    const {
+        options: { threshold },
+    } = ctx;
     let complexity = 0;
 
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
+        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
+        // requires tsutils > 3.0.
         if (isFunctionScopeBoundary(node)) {
+            // tslint:enable:deprecation
             const old = complexity;
             complexity = 1;
             ts.forEachChild(node, cb);
@@ -105,6 +117,7 @@ function walk(ctx: Lint.WalkContext<{ threshold: number }>): void {
 function increasesComplexity(node: ts.Node): boolean {
     switch (node.kind) {
         case ts.SyntaxKind.CaseClause:
+            return (node as ts.CaseClause).statements.length > 0;
         case ts.SyntaxKind.CatchClause:
         case ts.SyntaxKind.ConditionalExpression:
         case ts.SyntaxKind.DoStatement:

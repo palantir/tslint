@@ -1,0 +1,13 @@
+{
+    "rules": {
+        "file-name-casing": [
+            true,
+            {
+                ".*)": "snake-case", // making sure invalid RegExp will be ignored
+                "pascal.?case": "pascal-case",
+                "tsx$": "kebab-case",
+                ".*": "camel-case"
+            }
+        ]
+    }
+}
