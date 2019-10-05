@@ -74,6 +74,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [
             true,
             [true, "rxjs", "lodash"],
+            [true, [".*\\.temp$", ".*\\.tmp$"]],
+            [true, { lodash: ["pull", "pullAll"] }],
             [true, "lodash", { lodash: ["pull", "pullAll"] }],
             [true, "rxjs", { lodash: ["pull", "pullAll"] }, [".*\\.temp$", ".*\\.tmp$"]],
         ],
