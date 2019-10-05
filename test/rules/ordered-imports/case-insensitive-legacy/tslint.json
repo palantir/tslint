@@ -1,0 +1,11 @@
+{
+    "rules": {
+        "ordered-imports": [
+            true,
+            {
+                "import-sources-order": "case-insensitive-legacy",
+                "named-imports-order": "case-insensitive-legacy"
+            }
+        ]
+    }
+}
