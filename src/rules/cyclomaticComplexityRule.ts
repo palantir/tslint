@@ -66,6 +66,13 @@ export class Rule extends Lint.Rules.AbstractRule {
         );
     }
 
+    private get threshold(): number {
+        if (this.ruleArguments[0] !== undefined) {
+            return this.ruleArguments[0] as number;
+        }
+        return Rule.DEFAULT_THRESHOLD;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, { threshold: this.threshold });
     }
@@ -75,13 +82,6 @@ export class Rule extends Lint.Rules.AbstractRule {
         const isThresholdValid =
             typeof this.threshold === "number" && this.threshold >= Rule.MINIMUM_THRESHOLD;
         return super.isEnabled() && isThresholdValid;
-    }
-
-    private get threshold(): number {
-        if (this.ruleArguments[0] !== undefined) {
-            return this.ruleArguments[0] as number;
-        }
-        return Rule.DEFAULT_THRESHOLD;
     }
 }
 

@@ -3,6 +3,19 @@ class X {
     bar: number;
     foo: string;
 
+    set z(x: number) {}
+    get z() {
+        ~     [Getter for 'z' should appear before setter.]
+        return 0;
+    }
+
+    get y() {
+        ~     ['y' should come alphabetically before 'z']
+        return 0;
+    }
+    set y(x: number) {}
+        ~               ['y' should come alphabetically before 'z']
+
     [Symbol.iterator]() {}
     // No ordering among computed properties
     [Symbol.alpherator]() {}

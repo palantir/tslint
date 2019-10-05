@@ -3,6 +3,16 @@ class X {
     bar: number;
     foo: string;
 
+    get y() {
+        return 0;
+    }
+    set y(x: number) {}
+    get z() {
+        return 0;
+    }
+
+    set z(x: number) {}
+
     [Symbol.iterator]() {}
     // No ordering among computed properties
     [Symbol.alpherator]() {}
