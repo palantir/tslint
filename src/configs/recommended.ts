@@ -51,15 +51,11 @@ export const rules = {
     indent: {
         options: ["spaces"],
     },
-    "interface-name": {
-        options: ["always-prefix"],
-    },
     "interface-over-type-literal": true,
     "jsdoc-format": true,
     "label-position": true,
     "max-classes-per-file": { options: 1 },
     "max-line-length": { options: 120 },
-    "member-access": true,
     "member-ordering": {
         options: {
             order: "statics-first",
@@ -99,7 +95,6 @@ export const rules = {
     "no-var-requires": true,
     "object-literal-key-quotes": { options: "consistent-as-needed" },
     "object-literal-shorthand": true,
-    "object-literal-sort-keys": true,
     "one-line": {
         options: [
             "check-catch",
@@ -112,13 +107,6 @@ export const rules = {
     "one-variable-per-declaration": { options: ["ignore-for-loop"] },
     "only-arrow-functions": {
         options: ["allow-declarations", "allow-named-functions"],
-    },
-    "ordered-imports": {
-        options: {
-            "import-sources-order": "case-insensitive",
-            "module-source-path": "full",
-            "named-imports-order": "case-insensitive",
-        },
     },
     "prefer-const": true,
     "prefer-for-of": true,
