@@ -89,7 +89,7 @@ describe("JSON Formatter", () => {
                     character: 0,
                 },
                 ruleName: "last-name",
-                ruleSeverity: "ERROR",
+                ruleSeverity: "error",
             },
             {
                 name: TEST_FILE,
