@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { isObjectFlagSet, isObjectType, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -43,8 +44,19 @@ export class Rule extends Lint.Rules.TypedRule {
         "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const compilerOptions = program.getCompilerOptions();
+        const strictChecksEnabled = !!compilerOptions.strict;
+        const strictNullChecksEnabled = compilerOptions.strictNullChecks === true;
+        const strictNullChecksNotDisabled = compilerOptions.strictNullChecks !== false;
+
         return this.applyWithWalker(
-            new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker()),
+            new Walker(
+                sourceFile,
+                this.ruleName,
+                this.ruleArguments,
+                program.getTypeChecker(),
+                strictNullChecksEnabled || (strictChecksEnabled && strictNullChecksNotDisabled),
+            ),
         );
     }
 }
@@ -55,6 +67,7 @@ class Walker extends Lint.AbstractWalker<string[]> {
         ruleName: string,
         options: string[],
         private readonly checker: ts.TypeChecker,
+        private readonly strictNullChecks: boolean,
     ) {
         super(sourceFile, ruleName, options);
     }
@@ -63,7 +76,9 @@ class Walker extends Lint.AbstractWalker<string[]> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.NonNullExpression:
-                    this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    if (this.strictNullChecks) {
+                        this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    }
                     break;
                 case ts.SyntaxKind.TypeAssertionExpression:
                 case ts.SyntaxKind.AsExpression:

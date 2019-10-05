@@ -36,19 +36,36 @@ export class Rule extends Lint.Rules.AbstractRule {
         ruleName: "no-shadowed-variable",
         description: "Disallows shadowing variable declarations.",
         rationale: Lint.Utils.dedent`
-            Shadowing a variable masks access to it and obscures to what value an identifier actually refers.
-            For example, in the following code, it can be confusing why the filter is likely never true:
+            When a variable in a local scope and a variable in the containing scope have the same name, shadowing occurs.
+            Shadowing makes it impossible to access the variable in the containing scope and
+            obscures to what value an identifier actually refers. Compare the following snippets:
 
             \`\`\`
-            const findNeighborsWithin = (instance: MyClass, instances: MyClass[]): MyClass[] => {
-                return instances.filter((instance) => instance.neighbors.includes(instance));
-            };
+            const a = 'no shadow';
+            function print() {
+                console.log(a);
+            }
+            print(); // logs 'no shadow'.
             \`\`\`
+
+            \`\`\`
+            const a = 'no shadow';
+            function print() {
+                const a = 'shadow'; // TSLint will complain here.
+                console.log(a);
+            }
+            print(); // logs 'shadow'.
+            \`\`\`
+
+            ESLint has [an equivalent rule](https://eslint.org/docs/rules/no-shadow).
+            For more background information, refer to
+            [this MDN closure doc](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures#Lexical_scoping).
         `,
         optionsDescription: Lint.Utils.dedent`
             You can optionally pass an object to disable checking for certain kinds of declarations.
             Possible keys are \`"class"\`, \`"enum"\`, \`"function"\`, \`"import"\`, \`"interface"\`, \`"namespace"\`, \`"typeAlias"\`
-            and \`"typeParameter"\`. Just set the value to \`false\` for the check you want to disable.
+            and \`"typeParameter"\`. You can also pass \`"underscore\`" to ignore variable names that begin with \`_\`.
+            Just set the value to \`false\` for the check you want to disable.
             All checks default to \`true\`, i.e. are enabled by default.
             Note that you cannot disable variables and parameters.
 
@@ -85,6 +102,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                 typeAlias: { type: "boolean" },
                 typeParameter: { type: "boolean" },
                 temporalDeadZone: { type: "boolean" },
+                underscore: { type: "boolean" },
             },
         },
         optionExamples: [
@@ -99,6 +117,7 @@ export class Rule extends Lint.Rules.AbstractRule {
                     namespace: true,
                     typeAlias: false,
                     typeParameter: false,
+                    underscore: false,
                 },
             ],
         ],
@@ -131,7 +150,8 @@ type Kind =
     | "namespace"
     | "typeParameter"
     | "typeAlias"
-    | "temporalDeadZone";
+    | "temporalDeadZone"
+    | "underscore";
 type Options = Record<Kind, boolean>;
 
 function parseOptions(option: Partial<Options> | undefined): Options {
@@ -145,6 +165,7 @@ function parseOptions(option: Partial<Options> | undefined): Options {
         temporalDeadZone: true,
         typeAlias: true,
         typeParameter: true,
+        underscore: true,
         ...option,
     };
 }
@@ -281,9 +302,9 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                     break;
                 case ts.SyntaxKind.Parameter:
                     if (
-                        node.parent!.kind !== ts.SyntaxKind.IndexSignature &&
+                        node.parent.kind !== ts.SyntaxKind.IndexSignature &&
                         !isThisParameter(node as ts.ParameterDeclaration) &&
-                        isFunctionWithBody(node.parent!)
+                        isFunctionWithBody(node.parent)
                     ) {
                         this.handleBindingName((node as ts.ParameterDeclaration).name, false, true);
                     }
@@ -291,7 +312,7 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                 case ts.SyntaxKind.ModuleDeclaration:
                     if (
                         this.options.namespace &&
-                        node.parent!.kind !== ts.SyntaxKind.ModuleDeclaration &&
+                        node.parent.kind !== ts.SyntaxKind.ModuleDeclaration &&
                         (node as ts.ModuleDeclaration).name.kind === ts.SyntaxKind.Identifier &&
                         !isNodeFlagSet(node, ts.NodeFlags.GlobalAugmentation)
                     ) {
@@ -386,7 +407,8 @@ class NoShadowedVariableWalker extends Lint.AbstractWalker<Options> {
                         declarationsInScope.some(
                             declaration =>
                                 !declaration.tdz || declaration.identifier.pos < identifier.pos,
-                        ))
+                        )) &&
+                    (this.options.underscore || !identifier.getText().startsWith("_"))
                 ) {
                     this.addFailureAtNode(identifier, Rule.FAILURE_STRING_FACTORY(name));
                 } else if (parent !== undefined) {

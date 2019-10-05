@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,8 @@ export const rules = {
     "interface-over-type-literal": true,
     "jsdoc-format": true,
     "label-position": true,
-    "max-classes-per-file": {
-        options: [1],
-    },
-    "max-line-length": {
-        options: [120],
-    },
+    "max-classes-per-file": { options: 1 },
+    "max-line-length": { options: 120 },
     "member-ordering": {
         options: {
             order: "statics-first",
@@ -94,13 +90,10 @@ export const rules = {
     "no-unnecessary-initializer": true,
     "no-unsafe-finally": true,
     "no-unused-expression": true,
-    // disable this rule as it is very heavy performance-wise and not that useful
-    "no-use-before-declare": false,
+    "no-use-before-declare": false, // disabled because it is very heavy performance-wise and not that useful
     "no-var-keyword": true,
     "no-var-requires": true,
-    "object-literal-key-quotes": {
-        options: ["consistent-as-needed"],
-    },
+    "object-literal-key-quotes": { options: "consistent-as-needed" },
     "object-literal-shorthand": true,
     "one-line": {
         options: [
@@ -111,9 +104,7 @@ export const rules = {
             "check-whitespace",
         ],
     },
-    "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
-    },
+    "one-variable-per-declaration": { options: ["ignore-for-loop"] },
     "only-arrow-functions": {
         options: ["allow-declarations", "allow-named-functions"],
     },
@@ -123,9 +114,7 @@ export const rules = {
         options: ["double", "avoid-escape"],
     },
     radix: true,
-    semicolon: {
-        options: ["always"],
-    },
+    semicolon: { options: ["always"] },
     "space-before-function-paren": {
         options: {
             anonymous: "never",
@@ -142,9 +131,7 @@ export const rules = {
             singleline: "never",
         },
     },
-    "triple-equals": {
-        options: ["allow-null-check"],
-    },
+    "triple-equals": { options: ["allow-null-check"] },
     typedef: false,
     "typedef-whitespace": {
         options: [
@@ -229,16 +216,12 @@ export const jsRules = {
             "check-whitespace",
         ],
     },
-    "one-variable-per-declaration": {
-        options: ["ignore-for-loop"],
-    },
+    "one-variable-per-declaration": { options: ["ignore-for-loop"] },
     quotemark: {
         options: ["double", "avoid-escape"],
     },
     radix: true,
-    semicolon: {
-        options: ["always"],
-    },
+    semicolon: { options: ["always"] },
     "space-before-function-paren": {
         options: {
             anonymous: "never",
@@ -254,9 +237,7 @@ export const jsRules = {
             singleline: "never",
         },
     },
-    "triple-equals": {
-        options: ["allow-null-check"],
-    },
+    "triple-equals": { options: ["allow-null-check"] },
     "use-isnan": true,
     "variable-name": {
         options: ["ban-keywords", "check-format", "allow-pascal-case"],

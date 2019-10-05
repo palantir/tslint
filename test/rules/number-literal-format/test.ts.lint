@@ -3,6 +3,40 @@
 10;
 1.1e10;
 
+-0000006000;
+ ~~~~~~~~~~ [leading-0]
+
+-777.;
+ ~~~~ [trailing-decimal]
+
+-0.000;
+ ~~~~~ [trailing-0]
+
+-0.90000;
+ ~~~~~~~ [trailing-0]
+
+-.2;
+ ~~ [leading-decimal]
+
+-.50000;
+ ~~~~~~ [trailing-0]
+ ~~~~~~ [leading-decimal]
+
+-123e0003;
+     ~~~~ [leading-0]
+
+-145E0004;
+     ~~~~ [leading-0]
+
+-1467e-0008;
+      ~~~~~ [leading-0]
+
+-189.000e10;
+ ~~~~~~~ [trailing-0]
+
+-0xDEAdBEEF;
+ ~~~~~~~~~~ [uppercase]
+
 01;
 ~~ [leading-0]
 
@@ -32,6 +66,9 @@
 
 0xDEAdBEEF;
 ~~~~~~~~~~ [uppercase]
+
+0.010200;
+~~~~~~~~ [trailing-0]
 
 [leading-0]: Number literal should not have a leading '0'.
 [trailing-0]: Number literal should not have a trailing '0'.

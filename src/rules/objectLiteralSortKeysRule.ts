@@ -24,16 +24,24 @@ import {
 } from "tsutils";
 import * as ts from "typescript";
 
+import { showWarningOnce } from "../error";
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/objectLiteralSortKeys.examples";
 
+const OPTION_IGNORE_BLANK_LINES = "ignore-blank-lines";
 const OPTION_IGNORE_CASE = "ignore-case";
+const OPTION_LOCALE_COMPARE = "locale-compare";
 const OPTION_MATCH_DECLARATION_ORDER = "match-declaration-order";
+const OPTION_MATCH_DECLARATION_ORDER_ONLY = "match-declaration-order-only";
 const OPTION_SHORTHAND_FIRST = "shorthand-first";
 
 interface Options {
+    ignoreBlankLines: boolean;
     ignoreCase: boolean;
+    localeCompare: boolean;
     matchDeclarationOrder: boolean;
+    matchDeclarationOrderOnly: boolean;
     shorthandFirst: boolean;
 }
 
@@ -46,13 +54,16 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
             When using the default alphabetical ordering, additional blank lines may be used to group
             object properties together while keeping the elements within each group in alphabetical order.
+            To opt out of this use ${OPTION_IGNORE_BLANK_LINES} option.
         `,
         rationale: "Useful in preventing merge conflicts",
         optionsDescription: Lint.Utils.dedent`
             By default, this rule checks that keys are in alphabetical order.
             The following may optionally be passed:
 
+            * \`${OPTION_IGNORE_BLANK_LINES}\` will enforce alphabetical ordering regardless of blank lines between each key-value pair.
             * \`${OPTION_IGNORE_CASE}\` will compare keys in a case insensitive way.
+            * \`${OPTION_LOCALE_COMPARE}\` will compare keys using the expected sort order of special characters, such as accents.
             * \`${OPTION_MATCH_DECLARATION_ORDER}\` will prefer to use the key ordering of the contextual type of the object literal, as in:
 
                 \`\`\`
@@ -60,7 +71,13 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
                 const obj: I = { foo: 1, bar: 2 };
                 \`\`\`
 
-                If a contextual type is not found, alphabetical ordering will be used instead.
+            If a contextual type is not found, alphabetical ordering will be used instead.
+            * "${OPTION_MATCH_DECLARATION_ORDER_ONLY}" exactly like "${OPTION_MATCH_DECLARATION_ORDER}",
+                but don't fall back to alphabetical if a contextual type is not found.
+
+                Note: If both ${OPTION_MATCH_DECLARATION_ORDER_ONLY} and ${OPTION_MATCH_DECLARATION_ORDER} options are present,
+                      ${OPTION_MATCH_DECLARATION_ORDER_ONLY} will take precedence and alphabetical fallback will not occur.
+
             * \`${OPTION_SHORTHAND_FIRST}\` will enforce shorthand properties to appear first, as in:
 
                 \`\`\`
@@ -69,11 +86,25 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
             `,
         options: {
             type: "string",
-            enum: [OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
+            enum: [
+                OPTION_IGNORE_BLANK_LINES,
+                OPTION_IGNORE_CASE,
+                OPTION_LOCALE_COMPARE,
+                OPTION_MATCH_DECLARATION_ORDER,
+                OPTION_MATCH_DECLARATION_ORDER_ONLY,
+                OPTION_SHORTHAND_FIRST,
+            ],
         },
         optionExamples: [
             true,
-            [true, OPTION_IGNORE_CASE, OPTION_MATCH_DECLARATION_ORDER, OPTION_SHORTHAND_FIRST],
+            [
+                true,
+                OPTION_IGNORE_BLANK_LINES,
+                OPTION_IGNORE_CASE,
+                OPTION_LOCALE_COMPARE,
+                OPTION_MATCH_DECLARATION_ORDER,
+                OPTION_SHORTHAND_FIRST,
+            ],
         ],
         type: "maintainability",
         typescriptOnly: false,
@@ -99,15 +130,33 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         const options = parseOptions(this.ruleArguments);
-        if (options.matchDeclarationOrder) {
-            throw new Error(
-                `${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}".`,
+        if (options.matchDeclarationOrder || options.matchDeclarationOrderOnly) {
+            showWarningOnce(
+                Lint.Utils.dedent`
+                    ${this.ruleName} needs type info to use "${OPTION_MATCH_DECLARATION_ORDER}" or
+                    "${OPTION_MATCH_DECLARATION_ORDER_ONLY}".
+                    See https://palantir.github.io/tslint/usage/type-checking/ for documentation on
+                    how to enable this feature.
+                `,
             );
+            return [];
         }
+
         return this.applyWithFunction(sourceFile, walk, options);
     }
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
+        const options = parseOptions(this.ruleArguments);
+        if (options.matchDeclarationOrder && options.matchDeclarationOrderOnly) {
+            showWarningOnce(
+                `"${OPTION_MATCH_DECLARATION_ORDER}" will be ignored since ` +
+                    `"${OPTION_MATCH_DECLARATION_ORDER_ONLY}" has been enabled for ${
+                        this.ruleName
+                    }.`,
+            );
+            return [];
+        }
+
         return this.applyWithFunction(
             sourceFile,
             walk,
@@ -119,8 +168,11 @@ export class Rule extends Lint.Rules.OptionallyTypedRule {
 
 function parseOptions(ruleArguments: any[]): Options {
     return {
+        ignoreBlankLines: has(OPTION_IGNORE_BLANK_LINES),
         ignoreCase: has(OPTION_IGNORE_CASE),
+        localeCompare: has(OPTION_LOCALE_COMPARE),
         matchDeclarationOrder: has(OPTION_MATCH_DECLARATION_ORDER),
+        matchDeclarationOrderOnly: has(OPTION_MATCH_DECLARATION_ORDER_ONLY),
         shorthandFirst: has(OPTION_SHORTHAND_FIRST),
     };
 
@@ -132,7 +184,14 @@ function parseOptions(ruleArguments: any[]): Options {
 function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     const {
         sourceFile,
-        options: { ignoreCase, matchDeclarationOrder, shorthandFirst },
+        options: {
+            ignoreBlankLines,
+            ignoreCase,
+            localeCompare,
+            matchDeclarationOrder,
+            matchDeclarationOrderOnly,
+            shorthandFirst,
+        },
     } = ctx;
 
     ts.forEachChild(sourceFile, function cb(node): void {
@@ -143,7 +202,7 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
     });
 
     function check(node: ts.ObjectLiteralExpression): void {
-        if (matchDeclarationOrder) {
+        if (matchDeclarationOrder || matchDeclarationOrderOnly) {
             const type = getContextualType(node, checker!);
             // If type has an index signature, we can't check ordering.
             // If type has call/construct signatures, it can't be satisfied by an object literal anyway.
@@ -161,7 +220,9 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                 return;
             }
         }
-        checkAlphabetical(node);
+        if (!matchDeclarationOrderOnly) {
+            checkAlphabetical(node);
+        }
     }
 
     function checkAlphabetical(node: ts.ObjectLiteralExpression): void {
@@ -207,7 +268,21 @@ function walk(ctx: Lint.WalkContext<Options>, checker?: ts.TypeChecker): void {
                             ? property.name.text.toLowerCase()
                             : property.name.text;
                         // comparison with undefined is expected
-                        if (lastKey! > key && !hasBlankLineBefore(ctx.sourceFile, property)) {
+                        const keyOrderDescending =
+                            lastKey === undefined
+                                ? false
+                                : localeCompare
+                                ? lastKey.localeCompare(key) === 1
+                                : lastKey > key;
+
+                        if (keyOrderDescending && ignoreBlankLines) {
+                            ctx.addFailureAtNode(
+                                property.name,
+                                Rule.FAILURE_STRING_ALPHABETICAL(property.name.text),
+                            );
+                            return;
+                        }
+                        if (keyOrderDescending && !hasBlankLineBefore(ctx.sourceFile, property)) {
                             ctx.addFailureAtNode(
                                 property.name,
                                 Rule.FAILURE_STRING_ALPHABETICAL(property.name.text),
@@ -291,12 +366,12 @@ function hasDoubleNewLine(sourceFile: ts.SourceFile, position: number) {
 }
 
 function getTypeName(t: TypeLike): string | undefined {
-    const parent = t.parent!;
+    const parent = t.parent;
     return t.kind === ts.SyntaxKind.InterfaceDeclaration
         ? t.name.text
         : isTypeAliasDeclaration(parent)
-            ? parent.name.text
-            : undefined;
+        ? parent.name.text
+        : undefined;
 }
 
 type TypeLike = ts.InterfaceDeclaration | ts.TypeLiteralNode;

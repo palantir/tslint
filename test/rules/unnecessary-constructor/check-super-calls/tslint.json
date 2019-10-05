@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "unnecessary-constructor": [
+        true,
+        { "check-super-calls": true }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+[typescript]: >= 2.4.0
+
+async function promiseFunc() {
+    return false;
+}
+
+normalExpression = promiseFunc();
+const stringLiteral = "text" + promiseFunc();
+
+const globalUnaryExpression = !!promiseFunc();
+                                ~~~~~~~~~~~~~  [0]
+
+const globalBinaryExpression = "text" && promiseFunc();
+                                         ~~~~~~~~~~~~~  [0]
+
+promiseFunc() && console.log("topLevelBinaryExpression");
+~~~~~~~~~~~~~                        [0]
+
+function union(promiseOrUndefined: Promise<any> | undefined, promiseOrFalse: Promise<any> | false, promiseOrNull: Promise<any> | null) {
+    if (promiseOrUndefined || promiseOrFalse || promiseOrNull) {
+        return;
+    }
+};
+
+function funky(maybePromise?: Promise<number>) {
+    while (promiseFunc() && maybePromise) {
+           ~~~~~~~~~~~~~                    [0]
+
+        const binaryExpression = (promiseFunc() && "1") || ("1" && !promiseFunc()) ? ("1" && promiseFunc() ? "1" : "1") : maybePromise;
+                                  ~~~~~~~~~~~~~                                                                                        [0]
+                                                                    ~~~~~~~~~~~~~                                                      [0]
+                                                                                      ~~~~~~~~~~~~~~~~~~~~                             [0]
+                                                                                             ~~~~~~~~~~~~~                             [0]
+
+        // For-loop
+        for (let index = 0; promiseFunc(); index++) {
+                            ~~~~~~~~~~~~~             [0]
+
+            // a non-promise
+            if ("just some text" + promiseFunc()) {
+
+            // Promise literal
+            } else if (new Promise(() => { })) {
+                       ~~~~~~~~~~~~~~~~~~~~~~    [0]
+
+                // Nested Promise
+                if (promiseFunc()) {
+                    ~~~~~~~~~~~~~    [0]
+                }
+
+            // Parenthesized Expression + Exclamation Tokens
+            } else if (promiseFunc() && !!promiseFunc()) {
+                       ~~~~~~~~~~~~~                      [0]
+                                          ~~~~~~~~~~~~~   [0]
+            }
+        }
+    }
+}
+
+async function waiter(custumerDecisionPromise: Promise<any>) {
+    if (await custumerDecisionPromise) {
+        console.log("Customer ready to take an order.")
+    }
+}
+
+[0]: Promises are not allowed as boolean.

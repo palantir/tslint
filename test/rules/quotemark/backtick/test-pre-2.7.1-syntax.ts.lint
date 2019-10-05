@@ -1,0 +1,15 @@
+[typescript]: <2.7.1
+if (typeof v === "string") {}
+
+if (typeof "string" === 'number') {}
+           ~~~~~~~~ [double]
+
+const object: {
+   "optional-prop"?: "hello-optional"
+   "another-kebab": "hello-value"
+} = {
+   "optional-prop": undefined,
+   "another-kebab": "hello-value"
+};
+[single]: ' should be `
+[double]: " should be `

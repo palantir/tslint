@@ -91,7 +91,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
     const whitelist = new Set(options.whitelist);
     for (const name of findImports(ctx.sourceFile, ImportKind.All)) {
         if (!ts.isExternalModuleNameRelative(name.text)) {
-            const packageName = getPackageName(name.text);
+            const packageName = getPackageName(name.text, whitelist);
             if (
                 !whitelist.has(packageName) &&
                 builtins.indexOf(packageName) === -1 &&
@@ -110,11 +110,16 @@ function walk(ctx: Lint.WalkContext<Options>) {
     }
 }
 
-function getPackageName(name: string): string {
+function getPackageName(name: string, whitelist: Set<string>): string {
     const parts = name.split(/\//g);
-    if (name[0] !== "@") {
+    if (name[0] !== "@" || whitelist.has(parts[0])) {
         return parts[0];
     }
+
+    if (whitelist.has(name)) {
+        return name;
+    }
+
     return `${parts[0]}/${parts[1]}`;
 }
 
@@ -160,10 +165,8 @@ function getDependencies(fileName: string, options: Options): Set<string> {
 }
 
 function addDependencies(result: Set<string>, dependencies: Dependencies) {
-    for (const name in dependencies) {
-        if (dependencies.hasOwnProperty(name)) {
-            result.add(name);
-        }
+    for (const name of Object.keys(dependencies)) {
+        result.add(name);
     }
 }
 

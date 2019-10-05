@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "file-name-casing": [true, "invalid-option"]
+    }
+}

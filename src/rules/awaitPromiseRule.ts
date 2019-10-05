@@ -23,6 +23,7 @@ import {
     isUnionOrIntersectionType,
 } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -110,5 +111,7 @@ function containsType(type: ts.Type, predicate: (name: string) => boolean): bool
 }
 
 function isAsyncIterable(name: string) {
-    return name === "AsyncIterable" || name === "AsyncIterableIterator";
+    return (
+        name === "AsyncIterable" || name === "AsyncIterableIterator" || name === "AsyncGenerator"
+    );
 }

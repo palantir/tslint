@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/typedef.examples";
 
 interface Options {
@@ -28,6 +29,7 @@ interface Options {
     "arrow-parameter"?: boolean;
     "property-declaration"?: boolean;
     "variable-declaration"?: boolean;
+    "variable-declaration-ignore-function"?: boolean;
     "member-variable-declaration"?: boolean;
     "object-destructuring"?: boolean;
     "array-destructuring"?: boolean;
@@ -40,6 +42,7 @@ const OPTION_PARAMETER: Option = "parameter";
 const OPTION_ARROW_PARAMETER: Option = "arrow-parameter";
 const OPTION_PROPERTY_DECLARATION: Option = "property-declaration";
 const OPTION_VARIABLE_DECLARATION: Option = "variable-declaration";
+const OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION: Option = "variable-declaration-ignore-function";
 const OPTION_MEMBER_VARIABLE_DECLARATION: Option = "member-variable-declaration";
 const OPTION_OBJECT_DESTRUCTURING: Option = "object-destructuring";
 const OPTION_ARRAY_DESTRUCTURING: Option = "array-destructuring";
@@ -66,6 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             * \`"${OPTION_ARROW_PARAMETER}"\` checks type specifier of function parameters for arrow functions.
             * \`"${OPTION_PROPERTY_DECLARATION}"\` checks return types of interface properties.
             * \`"${OPTION_VARIABLE_DECLARATION}"\` checks non-binding variable declarations.
+            * \`"${OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION}"\` ignore variable declarations for non-arrow and arrow functions.
             * \`"${OPTION_MEMBER_VARIABLE_DECLARATION}"\` checks member variable declarations.
             * \`"${OPTION_OBJECT_DESTRUCTURING}"\` checks object destructuring declarations.
             * \`"${OPTION_ARRAY_DESTRUCTURING}"\` checks array destructuring declarations.`,
@@ -80,13 +84,14 @@ export class Rule extends Lint.Rules.AbstractRule {
                     OPTION_ARROW_PARAMETER,
                     OPTION_PROPERTY_DECLARATION,
                     OPTION_VARIABLE_DECLARATION,
+                    OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION,
                     OPTION_MEMBER_VARIABLE_DECLARATION,
                     OPTION_OBJECT_DESTRUCTURING,
                     OPTION_ARRAY_DESTRUCTURING,
                 ],
             },
             minLength: 0,
-            maxLength: 7,
+            maxLength: 10,
         },
         optionExamples: [
             [true, OPTION_CALL_SIGNATURE, OPTION_PARAMETER, OPTION_MEMBER_VARIABLE_DECLARATION],
@@ -147,20 +152,21 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkArrowFunction({ parent, parameters, type }: ts.ArrowFunction): void {
-        if (parent!.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent!)) {
+        if (parent.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent)) {
             this.checkTypeAnnotation("arrow-call-signature", parameters, type);
         }
     }
 
-    private checkParameter({ parent, name, type }: ts.ParameterDeclaration): void {
-        const isArrowFunction = parent!.kind === ts.SyntaxKind.ArrowFunction;
+    private checkParameter(node: ts.Node): void {
+        const { parent, name, type } = node as ts.ParameterDeclaration;
+        const isArrowFunction = parent.kind === ts.SyntaxKind.ArrowFunction;
 
         const option = (() => {
             if (!isArrowFunction) {
                 return "parameter";
-            } else if (isTypedPropertyDeclaration(parent!.parent!)) {
+            } else if (isTypedPropertyDeclaration(parent.parent)) {
                 return undefined;
-            } else if (utils.isPropertyDeclaration(parent!.parent!)) {
+            } else if (utils.isPropertyDeclaration(parent.parent)) {
                 return "member-variable-declaration";
             } else {
                 return "arrow-parameter";
@@ -176,34 +182,62 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
         // If this is an arrow function, it doesn't need to have a typedef on the property declaration
         // as the typedefs can be on the function's parameters instead
         if (initializer === undefined || initializer.kind !== ts.SyntaxKind.ArrowFunction) {
+            if (
+                this.options[OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION] === true &&
+                initializer !== undefined &&
+                initializer.kind === ts.SyntaxKind.FunctionExpression
+            ) {
+                return;
+            }
             this.checkTypeAnnotation("member-variable-declaration", name, type, name);
         }
     }
 
-    private checkVariableDeclaration({ parent, name, type }: ts.VariableDeclaration): void {
+    private checkVariableDeclaration(node: ts.Node): void {
+        const { parent, name, type } = node as ts.VariableDeclaration;
+
         // variable declarations should always have a grandparent, but check that to be on the safe side.
         // catch statements will be the parent of the variable declaration
         // for-in/for-of loops will be the gradparent of the variable declaration
         if (
-            parent!.kind === ts.SyntaxKind.CatchClause ||
-            parent!.parent!.kind === ts.SyntaxKind.ForInStatement ||
-            parent!.parent!.kind === ts.SyntaxKind.ForOfStatement
+            parent.kind === ts.SyntaxKind.CatchClause ||
+            parent.parent.kind === ts.SyntaxKind.ForInStatement ||
+            parent.parent.kind === ts.SyntaxKind.ForOfStatement
         ) {
             return;
         }
 
-        const option = (() => {
-            switch (name.kind) {
-                case ts.SyntaxKind.ObjectBindingPattern:
-                    return "object-destructuring";
-                case ts.SyntaxKind.ArrayBindingPattern:
-                    return "array-destructuring";
-                default:
-                    return "variable-declaration";
-            }
-        })();
+        let option: Option;
+
+        switch (name.kind) {
+            case ts.SyntaxKind.ObjectBindingPattern:
+                option = OPTION_OBJECT_DESTRUCTURING;
+                break;
+
+            case ts.SyntaxKind.ArrayBindingPattern:
+                option = OPTION_ARRAY_DESTRUCTURING;
+                break;
+
+            default:
+                option = OPTION_VARIABLE_DECLARATION;
+        }
+
+        if (this.shouldIgnoreVariableDeclaration(node)) {
+            return;
+        }
 
         this.checkTypeAnnotation(option, name, type, name);
+    }
+
+    private shouldIgnoreVariableDeclaration(node: ts.Node): boolean {
+        const ignoreFunctions: boolean =
+            this.options[OPTION_VARIABLE_DECLARATION_IGNORE_FUNCTION] === true;
+
+        return (
+            ignoreFunctions &&
+            (utils.getChildOfKind(node, ts.SyntaxKind.ArrowFunction) !== undefined ||
+                utils.getChildOfKind(node, ts.SyntaxKind.FunctionExpression) !== undefined)
+        );
     }
 
     private checkTypeAnnotation(

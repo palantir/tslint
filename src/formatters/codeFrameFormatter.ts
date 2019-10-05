@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 
+import { codeFrameColumns } from "@babel/code-frame";
+import chalk from "chalk";
+
 import { AbstractFormatter } from "../language/formatter/abstractFormatter";
 import { IFormatterMetadata } from "../language/formatter/formatter";
 import { RuleFailure } from "../language/rule/rule";
-
-import codeFrame = require("babel-code-frame");
-import chalk from "chalk";
-
 import * as Utils from "../utils";
 
 export class Formatter extends AbstractFormatter {
@@ -77,11 +76,10 @@ export class Formatter extends AbstractFormatter {
             ruleName = chalk.gray(`(${ruleName})`);
 
             // Frame
-            const lineAndCharacter = failure.getStartPosition().getLineAndCharacter();
-            const frame = codeFrame(
+            const { character: column, line } = failure.getStartPosition().getLineAndCharacter();
+            const frame = codeFrameColumns(
                 failure.getRawLines(),
-                lineAndCharacter.line + 1, // babel-code-frame is 1 index
-                lineAndCharacter.character,
+                { start: { line: line + 1, column } }, // babel-code-frame is 1 index
                 {
                     forceColor: chalk.enabled,
                     highlightCode: true,
