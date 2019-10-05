@@ -19,6 +19,7 @@ import { isCallExpression, isIdentifier, isPropertyAccessExpression } from "tsut
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/radix.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -58,34 +59,48 @@ function isPropertyAccessParseInt(
 
 function isPropertyAccessOfIdentifier(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
-    return isPropertyAccessExpression(expression) && isIdentifier(expression.expression) &&
-        identifers.some((identifer) => (expression.expression as ts.Identifier).text === identifer);
+    return (
+        isPropertyAccessExpression(expression) &&
+        isIdentifier(expression.expression) &&
+        identifiers.some(identifier => (expression.expression as ts.Identifier).text === identifier)
+    );
 }
 
 function isPropertyAccessOfProperty(
     expression: ts.LeftHandSideExpression,
-    identifers: string[],
+    identifiers: string[],
 ): expression is ts.PropertyAccessExpression {
-    return isPropertyAccessExpression(expression) && isPropertyAccessExpression(expression.expression) &&
-        identifers.some((identifer) => (expression.expression as ts.PropertyAccessExpression).name.text === identifer);
+    return (
+        isPropertyAccessExpression(expression) &&
+        isPropertyAccessExpression(expression.expression) &&
+        identifiers.some(
+            identifier =>
+                (expression.expression as ts.PropertyAccessExpression).name.text === identifier,
+        )
+    );
 }
 
-function walk(ctx: Lint.WalkContext<void>) {
+function walk(ctx: Lint.WalkContext) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
-        if (isCallExpression(node) && node.arguments.length === 1 &&
-            (
-                // parseInt("123")
-                isParseInt(node.expression) ||
+        if (
+            isCallExpression(node) &&
+            node.arguments.length === 1 &&
+            // parseInt("123")
+            (isParseInt(node.expression) ||
                 // window.parseInt("123") || global.parseInt("123") || Number.parseInt("123")
-                isPropertyAccessParseInt(node.expression) &&
-                isPropertyAccessOfIdentifier(node.expression, [ "global", "window", "Number" ])  ||
+                (isPropertyAccessParseInt(node.expression) &&
+                    isPropertyAccessOfIdentifier(node.expression, [
+                        "global",
+                        "window",
+                        "Number",
+                    ])) ||
                 // window.Number.parseInt("123") || global.Number.parseInt("123")
-                isPropertyAccessParseInt(node.expression) &&
-                isPropertyAccessOfProperty(node.expression, [ "Number" ]) &&
-                isPropertyAccessOfIdentifier(node.expression.expression, [ "global", "window" ])
-            )) {
+                (isPropertyAccessParseInt(node.expression) &&
+                    isPropertyAccessOfProperty(node.expression, ["Number"]) &&
+                    isPropertyAccessOfIdentifier(node.expression.expression, ["global", "window"])))
+        ) {
             ctx.addFailureAtNode(node, Rule.FAILURE_STRING);
         }
         return ts.forEachChild(node, cb);

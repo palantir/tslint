@@ -1,0 +1,12 @@
+[typescript]: >= 3.5.0
+
+type SomeType =
+
+    | null
+    ~~~~~~
+    | undefined
+~~~~~~~~~~~~~~~
+    | boolean;
+~~~~~~~~~~~~~ [0]
+
+[0]: Union type cannot include both 'null' and 'undefined'.

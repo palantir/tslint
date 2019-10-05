@@ -155,6 +155,26 @@ const optionsDescription = Lint.Utils.dedent`
 
     ${namesMarkdown(PRESET_NAMES)}
 
+    \`fields-first\` puts, in order of precedence:
+        * fields before constructors before methods
+        * static members before instance members
+        * public members before protected members before private members
+    \`instance-sandwich\` puts, in order of precedence:
+        * fields before constructors before methods
+        * static fields before instance fields, but static methods *after* instance methods
+        * public members before protected members before private members
+    \`statics-first\` puts, in order of precedence:
+        * static members before instance members
+            * public members before protected members before private members
+            * fields before methods
+        * instance fields before constructors before instance methods
+            * fields before constructors before methods
+            * public members before protected members before private members
+    Note that these presets, despite looking similar, can have subtly different behavior due to the order in which these
+    rules are specified. A fully expanded ordering can be found in the PRESETS constant in
+    https://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.
+    (You may need to check the version of the file corresponding to your version of tslint.)
+
     Alternatively, the value for \`order\` may be an array consisting of the following strings:
 
     ${namesMarkdown(allMemberKindNames)}
@@ -194,6 +214,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "object",
             properties: {
+                alphabetize: {
+                    type: "boolean",
+                },
                 order: {
                     oneOf: [
                         {
@@ -216,6 +239,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [
             [true, { order: "fields-first" }],
             [true, {
+                alphabetize: true,
                 order: [
                     "public-static-field",
                     "public-instance-field",
@@ -273,7 +297,6 @@ export class Rule extends Lint.Rules.AbstractRule {
 }
 
 class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
-
     private readonly fixes: Array<[Lint.RuleFailure, Lint.Replacement]> = [];
 
     public walk(sourceFile: ts.SourceFile) {
@@ -298,7 +321,7 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
     }
 
     /**
-     * Check wether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
+     * Check whether the passed members adhere to the configured order. If not, RuleFailures are generated and a single
      * Lint.Replacement is generated, which replaces the entire NodeArray with a correctly sorted one. The Replacement
      * is not immediately added to a RuleFailure, as incorrectly sorted nodes can be nested (e.g. a class declaration
      * in a method implementation), but instead temporarily stored in `this.fixes`. Nested Replacements are manually

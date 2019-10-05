@@ -12,12 +12,8 @@ export class Aaa {
     public set prop(value) { this.bbb = value; }
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [Documentation must exist for public properties.]
 
-    // TypeScript API doesn't give a symbol for this before version 2.8.0
-    // https://github.com/Microsoft/TypeScript/issues/14257
     [Symbol.iterator]() {}
-#if typescript >= 2.8.0
     ~~~~~~~~~~~~~~~~~~~~~~ [Documentation must exist for methods.]
-#endif
 }
 
 export enum Ddd { }

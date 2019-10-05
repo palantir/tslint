@@ -1,0 +1,9 @@
+[typescript]: <= 3.6.0
+
+// in TS 3.6 and later, the type checker infers this anonymous function as returning 'unknown'
+declare function f<T>(action: () => T | undefined): void;
+f(() => { return undefined; });
+          ~~~~~~~~~~~~~~~~~ [VOID]
+
+[VOID]: `void` function should use `return;`, not `return undefined;`.
+[UNDEFINED]: Value-returning function should use `return undefined;`, not just `return;`.

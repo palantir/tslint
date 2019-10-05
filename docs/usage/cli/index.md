@@ -41,6 +41,7 @@ Options:
 -i, --init                             generate a tslint.json config file in the current working directory
 -o, --out [out]                        output file
 --outputAbsolutePaths                  whether or not outputted file paths are absolute
+--print-config                         print resolved configuration for a file
 -r, --rules-dir [rules-dir]            rules directory
 -s, --formatters-dir [formatters-dir]  formatters directory
 -t, --format [format]                  output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)

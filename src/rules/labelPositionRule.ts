@@ -25,7 +25,8 @@ export class Rule extends Lint.Rules.AbstractRule {
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "label-position",
         description: "Only allows labels in sensible locations.",
-        descriptionDetails: "This rule only allows labels to be on `do/for/while/switch` statements.",
+        descriptionDetails:
+            "This rule only allows labels to be on `do/for/while/switch` statements.",
         rationale: Lint.Utils.dedent`
             Labels in JavaScript only can be used in conjunction with \`break\` or \`continue\`,
             constructs meant to be used for loop flow control. While you can theoretically use
@@ -45,7 +46,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isLabeledStatement(node) && !isLabelable(node.statement)) {
             ctx.addFailureAtNode(node.label, Rule.FAILURE_STRING);

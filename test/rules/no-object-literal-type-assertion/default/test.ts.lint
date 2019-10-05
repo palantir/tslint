@@ -1,0 +1,31 @@
+<T> ({});
+~~~~~~~~ [0]
+
+({}) as T;
+~~~~~~~~~ [0]
+
+<T> x;
+
+x as T;
+
+// Allow cast to 'any'
+{} as any;
+<any> {};
+
+// Allow cast to 'unknown'
+{} as unknown;
+<unknown> {};
+
+#if typescript >= 3.4.0
+// Allow const assertion
+({}) as const;
+<const> ({});
+#endif
+
+foo({} as T);
+    ~~~~~~~ [0]
+
+foo(<T>{});
+    ~~~~~ [0]
+
+[0]: Type assertion on object literals is forbidden, use a type annotation instead.

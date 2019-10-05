@@ -69,7 +69,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [true, OPTION_USE_TABS, OPTION_INDENT_SIZE_2],
         ],
         hasFix: true,
-        type: "maintainability",
+        type: "formatting",
         typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
@@ -86,7 +86,9 @@ export class Rule extends Lint.Rules.AbstractRule {
 
 function parseOptions(ruleArguments: any[]): Options | undefined {
     const type = ruleArguments[0] as string;
-    if (type !== OPTION_USE_TABS && type !== OPTION_USE_SPACES) { return undefined; }
+    if (type !== OPTION_USE_TABS && type !== OPTION_USE_SPACES) {
+        return undefined;
+    }
 
     const size = ruleArguments[1] as number | undefined;
     return {
@@ -101,36 +103,57 @@ interface Options {
 }
 
 function walk(ctx: Lint.WalkContext<Options>): void {
-    const { sourceFile, options: { tabs, size } } = ctx;
+    const {
+        sourceFile,
+        options: { tabs, size },
+    } = ctx;
     const regExp = tabs ? new RegExp(" ".repeat(size === undefined ? 1 : size)) : /\t/;
-    const failure = Rule.FAILURE_STRING(tabs ? "tab" : size === undefined ? "space" : `${size} space`);
+    const failure = Rule.FAILURE_STRING(
+        tabs ? "tab" : size === undefined ? "space" : `${size} space`,
+    );
 
-    for (const {pos, contentLength} of getLineRanges(sourceFile)) {
-        if (contentLength === 0) { continue; }
+    for (const { pos, contentLength } of getLineRanges(sourceFile)) {
+        if (contentLength === 0) {
+            continue;
+        }
         const line = sourceFile.text.substr(pos, contentLength);
         let indentEnd = line.search(/\S/);
-        if (indentEnd === 0) { continue; }
+        if (indentEnd === 0) {
+            continue;
+        }
         if (indentEnd === -1) {
             indentEnd = contentLength;
         }
         const whitespace = line.slice(0, indentEnd);
-        if (!regExp.test(whitespace)) { continue; }
+        if (!regExp.test(whitespace)) {
+            continue;
+        }
         const token = getTokenAtPosition(sourceFile, pos)!;
-        if (token.kind !== ts.SyntaxKind.JsxText &&
-            (pos >= token.getStart(sourceFile) || isPositionInComment(sourceFile, pos, token))) {
+        if (
+            token.kind !== ts.SyntaxKind.JsxText &&
+            (pos >= token.getStart(sourceFile) || isPositionInComment(sourceFile, pos, token))
+        ) {
             continue;
         }
         ctx.addFailureAt(pos, indentEnd, failure, createFix(pos, whitespace, tabs, size));
     }
 }
 
-function createFix(lineStart: number, fullLeadingWhitespace: string, tabs: boolean, size?: number): Lint.Fix | undefined {
-    if (size === undefined) { return undefined; }
+function createFix(
+    lineStart: number,
+    fullLeadingWhitespace: string,
+    tabs: boolean,
+    size?: number,
+): Lint.Fix | undefined {
+    if (size === undefined) {
+        return undefined;
+    }
     const replaceRegExp = tabs
-        // we want to find every group of `size` spaces, plus up to one 'incomplete' group
-        ? new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
+        ? // we want to find every group of `size` spaces, plus up to one 'incomplete' group
+          new RegExp(`^( {${size}})+( {1,${size - 1}})?`, "g")
         : /\t/g;
-    const replacement = fullLeadingWhitespace.replace(replaceRegExp, (match) =>
-        (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)));
+    const replacement = fullLeadingWhitespace.replace(replaceRegExp, match =>
+        (tabs ? "\t" : " ".repeat(size)).repeat(Math.ceil(match.length / size)),
+    );
     return new Lint.Replacement(lineStart, fullLeadingWhitespace.length, replacement);
 }

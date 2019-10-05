@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-import { hasModifier, isIdentifier, isReturnStatement, isTypeFlagSet, isTypeReference, isUnionType } from "tsutils";
+import {
+    hasModifier,
+    isIdentifier,
+    isReturnStatement,
+    isTypeFlagSet,
+    isTypeReference,
+    isUnionType,
+} from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -24,7 +31,8 @@ export class Rule extends Lint.Rules.TypedRule {
     /* tslint:disable:object-literal-sort-keys */
     public static metadata: Lint.IRuleMetadata = {
         ruleName: "return-undefined",
-        description: "Prefer `return;` in void functions and `return undefined;` in value-returning functions.",
+        description:
+            "Prefer `return;` in void functions and `return undefined;` in value-returning functions.",
         optionsDescription: "Not configurable.",
         options: null,
         optionExamples: [true],
@@ -44,7 +52,7 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
+function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker) {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isReturnStatement(node)) {
             check(node);
@@ -53,7 +61,7 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
     });
 
     function check(node: ts.ReturnStatement): void {
-        const actualReturnKind = returnKindFromReturn(node);
+        const actualReturnKind = getReturnKindFromReturnStatement(node);
         if (actualReturnKind === undefined) {
             return;
         }
@@ -64,18 +72,19 @@ function walk(ctx: Lint.WalkContext<void>, checker: ts.TypeChecker) {
             return;
         }
 
-        const returnKindFromType = getReturnKind(functionReturningFrom, checker);
+        const returnKindFromType = getReturnKindFromFunction(functionReturningFrom, checker);
         if (returnKindFromType !== undefined && returnKindFromType !== actualReturnKind) {
             ctx.addFailureAtNode(
                 node,
                 returnKindFromType === ReturnKind.Void
                     ? Rule.FAILURE_STRING_VOID_RETURN
-                    : Rule.FAILURE_STRING_VALUE_RETURN);
+                    : Rule.FAILURE_STRING_VALUE_RETURN,
+            );
         }
     }
 }
 
-function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined {
+function getReturnKindFromReturnStatement(node: ts.ReturnStatement): ReturnKind | undefined {
     if (node.expression === undefined) {
         return ReturnKind.Void;
     } else if (isIdentifier(node.expression) && node.expression.text === "undefined") {
@@ -85,9 +94,9 @@ function returnKindFromReturn(node: ts.ReturnStatement): ReturnKind | undefined 
     }
 }
 
-enum ReturnKind {
-    Void,
-    Value,
+const enum ReturnKind {
+    Void = "void",
+    Value = "value",
 }
 
 type FunctionLike =
@@ -99,7 +108,10 @@ type FunctionLike =
     | ts.GetAccessorDeclaration
     | ts.SetAccessorDeclaration;
 
-function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind | undefined {
+function getReturnKindFromFunction(
+    node: FunctionLike,
+    checker: ts.TypeChecker,
+): ReturnKind | undefined {
     switch (node.kind) {
         case ts.SyntaxKind.Constructor:
         case ts.SyntaxKind.SetAccessor:
@@ -108,17 +120,32 @@ function getReturnKind(node: FunctionLike, checker: ts.TypeChecker): ReturnKind 
             return ReturnKind.Value;
     }
 
-    const contextual = isFunctionExpressionLike(node) && node.type === undefined
-        ? tryGetReturnType(checker.getContextualType(node), checker)
-        : undefined;
-    const returnType = contextual !== undefined ? contextual : tryGetReturnType(checker.getTypeAtLocation(node), checker);
+    // Handle generator functions/methods:
+    if (node.asteriskToken !== undefined) {
+        return ReturnKind.Void;
+    }
+
+    const contextual =
+        isFunctionExpressionLike(node) && node.type === undefined
+            ? tryGetReturnType(checker.getContextualType(node), checker)
+            : undefined;
+    const returnType =
+        contextual !== undefined
+            ? contextual
+            : tryGetReturnType(checker.getTypeAtLocation(node), checker);
 
     if (returnType === undefined || isTypeFlagSet(returnType, ts.TypeFlags.Any)) {
         return undefined;
     }
-    if ((hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword) ? isEffectivelyVoidPromise : isEffectivelyVoid)(returnType)) {
+
+    const effectivelyVoidChecker = hasModifier(node.modifiers, ts.SyntaxKind.AsyncKeyword)
+        ? isEffectivelyVoidPromise
+        : isEffectivelyVoid;
+
+    if (effectivelyVoidChecker(returnType)) {
         return ReturnKind.Void;
     }
+
     return ReturnKind.Value;
 }
 
@@ -127,21 +154,30 @@ function isEffectivelyVoidPromise(type: ts.Type): boolean {
     // Would need access to `checker.getPromisedTypeOfPromise` to do this properly.
     // Assume that the return type is the global Promise (since this is an async function) and get its type argument.
 
-    // tslint:disable-next-line no-bitwise
-    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
-        isUnionType(type) && type.types.every(isEffectivelyVoidPromise) ||
-        isTypeReference(type) && type.typeArguments !== undefined && type.typeArguments.length === 1 &&
-            isEffectivelyVoidPromise(type.typeArguments[0]);
+    return (
+        // tslint:disable-next-line:no-bitwise
+        isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+        (isUnionType(type) && type.types.every(isEffectivelyVoidPromise)) ||
+        (isTypeReference(type) &&
+            type.typeArguments !== undefined &&
+            type.typeArguments.length === 1 &&
+            isEffectivelyVoidPromise(type.typeArguments[0]))
+    );
 }
 
 /** True for `void`, `undefined`, or `void | undefined`. */
 function isEffectivelyVoid(type: ts.Type): boolean {
-    // tslint:disable-next-line no-bitwise
-    return isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
-        isUnionType(type) && type.types.every(isEffectivelyVoid);
+    return (
+        // tslint:disable-next-line:no-bitwise
+        isTypeFlagSet(type, ts.TypeFlags.Void | ts.TypeFlags.Undefined) ||
+        (isUnionType(type) && type.types.every(isEffectivelyVoid))
+    );
 }
 
-function tryGetReturnType(fnType: ts.Type | undefined, checker: ts.TypeChecker): ts.Type | undefined {
+function tryGetReturnType(
+    fnType: ts.Type | undefined,
+    checker: ts.TypeChecker,
+): ts.Type | undefined {
     if (fnType === undefined) {
         return undefined;
     }
@@ -170,5 +206,7 @@ function isFunctionLike(node: ts.Node): node is FunctionLike {
 }
 
 function isFunctionExpressionLike(node: ts.Node): node is ts.FunctionExpression | ts.ArrowFunction {
-    return node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.ArrowFunction;
+    return (
+        node.kind === ts.SyntaxKind.FunctionExpression || node.kind === ts.SyntaxKind.ArrowFunction
+    );
 }

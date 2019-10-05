@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 
 import { isObjectFlagSet, isObjectType, isTypeFlagSet } from "tsutils";
 import * as ts from "typescript";
+
 import * as Lint from "../index";
 
 export class Rule extends Lint.Rules.TypedRule {
@@ -28,7 +29,7 @@ export class Rule extends Lint.Rules.TypedRule {
             type: "list",
             listType: {
                 type: "array",
-                items: {type: "string"},
+                items: { type: "string" },
             },
         },
         optionsDescription: "A list of whitelisted assertion types to ignore",
@@ -39,15 +40,35 @@ export class Rule extends Lint.Rules.TypedRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING = "This assertion is unnecessary since it does not change the type of the expression.";
+    public static FAILURE_STRING =
+        "This assertion is unnecessary since it does not change the type of the expression.";
 
     public applyWithProgram(sourceFile: ts.SourceFile, program: ts.Program): Lint.RuleFailure[] {
-        return this.applyWithWalker(new Walker(sourceFile, this.ruleName, this.ruleArguments, program.getTypeChecker()));
+        const compilerOptions = program.getCompilerOptions();
+        const strictChecksEnabled = !!compilerOptions.strict;
+        const strictNullChecksEnabled = compilerOptions.strictNullChecks === true;
+        const strictNullChecksNotDisabled = compilerOptions.strictNullChecks !== false;
+
+        return this.applyWithWalker(
+            new Walker(
+                sourceFile,
+                this.ruleName,
+                this.ruleArguments,
+                program.getTypeChecker(),
+                strictNullChecksEnabled || (strictChecksEnabled && strictNullChecksNotDisabled),
+            ),
+        );
     }
 }
 
 class Walker extends Lint.AbstractWalker<string[]> {
-    constructor(sourceFile: ts.SourceFile, ruleName: string, options: string[], private readonly checker: ts.TypeChecker) {
+    constructor(
+        sourceFile: ts.SourceFile,
+        ruleName: string,
+        options: string[],
+        private readonly checker: ts.TypeChecker,
+        private readonly strictNullChecks: boolean,
+    ) {
         super(sourceFile, ruleName, options);
     }
 
@@ -55,7 +76,9 @@ class Walker extends Lint.AbstractWalker<string[]> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.NonNullExpression:
-                    this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    if (this.strictNullChecks) {
+                        this.checkNonNullAssertion(node as ts.NonNullExpression);
+                    }
                     break;
                 case ts.SyntaxKind.TypeAssertionExpression:
                 case ts.SyntaxKind.AsExpression:
@@ -71,7 +94,11 @@ class Walker extends Lint.AbstractWalker<string[]> {
     private checkNonNullAssertion(node: ts.NonNullExpression) {
         const type = this.checker.getTypeAtLocation(node.expression);
         if (type === this.checker.getNonNullableType(type)) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, Lint.Replacement.deleteFromTo(node.expression.end, node.end));
+            this.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                Lint.Replacement.deleteFromTo(node.expression.end, node.end),
+            );
         }
     }
 
@@ -81,9 +108,11 @@ class Walker extends Lint.AbstractWalker<string[]> {
         }
         const castType = this.checker.getTypeAtLocation(node);
 
-        if (isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
-            isObjectType(castType) && (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType))) {
-
+        if (
+            isTypeFlagSet(castType, ts.TypeFlags.Literal) ||
+            (isObjectType(castType) &&
+                (isObjectFlagSet(castType, ts.ObjectFlags.Tuple) || couldBeTupleType(castType)))
+        ) {
             // It's not always safe to remove a cast to a literal type or tuple
             // type, as those types are sometimes widened without the cast.
             return;
@@ -91,9 +120,13 @@ class Walker extends Lint.AbstractWalker<string[]> {
 
         const uncastType = this.checker.getTypeAtLocation(node.expression);
         if (uncastType === castType) {
-            this.addFailureAtNode(node, Rule.FAILURE_STRING, node.kind === ts.SyntaxKind.TypeAssertionExpression
-                ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
-                : Lint.Replacement.deleteFromTo(node.expression.end, node.end));
+            this.addFailureAtNode(
+                node,
+                Rule.FAILURE_STRING,
+                node.kind === ts.SyntaxKind.TypeAssertionExpression
+                    ? Lint.Replacement.deleteFromTo(node.getStart(), node.expression.getStart())
+                    : Lint.Replacement.deleteFromTo(node.expression.end, node.end),
+            );
         }
     }
 }

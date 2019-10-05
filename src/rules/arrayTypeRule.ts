@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2016 Palantir Technologies, Inc.
+ * Copyright 2018 Palantir Technologies, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,14 @@ export class Rule extends Lint.Rules.AbstractRule {
     };
     /* tslint:enable:object-literal-sort-keys */
 
-    public static FAILURE_STRING_ARRAY = "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
-    public static FAILURE_STRING_GENERIC = "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
-    public static FAILURE_STRING_ARRAY_SIMPLE = "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
-    public static FAILURE_STRING_GENERIC_SIMPLE = "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_ARRAY =
+        "Array type using 'Array<T>' is forbidden. Use 'T[]' instead.";
+    public static FAILURE_STRING_GENERIC =
+        "Array type using 'T[]' is forbidden. Use 'Array<T>' instead.";
+    public static FAILURE_STRING_ARRAY_SIMPLE =
+        "Array type using 'Array<T>' is forbidden for simple types. Use 'T[]' instead.";
+    public static FAILURE_STRING_GENERIC_SIMPLE =
+        "Array type using 'T[]' is forbidden for non-simple types. Use 'Array<T>' instead.";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         return this.applyWithFunction(sourceFile, walk, this.ruleArguments[0] as Option);
@@ -71,14 +75,18 @@ function walk(ctx: Lint.WalkContext<Option>): void {
 
     function checkArrayType(node: ts.ArrayTypeNode): void {
         const { elementType, parent } = node;
-        if (option === "array" || option === "array-simple" && isSimpleType(elementType)) {
+        if (option === "array" || (option === "array-simple" && isSimpleType(elementType))) {
             return;
         }
 
-        const failureString = option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
+        const failureString =
+            option === "generic" ? Rule.FAILURE_STRING_GENERIC : Rule.FAILURE_STRING_GENERIC_SIMPLE;
         const parens = elementType.kind === ts.SyntaxKind.ParenthesizedType ? 1 : 0;
         // Add a space if the type is preceded by 'as' and the node has no leading whitespace
-        const space = parens === 0 && parent!.kind === ts.SyntaxKind.AsExpression && node.getStart() === node.getFullStart();
+        const space =
+            parens === 0 &&
+            parent.kind === ts.SyntaxKind.AsExpression &&
+            node.getStart() === node.getFullStart();
         const fix = [
             new Lint.Replacement(elementType.getStart(), parens, `${space ? " " : ""}Array<`),
             // Delete the square brackets and replace with an angle bracket
@@ -94,14 +102,22 @@ function walk(ctx: Lint.WalkContext<Option>): void {
             return;
         }
 
-        const failureString = option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
+        const failureString =
+            option === "array" ? Rule.FAILURE_STRING_ARRAY : Rule.FAILURE_STRING_ARRAY_SIMPLE;
         if (typeArguments === undefined || typeArguments.length === 0) {
             // Create an 'any' array
-            ctx.addFailureAtNode(node, failureString, Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"));
+            ctx.addFailureAtNode(
+                node,
+                failureString,
+                Lint.Replacement.replaceFromTo(node.getStart(), node.getEnd(), "any[]"),
+            );
             return;
         }
 
-        if (typeArguments.length !== 1 || (option === "array-simple" && !isSimpleType(typeArguments[0]))) {
+        if (
+            typeArguments.length !== 1 ||
+            (option === "array-simple" && !isSimpleType(typeArguments[0]))
+        ) {
             return;
         }
 
@@ -146,7 +162,10 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
         case ts.SyntaxKind.VoidKeyword:
         case ts.SyntaxKind.NeverKeyword:
         case ts.SyntaxKind.ThisType:
+        case ts.SyntaxKind.UnknownKeyword:
             return true;
+        case ts.SyntaxKind.ParenthesizedType:
+            return isSimpleType((nodeType as ts.ParenthesizedTypeNode).type);
         case ts.SyntaxKind.TypeReference:
             // TypeReferences must be non-generic or be another Array with a simple type
             const { typeName, typeArguments } = nodeType as ts.TypeReferenceNode;
@@ -157,7 +176,11 @@ function isSimpleType(nodeType: ts.TypeNode): boolean {
                 case 0:
                     return true;
                 case 1:
-                    return typeName.kind === ts.SyntaxKind.Identifier && typeName.text === "Array" && isSimpleType(typeArguments[0]);
+                    return (
+                        typeName.kind === ts.SyntaxKind.Identifier &&
+                        typeName.text === "Array" &&
+                        isSimpleType(typeArguments[0])
+                    );
                 default:
                     return false;
             }

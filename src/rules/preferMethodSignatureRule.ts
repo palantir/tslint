@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: null,
         optionExamples: [true],
         type: "style",
-        typescriptOnly: false
+        typescriptOnly: false,
     };
     /* tslint:enable:object-literal-sort-keys */
 
@@ -61,7 +61,7 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (isPropertySignature(node)) {
             const { type } = node;
@@ -71,7 +71,7 @@ function walk(ctx: Lint.WalkContext<void>): void {
                     Rule.FAILURE_STRING,
                     type.type === undefined
                         ? undefined
-                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))]
+                        : [Lint.Replacement.replaceNode(node, Rule.METH_SIGN_STRING(node))],
                 );
             }
         }

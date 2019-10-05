@@ -19,6 +19,7 @@ import * as utils from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
+
 import { codeExamples } from "./code-examples/noSparseArrays.examples";
 
 export class Rule extends Lint.Rules.AbstractRule {
@@ -43,10 +44,13 @@ export class Rule extends Lint.Rules.AbstractRule {
     }
 }
 
-function walk(ctx: Lint.WalkContext<void>): void {
+function walk(ctx: Lint.WalkContext): void {
     return ts.forEachChild(ctx.sourceFile, function cb(node: ts.Node): void {
         if (!utils.isArrayLiteralExpression(node)) {
-            if (utils.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+            if (
+                utils.isBinaryExpression(node) &&
+                node.operatorToken.kind === ts.SyntaxKind.EqualsToken
+            ) {
                 // Ignore LHS of assignments.
                 traverseExpressionsInLHS(node.left, cb);
                 return cb(node.right);
