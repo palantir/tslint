@@ -44,7 +44,7 @@ Options:
 --print-config                         print resolved configuration for a file
 -r, --rules-dir [rules-dir]            rules directory
 -s, --formatters-dir [formatters-dir]  formatters directory
--t, --format [format]                  output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)
+-t, --format [format]                  output format (json, stylish, verbose, pmd, prose, msbuild, checkstyle, vso, fileslist, codeFrame)
 -q, --quiet                            hide non "error" severity linting errors from output
 --test                                 test that tslint produces the correct output for the specified directory
 -p, --project [project]                tsconfig.json file
@@ -113,11 +113,12 @@ tslint accepts the following command-line options:
 -t, --format:
     The formatter to use to format the results of the linter before
     outputting it to stdout or the file passed in --out. The core
-    formatters are prose (human readable), json (machine readable)
-    and verbose. prose is the default if this option is not used.
+    formatters are stylish (colored and human readable), json (machine
+    readable), and verbose (human readable).
+    stylish is the default if this option is not used.
     Other built-in options include pmd, msbuild, checkstyle, and vso.
     Additional formatters can be added and used if the --formatters-dir
-    option is set.
+    option is set.`,
 
 -q, --quiet
     Hide non "error" severity linting errors from output. This can be

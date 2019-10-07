@@ -232,7 +232,7 @@ async function doLinting(
         formatter =
             configFile && configFile.linterOptions && configFile.linterOptions.format
                 ? configFile.linterOptions.format
-                : "prose";
+                : "stylish";
     }
 
     const linter = new Linter(
