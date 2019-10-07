@@ -24,8 +24,7 @@ export class Formatter extends AbstractFormatter {
     public static metadata: IFormatterMetadata = {
         formatterName: "verbose",
         description: "The human-readable formatter which includes the rule name in messages.",
-        descriptionDetails:
-            "Basic formatter which outputs simple human-readable messages",
+        descriptionDetails: "Basic formatter which outputs simple human-readable messages",
         sample: "ERROR: (semicolon) myFile.ts[1, 14]: Missing semicolon",
         consumer: "human",
     };
