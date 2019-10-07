@@ -184,7 +184,7 @@ export class Linter {
         const failures = this.options.quiet ? errors : this.failures;
 
         const formatterName =
-            this.options.formatter !== undefined ? this.options.formatter : "prose";
+            this.options.formatter !== undefined ? this.options.formatter : "stylish";
         const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
         if (Formatter === undefined) {
             throw new Error(`formatter '${String(formatterName)}' not found`);
