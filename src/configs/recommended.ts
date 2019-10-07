@@ -108,7 +108,6 @@ export const jsRules = {
     "no-duplicate-super": true,
     "no-duplicate-variable": true,
     "no-empty": true,
-    "no-empty-interface": true,
     "no-eval": true,
     "no-reference": true,
     "no-shadowed-variable": true,
