@@ -775,7 +775,7 @@ function execRunnerWithOutput(options: Partial<Options>) {
 
 // tslint:disable-next-line:promise-function-async
 function execRunner(options: Partial<Options>, logger: Logger = dummyLogger) {
-    return run({ exclude: [], files: [], ...options }, logger);
+    return run({ exclude: [], files: [], format: "prose", ...options }, logger);
 }
 
 // tslint:disable-next-line:ban-types
