@@ -539,7 +539,7 @@ function walk(context: Lint.WalkContext<ExclusionsMap>) {
             );
         }
 
-        if (tsutils.isConstructorDeclaration(node) && tsutils.isClassDeclaration(node.parent)) {
+        if (tsutils.isConstructorDeclaration(node)) {
             const {
                 parent: { members },
             } = node;

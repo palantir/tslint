@@ -3,7 +3,7 @@
     "completed-docs": [true, {
         "constructors": {
             "overloads": true,
-            "privacies": ["public", "private"]
+            "privacies": ["public", "protected", "private"]
         }
     }]
   }

@@ -7,7 +7,7 @@ class Foo {
     constructor(o: any) {}
 }
 
-class Foo {
+class FooPublic {
     public constructor(i: number);
 
     /**
@@ -16,7 +16,7 @@ class Foo {
     public constructor(o: any) {}
 }
 
-class Foo {
+class FooPrivate {
     private constructor(i: number);
 
     /**
@@ -25,7 +25,7 @@ class Foo {
     private constructor(o: any) {}
 }
 
-class Foo {
+class FooProtected {
     protected constructor(i: number);
     protected constructor(o: any) {}
 }

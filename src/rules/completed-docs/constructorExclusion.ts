@@ -36,22 +36,18 @@ export class ConstructorExclusion extends Exclusion<IConstructorExclusionDescrip
     public readonly privacies: Set<Privacy> = this.createSet(this.descriptor.privacies);
 
     public excludes(node: ts.Node) {
-        return !this.shouldPrivacyBeDocumented(node);
-    }
-
-    private shouldPrivacyBeDocumented(node: ts.Node) {
         if (this.privacies.has(ALL)) {
-            return true;
+            return false;
         }
 
         if (hasModifier(node.modifiers, ts.SyntaxKind.PrivateKeyword)) {
-            return this.privacies.has(PRIVACY_PRIVATE);
+            return !this.privacies.has(PRIVACY_PRIVATE);
         }
 
         if (hasModifier(node.modifiers, ts.SyntaxKind.ProtectedKeyword)) {
-            return this.privacies.has(PRIVACY_PROTECTED);
+            return !this.privacies.has(PRIVACY_PROTECTED);
         }
 
-        return this.privacies.has(PRIVACY_PUBLIC);
+        return !this.privacies.has(PRIVACY_PUBLIC);
     }
 }
