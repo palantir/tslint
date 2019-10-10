@@ -19,6 +19,7 @@ import { DESCRIPTOR_OVERLOADS, DocType } from "../completedDocsRule";
 
 import { BlockExclusion, IBlockExclusionDescriptor } from "./blockExclusion";
 import { ClassExclusion, IClassExclusionDescriptor } from "./classExclusion";
+import { ConstructorExclusion, IConstructorExclusionDescriptor } from "./constructorExclusion";
 import { Exclusion } from "./exclusion";
 import { IInputExclusionDescriptors, InputExclusionDescriptor } from "./exclusionDescriptors";
 import { ITagExclusionDescriptor, TagExclusion } from "./tagExclusion";
@@ -64,10 +65,18 @@ const createRequirementsForDocType = (docType: DocType, descriptor: InputExclusi
         overloadsSeparateDocs = !!(descriptor as any)[DESCRIPTOR_OVERLOADS];
     }
 
-    if (docType === "methods" || docType === "properties") {
-        requirements.push(new ClassExclusion(descriptor as IClassExclusionDescriptor));
-    } else {
-        requirements.push(new BlockExclusion(descriptor as IBlockExclusionDescriptor));
+    switch (docType) {
+        case "constructors":
+            requirements.push(
+                new ConstructorExclusion(descriptor as IConstructorExclusionDescriptor),
+            );
+            break;
+        case "methods":
+        case "properties":
+            requirements.push(new ClassExclusion(descriptor as IClassExclusionDescriptor));
+            break;
+        default:
+            requirements.push(new BlockExclusion(descriptor as IBlockExclusionDescriptor));
     }
 
     if ((descriptor as ITagExclusionDescriptor).tags !== undefined) {

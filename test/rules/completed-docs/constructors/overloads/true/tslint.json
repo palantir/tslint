@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "completed-docs": [true, {
+        "constructors": {
+            "overloads": true,
+            "privacies": ["public", "protected", "private"]
+        }
+    }]
+  }
+}
