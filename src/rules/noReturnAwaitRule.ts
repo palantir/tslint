@@ -15,11 +15,10 @@
  * limitations under the License.
  */
 
-import { isTryStatement } from "tsutils";
+import { isFunctionScopeBoundary, isTryStatement } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
-import { isFunctionScopeBoundary } from "../utils";
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -96,10 +95,7 @@ function isUnnecessaryAwait(node: ts.Node): boolean {
 
 function isInsideTryBlock(node: ts.Node): boolean {
     while (node.parent !== undefined) {
-        // tslint:disable:deprecation This is needed for https://github.com/palantir/tslint/pull/4274 and will be fixed once TSLint
-        // requires tsutils > 3.0.
         if (isFunctionScopeBoundary(node)) {
-            // tslint:enable:deprecation
             return false;
         }
         if (isTryStatement(node.parent)) {
