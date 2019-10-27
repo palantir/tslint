@@ -20,24 +20,26 @@ Now, let us first write the rule in TypeScript:
 ```typescript
 import * as Lint from "tslint";
 import * as ts from "typescript";
+import * as tsutils from 'tsutils';
 
 export class Rule extends Lint.Rules.AbstractRule {
     public static FAILURE_STRING = "import statement forbidden";
 
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
-        return this.applyWithWalker(new NoImportsWalker(sourceFile, this.getOptions()));
+        return this.applyWithFunction(sourceFile, walk);
     }
 }
 
-// The walker takes care of all the work.
-class NoImportsWalker extends Lint.RuleWalker {
-    public visitImportDeclaration(node: ts.ImportDeclaration) {
-        // create a failure at the current position
-        this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING));
+function walk(ctx: Lint.WalkContext<void>) {
+    function cb(node: ts.Node): void {
+        if (tsutils.isImportDeclaration(node)) {
+            ctx.addFailureAt(node.getStart(), node.getWidth(), Rule.FAILURE_STRING);
+        }
 
-        // call the base version of this visitor to actually parse this node
-        super.visitImportDeclaration(node);
+        return ts.forEachChild(node, cb);
     }
+
+    return ts.forEachChild(ctx.sourceFile, cb);
 }
 ```
 
@@ -57,14 +59,14 @@ Finally, add a line to your [`tslint.json` config file][0] for each of your cust
 
 Now that you're written a rule to detect problems, let's modify it to *fix* them.
 
-Instantiate a `Fix` object and pass it in as an argument to `addFailure`. This snippet replaces the offending import statement with an empty string:
+Instantiate a `Fix` object and pass it in as an argument to `addFailureAt`. This snippet replaces the offending import statement with an empty string:
 
 ```typescript
 // create a fixer for this failure
 const fix = new Lint.Replacement(node.getStart(), node.getWidth(), "");
 
 // create a failure at the current position
-this.addFailure(this.createFailure(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix));
+ctx.addFailureAt(node.getStart(), node.getWidth(), Rule.FAILURE_STRING, fix);
 ```
 ---
 Final notes:
