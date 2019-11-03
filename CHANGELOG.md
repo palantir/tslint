@@ -27,7 +27,7 @@ Thanks to our contributors!
 
 - [bugfix] relax [`promise-function-async`](https://palantir.github.io/tslint/rules/promise-function-async/) for short parenthesized arrow functions (#4765)
 - [bugfix] fix [`no-async-without-await`](https://palantir.github.io/tslint/rules/no-async-without-await/) false positive for abstract methods (#4782)
-- [bugfix] fix [`strict-comparison`](https://palantir.github.io/tslint/rules/strict-comparison/) false positive for `null` and `undefined` literals (#4786)
+- [bugfix] fix [`strict-comparisons`](https://palantir.github.io/tslint/rules/strict-comparisons/) false positive for `null` and `undefined` literals (#4786)
 - [bugfix] improve [`no-angle-bracket-type-assertion`](https://palantir.github.io/tslint/rules/no-angle-bracket-type-assertion/) autofix semantics with more parentheses (#4823)
 - [enhancement] add BigInt support to [`restrict-plus-operands`](https://palantir.github.io/tslint/rules/restrict-plus-operands/) rule (#4814)
 - [enhancement] [`await-promise`](https://palantir.github.io/tslint/rules/await-promise/) now supports new TypeScript 3.6 AST API symbols for async iterators (#4800)
