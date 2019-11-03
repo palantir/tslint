@@ -1,5 +1,44 @@
 # Change Log
 
+## v6.0.0-beta0
+
+- :fire: BREAKING CHANGES :fire:
+    - [api] Changed default formatter to stylish (#4872)
+    - [enhancement] Removed formatting and whitespace rules from `tslint:recommended` configuration (#4871)
+    - [enhancement] Removed pedantic rules from `tslint:recommended` configuration (#4312)
+    - [enhancement] `vso` formatter now reports severity of rule failures (#4286)
+    - [enhancement] [`typedef`](https://palantir.github.io/tslint/rules/typedef/) rule `arrow-call-signature` option is more consistent in reporting errors on lambdas and will flag more violations that were missed in the previous rule implementation (#4533)
+    - [bugfix] [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/) is now consistent with TypeScript's Organise Imports ordering (#4064)
+    - [bugfix] [`member-ordering`](https://palantir.github.io/tslint/rules/member-ordering/) now checks property accessors (getters and setters) (#3984)
+- Other changes
+    - [bugfix] Removed deprecated rules from `tslint:all` configuration (#4862)
+    - [bugfix] Preserve significant zeros in fixer for number-literal-format (#4856)
+    - [bugfix] [`no-redundant-jsdoc`](https://palantir.github.io/tslint/rules/no-redundant-jsdoc/) allow `@author` tag (#4854)
+    - [bugfix] `RuleFailure#toJson()` no longer forces rule severity to be an uppercase string (#2622)
+    - [bugfixfix] [`return-undefined`](https://palantir.github.io/tslint/rules/return-undefined/) rule now works with TS 3.7 (#4866)
+    - [enhancement] [`prefer-switch`](https://palantir.github.io/tslint/rules/prefer-switch/) is more lenient with `if` statements containing multiple OR conditions without any `else` clause (#4873)
+    - [enhancement] [`completed-doc`](https://palantir.github.io/tslint/rules/completed-doc/): add support for constructor documentation (#4861)
+    - [new-rule-option] `case-insensitive-legacy` for [`ordered-imports`](https://palantir.github.io/tslint/rules/ordered-imports/) rule (#4064)
+    - [docs] [`import-blacklist`](https://palantir.github.io/tslint/rules/import-blacklist/): add some options examples (#4858)
+    - [docs] Update custom rule example to use recursive walker (#4883)
+
+Thanks to our contributors!
+- J Rob Gant
+- Tanmoy Bhowmik
+- 谭九鼎
+- Ahmed Ghoneim
+- Josh Goldberg
+- Andrew Boyton
+- Peter Sandor
+- Vincent Langlet
+- Adrian Leonhard
+- Philipp Foedermayr
+- Adi Dahiya
+- Brian Olore
+- andrew bernard
+- joon1030
+
+
 ## v5.20.0
 
 - [bugfix] fix [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) false positive with `"ignore-rhs"` option (#4833)
