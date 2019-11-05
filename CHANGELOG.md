@@ -1,5 +1,9 @@
 # Change Log
 
+## v6.0.0-beta1
+
+No changes from v6.0.0-beta0, just re-released to correctly mark with the `beta` and `next` dist-tags on NPM.
+
 ## v6.0.0-beta0
 
 - :fire: BREAKING CHANGES :fire:
