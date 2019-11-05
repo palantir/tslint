@@ -33,11 +33,13 @@ Thanks to our contributors!
 - Vincent Langlet
 - Adrian Leonhard
 - Philipp Foedermayr
-- Adi Dahiya
 - Brian Olore
 - andrew bernard
 - joon1030
 
+## v5.20.1
+
+No changes from v5.20.0, just re-released to correctly mark with the `latest` dist-tag on NPM.
 
 ## v5.20.0
 
