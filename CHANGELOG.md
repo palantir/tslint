@@ -1,5 +1,9 @@
 # Change Log
 
+## v5.20.1
+
+No changes from v5.20.0, just re-released to correctly mark with the `latest` dist-tag on NPM.
+
 ## v5.20.0
 
 - [bugfix] fix [`strict-boolean-expressions`](https://palantir.github.io/tslint/rules/strict-boolean-expressions/) false positive with `"ignore-rhs"` option (#4833)
