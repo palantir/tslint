@@ -188,3 +188,17 @@ const func = (param: string | null = null) => {
 
 [CANNOT_USE]: Cannot use '%s' comparator for type '%s'.
 [CANNOT_COMPARE]: Cannot compare type '%s' to type '%s'.
+
+const MyType = string | boolean | number
+
+class MyClass<T extends MyType> {
+    myMethod(param1: T) {
+        if(param1 === true) return 'Yes'
+        if('test' === param1) return 'Yes'
+        if(123 === param1) return 'Yes'
+        return param1
+    }
+}
+
+[CANNOT_USE]: Cannot use '%s' comparator for type '%s'.
+[CANNOT_COMPARE]: Cannot compare type '%s' to type '%s'.

@@ -120,9 +120,66 @@ export class Rule extends Lint.Rules.TypedRule {
     }
 }
 
+function getConstraint(t: ts.Type): ts.TypeReferenceNode | undefined {
+    if (t.getSymbol() === undefined) {
+        return undefined;
+    }
+
+    const paramDeclaration = t.symbol.declarations.find(ts.isTypeParameterDeclaration);
+    if (paramDeclaration === undefined) {
+        return undefined;
+    }
+
+    const constraint = ts.getEffectiveConstraintOfTypeParameter(paramDeclaration);
+    if (constraint === undefined) {
+        return undefined;
+    }
+
+    if (ts.isTypeReferenceNode(constraint)) {
+        return constraint;
+    }
+
+    return undefined;
+}
+
+function findValueDeclarationOfType(typeName: string, sourceFile: ts.SourceFile) {
+    const locals = (sourceFile as any).locals as Map<string, ts.Symbol>;
+    const type = locals.get(typeName);
+    if (type !== undefined) {
+        return type.valueDeclaration;
+    }
+    return undefined;
+}
+
+function findIdentifiers(expressions: ts.Expression[]): ts.Identifier[] {
+    return expressions
+        .map(e => {
+            if (isBinaryExpression(e)) {
+                return findIdentifiers([e.left, e.right]);
+            }
+            return e;
+        })
+        .reduce<ts.Identifier[]>((acc, val) => acc.concat(val as ts.Identifier[]), []);
+}
+
+function findPossibleTypeKinds(typeName: string, sourceFile: ts.SourceFile): TypeKind[] {
+    const valueDeclaration = findValueDeclarationOfType(typeName, sourceFile);
+
+    if (
+        valueDeclaration !== undefined &&
+        ts.isVariableDeclaration(valueDeclaration) &&
+        valueDeclaration.initializer !== undefined
+    ) {
+        return findIdentifiers([valueDeclaration.initializer]).map(i =>
+            getKindFromSyntaxKind(i.originalKeywordKind as ts.SyntaxKind),
+        );
+    }
+
+    return [];
+}
+
 function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
     const { sourceFile, options } = ctx;
-
     const checker = program.getTypeChecker();
 
     return ts.forEachChild(sourceFile, function cb(node: ts.Node): void {
@@ -138,8 +195,27 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                 return;
             }
 
-            const leftKinds: TypeKind[] = getTypes(leftType);
-            const rightKinds: TypeKind[] = getTypes(rightType);
+            let leftKinds: TypeKind[] = getTypes(leftType);
+            let rightKinds: TypeKind[] = getTypes(rightType);
+
+            if (arrayContainsKind(leftKinds, [TypeKind.Object])) {
+                const constraint = getConstraint(leftType);
+                if (constraint !== undefined && ts.isIdentifier(constraint.typeName)) {
+                    leftKinds = findPossibleTypeKinds(
+                        constraint.typeName.escapedText.toString(),
+                        sourceFile,
+                    );
+                }
+            } else if (arrayContainsKind(rightKinds, [TypeKind.Object])) {
+                const constraint = getConstraint(rightType);
+                if (constraint !== undefined && ts.isIdentifier(constraint.typeName)) {
+                    rightKinds = findPossibleTypeKinds(
+                        constraint.typeName.escapedText.toString(),
+                        sourceFile,
+                    );
+                }
+            }
+
             const operandKind = getStrictestComparableType(leftKinds, rightKinds);
 
             if (operandKind === undefined) {
@@ -274,6 +350,26 @@ function isEqualityOperator(node: ts.BinaryExpression): boolean {
         default:
             return false;
     }
+}
+
+function getKindFromSyntaxKind(type: ts.SyntaxKind): TypeKind {
+    // tslint:disable:prefer-switch
+    if (type === ts.SyntaxKind.StringKeyword || type === ts.SyntaxKind.StringLiteral) {
+        return TypeKind.String;
+    } else if (type === ts.SyntaxKind.NumberKeyword || type === ts.SyntaxKind.NumericLiteral) {
+        return TypeKind.Number;
+    } else if (type === ts.SyntaxKind.BooleanKeyword) {
+        return TypeKind.Boolean;
+    } else if (type === ts.SyntaxKind.NullKeyword) {
+        return TypeKind.Null;
+    } else if (type === ts.SyntaxKind.UndefinedKeyword) {
+        return TypeKind.Undefined;
+    } else if (type === ts.SyntaxKind.AnyKeyword) {
+        return TypeKind.Any;
+    } else {
+        return TypeKind.Object;
+    }
+    // tslint:enable:prefer-switch
 }
 
 function getKind(type: ts.Type): TypeKind {
