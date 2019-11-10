@@ -1,0 +1,10 @@
+{
+    "rules": {
+        "file-header": [
+            true,
+            "Copyright \\d{4}",
+            "Copyright 2019",
+            "enforce-trailing-newline"
+        ]
+    }
+}
