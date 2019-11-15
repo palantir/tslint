@@ -33,8 +33,6 @@ export const codeExamples = [
         fail: Lint.Utils.dedent`
             const x: string = '11';
             const dec: number = parseInt(x);
-            const bin: number = parseInt(x, 2);
-            const hex: number = parseInt(x, 16);
         `,
     },
 ];
