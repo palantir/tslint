@@ -1,3 +1,0 @@
-var single = "single";
-             ~~~~~~~~  [" should be ']
-var unbalancedSingleAfter = ("a)

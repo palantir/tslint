@@ -1,8 +1,0 @@
-{
-    "rules": {
-      "file-header": [true, {
-        "match": "Good header",
-        "allow-single-line-comments": true
-      }]
-    }
-  }

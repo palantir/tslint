@@ -1,6 +1,0 @@
-function() {return 5;}
-            ~ [missing whitespace]
-
-function() {
-    const something: number = 5;
-}

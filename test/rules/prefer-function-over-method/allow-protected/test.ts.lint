@@ -1,9 +1,0 @@
-class C {
-    a() {}
-    ~ [0]
-    protected b() {}
-    private c() {}
-            ~ [0]
-}
-
-[0]: Class method does not use 'this'. Use a function instead.

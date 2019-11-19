@@ -1,2 +1,0 @@
-import foo from 'foo';
-                ~~~~~ [Module 'foo' is not listed as dependency in package.json]

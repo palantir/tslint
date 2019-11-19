@@ -1,5 +1,0 @@
-function() { return 5;}
-
-function() {
-    const something: number = 5;
-}

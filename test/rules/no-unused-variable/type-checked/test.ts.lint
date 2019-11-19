@@ -1,6 +1,0 @@
-[typescript]: < 2.9.0
-import {a, A} from './a.test';
-
-export class B {
-  static thing = a;
-}

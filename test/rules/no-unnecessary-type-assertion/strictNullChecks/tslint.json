@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-unnecessary-type-assertion": [true, "AnyDuringMigration"]
-  }
-}

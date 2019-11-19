@@ -1,6 +1,0 @@
-// don't crash on invalid jsx
-// tslint:disable
-const a =
-  <span /
-  >
-  </span>

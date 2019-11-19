@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-namespace": [true, "allow-declarations"]
-  }
-}

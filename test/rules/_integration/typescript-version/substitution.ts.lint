@@ -1,4 +1,0 @@
-[typescript]: >= 2.0.0
-'foo'; // substition has the same key as the version requirement, but still works
-~~~~~ [typescript]
-[typescript]: ' should be "

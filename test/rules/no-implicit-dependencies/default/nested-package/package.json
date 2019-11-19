@@ -1,7 +1,0 @@
-{
-    "name": "nested",
-    "version": "0.0.1",
-    "dependencies": {
-        "baz": "next"
-    }
-}

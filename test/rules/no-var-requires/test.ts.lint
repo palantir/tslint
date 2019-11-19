@@ -1,3 +1,0 @@
-import a = require("a");
-var b = require("b");
-        ~~~~~~~~~~~~  [require statement not part of an import statement]

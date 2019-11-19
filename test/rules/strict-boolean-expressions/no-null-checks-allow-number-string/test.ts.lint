@@ -1,9 +1,0 @@
-declare function get<T>(): T;
-
-if (get<number>()) {}
-
-if (get<string>()) {}
-
-enum E {}
-if (get<E>()) {}
-    ~~~~~~~~     [This type is not allowed in the 'if' condition because it is an enum. Allowed types are boolean, string, or number.]

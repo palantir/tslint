@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-submodule-imports": [true, "@angular/core", "rxjs"]
-  }
-}

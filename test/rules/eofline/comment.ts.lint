@@ -1,3 +1,0 @@
-let foo = bar;
-// some comment in last line
-                            ~nil [file should end with a newline]

@@ -1,5 +1,0 @@
-[typescript]: >= 2.1.0 < 2.9.0
-
-import * as React from "react/addons";
-
-console.log(<div></div>);

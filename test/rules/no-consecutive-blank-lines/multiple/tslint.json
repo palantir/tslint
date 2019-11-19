@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-consecutive-blank-lines": [true, 2]
-  }
-}

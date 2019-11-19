@@ -1,7 +1,0 @@
-import * as React from "react";
-
-export const a = (
-    <div className="class" id='id' data-a={'a' + "b" + 'c\td\ne'}></div>
-                   ~~~~~~~                                                  [" should be ']
-                                           ~~~                              [' should be "]
-                                                       ~~~~~~~~~            [' should be "]

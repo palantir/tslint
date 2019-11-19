@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "no-empty": [true, "allow-empty-catch"]
-  }
-}

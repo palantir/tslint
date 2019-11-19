@@ -1,6 +1,0 @@
-var single = 'single';
-    var double = 'married';
-var singleWithinDouble = '\'singleWithinDouble\'';
-var doubleWithinSingle = '"doubleWithinSingle"';
-var tabNewlineWithinDouble = 'tab\tNewline\nWithinDouble';
-'escaped"quotemark';

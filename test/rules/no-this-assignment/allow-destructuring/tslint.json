@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "no-this-assignment": [true, {
-      "allow-destructuring": true
-    }]
-  }
-}

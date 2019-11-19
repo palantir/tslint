@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "jsdoc-format": [true, "check-multiline-start"]
-  }
-}

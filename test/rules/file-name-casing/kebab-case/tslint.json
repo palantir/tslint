@@ -1,5 +1,0 @@
-{
-    "rules": {
-        "file-name-casing": [true, "kebab-case"]
-    }
-}

@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "ordered-imports": [true, {"module-source-path": "basename"}]
-  }
-}

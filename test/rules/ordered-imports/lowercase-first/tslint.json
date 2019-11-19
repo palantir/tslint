@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "ordered-imports": [true, {"import-sources-order": "lowercase-first", "named-imports-order": "lowercase-first"}]
-  }
-}

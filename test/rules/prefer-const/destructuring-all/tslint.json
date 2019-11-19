@@ -1,8 +1,0 @@
-{
-  "rules": {
-    "prefer-const": [
-        true,
-        {"destructuring": "all"}
-    ]
-  }
-}

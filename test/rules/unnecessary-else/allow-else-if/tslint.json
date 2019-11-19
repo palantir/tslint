@@ -1,5 +1,0 @@
-{
-    "rules": {
-      "unnecessary-else": [true,  { "allow-else-if": true }]
-    }
-}

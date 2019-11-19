@@ -1,9 +1,0 @@
-{
-  "rules": {
-    "no-unused-expression": [
-      true,
-      "allow-new",
-      "allow-fast-null-checks"
-    ]
-  }
-}

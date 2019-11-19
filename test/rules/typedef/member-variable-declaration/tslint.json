@@ -1,7 +1,0 @@
-{
-  "rules": {
-      "typedef": [true,
-         "member-variable-declaration"
-      ]
-   }
-}

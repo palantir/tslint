@@ -1,8 +1,0 @@
-{
-  "rules": {
-      "typedef": [true,
-         "parameter",
-         "call-signature"
-      ]
-   }
-}

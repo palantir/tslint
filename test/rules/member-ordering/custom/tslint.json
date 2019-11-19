@@ -1,8 +1,0 @@
-{
-    "rules": {
-        "member-ordering": [true, { "order": [
-            "public-static-method",
-            "private-instance-field"
-        ]}]
-    }
-}

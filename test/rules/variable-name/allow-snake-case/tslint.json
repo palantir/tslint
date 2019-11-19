@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "variable-name": [true, "allow-snake-case"]
-  }
-}

@@ -1,5 +1,0 @@
-{
-  "rules": {
-    "switch-final-break": [true, "always"]
-  }
-}

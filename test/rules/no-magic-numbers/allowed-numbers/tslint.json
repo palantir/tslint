@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "no-magic-numbers": [true, {
-      "allowed-numbers": [1337, 1337.7, -1337, -0]
-    }]
-  }
-}
