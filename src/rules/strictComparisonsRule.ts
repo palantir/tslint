@@ -125,7 +125,9 @@ function getConstraint(t: ts.Type): ts.TypeReferenceNode | undefined {
         return undefined;
     }
 
-    const paramDeclaration = t.symbol.declarations.find(d => d.kind === ts.SyntaxKind.TypeParameter) as ts.TypeParameterDeclaration
+    const paramDeclaration = t.symbol.declarations.find(
+        d => d.kind === ts.SyntaxKind.TypeParameter,
+    ) as ts.TypeParameterDeclaration;
     if (paramDeclaration === undefined) {
         return undefined;
     }
@@ -398,7 +400,7 @@ function getKind(type: ts.Type): TypeKind {
 
 function getEffectiveConstraintOfTypeParameter(node: ts.TypeParameterDeclaration) {
     if (ts.getEffectiveConstraintOfTypeParameter !== undefined) {
-        return ts.getEffectiveConstraintOfTypeParameter(node)
+        return ts.getEffectiveConstraintOfTypeParameter(node);
     }
-    return node.constraint
+    return node.constraint;
 }
