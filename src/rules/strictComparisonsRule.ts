@@ -125,12 +125,12 @@ function getConstraint(t: ts.Type): ts.TypeReferenceNode | undefined {
         return undefined;
     }
 
-    const paramDeclaration = t.symbol.declarations.find(ts.isTypeParameterDeclaration);
+    const paramDeclaration = t.symbol.declarations.find(d => d.kind === ts.SyntaxKind.TypeParameter) as ts.TypeParameterDeclaration
     if (paramDeclaration === undefined) {
         return undefined;
     }
 
-    const constraint = ts.getEffectiveConstraintOfTypeParameter(paramDeclaration);
+    const constraint = getEffectiveConstraintOfTypeParameter(paramDeclaration);
     if (constraint === undefined) {
         return undefined;
     }
@@ -394,4 +394,11 @@ function getKind(type: ts.Type): TypeKind {
     function is(flags: ts.TypeFlags) {
         return isTypeFlagSet(type, flags);
     }
+}
+
+function getEffectiveConstraintOfTypeParameter(node: ts.TypeParameterDeclaration) {
+    if (ts.getEffectiveConstraintOfTypeParameter !== undefined) {
+        return ts.getEffectiveConstraintOfTypeParameter(node)
+    }
+    return node.constraint
 }
