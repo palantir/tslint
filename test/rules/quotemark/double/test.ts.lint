@@ -1,0 +1,13 @@
+var single = 'single';
+             ~~~~~~~~  [' should be "]
+    var double = "married";
+var singleWithinDouble = "'singleWithinDouble'";
+var doubleWithinSingle = '"doubleWithinSingle"';
+                         ~~~~~~~~~~~~~~~~~~~~~~  [' should be "]
+var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be "]
+'escaped\'quotemark';
+~~~~~~~~~~~~~~~~~~~~ [' should be "]
+
+// "avoid-template" option is not set.
+`foo`;

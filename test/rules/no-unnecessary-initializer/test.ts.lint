@@ -1,0 +1,28 @@
+let a: string | undefined = undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+var b: string | undefined = undefined;
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+for (let c: number | undefined = undefined; c < 2; c++) {}
+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+let d;
+
+const e = undefined;
+
+function f(x: string | undefined = undefined, bar: number) {}
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+function f2(x: string | undefined = undefined, bar: number = 1) {}
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [1]
+
+declare function get<T>(): T
+const { g = undefined } = get<{ g?: number }>();
+        ~~~~~~~~~~~~~ [0]
+const [h = undefined] = get<number[]>();
+       ~~~~~~~~~~~~~ [0]
+
+function f({ x = undefined }: { x?: number }) {}
+             ~~~~~~~~~~~~~ [0]
+
+[0]: Unnecessary initialization to 'undefined'.
+[1]: Use an optional parameter instead of initializing to 'undefined'. Also, the type declaration does not need to include '| undefined'.

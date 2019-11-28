@@ -1,0 +1,88 @@
+[typescript]: < 2.9.0
+export function func1(x: number, y: number, ...args: number[]) {
+                                               ~~~~              [err % ('args')]
+    return x + y;
+}
+
+export function func2(x: number, y: number, ...args: number[]) {
+                                 ~                               [err % ('y')]
+    return x + args[0];
+}
+
+export function func3(x?: number, y?: number) {
+                                  ~             [err % ('y')]
+    return x;
+}
+
+export interface ITestInterface {
+    func4(x: number, y: number): number;
+}
+
+export class ABCD {
+    constructor(private x: number, public y: number, private z: number) {
+                        ~                                                 [prop % ('x')]
+    }
+
+    func5() {
+        return this.z;
+    }
+}
+
+export interface ITestMapInterface {
+    [key: string]: string;
+}
+
+export function func6(...args: number[]) {
+    return args;
+}
+
+export function func7(f: (x: number) => number) {
+    return f;
+}
+
+export function func8([x, y]: [number, number]) {
+                          ~                       [err % ('y')]
+    return x;
+}
+
+export class DestructuringTests {
+    constructor(public x: number, public [y, z]) { // tsc error on binding pattern
+    }
+
+    public func9({a, b}) {
+                     ~     [err % ('b')]
+        return a;
+    }
+
+    public func10([a, b]) {
+                      ~     [err % ('b')]
+        return [a];
+    }
+
+    // destructuring with default value
+    public func11([x = 0]) {
+                   ~         [err % ('x')]
+        return;
+    }
+}
+
+abstract class AbstractTest {
+#if typescript >= 2.9.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ ['AbstractTest' is declared but never used.]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~ [err % ('AbstractTest')]
+#endif
+#if typescript < 2.8.0
+               ~~~~~~~~~~~~ [err % ('AbstractTest')]
+#endif
+    abstract foo(x);
+}
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+[prop]: Property '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+[prop]: Property '%s' is declared but never used.
+#endif

@@ -1,0 +1,197 @@
+// should not flag (#2159)
+const columns = [{ data: [1] }];
+for (let i = 0; i < columns[0].data.length; i++) {
+    columns.map((x) => x.data[i]);
+}
+
+function sampleFunc() {
+    // issue #1931, should not error
+    const value1 = [1];
+    const value2 = [2];
+    for (let i = 0; i < (value1).length; i++) {
+        const x = (value1)[i] === (value2)[i];
+    }
+
+    // This loop only uses the iterator to access the array item, so we can recommend a for-of loop here
+    for (var a = 0; a < obj.arr.length; a++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+        console.log(obj.arr[a]);
+    }
+
+    // Same as above, but no curly braces
+    for (var b = 0; b < obj.arr.length; b++) console.log(obj.arr[b]);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+
+    // the index is used by itself, so a normal for loop is allowed here
+    for (var c = 0; c < arr.length; c++) {
+        doMath(c);
+    }
+
+    // Same as above, but no curly braces
+    for (var d = 0; d < arr.length; d++) doMath(d);
+
+    // the index is used by itself, so a normal for loop is allowed here
+    for (var e = 0; e < arr.length; e++) {
+        if(e > 5) {
+            doMath(e);
+        }
+        console.log(arr[e]);
+    }
+
+    // This iterates off of a hard-coded number and should be allowed
+    for (var f = 0; f <= 40; f++) {
+        doMath(f);
+    }
+
+    // Same as above, but no curly braces
+    for (var g = 0; g <= 40; g++) doMath(g);
+
+    // multiple operations in the initializer
+    for(var h=0, len=arr.length; h < len; h++) {}
+
+    // Same as above, but no curly braces
+    for(var i=0, len=arr.length; i < len; i++) arr[i];
+
+    // Odd for loop setups
+    var m = 0;
+    for (;;) {
+        if (m > 3) break;
+        console.log(m);
+        m++;
+    }
+
+    var n = 0;
+    for (; n < 9; n++) {
+        console.log(n);
+    }
+
+    var o = 0;
+    for (; o < arr.length; o++) {
+        console.log(arr[o]);
+    }
+
+    // Prefix incrementor
+    for(let p = 0; p < arr.length; ++p) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+        arr[p].whatever();
+    }
+
+    // empty
+    for(let x = 0; x < arr.length; x++) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+
+    // missing
+    for(; x < arr.length; x++) {}
+    for(let x = 0;; x++) {}
+    for(let x = 0; x < arr.length;) {}
+
+    // mismatch
+    for(let x = 0; NOTX < arr.length; x++) {}
+    for(let x = 0; x < arr.length; NOTX++) {}
+    for(let NOTX = 0; x < arr.length; x++) {}
+
+    // decrement
+    for(let x = 0; x < arr.length; x--) {}
+
+    // not `<`
+    for(let x = 0; x <= arr.length; x++) {}
+
+    // wrong starting point
+    for(let x = 1; x < arr.length; x++) {}
+
+    // not `length` property
+    for(let x = 0; x < arr.length(); x++) {}
+
+    // alternate incrementor
+    for(let x = 0; x < arr.length; x+=1) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for(let x = 0; x < arr.length; x=x+1) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for(let x = 0; x < arr.length; x=1+x) {}
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+
+    // adds too much
+    for(let x = 0; x < arr.length; x+=11) {}
+    for(let x = 0; x < arr.length; x=x+11) {}
+
+    for(let x = 0; x < arr.length; x++) {
+        x++;
+    }
+
+    // unexpected condition
+    for(let x = 0; true; x++) {}
+
+    // For-in loops ARE allowed
+    for (var q in obj) {
+        if (obj.hasOwnProperty(q)) {
+            console.log(q);
+        }
+    }
+
+    // For-of loops ARE allowed
+    for (var r of arr) {
+        console.log(r);
+    }
+
+    // array element is assigned a new value
+    for (let x = 0; x < arr.length; x++) {
+        arr[x] = 4;
+    }
+
+    // access element other than current
+    for (let x = 0; x < arr.length; x++) {
+        let y = arr[x + 1];
+    }
+}
+
+for (let shadow = 0; shadow < arr.length; shadow++) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    for (let shadow = 0; shadow < arr.length; shadow++) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   [0]
+    }
+}
+
+for (let i = 0; i < arr.length; i++) {
+    delete arr[i];
+}
+
+for (let i = 0; i < arr.length; ++i) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+    {
+        let i = 1;
+        let x = i;
+        let obj = {i, x};
+    }
+    i: while(true) {
+        let obj = {i: 1};
+        break i;
+    }
+
+    let node = arr[i];
+}
+
+function test() {
+    function print() {
+        console.log(arr[i])
+    }
+    for (var i = 0, i < arr.length, ++i)
+        print();
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    arr[i]++;
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    ({...arr[i]} = foo);
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    for (arr[i] of otherArr) {}
+}
+
+for (let i = 0; i < arr.length; ++i) {
+    ++(arr[i]);
+}
+
+[0]: Expected a 'for-of' loop instead of a 'for' loop with this simple iteration

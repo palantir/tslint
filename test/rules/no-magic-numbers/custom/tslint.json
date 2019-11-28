@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-magic-numbers": [true, 1337, 1337.7, -1337, -0]
+  }
+}

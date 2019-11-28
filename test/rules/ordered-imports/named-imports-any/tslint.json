@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "ordered-imports": [true, {"named-imports-order": "any"}]
+  }
+}

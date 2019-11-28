@@ -1,0 +1,52 @@
+var a = 5 as any;
+
+var b = 5 as any as number;
+
+var c = (5 as any) as number;
+
+var d = 5 as any as number;
+
+var e = 5 as any as number;
+
+let f = (flag as any as number) & value;
+f = (flag as any as number) | value;
+
+let g = a as any as A;
+
+let h = a as any as AsyncIterableIterator;
+
+interface Action {
+    payload: number | false;
+}
+
+const action: Action = {
+    payload: 5,
+}
+
+const booleanAction: Action = {
+    payload: false,
+}
+
+const a = 5 + (action.payload as number);
+
+const a = 5 - (action.payload as number);
+
+const a = 5 * (action.payload as number);
+
+const a = 5 / (action.payload as number);
+
+const a = 5 % (action.payload as number);
+
+const a = 5 && (action.payload as number);
+
+const a = 5 || (action.payload as number);
+
+const a = 5 % (action.payload as any as number);
+
+const a = 5 && (action.payload as any as number);
+
+const a = 5 || (action.payload as any as number);
+
+const a = true || (booleanAction.payload as boolean);
+
+const a = false && (booleanAction.payload as boolean);

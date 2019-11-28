@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-inferrable-types": [
+      true,
+      "ignore-params"
+    ]
+  }
+}

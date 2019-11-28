@@ -1,0 +1,281 @@
+declare module "*";
+                  ~ [0]
+declare module "foo" {}
+var x = 3;
+         ~ [0]
+a += b;
+      ~ [0]
+
+c = () => {
+};
+ ~ [0]
+
+d = function() { };
+                  ~ [0]
+
+console.log("i am adam, am i?");
+                               ~ [0]
+
+function xyz() {
+    return;
+          ~ [0]
+}
+
+switch(xyz) {
+    case 1:
+        break;
+             ~ [0]
+    case 2:
+        continue;
+                ~ [0]
+}
+
+throw new Error("some error");
+                             ~ [0]
+
+do {
+    var a = 4;
+             ~ [0]
+} while(x == 3);
+               ~ [0]
+
+debugger;
+        ~ [0]
+
+import v = require("i");
+                       ~ [0]
+module M {
+    export var x;
+                ~ [0]
+    []
+    export var y = x;
+    []
+    export function f(s: string): string;
+                                        ~ [0]
+    export function f(n: number): number
+    export function f(x: any) { return x; }
+                                        ~ [0]
+}
+
+declare module "M" {
+    function f(): number;
+                        ~ [0]
+    function g(): number
+}
+
+function useStrictUnnecessarySemicolon() {
+    "use strict";
+                ~ [0]
+    return null
+}
+
+class MyClass {
+    public name : string;
+                        ~ [0]
+    private index : number;
+                          ~ [0]
+    private email : string
+    public initializedProperty = 6
+    public initializedMethodProperty = () => {
+        return "hi";
+                   ~ [0]
+    };
+     ~ [0]
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+                         ~ [0]
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+                                                               ~ [0]
+                                                                  ~ [0]
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; }
+                                                                                     ~ [0]
+    public someMethod(): void;
+                             ~ [0]
+    public someMethod(param): void
+    public someMethod(param?) {
+        return
+    };
+     ~ [0]
+};
+ ~ [0]
+
+interface ITest {
+    foo?: string;
+                ~ [0]
+    bar: number;
+               ~ [0]
+    qux: string,
+    baz: boolean
+    bas: never;}
+              ~ [0]
+
+import {Router} from 'aurelia-router'
+
+import {Controller} from 'my-lib';
+                                 ~ [0]
+
+// Edge cases when not omitting semicolon needs to be supported
+
+var a = 1;
+("1" + "2").length
+
+var a = 1;
+[].length
+
+var a = 1;
++"a"
+
+var a = 1;
+-1
+
+var a = 1
+;("1" + "2").length
+
+var a = 1
+;[].length
+
+var a = 1
+;+"a"
+
+var a = 1
+;-1
+
+// For loops uses semicolons as well so make sure we aren't breaking those
+
+for (var i = 0; i < 10; ++i) {
+  // do something
+}
+
+export default LoginPage;
+                        ~ [0]
+export default LoginPage
+
+export = Date;
+             ~ [0]
+export = Date
+
+type t = number;
+               ~ [0]
+type t = number
+
+if (true);
+         ~ [0]
+for(;;);
+
+;
+~ [0]
+
+switch(foo.bar) {
+    case 'header':  header  = foo; break
+    case 'sidebar': sidebar = foo; break
+    case 'track':   track   = foo; /* some comment */ break
+}
+
+switch(foo.bar) {
+    case 'header':  header  = foo;
+                                 ~ [0]
+        break
+    case 'sidebar': sidebar = foo; /* some comment
+                                 ~ [0]
+        */ break
+    case 'track':   track   = foo; // some comment
+                                 ~ [0]
+        break
+}
+
+const x = f(() =>
+    0); const y = 2
+
+a = b;
+     ~ [0]
+++c
+
+foo();
+(bar).foo()
+
+foo();
+(bar as Bar).foo()
+
+foo();
+<Bar>bar.foo()
+
+foo();
+() => {}
+
+foo();
+`bar`
+
+foo();
+`bar${baz}`
+
+a;
+/b/g
+
+a;
+/=b/i
+
+function bar(foo) { if (foo) return true; return false }
+function bar(foo) { if (foo) {return true;} return false;}
+                                         ~ [0]
+                                                        ~ [0]
+
+class Foo {
+    public [foo];
+                ~ [0]
+    ['moo']
+    public bar = foo;
+    ['foo']
+    public baz = () => true;
+    ['foobar']
+    public baz2 = () => () => {return true};
+                                           ~ [0]
+    ['foobarbaz']
+    public bas = () => {return true};
+                                    ~ [0]
+    ['barfoo']
+    public moar = () =>
+        true;
+    ['barbaz']
+}
+
+declare module "foo";
+{ /* don't remove semicolon, otherwise the shorthand module get's a body */ }
+
+function *gen() {
+    yield;
+         ~ [0]
+    []
+    yield 1;
+    []
+    if (foo)
+        return yield;
+                    ~ [0]
+    []
+    if (!foo)
+        return yield 1 || yield;
+                               ~ [0]
+    []
+    return yield 1;
+    []
+}
+
+var foo = () => {};
+                  ~ [0]
+[]
+var bar; var foo = function() {};
+[]
+
+var
+[]
+
+const
+[]
+
+let
+[]
+
+[0]: Unnecessary semicolon

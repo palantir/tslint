@@ -1,0 +1,4 @@
+const [ paramA, paramB ] = [15, 'test'];
+      ~~~~~~~~~~~~~~~~~~ [expected array-destructuring: '[ paramA, paramB ]' to have a typedef]
+
+const [ paramA3, paramB3 ]: { number: string, paramB1: string } = [15, 'test'];

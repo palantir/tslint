@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-default-export": true
+  }
+}

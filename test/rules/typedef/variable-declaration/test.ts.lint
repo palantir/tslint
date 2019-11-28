@@ -1,0 +1,5 @@
+var v = { }
+    ~ [expected variable-declaration: 'v' to have a typedef]
+
+const { paramA, paramB } = { paramA: "test", paramB: 15 };
+const [ paramA, paramB ] = [15, 'test'];

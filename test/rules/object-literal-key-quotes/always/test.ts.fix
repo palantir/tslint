@@ -1,0 +1,20 @@
+const o = {
+  'hello': 123,
+  "goodbye": 234, // failure
+  "quote": 345,
+  "needs quote": 789,
+  "hyphens-need-quotes": null,
+  [computed]: 456,
+  "123": "hello", // failure
+  "10000": "something", // failure
+  "0.123": "float", // failure
+  '123': 'numbers do not need quotes',
+  '010': 'but this one does.',
+  '.123': 'as does this one',
+  "fn"() { return },
+  "true": 0, // failure
+  "0x0": 0,
+  "true": 0,
+  x,
+  ...y,
+};

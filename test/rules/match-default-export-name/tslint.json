@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "match-default-export-name": true
+  }
+}

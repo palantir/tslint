@@ -1,0 +1,39 @@
+///<reference path="something.ts"/>
+class Clazz { // this comment is correct
+    /* block comment
+     * adada
+     */
+    public funcxion() { // This comment has a capital letter starting it
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+        //This comment is on its own line, and starts with a capital _and_ no space
+          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [space_lower]
+        console.log("test"); //this comment has no space
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~ [space]
+    }
+    /// <not a reference/>
+    ////foo
+        ~~~ [space]
+}
+
+//#region test
+//#endregion
+
+`${location.protocol}//${location.hostname}`
+
+//noinspection JSUnusedGlobalSymbols
+const unusedVar = 'unneeded value';
+
+// TODO: Write more tests
+  ~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+// HACKING is not an exception
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [lower]
+
+// STDIN for input
+// STDOUT for output
+// stderr for errors
+
+
+
+[lower]: comment must start with lowercase letter or its start must match the regex pattern "STD\w{2,3}"
+[space]: comment must start with a space
+[space_lower]: comment must start with a space and lowercase letter or its start must match the regex pattern "STD\w{2,3}"

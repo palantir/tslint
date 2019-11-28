@@ -1,0 +1,2 @@
+let bar = baz;
+let foo = bar; // tslint:disable-line: eofline

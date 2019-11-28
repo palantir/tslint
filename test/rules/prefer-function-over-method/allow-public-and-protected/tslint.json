@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "prefer-function-over-method": [true, "allow-public", "allow-protected"]
+  }
+}

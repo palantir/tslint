@@ -1,0 +1,527 @@
+// region ObjectLiteralWithPropertyGetter
+
+var noPreceedingSpaceNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop():string {
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop(): string {
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop():   string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop() :string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop() : string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop() :   string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop()   :string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop()   : string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop()   :   string {
+        return this._Prop;
+    }
+};
+
+// endregion
+
+// region Interface
+
+interface NoPreceedingSpaceNoSubsequentSpaceInterface {
+    Prop:string;
+}
+
+interface NoPreceedingSpaceWithSubsequentSpaceInterface {
+    Prop: string;
+}
+
+interface NoPreceedingSpaceWithSubsequentSpacesInterface {
+    Prop:   string;
+}
+
+interface WithPreceedingSpaceNoSubsequentSpaceInterface {
+    Prop :string;
+}
+
+interface WithPreceedingSpaceWithSubsequentSpaceInterface {
+    Prop : string;
+}
+
+interface WithPreceedingSpaceWithSubsequentSpacesInterface {
+    Prop :   string;
+}
+
+interface WithPreceedingSpacesNoSubsequentSpaceInterface {
+    Prop   :string;
+}
+
+interface WithPreceedingSpacesWithSubsequentSpaceInterface {
+    Prop   : string;
+}
+
+interface WithPreceedingSpacesWithSubsequentSpacesInterface {
+    Prop   :   string;
+}
+
+// endregion
+
+// region Function
+
+function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
+    var c:number = a + b;
+    var d:number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:Exception) {
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
+    var c: number = a + b;
+    var d: number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex: Exception) {
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   number {
+    var c:   number = a + b;
+    var d:   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
+    var c :number = a + b;
+    var d :number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : number {
+    var c : number = a + b;
+    var d : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :   number {
+    var c :   number = a + b;
+    var d :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :number {
+    var c   :number = a + b;
+    var d   :number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)   : number {
+    var c   : number = a + b;
+    var d   : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   number)   :   number {
+    var c   :   number = a + b;
+    var d   :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :   Exception) {
+        console.log(ex);
+    }
+}
+
+// endregion
+
+// region Function multi-line signature
+
+function noPreceedingSpaceNoSubsequentSpaceMultiLineFn(
+    a:number,
+    b:number
+):number {
+    var c:number = a + b;
+    var d:number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:Exception) {
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpaceMultiLineFn(
+    a: number,
+    b: number
+): number {
+    var c: number = a + b;
+    var d: number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex: Exception) {
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpacesMultiLineFn(
+    a:   number,
+    b:   number
+):   number {
+    var c:   number = a + b;
+    var d:   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceNoSubsequentSpaceMultiLineFn(
+    a :number,
+    b :number
+) :number {
+    var c :number = a + b;
+    var d :number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceMultiLineFn(
+    a : number,
+    b : number
+) : number {
+    var c : number = a + b;
+    var d : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpacesMultiLineFn(
+    a :   number,
+    b :   number
+) :   number {
+    var c :   number = a + b;
+    var d :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesNoSubsequentSpaceMultiLineFn(
+    a   :number,
+    b   :number
+)   :number {
+    var c   :number = a + b;
+    var d   :number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpaceMultiLineFn(
+    a   : number,
+    b   : number
+)   : number {
+    var c   : number = a + b;
+    var d   : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpacesMultiLineFn(
+    a   :   number,
+    b   :   number
+)   :   number {
+    var c   :   number = a + b;
+    var d   :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :   Exception) {
+        console.log(ex);
+    }
+}
+
+// endregion
+
+// region CallSignaturePaddedParams
+
+function noPreceedingSpaceNoSubsequentSpaceSignature( ):{};
+
+function noPreceedingSpaceWithSubsequentSpaceSignature( ): {};
+
+function noPreceedingSpaceWithSubsequentSpacesSignature( ):   {};
+
+function withPreceedingSpaceNoSubsequentSpaceSignature( ) :{};
+
+function withPreceedingSpaceWithSubsequentSpaceSignature( ) : {};
+
+function withPreceedingSpaceWithSubsequentSpacesSignature( ) :   {};
+
+function withPreceedingSpacesNoSubsequentSpaceSignature( )   :{};
+
+function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
+
+function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
+
+// endregion
+
+// region Class
+
+class NoPreceedingSpaceNoSubsequentSpaceClass {
+    [index:number]:string
+
+    Prop:string = "some property";
+
+    public get name():string {
+        return "some name";
+    }
+
+    public set name(a:string):void {}
+
+    public shemp(
+        a:number,
+        b:number
+    ):void {}
+}
+
+class NoPreceedingSpaceWithSubsequentSpaceClass {
+    [index: number]: string
+
+    Prop: string = "some property";
+
+    public get name(): string {
+        return "some name";
+    }
+
+    public set name(a: string): void {}
+
+    public shemp(
+        a: number,
+        b: number
+    ): void {}
+}
+
+class NoPreceedingSpaceWithSubsequentSpacesClass {
+    [index:   number]:   string
+
+    Prop:   string = "some property";
+
+    public get name():   string {
+        return "some name";
+    }
+
+    public set name(a:   string):   void {}
+
+    public shemp(
+        a:   number,
+        b:   number
+    ):   void {}
+}
+
+class WithPreceedingSpaceNoSubsequentSpaceClass {
+    [index :number] :string
+
+    Prop :string = "some property";
+
+    public get name() :string {
+        return "some name";
+    }
+
+    public set name(a :string) :void {}
+
+    public shemp(
+        a :number,
+        b :number
+    ) :void {}
+}
+
+class WithPreceedingSpaceWithSubsequentSpaceClass {
+    [index : number] : string
+
+    Prop : string = "some property";
+
+    public get name() : string {
+        return "some name";
+    }
+
+    public set name(a : string) : void {}
+
+    public shemp(
+        a : number,
+        b : number
+    ) : void {}
+}
+
+class WithPreceedingSpaceWithSubsequentSpacesClass {
+    [index :   number] :   string
+
+    Prop :   string = "some property";
+
+    public get name() :   string {
+        return "some name";
+    }
+
+    public set name(a :   string) :   void {}
+
+    public shemp(
+        a :   number,
+        b :   number
+    ) :   void {}
+}
+
+class WithPreceedingSpacesNoSubsequentSpaceClass {
+    [index   :number]   :string
+
+    Prop   :string = "some property";
+
+    public get name()   :string {
+        return "some name";
+    }
+
+    public set name(a   :string)   :void {}
+
+    public shemp(
+        a   :number,
+        b   :number
+    )   :void {}
+}
+
+class WithPreceedingSpacesWithSubsequentSpaceClass {
+    [index   : number]   : string
+
+    Prop   : string = "some property";
+
+    public get name()   : string {
+        return "some name";
+    }
+
+    public set name(a   : string)   : void {}
+
+    public shemp(
+        a   : number,
+        b   : number
+    )   : void {}
+}
+
+class WithPreceedingSpacesWithSubsequentSpacesClass {
+    [index   :   number]   :   string
+
+    Prop   :   string = "some property";
+
+    public get name()   :   string {
+        return "some name";
+    }
+
+    public set name(a   :   string)   :   void {}
+
+    public shemp(
+        a   :   number,
+        b   :   number
+    )   :   void {}
+}
+
+// endregion

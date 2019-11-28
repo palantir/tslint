@@ -1,0 +1,14 @@
+type T = { x: number; }
+     ~                  [0]
+
+type U = string;
+type V = { x: number; } | { y: string; };
+export type W<T> = {
+            ~ [0]
+    x: T,
+};
+type Record<T, U> = {
+ 	[K in T]: U; 
+}
+
+[0]: Use an interface instead of a type literal.

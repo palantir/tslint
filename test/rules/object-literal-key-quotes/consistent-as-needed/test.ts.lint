@@ -1,0 +1,52 @@
+
+const o = {
+  'hello': 123,
+  ~~~~~~~       [Unnecessarily quoted property 'hello' found.]
+  "bye": 45,
+  ~~~~~      [Unnecessarily quoted property 'bye' found.]
+};
+const v = {
+  "hello": 123,
+  ~~~~~~~       [Unnecessarily quoted property 'hello' found.]
+  "bye": 45,
+  ~~~~~      [Unnecessarily quoted property 'bye' found.]
+};
+const s = {
+  hello: 123,
+  bye: 45,
+};
+const r = {
+  "hello": 123,
+  "bye-bye": 45,
+};
+const p = {
+  hello: 123,
+  "bye": 45,
+  ~~~~~      [Unnecessarily quoted property 'bye' found.]
+};
+const q = {
+  hello: 123,
+  ~~~~~       [Unquoted property 'hello' found.]
+  "bye-bye": 45,
+};
+const t = {
+  hello: 123,
+  nested: {
+    "bird": 2,
+    ~~~~~~     [Unnecessarily quoted property 'bird' found.]
+    egg: 3,
+  }
+};
+const u = {
+  hello: 123,
+  bye: 45,
+  nested: {
+    "bird": 1,
+    ~~~~~~     [Unnecessarily quoted property 'bird' found.]
+    "egg": 2,
+    ~~~~~     [Unnecessarily quoted property 'egg' found.]
+  }
+};
+const v = {
+    ...o,
+};

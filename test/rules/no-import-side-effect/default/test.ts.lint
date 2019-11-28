@@ -1,0 +1,22 @@
+
+// valid cases
+import {Injectable, Component, Directive} from '@angular/core';
+import {Inject} from '@angular/core';
+import {Observable} from 'rxjs/Observable';
+import {Observable as Obs} from 'rxjs/Observable';
+import * as _ from 'underscore';
+import DefaultExport from 'module-with-default';
+
+// invalid cases
+import './allow-side-effect';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+import './styles.css';
+~~~~~~~~~~~~~~~~~~~~~~  [0]
+import 'rxjs/add/observable/of';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+import 'rxjs/add/operator/mapTo';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+import 'random-side-effect';
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+[0]: import with explicit side-effect

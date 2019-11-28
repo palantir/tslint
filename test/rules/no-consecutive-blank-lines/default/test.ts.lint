@@ -1,0 +1,42 @@
+// the markup for this test is a little bit weird
+// tslint, for the first error below, says it goes from 
+// [5, 1] to [6, 1], and thus the markup appears to be off (but it's not)
+
+
+~nil
+class Clazz { // comment
+~nil [Consecutive blank lines are forbidden]
+
+    public funcxion() {
+
+        // also comment
+
+
+~nil
+        console.log("test");
+~nil [Consecutive blank lines are forbidden]
+
+    }
+
+
+~nil
+}
+~nil [Consecutive blank lines are forbidden]
+
+//Begin whitespace
+// The next two lines of "code" contain only tabs or spaces, they are also considered "blank" lines
+        
+        
+~ [Consecutive blank lines are forbidden]
+		
+		
+let foo = `
+ 
+ 
+`;
+
+let bar = `${bar
+ 
+ 
+~ [Consecutive blank lines are forbidden]
+}`;

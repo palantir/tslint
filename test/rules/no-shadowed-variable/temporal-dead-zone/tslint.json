@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "no-shadowed-variable": [
+      true,
+      {
+        "temporalDeadZone": false
+      }
+    ]
+  }
+}

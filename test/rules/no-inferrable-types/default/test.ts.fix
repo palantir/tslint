@@ -1,0 +1,35 @@
+// errors, inferrable type is declared
+let a = 7;
+let b = false;
+let c = "foo";
+let d = Infinity;
+let e = -Infinity;
+class C {
+    x = 1;
+}
+
+// errors, types are inferrable
+function foo (a = 5, b = true, c = "bah") { }
+
+class Foo {
+    bar = 0;
+    baz = true,
+    bas = "moar";
+    readonly foo: boolean = false;
+    constructor(readonly foobar: string = "test", public barfoo = 1) {}
+}
+
+// not errors, inferrable type is not declared
+let _x = 7;
+let _y = false;
+let _z = "foo";
+
+// not error, type is not inferrable
+let weird: any = 123;
+
+// not errors, inferrable type is not declared
+function bar(a = 5, b = true, c = "bah") { }
+
+// not errors, types are not inferrable
+function baz(a: any = 5, b: any = true, c: any = "bah") { }
+

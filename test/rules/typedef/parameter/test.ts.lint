@@ -1,0 +1,19 @@
+var NoTypesFn = function (a, b) {
+                          ~ [expected parameter: 'a' to have a typedef]
+                             ~ [expected parameter: 'b' to have a typedef]
+}
+
+var NoTypesArrowFn = (a, b) => {}
+
+class AComponent {
+    private _test(): void {
+        this._foo.test({
+            callback: () => {
+                // asd
+            },
+        });
+    }
+}
+
+function foo(bar: any) :void {}
+foo({bar: ()=>{}});

@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "one-variable-per-declaration": true
+  }
+}

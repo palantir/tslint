@@ -1,0 +1,44 @@
+let foo;
+
+function tmp(t: any) {
+    let x = 3;
+}
+
+let i,
+    j;
+
+let [a, b] = [1, 2];
+
+for (let n; false;);
+for (let n1 in foo);
+for (let n2 of foo);
+
+export let exportVar0 = 0;
+export   let  exportVar1 = 1;
+export   let  exportVar2 = 2,
+         exportVar21 = 21;
+export /* var tst */ let   exportVar3 = 3;
+
+module quz {
+    export let i;
+}
+
+declare var tmp2: any;
+
+let bar;
+const qux;
+
+let k,
+    l;
+
+let [x, y] = [1, 2];
+
+for (n; false;);
+for (let n; false;);
+for (let name in foo);
+for (let name of foo);
+for (const name in foo);
+for (const name of foo);
+
+export let exportLet = 1;
+export const exportConst = 1;

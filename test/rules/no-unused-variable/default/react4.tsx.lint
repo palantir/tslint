@@ -1,0 +1,7 @@
+[typescript]: < 2.9.0
+import * as React from "react";
+#if typescript >= 2.6.0
+            ~~~~~               ['React' is declared but its value is never read.]
+#else
+            ~~~~~               ['React' is declared but never used.]
+#endif

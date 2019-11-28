@@ -1,0 +1,16 @@
+class Foo {
+    public static x: number;
+    private static y: number;
+    public x: number;
+    private y: number;
+
+    public static m() {}
+    private static n() {}
+
+    constructor() {}
+    public m() {}
+    private n() {}
+
+    z: number;
+    ~~~~~~~~~~ [Declaration of public instance field not allowed after declaration of private instance method. Instead, this should come after private static fields.]
+}

@@ -1,0 +1,54 @@
+namespace N {
+    export type T = number;
+    export const x: N.T = 0;
+                    ~ [N]
+
+    export namespace M {
+        export type U = N.T;
+                        ~ [N]
+        export const y: M.U = 0;
+                        ~ [M]
+        export const z: N.M.U = 0;
+                        ~~~ [NM]
+        export const a = N.x;
+                         ~ [N]
+        export const b = M.y;
+                         ~ [M]
+        export const c = N.M.z;
+                         ~~~ [NM]
+    }
+}
+
+namespace A.B.C1 {
+    export const D = 7;
+}
+
+namespace A.B.C2 {
+    const copy = A.B.C1.D;
+                 ~~~ [Qualifier is unnecessary since 'A.B' is in scope.]
+}
+
+import * as B from "./b.test";
+declare module "./b.test" {
+    const x: B.T;
+             ~ [Qualifier is unnecessary since 'B' is in scope.]
+}
+
+namespace X {
+    export type T = number;
+    namespace Y {
+        type T = string;
+        // This qualifier *is* necessary since 'X.T' is shadowed.
+        const x: X.T = 0;
+    }
+}
+
+enum E {
+    A,
+    B = E.A
+        ~ [Qualifier is unnecessary since 'E' is in scope.]
+}
+
+[N]: Qualifier is unnecessary since 'N' is in scope.
+[M]: Qualifier is unnecessary since 'M' is in scope.
+[NM]: Qualifier is unnecessary since 'N.M' is in scope.

@@ -1,0 +1,7 @@
+var single = 'single';
+             ~~~~~~~~  [' should be "]
+    var double = "married";
+var singleWithinDouble = "'singleWithinDouble'";
+var doubleWithinSingle = '"doubleWithinSingle"';
+var tabNewlineWithinSingle = 'tab\tNewline\nWithinSingle';
+                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [' should be "]

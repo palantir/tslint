@@ -1,0 +1,14 @@
+interface I { }
+          ~     [An empty interface is equivalent to `{}`.]
+
+interface J extends I { }
+          ~               [An interface declaring no members is equivalent to its supertype.]
+
+interface K { x: number; }
+
+interface L extends J, K {} // extending more than one interface is ok, as it can be used instead of intersection types
+
+interface M extends {} // don't crash on empty extends list
+          ~               [An interface declaring no members is equivalent to its supertype.]
+
+interface N extends Promise<string|number> {}

@@ -1,0 +1,21 @@
+let undefined = 8;
+    ~~~~~~~~~      [variable name clashes with keyword/type]
+let boolean: boolean;
+    ~~~~~~~           [variable name clashes with keyword/type]
+function bad(any: any) { }
+             ~~~           [variable name clashes with keyword/type]
+let [number] = [3];
+     ~~~~~~         [variable name clashes with keyword/type]
+let {String} = {String: 1};
+     ~~~~~~                 [variable name clashes with keyword/type]
+
+// good:
+let foo = 2;
+let bar: any;
+function good(baz: any) { }
+let [faz] = [5];
+const {pom} = {pom: 5};
+
+interface Wob {
+    number: string;
+}

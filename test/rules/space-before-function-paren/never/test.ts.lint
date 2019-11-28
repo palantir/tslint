@@ -1,0 +1,107 @@
+// Anonymous
+function () {}
+        ~ [0]
+function (): void {
+        ~ [0]
+}
+function (a: string, cb: ()=>{}): void {}
+        ~ [0]
+
+var f = function () {};
+                ~ [0]
+var f = function (): void {
+                ~ [0]
+};
+var f = function (a: string, cb: ()=>{}): void {};
+                ~ [0]
+
+function <T>() {}
+var f = function <T>() {};
+
+// Named
+function foobar (){}
+               ~ [0]
+function foobar (): void{
+               ~ [0]
+}
+function foobar (a: string, cb: ()=>{}): void{}
+               ~ [0]
+
+var f = function foobar (){};
+                       ~ [0]
+var f = function foobar (): void{
+                       ~ [0]
+};
+var f = function foobar (a: string, cb: ()=>{}): void{};
+                       ~ [0]
+
+function foobar<T> () {}
+                  ~  [0]
+var f = function foobar<T> () {}
+                          ~  [0]
+
+// Default export (name ommited)
+export default function () {}
+                       ~ [0]
+
+// Async Arrow
+// ignore
+() => {};
+var arrow = () => {};
+
+async () => {};
+     ~ [0]
+var arrow = async () => {};
+                 ~ [0]
+
+<T>() => {};
+var arrow = <T>() => {};
+
+async <T>() => {};
+var arrow = async <T>() => {};
+
+// Method
+interface IMyInterface {
+        one ();
+           ~ [0]
+        two (): void;
+           ~ [0]
+        three (a: string, cb: ()=>{}): void;
+             ~ [0]
+        four<T> ();
+               ~  [0]
+}
+class MyClass {
+        one () {}
+           ~ [0]
+        two (): void {
+           ~ [0]
+        }
+        three (a: string, cb: ()=>{}): void {}
+             ~ [0]
+        four<T> () {}
+               ~  [0]
+
+        get a () {}
+             ~ [0]
+        set a () {}
+             ~ [0]
+}
+
+
+// Constructor
+class MyClass {
+        constructor () {}
+                   ~ [0]
+}
+class MyClass {
+        constructor (): void {
+                   ~ [0]
+        }
+}
+class MyClass {
+        constructor (a: string, cb: ()=>{}): void {}
+                   ~ [0]
+}
+
+[0]: Spaces before function parens are disallowed

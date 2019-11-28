@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "no-trailing-whitespace": [
+      true,
+      "ignore-template-strings"
+    ]
+  }
+}

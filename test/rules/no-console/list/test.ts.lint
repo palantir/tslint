@@ -1,0 +1,13 @@
+console.time();
+console.log("log");
+~~~~~~~~~~~             [Calls to 'console.log' are not allowed.]
+console.dir(object);
+~~~~~~~~~~~             [Calls to 'console.dir' are not allowed.]
+console.info("info");
+console.trace("trace");
+console.warn("warn");
+~~~~~~~~~~~~            [Calls to 'console.warn' are not allowed.]
+console.error("error");
+~~~~~~~~~~~~~           [Calls to 'console.error' are not allowed.]
+console.something();
+console.timeEnd();

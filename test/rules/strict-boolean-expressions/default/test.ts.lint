@@ -1,0 +1,235 @@
+class C { }
+enum MyEnum {
+	A, B, C
+}
+let anyType: {};
+let boolType: boolean;
+let boolType2: boolean;
+let bwrapType: Boolean;
+let numType = 9;
+let strType = "string";
+let objType = new Object();
+let classType = new C();
+let enumType = MyEnum.A;
+let boolFn = () => { return true; };
+let strFn = () => { return strType; };
+let numFn = () => { return numType; };
+let boolExpr = (strType !== undefined);
+
+/*** Binary Expressions ***/
+/*** Invalid Boolean Expressions ***/
+classType && boolType;
+~~~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+anyType && boolType;
+~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+numType && boolType;
+~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+boolType && strType;
+            ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
+boolType && objType && enumType;
+            ~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+                       ~~~~~~~~ [This type is not allowed in the operand for the '&&' operator because it is an enum. Only booleans are allowed.]
+bwrapType && boolType;
+~~~~~~~~~              [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+
+boolType || classType;
+            ~~~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+boolType || anyType;
+            ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+boolType || numType;
+            ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
+strType || boolType;
+~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+bwrapType || boolType;
+~~~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+objType || boolType || enumType;
+~~~~~~~                          [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+                       ~~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is an enum. Only booleans are allowed.]
+
+boolExpr && strType;
+            ~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
+numType || boolExpr;
+~~~~~~~              [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
+numType && boolExpr || strType;
+~~~~~~~                         [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+                       ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+bwrapType || boolExpr && bwrapType;
+~~~~~~~~~                           [This type is not allowed in the operand for the '||' operator because it is always truthy. Only booleans are allowed.]
+                         ~~~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is always truthy. Only booleans are allowed.]
+
+/*** Valid Boolean Expressions ***/
+boolType && boolType2;
+boolExpr || boolType;
+(numType > 0) && boolFn();
+(strType !== "bool") && boolExpr;
+(numType > 0) && (strType !== "bool");
+(strType !== undefined) || (numType < 0);
+
+/*** ConditionalExpression ***/
+/*** Invalid ***/
+strType ? strType : numType;
+~~~~~~~                      [This type is not allowed in the condition because it is a string. Only booleans are allowed.]
+numType ? numType : numFn();
+~~~~~~~                      [This type is not allowed in the condition because it is a number. Only booleans are allowed.]
+objType ? objType : boolExpr;
+~~~~~~~                       [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
+classType ? strType : undefined;
+~~~~~~~~~                        [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
+bwrapType ? 1 : 0;
+~~~~~~~~~          [This type is not allowed in the condition because it is always truthy. Only booleans are allowed.]
+enumType ? 0 : 1;
+~~~~~~~~          [This type is not allowed in the condition because it is an enum. Only booleans are allowed.]
+
+/*** Valid ***/
+boolFn() ? numType : strType;
+boolType ? strType : undefined;
+
+/*** PrefixUnary Expressions ***/
+/*** Invalid ***/
+!!numType;
+  ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is a number. Only booleans are allowed.]
+!strType;
+ ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is a string. Only booleans are allowed.]
+!objType;
+ ~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
+!enumType;
+ ~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is an enum. Only booleans are allowed.]
+!!classType;
+  ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
+!bwrapType;
+ ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always truthy. Only booleans are allowed.]
+!!undefined;
+  ~~~~~~~~~  [This type is not allowed in the operand for the '!' operator because it is always falsy. Only booleans are allowed.]
+
+/*** Valid ***/
+!!boolFn();
+!boolExpr;
+!!boolType;
+
+/*** If Statement ***/
+/*** Invalid ***/
+if (numType) { }
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a number. Only booleans are allowed.]
+if (objType) { }
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
+if (strType) { }
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a string. Only booleans are allowed.]
+if (bwrapType) { }
+    ~~~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
+if (strFn()) { }
+    ~~~~~~~                       [This type is not allowed in the 'if' condition because it is a string. Only booleans are allowed.]
+if (MyEnum.A) { }
+    ~~~~~~~~                       [This type is not allowed in the 'if' condition because it is an enum. Only booleans are allowed.]
+if (classType) { }
+    ~~~~~~~~~                       [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
+
+/*** Valid ***/
+if (boolFn()) { }
+if (boolExpr) { }
+if (boolType) { }
+
+/*** While Statement ***/
+/*** Invalid ***/
+while (numType) { break; }
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a number. Only booleans are allowed.]
+while (objType) { break; }
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
+while (strType) { break; }
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a string. Only booleans are allowed.]
+while (strFn()) { break; }
+       ~~~~~~~                       [This type is not allowed in the 'while' condition because it is a string. Only booleans are allowed.]
+while (bwrapType) { break; }
+       ~~~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
+while (MyEnum.A) { break; }
+       ~~~~~~~~                       [This type is not allowed in the 'while' condition because it is an enum. Only booleans are allowed.]
+while (classType) { break; }
+       ~~~~~~~~~                       [This type is not allowed in the 'while' condition because it is always truthy. Only booleans are allowed.]
+
+/*** Valid ***/
+while (boolFn()) { break; }
+while (boolExpr) { break; }
+while (boolType) { break; }
+
+/*** Do Statement ***/
+/*** Invalid ***/
+do { break; } while (numType);
+                     ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a number. Only booleans are allowed.]
+do { break; } while (objType);
+                     ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
+do { break; } while (strType);
+                     ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a string. Only booleans are allowed.]
+do { break; } while (bwrapType);
+                     ~~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
+do { break; } while (strFn());
+                     ~~~~~~~   [This type is not allowed in the 'do-while' condition because it is a string. Only booleans are allowed.]
+do { break; } while (MyEnum.A);
+                     ~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is an enum. Only booleans are allowed.]
+do { break; } while (classType);
+                     ~~~~~~~~~   [This type is not allowed in the 'do-while' condition because it is always truthy. Only booleans are allowed.]
+
+/*** Valid ***/
+do { break; } while (boolFn());
+do { break; } while (boolExpr);
+do { break; } while (boolType);
+
+/*** For Statement ***/
+/*** Invalid ***/
+for (let j = 0; j; j++) { break; }
+                ~                  [This type is not allowed in the 'for' condition because it is a number. Only booleans are allowed.]
+/*** Valid ***/
+for (let j = 0; j > numType; j++) { break; }
+
+// Allow always-truthy or always-falsy in the case of 'true' and 'false'
+while (true) {}
+if (false) {}
+// Do *not* allow 'true' in a union
+declare var trueOrDate: true | Date;
+if (trueOrDate) {}
+    ~~~~~~~~~~ [This type is not allowed in the 'if' condition because it is always truthy. Only booleans are allowed.]
+
+declare var a: any;
+// Allow 'any'
+if (a) {}
+
+let bool1:boolean = true
+let bool2:boolean = true
+let obj:{}|undefined = {}
+
+  bool1 && obj && bool2
+           ~~~          [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+  bool1 && bool2 && obj
+                    ~~~ [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+  boolExpr && numType || strType;
+              ~~~~~~~             [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+                         ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+  boolExpr || numType || strType;
+              ~~~~~~~             [This type is not allowed in the operand for the '||' operator because it is a number. Only booleans are allowed.]
+                         ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+  boolExpr || numType && strType;
+              ~~~~~~~             [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+                         ~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
+  boolExpr && numType && strType;
+              ~~~~~~~             [This type is not allowed in the operand for the '&&' operator because it is a number. Only booleans are allowed.]
+                         ~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
+  boolExpr || boolType && strType;
+                          ~~~~~~~  [This type is not allowed in the operand for the '&&' operator because it is a string. Only booleans are allowed.]
+  boolExpr || boolType || strType;
+                          ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+  boolExpr && boolType || strType;
+                          ~~~~~~~  [This type is not allowed in the operand for the '||' operator because it is a string. Only booleans are allowed.]
+
+  bool1 && obj && bool2
+           ~~~          [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+
+  obj && bool2 && obj
+  ~~~                 [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+                  ~~~ [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+
+  obj || bool2 || obj
+  ~~~                 [This type is not allowed in the operand for the '||' operator because it could be undefined. Only booleans are allowed.]
+                  ~~~ [This type is not allowed in the operand for the '||' operator because it could be undefined. Only booleans are allowed.]
+
+  obj || bool2 && obj
+  ~~~                 [This type is not allowed in the operand for the '||' operator because it could be undefined. Only booleans are allowed.]
+                  ~~~ [This type is not allowed in the operand for the '&&' operator because it could be undefined. Only booleans are allowed.]
+

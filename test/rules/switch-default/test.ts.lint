@@ -1,0 +1,74 @@
+switch (foo) {
+~~~~~~~~~~~~~~
+case 1:
+~~~~~~~
+    bar();
+~~~~~~~~~~
+    break;
+~~~~~~~~~~
+}
+~ [Switch statement should include a 'default' case]
+
+switch (foo) {
+~~~~~~~~~~~~~~
+case 1:
+~~~~~~~
+    bar();
+~~~~~~~~~~
+    break;
+~~~~~~~~~~
+case 2:
+~~~~~~~
+    bar();
+~~~~~~~~~~
+    break;
+~~~~~~~~~~
+case 3:
+~~~~~~~
+    bar();
+~~~~~~~~~~
+    break;
+~~~~~~~~~~
+}
+~ [Switch statement should include a 'default' case]
+
+// valid
+switch (foo) {
+case 1:
+    bar();
+    break;
+default:
+    break;
+}
+
+// valid
+switch (foo) {
+default:
+    bar();
+    break;
+case 1:
+    bar();
+    break;
+}
+
+// valid
+switch (foo) {
+case 1:
+    bar();
+    break;
+default:
+    break;
+case 2:
+    break;
+}
+
+// valid
+baz:
+while (true){
+    switch(foo) {
+    case 1:
+        bar();
+        continue baz;
+    default:
+    }
+}

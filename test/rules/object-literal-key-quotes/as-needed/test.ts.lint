@@ -1,0 +1,27 @@
+const o = {
+  'hello': 123, // failure
+  ~~~~~~~  [Unnecessarily quoted property 'hello' found.]
+  goodbye: 234,
+  "quote": 345, // failure
+  ~~~~~~~  [Unnecessarily quoted property 'quote' found.]
+  "needs quote": 789,
+  "hyphens-need-quotes": null,
+  [computed]: 456,
+  123: "hello",
+  1e4: "something",
+  .123: "float",
+  '123': 'numbers do not need quotes', // failure
+  ~~~~~  [Unnecessarily quoted property '123' found.]
+  1.23: null,
+  '010': 'but this one does.',
+  '.123': 'as does this one',
+  '-1': 'and this one',
+  fn() { return },
+  true: 0,
+  "0x0": 0,
+  "true": 0, // failure
+  ~~~~~~  [Unnecessarily quoted property 'true' found.]
+  '': 'always quote the empty string',
+  x,
+  ...y,
+};

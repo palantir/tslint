@@ -1,0 +1,8 @@
+// this line uses LF
+~~~~~~~~~~~~~~~~~~~~ [Expected linebreak to be 'CRLF']
+// this line uses LF
+~~~~~~~~~~~~~~~~~~~~ [Expected linebreak to be 'CRLF']
+// this line uses LF
+~~~~~~~~~~~~~~~~~~~~ [Expected linebreak to be 'CRLF']
+// this line uses LF
+~~~~~~~~~~~~~~~~~~~~ [Expected linebreak to be 'CRLF']

@@ -1,0 +1,29 @@
+function doIt() {}
+async function doAsync() {}
+function print(strs) {}
+
+[].forEach(x => console.log(x));
+                ~~~~~~~~~~~~~~ [0]
+
+[].forEach(x => x && console.log(x));
+                     ~~~~~~~~~~~~~~ [0]
+
+async function f(): Promise<void> {
+    const x = doIt();
+              ~~~~~~  [0]
+    console.log(await doAsync());
+                ~~~~~~~~~~~~~~~  [0]
+    return print``;
+           ~~~~~~~  [0]
+}
+
+true && console.log(0);
+false || console.log(0);
+
+declare function doIt(): void;
+declare function doAsync(): Promise<void>;
+declare function print(strs: TemplateStringsArray): void;
+
+!!data ? console.info(message, data) : console.info(message);
+
+[0]: Expression has type `void`. Put it on its own line as a statement.

@@ -1,0 +1,107 @@
+[typescript]: < 2.9.0
+import { _A } from './a.test';
+
+var x = 3;
+
+var y = x;
+    ~      [err % ('y')]
+var _y = x;
+var z;
+#if typescript >= 2.6.0
+    ~ [err % ('z')]
+#endif
+
+export var abcd = 3;
+
+class ABCD {
+#if typescript >= 2.9.0
+~~~~~~~~~~ ['ABCD' is declared but never used.]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+~~~~~~~~~~ [err % ('ABCD')]
+#endif
+#if typescript < 2.8.0
+      ~~~~ [err % ('ABCD')]
+#endif
+    constructor() {
+        z = 3;
+    }
+}
+
+try {
+  // code here
+} catch (e) {
+  // e is Unused but that's still ok
+}
+
+declare var tmp: any;
+            ~~~       [err % ('tmp')]
+
+export function testDestructuring() {
+    var [a, b] = [1, 2];
+         ~               [err % ('a')]
+            ~            [err % ('b')]
+    var [_a, _b] = [1, 2];
+    var [c] = [3];
+
+    var {d, e} = { d: 1, e: 2 };
+#if typescript >= 2.9.0
+        ~~~~~~                   [All destructured elements are unused.]
+#else
+         ~                       [err % ('d')]
+            ~                    [err % ('e')]
+#endif
+    var {d: _d, e: _e} = { d: 1, e: 2 };
+#if typescript >= 2.9.0
+        ~~~~~~~~~~~~~~           [All destructured elements are unused.]
+#endif
+    // this above is incorrect, unfortunately w/ TS 2.9+, ignore pattern doesn't work for this sort of error
+    var {f} = { f: 3 };
+
+    return c * f;
+}
+
+export var [foo, bar] = [1, 2];
+
+export function testUnusedSpread() {
+  var a = [1, 2];
+      ~           [err % ('a')]
+  var _a = [1, 2];
+  var b = [3, 4];
+  var c = [...b, 5]; // make sure we see that b is being used
+
+  return c;
+
+}
+
+for(let e of [1,2,3]) {
+        ~               [err % ('e')]
+
+}
+
+for(let _e of [1,2,3]) {
+
+}
+
+export function testRenamingDestructure() {
+  var a = 2;
+  let {a: b} = {a: 4};
+#if typescript >= 2.9.0
+      ~~~~~~           [err % ('b')]
+#endif
+#if typescript >= 2.8.0 < 2.9.0
+       ~~~~            [err % ('b')]
+#endif
+#if typescript < 2.8.0
+          ~            [err % ('b')]
+#endif
+  let {a: _b} = {a: 4};
+  let {x: y} = {x: 7}; // false positive
+  return a + y;
+}
+
+#if typescript >= 2.6.0
+[err]: '%s' is declared but its value is never read.
+#else
+[err]: '%s' is declared but never used.
+#endif

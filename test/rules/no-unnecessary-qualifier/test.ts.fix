@@ -1,0 +1,41 @@
+namespace N {
+    export type T = number;
+    export const x: T = 0;
+
+    export namespace M {
+        export type U = T;
+        export const y: U = 0;
+        export const z: U = 0;
+        export const a = x;
+        export const b = y;
+        export const c = z;
+    }
+}
+
+namespace A.B.C1 {
+    export const D = 7;
+}
+
+namespace A.B.C2 {
+    const copy = C1.D;
+}
+
+import * as B from "./b.test";
+declare module "./b.test" {
+    const x: T;
+}
+
+namespace X {
+    export type T = number;
+    namespace Y {
+        type T = string;
+        // This qualifier *is* necessary since 'X.T' is shadowed.
+        const x: X.T = 0;
+    }
+}
+
+enum E {
+    A,
+    B = A
+}
+

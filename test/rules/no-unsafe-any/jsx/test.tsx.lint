@@ -1,0 +1,15 @@
+declare const AnyComponent: any;
+
+const nativeJsxFull = <span></span>;
+const nativeJsxShort = <span />;
+
+const nativeFragmentEmpty = <></>;
+const nativeFragmentFull = <><span /></>;
+
+const componentJsxFull = <AnyComponent></AnyComponent>;
+                          ~~~~~~~~~~~~ [0]
+                                         ~~~~~~~~~~~~ [0]
+const componentJsxShort = <AnyComponent />;
+                           ~~~~~~~~~~~~ [0]
+
+[0]: Unsafe use of expression of type 'any'.

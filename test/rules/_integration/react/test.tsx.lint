@@ -1,0 +1,58 @@
+import * as React from 'react'; // quotemark failure
+                       ~~~~~~~                       [' should be "]
+
+class BazComponent extends React.Component<React.Props<BazComponent>, {}> {
+    public render() {
+        return (
+            <div></div>
+        );
+    }
+}
+
+interface IFooProps extends React.Props<FooComponent> {
+    fooProp: string;
+}
+
+interface IFooState {
+    bar:string[]; // whitespace failure
+        ~                               [missing whitespace]
+}
+
+export class FooComponent extends React.Component<IFooProps, IFooState> {
+    public state = {
+        bar: [] as string[]
+    };
+
+    public render() {
+        return (
+            <div onClick={() => this.onClick()} class={true===false?"foo":"bar"}>
+                                                           ~                      [missing whitespace]
+                                                              ~                   [missing whitespace]
+                                                                   ~              [missing whitespace]
+                                                                    ~             [missing whitespace]
+                                                                         ~        [missing whitespace]
+                                                                          ~       [missing whitespace]
+                {this.state.bar.map((s) => <span>{s}</span>)}
+                <BazComponent someProp={123} anotherProp={456} />
+            </div>
+        );
+	} // indent failure
+~                    [space indentation expected]
+
+    private onClick() {
+        console.info("foo component clicked");
+    }
+}
+
+export function buildFooComponent(): JSX.Element {
+    let x: string = "test";
+    return <FooComponent fooProp={ x } />;
+}
+
+// test false positive for JSX spread (https://github.com/palantir/tslint/issues/658)
+class MyComponent extends React.Component<{}, {}> {
+    public render() {
+        let props = { foo: "bar" };
+        return <div {...props}></div>;
+    }
+}

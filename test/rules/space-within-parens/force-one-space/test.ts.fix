@@ -1,0 +1,11 @@
+// export statement
+export function rgb2lab( r : number, g : number, b : number ) : { L : number; a : number; b: number } {
+    var xyz = Conversion.rgb2xyz( r, g, b );
+    return Conversion.xyz2lab( xyz.x, xyz.y, xyz.z );
+}
+
+foo( /*no param*/ );
+
+// empty parens are always allowed
+foo();
+

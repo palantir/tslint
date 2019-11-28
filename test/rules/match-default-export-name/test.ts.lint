@@ -1,0 +1,3 @@
+import b from "./named.test";
+       ~ [Expected import 'b' to match the default export 'a'.]
+import anyName from "./anonymous.test";

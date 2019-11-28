@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "quotemark": [true, "double"],
+    "variable-name": true,
+    "no-var-keyword": false,
+    "comment-format": [
+      true,
+      "check-space"
+    ]
+  }
+}

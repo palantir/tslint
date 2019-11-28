@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "member-access": [true, "check-accessor"]
+  }
+}

@@ -1,0 +1,65 @@
+let x: Array<number> = [1] as number[];
+                              ~~~~~~~~  [0]
+let y: string[] = <Array<string>>["2"];
+       ~~~~~~~~                         [0]
+let z: Array = [3, "4"];
+let u: unknown[] = [];
+       ~~~~~~~~~       [0]
+
+let xx: Array<Array<number>> = [[1, 2], [3]];
+let yy: number[][] = [[4, 5], [6]];
+        ~~~~~~~~~~                  [0]
+        ~~~~~~~~                    [0]
+
+let ya = [[1, "2"]] as[number, string][];
+                      ~~~~~~~~~~~~~~~~~~  [0]
+
+type Arr<T> = Array<T>;
+
+// Ignore user defined aliases
+let yyyy: Arr<Array<Arr<string>>[]> = [[[["2"]]]];
+              ~~~~~~~~~~~~~~~~~~~~                 [0]
+
+interface ArrayClass<T> {
+    foo: Array<T>;
+    bar: T[];
+         ~~~  [0]
+    baz: Arr<T>;
+}
+
+function fooFunction(foo: Array<ArrayClass<string>>) {
+    return foo.map(e => e.foo);
+}
+
+function barFunction(bar: ArrayClass<String>[]) {
+                          ~~~~~~~~~~~~~~~~~~~~    [0]
+    return bar.map(e => e.bar);
+}
+
+function bazFunction(baz: Arr<ArrayClass<String>>) {
+    return baz.map(e => e.baz);
+}
+
+let fooVar: Array<(c: number) => number>;
+let barVar: ((c: number) => number)[];
+            ~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+type fooUnion = Array<string|number|boolean>;
+type barUnion = (string|number|boolean)[];
+                ~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+
+type fooIntersection = Array<string & number>;
+type barIntersection = (string & number)[];
+                       ~~~~~~~~~~~~~~~~~~~  [0]
+
+interface FooInterface {
+    '.bar': {baz: string[];};
+                  ~~~~~~~~    [0]
+}
+
+// Test an unknown Array
+let t: unknown[] = [];
+       ~~~~~~~~~       [0]
+let u: Array<unknown> = [];
+
+[0]: Array type using 'T[]' is forbidden. Use 'Array<T>' instead.

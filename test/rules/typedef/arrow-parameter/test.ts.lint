@@ -1,0 +1,13 @@
+var NoTypesFn = function (a, b) {}
+
+var NoTypesArrowFn = (a, b) => {}
+                      ~ [expected arrow-parameter: 'a' to have a typedef]
+                         ~ [expected arrow-parameter: 'b' to have a typedef]
+
+someFunc(n => n+1);
+         ~ [expected arrow-parameter: 'n' to have a typedef]
+someFunc((n) => n+1);
+          ~ [expected arrow-parameter: 'n' to have a typedef]
+someFunc((n,m) => n+m);
+          ~ [expected arrow-parameter: 'n' to have a typedef]
+            ~ [expected arrow-parameter: 'm' to have a typedef]

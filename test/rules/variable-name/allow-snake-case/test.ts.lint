@@ -1,0 +1,64 @@
+var validName1 = "hi";
+var VALIDNAME2 = "there";
+var valid_name3 = "tslint";
+var Invalid_name1 = " ";  // failure
+    ~~~~~~~~~~~~~                    [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+var InvalidName2 = " ";  // failure
+    ~~~~~~~~~~~~                    [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+
+class Test {
+    private valid_name = " ";
+    private Invalid_name1 = "how"; // failure
+            ~~~~~~~~~~~~~                     [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+    private _optionallyValid = "are"; // sometimes a failure
+            ~~~~~~~~~~~~~~~~                                 [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+}
+
+function test() {
+    () => {
+        var valid_name = " ";
+        var InVaLiDnAmE4 = "you"; // failure
+            ~~~~~~~~~~~~                     [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+    };
+}
+
+declare var DeclaresAreValid: any;
+
+export function functionWithInvalidParamNames (ok_name, BadName) { // 1 failure
+                                                        ~~~~~~~                  [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+}
+
+let { foo, bar } = { foo: 1, bar: 2 };
+let [ InvalidFoo, invalid_bar, ...invalid_baz ] =  [1, 2, 3, 4]; // 1 failure
+      ~~~~~~~~~~                                                               [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+
+export function anotherFunctionWithInvalidParamNames ([first_element, SecondElement]) { // 1 failure
+                                                                      ~~~~~~~~~~~~~                   [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+    //
+}
+
+export function functionWithInvalidSpread(InvalidArg: ...number) { // 1 failure
+                                          ~~~~~~~~~~                            [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+  //
+}
+
+let optionallyValid_ = "bar";
+    ~~~~~~~~~~~~~~~~          [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+let _$httpBackend_ = "leading and trailing";
+    ~~~~~~~~~~~~~~          [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+
+// Aliases.
+class X {
+  ValidAlias = ValidAlias;
+}
+
+var ValidAlias = some.ValidAlias;
+var ValidAlias = some.InValidAlias;
+    ~~~~~~~~~~                [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+
+var someObject = {MoreValidAlias: 1};
+var {MoreValidAlias: localVar} = someObject;
+var {MoreValidAlias: local_var} = someObject;
+var {MoreValidAlias: LocalVar} = someObject;
+                     ~~~~~~~~                [variable name must be in lowerCamelCase, snake_case or UPPER_CASE]
+var {MoreValidAlias} = someObject;

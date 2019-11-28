@@ -1,0 +1,33 @@
+class Clazz {
+    public funcxion() {
+        console.log("test")   ;
+    }
+
+
+    private foobar() {
+    }
+}
+const template = `
+I have trailing whitespace
+`;
+// single line comment without trailing whitespace
+// single line comment with trailing whitespace
+ /* single line multiline comment */
+/* whitespace after comment */
+/* first line has trailing whitespace
+   second line is ok
+   last line is not checked         */
+/*
+ */
+
+/**
+ * JSDoc comment with trailing whitespace
+ *
+ */
+
+/***
+ * not a JSDoc comment
+ *
+ */
+
+// following line checks for trailing whitespace before EOF

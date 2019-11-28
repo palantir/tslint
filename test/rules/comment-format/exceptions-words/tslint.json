@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "comment-format": [true, "check-space", "check-lowercase", {"ignore-words": ["TODO", "HACK"]}]
+  }
+}

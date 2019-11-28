@@ -1,0 +1,161 @@
+class Promise<T> {
+    then(): Promise<T>;
+}
+
+function returnsPromiseFunction() {
+    return new Promise<void>();
+}
+
+const returnsPromiseVariable = () => new Promise<void>();
+
+class ReturnsPromiseClass {
+    returnsPromiseMemberFunction() {
+        return new Promise<void>();
+    }
+
+    returnsPromiseMemberVariable = () => new Promise();
+
+    static returnsPromiseStaticFunction = () => new Promise();
+}
+
+let a = returnsPromiseFunction();
+let b = returnsPromiseVariable();
+let c = new ReturnsPromiseClass().returnsPromiseMemberFunction();
+let d = new ReturnsPromiseClass().returnsPromiseMemberVariable();
+let e = ReturnsPromiseClass.returnsPromiseStaticFunction();
+
+returnsPromiseFunction();
+~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+returnsPromiseFunction().then();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+returnsPromiseVariable();
+~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+returnsPromiseVariable().then();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+new ReturnsPromiseClass().returnsPromiseMemberFunction();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+new ReturnsPromiseClass().returnsPromiseMemberFunction().then();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+new ReturnsPromiseClass().returnsPromiseMemberVariable();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+new ReturnsPromiseClass().returnsPromiseMemberVariable().then();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+ReturnsPromiseClass.returnsPromiseStaticFunction();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+ReturnsPromiseClass.returnsPromiseStaticFunction().then();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+(function () {
+    let a = returnsPromiseFunction();
+
+    returnsPromiseFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    returnsPromiseFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberVariable();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberVariable().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    ReturnsPromiseClass.returnsPromiseStaticFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    ReturnsPromiseClass.returnsPromiseStaticFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+})();
+
+(() => {
+    let a = returnsPromiseFunction();
+
+    returnsPromiseFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    returnsPromiseFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberVariable();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    new ReturnsPromiseClass().returnsPromiseMemberVariable().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    ReturnsPromiseClass.returnsPromiseStaticFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+
+    ReturnsPromiseClass.returnsPromiseStaticFunction().then();
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       [0]
+})();
+
+[].push(returnsPromiseFunction());
+
+[].push(returnsPromiseFunction().then());
+
+[].push(ReturnsPromiseClass.returnsPromiseStaticFunction());
+
+[].push(ReturnsPromiseClass.returnsPromiseStaticFunction().then());
+
+while (returnsPromiseFunction());
+
+while (returnsPromiseFunction().then());
+
+for (let i = 0; i < returnsPromiseFunction(); i += 1);
+
+for (let i = 0; i < returnsPromiseFunction().then(); i += 1);
+
+for (let i in returnsPromiseFunction());
+
+for (let i in returnsPromiseFunction().then());
+
+for (const promise of returnsPromiseFunction());
+
+for (const promise of returnsPromiseFunction().then());
+
+let promise = Math.random() > .5
+    ? returnsPromiseFunction()
+    : returnsPromiseFunction().then();
+
+declare var foo: boolean;
+if (foo)
+    returnsPromiseFunction();
+    ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+switch(foo) {
+    case true:
+        returnsPromiseFunction();
+        ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+        break;
+    case false: {
+        returnsPromiseFunction();
+        ~~~~~~~~~~~~~~~~~~~~~~~~ [0]
+        break;
+    }
+}
+
+returnsPromiseFunction().catch(e => { console.error(e.stack); });
+
+returnsPromiseFunction().then(() => {}, e => { console.error(e.stack); });
+
+[0]: Promises must be handled appropriately

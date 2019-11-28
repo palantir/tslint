@@ -1,0 +1,51 @@
+// valid case
+var a = ([x, y]) => {};
+var aa = ({x, y}) => {};
+var b = (a: number) => {};
+var c = (a, b) => {};
+var f = (...rest) => {};
+var f = a: number => {}; // TSLint don't warn. But syntax is wrong.
+var bar = <T>(method: () => T) => {
+    method();
+};
+var barbar = <T>(method: (a: any) => T) => {
+    method("");
+};
+var barbarbar = <T>(method: (a) => T) => {
+    method("");
+};
+var piyo = <T, U>(method: () => T) => {
+    method();
+};
+const validAsync = async (param: any) => {};
+
+var e = (a => {})(1);
+var f = ab => {};
+
+arr.map(a => b);
+
+// invalid case
+var a =a => {};
+const invalidAsync = async param => {};
+const invalidAsync = async param => {};
+
+// parens required when return type annotation is present
+const fn = (param): void => {};
+
+let foo =bar => bar;
+
+let foo =bar => bar;
+
+let foo =bar => bar;
+
+let foo = async bar => bar;
+
+arr.map(a => b);
+
+foo(async a => b);
+
+function *gen() { yield a => b; }
+
+export default a => b;
+
+throw a => b;

@@ -1,0 +1,109 @@
+var testVariable = 123;
+
+function testFunction() {
+    if (typeof x === 'null') {
+        ~~~~~~~~~~~~~~~~~~~      [0]
+        console.log("called");
+    }
+    const x = typeof foo === 'undefied'
+              ~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+}
+
+console.log(typeof window == 'object ')
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+
+const string = "string";
+typeof bar === string
+typeof bar === `${string}`;
+typeof bar === `${"s"}tring`;
+
+var num = 123;
+typeof num !== "number";
+typeof num !== "object";
+typeof num !== "string";
+typeof num !== "boolean";
+typeof num !== "function";
+typeof num !== "symbol";
+typeof num !== "undefined";
+
+"number" !== typeof num;
+"object" !== typeof num;
+"string" !== typeof num;
+"boolean" !== typeof num;
+"function" !== typeof num;
+"symbol" !== typeof num;
+"undefined" !== typeof num;
+
+typeof num === "number";
+typeof num === "object";
+typeof num === "string";
+typeof num === "boolean";
+typeof num === "function";
+typeof num === "symbol";
+typeof num === "undefined";
+
+"number" === typeof num;
+"object" === typeof num;
+"string" === typeof num;
+"boolean" === typeof num;
+"function" === typeof num;
+"symbol" === typeof num;
+"undefined" === typeof num;
+
+typeof num == "number";
+typeof num == "object";
+typeof num == "string";
+typeof num == "boolean";
+typeof num == "function";
+typeof num == "symbol";
+typeof num == "undefined";
+
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
+
+typeof num != "number";
+typeof num != "object";
+typeof num != "string";
+typeof num != "boolean";
+typeof num != "function";
+typeof num != "symbol";
+typeof num != "undefined";
+
+"number" == typeof num;
+"object" == typeof num;
+"string" == typeof num;
+"boolean" == typeof num;
+"function" == typeof num;
+"symbol" == typeof num;
+"undefined" == typeof num;
+"frizzle" == typeof num;
+~~~~~~~~~~~~~~~~~~~~~~~ [0]
+
+typeof bar === 123
+~~~~~~~~~~~~~~~~~~      [0]
+typeof bar === undefined
+~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+typeof bar === null
+~~~~~~~~~~~~~~~~~~~      [0]
+typeof bar === true
+~~~~~~~~~~~~~~~~~~~      [0]
+typeof bar === false
+~~~~~~~~~~~~~~~~~~~~      [0]
+
+123 === typeof bar
+~~~~~~~~~~~~~~~~~~      [0]
+undefined === typeof bar
+~~~~~~~~~~~~~~~~~~~~~~~~      [0]
+null === typeof bar
+~~~~~~~~~~~~~~~~~~~      [0]
+true === typeof bar
+~~~~~~~~~~~~~~~~~~~      [0]
+false === typeof bar
+~~~~~~~~~~~~~~~~~~~~      [0]
+
+[0]: 'typeof' expression must be compared to one of: "undefined", "string", "boolean", "number", "function", "object", "symbol"

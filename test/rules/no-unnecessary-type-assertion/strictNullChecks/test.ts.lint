@@ -1,0 +1,124 @@
+const nonNullStringLiteral: 'test';
+const nonNullString: string;
+const nullableString: string|undefined;
+let anyType: any;
+type AnyDuringMigration = any;
+let tuple: [number, number] = [1, 2];
+
+// non-null
+let a = nonNullStringLiteral!;
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
+let b = nonNullString!;
+        ~~~~~~~~~~~~~~  [0]
+let c = nullableString!;
+tuple!;
+~~~~~~ [0]
+
+// as
+let d = nonNullStringLiteral as string;
+let e = nonNullString as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let f = nullableString as string;
+
+// type assertion
+let g = <string>nonNullStringLiteral;
+let h = <string>nonNullString;
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
+let i = <string>nullableString;
+
+// complex inner expression
+let j = (nonNullString + nonNullStringLiteral)!;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let k = (nonNullString + nonNullStringLiteral) as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let l = <string>(nonNullString + nonNullStringLiteral);
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let m = nonNullString.trim()!;
+        ~~~~~~~~~~~~~~~~~~~~~  [0]
+let n = nonNullString.trim() as string;
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let o = <string>nonNullString.trim();
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~  [0]
+let p = nonNullString!.trim();
+        ~~~~~~~~~~~~~~  [0]
+
+// custom types
+interface Iface1 {
+    prop: string;
+}
+interface Iface2 {
+    prop: string;
+}
+
+const value1: Iface1 = {prop: 'test'};
+const value2: Iface2 = {prop: 'test'};
+
+let q = <Iface1>value1;
+        ~~~~~~~~~~~~~~  [0]
+let r = <Iface2>value1;
+let s = value2 as Iface2;
+        ~~~~~~~~~~~~~~~~  [0]
+let t = value2 as Iface1;
+let aa = anyType as AnyDuringMigration;
+
+interface TypeA {
+    kind: 'a';
+}
+interface TypeB {
+    kind: 'b';
+}
+
+function isB(x: TypeA|TypeB): x is TypeB {
+    return true;
+}
+
+function func(aOrB: TypeA|TypeB) {
+    let u = aOrB as TypeA;
+    let v = <TypeB>aOrB;
+
+    if (aOrB.kind === 'a') {
+        let w = aOrB as TypeA;
+                ~~~~~~~~~~~~~  [0]
+    } else {
+        let x = <TypeB>aOrB;
+                ~~~~~~~~~~~  [0]
+    }
+
+    if (isB(aOrB)) {
+        let y = aOrB as TypeB;
+                ~~~~~~~~~~~~~  [0]
+    } else {
+        let z = <TypeA>aOrB;
+                ~~~~~~~~~~~  [0]
+    }
+}
+
+// Expecting no warning for these assertions as they are not unnecessary.
+
+type Bar = 'bar';
+const data = {
+    x: 'foo' as 'foo',
+    y: 'bar' as Bar,
+}
+
+[1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+let x: Array<[number, string]> = [1, 2, 3, 4, 5].map(x => [x, 'A' + x] as [number, string]);
+
+interface NotATuple {
+    0: number,
+    0.5: number,
+    2: number,
+}
+
+declare const notATuple: NotATuple;
+<NotATuple>notATuple;
+~~~~~~~~~~~~~~~~~~~~ [0]
+
+function foo() {
+    let xx: 1 | 2 = 1;
+    const f = () => xx = 2;
+    f();
+    xx as 1 | 2 === 2; // xx is inferred as 1, assertion is necessary to avoid compile error
+}
+
+[0]: This assertion is unnecessary since it does not change the type of the expression.

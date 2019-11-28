@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "import-blacklist": [true, "rxjs", { "lodash": ["pullAll", "pull"] }, { "dummy": ["default"] }, [".*\\.temp$", ".*\\.tmp$"]]
+  }
+}

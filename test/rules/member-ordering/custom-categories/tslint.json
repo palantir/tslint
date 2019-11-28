@@ -1,0 +1,18 @@
+{
+    "rules": {
+        "member-ordering": [true, {
+            "order": [
+                {
+                    "name": "static non-private",
+                    "kinds": [
+                        "public-static-field",
+                        "protected-static-field",
+                        "public-static-method",
+                        "protected-static-method"
+                    ]
+                },
+                "constructor"
+            ]
+        }]
+    }
+}

@@ -1,0 +1,23 @@
+namespace App {
+    class GiveMeANumber {
+
+        /* tslint:disable:no-any */
+        private num:any = 10;
+        /* tslint:enable:no-any */
+
+        //This is some kind of comment
+        constructor(){
+            this.giveNumber();
+        }
+
+        /*
+        Here is another comment
+        It's very helpful.
+        */
+
+        public giveNumber = () =>{  
+            alert(this.num);
+        };
+    }
+}
+~ [This file has 22 lines, which exceeds the maximum of 10 lines allowed. Consider breaking this file up into smaller parts]

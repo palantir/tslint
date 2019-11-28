@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "variable-name": [true, "allow-leading-underscore", "allow-trailing-underscore"]
+  }
+}

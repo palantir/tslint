@@ -1,0 +1,71 @@
+// ensure that Bar and Baz do not get conflated
+interface Bar {
+    x(): void;
+}
+
+interface Baz {
+    y: number;
+}
+
+interface BarBaz {
+    x(): void;
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+class Foo {
+    x(): void {}
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+interface IArrowMethods {
+    a: number;
+    b(): void;
+    d: () => void;
+    ~~~~~~~~~~~~~~ [0]
+}
+
+class ArrowMethods {
+    public a = 5;
+    private callback: () => void
+    public b = "foo";
+    public c() {}
+    public d = () => {};
+    public e = function() {};
+}
+
+class OutOfOrder {
+    a = () => {};
+    b = 5;
+    ~~~~~~ [0]
+}
+
+class Constructor1 {
+    blah: number = 0;
+    constructor() {}
+}
+
+class Constructor2 {
+    constructor() {}
+    blah: number = 0;
+    ~~~~~~~~~~~~~~~~~ [0]
+}
+
+// Works for type literal, just like interface
+type T = {
+    x(): void;
+    y: number;
+    ~~~~~~~~~~ [0]
+}
+
+// Works for class inside object literal
+const o = {
+    foo: class C {
+        x(): void;
+        y: number;
+        ~~~~~~~~~~ [0]
+    }
+}
+
+[0]: Declaration of field not allowed after declaration of method. Instead, this should come at the beginning of the class/interface.

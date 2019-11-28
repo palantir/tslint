@@ -1,0 +1,26 @@
+function foo(a: any) : any {
+    return;
+}
+
+let a = () => {};
+let b = function () {};
+        ~~~~~~~~                 [0]
+
+function c() {}
+
+function () {
+    // ...
+}
+
+((func) => func())(function e(): void {});
+                   ~~~~~~~~                   [0]
+
+((func) => func())(() => {});
+
+function* generator() {}
+let generator = function*() {}
+
+function hasThisParameter(this) {}
+let hasThisParameter = function(this) {}
+
+[0]: non-arrow functions are forbidden

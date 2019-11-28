@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-promise-as-boolean": true
+  }
+}

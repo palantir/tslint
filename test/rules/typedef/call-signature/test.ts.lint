@@ -1,0 +1,39 @@
+function foge() {}
+         ~~~~ [expected call-signature: 'foge' to have a typedef]
+
+class TsLint {
+    helloWorld() {
+    ~~~~~~~~~~ [expected call-signature: 'helloWorld' to have a typedef]
+        return 'Hello World';
+    };
+
+    arrowHelloWorld = () => {
+        return this.helloWorld();
+    };
+}
+
+var obj = {
+    foge: function() {},
+                  ~~ [expected call-signature to have a typedef]
+    bar: () => {}
+}
+
+setTimeout(() => {}, 1000);
+setTimeout(function() {}, 1000);
+                   ~~ [expected call-signature to have a typedef]
+
+someFunc(n => n+1);
+someFunc(n => {});
+
+class AComponent {
+    private _test(): void {
+        this._foo.test({
+            callback: () => {
+                // asd
+            },
+        });
+    }
+}
+
+function foo(bar: any) :void {}
+foo({bar: ()=>{}});

@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-trailing-whitespace": true
+  }
+}

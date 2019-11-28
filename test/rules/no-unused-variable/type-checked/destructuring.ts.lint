@@ -1,0 +1,15 @@
+[typescript]: < 2.9.0
+import { SomeClass, someVar } from "./some.test";
+const person = { name: "alice" };
+const { name } = person;
+#if typescript >= 2.9.0
+      ~~~~~~~~ ['name' is declared but its value is never read.]
+#endif
+#if typescript >= 2.6.0 < 2.9.0
+        ~~~~ ['name' is declared but its value is never read.]
+#endif
+#if typescript < 2.6.0
+        ~~~~ ['name' is declared but never used.]
+#endif
+
+export const {prop} = someVar;

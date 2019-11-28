@@ -1,0 +1,12 @@
+const a = (
+    <a href="https://github.com/">
+        https://github.com/ {
+            //invalid comment
+              ~~~~~~~~~~~~~~~ [space]
+            content
+        },	text
+    </a>
+);
+
+
+[space]: comment must start with a space

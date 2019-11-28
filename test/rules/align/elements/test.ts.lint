@@ -1,0 +1,53 @@
+let foo = [];
+let foo = [1, 2];
+let foo = [
+    1, 2
+];
+let foo = [
+    1,
+    2
+];
+let foo = [
+    1,
+     2
+     ~ [elements are not aligned]
+];
+let foo = [
+    ...foo,
+       1
+       ~ [elements are not aligned]
+];
+let foo = [
+    ,
+    1,
+    ,
+    ,
+];
+let foo = [
+     ,
+    1,
+    ~ [elements are not aligned]
+   ,
+   ~nil [elements are not aligned]
+     ,
+]
+
+let [foo, bar] = foo;
+let [
+    foo, bar 
+] = foo;
+let [foo,
+    bar
+    ~~~ [elements are not aligned]
+] = foo;
+let [
+    ,
+    ...foo
+] = foo;
+
+let foo: [number, number];
+let foo = [
+    number
+    , number
+      ~~~~~~ [elements are not aligned]
+]

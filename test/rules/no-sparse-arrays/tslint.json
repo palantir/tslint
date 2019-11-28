@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-sparse-arrays": true
+  }
+}

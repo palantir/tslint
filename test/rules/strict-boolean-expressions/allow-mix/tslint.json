@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "strict-boolean-expressions": [true, "allow-string", "allow-undefined-union", "allow-mix"]
+  }
+}

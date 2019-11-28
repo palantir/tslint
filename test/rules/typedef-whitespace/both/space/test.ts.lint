@@ -1,0 +1,767 @@
+// region ObjectLiteralWithPropertyGetter
+
+var noPreceedingSpaceNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop():string {
+              ~nil [before-call]
+               ~nil [after-call]
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop(): string {
+              ~nil [before-call]
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop():   string {
+              ~nil [before-call]
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop() :string {
+                ~nil [after-call]
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop() : string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpaceWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop() :   string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesNoSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop()   :string {
+                  ~nil [after-call]
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesWithSubsequentSpaceObject = {
+    _Prop: "some property",
+
+    get Prop()   : string {
+        return this._Prop;
+    }
+};
+
+var withPreceedingSpacesWithSubsequentSpacesObject = {
+    _Prop: "some property",
+
+    get Prop()   :   string {
+        return this._Prop;
+    }
+};
+
+var noPreceedingSpaceWithSubsequentNewLineObject = {
+    _Prop:
+        "some property",
+
+    get Prop():
+              ~nil [before-call]
+        string {
+        return this._Prop;
+    }
+};
+
+// endregion
+
+// region Interface
+
+interface NoPreceedingSpaceNoSubsequentSpaceInterface {
+    Prop:string;
+        ~nil [before-property]
+         ~nil [after-property]
+}
+
+interface NoPreceedingSpaceWithSubsequentSpaceInterface {
+    Prop: string;
+        ~nil [before-property]
+}
+
+interface NoPreceedingSpaceWithSubsequentSpacesInterface {
+    Prop:   string;
+        ~nil [before-property]
+}
+
+interface WithPreceedingSpaceNoSubsequentSpaceInterface {
+    Prop :string;
+          ~nil [after-property]
+}
+
+interface WithPreceedingSpaceWithSubsequentSpaceInterface {
+    Prop : string;
+}
+
+interface WithPreceedingSpaceWithSubsequentSpacesInterface {
+    Prop :   string;
+}
+
+interface WithPreceedingSpacesNoSubsequentSpaceInterface {
+    Prop   :string;
+            ~nil [after-property]
+}
+
+interface WithPreceedingSpacesWithSubsequentSpaceInterface {
+    Prop   : string;
+}
+
+interface WithPreceedingSpacesWithSubsequentSpacesInterface {
+    Prop   :   string;
+}
+
+interface NoPreceedingSpaceNoSubsequentSpaceAndNewLineInterface {
+    Prop:
+        ~nil [before-property]
+        string;
+}
+
+// endregion
+
+// region Function
+
+function noPreceedingSpaceNoSubsequentSpaceFn(a:number, b:number):number {
+                                               ~nil [before-parameter]
+                                                ~nil [after-parameter]
+                                                         ~nil [before-parameter]
+                                                          ~nil [after-parameter]
+                                                                 ~nil [before-call]
+                                                                  ~nil [after-call]
+    var c:number = a + b;
+         ~nil [before-variable]
+          ~nil [after-variable]
+    var d:number = a - b;
+         ~nil [before-variable]
+          ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex:Exception) {
+               ~nil [before-variable]
+                ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpaceFn(a: number, b: number): number {
+                                                 ~nil [before-parameter]
+                                                            ~nil [before-parameter]
+                                                                     ~nil [before-call]
+    var c: number = a + b;
+         ~nil [before-variable]
+    var d: number = a - b;
+         ~nil [before-variable]
+
+    try {
+        return c / d;
+    } catch (ex: Exception) {
+               ~nil [before-variable]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpacesFn(a:   number, b:   number):   number {
+                                                  ~nil [before-parameter]
+                                                               ~nil [before-parameter]
+                                                                          ~nil [before-call]
+    var c:   number = a + b;
+         ~nil [before-variable]
+    var d:   number = a - b;
+         ~nil [before-variable]
+
+    try {
+        return c / d;
+    } catch (ex:   Exception) {
+               ~nil [before-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceNoSubsequentSpaceFn(a :number, b :number) :number {
+                                                   ~nil [after-parameter]
+                                                              ~nil [after-parameter]
+                                                                       ~nil [after-call]
+    var c :number = a + b;
+           ~nil [after-variable]
+    var d :number = a - b;
+           ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex :Exception) {
+                 ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceFn(a : number, b : number) : number {
+    var c : number = a + b;
+    var d : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpacesFn(a :   number, b :   number) :   number {
+    var c :   number = a + b;
+    var d :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesNoSubsequentSpaceFn(a   :number, b   :number)   :number {
+                                                      ~nil [after-parameter]
+                                                                   ~nil [after-parameter]
+                                                                              ~nil [after-call]
+    var c   :number = a + b;
+             ~nil [after-variable]
+    var d   :number = a - b;
+             ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex   :Exception) {
+                   ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpaceFn(a   : number, b   : number)   : number {
+    var c   : number = a + b;
+    var d   : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpacesFn(a   :   number, b   :   number)   :   number {
+    var c   :   number = a + b;
+    var d   :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :   Exception) {
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineFn(a:
+                                                         ~nil [before-parameter]
+    number, b:
+             ~nil [before-parameter]
+    number):
+           ~nil [before-call]
+    number {
+    var c:
+         ~nil [before-variable]
+        number = a + b;
+    var d
+        : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex:
+               ~nil [before-variable]
+        Exception) {
+        console.log(ex);
+    }
+}
+
+// endregion
+
+// region Function multi-line signature
+
+function noPreceedingSpaceNoSubsequentSpaceMultiLineFn(
+    a:number,
+     ~nil [before-parameter]
+      ~nil [after-parameter]
+    b:number
+     ~nil [before-parameter]
+      ~nil [after-parameter]
+):number {
+ ~nil [before-call]
+  ~nil [after-call]
+    var c:number = a + b;
+         ~nil [before-variable]
+          ~nil [after-variable]
+    var d:number = a - b;
+         ~nil [before-variable]
+          ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex:Exception) {
+               ~nil [before-variable]
+                ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpaceMultiLineFn(
+    a: number,
+     ~nil [before-parameter]
+    b: number
+     ~nil [before-parameter]
+): number {
+ ~nil [before-call]
+    var c: number = a + b;
+         ~nil [before-variable]
+    var d: number = a - b;
+         ~nil [before-variable]
+
+    try {
+        return c / d;
+    } catch (ex: Exception) {
+               ~nil [before-variable]
+        console.log(ex);
+    }
+}
+
+function noPreceedingSpaceWithSubsequentSpacesMultiLineFn(
+    a:   number,
+     ~nil [before-parameter]
+    b:   number
+     ~nil [before-parameter]
+):   number {
+ ~nil [before-call]
+    var c:   number = a + b;
+         ~nil [before-variable]
+    var d:   number = a - b;
+         ~nil [before-variable]
+
+    try {
+        return c / d;
+    } catch (ex:   Exception) {
+               ~nil [before-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceNoSubsequentSpaceMultiLineFn(
+    a :number,
+       ~nil [after-parameter]
+    b :number
+       ~nil [after-parameter]
+) :number {
+   ~nil [after-call]
+    var c :number = a + b;
+           ~nil [after-variable]
+    var d :number = a - b;
+           ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex :Exception) {
+                 ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpaceMultiLineFn(
+    a : number,
+    b : number
+) : number {
+    var c : number = a + b;
+    var d : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpaceWithSubsequentSpacesMultiLineFn(
+    a :   number,
+    b :   number
+) :   number {
+    var c :   number = a + b;
+    var d :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex :   Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesNoSubsequentSpaceMultiLineFn(
+    a   :number,
+         ~nil [after-parameter]
+    b   :number
+         ~nil [after-parameter]
+)   :number {
+     ~nil [after-call]
+    var c   :number = a + b;
+             ~nil [after-variable]
+    var d   :number = a - b;
+             ~nil [after-variable]
+
+    try {
+        return c / d;
+    } catch (ex   :Exception) {
+                   ~nil [after-variable]
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpaceMultiLineFn(
+    a   : number,
+    b   : number
+)   : number {
+    var c   : number = a + b;
+    var d   : number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   : Exception) {
+        console.log(ex);
+    }
+}
+
+function withPreceedingSpacesWithSubsequentSpacesMultiLineFn(
+    a   :   number,
+    b   :   number
+)   :   number {
+    var c   :   number = a + b;
+    var d   :   number = a - b;
+
+    try {
+        return c / d;
+    } catch (ex   :   Exception) {
+        console.log(ex);
+    }
+}
+
+// endregion
+
+// region CallSignaturePaddedParams
+
+function noPreceedingSpaceNoSubsequentSpaceSignature( ):{};
+                                                       ~nil [before-call]
+                                                        ~nil [after-call]
+
+function noPreceedingSpaceWithSubsequentSpaceSignature( ): {};
+                                                         ~nil [before-call]
+
+function noPreceedingSpaceWithSubsequentSpacesSignature( ):   {};
+                                                          ~nil [before-call]
+
+function withPreceedingSpaceNoSubsequentSpaceSignature( ) :{};
+                                                           ~nil [after-call]
+
+function withPreceedingSpaceWithSubsequentSpaceSignature( ) : {};
+
+function withPreceedingSpaceWithSubsequentSpacesSignature( ) :   {};
+
+function withPreceedingSpacesNoSubsequentSpaceSignature( )   :{};
+                                                              ~nil [after-call]
+
+function withPreceedingSpacesWithSubsequentSpaceSignature( )   : {};
+
+function withPreceedingSpacesWithSubsequentSpacesSignature( )   :   {};
+
+function noPreceedingSpaceNoSubsequentSpaceAndNewLineSignature( ):
+                                                                 ~nil [before-call]
+    {};
+
+// endregion
+
+// region Class
+
+class NoPreceedingSpaceNoSubsequentSpaceClass {
+    [index:number]:string
+          ~nil [before-parameter]
+           ~nil [after-parameter]
+                  ~nil [before-index]
+                   ~nil [after-index]
+
+    Prop:string = "some property";
+        ~nil [before-property]
+         ~nil [after-property]
+
+    public get name():string {
+                     ~nil [before-call]
+                      ~nil [after-call]
+        return "some name";
+    }
+
+    public set name(a:string):void {}
+                     ~nil [before-parameter]
+                      ~nil [after-parameter]
+                             ~nil [before-call]
+                              ~nil [after-call]
+
+    public shemp(
+        a:number,
+         ~nil [before-parameter]
+          ~nil [after-parameter]
+        b:number
+         ~nil [before-parameter]
+          ~nil [after-parameter]
+    ):void {}
+     ~nil [before-call]
+      ~nil [after-call]
+}
+
+class NoPreceedingSpaceWithSubsequentSpaceClass {
+    [index: number]: string
+          ~nil [before-parameter]
+                   ~nil [before-index]
+
+    Prop: string = "some property";
+        ~nil [before-property]
+
+    public get name(): string {
+                     ~nil [before-call]
+        return "some name";
+    }
+
+    public set name(a: string): void {}
+                     ~nil [before-parameter]
+                              ~nil [before-call]
+
+    public shemp(
+        a: number,
+         ~nil [before-parameter]
+        b: number
+         ~nil [before-parameter]
+    ): void {}
+     ~nil [before-call]
+}
+
+class NoPreceedingSpaceWithSubsequentSpacesClass {
+    [index:   number]:   string
+          ~nil [before-parameter]
+                     ~nil [before-index]
+
+    Prop:   string = "some property";
+        ~nil [before-property]
+
+    public get name():   string {
+                     ~nil [before-call]
+        return "some name";
+    }
+
+    public set name(a:   string):   void {}
+                     ~nil [before-parameter]
+                                ~nil [before-call]
+
+    public shemp(
+        a:   number,
+         ~nil [before-parameter]
+        b:   number
+         ~nil [before-parameter]
+    ):   void {}
+     ~nil [before-call]
+}
+
+class WithPreceedingSpaceNoSubsequentSpaceClass {
+    [index :number] :string
+            ~nil [after-parameter]
+                     ~nil [after-index]
+
+    Prop :string = "some property";
+          ~nil [after-property]
+
+    public get name() :string {
+                       ~nil [after-call]
+        return "some name";
+    }
+
+    public set name(a :string) :void {}
+                       ~nil [after-parameter]
+                                ~nil [after-call]
+
+    public shemp(
+        a :number,
+           ~nil [after-parameter]
+        b :number
+           ~nil [after-parameter]
+    ) :void {}
+       ~nil [after-call]
+}
+
+class WithPreceedingSpaceWithSubsequentSpaceClass {
+    [index : number] : string
+
+    Prop : string = "some property";
+
+    public get name() : string {
+        return "some name";
+    }
+
+    public set name(a : string) : void {}
+
+    public shemp(
+        a : number,
+        b : number
+    ) : void {}
+}
+
+class WithPreceedingSpaceWithSubsequentSpacesClass {
+    [index :   number] :   string
+
+    Prop :   string = "some property";
+
+    public get name() :   string {
+        return "some name";
+    }
+
+    public set name(a :   string) :   void {}
+
+    public shemp(
+        a :   number,
+        b :   number
+    ) :   void {}
+}
+
+class WithPreceedingSpacesNoSubsequentSpaceClass {
+    [index   :number]   :string
+              ~nil [after-parameter]
+                         ~nil [after-index]
+
+    Prop   :string = "some property";
+            ~nil [after-property]
+
+    public get name()   :string {
+                         ~nil [after-call]
+        return "some name";
+    }
+
+    public set name(a   :string)   :void {}
+                         ~nil [after-parameter]
+                                    ~nil [after-call]
+
+    public shemp(
+        a   :number,
+             ~nil [after-parameter]
+        b   :number
+             ~nil [after-parameter]
+    )   :void {}
+         ~nil [after-call]
+}
+
+class WithPreceedingSpacesWithSubsequentSpaceClass {
+    [index   : number]   : string
+
+    Prop   : string = "some property";
+
+    public get name()   : string {
+        return "some name";
+    }
+
+    public set name(a   : string)   : void {}
+
+    public shemp(
+        a   : number,
+        b   : number
+    )   : void {}
+}
+
+class WithPreceedingSpacesWithSubsequentSpacesClass {
+    [index   :   number]   :   string
+
+    Prop   :   string = "some property";
+
+    public get name()   :   string {
+        return "some name";
+    }
+
+    public set name(a   :   string)   :   void {}
+
+    public shemp(
+        a   :   number,
+        b   :   number
+    )   :   void {}
+}
+
+class NoPreceedingSpaceNoSubsequentSpaceAndNewLineClass {
+    [index:number]:
+          ~nil [before-parameter]
+           ~nil [after-parameter]
+                  ~nil [before-index]
+        string
+
+    Prop:
+        ~nil [before-property]
+        string = "some property";
+
+    public get name():
+                     ~nil [before-call]
+        string {
+        return "some name";
+    }
+
+    public set name(a:
+                     ~nil [before-parameter]
+        string):
+               ~nil [before-call]
+        void {}
+
+    public shemp(
+        a:
+         ~nil [before-parameter]
+        number,
+        b:
+         ~nil [before-parameter]
+        number
+    ):
+     ~nil [before-call]
+    void {}
+}
+
+let foo = ():void => {};
+            ~nil [before-call]
+             ~nil [after-call]
+let foo = () : void => {};
+let foo = ()   :   void => {};
+
+// endregion
+
+[_base]: expected space %s colon in %s
+[before-call]: _base % ('before', 'call-signature')
+[after-call]: _base % ('after', 'call-signature')
+[before-parameter]: _base % ('before', 'parameter')
+[after-parameter]: _base % ('after', 'parameter')
+[before-index]: _base % ('before', 'index-signature')
+[after-index]: _base % ('after', 'index-signature')
+[before-variable]: _base % ('before', 'variable-declaration')
+[after-variable]: _base % ('after', 'variable-declaration')
+[before-property]: _base % ('before', 'property-declaration')
+[after-property]: _base % ('after', 'property-declaration')

@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "promise-function-async": true
+  }
+}

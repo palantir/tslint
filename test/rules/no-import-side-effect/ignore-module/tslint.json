@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "no-import-side-effect": [
+      true,
+      {
+        "ignore-module": "(allow-side-effect|\\.css)$"
+      }
+    ]
+  }
+}

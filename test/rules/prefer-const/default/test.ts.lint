@@ -1,0 +1,270 @@
+const a = 1;
+
+// different reassignments
+let b = 1;
+b = 2;
+let b1 = 1;
+b1++;
+let b2 = 1;
+b2--;
+let b3 = 1;
+b3 /= 2;
+let b4 = 1;
+--b4;
+
+// basic failure
+let c = 1; // failure
+    ~                 [let % ('c')]
+
+// multiple declarations
+const c5 = 5, c6 = 6;
+let c1 = 1, c2 = 2; // 2 failures
+    ~~                            [let % ('c1')]
+            ~~                    [let % ('c2')]
+let c3 = 1, c4 = 2; // 1 failure
+            ~~                   [let % ('c4')]
+c3 = 4;
+
+// destructuring
+{
+    let destructLater = 4;
+    [destructLater] = 5;
+    let a: number;
+    let b: number;
+    let c: any;
+    ({ eh: a, b, ...c } = { eh: 0, b: 1 });
+}
+
+let {h, i} = {h: 1, i: 1}; // failure for 'h'
+     ~                                        [let % ('h')]
+let [j, k] = [1, 1]; // failure for 'j'
+     ~                                  [let % ('j')]
+let [x1, x3] = [1, 2], [x2] = [3]; // failure for x1, x3
+     ~~                                                  [let % ('x1')]
+         ~~                                              [let % ('x3')]
+let {a: {b: {q}, c: {r}}} = { a: { b: { q: 3 }, c: { r: 2 } } }; // failure for 'r'
+                     ~                                                              [let % ('r')]
+i = 2;
+k = 2;
+q = 4;
+x2 = 5;
+
+// functions
+function myFunc(d: number, e: number) {
+    let f = 1; // failure
+        ~                 [let % ('f')]
+    const g = 1;
+    d = 2;
+}
+function myFunc2() {
+    let [l, m] = [1, 1]; // failure for 'l'
+         ~                                  [let % ('l')]
+    m = 2;
+    return l;
+}
+
+// for-of
+for (let n of [1, 1]) { // failure for 'n'
+         ~                                 [let % ('n')]
+    console.log(n);
+}
+for (let {o, p} of [{1, 1}, {1, 1}]) {
+    console.log(o);
+    p = 2;
+}
+
+// for loop
+for (let i1 = 0; i1 < 4; i1++) {
+}
+for (let i2 = 0;;) {    // failure
+         ~~                        [let % ('i2')]
+}
+for (const i2 = 0;;) {
+}
+
+// scope
+let sc = 0;
+let sc1 = 0;
+    ~~~      [let % ('sc1')]
+let sc2 = 0;
+let sc3 = 0;
+{
+    sc = 1;
+}
+for(;;) {
+    sc2 = 3;
+}
+class MyClass {
+    private classVar = 5;
+    public Increment() {
+        let sc4 = 0;
+        let sc5 = 0;    // error
+            ~~~                  [let % ('sc5')]
+        this.classVar++;
+        sc3++;
+        sc4++;
+    }
+}
+
+// separate declaration and assignment (no error)
+let x: number;
+x = 5;
+
+// ignores RHS of declaration
+let usedAsRHS = 3;
+    ~~~~~~~~~                  [let % ('usedAsRHS')]
+let LHS: number | string = usedAsRHS;
+    ~~~                  [let % ('LHS')]
+
+// handle nested declaration
+let nest = () => {
+    ~~~~          [let % ('nest')]
+    const a = 4;
+    let b = 0;
+    let c = 1;
+        ~      [let % ('c')]
+    b = 2;
+    return a + b + c;
+};
+
+let nest2 = () => {
+    ~~~~~           [let % ('nest2')]
+    let error = false;
+        ~~~~~           [let % ('error')]
+    try {
+    } catch(error) {
+        // variable error is block scoped
+        error = true;
+    }
+}
+
+// export
+export let x = 4;
+
+// array
+let arr = [];
+    ~~~           [let % ('arr')]
+arr.push(0);
+arr[1] = 1;
+arr.length = 1;
+
+// reassignment of the forward declaration
+function useOfForwardDecl() {
+    forwardDecl = 1;
+}
+
+let forwardDecl: number;
+
+module E {
+    let x = 1;
+        ~      [let % ('x')]
+}
+
+switch (1) {
+    case 1:
+        let x = 1;
+            ~      [let % ('x')]
+        break;
+    case 2:
+        let y = 1;
+            ~      [let % ('y')]
+        break;
+}
+
+var someVariable = 0;
+    ~~~~~~~~~~~~           [var % ('someVariable')]
+function funcxion(someVariable, someParameter) {
+    someVariable = 1;
+    {
+        var var1 = 0;
+        var var2 = 0;
+            ~~~~           [var % ('var2')]
+    }
+    {
+        var1 = 1;
+    }
+    {
+        let var2 = 1;
+        var2 = 2;
+    }
+}
+
+let shadowed1 = 0;
+    ~~~~~~~~~           [let % ('shadowed1')]
+let shadowed2 = 0;
+    ~~~~~~~~~           [let % ('shadowed2')]
+let shadowed3 = 0;
+    ~~~~~~~~~           [let % ('shadowed3')]
+function shadowVariables({shadowed1, ...shadowed2}, shadowed3) {
+    shadowed1 = 1;
+    shadowed2 = 1;
+    shadowed3 = 1;
+}
+
+// no error in for loop initializer
+for (let i = 1, l = arr.length; i < l; ++i) {
+}
+
+{
+    let var1 = 0;
+        ~~~~           [let % ('var1')]
+    let var2 = 0;
+    function foo(var1 = var2 = 1, var2 = var1 = 1) {}
+    function foo2(p1 = var2 = 1) {
+        let var2 = 0;
+            ~~~~           [let % ('var2')]
+    }
+}
+
+// cannot fix, because of uninitialized variables
+let uninitialized;
+    ~~~~~~~~~~~~~           [let % ('uninitialized')]
+let initialized1 = 0, uninitialized2;
+    ~~~~~~~~~~~~           [let % ('initialized1')]
+                      ~~~~~~~~~~~~~~           [let % ('uninitialized2')]
+
+// ambient declarations are not checked
+declare let ambient = 0;
+
+declare namespace ambient {
+    let foo = 0;
+}
+
+{
+    let someVar: string;
+    for (someVar in someObj) {}
+}
+{
+    let someVar: string;
+    for (someVar of someArr) {}
+}
+{
+    let someVar: string, someVar2: string;
+    for ({someVar, foo: someVar2} of someArr) {}
+}
+{
+    let someVar: string, someObj: any;
+        ~~~~~~~ [let % ('someVar')]
+                         ~~~~~~~ [let % ('someObj')]
+    for ({someVar: someObj.val} of someArr) {}
+}
+for (let [var1, var2] of someArr) {
+    var1 = null;
+}
+for (let [var1, var2] of someArr) {}
+          ~~~~ [let % ('var1')]
+                ~~~~ [let % ('var2')]
+for (let {var1, var2} of someArr) {
+    var2 = null;
+}
+
+{
+    let k: any = 0;
+    function foo(param: {[k: string]: string}) {
+        k = param;
+    }
+}
+
+[_base]: Identifier '%%s' is never reassigned; use 'const' instead of '%s'.
+[let]: _base % ('let')
+[var]: _base % ('var')

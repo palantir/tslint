@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "no-for-in-array": true
+  }
+}

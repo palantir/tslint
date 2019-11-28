@@ -1,0 +1,40 @@
+// Named imports should be alphabetized.
+import {A, B} from 'foo';
+import {B, A} from 'foo'; // failure
+        ~~~~                         [ordered-imports]
+
+// Lowercase comes before uppercase.
+import {A, b, C} from 'zfoo';
+        ~~~~                  [Named imports must be alphabetized.]
+import {bz, A, C} from 'foo'; // failure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~            [Import sources within a group must be alphabetized.]
+
+// Import sources should be alphabetized.
+import * as bar from 'bar';
+import * as foo from 'foo';
+
+import * as abc from 'abc';
+import * as foo from 'foo';
+import * as bar from 'bar'; // failure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~            [ordered-sources]
+
+// Lowercase comes before uppercase
+import {A, B} from 'Bar';
+import {A, B} from 'baz';
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+import {A, B} from 'Foo';
+
+// Other styles of import statements.
+import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
+import someDefault from "module";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [Import sources within a group must be alphabetized.]
+import "something";
+
+// contains ImportEqualsDeclaration
+import c = require('./c');
+import * as a from './a';
+~~~~~~~~~~~~~~~~~~~~~~~~~ [ordered-sources]
+import b from './b';
+
+[ordered-imports]: Named imports must be alphabetized.
+[ordered-sources]: Import sources within a group must be alphabetized.

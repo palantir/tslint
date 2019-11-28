@@ -1,0 +1,76 @@
+namespace foo {
+}
+
+// valid, special syntax for augmenting global
+declare global { }
+
+module bar {
+~~~~~~   [0]
+}
+
+declare module buzz {
+        ~~~~~~   [0]
+}
+
+declare module "hoge" {
+}
+declare module 'fuga' {
+}
+
+namespace foo.bar {
+}
+namespace foo.bar.baz {
+}
+namespace foo {
+    namespace bar.baz {
+    }
+}
+
+namespace foo.bar {
+    module baz {
+    ~~~~~~   [0]
+        namespace buzz {
+        }
+    }
+}
+
+module foo.bar {
+~~~~~~   [0]
+    namespace baz {
+        module buzz {
+        ~~~~~~   [0]
+        }
+    }
+}
+
+namespace name.namespace {
+}
+namespace namespace.name {
+}
+
+// intentionally malformed for test cases, do not format
+declare module declare
+        ~~~~~~   [0]
+.dec{}
+declare  module dec . declare  {
+         ~~~~~~   [0]
+}
+
+module  mod.module{}
+~~~~~~   [0]
+module module.mod
+~~~~~~   [0]
+{
+}
+
+module global {}
+~~~~~~ [0]
+module foo.global {}
+~~~~~~ [0]
+module foo {
+~~~~~~ [0]
+    export module global {}
+           ~~~~~~ [0]
+}
+
+[0]: The internal 'module' syntax is deprecated, use the 'namespace' keyword instead.

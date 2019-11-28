@@ -1,0 +1,30 @@
+// This rule will always pass since the arguments value in tslint.json is a string,
+// while it should be a valid integer and > 1.
+// In such a case, the rule is not enabled.
+
+class Clazz { // comment
+
+    public funcxion() {
+
+
+        // also comment
+
+
+
+        // still allowed since 2 lines only
+
+
+
+        
+        
+        // this one won't be allowed anymore
+
+        console.log("test");
+
+    }
+
+
+}
+
+
+

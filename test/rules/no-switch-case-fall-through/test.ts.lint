@@ -1,0 +1,144 @@
+switch (foo) {
+    case 1:
+        bar();
+    case 2:
+    ~~~~    [expected a 'break' before 'case']
+        bar();
+        bar();
+    case 3:
+    ~~~~    [expected a 'break' before 'case']
+    case 4:
+    default:
+        break;
+}
+
+
+switch (foo) {
+    case 1:
+        bar();
+    case 2:
+    ~~~~    [expected a 'break' before 'case']
+        bar();
+}
+
+
+switch (foo) {
+    case 1:
+    case 2:
+    default:
+        bar();
+}
+
+switch (foo) {
+    case 1:
+        switch (bar) {
+            case "":
+            default:
+                break;
+        }
+    case 2:
+    ~~~~    [expected a 'break' before 'case']
+}
+
+switch (foo) {
+    case 1:
+    case 2:
+
+    case 3:
+
+    case 4:
+        break;
+    default:
+        bar();
+}
+
+
+switch (foo) {
+    case 1:
+        return; // handle return the same as break
+    case 2:
+    case 3:
+        throw "error";
+}
+
+switch (foo) {
+    case 1:
+        bar();
+        /* falls through */
+    case 2:
+        bar();
+        /* Testing */
+        /* falls through */
+    default:
+        bar();
+        // falls through
+    case 3:
+        break;
+}
+
+// valid
+switch (foo) {
+    case 1:
+        break;
+    case 2:
+    case 3:
+        break;
+    default:
+}
+
+// recognise blocks
+switch (foo) {
+    case 1: {
+        break;
+    }
+    case 2:
+}
+
+// recognise if-else
+switch (foo) {
+    case 1:
+        if (bar) {
+            break;
+        } else {
+            return;
+        }
+    case 2:
+        if (bar) {
+            break;
+        }
+    case 3:
+    ~~~~    [expected a 'break' before 'case']
+}
+
+// allow throw
+switch (foo) {
+    case 1:
+        throw bar;
+    case 2:
+}
+
+// handle nested switch statements
+switch (foo) {
+    case 1:
+        switch (bar) {
+            case 1:
+                foobar(); // this case clause falls through and returns in the default clause
+            default:
+            ~~~~~~~    [expected a 'break' before 'default']
+                return;
+        }
+    case 2:
+}
+
+switch (foo) {
+    case 1:
+        foo;
+        // Falls through
+    case 2:
+        foo;
+        // Falls through.
+    case 3:
+        foo;
+        // Falls through -- for reasons
+    default:
+}

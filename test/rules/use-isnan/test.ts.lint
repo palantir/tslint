@@ -1,0 +1,64 @@
+
+// no violation for comparing NaN using isNaN
+if (isNaN(NaN)) {
+}
+
+// no violation for correctly checking for isNaN
+if (isNaN(something)) { }
+
+// no violation for assignments
+let x = 0;
+x = NaN;
+x += NaN;
+x -= NaN;
+x /= NaN;
+x *= NaN;
+x %= NaN;
+x **= NaN;
+x <<= NaN;
+x >>= NaN;
+x >>>= NaN;
+x &= NaN;
+x ^= NaN;
+x |= NaN;
+
+// no violation for arithmetic operators
+x = x + NaN;
+x = NaN - x;
+x = x / NaN;
+x = NaN * x;
+x = x % NaN;
+x = NaN ** x;
+
+// no violation for bitwise operators
+x = x & NaN;
+x = NaN | x;
+x = x ^ NaN;
+x = NaN << x;
+x = x >> NaN;
+x = NaN >>> x;
+x = x & NaN;
+
+// no violation for other operators
+if (x instanceof NaN) { }
+if (NaN in x) { }
+
+// do not use equality operators to compare for NaN
+if (foo == NaN) {  }
+    ~~~~~~~~~~         [Found an invalid comparison for NaN: foo == NaN]
+if (NaN === foo) {  }
+    ~~~~~~~~~~~        [Found an invalid comparison for NaN: NaN === foo]
+if (foo != NaN) {  }
+    ~~~~~~~~~~         [Found an invalid comparison for NaN: foo != NaN]
+if (NaN !== foo) {  }
+    ~~~~~~~~~~~        [Found an invalid comparison for NaN: NaN !== foo]
+
+// do not use any binary operators to compare for NaN
+if (foo > NaN) { }
+    ~~~~~~~~~         [Found an invalid comparison for NaN: foo > NaN]
+if (NaN >= foo) { }
+    ~~~~~~~~~~        [Found an invalid comparison for NaN: NaN >= foo]
+if (foo < NaN) { }
+    ~~~~~~~~~         [Found an invalid comparison for NaN: foo < NaN]
+if (NaN <= foo) { }
+    ~~~~~~~~~~        [Found an invalid comparison for NaN: NaN <= foo]

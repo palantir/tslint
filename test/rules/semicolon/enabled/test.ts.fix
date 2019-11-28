@@ -1,0 +1,87 @@
+var x = 3;
+a += b;
+
+c = () => {
+};
+
+f(() => {
+    return 1;
+});
+
+d = function() { };
+
+console.log("i am adam, am i?");
+
+function xyz() {
+    return;
+}
+
+switch(xyz) {
+    case 1:
+        break;
+    case 2:
+        continue;
+}
+
+throw new Error("some error");
+
+do {
+    var a = 4;
+} while(x == 3);
+
+debugger;
+
+import v = require("i");
+module M {
+    export var x;
+    export function f(s: string): string;
+    export function f(n: number): number;
+    export function f(x: any) { return x; }
+}
+
+declare module "M" {
+    function f(): number;
+    function g(): number;
+}
+
+function useStrictMissingSemicolon() {
+    "use strict";
+    return null;
+}
+
+class MyClass {
+    public name : string;
+    private index : number;
+    private email : string;
+
+    public initializedProperty = 6;
+    public initializedMethodProperty: mytype = () => {
+        return "hi";
+    }
+
+    public initializedMethodPropertyWithoutSemicolon = () => {
+        return "hi again";
+    }
+
+    public initializedMethodProperty1Line = () => { return "hi"; };
+
+    public initializedMethodPropertyWithoutSemicolon1Line = () => { return "hi again"; };
+}
+
+interface ITest {
+    foo?: string;
+    bar: number;
+    qux: string;
+    baz: boolean;
+}
+
+import {Router} from 'aurelia-router';
+
+import {Controller} from 'my-lib';
+
+export default LoginPage;
+export default LoginPage;
+export = Date;
+export = Date;
+type t = number;
+type t = number;

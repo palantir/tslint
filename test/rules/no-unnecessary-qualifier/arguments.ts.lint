@@ -1,0 +1,12 @@
+namespace N {
+    export type T = number;
+    export const x: N.T = 0;
+                    ~ [N]
+    export function f() {
+      if (arguments.length > 0) {
+        console.log('arguments should not break this rule');
+      }
+    }
+}
+
+[N]: Qualifier is unnecessary since 'N' is in scope.

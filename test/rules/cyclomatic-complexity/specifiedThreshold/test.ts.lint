@@ -1,0 +1,383 @@
+// Test each function type.
+const validFunctionExpression = function() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+const invalidFunctionExpression = function() {
+                                  ~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~  [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+
+function validFunctionDeclaration() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+function invalidFunctionDeclaration() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidFunctionDeclaration has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+const validArrowFunction = () => {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+}
+
+const invalidArrowFunction = () => {
+                             ~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+class MyClass {
+    get validGet(): string {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+        return "test";
+    }
+
+    get invalidGet(): string {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        return "test";
+~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The function invalidGet has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+    set validSet(newValue: string) {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+
+    set invalidSet(newValue: string) {
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The function invalidSet has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+    validMethod() {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+
+    invalidMethod() {
+    ~~~~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The function invalidMethod has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+}
+
+class validConstructor {
+    constructor() {
+        const condition1 = true ? "true" : "false";
+        const condition2 = true ? "true" : "false";
+    }
+}
+
+class invalidConstructor {
+    constructor() {
+    ~~~~~~~~~~~~~~~
+        const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The function has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+}
+
+// Test each remaining expression type.
+function validBinaryExpression() {
+    return first || second && third
+}
+
+function invalidBinaryExpression() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    return first || second && third || fourth;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidBinaryExpression has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validSwitch() {
+    switch(5) {
+        case 0:
+        case 2:
+            return "even";
+        case 1:
+        case 3:
+            return "odd";
+        default:
+            return -1;
+    }
+}
+
+function invalidSwitch() {
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+    switch(5) {
+~~~~~~~~~~~~~~~
+        case 0:
+~~~~~~~~~~~~~~~
+            return 0;
+~~~~~~~~~~~~~~~~~~~~~
+        case 1:
+~~~~~~~~~~~~~~~
+            return 1;
+~~~~~~~~~~~~~~~~~~~~~
+        case 2:
+~~~~~~~~~~~~~~~
+            return 2;
+~~~~~~~~~~~~~~~~~~~~~
+        default:
+~~~~~~~~~~~~~~~~
+            return -1;
+~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~
+}
+~  [The function invalidSwitch has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validCatch() {
+    try { }
+    catch(error) { }
+    try { }
+    catch(error) { }
+    try { }
+    finally { }
+}
+
+function invalidCatch() {
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~
+    catch(error) { }
+~~~~~~~~~~~~~~~~~~~~
+    try { }
+~~~~~~~~~~~
+    finally { }
+~~~~~~~~~~~~~~~
+}
+~  [The function invalidCatch has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validDo() {
+    do { }
+    while (false)
+    do { }
+    while (false)
+}
+
+function invalidDo() {
+~~~~~~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~
+    do { }
+~~~~~~~~~~
+    while (false)
+~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidDo has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validFor() {
+    for(;;) { }
+    for(;;) { }
+}
+
+function invalidFor() {
+~~~~~~~~~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~
+    for(;;) { }
+~~~~~~~~~~~~~~~
+}
+~ [The function invalidFor has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validForIn() {
+    for(let i in [0,1,2]) { }
+    for(let i in [0,1,2]) { }
+}
+
+function invalidForIn() {
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i in [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidForIn has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validForOf() {
+    for(let i of [0,1,2]) { }
+    for(let i of [0,1,2]) { }
+}
+
+function invalidForOf() {
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    for(let i of [0,1,2]) { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidForOf has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+let variable = 1;
+
+function validIf() {
+    if(variable) { }
+    if(variable) { } else { }
+}
+
+function invalidIf() {
+~~~~~~~~~~~~~~~~~~~~~~
+    if(variable) { }
+~~~~~~~~~~~~~~~~~~~~
+    if(variable) { } else { }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(variable) { }
+~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidIf has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+function validWhile() {
+    while(false) { }
+    while(false) { }
+}
+
+function invalidWhile() {
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~
+    while(false) { }
+~~~~~~~~~~~~~~~~~~~~
+}
+~ [The function invalidWhile has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+// Test that the rule behaves correctly for nested functions.
+
+// Valid outer function, invalid inner function.
+function outer1() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+    function inner1() {
+    ~~~~~~~~~~~~~~~~~~~
+        const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition4 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition5 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~ [The function inner1 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+}
+
+// Invalid outer function, valid inner function.
+function outer2() {
+~~~~~~~~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    function inner2() {
+~~~~~~~~~~~~~~~~~~~~~~~
+        const condition4 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition5 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~
+}
+~ [The function outer2 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+
+// Both valid.
+function outer3() {
+    const condition1 = true ? "true" : "false";
+    const condition2 = true ? "true" : "false";
+    function inner3() {
+        const condition3 = true ? "true" : "false";
+        const condition4 = true ? "true" : "false";
+    }
+}
+
+// Both invalid.
+function outer4() {
+~~~~~~~~~~~~~~~~~~~
+    const condition1 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition2 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const condition3 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    function inner4() {
+~~~~~~~~~~~~~~~~~~~~~~~
+    ~~~~~~~~~~~~~~~~~~~
+        const condition4 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition5 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        const condition6 = true ? "true" : "false";
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    }
+~~~~~
+~~~~~ [The function inner4 has a cyclomatic complexity of 4 which is higher than the threshold of 3]
+}
+~ [The function outer4 has a cyclomatic complexity of 4 which is higher than the threshold of 3]

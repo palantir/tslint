@@ -1,0 +1,5 @@
+{
+    "rules": {
+        "interface-over-type-literal": true
+    }
+}

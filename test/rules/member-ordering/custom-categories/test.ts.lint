@@ -1,0 +1,10 @@
+class C {
+    static foo() {}
+    protected static bar = 0;
+    static baz();
+
+    constructor();
+
+    static bang();
+    ~~~~~~~~~~~~~~ [Declaration of static non-private not allowed after declaration of constructor. Instead, this should come at the beginning of the class/interface.]
+}
