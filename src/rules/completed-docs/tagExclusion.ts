@@ -49,6 +49,10 @@ export class TagExclusion extends Exclusion<ITagExclusionDescriptor> {
                 return true;
             }
 
+            if (this.contentTags === undefined) {
+                return false;
+            }
+
             const matcherBody = this.contentTags[tagWithContent[0]];
             if (matcherBody === undefined) {
                 continue;
