@@ -1,0 +1,3 @@
+const nonNullValue: string = 'a';
+// The "!" assertion below is unnecessary, but ignored due to "!" being whitelisted.
+const alsoNotNull: string = nonNullValue!;

@@ -32,7 +32,7 @@ export class Rule extends Lint.Rules.TypedRule {
                 items: { type: "string" },
             },
         },
-        optionsDescription: "A list of whitelisted assertion types to ignore",
+        optionsDescription: `A list of whitelisted assertion types to ignore (use ! for null assertions)`,
         type: "typescript",
         hasFix: true,
         typescriptOnly: true,
@@ -76,7 +76,7 @@ class Walker extends Lint.AbstractWalker<string[]> {
         const cb = (node: ts.Node): void => {
             switch (node.kind) {
                 case ts.SyntaxKind.NonNullExpression:
-                    if (this.strictNullChecks) {
+                    if (this.strictNullChecks && this.options.indexOf("!") === -1) {
                         this.checkNonNullAssertion(node as ts.NonNullExpression);
                     }
                     break;
