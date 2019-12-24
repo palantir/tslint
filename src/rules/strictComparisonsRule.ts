@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { isBinaryExpression, isTypeFlagSet, isUnionType } from "tsutils";
+import { isBinaryExpression, isTypeFlagSet, isUnionType, isTypeReferenceNode } from "tsutils";
 import * as ts from "typescript";
 
 import * as Lint from "../index";
@@ -137,7 +137,7 @@ function getConstraint(t: ts.Type): ts.TypeReferenceNode | undefined {
         return undefined;
     }
 
-    if (ts.isTypeReferenceNode(constraint)) {
+    if (isTypeReferenceNode(constraint)) {
         return constraint;
     }
 
@@ -202,7 +202,7 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
 
             if (arrayContainsKind(leftKinds, [TypeKind.Object])) {
                 const constraint = getConstraint(leftType);
-                if (constraint !== undefined && ts.isIdentifier(constraint.typeName)) {
+                if (constraint !== undefined && ts.isIdentifier(constraint.typeName) && constraint.typeName.escapedText !== undefined) {
                     leftKinds = findPossibleTypeKinds(
                         constraint.typeName.escapedText.toString(),
                         sourceFile,
@@ -210,7 +210,7 @@ function walk(ctx: Lint.WalkContext<Options>, program: ts.Program) {
                 }
             } else if (arrayContainsKind(rightKinds, [TypeKind.Object])) {
                 const constraint = getConstraint(rightType);
-                if (constraint !== undefined && ts.isIdentifier(constraint.typeName)) {
+                if (constraint !== undefined && ts.isIdentifier(constraint.typeName) && constraint.typeName.escapedText !== undefined) {
                     rightKinds = findPossibleTypeKinds(
                         constraint.typeName.escapedText.toString(),
                         sourceFile,
