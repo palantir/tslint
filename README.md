@@ -7,9 +7,11 @@
 
 # TSLint
 
-TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
+:warning: __TSLint is deprecated.__
 
-:warning: __TSLint will be deprecated some time in 2019__. See this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534). If you're interested in helping with the TSLint/ESLint migration, please check out our [OSS Fellowship](https://medium.com/palantir/fellowships-for-open-source-developers-3892e6b75ee1) program.
+> See this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534). If you're interested in helping with the TSLint/ESLint migration, please check out our [OSS Fellowship](https://medium.com/palantir/fellowships-for-open-source-developers-3892e6b75ee1) program.
+
+TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
 TSLint currently supports:
 
