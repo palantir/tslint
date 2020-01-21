@@ -1,5 +1,24 @@
 # Change Log
 
+## v6.0.0
+
+This version has been marked as deprecated on NPM to encourage users to migrate to ESLint.
+
+- [bugfix] fix `enforce-trailing-newline` option in [`file-header`](https://palantir.github.io/tslint/rules/file-header/) rule (#4890)
+- [bugfix] avoid writing to temp files with `writeFileSync` on macOS 10.15 (#4887)
+- [bugfix] fix crash in [`completed-docs`](https://palantir.github.io/tslint/rules/completed/) rule when tag contents are undefined (#4895)
+- [docs] fix example code of Radix rule (#4892)
+- [docs] Add missing colon after `[error]` in testing rules documentation (#4903)
+
+Thanks to our contributors!
+
+- Ivan Sorokin
+- Tanmoy Bhowmik
+- Meng Wang
+- Jay Bhagat
+- Aman Sharma
+- Josh Goldberg
+
 ## v6.0.0-beta1
 
 No changes from v6.0.0-beta0, just re-released to correctly mark with the `beta` and `next` dist-tags on NPM.
