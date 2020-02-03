@@ -22,7 +22,7 @@ import { ICodeExample } from "../../language/rule/rule";
 export const codeExamples: ICodeExample[] = [
     {
         description:
-            "Disallow object literals to appear in type assertion expressions (default). Casing to `any` and `unknown` is allowed.",
+            "Disallow object literals to appear in type assertion expressions (default). Casting to `any` and `unknown` is allowed.",
         config: Lint.Utils.dedent`
             "rules": { "no-object-literal-type-assertion": true }
         `,
