@@ -156,6 +156,12 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
 
     function handlePropertyAccessExpression(node: ts.PropertyAccessExpression, parent: ts.Node) {
         switch (parent.kind) {
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                const grandParent = parent.parent;
+                handleParentArrayLiteralExpression(
+                    node, parent as ts.ArrayLiteralExpression,
+                    grandParent as ts.BinaryExpression);
+                break;
             case ts.SyntaxKind.BinaryExpression:
                 handleParentBinaryExpression(node, parent as ts.BinaryExpression);
                 break;
@@ -172,6 +178,16 @@ function walk(context: Lint.WalkContext<Options>, typeChecker: ts.TypeChecker) {
         }
 
         ts.forEachChild(node, visitNode);
+    }
+
+    function handleParentArrayLiteralExpression(
+      node: ts.PropertyAccessExpression, parent: ts.ArrayLiteralExpression,
+      grandParent: ts.BinaryExpression,
+    ) {
+        if (grandParent != null && grandParent.left === parent &&
+            utils.isAssignmentKind(grandParent.operatorToken.kind)) {
+          scope.addVariableModification(node);
+        }
     }
 
     function handleParentBinaryExpression(
