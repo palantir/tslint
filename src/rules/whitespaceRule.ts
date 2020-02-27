@@ -172,7 +172,11 @@ function walk(ctx: Lint.WalkContext<Options>) {
 
             case ts.SyntaxKind.ExportDeclaration:
                 const { exportClause } = node as ts.ExportDeclaration;
-                if (options.module && exportClause !== undefined) {
+                if (
+                    options.module &&
+                    exportClause !== undefined &&
+                    ts.isNamedExports(exportClause)
+                ) {
                     exportClause.elements.forEach((element, idx, arr) => {
                         if (idx === arr.length - 1) {
                             const token = exportClause.getLastToken()!;

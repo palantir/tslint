@@ -237,7 +237,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
                               toExportName,
                           )
                         : []),
-                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : []),
+                    ...(exportClause && ts.isNamedExports(exportClause)
+                        ? exportClause.elements.map(toExportName)
+                        : []),
                 ];
 
                 for (const importName of namedImportsOrReExports) {

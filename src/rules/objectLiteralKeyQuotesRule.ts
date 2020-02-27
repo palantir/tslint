@@ -157,7 +157,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
         return ts.forEachChild(sourceFile, cb);
     }
 
-    private reportMissing(node: ts.NumericLiteral | ts.Identifier) {
+    private reportMissing(node: ts.NumericLiteral | ts.Identifier | ts.PrivateIdentifier) {
         const start = node.getStart(this.sourceFile);
         this.addFailure(
             start,
@@ -178,7 +178,7 @@ class ObjectLiteralKeyQuotesWalker extends Lint.AbstractWalker<Options> {
 
 function mapPropertyName(
     property: ts.ObjectLiteralElementLike,
-): ts.StringLiteral | ts.NumericLiteral | ts.Identifier | undefined {
+): ts.StringLiteral | ts.NumericLiteral | ts.Identifier | ts.PrivateIdentifier | undefined {
     if (
         property.kind === ts.SyntaxKind.ShorthandPropertyAssignment ||
         property.kind === ts.SyntaxKind.SpreadAssignment ||

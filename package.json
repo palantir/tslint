@@ -73,7 +73,7 @@
         "tslint-config-prettier": "^1.18.0",
         "tslint-plugin-prettier": "^2.0.1",
         "tslint-test-config-non-relative": "file:test/external/tslint-test-config-non-relative",
-        "typescript": "~3.6.3",
+        "typescript": "~3.8.2",
         "yarn-deduplicate": "^1.1.1"
     },
     "engines": {
