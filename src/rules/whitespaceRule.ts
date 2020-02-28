@@ -175,7 +175,7 @@ function walk(ctx: Lint.WalkContext<Options>) {
                 if (
                     options.module &&
                     exportClause !== undefined &&
-                    ts.isNamedExports(exportClause)
+                    utils.isNamedExports(exportClause)
                 ) {
                     exportClause.elements.forEach((element, idx, arr) => {
                         if (idx === arr.length - 1) {
