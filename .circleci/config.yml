@@ -78,6 +78,15 @@ jobs:
             - attach_workspace: { at: '.' }
             - run: yarn test
 
+    test2.1:
+        docker: *docker-node-8
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@2.1
+            - run: yarn test
+
     test2.4:
         docker: *docker-node-8
         steps:
