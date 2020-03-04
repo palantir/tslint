@@ -106,7 +106,7 @@ jobs:
             - run: yarn test
 
     test2.9:
-        docker: *docker-node-
+        docker: *docker-node-8
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
