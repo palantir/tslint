@@ -10,9 +10,6 @@ aliases:
     - &docker-node-8
         - image: circleci/node:8
 
-    - &docker-node-6
-        - image: circleci/node:6
-
     - &restore-node-modules-cache
         name: Restore node_modules cache
         key: v1-yarn-deps-{{ checksum "yarn.lock" }}
@@ -82,7 +79,7 @@ jobs:
             - run: yarn test
 
     test2.1:
-        docker: *docker-node-6
+        docker: *docker-node-8
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
@@ -91,7 +88,7 @@ jobs:
             - run: yarn test
 
     test2.4:
-        docker: *docker-node-6
+        docker: *docker-node-8
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
@@ -99,17 +96,8 @@ jobs:
             - run: yarn add typescript@2.4
             - run: yarn test
 
-    test2.7:
-        docker: *docker-node-6
-        steps:
-            - checkout
-            - restore_cache: *restore-node-modules-cache
-            - attach_workspace: { at: '.' }
-            - run: yarn add typescript@2.7
-            - run: yarn test
-
     test2.8:
-        docker: *docker-node-6
+        docker: *docker-node-8
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
@@ -117,22 +105,32 @@ jobs:
             - run: yarn add typescript@2.8
             - run: yarn test
 
-    test2.9:
-        docker: *docker-node-6
-        steps:
-            - checkout
-            - restore_cache: *restore-node-modules-cache
-            - attach_workspace: { at: '.' }
-            - run: yarn add typescript@2.9
-            - run: yarn test
-
-    test3.0:
+    test3.1:
         docker: *docker-node-8
         steps:
             - checkout
             - restore_cache: *restore-node-modules-cache
             - attach_workspace: { at: '.' }
-            - run: yarn add typescript@3.0.1
+            - run: yarn add typescript@3.1
+            - run: yarn test
+
+    test3.4:
+        docker: *docker-node-8
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@3.4
+            - run: yarn test
+
+    test3.8:
+        docker: *docker-node-8
+        steps:
+            - checkout
+            - restore_cache: *restore-node-modules-cache
+            - attach_workspace: { at: '.' }
+            - run: yarn add typescript@3.8
+            - run: yarn test
             - run: yarn test
 
     testRc:
@@ -170,13 +168,13 @@ workflows:
                   requires: [build]
             - test2.4:
                   requires: [build]
-            - test2.7:
-                  requires: [build]
             - test2.8:
                   requires: [build]
-            - test2.9:
+            - test3.1:
                   requires: [build]
-            - test3.0:
+            - test3.4:
+                  requires: [build]
+            - test3.8:
                   requires: [build]
             - testRc:
                   requires: [build]
