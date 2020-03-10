@@ -64,7 +64,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.PropertyAccessExpression:
                 const { expression, name } = node as ts.PropertyAccessExpression;
-                if (utils.isEntityNameExpression(expression)) {
+                if (utils.isEntityNameExpression(expression) && !Lint.isPrivateIdentifier(name)) {
                     visitNamespaceAccess(node, expression, name);
                     break;
                 }

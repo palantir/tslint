@@ -20,6 +20,7 @@ import {
     ImportKind,
     isExportDeclaration,
     isImportDeclaration,
+    isNamedExports,
     isNamedImports,
 } from "tsutils";
 import * as ts from "typescript";
@@ -237,7 +238,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
                               toExportName,
                           )
                         : []),
-                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : []),
+                    ...(exportClause !== undefined && isNamedExports(exportClause)
+                        ? exportClause.elements.map(toExportName)
+                        : []),
                 ];
 
                 for (const importName of namedImportsOrReExports) {

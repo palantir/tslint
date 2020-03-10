@@ -17,6 +17,20 @@ namespace N {
         export const c = N.M.z;
                          ~~~ [NM]
     }
+
+    #if typescript >= 3.8.0
+    export class C {
+        #p: string;
+
+        constructor() {
+            this.#p = 'C!';
+        }
+
+        getP() {
+            return this.#p;
+        }
+    }
+    #endif
 }
 
 namespace A.B.C1 {
