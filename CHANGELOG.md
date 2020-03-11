@@ -1,5 +1,15 @@
 # Change Log
 
+## v6.1.0
+
+- [enhancement] Upgrade to TypeScript 3.8, support new syntax (#4915)
+- [docs] [`no-object-literal-type-assertion`](https://palantir.github.io/tslint/rules/no-object-literal-type-assertion/) fix typo in rule description (#4911)
+
+Thanks to our contributors!
+
+- Daniel Zwelling
+- Ryan Delaney
+
 ## v6.0.0
 
 This version has been marked as deprecated on NPM to encourage users to migrate to ESLint.
