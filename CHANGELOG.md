@@ -1,5 +1,9 @@
 # Change Log
 
+## v6.1.1
+
+- [bugfix] upgrade mkdirp dependency to `^0.5.3` (#4918)
+
 ## v6.1.0
 
 - [enhancement] Upgrade to TypeScript 3.8, support new syntax (#4915)
