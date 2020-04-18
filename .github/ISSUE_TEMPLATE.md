@@ -6,7 +6,10 @@ about: Report a bug in TSLint
 
 ### Bug Report
 
-_Note: TSLint is now deprecated in favor of ESLint. Bug reports which deal with security vulnerabilities, TypeScript compatibility, or ESLint migration workflows may be considered; other requests are likely to be declined. See [the roadmap](https://github.com/palantir/tslint/issues/4534) for more details._
+:warning: __TSLint is deprecated.__
+Please use [ESLint](https://eslint.org) with [typescript-eslint](https://typescript-eslint.io) instead.
+
+_Bug reports which deal with security vulnerabilities, TypeScript compatibility, or ESLint migration workflows may be considered; other requests are likely to be declined. See [the roadmap](https://github.com/palantir/tslint/issues/4534) for more details._
 
 - __TSLint version__:
 - __TypeScript version__:
