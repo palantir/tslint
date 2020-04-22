@@ -23,7 +23,7 @@
 
 // tslint:disable:no-console
 
-import * as Octokit from "@octokit/rest";
+import { Octokit } from "@octokit/rest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
