@@ -582,9 +582,3 @@ export function isWhiteSpace(ch: number): boolean {
     // tslint:disable-next-line
     return (ts.isWhiteSpaceLike || (ts as any).isWhiteSpace)(ch);
 }
-
-/** Wrapper for compatability with typescript@<3.8.2 */
-export function isPrivateIdentifier(node: ts.Node): node is ts.PrivateIdentifier {
-    // tslint:disable-next-line
-    return ts.isPrivateIdentifier ? ts.isPrivateIdentifier(node) : false;
-}
