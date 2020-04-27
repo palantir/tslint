@@ -154,7 +154,7 @@ function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Sym
 }
 
 /** Wrapper for compatability with typescript@<3.8.2 */
-export function isPrivateIdentifier(node: ts.Node): node is ts.PrivateIdentifier {
+function isPrivateIdentifier(node: ts.Node): node is ts.PrivateIdentifier {
     // tslint:disable-next-line
     return ts.isPrivateIdentifier ? ts.isPrivateIdentifier(node) : false;
 }
