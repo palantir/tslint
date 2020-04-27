@@ -1,5 +1,9 @@
 # Change Log
 
+## v6.1.2
+
+-   [bugfix] restore typings compatibility with TS < 3.8 (#4933)
+
 ## v6.1.1
 
 -   [bugfix] upgrade mkdirp dependency to `^0.5.3` (#4918)
