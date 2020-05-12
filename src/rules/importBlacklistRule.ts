@@ -20,6 +20,7 @@ import {
     ImportKind,
     isExportDeclaration,
     isImportDeclaration,
+    isNamedExports,
     isNamedImports,
 } from "tsutils";
 import * as ts from "typescript";
@@ -74,6 +75,8 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionExamples: [
             true,
             [true, "rxjs", "lodash"],
+            [true, [".*\\.temp$", ".*\\.tmp$"]],
+            [true, { lodash: ["pull", "pullAll"] }],
             [true, "lodash", { lodash: ["pull", "pullAll"] }],
             [true, "rxjs", { lodash: ["pull", "pullAll"] }, [".*\\.temp$", ".*\\.tmp$"]],
         ],
@@ -235,7 +238,9 @@ function walk(ctx: Lint.WalkContext<Options>) {
                               toExportName,
                           )
                         : []),
-                    ...(exportClause !== undefined ? exportClause.elements.map(toExportName) : []),
+                    ...(exportClause !== undefined && isNamedExports(exportClause)
+                        ? exportClause.elements.map(toExportName)
+                        : []),
                 ];
 
                 for (const importName of namedImportsOrReExports) {

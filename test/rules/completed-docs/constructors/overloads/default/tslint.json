@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "completed-docs": [true, {
+        "constructors": {
+            "privacies": ["public", "private"]
+        }
+    }]
+  }
+}

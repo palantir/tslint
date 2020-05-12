@@ -10,6 +10,20 @@ namespace N {
         export const b = y;
         export const c = z;
     }
+
+    #if typescript >= 3.8.0
+    export class C {
+        #p: string;
+
+        constructor() {
+            this.#p = 'C!';
+        }
+
+        getP() {
+            return this.#p;
+        }
+    }
+    #endif
 }
 
 namespace A.B.C1 {

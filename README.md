@@ -1,5 +1,5 @@
-[![NPM version](https://badge.fury.io/js/tslint.svg)](http://badge.fury.io/js/tslint)
-[![Downloads](http://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
+[![NPM version](https://badge.fury.io/js/tslint.svg)](https://badge.fury.io/js/tslint)
+[![Downloads](https://img.shields.io/npm/dm/tslint.svg)](https://npmjs.org/package/tslint)
 [![Dependency Status](https://david-dm.org/palantir/tslint.svg)](https://david-dm.org/palantir/tslint)
 [![devDependency Status](https://david-dm.org/palantir/tslint/dev-status.svg)](https://david-dm.org/palantir/tslint/?type=dev)
 [![peerDependency Status](https://david-dm.org/palantir/tslint/peer-status.svg)](https://david-dm.org/palantir/tslint/?type=peer)
@@ -7,9 +7,11 @@
 
 # TSLint
 
-TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
+:warning: __TSLint is deprecated.__
 
-:warning: __TSLint [has been deprecated](https://medium.com/palantir/tslint-in-2019-1a144c2317a9) as of 2019__. Please see this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534). If you're interested in helping with the TSLint/ESLint migration, please check out our [OSS Fellowship](https://medium.com/palantir/fellowships-for-open-source-developers-3892e6b75ee1) program.
+> See this issue for more details: [Roadmap: TSLint &rarr; ESLint](https://github.com/palantir/tslint/issues/4534). If you're interested in helping with the TSLint/ESLint migration, please check out our [OSS Fellowship](https://medium.com/palantir/fellowships-for-open-source-developers-3892e6b75ee1) program.
+
+TSLint is an extensible static analysis tool that checks [TypeScript](https://github.com/Microsoft/TypeScript) code for readability, maintainability, and functionality errors. It is widely supported across modern editors & build systems and can be customized with your own lint rules, configurations, and formatters.
 
 TSLint currently supports:
 

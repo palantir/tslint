@@ -337,7 +337,7 @@ describe("Executable", function(this: Mocha.Suite) {
         it("fixes multiple rules without overwriting each other", async () => {
             const tempFile = path.relative(process.cwd(), createTempFile("ts"));
             fs.writeFileSync(
-                tempFile,
+                path.resolve(tempFile),
                 'import * as x from "b"\nimport * as y from "a_long_module";\n',
             );
             const result = await execRunnerWithOutput({
@@ -348,7 +348,7 @@ describe("Executable", function(this: Mocha.Suite) {
             const content = fs.readFileSync(tempFile, "utf8");
             // compare against file name which will be returned by formatter (used in TypeScript)
             const denormalizedFileName = denormalizeWinPath(tempFile);
-            fs.unlinkSync(tempFile);
+            fs.unlinkSync(path.resolve(tempFile));
             assert.equal(result.status, Status.Ok, "process should exit without an error");
             assert.strictEqual(
                 content,
@@ -775,7 +775,7 @@ function execRunnerWithOutput(options: Partial<Options>) {
 
 // tslint:disable-next-line:promise-function-async
 function execRunner(options: Partial<Options>, logger: Logger = dummyLogger) {
-    return run({ exclude: [], files: [], ...options }, logger);
+    return run({ exclude: [], files: [], format: "prose", ...options }, logger);
 }
 
 // tslint:disable-next-line:ban-types

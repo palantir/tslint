@@ -42,7 +42,7 @@ import { arrayify, dedent, flatMap, mapDefined } from "./utils";
  * Linter that can lint multiple files in consecutive runs.
  */
 export class Linter {
-    public static VERSION = "5.20.0";
+    public static VERSION = "6.1.2";
 
     public static findConfiguration = findConfiguration;
     public static findConfigurationPath = findConfigurationPath;
@@ -184,7 +184,7 @@ export class Linter {
         const failures = this.options.quiet ? errors : this.failures;
 
         const formatterName =
-            this.options.formatter !== undefined ? this.options.formatter : "prose";
+            this.options.formatter !== undefined ? this.options.formatter : "stylish";
         const Formatter = findFormatter(formatterName, this.options.formattersDirectory);
         if (Formatter === undefined) {
             throw new Error(`formatter '${String(formatterName)}' not found`);
@@ -257,7 +257,7 @@ export class Linter {
                 const oldSource = fs.readFileSync(filePath, "utf-8");
                 fileNewSource = Replacement.applyFixes(oldSource, fileFixes);
             }
-            fs.writeFileSync(filePath, fileNewSource);
+            fs.writeFileSync(path.resolve(filePath), fileNewSource);
             this.updateProgram(filePath);
         });
 

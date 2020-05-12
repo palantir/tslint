@@ -161,13 +161,14 @@ const options: Option[] = [
         name: "format",
         type: "string",
         describe:
-            "output format (prose, json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
+            "output format (json, stylish, verbose, pmd, msbuild, checkstyle, vso, fileslist, codeFrame)",
         description: dedent`
             The formatter to use to format the results of the linter before
             outputting it to stdout or the file passed in --out. The core
-            formatters are prose (human readable), json (machine readable)
-            and verbose. prose is the default if this option is not used.
-            Other built-in options include pmd, msbuild, checkstyle, and vso.
+            formatters are stylish (colored and human readable), json (machine
+            readable), and verbose (human readable).
+            stylish is the default if this option is not used.
+            Other built-in options include pmd, prose, msbuild, checkstyle, and vso.
             Additional formatters can be added and used if the --formatters-dir
             option is set.`,
     },

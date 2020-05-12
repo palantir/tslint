@@ -1,0 +1,40 @@
+class Foo {
+    constructor(i: number);
+    ~~~~~~~~~~~~~~~~~~~~~~~ [default]
+    /**
+     * Exists in one place
+     */
+    constructor(o: any) {}
+}
+
+class FooPublic {
+    public constructor(i: number);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [public]
+    /**
+     * Exists in one place
+     */
+    public constructor(o: any) {}
+}
+
+class FooPrivate {
+    private constructor(i: number);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [private]
+    /**
+     * Exists in one place
+     */
+    private constructor(o: any) {}
+}
+
+class FooProtected {
+    protected constructor(i: number);
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [protected]
+    /**
+     * Exists in one place
+     */
+    protected constructor(o: any) {}
+}
+
+[default]: Documentation must exist for constructors.
+[public]: Documentation must exist for public constructors.
+[private]: Documentation must exist for private constructors.
+[protected]: Documentation must exist for protected constructors.

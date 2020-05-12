@@ -64,7 +64,7 @@ function walk(ctx: Lint.WalkContext, checker: ts.TypeChecker): void {
 
             case ts.SyntaxKind.PropertyAccessExpression:
                 const { expression, name } = node as ts.PropertyAccessExpression;
-                if (utils.isEntityNameExpression(expression)) {
+                if (utils.isEntityNameExpression(expression) && !isPrivateIdentifier(name)) {
                     visitNamespaceAccess(node, expression, name);
                     break;
                 }
@@ -151,4 +151,10 @@ function tryGetAliasedSymbol(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Sym
     return utils.isSymbolFlagSet(symbol, ts.SymbolFlags.Alias)
         ? checker.getAliasedSymbol(symbol)
         : undefined;
+}
+
+/** Wrapper for compatability with typescript@<3.8.2 */
+function isPrivateIdentifier(node: ts.Node): node is ts.PrivateIdentifier {
+    // tslint:disable-next-line
+    return ts.isPrivateIdentifier ? ts.isPrivateIdentifier(node) : false;
 }

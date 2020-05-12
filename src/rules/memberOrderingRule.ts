@@ -20,27 +20,39 @@ import * as ts from "typescript";
 
 import { showWarningOnce } from "../error";
 import * as Lint from "../index";
-import { flatMap, mapDefined } from "../utils";
+import { dedent, flatMap, mapDefined } from "../utils";
 
 const OPTION_ORDER = "order";
 const OPTION_ALPHABETIZE = "alphabetize";
 
 enum MemberKind {
     publicStaticField,
-    publicStaticMethod,
     protectedStaticField,
-    protectedStaticMethod,
     privateStaticField,
+
+    publicStaticMethod,
     privateStaticMethod,
+    protectedStaticMethod,
+
     publicInstanceField,
     protectedInstanceField,
     privateInstanceField,
+
     publicConstructor,
     protectedConstructor,
     privateConstructor,
+
     publicInstanceMethod,
     protectedInstanceMethod,
     privateInstanceMethod,
+
+    publicStaticAccessor,
+    protectedStaticAccessor,
+    privateStaticAccessor,
+
+    publicInstanceAccessor,
+    protectedInstanceAccessor,
+    privateInstanceAccessor,
 }
 
 const PRESETS = new Map<string, MemberCategoryJson[]>([
@@ -50,13 +62,25 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
             "public-static-field",
             "protected-static-field",
             "private-static-field",
+
             "public-instance-field",
             "protected-instance-field",
             "private-instance-field",
+
             "constructor",
+
+            "public-static-accessor",
+            "protected-static-accessor",
+            "private-static-accessor",
+
             "public-static-method",
             "protected-static-method",
             "private-static-method",
+
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
+
             "public-instance-method",
             "protected-instance-method",
             "private-instance-method",
@@ -68,13 +92,25 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
             "public-static-field",
             "protected-static-field",
             "private-static-field",
+
             "public-instance-field",
             "protected-instance-field",
             "private-instance-field",
+
             "constructor",
+
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
+
             "public-instance-method",
             "protected-instance-method",
             "private-instance-method",
+
+            "public-static-accessor",
+            "protected-static-accessor",
+            "private-static-accessor",
+
             "public-static-method",
             "protected-static-method",
             "private-static-method",
@@ -84,15 +120,27 @@ const PRESETS = new Map<string, MemberCategoryJson[]>([
         "statics-first",
         [
             "public-static-field",
+            "public-static-accessor",
             "public-static-method",
+
             "protected-static-field",
+            "protected-static-accessor",
             "protected-static-method",
+
             "private-static-field",
+            "private-static-accessor",
             "private-static-method",
+
             "public-instance-field",
             "protected-instance-field",
             "private-instance-field",
+
             "constructor",
+
+            "public-instance-accessor",
+            "protected-instance-accessor",
+            "private-instance-accessor",
+
             "public-instance-method",
             "protected-instance-method",
             "private-instance-method",
@@ -119,26 +167,20 @@ const optionsDescription = Lint.Utils.dedent`
     ${namesMarkdown(PRESET_NAMES)}
 
     \`fields-first\` puts, in order of precedence:
-
         * fields before constructors before methods
         * static members before instance members
         * public members before protected members before private members
-
     \`instance-sandwich\` puts, in order of precedence:
-
         * fields before constructors before methods
         * static fields before instance fields, but static methods *after* instance methods
         * public members before protected members before private members
-
     \`statics-first\` puts, in order of precedence:
-
         * static members before instance members
             * public members before protected members before private members
             * fields before methods
         * instance fields before constructors before instance methods
             * fields before constructors before methods
             * public members before protected members before private members
-
     Note that these presets, despite looking similar, can have subtly different behavior due to the order in which these
     rules are specified. A fully expanded ordering can be found in the PRESETS constant in
     https://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.
@@ -162,7 +204,9 @@ const optionsDescription = Lint.Utils.dedent`
             ]
         }
 
-    The '${OPTION_ALPHABETIZE}' option will enforce that members within the same category should be alphabetically sorted by name.`;
+    The '${OPTION_ALPHABETIZE}' option will enforce that members within the same category should be alphabetically sorted by name.
+    Computed property names are sorted before others but not sorted amongst each other.
+    Additionally getters will be sorted before setters (after alphabetization).`;
 
 export class Rule extends Lint.Rules.AbstractRule {
     /* tslint:disable:object-literal-sort-keys */
@@ -181,6 +225,9 @@ export class Rule extends Lint.Rules.AbstractRule {
         options: {
             type: "object",
             properties: {
+                alphabetize: {
+                    type: "boolean",
+                },
                 order: {
                     oneOf: [
                         {
@@ -197,9 +244,6 @@ export class Rule extends Lint.Rules.AbstractRule {
                         },
                     ],
                 },
-                alphabetize: {
-                    type: "boolean",
-                },
             },
             additionalProperties: false,
         },
@@ -208,6 +252,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             [
                 true,
                 {
+                    alphabetize: true,
                     order: [
                         "public-static-field",
                         "public-instance-field",
@@ -219,7 +264,6 @@ export class Rule extends Lint.Rules.AbstractRule {
                         "protected-instance-method",
                         "private-instance-method",
                     ],
-                    alphabetize: true,
                 },
             ],
             [
@@ -251,7 +295,12 @@ export class Rule extends Lint.Rules.AbstractRule {
         }
     }
 
-    /* tslint:enable:object-literal-sort-keys */
+    public static stringCompare(a: string, b: string) {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        return aLower < bLower ? -1 : aLower > bLower ? 1 : 0;
+    }
+
     public apply(sourceFile: ts.SourceFile): Lint.RuleFailure[] {
         let options: Options;
         try {
@@ -302,16 +351,18 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
      * before the checkMembers call in this.walk().
      */
     private checkMembers(members: ts.NodeArray<Member>) {
-        let prevRank = -1;
-        let prevName: string | undefined;
+        let prevMember = members[0];
         let failureExists = false;
-        for (const member of members) {
+        for (let i = 1; i < members.length; i++) {
+            const member = members[i];
+
             const rank = this.memberRank(member);
             if (rank === -1) {
                 // no explicit ordering for this kind of node specified, so continue
                 continue;
             }
 
+            const prevRank = this.memberRank(prevMember);
             if (rank < prevRank) {
                 const nodeType = this.rankName(rank);
                 const prevNodeType = this.rankName(prevRank);
@@ -326,32 +377,43 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                 // add empty array as fix so we can add a replacement later. (fix itself is readonly)
                 this.addFailureAtNode(member, errorLine1, []);
                 failureExists = true;
-            } else {
-                if (this.options.alphabetize && member.name !== undefined) {
-                    if (rank !== prevRank) {
-                        // No alphabetical ordering between different ranks
-                        prevName = undefined;
-                    }
-
-                    const curName = nameString(member.name);
-                    if (prevName !== undefined && caseInsensitiveLess(curName, prevName)) {
-                        this.addFailureAtNode(
-                            member.name,
-                            Rule.FAILURE_STRING_ALPHABETIZE(
-                                this.findLowerName(members, rank, curName),
-                                curName,
-                            ),
-                            [],
-                        );
-                        failureExists = true;
-                    } else {
-                        prevName = curName;
-                    }
+                continue; // avoid updating prevMember at end of loop
+            } else if (
+                prevRank === rank &&
+                this.options.alphabetize &&
+                member.name !== undefined &&
+                prevMember.name !== undefined
+            ) {
+                const curName = nameString(member.name);
+                const prevName = nameString(prevMember.name);
+                const alphaDiff = Rule.stringCompare(prevName, curName);
+                if (alphaDiff > 0) {
+                    this.addFailureAtNode(
+                        member.name,
+                        Rule.FAILURE_STRING_ALPHABETIZE(
+                            this.findLowerName(members, rank, curName),
+                            curName,
+                        ),
+                        [],
+                    );
+                    failureExists = true;
+                    continue;
+                } else if (
+                    alphaDiff === 0 &&
+                    curName !== "" && // do not enforce get < set for computed properties
+                    member.kind === ts.SyntaxKind.GetAccessor &&
+                    prevMember.kind === ts.SyntaxKind.SetAccessor
+                ) {
+                    this.addFailureAtNode(
+                        member.name,
+                        `Getter for '${curName}' should appear before setter.`,
+                        [],
+                    );
+                    failureExists = true;
+                    continue;
                 }
-
-                // keep track of last good node
-                prevRank = rank;
             }
+            prevMember = member;
         }
         if (failureExists) {
             const sortedMemberIndexes = members
@@ -369,9 +431,20 @@ class MemberOrderingWalker extends Lint.AbstractWalker<Options> {
                     if (this.options.alphabetize && a.name !== undefined && b.name !== undefined) {
                         const aName = nameString(a.name);
                         const bName = nameString(b.name);
-                        const nameDiff = aName.localeCompare(bName);
+                        const nameDiff = Rule.stringCompare(aName, bName);
                         if (nameDiff !== 0) {
                             return nameDiff;
+                        }
+                        const getSetDiff =
+                            a.kind === ts.SyntaxKind.GetAccessor &&
+                            b.kind === ts.SyntaxKind.SetAccessor
+                                ? -1
+                                : a.kind === ts.SyntaxKind.SetAccessor &&
+                                  b.kind === ts.SyntaxKind.GetAccessor
+                                ? 1
+                                : 0;
+                        if (aName !== "" && getSetDiff !== 0) {
+                            return getSetDiff;
                         }
                     }
                     // finally, sort by position in original NodeArray so the sort remains stable.
@@ -459,18 +532,6 @@ function caseInsensitiveLess(a: string, b: string) {
     return a.toLowerCase() < b.toLowerCase();
 }
 
-function memberKindForConstructor(access: Access): MemberKind {
-    return (MemberKind as any)[`${access}Constructor`] as MemberKind;
-}
-
-function memberKindForMethodOrField(
-    access: Access,
-    membership: "Static" | "Instance",
-    kind: "Method" | "Field",
-): MemberKind {
-    return (MemberKind as any)[access + membership + kind] as MemberKind;
-}
-
 const allAccess: Access[] = ["public", "protected", "private"];
 
 function memberKindFromName(name: string): MemberKind[] {
@@ -492,29 +553,36 @@ function getMemberKind(member: Member): MemberKind | undefined {
         : hasModifier(member.modifiers, ts.SyntaxKind.ProtectedKeyword)
         ? "protected"
         : "public";
+    const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword)
+        ? "Static"
+        : "Instance";
 
     switch (member.kind) {
         case ts.SyntaxKind.Constructor:
         case ts.SyntaxKind.ConstructSignature:
-            return memberKindForConstructor(accessLevel);
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + "Constructor"] as MemberKind;
+
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + "Accessor"] as MemberKind;
 
         case ts.SyntaxKind.PropertyDeclaration:
         case ts.SyntaxKind.PropertySignature:
-            return methodOrField(isFunctionLiteral((member as ts.PropertyDeclaration).initializer));
+            const type = isFunctionLiteral((member as ts.PropertyDeclaration).initializer)
+                ? "Method"
+                : "Field";
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + type] as MemberKind;
 
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature:
-            return methodOrField(true);
+            // tslint:disable-next-line:prefer-template
+            return (MemberKind as any)[accessLevel + membership + "Method"] as MemberKind;
 
         default:
             return undefined;
-    }
-
-    function methodOrField(isMethod: boolean) {
-        const membership = hasModifier(member.modifiers, ts.SyntaxKind.StaticKeyword)
-            ? "Static"
-            : "Instance";
-        return memberKindForMethodOrField(accessLevel, membership, isMethod ? "Method" : "Field");
     }
 }
 
@@ -555,12 +623,21 @@ function getOptionsJson(allOptions: any[]): { order: MemberCategoryJson[]; alpha
         | string;
     if (typeof firstOption !== "object") {
         // Undocumented direct string option. Deprecate eventually.
-        return { order: convertFromOldStyleOptions(allOptions), alphabetize: false }; // presume allOptions to be string[]
+        const order = convertFromOldStyleOptions(allOptions);
+        showWarningOnce(
+            dedent`
+            Warning: member-ordering - Direct string option is deprecated and does not support accessors.
+            See also https://palantir.github.io/tslint/rules/member-ordering/
+            You should replace ${allOptions.map(o => JSON.stringify(o)).join()}
+            with the following equivalent options and add -accessor categories as appropriate:\n` +
+                JSON.stringify(order, undefined, "  "),
+        );
+        return { order, alphabetize: false }; // presume allOptions to be string[]
     }
 
     return {
-        alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
         order: categoryFromOption(firstOption[OPTION_ORDER]),
+        alphabetize: firstOption[OPTION_ALPHABETIZE] === true,
     };
 }
 function categoryFromOption(orderOption: MemberCategoryJson[] | string): MemberCategoryJson[] {

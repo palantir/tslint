@@ -77,6 +77,13 @@ function walk(ctx: Lint.WalkContext<number>): void {
 function check(node: ts.IfStatement, sourceFile: ts.SourceFile, minCases: number): boolean {
     let switchVariable: ts.Expression | undefined;
     let casesSeen = 0;
+
+    const { elseStatement } = node;
+
+    if (elseStatement === undefined) {
+        return false;
+    }
+
     const couldBeSwitch = everyCase(node, expr => {
         casesSeen++;
         if (switchVariable !== undefined) {

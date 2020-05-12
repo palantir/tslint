@@ -22,6 +22,7 @@ const customRulesOptions: Options = {
     config: "./test/config/tslint-custom-rules.json",
     exclude: [],
     files: ["src/test.ts"],
+    format: "prose",
     rulesDirectory: "./test/files/custom-rules",
 };
 

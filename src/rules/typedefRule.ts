@@ -152,7 +152,7 @@ class TypedefWalker extends Lint.AbstractWalker<Options> {
     }
 
     private checkArrowFunction({ parent, parameters, type }: ts.ArrowFunction): void {
-        if (parent.kind !== ts.SyntaxKind.CallExpression && !isTypedPropertyDeclaration(parent)) {
+        if (!isTypedPropertyDeclaration(parent)) {
             this.checkTypeAnnotation("arrow-call-signature", parameters, type);
         }
     }

@@ -6,6 +6,10 @@ import {A, B} from 'foo'; // failure
 import {A, bz, C} from 'foo'; // failure
 import {A, b, C} from 'zfoo';
 
+// Underscores come last.
+import {A, C, d, _b} from 'zfoo'; // failure
+import {A, C, d, _b} from 'zfoo';
+
 import {g} from "y"; // failure
 import {
     a as d,
@@ -40,5 +44,5 @@ import someDefault, {nameA, nameBReallyLong as anotherName} from "./wherever";
 // do not fix cases where a newline is missing
 import * as foo from 'foo';  import * as bar from 'bar';
 
-import * as foo from 'foo';
 import * as bar from 'bar';
+import * as foo from 'foo';
