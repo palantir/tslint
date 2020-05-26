@@ -474,7 +474,7 @@
   {
     "ruleName": "completed-docs",
     "description": "Enforces JSDoc comments for important items be filled out.",
-    "optionsDescription": "\n`true` to enable for `[classes, functions, methods, properties]`,\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * `\"functions\"` `\"methods\"` may also specify `\"overloads\"`\n      to indicate that each overload should have its own documentation, which is `false` by default.\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"existence\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
+    "optionsDescription": "\n`true` to enable for `[classes, functions, methods, properties]`,\nor an array with each item in one of two formats:\n\n* `string` to enable for that type\n* `object` keying types to when their documentation is required:\n    * `\"methods\"` and `\"properties\"` may specify:\n        * `\"privacies\"`:\n            * `\"all\"`\n            * `\"private\"`\n            * `\"protected\"`\n            * `\"public\"`\n        * `\"locations\"`:\n            * `\"all\"`\n            * `\"instance\"`\n            * `\"static\"`\n    * Other types may specify `\"visibilities\"`:\n        * `\"all\"`\n        * `\"exported\"`\n        * `\"internal\"`\n    * `\"functions\"` `\"methods\"` may also specify `\"overloads\"`\n      to indicate that each overload should have its own documentation, which is `false` by default.\n    * All types may also provide `\"tags\"`\n      with members specifying tags that allow the docs to not have a body.\n        * `\"content\"`: Object mapping tags to `RegExp` bodies content allowed to count as complete docs.\n        * `\"existence\"`: Array of tags that must only exist to count as complete docs.\n\nTypes that may be enabled are:\n\n* `\"classes\"`\n* `\"constructors\"`\n* `\"enums\"`\n* `\"enum-members\"`\n* `\"functions\"`\n* `\"interfaces\"`\n* `\"methods\"`\n* `\"namespaces\"`\n* `\"properties\"`\n* `\"types\"`\n* `\"variables\"`",
     "options": {
       "type": "array",
       "items": {
@@ -521,6 +521,39 @@
                       "internal"
                     ],
                     "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "constructors": {
+                "properties": {
+                  "tags": {
+                    "properties": {
+                      "content": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "existence": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    }
+                  },
+                  "privacies": {
+                    "enum": [
+                      "all",
+                      "private",
+                      "protected",
+                      "public"
+                    ],
+                    "type": "string"
+                  },
+                  "overloads": {
+                    "type": "boolean"
                   }
                 },
                 "type": "object"
@@ -1200,6 +1233,22 @@
       ],
       [
         true,
+        [
+          ".*\\.temp$",
+          ".*\\.tmp$"
+        ]
+      ],
+      [
+        true,
+        {
+          "lodash": [
+            "pull",
+            "pullAll"
+          ]
+        }
+      ],
+      [
+        true,
         "lodash",
         {
           "lodash": [
@@ -1618,10 +1667,13 @@
     "description": "Enforces member ordering.",
     "hasFix": true,
     "rationale": "\nA consistent ordering for class members can make classes easier to read, navigate, and edit.\n\nA common opposite practice to `member-ordering` is to keep related groups of classes together.\nInstead of creating classes with multiple separate groups, consider splitting class responsibilities\napart across multiple single-responsibility classes.\n        ",
-    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\n`fields-first` puts, in order of precedence:\n\n    * fields before constructors before methods\n    * static members before instance members\n    * public members before protected members before private members\n\n`instance-sandwich` puts, in order of precedence:\n\n    * fields before constructors before methods\n    * static fields before instance fields, but static methods *after* instance methods\n    * public members before protected members before private members\n\n`statics-first` puts, in order of precedence:\n\n    * static members before instance members\n        * public members before protected members before private members\n        * fields before methods\n    * instance fields before constructors before instance methods\n        * fields before constructors before methods\n        * public members before protected members before private members\n\nNote that these presets, despite looking similar, can have subtly different behavior due to the order in which these\nrules are specified. A fully expanded ordering can be found in the PRESETS constant in\nhttps://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.\n(You may need to check the version of the file corresponding to your version of tslint.)\n\nAlternatively, the value for `order` may be an array consisting of the following strings:\n\n* `public-static-field`\n* `public-static-method`\n* `protected-static-field`\n* `protected-static-method`\n* `private-static-field`\n* `private-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.",
+    "optionsDescription": "\nOne argument, which is an object, must be provided. It should contain an `order` property.\nThe `order` property should have a value of one of the following strings:\n\n* `fields-first`\n* `instance-sandwich`\n* `statics-first`\n\n`fields-first` puts, in order of precedence:\n    * fields before constructors before methods\n    * static members before instance members\n    * public members before protected members before private members\n`instance-sandwich` puts, in order of precedence:\n    * fields before constructors before methods\n    * static fields before instance fields, but static methods *after* instance methods\n    * public members before protected members before private members\n`statics-first` puts, in order of precedence:\n    * static members before instance members\n        * public members before protected members before private members\n        * fields before methods\n    * instance fields before constructors before instance methods\n        * fields before constructors before methods\n        * public members before protected members before private members\nNote that these presets, despite looking similar, can have subtly different behavior due to the order in which these\nrules are specified. A fully expanded ordering can be found in the PRESETS constant in\nhttps://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.\n(You may need to check the version of the file corresponding to your version of tslint.)\n\nAlternatively, the value for `order` may be an array consisting of the following strings:\n\n* `public-static-field`\n* `protected-static-field`\n* `private-static-field`\n* `public-static-method`\n* `private-static-method`\n* `protected-static-method`\n* `public-instance-field`\n* `protected-instance-field`\n* `private-instance-field`\n* `public-constructor`\n* `protected-constructor`\n* `private-constructor`\n* `public-instance-method`\n* `protected-instance-method`\n* `private-instance-method`\n* `public-static-accessor`\n* `protected-static-accessor`\n* `private-static-accessor`\n* `public-instance-accessor`\n* `protected-instance-accessor`\n* `private-instance-accessor`\n\nYou can also omit the access modifier to refer to \"public-\", \"protected-\", and \"private-\" all at once; for example, \"static-field\".\n\nYou can also make your own categories by using an object instead of a string:\n\n    {\n        \"name\": \"static non-private\",\n        \"kinds\": [\n            \"public-static-field\",\n            \"protected-static-field\",\n            \"public-static-method\",\n            \"protected-static-method\"\n        ]\n    }\n\nThe 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.\nComputed property names are sorted before others but not sorted amongst each other.\nAdditionally getters will be sorted before setters (after alphabetization).",
     "options": {
       "type": "object",
       "properties": {
+        "alphabetize": {
+          "type": "boolean"
+        },
         "order": {
           "oneOf": [
             {
@@ -1638,11 +1690,11 @@
                 "type": "string",
                 "enum": [
                   "public-static-field",
-                  "public-static-method",
                   "protected-static-field",
-                  "protected-static-method",
                   "private-static-field",
+                  "public-static-method",
                   "private-static-method",
+                  "protected-static-method",
                   "public-instance-field",
                   "protected-instance-field",
                   "private-instance-field",
@@ -1651,15 +1703,18 @@
                   "private-constructor",
                   "public-instance-method",
                   "protected-instance-method",
-                  "private-instance-method"
+                  "private-instance-method",
+                  "public-static-accessor",
+                  "protected-static-accessor",
+                  "private-static-accessor",
+                  "public-instance-accessor",
+                  "protected-instance-accessor",
+                  "private-instance-accessor"
                 ]
               },
               "maxLength": 13
             }
           ]
-        },
-        "alphabetize": {
-          "type": "boolean"
         }
       },
       "additionalProperties": false
@@ -1674,6 +1729,7 @@
       [
         true,
         {
+          "alphabetize": true,
           "order": [
             "public-static-field",
             "public-instance-field",
@@ -1684,8 +1740,7 @@
             "public-instance-method",
             "protected-instance-method",
             "private-instance-method"
-          ],
-          "alphabetize": true
+          ]
         }
       ],
       [
@@ -2523,7 +2578,7 @@
     "typescriptOnly": true,
     "codeExamples": [
       {
-        "description": "Disallow object literals to appear in type assertion expressions (default). Casing to `any` and `unknown` is allowed.",
+        "description": "Disallow object literals to appear in type assertion expressions (default). Casting to `any` and `unknown` is allowed.",
         "config": "```json\n\"rules\": { \"no-object-literal-type-assertion\": true }\n```",
         "pass": "```ts\nlet foo = {} as any;\nlet foo = {} as unknown;\n\nlet foo = {} as any as Foo;\nlet foo = {} as unknown as Foo;\n```",
         "fail": "```ts\nlet foo = {} as Foo;\nlet foo = <Foo>{};\n```"
@@ -3469,7 +3524,7 @@
     "description": "Requires that import statements be alphabetized and grouped.",
     "descriptionDetails": "\nEnforce a consistent ordering for ES6 imports:\n- Named imports must be alphabetized (i.e. \"import {A, B, C} from \"foo\";\")\n    - The exact ordering can be controlled by the named-imports-order option.\n    - \"longName as name\" imports are ordered by \"longName\".\n- Import sources must be alphabetized within groups, i.e.:\n        import * as foo from \"a\";\n        import * as bar from \"b\";\n- Groups of imports are delineated by blank lines. You can use this rule to group\n    imports however you like, e.g. by first- vs. third-party or thematically or\n    you can define groups based upon patterns in import path names.",
     "hasFix": true,
-    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"grouped-imports\"` option to control the grouping of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).  The grouping used\nis controlled by the `\"groups\"` option.\n\nPossible values for `\"grouped-imports\"` are:\n\n* `false`: Do not enforce grouping. (This is the default.)\n* `true`: Group source imports using default grouping or groups setting.\n\nThe value of `\"groups\"` is a list of group rules of the form:\n\n    [{\n        \"name\": \"optional rule name\",\n        \"match\": \"regex string\",\n        \"order\": 10\n    }, {\n        \"name\": \"pkga imports\",\n        \"match\": \"^@pkga\",\n        \"order\": 20\n    }]\n\nthere is also a simplified form where you only pass a list of patterns and\nthe order is given by the position in the list\n\n    [\"^@pkga\", \"^\\.\\.\"]\n\nThe first rule in the list to match a given import is the group that is used.\nIf no rule in matched then the import will be put in an `unmatched` group\nat the end of all groups. The groups must be ordered based upon the sequential\nvalue of the `order` value. (ie. order 0 is first)\n\nIf no `\"groups\"` options is set, a default grouping is used of third-party,\nparent directories and the current directory. (`\"bar\"`, `\"../baz\"`, `\"./foo\"`.)\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"module-source-path\"` option to control the ordering of imports based full path\nor just the module name\n\nPossible values for `\"module-source-path\"` are:\n\n* `\"full'`: Correct order is  `\"./a/Foo\"`, `\"./b/baz\"`, `\"./c/Bar\"`. (This is the default.)\n* `\"basename\"`: Correct order is `\"./c/Bar\"`, `\"./b/baz\"`, `\"./a/Foo\"`.\n\n        ",
+    "optionsDescription": "\nYou may set the `\"import-sources-order\"` option to control the ordering of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"import-sources-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`. (This is the default.)\n* `\"case-insensitive-legacy'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`.\n* `\"lowercase-first\"`: Correct order is `\"baz\"`, `\"Bar\"`, `\"Foo\"`.\n* `\"lowercase-last\"`: Correct order is `\"Bar\"`, `\"Foo\"`, `\"baz\"`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"grouped-imports\"` option to control the grouping of source\nimports (the `\"foo\"` in `import {A, B, C} from \"foo\"`).  The grouping used\nis controlled by the `\"groups\"` option.\n\nPossible values for `\"grouped-imports\"` are:\n\n* `false`: Do not enforce grouping. (This is the default.)\n* `true`: Group source imports using default grouping or groups setting.\n\nThe value of `\"groups\"` is a list of group rules of the form:\n\n    [{\n        \"name\": \"optional rule name\",\n        \"match\": \"regex string\",\n        \"order\": 10\n    }, {\n        \"name\": \"pkga imports\",\n        \"match\": \"^@pkga\",\n        \"order\": 20\n    }]\n\nthere is also a simplified form where you only pass a list of patterns and\nthe order is given by the position in the list\n\n    [\"^@pkga\", \"^\\.\\.\"]\n\nThe first rule in the list to match a given import is the group that is used.\nIf no rule in matched then the import will be put in an `unmatched` group\nat the end of all groups. The groups must be ordered based upon the sequential\nvalue of the `order` value. (ie. order 0 is first)\n\nIf no `\"groups\"` options is set, a default grouping is used of third-party,\nparent directories and the current directory. (`\"bar\"`, `\"../baz\"`, `\"./foo\"`.)\n\nYou may set the `\"named-imports-order\"` option to control the ordering of named\nimports (the `{A, B, C}` in `import {A, B, C} from \"foo\"`).\n\nPossible values for `\"named-imports-order\"` are:\n\n* `\"case-insensitive'`: Correct order is `{A, b, C}`. (This is the default.)\n* `\"case-insensitive-legacy'`: Correct order is `\"Bar\"`, `\"baz\"`, `\"Foo\"`.\n* `\"lowercase-first\"`: Correct order is `{b, A, C}`.\n* `\"lowercase-last\"`: Correct order is `{A, C, b}`.\n* `\"any\"`: Allow any order.\n\nYou may set the `\"module-source-path\"` option to control the ordering of imports based full path\nor just the module name\n\nPossible values for `\"module-source-path\"` are:\n\n* `\"full'`: Correct order is  `\"./a/Foo\"`, `\"./b/baz\"`, `\"./c/Bar\"`. (This is the default.)\n* `\"basename\"`: Correct order is `\"./c/Bar\"`, `\"./b/baz\"`, `\"./a/Foo\"`.\n\n        ",
     "options": {
       "type": "object",
       "properties": {
@@ -3508,6 +3563,7 @@
           "type": "string",
           "enum": [
             "case-insensitive",
+            "case-insensitive-legacy",
             "lowercase-first",
             "lowercase-last",
             "any"
@@ -3517,6 +3573,7 @@
           "type": "string",
           "enum": [
             "case-insensitive",
+            "case-insensitive-legacy",
             "lowercase-first",
             "lowercase-last",
             "any"
@@ -3842,7 +3899,7 @@
         "description": "Requires the inclusion of the radix parameter when calling `parseInt`.",
         "config": "```json\n\"rules\": { \"radix\": true }\n```",
         "pass": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x, 10);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```",
-        "fail": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x);\nconst bin: number = parseInt(x, 2);\nconst hex: number = parseInt(x, 16);\n```"
+        "fail": "```ts\nconst x: string = '11';\nconst dec: number = parseInt(x);\n```"
       }
     ]
   },

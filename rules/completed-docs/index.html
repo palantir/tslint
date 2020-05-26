@@ -32,6 +32,7 @@ optionsDescription: |-
   Types that may be enabled are:
 
   * `"classes"`
+  * `"constructors"`
   * `"enums"`
   * `"enum-members"`
   * `"functions"`
@@ -76,6 +77,28 @@ options:
                   - exported
                   - internal
                 type: string
+            type: object
+          constructors:
+            properties:
+              tags:
+                properties:
+                  content:
+                    items:
+                      type: string
+                    type: object
+                  existence:
+                    items:
+                      type: string
+                    type: array
+              privacies:
+                enum:
+                  - all
+                  - private
+                  - protected
+                  - public
+                type: string
+              overloads:
+                type: boolean
             type: object
           enums: *ref_0
           enum-members: *ref_0
@@ -197,6 +220,39 @@ optionsJSON: |-
                     "internal"
                   ],
                   "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "constructors": {
+              "properties": {
+                "tags": {
+                  "properties": {
+                    "content": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "object"
+                    },
+                    "existence": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  }
+                },
+                "privacies": {
+                  "enum": [
+                    "all",
+                    "private",
+                    "protected",
+                    "public"
+                  ],
+                  "type": "string"
+                },
+                "overloads": {
+                  "type": "boolean"
                 }
               },
               "type": "object"
