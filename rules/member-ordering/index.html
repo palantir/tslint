@@ -20,26 +20,20 @@ optionsDescription: |-
   * `statics-first`
 
   `fields-first` puts, in order of precedence:
-
       * fields before constructors before methods
       * static members before instance members
       * public members before protected members before private members
-
   `instance-sandwich` puts, in order of precedence:
-
       * fields before constructors before methods
       * static fields before instance fields, but static methods *after* instance methods
       * public members before protected members before private members
-
   `statics-first` puts, in order of precedence:
-
       * static members before instance members
           * public members before protected members before private members
           * fields before methods
       * instance fields before constructors before instance methods
           * fields before constructors before methods
           * public members before protected members before private members
-
   Note that these presets, despite looking similar, can have subtly different behavior due to the order in which these
   rules are specified. A fully expanded ordering can be found in the PRESETS constant in
   https://github.com/palantir/tslint/blob/master/src/rules/memberOrderingRule.ts.
@@ -48,11 +42,11 @@ optionsDescription: |-
   Alternatively, the value for `order` may be an array consisting of the following strings:
 
   * `public-static-field`
-  * `public-static-method`
   * `protected-static-field`
-  * `protected-static-method`
   * `private-static-field`
+  * `public-static-method`
   * `private-static-method`
+  * `protected-static-method`
   * `public-instance-field`
   * `protected-instance-field`
   * `private-instance-field`
@@ -62,6 +56,12 @@ optionsDescription: |-
   * `public-instance-method`
   * `protected-instance-method`
   * `private-instance-method`
+  * `public-static-accessor`
+  * `protected-static-accessor`
+  * `private-static-accessor`
+  * `public-instance-accessor`
+  * `protected-instance-accessor`
+  * `private-instance-accessor`
 
   You can also omit the access modifier to refer to "public-", "protected-", and "private-" all at once; for example, "static-field".
 
@@ -78,9 +78,13 @@ optionsDescription: |-
       }
 
   The 'alphabetize' option will enforce that members within the same category should be alphabetically sorted by name.
+  Computed property names are sorted before others but not sorted amongst each other.
+  Additionally getters will be sorted before setters (after alphabetization).
 options:
   type: object
   properties:
+    alphabetize:
+      type: boolean
     order:
       oneOf:
         - type: string
@@ -93,11 +97,11 @@ options:
             type: string
             enum:
               - public-static-field
-              - public-static-method
               - protected-static-field
-              - protected-static-method
               - private-static-field
+              - public-static-method
               - private-static-method
+              - protected-static-method
               - public-instance-field
               - protected-instance-field
               - private-instance-field
@@ -107,9 +111,13 @@ options:
               - public-instance-method
               - protected-instance-method
               - private-instance-method
+              - public-static-accessor
+              - protected-static-accessor
+              - private-static-accessor
+              - public-instance-accessor
+              - protected-instance-accessor
+              - private-instance-accessor
           maxLength: 13
-    alphabetize:
-      type: boolean
   additionalProperties: false
 optionExamples:
   - '[true, {"order": "fields-first"}]'
@@ -117,6 +125,7 @@ optionExamples:
     [
       true,
       {
+        "alphabetize": true,
         "order": [
           "public-static-field",
           "public-instance-field",
@@ -127,8 +136,7 @@ optionExamples:
           "public-instance-method",
           "protected-instance-method",
           "private-instance-method"
-        ],
-        "alphabetize": true
+        ]
       }
     ]
   - |-
@@ -157,6 +165,9 @@ optionsJSON: |-
   {
     "type": "object",
     "properties": {
+      "alphabetize": {
+        "type": "boolean"
+      },
       "order": {
         "oneOf": [
           {
@@ -173,11 +184,11 @@ optionsJSON: |-
               "type": "string",
               "enum": [
                 "public-static-field",
-                "public-static-method",
                 "protected-static-field",
-                "protected-static-method",
                 "private-static-field",
+                "public-static-method",
                 "private-static-method",
+                "protected-static-method",
                 "public-instance-field",
                 "protected-instance-field",
                 "private-instance-field",
@@ -186,15 +197,18 @@ optionsJSON: |-
                 "private-constructor",
                 "public-instance-method",
                 "protected-instance-method",
-                "private-instance-method"
+                "private-instance-method",
+                "public-static-accessor",
+                "protected-static-accessor",
+                "private-static-accessor",
+                "public-instance-accessor",
+                "protected-instance-accessor",
+                "private-instance-accessor"
               ]
             },
             "maxLength": 13
           }
         ]
-      },
-      "alphabetize": {
-        "type": "boolean"
       }
     },
     "additionalProperties": false

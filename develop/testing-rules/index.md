@@ -111,7 +111,7 @@ const tree = 5;
       ~~~~      [error % ("plants")]
 const skyscraper = 100;
 
-[error] Variables named after %s are not allowed!
+[error]: Variables named after %s are not allowed!
 [no-animal]: error % ('animals')
 ```
 
@@ -136,7 +136,7 @@ const tree = 5;
       ~~~~      [error % ("plants", "tree")]
 const skyscraper = 100;
 
-[error] Variables named after %s are not allowed: '%s'
+[error]: Variables named after %s are not allowed: '%s'
 [no-animal]: error % ('animals')
 ```
 
