@@ -30,7 +30,7 @@ export class Rule extends Lint.Rules.AbstractRule {
             Submodules of some packages are treated as private APIs and the import
             paths may change without deprecation periods. It's best to stick with
             top-level package exports.`,
-        optionsDescription: "A list of whitelisted package or submodule names.",
+        optionsDescription: "A blacklist of package or submodule names to exclude from this rule.",
         options: {
             type: "array",
             items: {
@@ -58,15 +58,15 @@ function walk(ctx: Lint.WalkContext<string[]>) {
         if (
             !ts.isExternalModuleNameRelative(name.text) &&
             isSubmodulePath(name.text) &&
-            !isWhitelisted(name.text, ctx.options)
+            !isBlacklisted(name.text, ctx.options)
         ) {
             ctx.addFailureAtNode(name, Rule.FAILURE_STRING);
         }
     }
 }
 
-function isWhitelisted(path: string, whitelist: string[]): boolean {
-    for (const option of whitelist) {
+function isBlacklisted(path: string, blacklist: string[]): boolean {
+    for (const option of blacklist) {
         if (path === option || path.startsWith(`${option}/`)) {
             return true;
         }
