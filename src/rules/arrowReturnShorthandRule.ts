@@ -116,8 +116,8 @@ function createFix(
     return anyComments
         ? undefined
         : [
-              // Object literal must be wrapped in `()`
-              ...(expr.kind === ts.SyntaxKind.ObjectLiteralExpression
+              // Some expressions must be wrapped in `()`
+              ...(isParenthesisNeeded(expr)
                   ? [
                         Lint.Replacement.appendText(expr.getStart(), "("),
                         Lint.Replacement.appendText(expr.getEnd(), ")"),
@@ -130,6 +130,13 @@ function createFix(
               // " }" (may include semicolon)
               Lint.Replacement.deleteFromTo(expr.end, closeBrace.end),
           ];
+
+    function isParenthesisNeeded(node) {
+		if (node.kind === ts.SyntaxKind.AsExpression) {
+			return isParenthesisNeeded(node.expression);
+		}
+        return node.kind === ts.SyntaxKind.ObjectLiteralExpression;
+    }
 
     function hasComments(node: ts.Node): boolean {
         return hasCommentAfterPosition(text, node.getEnd());
