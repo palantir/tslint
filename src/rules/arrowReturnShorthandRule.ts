@@ -131,7 +131,7 @@ function createFix(
               Lint.Replacement.deleteFromTo(expr.end, closeBrace.end),
           ];
 
-    function isParenthesisNeeded(node) {
+    function isParenthesisNeeded(node: ts.Node): boolean {
 		if (node.kind === ts.SyntaxKind.AsExpression) {
 			return isParenthesisNeeded(node.expression);
 		}
