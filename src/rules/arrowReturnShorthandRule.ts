@@ -133,7 +133,7 @@ function createFix(
 
     function isParenthesisNeeded(node: ts.Node): boolean {
 		if (node.kind === ts.SyntaxKind.AsExpression) {
-			return isParenthesisNeeded(node.expression);
+			return isParenthesisNeeded((node as ts.AsExpression).expression);
 		}
         return node.kind === ts.SyntaxKind.ObjectLiteralExpression;
     }
