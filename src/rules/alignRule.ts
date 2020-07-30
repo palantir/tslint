@@ -142,7 +142,9 @@ class AlignWalker extends Lint.AbstractWalker<Options> {
                     case ts.SyntaxKind.TupleType:
                         if (this.options.elements) {
                             this.checkAlignment(
-                                (node as ts.TupleTypeNode).elementTypes,
+                                // In TS 4 TupleTypeNode.elementTypes has been updated to elements
+                                // tslint:disable-next-line
+                                (node as any).elementTypes || (node as ts.TupleTypeNode).elements,
                                 OPTION_ELEMENTS,
                             );
                         }

@@ -87,7 +87,7 @@ class OneLineWalker extends Lint.AbstractWalker<Options> {
                     if (
                         !isBlockLike(node.parent) ||
                         (node.parent.kind === ts.SyntaxKind.CaseClause &&
-                            (node.parent as ts.CaseClause).statements.length === 1)
+                            node.parent.statements.length === 1)
                     ) {
                         this.check({ pos: node.pos, end: (node as ts.Block).statements.pos });
                     }
