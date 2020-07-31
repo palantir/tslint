@@ -1,5 +1,9 @@
 # Change Log
 
+## v6.1.3
+
+-   [bugfix] add support for TypeScript 4.0 peer dependency (#4943)
+
 ## v6.1.2
 
 -   [bugfix] restore typings compatibility with TS < 3.8 (#4933)
@@ -517,7 +521,7 @@ Thanks to our contributors!
 
 ## :warning: Deprecations
 
--   [deprecation][`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) is deprecated because typescript now covers most of its functionality (#3919)
+-   [deprecation] [`no-unused-variable`](https://palantir.github.io/tslint/rules/no-unused-variable/) is deprecated because typescript now covers most of its functionality (#3919)
 
 ## :tada: Features
 
