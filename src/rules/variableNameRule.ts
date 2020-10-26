@@ -53,7 +53,7 @@ export class Rule extends Lint.Rules.AbstractRule {
         optionsDescription: Lint.Utils.dedent`
             Several arguments may be optionally provided:
 
-            * \`"${OPTION_CHECK_FORMAT}"\` enbables enforcement of a certain naming format. By default, the rule only allows only lowerCamelCased or UPPER_CASED variable names.
+            * \`"${OPTION_CHECK_FORMAT}"\` enables enforcement of a certain naming format. By default, the rule only allows only lowerCamelCased or UPPER_CASED variable names.
               * These additional options make the check stricter:
                 * \`"${OPTION_REQUIRE_CONST_FOR_ALL_CAPS}"\`: enforces that all variables with UPPER_CASED names should be \`const\`.
               * These additional options make the check more permissive:
